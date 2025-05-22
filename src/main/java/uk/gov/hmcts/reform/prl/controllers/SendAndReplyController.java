@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -39,7 +38,6 @@ import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
-import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_ADDTIONAL_APPLICATION_BUNDLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_CLOSED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_IN_REVIEW;
@@ -63,12 +61,7 @@ public class SendAndReplyController extends AbstractCallbackController {
     private final UploadAdditionalApplicationService uploadAdditionalApplicationService;
 
 
-    public static final String SEND_AND_CLOSE_EXTERNAL_MESSAGE = """
-        ### What happens next
 
-        The court will send this message in a notification to the external party or parties.
-        """;
-    public static final String REPLY_AND_CLOSE_MESSAGE = "### What happens next \n\n Your message has been sent.";
     public static final String MESSAGES = "messages";
 
     @Autowired
@@ -329,26 +322,9 @@ public class SendAndReplyController extends AbstractCallbackController {
     public ResponseEntity<SubmittedCallbackResponse> handleSubmittedSendAndReply(@RequestHeader("Authorization")
                                                                                  @Parameter(hidden = true) String authorisation,
                                                                                  @RequestBody CallbackRequest callbackRequest) {
-        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
-
-        if (REPLY.equals(caseData.getChooseSendOrReply())
-            && YesOrNo.Yes.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
-            return ok(SubmittedCallbackResponse.builder().confirmationBody(
-                REPLY_AND_CLOSE_MESSAGE
-            ).build());
-        }
-
-        if (SEND.equals(caseData.getChooseSendOrReply()) && InternalExternalMessageEnum.EXTERNAL.equals(
-            caseData.getSendOrReplyMessage().getSendMessageObject().getInternalOrExternalMessage())) {
-            return ok(SubmittedCallbackResponse.builder().confirmationBody(
-                SEND_AND_CLOSE_EXTERNAL_MESSAGE
-            ).build());
-        }
-
-        sendAndReplyService.closeAwPTask(caseData);
-
-        return ok(SubmittedCallbackResponse.builder().build());
+        return sendAndReplyService.sendAndReplySubmitted(callbackRequest);
     }
+
 
     @PostMapping("/send-or-reply-to-messages/clear-dynamic-lists")
     public AboutToStartOrSubmitCallbackResponse clearDynamicLists(@RequestHeader("Authorization")

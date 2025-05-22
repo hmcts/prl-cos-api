@@ -65,6 +65,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_IN_REVIEW;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
@@ -869,10 +870,13 @@ public class SendAndReplyControllerTest {
             .replyMessageDynamicList(DynamicList.builder().build())
             .build();
 
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(sendAndReplyService.sendAndReplySubmitted(callbackRequest)).thenReturn(ok(SubmittedCallbackResponse.builder().build()));
+
         ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyController.handleSubmittedSendAndReply(auth, callbackRequest);
+
         Assertions.assertThat(response.getStatusCode().value()).isEqualTo(200);
+        verify(sendAndReplyService).sendAndReplySubmitted(callbackRequest);
     }
 
     @Test
@@ -895,10 +899,11 @@ public class SendAndReplyControllerTest {
             .replyMessageDynamicList(DynamicList.builder().build())
             .build();
 
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(sendAndReplyService.sendAndReplySubmitted(callbackRequest)).thenReturn(ok(SubmittedCallbackResponse.builder().build()));
         ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyController.handleSubmittedSendAndReply(auth, callbackRequest);
         Assertions.assertThat(response.getStatusCodeValue()).isEqualTo(200);
+        verify(sendAndReplyService).sendAndReplySubmitted(callbackRequest);
     }
 
     @Test
@@ -917,10 +922,11 @@ public class SendAndReplyControllerTest {
             .replyMessageDynamicList(DynamicList.builder().build())
             .build();
 
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(sendAndReplyService.sendAndReplySubmitted(callbackRequest)).thenReturn(ok(SubmittedCallbackResponse.builder().build()));
         ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyController.handleSubmittedSendAndReply(auth, callbackRequest);
         Assertions.assertThat(response.getStatusCodeValue()).isEqualTo(200);
+        verify(sendAndReplyService).sendAndReplySubmitted(callbackRequest);
 
     }
 

@@ -9,6 +9,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -17,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
@@ -107,6 +109,7 @@ import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
+import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATE_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_C2_APPLICATION_SNR_CODE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_OTHER_APPLICATION_SNR_CODE;
@@ -244,6 +247,13 @@ public class SendAndReplyService {
 
     private static final String LETTER_TYPE = "MessagePack";
     public static final String THIS_INFORMATION_IS_CONFIDENTIAL = "This information is to be kept confidential";
+
+    public static final String SEND_AND_CLOSE_EXTERNAL_MESSAGE = """
+        ### What happens next
+
+        The court will send this message in a notification to the external party or parties.
+        """;
+    public static final String REPLY_AND_CLOSE_MESSAGE = "### What happens next \n\n Your message has been sent.";
 
     public EmailTemplateVars buildNotificationEmail(CaseData caseData, Message message) {
         String caseName = caseData.getApplicantCaseName();
@@ -2089,6 +2099,28 @@ public class SendAndReplyService {
         return CollectionUtils.isNotEmpty(message.getExternalMessageWhoToSendTo().getValue())
             || Yes.equals(message.getSendMessageToCafcass()) || Yes.equals(message.getSendMessageToOtherParties());
 
+    }
+
+    public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmitted(CallbackRequest callbackRequest) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        if (REPLY.equals(caseData.getChooseSendOrReply())
+            && YesOrNo.Yes.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
+            return ok(SubmittedCallbackResponse.builder().confirmationBody(
+                REPLY_AND_CLOSE_MESSAGE
+            ).build());
+        }
+
+        if (SEND.equals(caseData.getChooseSendOrReply()) && InternalExternalMessageEnum.EXTERNAL.equals(
+            caseData.getSendOrReplyMessage().getSendMessageObject().getInternalOrExternalMessage())) {
+            return ok(SubmittedCallbackResponse.builder().confirmationBody(
+                SEND_AND_CLOSE_EXTERNAL_MESSAGE
+            ).build());
+        }
+
+        closeAwPTask(caseData);
+
+        return ok(SubmittedCallbackResponse.builder().build());
     }
 
     public AboutToStartOrSubmitCallbackResponse clearDynamicLists(CallbackRequest callbackRequest) {
