@@ -39,8 +39,8 @@ class AttendHearingMapperTest {
         assertEquals("Wheelchair access", result.getAdjustmentsRequired());
         assertEquals(YesOrNo.Yes, result.getIsSpecialArrangementsRequired());
         assertEquals(
-            "To be shielded by a privacy screen in the courtroom," +
-                "To join the hearing by video link rather than in person",
+            "To be shielded by a privacy screen in the courtroom,"
+                + "To join the hearing by video link rather than in person",
             result.getSpecialArrangementsRequired()
         );
     }
