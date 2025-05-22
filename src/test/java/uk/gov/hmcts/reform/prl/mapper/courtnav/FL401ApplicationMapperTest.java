@@ -1,13 +1,12 @@
 package uk.gov.hmcts.reform.prl.mapper.courtnav;
 
 import javassist.NotFoundException;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
@@ -28,13 +27,13 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavHome;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavMetaData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavRelationShipToRespondent;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavRespondent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavRespondentBehaviour;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavStmtOfTruth;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtProceedings;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.Family;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.GoingToCourt;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ProtectedChild;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.RespondentDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.Situation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantRelationshipDescriptionEnum;
@@ -60,27 +59,44 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class FL401ApplicationMapperTest {
+@SpringBootTest
+class FL401ApplicationMapperTest {
 
-    @InjectMocks
-    FL401ApplicationMapper fl401ApplicationMapper;
+    @Autowired
+    private FL401ApplicationMapper fl401ApplicationMapper;
 
-    @Mock
+    @Autowired
+    private CourtNavApplicantMapper courtNavApplicantMapper;
+
+    @Autowired
+    private CourtNavRespondentMapper courtNavRespondentMapper;
+
+    @Autowired
+    private CourtNavHomeMapper courtNavHomeMapper;
+
+    @MockBean
     private CourtFinderService courtFinderService;
 
-    @Mock
+    @MockBean
+    private LaunchDarklyClient launchDarklyClient;
+
+    @MockBean
+    private LocationRefDataService locationRefDataService;
+
+    @MockBean
+    private CourtSealFinderService courtSealFinderService;
+
     private Court court;
     private CourtNavFl401 courtNavFl401;
 
@@ -88,7 +104,7 @@ public class FL401ApplicationMapperTest {
     private Situation situation1;
     private BeforeStart beforeStart;
     private ApplicantsDetails applicantsDetails;
-    private RespondentDetails respondentDetails;
+    private CourtNavRespondent courtNavRespondent;
     private CourtNavRelationShipToRespondent relationShipToRespondent;
     private Family family;
     private CourtNavHome home;
@@ -98,32 +114,8 @@ public class FL401ApplicationMapperTest {
     private GoingToCourt goingToCourt;
     private CourtNavMetaData courtNavMetaData;
 
-    @Mock
-    private LaunchDarklyClient launchDarklyClient;
-
-    @Mock
-    private LocationRefDataService locationRefDataService;
-
-    @Mock
-    private CourtSealFinderService courtSealFinderService;
-
-    @Before
-    public void setUp() {
-        CourtNavAddressMapper addressMapper = new CourtNavAddressMapperImpl();
-        CourtNavApplicantMapper courtNavApplicantMapper = new CourtNavApplicantMapper(addressMapper);
-        CourtNavRespondentMapper courtNavRespondentMapper = new CourtNavRespondentMapper(addressMapper);
-        CourtNavHomeMapper courtNavHomeMapper = new CourtNavHomeMapper(addressMapper);
-
-        fl401ApplicationMapper = new FL401ApplicationMapper(
-            courtFinderService,
-            launchDarklyClient,
-            locationRefDataService,
-            courtSealFinderService,
-            courtNavApplicantMapper,
-            courtNavRespondentMapper,
-            courtNavHomeMapper
-        );
-
+    @BeforeEach
+    void setUp() {
         court = Court.builder()
             .courtName("testcourt")
             .build();
@@ -193,22 +185,22 @@ public class FL401ApplicationMapperTest {
                                   .build())
             .build();
 
-        respondentDetails = RespondentDetails.builder()
-            .respondentFirstName("resp test")
-            .respondentLastName("fl401")
-            .respondentDateOfBirth(CourtNavDate.builder()
+        courtNavRespondent = CourtNavRespondent.builder()
+            .firstName("resp test")
+            .lastName("fl401")
+            .dateOfBirth(CourtNavDate.builder()
                                        .day(10)
                                        .month(9)
                                        .year(1989)
                                        .build())
-            .respondentEmailAddress("test@resp.com")
-            .respondentAddress(CourtNavAddress.builder()
+            .email("test@resp.com")
+            .address(CourtNavAddress.builder()
                                    .addressLine1("55 Test Street")
                                    .postTown("Town")
                                    .postCode("LU1 5ET")
                                    .build())
             .respondentLivesWithApplicant(true)
-            .respondentPhoneNumber("12345670987")
+            .phoneNumber("12345670987")
             .build();
 
         List<CourtProceedings> courtProceedings = new ArrayList<>();
@@ -376,7 +368,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavMetaDataIsNull() {
+    void testCourtnavMetaDataIsNull() {
 
         courtNavFl401 = CourtNavFl401.builder()
             .metaData(CourtNavMetaData.builder()
@@ -393,7 +385,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavCaseDataIsNull() {
+    void testCourtnavCaseDataIsNull() {
 
         courtNavFl401 = CourtNavFl401.builder()
             .fl401(null)
@@ -404,7 +396,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavCaseDataWithBeforeStart() {
+    void testCourtnavCaseDataWithBeforeStart() {
 
 
         CaseData caseData = CaseData.builder()
@@ -425,14 +417,14 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavCaseDataWithCourtNavFL401Details() throws NotFoundException {
+    void testCourtnavCaseDataWithCourtNavFL401Details() throws NotFoundException {
 
         courtNavFl401 = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
                        .beforeStart(beforeStart)
                        .situation(situation)
                        .applicantDetails(applicantsDetails)
-                       .respondentDetails(respondentDetails)
+                       .courtNavRespondent(courtNavRespondent)
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
@@ -462,14 +454,14 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavCaseDataWithCourtNavFL401DetailsWithOccupationalOrder() throws NotFoundException {
+    void testCourtnavCaseDataWithCourtNavFL401DetailsWithOccupationalOrder() throws NotFoundException {
 
         courtNavFl401 = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
                        .beforeStart(beforeStart)
                        .situation(situation1)
                        .applicantDetails(applicantsDetails)
-                       .respondentDetails(respondentDetails)
+                       .courtNavRespondent(courtNavRespondent)
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
@@ -499,7 +491,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavMetaDataCourtnavApprovedAsFalse() throws NotFoundException {
+    void testCourtnavMetaDataCourtnavApprovedAsFalse() throws NotFoundException {
 
         courtNavMetaData = CourtNavMetaData.builder()
             .courtNavApproved(false)
@@ -514,7 +506,7 @@ public class FL401ApplicationMapperTest {
                        .beforeStart(beforeStart)
                        .situation(situation1)
                        .applicantDetails(applicantsDetails)
-                       .respondentDetails(respondentDetails)
+                       .courtNavRespondent(courtNavRespondent)
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
@@ -545,7 +537,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavOrdersAppliedWithoutNoticeAsFalse() throws NotFoundException {
+    void testCourtnavOrdersAppliedWithoutNoticeAsFalse() throws NotFoundException {
 
         situation = situation.toBuilder()
             .ordersAppliedWithoutNotice(false)
@@ -557,7 +549,7 @@ public class FL401ApplicationMapperTest {
                        .beforeStart(beforeStart)
                        .situation(situation)
                        .applicantDetails(applicantsDetails)
-                       .respondentDetails(respondentDetails)
+                       .courtNavRespondent(courtNavRespondent)
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
@@ -587,7 +579,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavFamilyAsApplicant() throws NotFoundException {
+    void testCourtnavFamilyAsApplicant() throws NotFoundException {
 
         family = Family.builder()
             .whoApplicationIsFor(ApplicationCoverEnum.applicantOnly)
@@ -601,7 +593,7 @@ public class FL401ApplicationMapperTest {
                        .beforeStart(beforeStart)
                        .situation(situation)
                        .applicantDetails(applicantsDetails)
-                       .respondentDetails(respondentDetails)
+                       .courtNavRespondent(courtNavRespondent)
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
@@ -630,7 +622,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavRelationShipDescriptionAsNoneOfTheAbove() throws NotFoundException {
+    void testCourtnavRelationShipDescriptionAsNoneOfTheAbove() throws NotFoundException {
 
         relationShipToRespondent = CourtNavRelationShipToRespondent.builder()
             .relationshipDescription(ApplicantRelationshipDescriptionEnum.noneOfAbove)
@@ -647,7 +639,7 @@ public class FL401ApplicationMapperTest {
                        .beforeStart(beforeStart)
                        .situation(situation)
                        .applicantDetails(applicantsDetails)
-                       .respondentDetails(respondentDetails)
+                       .courtNavRespondent(courtNavRespondent)
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
@@ -679,7 +671,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavGoingToCourtInterpreterNeeds() throws NotFoundException {
+    void testCourtnavGoingToCourtInterpreterNeeds() throws NotFoundException {
 
         List<SpecialMeasuresEnum> specialMeasuresEnum = new ArrayList<>();
         specialMeasuresEnum.add(SpecialMeasuresEnum.separateWaitingRoom);
@@ -698,7 +690,7 @@ public class FL401ApplicationMapperTest {
                        .beforeStart(beforeStart)
                        .situation(situation)
                        .applicantDetails(applicantsDetails)
-                       .respondentDetails(respondentDetails)
+                       .courtNavRespondent(courtNavRespondent)
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
@@ -727,7 +719,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavGoingToCourtWithNoSpecialMeasures() throws NotFoundException {
+    void testCourtnavGoingToCourtWithNoSpecialMeasures() throws NotFoundException {
 
         goingToCourt = GoingToCourt.builder()
             .isInterpreterRequired(true)
@@ -743,7 +735,7 @@ public class FL401ApplicationMapperTest {
                        .beforeStart(beforeStart)
                        .situation(situation)
                        .applicantDetails(applicantsDetails)
-                       .respondentDetails(respondentDetails)
+                       .courtNavRespondent(courtNavRespondent)
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
@@ -774,7 +766,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavOngoingCourtProceedings() throws NotFoundException {
+    void testCourtnavOngoingCourtProceedings() throws NotFoundException {
 
         List<CourtProceedings> courtProceedings = new ArrayList<>();
         courtProceedings.add(CourtProceedings.builder()
@@ -811,7 +803,7 @@ public class FL401ApplicationMapperTest {
                        .beforeStart(beforeStart)
                        .situation(situation)
                        .applicantDetails(applicantsDetails)
-                       .respondentDetails(respondentDetails)
+                       .courtNavRespondent(courtNavRespondent)
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
@@ -844,7 +836,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavHomeChildrenIsNull() throws NotFoundException {
+    void testCourtnavHomeChildrenIsNull() throws NotFoundException {
 
         home1 = home1.toBuilder()
             .childrenApplicantResponsibility(null)
@@ -856,7 +848,7 @@ public class FL401ApplicationMapperTest {
                        .beforeStart(beforeStart)
                        .situation(situation1)
                        .applicantDetails(applicantsDetails)
-                       .respondentDetails(respondentDetails)
+                       .courtNavRespondent(courtNavRespondent)
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
@@ -885,7 +877,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavHomePreviouslyLivedAtThisAddressAsNeither() throws NotFoundException {
+    void testCourtnavHomePreviouslyLivedAtThisAddressAsNeither() throws NotFoundException {
 
         home1 = home1.toBuilder()
             .previouslyLivedAtAddress(null)
@@ -897,7 +889,7 @@ public class FL401ApplicationMapperTest {
                        .beforeStart(beforeStart)
                        .situation(situation1)
                        .applicantDetails(applicantsDetails)
-                       .respondentDetails(respondentDetails)
+                       .courtNavRespondent(courtNavRespondent)
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
@@ -927,7 +919,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavHomeLivingStituationAsNull() throws NotFoundException {
+    void testCourtnavHomeLivingStituationAsNull() throws NotFoundException {
 
         home1 = home1.toBuilder()
             .wantToHappenWithLivingSituation(null)
@@ -939,7 +931,7 @@ public class FL401ApplicationMapperTest {
                        .beforeStart(beforeStart)
                        .situation(situation1)
                        .applicantDetails(applicantsDetails)
-                       .respondentDetails(respondentDetails)
+                       .courtNavRespondent(courtNavRespondent)
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
@@ -969,7 +961,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavHomeNameOnRentalAgreementAsNull() throws NotFoundException {
+    void testCourtnavHomeNameOnRentalAgreementAsNull() throws NotFoundException {
 
         home1 = home1.toBuilder()
             .propertyIsRented(false)
@@ -983,7 +975,7 @@ public class FL401ApplicationMapperTest {
                        .beforeStart(beforeStart)
                        .situation(situation1)
                        .applicantDetails(applicantsDetails)
-                       .respondentDetails(respondentDetails)
+                       .courtNavRespondent(courtNavRespondent)
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
@@ -1013,7 +1005,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavHomeMortagageAndRentDetailsAsFalse() throws NotFoundException {
+    void testCourtnavHomeMortagageAndRentDetailsAsFalse() throws NotFoundException {
 
         home1 = home1.toBuilder()
             .propertyIsRented(false)
@@ -1027,7 +1019,7 @@ public class FL401ApplicationMapperTest {
                        .beforeStart(beforeStart)
                        .situation(situation1)
                        .applicantDetails(applicantsDetails)
-                       .respondentDetails(respondentDetails)
+                       .courtNavRespondent(courtNavRespondent)
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
@@ -1062,7 +1054,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavFamilyHomeEmptyListDoesNotCauseNullPE() throws NotFoundException {
+    void testCourtnavFamilyHomeEmptyListDoesNotCauseNullPE() throws NotFoundException {
 
         home1 = home1.toBuilder()
             .wantToHappenWithFamilyHome(Collections.emptyList())
@@ -1073,7 +1065,7 @@ public class FL401ApplicationMapperTest {
                        .beforeStart(beforeStart)
                        .situation(situation1)
                        .applicantDetails(applicantsDetails)
-                       .respondentDetails(respondentDetails)
+                       .courtNavRespondent(courtNavRespondent)
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
@@ -1102,7 +1094,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavApplicantDetailsHasNoConfidentialInfo() throws NotFoundException {
+    void testCourtnavApplicantDetailsHasNoConfidentialInfo() throws NotFoundException {
 
         applicantsDetails = applicantsDetails.toBuilder()
             .applicantGender(Gender.female)
@@ -1119,7 +1111,7 @@ public class FL401ApplicationMapperTest {
                        .beforeStart(beforeStart)
                        .situation(situation1)
                        .applicantDetails(applicantsDetails)
-                       .respondentDetails(respondentDetails)
+                       .courtNavRespondent(courtNavRespondent)
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
@@ -1150,16 +1142,16 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavRespondentDetailsHasNullInfo() throws NotFoundException {
+    void testCourtnavRespondentDetailsHasNullInfo() throws NotFoundException {
 
-        respondentDetails = RespondentDetails.builder()
-            .respondentFirstName("resp test")
-            .respondentLastName("fl401")
-            .respondentDateOfBirth(null)
-            .respondentEmailAddress(null)
-            .respondentAddress(null)
+        courtNavRespondent = CourtNavRespondent.builder()
+            .firstName("resp test")
+            .lastName("fl401")
+            .dateOfBirth(null)
+            .email(null)
+            .address(null)
             .respondentLivesWithApplicant(false)
-            .respondentPhoneNumber(null)
+            .phoneNumber(null)
             .build();
 
         courtNavFl401 = CourtNavFl401.builder()
@@ -1167,7 +1159,7 @@ public class FL401ApplicationMapperTest {
                        .beforeStart(beforeStart)
                        .situation(situation1)
                        .applicantDetails(applicantsDetails)
-                       .respondentDetails(respondentDetails)
+                       .courtNavRespondent(courtNavRespondent)
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
@@ -1198,7 +1190,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavRelationShiptoRespondentHasRelationEndDate() throws NotFoundException {
+    void testCourtnavRelationShiptoRespondentHasRelationEndDate() throws NotFoundException {
 
         relationShipToRespondent = CourtNavRelationShipToRespondent.builder()
             .relationshipDescription(ApplicantRelationshipDescriptionEnum.formerlyMarriedOrCivil)
@@ -1227,7 +1219,7 @@ public class FL401ApplicationMapperTest {
                        .beforeStart(beforeStart)
                        .situation(situation1)
                        .applicantDetails(applicantsDetails)
-                       .respondentDetails(respondentDetails)
+                       .courtNavRespondent(courtNavRespondent)
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
@@ -1258,7 +1250,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavFamilyParentalResponsibilityAsFalse() throws NotFoundException {
+    void testCourtnavFamilyParentalResponsibilityAsFalse() throws NotFoundException {
 
         List<ProtectedChild> protectedChildren = new ArrayList<>();
 
@@ -1287,7 +1279,7 @@ public class FL401ApplicationMapperTest {
                        .beforeStart(beforeStart)
                        .situation(situation1)
                        .applicantDetails(applicantsDetails)
-                       .respondentDetails(respondentDetails)
+                       .courtNavRespondent(courtNavRespondent)
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
@@ -1316,7 +1308,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavRespondentBehaviourTowardsApplicantAsNull() throws NotFoundException {
+    void testCourtnavRespondentBehaviourTowardsApplicantAsNull() throws NotFoundException {
 
         List<BehaviourTowardsChildrenEnum> behaviourTowardsChildrenEnum = new ArrayList<>();
         behaviourTowardsChildrenEnum.add(BehaviourTowardsChildrenEnum.beingViolentOrThreatening);
@@ -1333,7 +1325,7 @@ public class FL401ApplicationMapperTest {
                        .beforeStart(beforeStart)
                        .situation(situation)
                        .applicantDetails(applicantsDetails)
-                       .respondentDetails(respondentDetails)
+                       .courtNavRespondent(courtNavRespondent)
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
@@ -1362,7 +1354,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavRespondentBehaviourTowardsChildrenAsNull() throws NotFoundException {
+    void testCourtnavRespondentBehaviourTowardsChildrenAsNull() throws NotFoundException {
 
         List<BehaviourTowardsApplicantEnum> behaviourTowardsApplicantEnum = new ArrayList<>();
         behaviourTowardsApplicantEnum.add(BehaviourTowardsApplicantEnum.comingNearHome);
@@ -1380,7 +1372,7 @@ public class FL401ApplicationMapperTest {
                        .beforeStart(beforeStart)
                        .situation(situation)
                        .applicantDetails(applicantsDetails)
-                       .respondentDetails(respondentDetails)
+                       .courtNavRespondent(courtNavRespondent)
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
@@ -1410,14 +1402,14 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtNavCaseDataWhenPopulateDefaultCaseFlagIsOn() throws NotFoundException {
+    void testCourtNavCaseDataWhenPopulateDefaultCaseFlagIsOn() throws NotFoundException {
 
         courtNavFl401 = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
                        .beforeStart(beforeStart)
                        .situation(situation)
                        .applicantDetails(applicantsDetails)
-                       .respondentDetails(respondentDetails)
+                       .courtNavRespondent(courtNavRespondent)
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
@@ -1445,14 +1437,14 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtNavCaseDataWhenCourtDetailFoundForEpmsId() throws NotFoundException {
+    void testCourtNavCaseDataWhenCourtDetailFoundForEpmsId() throws NotFoundException {
 
         courtNavFl401 = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
                        .beforeStart(beforeStart)
                        .situation(situation)
                        .applicantDetails(applicantsDetails)
-                       .respondentDetails(respondentDetails)
+                       .courtNavRespondent(courtNavRespondent)
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
@@ -1478,14 +1470,14 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtNavCaseDataWhenCourtDetailFoundForEpmsIdAndFlagIsOn() throws NotFoundException {
+    void testCourtNavCaseDataWhenCourtDetailFoundForEpmsIdAndFlagIsOn() throws NotFoundException {
 
         courtNavFl401 = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
                        .beforeStart(beforeStart)
                        .situation(situation)
                        .applicantDetails(applicantsDetails)
-                       .respondentDetails(respondentDetails)
+                       .courtNavRespondent(courtNavRespondent)
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
@@ -1511,14 +1503,14 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtNavCaseDataWhenPopulateDefaultCaseFlagIsOff() throws NotFoundException {
+    void testCourtNavCaseDataWhenPopulateDefaultCaseFlagIsOff() throws NotFoundException {
 
         courtNavFl401 = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
                        .beforeStart(beforeStart)
                        .situation(situation)
                        .applicantDetails(applicantsDetails)
-                       .respondentDetails(respondentDetails)
+                       .courtNavRespondent(courtNavRespondent)
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
@@ -1547,7 +1539,7 @@ public class FL401ApplicationMapperTest {
 
 
     @Test
-    public void testCourtNavContactInfirmation() throws NotFoundException {
+    void testCourtNavContactInfirmation() throws NotFoundException {
 
         applicantsDetails = applicantsDetails.toBuilder().applicantContactInstructions("Test").build();
         courtNavFl401 = CourtNavFl401.builder()
@@ -1555,7 +1547,7 @@ public class FL401ApplicationMapperTest {
                        .beforeStart(beforeStart)
                        .situation(situation)
                        .applicantDetails(applicantsDetails)
-                       .respondentDetails(respondentDetails)
+                       .courtNavRespondent(courtNavRespondent)
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
