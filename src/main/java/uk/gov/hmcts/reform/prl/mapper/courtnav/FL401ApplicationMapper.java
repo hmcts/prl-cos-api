@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
@@ -21,13 +20,11 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.AttendHearing;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtProceedings;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicationCoverEnum;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.SpecialMeasuresEnum;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
@@ -40,8 +37,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -64,17 +62,18 @@ public class FL401ApplicationMapper {
     private final ApplicantRelationshipMapper applicantRelationshipMapper;
     private final RespondentBehaviourMapper respondentBehaviourMapper;
     private final StatementOfTruthMapper statementOfTruthMapper;
+    private final AttendHearingMapper attendHearingMapper;
 
     private Court court = null;
 
     public CaseData mapCourtNavData(CourtNavFl401 courtNavCaseData, String authorization) throws NotFoundException {
         CaseData caseData = CaseData.builder()
-            .isCourtNavCase(YesOrNo.Yes)
+            .isCourtNavCase(Yes)
             .state(State.SUBMITTED_PAID)
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .caseOrigin(courtNavCaseData.getMetaData().getCaseOrigin())
-            .courtNavApproved(courtNavCaseData.getMetaData().isCourtNavApproved() ? YesOrNo.Yes : YesOrNo.No)
-            .hasDraftOrder(courtNavCaseData.getMetaData().isHasDraftOrder() ? YesOrNo.Yes : YesOrNo.No)
+            .courtNavApproved(courtNavCaseData.getMetaData().isCourtNavApproved() ? Yes : No)
+            .hasDraftOrder(courtNavCaseData.getMetaData().isHasDraftOrder() ? Yes : No)
             .numberOfAttachments(String.valueOf(courtNavCaseData.getMetaData().getNumberOfAttachments()))
             .specialCourtName(courtNavCaseData.getMetaData().getCourtSpecialRequirements())
             .applicantAge(ApplicantAge.getValue(String.valueOf(courtNavCaseData.getFl401().getBeforeStart().getApplicantHowOld())))
@@ -92,7 +91,7 @@ public class FL401ApplicationMapper {
                                         .doesApplicantHaveChildren(courtNavCaseData.getFl401().getFamily()
                                                                        .getWhoApplicationIsFor()
                                                                        .equals(ApplicationCoverEnum.applicantOnly)
-                                                                       ? YesOrNo.No : YesOrNo.Yes)
+                                                                       ? No : Yes)
                                         .build())
             .applicantChildDetails(!courtNavCaseData.getFl401().getFamily()
                 .getWhoApplicationIsFor().equals(ApplicationCoverEnum.applicantOnly)
@@ -106,20 +105,9 @@ public class FL401ApplicationMapper {
                       ? courtNavHomeMapper.mapHome(courtNavCaseData.getFl401().getCourtNavHome())
                       : null)
             .fl401StmtOfTruth(statementOfTruthMapper.mapStatementOfTruth(courtNavCaseData))
-            .attendHearing(AttendHearing.builder()
-                               .isInterpreterNeeded(Boolean.TRUE.equals(courtNavCaseData.getFl401().getGoingToCourt().getIsInterpreterRequired())
-                                                        ? YesOrNo.Yes : YesOrNo.No)
+            .attendHearing(attendHearingMapper.mapAttendHearing(courtNavCaseData)
+                               .toBuilder()
                                .interpreterNeeds(interpreterNeedsMapper.mapInterpreterNeeds(courtNavCaseData))
-                               .isDisabilityPresent(courtNavCaseData.getFl401().getGoingToCourt().isAnyDisabilityNeeds() ? YesOrNo.Yes : YesOrNo.No)
-                               .adjustmentsRequired(courtNavCaseData.getFl401().getGoingToCourt().isAnyDisabilityNeeds()
-                                                        ? courtNavCaseData.getFl401().getGoingToCourt().getDisabilityNeedsDetails() : null)
-                               .isSpecialArrangementsRequired(null != courtNavCaseData.getFl401().getGoingToCourt().getAnySpecialMeasures()
-                                                                  ? YesOrNo.Yes : YesOrNo.No)
-                               .specialArrangementsRequired(null != courtNavCaseData.getFl401().getGoingToCourt().getAnySpecialMeasures()
-                                                                ? (courtNavCaseData.getFl401().getGoingToCourt().getAnySpecialMeasures()
-                                   .stream()
-                                   .map(SpecialMeasuresEnum::getDisplayedValue)
-                                   .collect(Collectors.joining(","))) : null)
                                .build())
             .fl401OtherProceedingDetails(getFl401OtherProceedingDetails(courtNavCaseData))
             .build();
