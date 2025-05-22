@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants;
-import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401Consent;
@@ -21,12 +20,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401Proceedings;
-import uk.gov.hmcts.reform.prl.models.complextypes.RelationshipDateComplex;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBailConditionDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
-import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationDateInfo;
-import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationObjectType;
-import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationOptionsInfo;
 import uk.gov.hmcts.reform.prl.models.complextypes.StatementOfTruth;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.court.Court;
@@ -75,6 +70,7 @@ public class FL401ApplicationMapper {
     private final ApplicantChildMapper applicantChildMapper;
     private final InterpreterNeedsMapper interpreterNeedsMapper;
     private final OrderWithoutNoticeMapper orderWithoutNoticeMapper;
+    private final ApplicantRelationshipMapper applicantRelationshipMapper;
 
     private Court court = null;
 
@@ -107,48 +103,19 @@ public class FL401ApplicationMapper {
                                         .build())
             .applicantChildDetails(!courtNavCaseData.getFl401().getFamily()
                 .getWhoApplicationIsFor().equals(ApplicationCoverEnum.applicantOnly)
-                                       ? applicantChildMapper.mapProtectedChildren(courtNavCaseData.getFl401().getFamily().getProtectedChildren()) : null)
+                                       ? applicantChildMapper.mapProtectedChildren(
+                                           courtNavCaseData.getFl401().getFamily().getProtectedChildren()) : null)
             .respondentBehaviourData(courtNavCaseData.getFl401().getSituation()
                                          .getOrdersAppliedFor().contains(FL401OrderTypeEnum.nonMolestationOrder)
                                          ? (RespondentBehaviour.builder()
                 .applicantWantToStopFromRespondentDoing(getApplicantBehaviourList(courtNavCaseData))
                 .applicantWantToStopFromRespondentDoingToChild(getChildrenBehaviourList(courtNavCaseData))
-                .otherReasonApplicantWantToStopFromRespondentDoing(courtNavCaseData.getFl401()
-                                                                       .getRespondentBehaviour().getStopBehaviourAnythingElse())
+                .otherReasonApplicantWantToStopFromRespondentDoing(
+                    courtNavCaseData.getFl401().getRespondentBehaviour().getStopBehaviourAnythingElse())
                 .build()) : null)
-            .respondentRelationObject(RespondentRelationObjectType.builder()
-                                          .applicantRelationship(ApplicantRelationshipEnum
-                                                                     .getDisplayedValueFromEnumString(
-                                                                         courtNavCaseData.getFl401()
-                                                                             .getRelationshipWithRespondent()
-                                                                             .getRelationshipDescription()
-                                                                             .getId()))
-                                          .build())
-            .respondentRelationDateInfoObject((!courtNavCaseData.getFl401().getRelationshipWithRespondent()
-                .getRelationshipDescription().getId()
-                .equalsIgnoreCase("noneOfAbove"))
-                                                  ? (RespondentRelationDateInfo.builder()
-                .relationStartAndEndComplexType(RelationshipDateComplex.builder()
-                                                    .relationshipDateComplexStartDate(LocalDate.parse(courtNavCaseData
-                                                                                                          .getFl401()
-                                                                                                          .getRelationshipWithRespondent()
-                                                                                                          .getRelationshipStartDate()
-                                                                                                          .mergeDate()))
-                                                    .relationshipDateComplexEndDate(getRelationShipEndDate(courtNavCaseData))
-                                                    .build())
-                .applicantRelationshipDate(getRelationShipCeremonyDate(courtNavCaseData))
-                .build()) : null)
-            .respondentRelationOptions((courtNavCaseData
-                .getFl401()
-                .getRelationshipWithRespondent()
-                .getRelationshipDescription().getId().equalsIgnoreCase(
-                    "noneOfAbove"))
-                                           ? (RespondentRelationOptionsInfo.builder()
-                .applicantRelationshipOptions(courtNavCaseData.getFl401()
-                                                  .getRelationshipWithRespondent().getRespondentsRelationshipToApplicant())
-                .relationOptionsOther(courtNavCaseData.getFl401()
-                                          .getRelationshipWithRespondent().getRespondentsRelationshipToApplicantOther())
-                .build()) : null)
+            .respondentRelationObject(applicantRelationshipMapper.mapRelationType(courtNavCaseData))
+            .respondentRelationDateInfoObject(applicantRelationshipMapper.mapRelationDates(courtNavCaseData))
+            .respondentRelationOptions(applicantRelationshipMapper.mapRelationOptions(courtNavCaseData))
             .home(courtNavCaseData.getFl401().getCourtNavHome() != null
                       ? courtNavHomeMapper.mapHome(courtNavCaseData.getFl401().getCourtNavHome())
                       : null)
@@ -285,33 +252,6 @@ public class FL401ApplicationMapper {
         return (null !=  courtNavCaseData.getFl401()
             .getRespondentBehaviour().getStopBehaviourTowardsApplicant())
             ? getBehaviourTowardsApplicant(courtNavCaseData) : null;
-    }
-
-
-    private LocalDate getRelationShipCeremonyDate(CourtNavFl401 courtNavCaseData) {
-        LocalDate cermonyDate = null;
-
-        if (null != courtNavCaseData.getFl401().getRelationshipWithRespondent().getCeremonyDate()) {
-            cermonyDate = LocalDate.parse(courtNavCaseData
-                                              .getFl401()
-                                              .getRelationshipWithRespondent()
-                                              .getCeremonyDate().mergeDate());
-        }
-        return cermonyDate;
-    }
-
-
-    private LocalDate getRelationShipEndDate(CourtNavFl401 courtNavCaseData) {
-        LocalDate endDate = null;
-
-        if (null != courtNavCaseData.getFl401().getRelationshipWithRespondent().getRelationshipEndDate()) {
-            endDate = LocalDate.parse(courtNavCaseData
-                                          .getFl401()
-                                          .getRelationshipWithRespondent()
-                                          .getRelationshipEndDate()
-                                          .mergeDate());
-        }
-        return endDate;
     }
 
     private String getCaseName(CourtNavFl401 courtNavCaseData) {
