@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.Map;
 
@@ -43,9 +44,14 @@ public class ReturnToPreviousStateController extends AbstractCallbackController 
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
+            log.info("Returning to previous state from {} for case {}",
+                     callbackRequest.getCaseDetails().getId(),
+                     callbackRequest.getCaseDetails().getState());
+
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue()).data(caseDataMap).build();
+                .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue()).data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
