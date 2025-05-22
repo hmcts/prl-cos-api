@@ -58,7 +58,7 @@ public class CourtNavCaseData implements MappableObject {
     /**
      * Statement of truth.
      */
-    private final CourtNavStmtOfTruth statementOfTruth;
+    private final CourtNavStatementOfTruth statementOfTruth;
 
 
     /**

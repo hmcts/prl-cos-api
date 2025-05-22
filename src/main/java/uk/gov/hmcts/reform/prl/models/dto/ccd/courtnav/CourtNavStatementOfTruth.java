@@ -14,7 +14,7 @@ import java.util.List;
 @Getter
 @Setter
 @AllArgsConstructor
-public class CourtNavStmtOfTruth {
+public class CourtNavStatementOfTruth {
     private final List<ConsentEnum> declaration;
     private final String signature;
     private final CourtNavDate signatureDate;

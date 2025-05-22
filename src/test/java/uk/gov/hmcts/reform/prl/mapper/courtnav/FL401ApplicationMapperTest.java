@@ -29,7 +29,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavMetaData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavRelationShipToRespondent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavRespondent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavRespondentBehaviour;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavStmtOfTruth;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavStatementOfTruth;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtProceedings;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.Family;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.GoingToCourt;
@@ -97,7 +97,7 @@ class FL401ApplicationMapperTest {
     private CourtNavHome home;
     private CourtNavHome home1;
     private CourtNavRespondentBehaviour respondentBehaviour;
-    private CourtNavStmtOfTruth stmtOfTruth;
+    private CourtNavStatementOfTruth stmtOfTruth;
     private GoingToCourt goingToCourt;
     private CourtNavMetaData courtNavMetaData;
 
@@ -318,7 +318,7 @@ class FL401ApplicationMapperTest {
         List<ConsentEnum> consentEnum = new ArrayList<>();
         consentEnum.add(ConsentEnum.applicantConfirm);
 
-        stmtOfTruth = CourtNavStmtOfTruth.builder()
+        stmtOfTruth = CourtNavStatementOfTruth.builder()
             .declaration(consentEnum)
             .signature("appl sign")
             .signatureDate(CourtNavDate.builder()
