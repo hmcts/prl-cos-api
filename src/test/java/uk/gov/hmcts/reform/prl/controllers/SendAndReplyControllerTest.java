@@ -502,20 +502,7 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testHandleSubmittedSendAndReplyWhenRespToMesgNo() {
-        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
-
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        when(sendAndReplyService.sendAndReplySubmitted(callbackRequest)).thenReturn(ok(SubmittedCallbackResponse.builder().build()));
-
-        ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyController.handleSubmittedSendAndReply(auth, callbackRequest);
-
-        Assertions.assertThat(response.getStatusCode().value()).isEqualTo(200);
-        verify(sendAndReplyService).sendAndReplySubmitted(callbackRequest);
-    }
-
-    @Test
-    public void testHandSubmittedSendAndReplyWhenRespondToMessageYesOrNo() {
+    public void testHandSubmittedSendAndReply() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
