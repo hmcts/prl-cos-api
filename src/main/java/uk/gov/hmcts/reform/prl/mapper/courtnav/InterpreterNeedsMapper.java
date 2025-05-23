@@ -14,7 +14,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Mapper(componentModel = "spring")
 public interface InterpreterNeedsMapper {
 
-    default List<Element<InterpreterNeed>> mapInterpreterNeeds(CourtNavFl401 source) {
+    default List<Element<InterpreterNeed>> map(CourtNavFl401 source) {
         boolean needsInterpreter = Boolean.TRUE.equals(
             source.getFl401().getGoingToCourt().getIsInterpreterRequired());
 

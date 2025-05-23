@@ -36,7 +36,7 @@ class StatementOfTruthMapperTest {
             .fl401(CourtNavCaseData.builder().statementOfTruth(statement).build())
             .build();
 
-        StatementOfTruth result = mapper.mapStatementOfTruth(source);
+        StatementOfTruth result = mapper.map(source);
 
         assertNotNull(result);
         assertEquals("John Smith", result.getSignature());

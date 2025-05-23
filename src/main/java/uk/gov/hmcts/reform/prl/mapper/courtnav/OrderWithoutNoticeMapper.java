@@ -17,7 +17,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 @Mapper(componentModel = "spring")
 public interface OrderWithoutNoticeMapper {
 
-    default WithoutNoticeOrderDetails mapOrderWithoutNotice(CourtNavFl401 source) {
+    default WithoutNoticeOrderDetails map(CourtNavFl401 source) {
         boolean appliedWithoutNotice = source.getFl401().getSituation().isOrdersAppliedWithoutNotice();
         return WithoutNoticeOrderDetails.builder()
             .orderWithoutGivingNotice(appliedWithoutNotice ? Yes : No)

@@ -32,7 +32,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class CourtNavHomeMapper {
     private final CourtNavAddressMapper addressMapper;
 
-    public Home mapHome(CourtNavHome courtNavHome) {
+    public Home map(CourtNavHome courtNavHome) {
         return Home.builder()
             .address(addressMapper.map(courtNavHome.getOccupationOrderAddress()))
             .peopleLivingAtThisAddress(getPeopleLivingAtThisAddress(courtNavHome))

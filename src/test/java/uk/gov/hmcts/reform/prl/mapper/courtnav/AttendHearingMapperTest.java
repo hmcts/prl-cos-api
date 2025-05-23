@@ -32,7 +32,7 @@ class AttendHearingMapperTest {
             .fl401(CourtNavCaseData.builder().goingToCourt(goingToCourt).build())
             .build();
 
-        AttendHearing result = mapper.mapAttendHearing(source);
+        AttendHearing result = mapper.map(source);
 
         assertEquals(YesOrNo.Yes, result.getIsInterpreterNeeded());
         assertEquals(YesOrNo.Yes, result.getIsDisabilityPresent());
@@ -57,7 +57,7 @@ class AttendHearingMapperTest {
             .fl401(CourtNavCaseData.builder().goingToCourt(goingToCourt).build())
             .build();
 
-        AttendHearing result = mapper.mapAttendHearing(source);
+        AttendHearing result = mapper.map(source);
 
         assertEquals(YesOrNo.No, result.getIsInterpreterNeeded());
         assertEquals(YesOrNo.No, result.getIsDisabilityPresent());

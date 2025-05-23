@@ -13,7 +13,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 @Mapper(componentModel = "spring")
 public interface AttendHearingMapper {
 
-    default AttendHearing mapAttendHearing(CourtNavFl401 source) {
+    default AttendHearing map(CourtNavFl401 source) {
         var goingToCourt = source.getFl401().getGoingToCourt();
 
         return AttendHearing.builder()

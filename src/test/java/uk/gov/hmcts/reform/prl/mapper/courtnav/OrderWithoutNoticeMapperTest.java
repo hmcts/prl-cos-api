@@ -33,7 +33,7 @@ class OrderWithoutNoticeMapperTest {
             .fl401(CourtNavCaseData.builder().situation(situation).build())
             .build();
 
-        WithoutNoticeOrderDetails order = mapper.mapOrderWithoutNotice(source);
+        WithoutNoticeOrderDetails order = mapper.map(source);
         assertEquals(YesOrNo.No, order.getOrderWithoutGivingNotice());
 
         ReasonForWithoutNoticeOrder reason = mapper.mapReasonForWithoutNotice(source);
@@ -56,7 +56,7 @@ class OrderWithoutNoticeMapperTest {
             .fl401(CourtNavCaseData.builder().situation(situation).build())
             .build();
 
-        WithoutNoticeOrderDetails order = mapper.mapOrderWithoutNotice(source);
+        WithoutNoticeOrderDetails order = mapper.map(source);
         assertEquals(YesOrNo.Yes, order.getOrderWithoutGivingNotice());
 
         ReasonForWithoutNoticeOrder reason = mapper.mapReasonForWithoutNotice(source);

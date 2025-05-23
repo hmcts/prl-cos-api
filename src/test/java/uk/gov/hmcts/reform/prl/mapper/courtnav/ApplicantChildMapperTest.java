@@ -31,7 +31,7 @@ class ApplicantChildMapperTest {
             .respondentRelationship("Father")
             .build();
 
-        List<Element<ApplicantChild>> result = applicantChildMapper.mapProtectedChildren(List.of(child));
+        List<Element<ApplicantChild>> result = applicantChildMapper.map(List.of(child));
 
         assertEquals(1, result.size());
         ApplicantChild mapped = result.getFirst().getValue();
@@ -43,7 +43,7 @@ class ApplicantChildMapperTest {
 
     @Test
     void shouldReturnNullWhenInputIsNull() {
-        List<Element<ApplicantChild>> result = applicantChildMapper.mapProtectedChildren(null);
+        List<Element<ApplicantChild>> result = applicantChildMapper.map(null);
         assertNull(result);
     }
 

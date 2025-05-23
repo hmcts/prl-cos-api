@@ -12,7 +12,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface StatementOfTruthMapper {
 
-    default StatementOfTruth mapStatementOfTruth(CourtNavFl401 source) {
+    default StatementOfTruth map(CourtNavFl401 source) {
         var statement = source.getFl401().getStatementOfTruth();
 
         return StatementOfTruth.builder()

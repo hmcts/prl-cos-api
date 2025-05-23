@@ -62,7 +62,7 @@ class CourtNavHomeMapperTest {
             .anythingElseForCourtToConsider("Court notes")
             .build();
 
-        Home result = homeMapper.mapHome(courtNavHome);
+        Home result = homeMapper.map(courtNavHome);
 
         assertEquals("1 Main St", result.getAddress().getAddressLine1());
         assertEquals("Other", result.getTextAreaSomethingElse());
@@ -83,7 +83,7 @@ class CourtNavHomeMapperTest {
             .childrenSharedResponsibility(null)
             .build();
 
-        Home result = homeMapper.mapHome(courtNavHome);
+        Home result = homeMapper.map(courtNavHome);
 
         assertNull(result.getLandlords());
         assertNull(result.getMortgages());

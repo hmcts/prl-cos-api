@@ -25,7 +25,7 @@ public class CourtNavApplicantMapper {
 
     private final CourtNavAddressMapper courtNavAddressMapper;
 
-    public PartyDetails mapApplicant(ApplicantsDetails applicant) {
+    public PartyDetails map(ApplicantsDetails applicant) {
 
         ContactPreferences contactPreferences = null;
         if (isNotEmpty(applicant.getApplicantPreferredContact())) {

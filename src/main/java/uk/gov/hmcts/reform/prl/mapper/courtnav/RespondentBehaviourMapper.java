@@ -15,7 +15,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface RespondentBehaviourMapper {
 
-    default RespondentBehaviour mapRespondentBehaviour(CourtNavFl401 source) {
+    default RespondentBehaviour map(CourtNavFl401 source) {
         List<FL401OrderTypeEnum> orderTypes = source.getFl401().getSituation().getOrdersAppliedFor();
         if (orderTypes == null || !orderTypes.contains(FL401OrderTypeEnum.nonMolestationOrder)) {
             return null;

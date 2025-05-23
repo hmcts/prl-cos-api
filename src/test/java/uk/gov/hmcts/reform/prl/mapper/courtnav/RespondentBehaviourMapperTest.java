@@ -35,7 +35,7 @@ class RespondentBehaviourMapperTest {
                        .build())
             .build();
 
-        RespondentBehaviour result = mapper.mapRespondentBehaviour(source);
+        RespondentBehaviour result = mapper.map(source);
         assertNull(result);
     }
 
@@ -58,7 +58,7 @@ class RespondentBehaviourMapperTest {
                        .build())
             .build();
 
-        RespondentBehaviour result = mapper.mapRespondentBehaviour(source);
+        RespondentBehaviour result = mapper.map(source);
 
         assertNotNull(result);
         assertEquals(1, result.getApplicantWantToStopFromRespondentDoing().size());
@@ -90,7 +90,7 @@ class RespondentBehaviourMapperTest {
                        .build())
             .build();
 
-        RespondentBehaviour result = mapper.mapRespondentBehaviour(source);
+        RespondentBehaviour result = mapper.map(source);
 
         assertNotNull(result);
         assertNull(result.getApplicantWantToStopFromRespondentDoing());

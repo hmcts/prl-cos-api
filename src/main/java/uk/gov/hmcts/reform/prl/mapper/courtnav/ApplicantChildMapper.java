@@ -27,7 +27,7 @@ public interface ApplicantChildMapper {
             .build();
     }
 
-    default List<Element<ApplicantChild>> mapProtectedChildren(List<ProtectedChild> protectedChildren) {
+    default List<Element<ApplicantChild>> map(List<ProtectedChild> protectedChildren) {
         if (protectedChildren == null) {
             return null;
         }

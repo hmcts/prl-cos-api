@@ -61,7 +61,7 @@ class CourtNavApplicantMapperTest {
             .shareContactDetailsWithRespondent(false)
             .build();
 
-        PartyDetails result = courtNavApplicantMapper.mapApplicant(input);
+        PartyDetails result = courtNavApplicantMapper.map(input);
 
         assertNotNull(result.getPartyId());
         assertEquals("Jane", result.getFirstName());
@@ -97,7 +97,7 @@ class CourtNavApplicantMapperTest {
             .shareContactDetailsWithRespondent(true)
             .build();
 
-        PartyDetails result = courtNavApplicantMapper.mapApplicant(input);
+        PartyDetails result = courtNavApplicantMapper.map(input);
 
         assertEquals("Test", result.getFirstName());
         assertNull(result.getAddress());
@@ -126,7 +126,7 @@ class CourtNavApplicantMapperTest {
             .shareContactDetailsWithRespondent(false)
             .build();
 
-        PartyDetails result = courtNavApplicantMapper.mapApplicant(input);
+        PartyDetails result = courtNavApplicantMapper.map(input);
 
         assertEquals(Gender.other, result.getGender());
         assertEquals("Non-binary", result.getOtherGender());

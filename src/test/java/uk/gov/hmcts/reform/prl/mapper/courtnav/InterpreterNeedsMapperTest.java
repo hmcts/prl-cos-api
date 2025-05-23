@@ -30,7 +30,7 @@ class InterpreterNeedsMapperTest {
                        .build())
             .build();
 
-        List<Element<InterpreterNeed>> result = mapper.mapInterpreterNeeds(source);
+        List<Element<InterpreterNeed>> result = mapper.map(source);
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
@@ -48,7 +48,7 @@ class InterpreterNeedsMapperTest {
                        .build())
             .build();
 
-        List<Element<InterpreterNeed>> result = mapper.mapInterpreterNeeds(source);
+        List<Element<InterpreterNeed>> result = mapper.map(source);
         assertEquals(1, result.size());
         InterpreterNeed need = result.getFirst().getValue();
         assertEquals("Polish", need.getLanguage());
@@ -70,7 +70,7 @@ class InterpreterNeedsMapperTest {
                        .build())
             .build();
 
-        List<Element<InterpreterNeed>> result = mapper.mapInterpreterNeeds(source);
+        List<Element<InterpreterNeed>> result = mapper.map(source);
         assertEquals(1, result.size());
         InterpreterNeed need = result.getFirst().getValue();
         assertEquals("Chinese - Cantonese", need.getLanguage());

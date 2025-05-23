@@ -20,7 +20,7 @@ public interface CourtNavRespondentMapper {
     @Mapping(target = "isCurrentAddressKnown", source = "address", qualifiedByName = "isNotNull")
     @Mapping(target = "respondentLivedWithApplicant", source = "respondentLivesWithApplicant", qualifiedByName = "booleanToYesOrNo")
     @Mapping(target = "partyId", expression = "java(java.util.UUID.randomUUID())")
-    PartyDetails mapRespondent(CourtNavRespondent respondent);
+    PartyDetails map(CourtNavRespondent respondent);
 
     @Named("mapCourtNavDate")
     default LocalDate mapCourtNavDate(CourtNavDate courtNavDate) {

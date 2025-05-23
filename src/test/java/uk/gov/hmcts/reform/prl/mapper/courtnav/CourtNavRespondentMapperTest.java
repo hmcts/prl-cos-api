@@ -38,7 +38,7 @@ class CourtNavRespondentMapperTest {
             .respondentLivesWithApplicant(true)
             .build();
 
-        PartyDetails result = courtNavRespondentMapper.mapRespondent(input);
+        PartyDetails result = courtNavRespondentMapper.map(input);
 
         assertEquals("John", result.getFirstName());
         assertEquals("Smith", result.getLastName());
@@ -62,7 +62,7 @@ class CourtNavRespondentMapperTest {
             .respondentLivesWithApplicant(false)
             .build();
 
-        PartyDetails result = courtNavRespondentMapper.mapRespondent(input);
+        PartyDetails result = courtNavRespondentMapper.map(input);
 
         assertEquals("Anon", result.getFirstName());
         assertNull(result.getDateOfBirth());
