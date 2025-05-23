@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -52,11 +51,6 @@ public class ReviewAdditionalApplicationServiceTest {
 
     @Mock
     private ObjectMapper objectMapper;
-
-    @Before
-    public void setup() {
-
-    }
 
     @Test
     public void testPopulateReviewAdditionalApplication() {

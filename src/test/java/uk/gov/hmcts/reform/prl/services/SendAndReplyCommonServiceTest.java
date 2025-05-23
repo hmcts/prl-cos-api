@@ -210,7 +210,6 @@ public class SendAndReplyCommonServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(sendAndReplyService.addMessage(caseData, auth, caseDataMap)).thenReturn(msgListWithNewMessage);
 
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyCommonService.sendMessages(auth, caseData, caseDataMap);
         verify(sendAndReplyService).addMessage(caseData, auth, caseDataMap);
     }
@@ -320,7 +319,6 @@ public class SendAndReplyCommonServiceTest {
         when(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData,SEND))
             .thenReturn("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355");
 
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyCommonService.sendMessages(auth, caseData, caseDataMap);
         verify(sendAndReplyService).addMessage(caseData, auth, caseDataMap);
     }
@@ -367,15 +365,12 @@ public class SendAndReplyCommonServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(sendAndReplyService.addMessage(caseData, auth, caseDataMap)).thenReturn(msgListWithNewMessage);
 
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyCommonService.sendMessages(auth, caseData, caseDataMap);
         verify(sendAndReplyService).addMessage(caseData, auth, caseDataMap);
     }
 
     @Test
     public void testSendOrReplyToMessagesSubmitForReplyAndClose() {
-
-
 
         caseDataMap = new HashMap<>();
         CaseDetails caseDetails = CaseDetails.builder()
@@ -387,9 +382,7 @@ public class SendAndReplyCommonServiceTest {
 
         List<Element<Message>> openMessagesBefore = messages;
 
-        List<Element<Message>> closedMessage = new ArrayList<>();
-
-        closedMessage = messages.stream()
+        List<Element<Message>> closedMessage = messages.stream()
             .filter(m -> m.getId().equals(selectedValue))
             .findFirst()
             .map(element -> {
@@ -443,7 +436,7 @@ public class SendAndReplyCommonServiceTest {
                     .messages(openMessagesBefore)
                     .build())
             .build();
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
         sendAndReplyCommonService.replyMessages(auth, caseData, caseDataMap);
         verify(sendAndReplyService).closeMessage(caseDataAfterClosed, caseDataMap);
     }
@@ -465,8 +458,6 @@ public class SendAndReplyCommonServiceTest {
         msgHisElemList.add(element(messageHistory));
 
         messagesWithHistory.get(0).getValue().setReplyHistory(msgHisElemList);
-
-        UUID selectedValue = messages.get(0).getId();
 
         CaseData caseData = CaseData.builder().id(12345L)
             .chooseSendOrReply(REPLY)
@@ -494,7 +485,6 @@ public class SendAndReplyCommonServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(sendAndReplyService.replyAndAppendMessageHistory(caseData, auth, caseDataMap)).thenReturn(messagesWithHistory);
 
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyCommonService.replyMessages(auth, caseData, caseDataMap);
         verify(sendAndReplyService).replyAndAppendMessageHistory(caseData, auth, caseDataMap);
     }
@@ -523,7 +513,6 @@ public class SendAndReplyCommonServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(sendAndReplyService.closeMessage(caseData, caseDataMap)).thenReturn(listOfClosedMessages);
 
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyCommonService.replyMessages(auth, caseData, caseDataMap);
         verify(sendAndReplyService).closeMessage(caseData, caseDataMap);
     }

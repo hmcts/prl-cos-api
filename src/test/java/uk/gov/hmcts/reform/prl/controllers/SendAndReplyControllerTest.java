@@ -17,13 +17,10 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
-import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.dto.SendOrReplyDto;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -278,7 +275,6 @@ public class SendAndReplyControllerTest {
 
     @Test
     public void testHandleAboutToSubmitReplyPathClose() {
-        Map<String, Object> caseDataMap = new HashMap<>();
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         Message message = Message.builder().status(MessageStatus.OPEN).isReplying(YesOrNo.No).build();
         CaseData caseDataWithMessage = CaseData.builder().id(12345L)
@@ -508,19 +504,6 @@ public class SendAndReplyControllerTest {
     @Test
     public void testHandleSubmittedSendAndReplyWhenRespToMesgNo() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
-        Message message = Message.builder().isReplying(YesOrNo.Yes).build();
-
-        CaseData caseData = CaseData.builder().id(12345L)
-            .chooseSendOrReply(REPLY)
-            .sendOrReplyMessage(
-                SendOrReplyMessage.builder()
-                    .respondToMessage(YesOrNo.No)
-                    .messages(messages)
-                    .messages(messages)
-                    .build())
-            .messageReply(message)
-            .replyMessageDynamicList(DynamicList.builder().build())
-            .build();
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(sendAndReplyService.sendAndReplySubmitted(callbackRequest)).thenReturn(ok(SubmittedCallbackResponse.builder().build()));
@@ -534,22 +517,6 @@ public class SendAndReplyControllerTest {
     @Test
     public void testHandleSubmittedSendAndReplyWhenRespToMesgSendAndNo() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
-        Message message = Message.builder().isReplying(YesOrNo.Yes).build();
-
-        CaseData caseData = CaseData.builder().id(12345L)
-            .chooseSendOrReply(SEND)
-            .sendOrReplyMessage(
-                SendOrReplyMessage.builder()
-                    .respondToMessage(YesOrNo.No)
-                    .messages(messages)
-                    .messages(messages)
-                    .sendMessageObject(Message.builder()
-                                           .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                                           .build())
-                    .build())
-            .messageReply(message)
-            .replyMessageDynamicList(DynamicList.builder().build())
-            .build();
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(sendAndReplyService.sendAndReplySubmitted(callbackRequest)).thenReturn(ok(SubmittedCallbackResponse.builder().build()));
@@ -561,18 +528,6 @@ public class SendAndReplyControllerTest {
     @Test
     public void testHandSubmittedSendAndReplyWhenRespondToMessageYes() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
-        Message message = Message.builder().isReplying(YesOrNo.Yes).build();
-
-        CaseData caseData = CaseData.builder().id(12345L)
-            .chooseSendOrReply(REPLY)
-            .sendOrReplyMessage(
-                SendOrReplyMessage.builder()
-                    .respondToMessage(YesOrNo.Yes)
-                    .messages(messages)
-                    .build())
-            .messageReply(message)
-            .replyMessageDynamicList(DynamicList.builder().build())
-            .build();
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(sendAndReplyService.sendAndReplySubmitted(callbackRequest)).thenReturn(ok(SubmittedCallbackResponse.builder().build()));
@@ -585,25 +540,6 @@ public class SendAndReplyControllerTest {
     @Test
     public void testClearDynamicLists() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
-        Message message = Message.builder().isReplying(YesOrNo.Yes).build();
-
-        CaseData caseData = CaseData.builder().id(12345L)
-            .chooseSendOrReply(REPLY)
-            .sendOrReplyMessage(
-                SendOrReplyMessage.builder()
-                    .sendMessageObject(Message.builder()
-                        .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
-                        .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
-                        .messageAbout(MessageAboutEnum.APPLICATION)
-                        .sendReplyJudgeName(JudicialUser.builder().personalCode("123").build())
-                        .messageContent("some msg content")
-                        .build())
-                    .respondToMessage(YesOrNo.No)
-                    .messages(messages)
-                    .build())
-            .messageReply(message)
-            .replyMessageDynamicList(DynamicList.builder().build())
-            .build();
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(sendAndReplyService.clearDynamicLists(callbackRequest)).thenReturn(AboutToStartOrSubmitCallbackResponse.builder().build());

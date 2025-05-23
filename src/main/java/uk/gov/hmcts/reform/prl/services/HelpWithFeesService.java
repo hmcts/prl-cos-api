@@ -134,9 +134,8 @@ public class HelpWithFeesService {
                         additionalApplicationsBundle
                     )
                 );
-                if (chosenAdditionalApplication != null) {
-                    caseDataUpdated.put(WA_ADDITIONAL_APPLICATION_COLLECTION_ID, chosenAdditionalApplication.getId());
-                }
+
+                caseDataUpdated.put(WA_ADDITIONAL_APPLICATION_COLLECTION_ID, chosenAdditionalApplication.getId());
                 caseDataUpdated.put(AWP_ADDTIONAL_APPLICATION_BUNDLE, additionalApplications);
                 caseDataUpdated.put(IS_THE_CASE_IN_DRAFT_STATE, YesOrNo.No.getDisplayedValue());
                 //WA fields
