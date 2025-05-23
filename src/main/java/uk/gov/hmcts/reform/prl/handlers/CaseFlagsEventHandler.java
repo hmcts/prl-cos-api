@@ -13,12 +13,23 @@ import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.amroles.InternalCaseworkerAmRolesEnum;
 import uk.gov.hmcts.reform.prl.events.CaseFlagsEvent;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caseflags.AllPartyFlags;
+import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
+import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -46,7 +57,33 @@ public class CaseFlagsEventHandler {
             .stream()
             .map(RoleAssignmentResponse::getRoleName)
             .toList();
-        if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.CTSC.getRoles()::contains)) {
+
+        CaseData caseData = objectMapper.convertValue(
+            event.callbackRequest().getCaseDetails().getData(),
+            CaseData.class
+        );
+
+        List<Element<FlagDetail>> allDetails = new ArrayList<>();
+
+        if (caseData.getCaseFlags() != null && caseData.getCaseFlags().getDetails() != null) {
+            allDetails.addAll(caseData.getCaseFlags().getDetails());
+        }
+
+        if (caseData.getAllPartyFlags() != null) {
+            allDetails.addAll(extractAllFlagDetails(caseData.getAllPartyFlags()));
+        }
+
+        List<Element<FlagDetail>> sortedDetails = allDetails.stream()
+            .filter(detail -> detail.getValue() != null
+                && detail.getValue().getStatus() != null
+                && detail.getValue().getDateTimeCreated() != null)
+            .sorted(Comparator.comparing(detail -> detail.getValue().getDateTimeCreated()))
+            .toList();
+
+        boolean isLastFlagRequested = !sortedDetails.isEmpty()
+            && "Requested".equalsIgnoreCase(sortedDetails.get(sortedDetails.size() - 1).getValue().getStatus());
+
+        if (isLastFlagRequested && roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.COURT_ADMIN_TEAM_LEADER.getRoles()::contains)) {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
                 caseId,
                 CaseEvent.CREATE_WA_TASK_FOR_CTSC_CASE_FLAGS.getValue()
@@ -60,5 +97,26 @@ public class CaseFlagsEventHandler {
                 startAllTabsUpdateDataContent.caseDataMap()
             );
         }
+    }
+
+    private List<Element<FlagDetail>> extractAllFlagDetails(AllPartyFlags allPartyFlags) {
+        if (allPartyFlags == null) {
+            return Collections.emptyList();
+        }
+
+        return Arrays.stream(allPartyFlags.getClass().getDeclaredFields())
+            .filter(field -> field.getType().equals(Flags.class))
+            .map(field -> {
+                field.setAccessible(true);
+                try {
+                    Flags flags = (Flags) field.get(allPartyFlags);
+                    return flags != null ? flags.getDetails() : null;
+                } catch (IllegalAccessException e) {
+                    return null;
+                }
+            })
+            .filter(Objects::nonNull)
+            .flatMap(List::stream)
+            .collect(Collectors.toList());
     }
 }
