@@ -26,13 +26,13 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewAdditionalApplicationWrapper;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.ReviewAdditionalApplicationService;
+import uk.gov.hmcts.reform.prl.services.SendAndReplyCommonService;
 import uk.gov.hmcts.reform.prl.services.SendAndReplyService;
-import uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabsService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -47,11 +47,13 @@ import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
@@ -70,9 +72,7 @@ public class ReviewAdditionalApplicationControllerTest {
     @Mock
     private SendAndReplyService sendAndReplyService;
     @Mock
-    private AllTabsService allTabsService;
-    @Mock
-    private UploadAdditionalApplicationService uploadAdditionalApplicationService;
+    SendAndReplyCommonService sendAndReplyCommonService;
 
     @InjectMocks
     private ReviewAdditionalApplicationController controller;
@@ -311,5 +311,68 @@ public class ReviewAdditionalApplicationControllerTest {
         when(sendAndReplyService.clearDynamicLists(callbackRequest)).thenReturn(AboutToStartOrSubmitCallbackResponse.builder().build());
         controller.clearDynamicLists(auth, callbackRequest);
         verify(sendAndReplyService).clearDynamicLists(callbackRequest);
+    }
+
+    @Test
+    public void testSendOrReplyToMessagesSubmitForSend() {
+
+        caseDataMap = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345L)
+            .data(caseDataMap)
+            .build();
+
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .reviewAdditionalApplicationWrapper(ReviewAdditionalApplicationWrapper.builder().isAdditionalApplicationReviewed(
+                Yes).build())
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        controller.aboutToSubmitReviewAdditionalApplication(auth, callbackRequest);
+        verify(sendAndReplyCommonService).sendMessages(auth, caseData, caseDataMap);
+    }
+
+    @Test
+    public void testSendOrReplyToMessagesSubmitForReply() {
+
+        caseDataMap = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345L)
+            .state(State.SUBMITTED_PAID.getValue())
+            .data(caseDataMap)
+            .build();
+
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(REPLY)
+            .reviewAdditionalApplicationWrapper(ReviewAdditionalApplicationWrapper.builder().isAdditionalApplicationReviewed(
+                Yes).build())
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        controller.aboutToSubmitReviewAdditionalApplication(auth, callbackRequest);
+        verify(sendAndReplyCommonService).replyMessages(auth, caseData, caseDataMap);
+    }
+
+    @Test
+    public void testSendOrReplyToMessagesSubmitIfAdditionalApplicationIsNotReviewed() {
+
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .reviewAdditionalApplicationWrapper(ReviewAdditionalApplicationWrapper.builder().isAdditionalApplicationReviewed(
+                No).build())
+            .build();
+
+        caseDataMap = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345L)
+            .data(caseDataMap)
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        controller.aboutToSubmitReviewAdditionalApplication(auth, callbackRequest);
+        verifyNoInteractions(sendAndReplyCommonService);
     }
 }

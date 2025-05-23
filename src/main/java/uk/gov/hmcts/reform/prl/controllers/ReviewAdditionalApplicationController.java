@@ -29,8 +29,8 @@ import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.ReviewAdditionalApplicationService;
+import uk.gov.hmcts.reform.prl.services.SendAndReplyCommonService;
 import uk.gov.hmcts.reform.prl.services.SendAndReplyService;
-import uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
@@ -40,9 +40,6 @@ import java.util.Objects;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_ADDTIONAL_APPLICATION_BUNDLE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_CLOSED;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_IN_REVIEW;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
@@ -59,23 +56,23 @@ public class ReviewAdditionalApplicationController extends AbstractCallbackContr
     private final ReviewAdditionalApplicationService reviewAdditionalApplicationService;
     private final SendAndReplyService sendAndReplyService;
     private final AuthorisationService authorisationService;
-    private final UploadAdditionalApplicationService uploadAdditionalApplicationService;
+    private final SendAndReplyCommonService sendAndReplyCommonService;
 
     public static final String MESSAGES = "messages";
     public static final String CONFIRMATION_HEADER = "# Order approved";
-    
+
     @Autowired
     public ReviewAdditionalApplicationController(ObjectMapper objectMapper,
                                                  EventService eventPublisher,
                                                  ReviewAdditionalApplicationService reviewAdditionalApplicationService,
                                                  SendAndReplyService sendAndReplyService,
                                                  AuthorisationService authorisationService,
-                                                 UploadAdditionalApplicationService uploadAdditionalApplicationService) {
+                                                 SendAndReplyCommonService sendAndReplyCommonService) {
         super(objectMapper, eventPublisher);
         this.reviewAdditionalApplicationService = reviewAdditionalApplicationService;
         this.sendAndReplyService = sendAndReplyService;
         this.authorisationService = authorisationService;
-        this.uploadAdditionalApplicationService = uploadAdditionalApplicationService;
+        this.sendAndReplyCommonService = sendAndReplyCommonService;
     }
 
     @PostMapping(path = "/review-additional-application/about-to-start",
@@ -171,72 +168,9 @@ public class ReviewAdditionalApplicationController extends AbstractCallbackContr
         if (caseData.getReviewAdditionalApplicationWrapper() != null
             && YesOrNo.Yes.equals(caseData.getReviewAdditionalApplicationWrapper().getIsAdditionalApplicationReviewed())) {
             if (caseData.getChooseSendOrReply().equals(SEND)) {
-                caseDataMap.put(MESSAGES, sendAndReplyService.addMessage(caseData, authorisation, caseDataMap));
-                String additionalApplicationCodeSelected = sendAndReplyService.fetchAdditionalApplicationCodeIfExist(
-                    caseData, SEND
-                );
-
-                if (null != additionalApplicationCodeSelected) {
-                    caseDataMap.put(
-                        AWP_ADDTIONAL_APPLICATION_BUNDLE,
-                        uploadAdditionalApplicationService
-                            .updateAwpApplicationStatus(
-                                additionalApplicationCodeSelected,
-                                caseData.getAdditionalApplicationsBundle(),
-                                AWP_STATUS_IN_REVIEW
-                            )
-                    );
-                }
-
-                sendAndReplyService.sendNotificationToExternalParties(
-                    caseData,
-                    authorisation
-                );
-
-                //send emails in case of sending to others with emails
-                sendAndReplyService.sendNotificationEmailOther(caseData);
-                //WA - clear reply field in case of SEND
-                sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
+                sendAndReplyCommonService.sendMessages(authorisation, caseData, caseDataMap);
             } else {
-                if (YesOrNo.No.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
-                    //Reply & close
-                    caseDataMap.put(MESSAGES, sendAndReplyService.closeMessage(caseData, caseDataMap));
-
-                    // Update status of Additional applications if selected to Closed
-                    String additionalApplicationCodeSelected = sendAndReplyService.fetchAdditionalApplicationCodeIfExist(
-                        caseData, REPLY
-                    );
-                    log.info(
-                        "additionalApplicationCodeSelected while closing message {}",
-                        additionalApplicationCodeSelected
-                    );
-                    if (null != additionalApplicationCodeSelected) {
-                        caseDataMap.put(
-                            AWP_ADDTIONAL_APPLICATION_BUNDLE,
-                            uploadAdditionalApplicationService
-                                .updateAwpApplicationStatus(
-                                    additionalApplicationCodeSelected,
-                                    caseData.getAdditionalApplicationsBundle(),
-                                    AWP_STATUS_CLOSED
-                                )
-                        );
-                    }
-
-                    // in case of reply and close message, removing replymessageobject for wa
-                    sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
-                } else {
-                    //Reply & append history
-                    caseDataMap.put(
-                        MESSAGES,
-                        sendAndReplyService.replyAndAppendMessageHistory(
-                            caseData,
-                            authorisation,
-                            caseDataMap
-                        )
-                    );
-                }
-                //WA - clear send field in case of REPLY
-                sendAndReplyService.removeTemporaryFields(caseDataMap, "sendMessageObject");
+                sendAndReplyCommonService.replyMessages(authorisation, caseData, caseDataMap);
             }
         }
 
