@@ -18,7 +18,6 @@ public interface AttendHearingMapper {
 
         return AttendHearing.builder()
             .isInterpreterNeeded(Boolean.TRUE.equals(goingToCourt.getIsInterpreterRequired()) ? Yes : No)
-            .interpreterNeeds(null) // already mapped via InterpreterNeedsMapper separately
             .isDisabilityPresent(goingToCourt.isAnyDisabilityNeeds() ? Yes : No)
             .adjustmentsRequired(goingToCourt.isAnyDisabilityNeeds() ? goingToCourt.getDisabilityNeedsDetails() : null)
             .isSpecialArrangementsRequired(goingToCourt.getAnySpecialMeasures() != null ? Yes : No)

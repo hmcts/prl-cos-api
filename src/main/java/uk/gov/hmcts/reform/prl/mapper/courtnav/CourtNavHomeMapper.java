@@ -108,10 +108,8 @@ public class CourtNavHomeMapper {
     }
 
     private YesOrNo getAnyChildrenLivedAtAddress(CourtNavHome home) {
-        return (null != home
-            .getChildrenApplicantResponsibility())
-            || (null != home
-            .getChildrenSharedResponsibility())
+        return (null != home.getChildrenApplicantResponsibility())
+            || (null != home.getChildrenSharedResponsibility())
             ? Yes : No;
     }
 
