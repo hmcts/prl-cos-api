@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.dto.SendOrReplyDto;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewAdditionalApplicationWrapper;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
@@ -214,6 +215,78 @@ public class ReviewAdditionalApplicationControllerTest {
         AboutToStartOrSubmitCallbackResponse response = controller
             .aboutToStartReviewAdditionalApplication(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
         Assert.assertNotNull(response);
+    }
+
+    @Test
+    public void testReviewAdditionalApplicatonMidEventWhenNoError() {
+        Element<AdditionalApplicationsBundle> reviewAdditionalApplicationElement = Element.<AdditionalApplicationsBundle>builder().build();
+        List<Element<AdditionalApplicationsBundle>> reviewAdditionalApplicationCollection = new ArrayList<>();
+        reviewAdditionalApplicationCollection.add(reviewAdditionalApplicationElement);
+        CaseData caseData = CaseData.builder()
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .id(123L)
+            .reviewAdditionalApplicationWrapper(ReviewAdditionalApplicationWrapper.builder().isAdditionalApplicationReviewed(
+                Yes).build())
+            .additionalApplicationsBundle(reviewAdditionalApplicationCollection)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        caseDataMap = new HashMap<>();
+        caseDataMap.put(CASE_TYPE_OF_APPLICATION, caseData.getCaseTypeOfApplication());
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        CallbackResponse response = controller
+            .reviewAdditionalApplicatonMidEvent(AUTH_TOKEN, callbackRequest);
+        Assert.assertNotNull(response);
+        Assert.assertTrue(response.getErrors().isEmpty());
+    }
+
+    @Test
+    public void testReviewAdditionalApplicatonMidEventWhenError() {
+        Element<AdditionalApplicationsBundle> reviewAdditionalApplicationElement = Element.<AdditionalApplicationsBundle>builder().build();
+        List<Element<AdditionalApplicationsBundle>> reviewAdditionalApplicationCollection = new ArrayList<>();
+        reviewAdditionalApplicationCollection.add(reviewAdditionalApplicationElement);
+        CaseData caseData = CaseData.builder()
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .id(123L)
+            .reviewAdditionalApplicationWrapper(ReviewAdditionalApplicationWrapper.builder().isAdditionalApplicationReviewed(
+                No).build())
+            .additionalApplicationsBundle(reviewAdditionalApplicationCollection)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        caseDataMap = new HashMap<>();
+        caseDataMap.put(CASE_TYPE_OF_APPLICATION, caseData.getCaseTypeOfApplication());
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        CallbackResponse response = controller
+            .reviewAdditionalApplicatonMidEvent(AUTH_TOKEN, callbackRequest);
+        Assert.assertNotNull(response);
+        Assert.assertFalse(response.getErrors().isEmpty());
     }
 
     @Test
