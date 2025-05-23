@@ -53,8 +53,6 @@ public class ReviewAdditionalApplicationServiceTest {
     @Mock
     private ObjectMapper objectMapper;
 
-    private final String authToken = "Bearer testAuthtoken";
-
     @Before
     public void setup() {
 
@@ -89,7 +87,7 @@ public class ReviewAdditionalApplicationServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getAdditionalApplicationsBundle(), objectMapper)).thenReturn(additionalApplicationsBundleElement.getId());
         Map<String, Object> caseDataMap = reviewAdditionalApplicationService.populateReviewAdditionalApplication(
-            caseData, new HashMap<>(), authToken, null, REVIEW_ADDITIONAL_APPLICATION.getId());
+            caseData, new HashMap<>(), null, REVIEW_ADDITIONAL_APPLICATION.getId());
         assertNotNull(caseDataMap.get("selectedAdditionalApplicationsBundle"));
     }
 
@@ -141,7 +139,7 @@ public class ReviewAdditionalApplicationServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getAdditionalApplicationsBundle(), objectMapper)).thenReturn(additionalApplicationsBundleElement.getId());
         Map<String, Object> caseDataMap = reviewAdditionalApplicationService.populateReviewAdditionalApplication(
-            caseData, new HashMap<>(), authToken, clientContextCoded,
+            caseData, new HashMap<>(), clientContextCoded,
             REVIEW_ADDITIONAL_APPLICATION.getId());
 
         assertNotNull(caseDataMap.get("selectedAdditionalApplicationsBundle"));
@@ -176,7 +174,7 @@ public class ReviewAdditionalApplicationServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getAdditionalApplicationsBundle(), objectMapper)).thenReturn(additionalApplicationsBundleElement.getId());
         Map<String, Object> caseDataMap = reviewAdditionalApplicationService.populateReviewAdditionalApplication(
-            caseData, new HashMap<>(), authToken, null, EDIT_AND_APPROVE_ORDER.getId());
+            caseData, new HashMap<>(), null, EDIT_AND_APPROVE_ORDER.getId());
         assertNotNull(caseDataMap.get("selectedAdditionalApplicationsBundle"));
     }
 

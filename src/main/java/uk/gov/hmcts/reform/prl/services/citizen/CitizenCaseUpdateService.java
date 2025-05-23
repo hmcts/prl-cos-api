@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.CitizenUpdatePartyDataContent;
@@ -340,7 +341,7 @@ public class CitizenCaseUpdateService {
         Map<String, Object> caseDataMapToBeUpdated = startAllTabsUpdateDataContent.caseDataMap();
         //Update latest awp data after mapping into caseData
         caseDataMapToBeUpdated.put("additionalApplicationsBundle", updatedCaseData.getAdditionalApplicationsBundle());
-        if (updatedCaseData.getAdditionalApplicationsBundle().size() >= 1) {
+        if (!CollectionUtils.isEmpty(updatedCaseData.getAdditionalApplicationsBundle())) {
             caseDataMapToBeUpdated.put(WA_ADDITIONAL_APPLICATION_COLLECTION_ID, updatedCaseData.getAdditionalApplicationsBundle().get(0).getId());
         }
         caseDataMapToBeUpdated.put("citizenAwpPayments", updatedCaseData.getCitizenAwpPayments());

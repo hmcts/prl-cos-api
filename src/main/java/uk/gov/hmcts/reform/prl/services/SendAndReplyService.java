@@ -2128,11 +2128,11 @@ public class SendAndReplyService {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
         Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
-        if (Objects.nonNull(message) && InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())) {
-            if (!atLeastOnePartySelectedForExternalMessage(message)) {
-                return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(
-                    "No recipients selected to send your message. Select at least one party")).build();
-            }
+        if (Objects.nonNull(message)
+            && InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())
+            && !atLeastOnePartySelectedForExternalMessage(message)) {
+            return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(
+                "No recipients selected to send your message. Select at least one party")).build();
         }
         //reset dynamic list fields
         caseData = resetSendAndReplyDynamicLists(caseData);

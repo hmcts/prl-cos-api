@@ -29,12 +29,10 @@ public class ReviewAdditionalApplicationService {
 
     public Map<String, Object> populateReviewAdditionalApplication(CaseData caseData,
                                                                    Map<String, Object> caseDataMap,
-                                                                   String authorization,
                                                                    String clientContext,
                                                                    String eventId) {
         AdditionalApplicationsBundle selectedAdditionalApplicationsBundle = getSelectedAdditionalApplicationDetails(
             caseData,
-            caseDataMap,
             clientContext, eventId
         );
         caseDataMap.put("selectedAdditionalApplicationsBundle", selectedAdditionalApplicationsBundle);
@@ -42,7 +40,6 @@ public class ReviewAdditionalApplicationService {
     }
 
     private AdditionalApplicationsBundle getSelectedAdditionalApplicationDetails(CaseData caseData,
-                                                                                Map<String, Object> caseDataMap,
                                                                                 String clientContext,
                                                                                 String eventId) {
         final UUID additionalApplicationId;

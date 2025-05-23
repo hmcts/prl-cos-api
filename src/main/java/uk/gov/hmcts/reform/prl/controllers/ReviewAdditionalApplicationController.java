@@ -58,7 +58,6 @@ public class ReviewAdditionalApplicationController extends AbstractCallbackContr
     private final AuthorisationService authorisationService;
     private final SendAndReplyCommonService sendAndReplyCommonService;
 
-    public static final String MESSAGES = "messages";
     public static final String CONFIRMATION_HEADER = "# Order approved";
 
     @Autowired
@@ -97,7 +96,7 @@ public class ReviewAdditionalApplicationController extends AbstractCallbackContr
 
             CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
             caseDataMap = reviewAdditionalApplicationService.populateReviewAdditionalApplication(
-                caseData, caseDataMap, authorisation, clientContext, callbackRequest.getEventId());
+                caseData, caseDataMap, clientContext, callbackRequest.getEventId());
 
             caseDataMap.putAll(sendAndReplyService.setSenderAndGenerateMessageReplyList(caseData, authorisation));
 

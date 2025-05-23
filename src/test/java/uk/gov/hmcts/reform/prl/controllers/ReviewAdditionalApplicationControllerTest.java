@@ -211,7 +211,6 @@ public class ReviewAdditionalApplicationControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(reviewAdditionalApplicationService.populateReviewAdditionalApplication(caseData,
                                                                                     caseDataMap,
-                                                                                    AUTH_TOKEN,
                                                                                     "clcx",
                                                                                     Event.REVIEW_ADDITIONAL_APPLICATION.getId()))
             .thenReturn(caseDataMap);

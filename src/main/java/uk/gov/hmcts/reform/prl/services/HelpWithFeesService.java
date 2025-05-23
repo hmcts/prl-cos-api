@@ -134,7 +134,7 @@ public class HelpWithFeesService {
                         additionalApplicationsBundle
                     )
                 );
-                if (caseData.getAdditionalApplicationsBundle().size() >= 1) {
+                if (chosenAdditionalApplication != null) {
                     caseDataUpdated.put(WA_ADDITIONAL_APPLICATION_COLLECTION_ID, chosenAdditionalApplication.getId());
                 }
                 caseDataUpdated.put(AWP_ADDTIONAL_APPLICATION_BUNDLE, additionalApplications);

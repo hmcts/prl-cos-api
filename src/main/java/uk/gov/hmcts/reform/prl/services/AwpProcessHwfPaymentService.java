@@ -11,6 +11,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -138,7 +139,7 @@ public class AwpProcessHwfPaymentService {
             }
             log.info("All Hwf AwP payments processed? " + allCitizenAwpWithHwfHasBeenProcessed);
             caseDataUpdated.put(AWP_ADDTIONAL_APPLICATION_BUNDLE, caseData.getAdditionalApplicationsBundle());
-            if (caseData.getAdditionalApplicationsBundle().size() >= 1) {
+            if (!CollectionUtils.isEmpty(caseData.getAdditionalApplicationsBundle())) {
                 caseDataUpdated.put(WA_ADDITIONAL_APPLICATION_COLLECTION_ID, caseData.getAdditionalApplicationsBundle().get(0).getId());
             }
             caseDataUpdated.put(
