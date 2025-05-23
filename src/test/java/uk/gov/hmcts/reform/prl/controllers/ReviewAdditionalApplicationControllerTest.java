@@ -23,8 +23,10 @@ import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.dto.SendOrReplyDto;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewAdditionalApplicationWrapper;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
@@ -40,18 +42,23 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_C2_APPLICATION_SNR_CODE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_OTHER_APPLICATION_SNR_CODE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -83,6 +90,9 @@ public class ReviewAdditionalApplicationControllerTest {
     public static final String AUTH_TOKEN = "Bearer TestAuthToken";
     public static final String S2S_TOKEN = "s2s AuthToken";
     public static Map<String, Object> clientContext = new HashMap<>();
+
+    String awpOtherCode;
+    String awpC2Code;
 
     CaseData replyCaseData;
     Map<String, Object> caseDataMap;
@@ -166,6 +176,9 @@ public class ReviewAdditionalApplicationControllerTest {
         message2Element = element(message2);
         listOfClosedMessages = Arrays.asList(element(message2));
 
+        awpOtherCode = AWP_OTHER_APPLICATION_SNR_CODE + UNDERSCORE + dateSent;
+        awpC2Code = AWP_C2_APPLICATION_SNR_CODE + UNDERSCORE + dateSent;
+
         when(objectMapper.convertValue(sendCaseDetails.getData(), CaseData.class)).thenReturn(sendCaseData);
     }
 
@@ -205,6 +218,101 @@ public class ReviewAdditionalApplicationControllerTest {
         AboutToStartOrSubmitCallbackResponse response = controller
             .aboutToStartReviewAdditionalApplication(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
         Assert.assertNotNull(response);
+    }
+
+    @Test
+    public void testPopulateApplicationForSendWhenSelectedApplicationIsNull() {
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        Message message = Message.builder().isReplying(YesOrNo.No).build();
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .reviewAdditionalApplicationWrapper(ReviewAdditionalApplicationWrapper.builder().build())
+            .messageReply(message)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .respondToMessage(No)
+                    .messages(messages)
+                    .build())
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .sendOrReplyDto(SendOrReplyDto.builder().closedMessages(Collections.singletonList(element(message))).build())
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(sendAndReplyService.populateDynamicListsForSendAndReply(caseData,auth)).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        controller.populateApplication(auth, callbackRequest);
+        verify(sendAndReplyService).populateDynamicListsForSendAndReply(caseData,auth);
+        verifyNoInteractions(reviewAdditionalApplicationService);
+    }
+
+    @Test
+    public void testPopulateApplicationForSendWhenSelectedApplicationIsNotNull() {
+        UUID uuid = UUID.randomUUID();
+        DynamicListElement dynamicListElement = DynamicListElement.builder()
+            .code(awpOtherCode)
+            .label("test-document")
+            .build();
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        dynamicListElements.add(dynamicListElement);
+        DynamicList list = DynamicList.builder()
+            .listItems(dynamicListElements)
+            .value(DynamicListElement.builder().code(uuid).build()).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        Message message = Message.builder()
+            .applicationsList(DynamicList.builder()
+                                  .listItems(list.getListItems())
+                                  .value(list.getValue())
+                                  .build())
+            .isReplying(YesOrNo.No).build();
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .reviewAdditionalApplicationWrapper(ReviewAdditionalApplicationWrapper.builder()
+                                                    .selectedAdditionalApplicationsBundle(AdditionalApplicationsBundle.builder()
+                                                                                              .build())
+                                                    .build())
+            .messageReply(message)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(message)
+                    .respondToMessage(No)
+                    .messages(messages)
+                    .build())
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .sendOrReplyDto(SendOrReplyDto.builder().closedMessages(Collections.singletonList(element(message))).build())
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(sendAndReplyService.populateDynamicListsForSendAndReply(caseData,auth)).thenReturn(caseData);
+        when(reviewAdditionalApplicationService.getApplicationBundleDynamicCode(any(AdditionalApplicationsBundle.class)))
+            .thenReturn(awpOtherCode);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        controller.populateApplication(auth, callbackRequest);
+        verify(sendAndReplyService).populateDynamicListsForSendAndReply(caseData,auth);
+        verify(reviewAdditionalApplicationService).getApplicationBundleDynamicCode(any(AdditionalApplicationsBundle.class));
+    }
+
+    @Test
+    public void testPopulateApplicationForReply() {
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        Message message = Message.builder().isReplying(YesOrNo.No).build();
+        CaseData caseData = CaseData.builder().id(12345L)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .respondToMessage(YesOrNo.No)
+                    .messages(messages)
+                    .build())
+            .chooseSendOrReply(REPLY)
+            .messageReply(message)
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .sendOrReplyDto(SendOrReplyDto.builder().closedMessages(Collections.singletonList(element(message))).build())
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        controller.populateApplication(auth, callbackRequest);
+        verify(sendAndReplyService).populateMessageReplyFields(caseData, auth);
+
     }
 
     @Test
