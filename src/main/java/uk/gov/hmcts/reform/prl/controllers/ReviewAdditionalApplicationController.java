@@ -118,8 +118,10 @@ public class ReviewAdditionalApplicationController extends AbstractCallbackContr
         List<String> errors = new ArrayList<>();
         if (caseData.getReviewAdditionalApplicationWrapper() != null
             && YesOrNo.No.equals(caseData.getReviewAdditionalApplicationWrapper().getIsAdditionalApplicationReviewed())) {
-
             errors.add("Please review other applications");
+        } else if (caseData.getReviewAdditionalApplicationWrapper() == null
+            || caseData.getReviewAdditionalApplicationWrapper().getIsAdditionalApplicationReviewed() == null) {
+            errors.add("Have you reviewed the additional application? is required");
         }
         return CallbackResponse.builder().data(caseData).errors(errors).build();
     }
