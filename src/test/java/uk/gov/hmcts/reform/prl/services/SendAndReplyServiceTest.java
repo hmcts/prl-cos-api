@@ -3482,7 +3482,7 @@ public class SendAndReplyServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         Message message = Message.builder().isReplying(YesOrNo.Yes).build();
 
-        CaseData caseData = CaseData.builder().id(12345L)
+        caseData = CaseData.builder().id(12345L)
             .chooseSendOrReply(SEND)
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
@@ -3500,7 +3500,7 @@ public class SendAndReplyServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyService.sendAndReplySubmitted(callbackRequest);
-        Assertions.assertThat(response.getStatusCodeValue()).isEqualTo(200);
+        Assertions.assertThat(response.getStatusCode().value()).isEqualTo(200);
     }
 
     @Test
@@ -3508,7 +3508,7 @@ public class SendAndReplyServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         Message message = Message.builder().isReplying(YesOrNo.Yes).build();
 
-        CaseData caseData = CaseData.builder().id(12345L)
+        caseData = CaseData.builder().id(12345L)
             .chooseSendOrReply(REPLY)
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
@@ -3531,7 +3531,7 @@ public class SendAndReplyServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         Message message = Message.builder().isReplying(YesOrNo.Yes).build();
 
-        CaseData caseData = CaseData.builder().id(12345L)
+        caseData = CaseData.builder().id(12345L)
             .chooseSendOrReply(REPLY)
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
@@ -3545,7 +3545,7 @@ public class SendAndReplyServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyService.sendAndReplySubmitted(callbackRequest);
-        Assertions.assertThat(response.getStatusCodeValue()).isEqualTo(200);
+        Assertions.assertThat(response.getStatusCode().value()).isEqualTo(200);
 
     }
 
@@ -3554,7 +3554,7 @@ public class SendAndReplyServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         Message message = Message.builder().isReplying(YesOrNo.Yes).build();
 
-        CaseData caseData = CaseData.builder().id(12345L)
+        caseData = CaseData.builder().id(12345L)
             .chooseSendOrReply(REPLY)
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
