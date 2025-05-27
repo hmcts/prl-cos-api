@@ -623,7 +623,8 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/controllers/EditAndApproveDraftOrderController.java',
   "**/controllers/*.java",
   "**/caseflags/*.java",
-  "**/handlers/CaseFlagsEventHandler.java"
+  "**/handlers/CaseFlagsEventHandler.java",
+  "**uk/gov/hmcts/reform/prl/events/WorkAllocationTaskStatusEvent.java"
 ]
 
 sonarqube {
