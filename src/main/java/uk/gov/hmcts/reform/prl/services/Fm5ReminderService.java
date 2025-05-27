@@ -91,7 +91,7 @@ public class Fm5ReminderService {
             //Iterate all cases to evaluate rules to trigger FM5 reminder
             Map<String, Fm5PendingParty> qualifiedCasesAndPartiesBeforeHearing =
                 getQualifiedCasesAndHearingsForNotifications(caseDetailsList, hearingAwayDays);
-            log.info("final list of cases to process for FM5 notifications: {}", qualifiedCasesAndPartiesBeforeHearing);
+            log.info("Final list of cases to process for FM5 notifications: {}", qualifiedCasesAndPartiesBeforeHearing);
             //Send FM5 reminders to cases meeting all system rules, else update not needed
             qualifiedCasesAndPartiesBeforeHearing.forEach(
                 (key, fm5PendingParty) -> {
@@ -169,11 +169,13 @@ public class Fm5ReminderService {
             );
 
             if (isNotEmpty(hearingsForAllCaseIdsWithCourtVenue)) {
-                log.info("List of hearings for cases with court venue: {}", hearingsForAllCaseIdsWithCourtVenue);
                 hearingsForAllCaseIdsWithCourtVenue.forEach(
                     hearing -> {
+                        log.info("Checking first listed hearing for case {}", hearing.getCaseRef());
+                        log.info("first listed hearing: {}", hearing.getCaseHearings().getFirst().getHearingID());
                         if (isFirstListedHearingAwayForDays(hearing,
                                                             null != hearingAwayDays ? hearingAwayDays : 18)) {
+                            log.info("Putting qualified case before hearing for case {}", hearing.getCaseRef());
                             qualifiedCasesAndPartiesBeforeHearing.put(
                                 hearing.getCaseRef(),
                                 filteredCaseAndParties.get(hearing.getCaseRef())
@@ -190,6 +192,7 @@ public class Fm5ReminderService {
         HashMap<String, Fm5PendingParty> caseIdPendingPartyMapping = new HashMap<>();
         //if consent order is present, no need to remind
         if (null != caseData.getDraftConsentOrderFile()) {
+            log.info("Draft consent order file found for caseId {}", caseData.getId());
             caseIdPendingPartyMapping.put(String.valueOf(caseData.getId()), Fm5PendingParty.NOTIFICATION_NOT_REQUIRED);
             return caseIdPendingPartyMapping;
         }
@@ -197,12 +200,14 @@ public class Fm5ReminderService {
         //if no emergency care proceedings, no need to remind
         if (null != caseData.getMiamPolicyUpgradeDetails()
             && Yes.equals(caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam())) {
+            log.info("Miam policy upgrade details found for caseId {}", caseData.getId());
             caseIdPendingPartyMapping.put(String.valueOf(caseData.getId()), Fm5PendingParty.NOTIFICATION_NOT_REQUIRED);
             return caseIdPendingPartyMapping;
         }
 
         //if applicant AOH is present, no need to remind
         if (null != caseData.getC1ADocument() || null != caseData.getC1AWelshDocument()) {
+            log.info("C1A document found for caseId {}", caseData.getId());
             caseIdPendingPartyMapping.put(String.valueOf(caseData.getId()), Fm5PendingParty.NOTIFICATION_NOT_REQUIRED);
             return caseIdPendingPartyMapping;
         }
@@ -235,6 +240,7 @@ public class Fm5ReminderService {
             citizenUploadedCaseDocsList,
             restrictedDocumentsList
         )) {
+            log.info("Party Aoh available for caseId {}", caseData.getId());
             caseIdPendingPartyMapping.put(String.valueOf(caseData.getId()), Fm5PendingParty.NOTIFICATION_NOT_REQUIRED);
             return caseIdPendingPartyMapping;
         }
@@ -328,8 +334,12 @@ public class Fm5ReminderService {
 
     public boolean isFirstListedHearingAwayForDays(Hearings hearings,
                                                    long days) {
-        if (null != hearings) {
-            List<HearingDaySchedule> sortedHearingDaySchedules = nullSafeCollection(hearings.getCaseHearings()).stream()
+        Hearings hearingsToProcess;
+        hearingsToProcess = hearings;
+        if (null != hearingsToProcess) {
+            log.info("sorting schedule for hearing {}", hearingsToProcess.getCaseHearings().getFirst().getHearingID());
+            List<HearingDaySchedule> sortedHearingDaySchedules = nullSafeCollection(hearingsToProcess
+                                                                                        .getCaseHearings()).stream()
                 .filter(eachHearing -> eachHearing.getHmcStatus().equals(LISTED)
                     && null != eachHearing.getHearingDaySchedule())
                 .map(CaseHearing::getHearingDaySchedule)
@@ -339,12 +349,20 @@ public class Fm5ReminderService {
                     Comparator.nullsLast(Comparator.naturalOrder())
                 ))
                 .toList();
-
+            log.info("sorted hearing day schedules: {}", sortedHearingDaySchedules.stream().toList());
             if (CollectionUtils.isNotEmpty(sortedHearingDaySchedules)) {
+                log.info("hearing day schedules found {}",
+                         sortedHearingDaySchedules.getFirst().getHearingStartDateTime());
+                log.info("checking if {} days is the same as {}", LocalDateTime.now().plusDays(days),
+                         sortedHearingDaySchedules.getFirst().getHearingStartDateTime());
+                log.info("returning {}", LocalDate.from(LocalDateTime.now()).plusDays(days)
+                    .equals(LocalDate.from(sortedHearingDaySchedules.getFirst().getHearingStartDateTime())));
                 return LocalDate.from(LocalDateTime.now()).plusDays(days)
-                    .equals(LocalDate.from(sortedHearingDaySchedules.get(0).getHearingStartDateTime()));
+                    .equals(LocalDate.from(sortedHearingDaySchedules.getFirst().getHearingStartDateTime()));
             }
+            log.info("First hearing outside of date range for case {}", hearingsToProcess.getCaseRef());
         }
+        log.info("hearingsToProcess is null");
         return false;
     }
 
