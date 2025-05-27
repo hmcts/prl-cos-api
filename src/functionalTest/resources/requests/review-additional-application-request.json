@@ -1,0 +1,159 @@
+{
+  "case_details": {
+    "callback_response_status": "string",
+    "case_data": {
+      "applicantCaseName": "John Smith",
+      "caseTypeOfApplication": "C100",
+      "chooseSendOrReply": "SEND",
+      "additionalApplicationsBundle": [
+        {
+          "id": "1ddef42f-aacf-4a1a-b441-1a66ae0c7e11",
+          "value": {
+            "author": "Legal Representative of Applicant Elise Lynn (Respondent)",
+            "partyType": "respondent",
+            "selectedParties": [
+              {
+                "id": "c6ca3d86-e4be-4bb2-b360-35ed70a37026",
+                "value": {
+                  "partyId": "a2b211f4-6072-4970-9c34-08a47ff6ec9c",
+                  "partyName": "Elise Lynn (Respondent)",
+                  "servedDateTime": null
+                }
+              }
+            ],
+            "uploadedDateTime": "21-May-2025 10:19:50 am",
+            "otherApplicationsBundle": {
+              "author": "Legal Representative of Applicant Elise Lynn (Respondent)",
+              "urgency": {
+                "urgencyType": "WITHIN_5_DAYS"
+              },
+              "applicantName": "Elise Lynn (Respondent)",
+              "finalDocument": [
+                {
+                  "id": "5644f67e-b9af-4a6b-be1c-49f84622be9a",
+                  "value": {
+                    "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/a770a522-7255-4d47-9db9-a1865eb0d4d3",
+                    "document_filename": "TestPage2.pdf",
+                    "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/a770a522-7255-4d47-9db9-a1865eb0d4d3/binary"
+                  }
+                }
+              ],
+              "applicationType": "FL403_EXTEND_AN_ORDER",
+              "uploadedDateTime": "21-May-2025 10:19:50 am",
+              "applicationStatus": "Submitted",
+              "supplementsBundle": [],
+              "documentRelatedToCase": "Yes",
+              "supportingEvidenceBundle": []
+            }
+          }
+        },
+        {
+          "id": "1743d002-7464-4fc1-9ca7-35fd6ca9f9ac",
+          "value": {
+            "author": "Legal Representative of Applicant John Smith(Applicant)",
+            "partyType": "respondent",
+            "selectedParties": [
+              {
+                "id": "447fbdb5-ca44-42dd-b0a1-a5e748bb4f75",
+                "value": {
+                  "partyId": "a2b211f4-6072-4970-9c34-08a47ff6ec9c",
+                  "partyName": "John Smith(Applicant)",
+                  "servedDateTime": null
+                }
+              }
+            ],
+            "c2DocumentBundle": {
+              "author": "Legal Representative of Applicant John Smith(Applicant)",
+              "urgency": {
+                "urgencyType": "WITHIN_5_DAYS"
+              },
+              "applicantName": "John Smith(Applicant)",
+              "finalDocument": [
+                {
+                  "id": "f4e27afc-1f92-430f-a82f-1e8932ec5bb9",
+                  "value": {
+                    "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b447dc82-5de5-4caa-9d18-d1f463073db5",
+                    "document_filename": "TestPage1.pdf",
+                    "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b447dc82-5de5-4caa-9d18-d1f463073db5/binary"
+                  }
+                }
+              ],
+              "uploadedDateTime": "21-May-2025 10:19:12 am",
+              "applicationStatus": "In review",
+              "supplementsBundle": [],
+              "c2ApplicationDetails": {
+                "consent": "withoutConsent"
+              },
+              "documentRelatedToCase": "Yes",
+              "supportingEvidenceBundle": [],
+              "additionalDraftOrdersBundle": [],
+              "otherReasonsFoC2Application": "adfasf",
+              "combinedReasonsForC2Application": [
+                "OTHER"
+              ]
+            },
+            "uploadedDateTime": "21-May-2025 10:19:12 am"
+          }
+        }
+      ],
+      "messageReply": {
+        "isReplying": "Yes",
+        "sendReplyJudgeName": {
+          "idamId": "testIdamId"
+        }
+      },
+      "respondToMessage": "Yes",
+      "openMessages": [{
+        "id": "559c3c44-a2fc-475d-9822-42747c29469c",
+        "value": {
+          "senderEmail": "sender@email.com",
+          "recipientEmail": "recipient@email.com",
+          "messageContent": "testContet",
+          "messageUrgency": "testUrgnecy",
+          "messageSubject": "testSubject",
+          "sendReplyJudgeName": {
+            "idamId": "testIdamId"
+          },
+          "status": "OPEN",
+          "recipientEmailAddresses": "fprl_caseworker_solicitor@mailinator.com",
+          "updatedTime": "2022-12-12T12:12:12.000000",
+          "latestMessage": "latestMessage"
+        }
+      }],
+      "messageObject": {
+        "senderEmail": "fprl_caseworker_solicitor@mailinator.com",
+        "recipientEmail": null,
+        "messageSubject": null,
+        "messageUrgency": null,
+        "sendReplyJudgeName": {
+          "idamId": "testIdamId"
+        }
+      }
+    },
+    "case_type_id": "string",
+    "created_date": "2022-03-15T15:02:33.880Z",
+    "id": "1701870369166430",
+    "jurisdiction": "string",
+    "last_modified": "2022-03-15T15:02:33.880Z",
+    "locked_by_user_id": 0,
+    "security_classification": "PRIVATE",
+    "security_level": 0,
+    "state": "string"
+  },
+  "case_details_before": {
+    "callback_response_status": "string",
+    "case_data": {
+      "applicantCaseName": "John Smith"
+    },
+    "case_type_id": "string",
+    "created_date": "2022-03-15T15:02:33.880Z",
+    "id": 0,
+    "jurisdiction": "string",
+    "last_modified": "2022-03-15T15:02:33.880Z",
+    "locked_by_user_id": 0,
+    "security_classification": "PRIVATE",
+    "security_level": 0,
+    "state": "string"
+  },
+  "event_id": "string"
+}

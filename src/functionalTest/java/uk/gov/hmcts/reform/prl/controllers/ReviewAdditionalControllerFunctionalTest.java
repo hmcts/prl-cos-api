@@ -12,6 +12,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
+import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
+
+import java.util.Base64;
 
 @Slf4j
 @SpringBootTest
@@ -22,9 +25,15 @@ public class ReviewAdditionalControllerFunctionalTest {
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;
 
-    private static final String SEND_AND_REPLY_REQUEST_FOR_SEND = "requests/send-and-reply-request.json";
+    @Autowired
+    protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
+
+    private static final String REVIEW_ADDITIONAL_APPLICATION_REQUEST_FOR_SEND = "requests/review-additional-application-request.json";
 
     private static final String SEND_AND_REPLY_REQUEST_FOR_REPLY = "requests/send-and-reply-request-for-reply.json";
+
+    private static final String REVIEW_ADDITIONAL_APPLICATION_CLIENT_CONTEXT
+        = "requests/review-additional-application-request-client-context.json";
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
@@ -36,9 +45,12 @@ public class ReviewAdditionalControllerFunctionalTest {
 
     @Test
     public void givenBodyWithSendData_whenAboutToStartCallback_thenPopulateDynamicList() throws Exception {
-        String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST_FOR_SEND);
+        String requestBody = ResourceLoader.loadJson(REVIEW_ADDITIONAL_APPLICATION_REQUEST_FOR_SEND);
+        String client = ResourceLoader.loadJson(REVIEW_ADDITIONAL_APPLICATION_CLIENT_CONTEXT);
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .header("client-context", Base64.getEncoder().encodeToString(client.getBytes()))
             .body(requestBody)
             .when()
             .contentType("application/json")
@@ -49,7 +61,7 @@ public class ReviewAdditionalControllerFunctionalTest {
 
     @Test
     public void givenBodyWithSendData_whenMidEventCallback_thenPopulateDynamicList() throws Exception {
-        String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST_FOR_SEND);
+        String requestBody = ResourceLoader.loadJson(REVIEW_ADDITIONAL_APPLICATION_REQUEST_FOR_SEND);
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .body(requestBody)
