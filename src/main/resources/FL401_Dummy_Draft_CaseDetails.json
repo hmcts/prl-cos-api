@@ -917,6 +917,7 @@
       "dxNumber": null,
       "landline": null,
       "lastName": "Smith",
+      "liveInRefuge": "No",
       "response": {
         "miam": {
           "attendedMiam": null,
