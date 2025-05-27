@@ -42,6 +42,7 @@ public enum CaseEvent {
     C100_REQUEST_SUPPORT("c100RequestSupport"),
     FL401_REQUEST_SUPPORT("fl401RequestSupport"),
     C100_MANAGE_SUPPORT("c100ManageSupport"),
+    C100_MANAGE_FLAGS("c100ManageFlags"),
     FL401_MANAGE_SUPPORT("fl401ManageSupport"),
     TS_ADMIN_APPLICATION_NOC("testingSupportDummyCase"),
     CITIZEN_STATEMENT_OF_SERVICE("citizenStatementOfService"),

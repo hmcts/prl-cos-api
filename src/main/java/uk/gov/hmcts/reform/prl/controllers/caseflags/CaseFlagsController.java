@@ -51,4 +51,27 @@ public class CaseFlagsController {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
+
+    @PostMapping(path = "/check-wa-task-status", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to check the work allocation status to decide if the task should be closed or not")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public void checkWorkAllocationTaskStatus(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            caseFlagsWaService.checkWorkAllocationTaskStatus(
+                authorisation,
+                callbackRequest
+            );
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
 }

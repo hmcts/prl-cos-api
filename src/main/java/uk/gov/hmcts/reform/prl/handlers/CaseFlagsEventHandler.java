@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.amroles.InternalCaseworkerAmRolesEnum;
 import uk.gov.hmcts.reform.prl.events.CaseFlagsEvent;
+import uk.gov.hmcts.reform.prl.events.WorkAllocationTaskStatusEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseflags.AllPartyFlags;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
@@ -23,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssig
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -96,6 +98,56 @@ public class CaseFlagsEventHandler {
                 startAllTabsUpdateDataContent.eventRequestData(),
                 startAllTabsUpdateDataContent.caseDataMap()
             );
+        }
+    }
+
+    @Async
+    @EventListener
+    public void checkWaTaskStatus(final WorkAllocationTaskStatusEvent event) {
+        String caseId = String.valueOf(event.callbackRequest().getCaseDetails().getId());
+
+        CaseData caseData = objectMapper.convertValue(
+            event.callbackRequest().getCaseDetails().getData(),
+            CaseData.class
+        );
+
+        List<Element<FlagDetail>> allFlagsDetails = new ArrayList<>();
+        if (caseData.getCaseFlags() != null && caseData.getCaseFlags().getDetails() != null) {
+            allFlagsDetails.addAll(caseData.getCaseFlags().getDetails());
+        }
+
+        if (caseData.getAllPartyFlags() != null && caseData.getCaseFlags().getDetails() != null) {
+            allFlagsDetails.addAll(extractAllFlagDetails(caseData.getAllPartyFlags()));
+        }
+
+        List<Element<FlagDetail>> sortedAllFlagsDetails = allFlagsDetails.stream()
+            .filter(detail -> detail.getValue() != null && detail.getValue().getDateTimeModified() != null)
+            .sorted(Comparator.comparing((Element<FlagDetail> detail) ->
+                                             detail.getValue().getDateTimeModified()).reversed())
+            .toList();
+
+        if (allFlagsDetails.isEmpty()) {
+            return;
+        }
+
+        FlagDetail mostRecentlyModified = sortedAllFlagsDetails.get(0).getValue();
+
+        if (!"Requested".equalsIgnoreCase(mostRecentlyModified.getStatus())) {
+            LocalDateTime modifiedTime = mostRecentlyModified.getDateTimeModified();
+            if (modifiedTime != null && modifiedTime.isAfter(LocalDateTime.now().minusSeconds(10))) {
+                StartAllTabsUpdateDataContent updateData = allTabService.getStartUpdateForSpecificEvent(
+                    caseId,
+                    CaseEvent.C100_MANAGE_FLAGS.getValue()
+                );
+
+                allTabService.submitAllTabsUpdate(
+                    updateData.authorisation(),
+                    caseId,
+                    updateData.startEventResponse(),
+                    updateData.eventRequestData(),
+                    updateData.caseDataMap()
+                );
+            }
         }
     }
 
