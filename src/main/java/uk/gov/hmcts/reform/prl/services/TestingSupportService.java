@@ -115,6 +115,8 @@ public class TestingSupportService {
 
     private static final String VALID_C100_DRAFT_V3_INPUT_COURT_ADMIN_JSON = "C100_Dummy_Draft_admin_CaseDetails_v3.json";
 
+    private static final String TEST_C100_SUBMITTED_JSON = "C100_submitted_dummy_case.json";
+
     public Map<String, Object> initiateCaseCreation(String authorisation, CallbackRequest callbackRequest) throws Exception {
         if (isAuthorized(authorisation)) {
             String requestBody;
@@ -277,7 +279,7 @@ public class TestingSupportService {
     private String loadCaseDetailsInDraftStage(CaseData initialCaseData) throws Exception {
         String requestBody;
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
-            requestBody = ResourceLoader.loadJson(VALID_C100_DRAFT_V3_INPUT_JSON);
+            requestBody = ResourceLoader.loadJson(TEST_C100_SUBMITTED_JSON);
         } else {
             requestBody = ResourceLoader.loadJson(VALID_FL401_DRAFT_INPUT_JSON);
         }
