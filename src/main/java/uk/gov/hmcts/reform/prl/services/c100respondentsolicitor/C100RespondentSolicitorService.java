@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -29,6 +30,7 @@ import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.enums.respondentsolicitor.RespondentWelshNeedsListEnum;
 import uk.gov.hmcts.reform.prl.exception.RespondentSolicitorException;
+import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.mapper.welshlang.WelshLangMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -74,7 +76,7 @@ import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
-import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -171,7 +173,7 @@ public class C100RespondentSolicitorService {
     private final ManageDocumentsService manageDocumentsService;
     private final UserService userService;
     private final DocumentLanguageService documentLanguageService;
-    private final CaseSummaryTabService caseSummaryTab;
+    private final AllTabServiceImpl allTabService;
     private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
 
     public static final String RESPONSE_SUBMITTED_LABEL = "# Ymateb wedi'i gyflwyno<br/>Response Submitted";
@@ -761,7 +763,7 @@ public class C100RespondentSolicitorService {
         return buildResponseForRespondent;
     }
 
-    private static Response buildKeepDetailsPrivateForRefuge(CaseData caseData,
+    static Response buildKeepDetailsPrivateForRefuge(CaseData caseData,
                                                              Response buildResponseForRespondent,
                                                              Element<PartyDetails> respondent) {
         setRespondentConfidentiality(caseData, respondent);
@@ -784,7 +786,7 @@ public class C100RespondentSolicitorService {
         return  buildResponseForRespondent;
     }
 
-    private static Response buildKeepDetailsPrivateForNonRefuge(CaseData caseData,
+    static Response buildKeepDetailsPrivateForNonRefuge(CaseData caseData,
                                                                 Response buildResponseForRespondent,
                                                                 Element<PartyDetails> respondent) {
         setRespondentConfidentiality(caseData, respondent);
@@ -863,9 +865,9 @@ public class C100RespondentSolicitorService {
             courtOrderDetails = null;
         }
         return consent.toBuilder()
-                .noConsentReason(noConsentReason)
-                .courtOrderDetails(courtOrderDetails)
-                .build();
+            .noConsentReason(noConsentReason)
+            .courtOrderDetails(courtOrderDetails)
+            .build();
     }
 
     public Optional<SolicitorRole> getSolicitorRole(CallbackRequest callbackRequest) {
@@ -965,99 +967,119 @@ public class C100RespondentSolicitorService {
     }
 
     public Map<String, Object> submitC7ResponseForActiveRespondent(String authorisation, CallbackRequest callbackRequest) throws Exception {
-        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        Map<String, Object> updatedCaseData = new HashMap<>(callbackRequest.getCaseDetails().getData());
         updatedCaseData.remove("respondentSolicitorName");
+
         List<QuarantineLegalDoc> quarantineLegalDocList = new ArrayList<>();
         UserDetails userDetails = userService.getUserDetails(authorisation);
+
         final String[] surname = {null};
         userDetails.getSurname().ifPresent(snm -> surname[0] = snm);
-        UserDetails updatedUserDetails = UserDetails.builder()
-                .email(userDetails.getEmail())
-                .id(userDetails.getId())
-                .surname(surname[0])
-                .forename(userDetails.getForename() != null ? userDetails.getForename() : null)
-                .roles(manageDocumentsService.getLoggedInUserType(authorisation))
-                .build();
-        CaseData caseData = objectMapper.convertValue(
-                updatedCaseData,
-                CaseData.class
-        );
 
+        UserDetails updatedUserDetails = UserDetails.builder()
+            .email(userDetails.getEmail())
+            .id(userDetails.getId())
+            .surname(surname[0])
+            .forename(userDetails.getForename())
+            .roles(manageDocumentsService.getLoggedInUserType(authorisation))
+            .build();
+
+        CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
         Optional<SolicitorRole> solicitorRole = getSolicitorRole(callbackRequest);
         Element<PartyDetails> representedRespondent = null;
+
         if (solicitorRole.isPresent()) {
             representedRespondent = findSolicitorRepresentedRespondents(callbackRequest, solicitorRole.get());
         }
 
-        if (representedRespondent != null && representedRespondent.getValue() != null && PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(
-                caseData.getCaseTypeOfApplication())) {
-            if (representedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm() != null
-                    && representedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm()
-                    .getResponseToAllegationsOfHarmDocument() != null) {
+        if (representedRespondent != null && representedRespondent.getValue() != null
+            && PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+
+            final Element<PartyDetails> respondentFinal = representedRespondent;
+
+            Element<PartyDetails> updatedRespondentFromCallback = caseData.getRespondents().stream()
+                .filter(r -> r.getId().equals(respondentFinal.getId()))
+                .findFirst()
+                .orElse(representedRespondent);
+
+            PartyDetails merged = CitizenPartyDetailsMapper.updateCitizenPersonalDetails(
+                representedRespondent.getValue(),
+                updatedRespondentFromCallback.getValue()
+            );
+
+            if (merged.getResponse() != null
+                && merged.getResponse().getResponseToAllegationsOfHarm() != null
+                && merged.getResponse().getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmDocument() != null) {
 
                 quarantineLegalDocList.add(getQuarantineLegalDocuments(
-                        updatedUserDetails,
-                        representedRespondent.getValue().getResponse()
-                                .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmDocument(),
-                        "respondentC1AResponse", "Respondent C1A response",
-                        representedRespondent.getValue().getLabelForDynamicList(),
-                        String.valueOf(representedRespondent.getId())));
+                    updatedUserDetails,
+                    merged.getResponse().getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmDocument(),
+                    "respondentC1AResponse", "Respondent C1A response",
+                    merged.getLabelForDynamicList(),
+                    String.valueOf(representedRespondent.getId())
+                ));
             }
+
             updateListWithPreviousOrderDocuments(updatedUserDetails, quarantineLegalDocList, representedRespondent);
 
-            PartyDetails amended = representedRespondent.getValue().toBuilder()
-                    .response(representedRespondent.getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes)
-                            .responseToAllegationsOfHarm(ResponseToAllegationsOfHarm.builder()
-                                    .responseToAllegationsOfHarmYesOrNoResponse(
-                                            representedRespondent.getValue()
-                                                    .getResponse().getResponseToAllegationsOfHarm()
-                                                    .getResponseToAllegationsOfHarmYesOrNoResponse())
-                                    .build())
-                            .respondentExistingProceedings(getAmendedProceedings(representedRespondent))
-                            .build())
-                    .build();
+            PartyDetails amended = merged.toBuilder()
+                .response(merged.getResponse().toBuilder()
+                              .c7ResponseSubmitted(Yes)
+                              .respondentExistingProceedings(getAmendedProceedings(representedRespondent))
+                              .build())
+                .build();
 
             amended = updatedRefugeData(amended);
             caseData = updateRefugeDocumentList(caseData, amended);
 
-            String party = representedRespondent.getValue().getLabelForDynamicList();
+            String party = merged.getLabelForDynamicList();
             caseData.getRespondents().set(
-                    caseData.getRespondents().indexOf(representedRespondent),
-                    element(representedRespondent.getId(), amended)
+                caseData.getRespondents().indexOf(representedRespondent),
+                element(representedRespondent.getId(), amended)
             );
+
             confidentialityC8RefugeService.processRefugeDocumentsC7ResponseSubmission(
                 updatedCaseData,
-                representedRespondent.getValue(),
+                merged,
                 caseData.getRefugeDocuments(),
                 caseData.getHistoricalRefugeDocuments(),
                 caseData.getRespondents().indexOf(representedRespondent) + 1
             );
-            String createdBy = StringUtils.isEmpty(representedRespondent.getValue().getRepresentativeFullNameForCaseFlags())
-                    ? party : representedRespondent.getValue().getRepresentativeFullNameForCaseFlags() + SOLICITOR;
+
+            String createdBy = StringUtils.isEmpty(merged.getRepresentativeFullNameForCaseFlags())
+                ? party : merged.getRepresentativeFullNameForCaseFlags() + SOLICITOR;
+
             updatedCaseData.put(RESPONDENTS, caseData.getRespondents());
 
             Map<String, Object> dataMap = generateRespondentDocsAndUpdateCaseData(
-                    authorisation,
-                    callbackRequest,
-                    caseData,
-                    representedRespondent,
-                    quarantineLegalDocList
+                authorisation,
+                callbackRequest,
+                caseData,
+                representedRespondent,
+                quarantineLegalDocList
             );
 
             generateC8AndUpdateCaseData(
-                    authorisation,
-                    updatedCaseData,
-                    caseData,
-                    solicitorRole,
-                    party,
-                    createdBy,
-                    dataMap
+                authorisation,
+                updatedCaseData,
+                caseData,
+                solicitorRole,
+                party,
+                createdBy,
+                dataMap
             );
         }
 
-        updatedCaseData.putAll(caseSummaryTab.updateTab(caseData));
-        moveRespondentDocumentsToQuarantineTab(updatedCaseData,userDetails,quarantineLegalDocList);
-
+        moveRespondentDocumentsToQuarantineTab(updatedCaseData, userDetails, quarantineLegalDocList);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(String.valueOf(
+            callbackRequest.getCaseDetails().getId()));
+        allTabService.submitAllTabsUpdate(
+            authorisation,
+            String.valueOf(callbackRequest.getCaseDetails().getId()),
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            updatedCaseData
+        );
         return updatedCaseData;
     }
 
