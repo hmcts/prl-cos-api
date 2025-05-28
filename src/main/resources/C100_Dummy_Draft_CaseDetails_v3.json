@@ -1362,7 +1362,7 @@
       "visibility": null
     },
     "caseTypeOfApplication": "C100",
-    "caseAccessCategory": "C100",
+    "CaseAccessCategory": "C100",
     "caApplicant4ExternalFlags": {
       "details": [
 

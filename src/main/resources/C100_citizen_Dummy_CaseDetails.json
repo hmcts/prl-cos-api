@@ -17,7 +17,7 @@
     "c100RebuildTypeOfOrder": "{\"too_courtOrder\":[\"whoChildLiveWith\",\"childTimeSpent\"],\"too_shortStatement\":\"Divorce application continued seperately\"}",
     "c100RebuildChildPostCode": "SW1H 9AJ",
     "caseTypeOfApplication": "C100",
-    "caseAccessCategory": "C100",
+    "CaseAccessCategory": "C100",
     "c100RebuildInternationalElements": "{\"ie_internationalStart\":\"No\",\"ie_internationalParents\":\"No\",\"ie_internationalJurisdiction\":\"No\",\"ie_internationalRequest\":\"No\"}",
     "c100RebuildHearingUrgency": "{\"hu_urgentHearingReasons\":\"No\"}",
     "c100RebuildReasonableAdjustments": "{\"ra_typeOfHearing\":[\"videoHearing\"],\"ra_languageNeeds\":[\"speakInWelsh\",\"readAndWriteInWelsh\"],\"ra_specialArrangements\":[\"separateWaitingRoom\"],\"ra_disabilityRequirements\":[\"documentsHelp\"],\"ra_documentInformation\":[\"brailleDocuments\",\"largePrintDocuments\"],\"ra_largePrintDocuments_subfield\":\"Large print\"}",

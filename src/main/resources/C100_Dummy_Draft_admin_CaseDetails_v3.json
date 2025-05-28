@@ -2616,7 +2616,7 @@
     },
     "caseNameHmctsInternal": "Test case",
     "caseTypeOfApplication": "C100",
-    "caseAccessCategory": "C100",
+    "CaseAccessCategory": "C100",
     "draftConsentOrderFile": null,
     "otherProceedingsTable": {
       "previousOrOngoingProceedings": "Yes"

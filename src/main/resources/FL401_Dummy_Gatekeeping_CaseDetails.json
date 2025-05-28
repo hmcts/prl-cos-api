@@ -107,7 +107,7 @@
     "legalAdviserList": null,
     "isHomeEntered": "true",
     "caseTypeOfApplication": "FL401",
-    "caseAccessCategory": "FL401",
+    "CaseAccessCategory": "FL401",
     "otherProceedingsTable": {
       "previousOrOngoingProceedings": ""
     },

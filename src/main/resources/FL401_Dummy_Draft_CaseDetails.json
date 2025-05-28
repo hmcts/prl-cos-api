@@ -61,7 +61,7 @@
     "languageRequirementApplicationNeedWelsh": "Yes",
     "isHomeEntered": "false",
     "caseTypeOfApplication": "FL401",
-    "caseAccessCategory": "FL401",
+    "CaseAccessCategory": "FL401",
     "otherProceedingsTable": {
       "previousOrOngoingProceedings": ""
     },

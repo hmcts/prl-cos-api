@@ -1073,9 +1073,9 @@ public class CallbackControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
             .aboutToSubmitCaseCreation(authToken,s2sToken, callbackRequest);
-        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseAccessCategory"));
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("CaseAccessCategory"));
         assertEquals(aboutToStartOrSubmitCallbackResponse.getData().get("caseTypeOfApplication"),
-                     aboutToStartOrSubmitCallbackResponse.getData().get("caseAccessCategory"));
+                     aboutToStartOrSubmitCallbackResponse.getData().get("CaseAccessCategory"));
     }
 
 

@@ -3326,7 +3326,7 @@
     "applicantAttendedMiam": "No",
     "caseNameHmctsInternal": "John Doe Vs Mary Richards v2",
     "caseTypeOfApplication": "C100",
-    "caseAccessCategory": "C100",
+    "CaseAccessCategory": "C100",
     "claimingExemptionMiam": "Yes",
     "draftConsentOrderFile": null,
     "otherProceedingsTable": {
