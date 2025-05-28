@@ -484,56 +484,52 @@ public class TestingSupportService {
     }
 
     public CaseDetails createCcdCase(String authorisation, String s2sToken, String jsonBody) {
-        if (isAuthorized(authorisation, s2sToken)) {
-            try {
-                CaseDetails caseDetails = objectMapper.readValue(
-                    jsonBody,
-                    CaseDetails.class
-                );
+        try {
+            CaseDetails caseDetails = objectMapper.readValue(
+                jsonBody,
+                CaseDetails.class
+            );
 
-                CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-                String cosApis2sToken = authTokenGenerator.generate();
-                UserDetails userDetails = idamClient.getUserDetails(authorisation);
+            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+            String cosApis2sToken = authTokenGenerator.generate();
+            UserDetails userDetails = idamClient.getUserDetails(authorisation);
 
-                EventRequestData eventRequestData = EventRequestData.builder()
-                    .userId(userDetails.getId())
-                    .jurisdictionId(JURISDICTION)
-                    .caseTypeId(CASE_TYPE)
-                    .eventId(SOLICITOR_CREATE.getId())
-                    .ignoreWarning(true)
-                    .build();
+            EventRequestData eventRequestData = EventRequestData.builder()
+                .userId(userDetails.getId())
+                .jurisdictionId(JURISDICTION)
+                .caseTypeId(CASE_TYPE)
+                .eventId(SOLICITOR_CREATE.getId())
+                .ignoreWarning(true)
+                .build();
 
-                StartEventResponse startEventResponse = ccdCoreCaseDataService.startSubmitCreate(
-                    authorisation,
-                    cosApis2sToken,
-                    eventRequestData,
-                    true
-                );
+            StartEventResponse startEventResponse = ccdCoreCaseDataService.startSubmitCreate(
+                authorisation,
+                cosApis2sToken,
+                eventRequestData,
+                true
+            );
 
-                Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
-                Iterables.removeIf(caseDataMap.values(), Objects::isNull);
-                CaseDataContent caseDataContent = CaseDataContent.builder()
-                    .eventToken(startEventResponse.getToken())
-                    .event(Event.builder()
-                               .id(startEventResponse.getEventId())
-                               .build())
-                    .data(caseDataMap)
-                    .build();
+            Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
+            Iterables.removeIf(caseDataMap.values(), Objects::isNull);
+            CaseDataContent caseDataContent = CaseDataContent.builder()
+                .eventToken(startEventResponse.getToken())
+                .event(Event.builder()
+                           .id(startEventResponse.getEventId())
+                           .build())
+                .data(caseDataMap)
+                .build();
 
-                return ccdCoreCaseDataService.submitCreate(
-                    authorisation,
-                    cosApis2sToken,
-                    userDetails.getId(),
-                    caseDataContent,
-                    true
-                );
-            } catch (JsonProcessingException e) {
-                log.error("Exception happened in parsing json request body {}", e.getMessage());
-            }
-
-            return null;
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
+            return ccdCoreCaseDataService.submitCreate(
+                authorisation,
+                cosApis2sToken,
+                userDetails.getId(),
+                caseDataContent,
+                true
+            );
+        } catch (JsonProcessingException e) {
+            log.error("Exception happened in parsing json request body {}", e.getMessage());
         }
+
+        return null;
     }
 }
