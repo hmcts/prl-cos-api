@@ -47,12 +47,13 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Objects;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
-import static uk.gov.hmcts.reform.prl.enums.CaseCreatedBy.CITIZEN;
-import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_CREATE;
 import static uk.gov.hmcts.reform.prl.enums.Event.*;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
