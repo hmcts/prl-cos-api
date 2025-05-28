@@ -768,11 +768,29 @@ public class TestingSupportServiceTest {
         when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         when(authTokenGenerator.generate()).thenReturn("token");
-        when(idamClient.getUserDetails(anyString())).thenReturn(new UserDetails("123", "test@test.com", "Steve", "Holt", Collections.emptyList()));
-        StartEventResponse dummyStartEventResponse = StartEventResponse.builder().caseDetails(caseDetails).eventId(SOLICITOR_CREATE.getId()).token("s2sToken").build();
-        when(ccdCoreCaseDataService.startSubmitCreate(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyBoolean())).thenReturn(dummyStartEventResponse);
+        when(idamClient.getUserDetails(anyString())).thenReturn(new UserDetails(
+            "123",
+            "test@test.com",
+            "Steve",
+            "Holt",
+            Collections.emptyList()
+        ));
+        StartEventResponse dummyStartEventResponse = StartEventResponse.builder().caseDetails(caseDetails).eventId(
+            SOLICITOR_CREATE.getId()).token("s2sToken").build();
+        when(ccdCoreCaseDataService.startSubmitCreate(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.anyBoolean()
+        )).thenReturn(dummyStartEventResponse);
         when(objectMapper.convertValue(any(), (TypeReference<Object>) any())).thenReturn(caseDataMap);
-        when(ccdCoreCaseDataService.submitCreate(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyBoolean())).thenReturn(caseDetails);
+        when(ccdCoreCaseDataService.submitCreate(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.anyBoolean()
+        )).thenReturn(caseDetails);
 
         CaseDetails updatedCaseDetails = testingSupportService.createCcdCase(auth, s2sAuth, "test body");
         assertEquals(Optional.of(12345678L), Optional.of(updatedCaseDetails.getId()));
