@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -240,6 +241,25 @@ public class TestingSupportController {
                 callbackRequest, authorisation
             ))
             .build();
+    }
+
+    @PostMapping(path = "/create-testing-support-custom-case")
+    @Operation(description = "Create a testing support case from custom request json")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Dummy case created"),
+        @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
+    })
+    public CaseDetails createCustomTSSupportCase(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody String jsonBody
+    ) throws Exception {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            return testingSupportService.createCcdCase(authorisation, s2sToken, jsonBody);
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 }
 

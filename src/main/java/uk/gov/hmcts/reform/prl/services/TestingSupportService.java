@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Iterables;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,9 +11,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.*;
+import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -44,32 +47,13 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_NAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_OR_RESPONDENT_CASE_NAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATA_ID;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NAME_HMCTS_INTERNAL;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_OF_SUBMISSION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_WELSH;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_WELSH;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL_401_STMT_OF_TRUTH;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TESTING_SUPPORT_LD_FLAG_ENABLED;
-import static uk.gov.hmcts.reform.prl.enums.Event.TS_CA_URGENT_CASE;
-import static uk.gov.hmcts.reform.prl.enums.Event.TS_SOLICITOR_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
+import static uk.gov.hmcts.reform.prl.enums.CaseCreatedBy.CITIZEN;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_CREATE;
+import static uk.gov.hmcts.reform.prl.enums.Event.*;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -96,6 +80,8 @@ public class TestingSupportService {
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     private final CaseInitiationService caseInitiationService;
     private final TaskListService taskListService;
+    private final IdamClient idamClient;
+    private final CcdCoreCaseDataService ccdCoreCaseDataService;
 
     private static final String VALID_RESPONDENT_TASKLIST_INPUT_JSON = "Dummy_Respondent_Tasklist_Data.json";
 
@@ -114,8 +100,6 @@ public class TestingSupportService {
     private static final String VALID_C100_GATEKEEPING_V3_INPUT_JSON = "C100_Dummy_Gatekeeping_CaseDetails_v3.json";
 
     private static final String VALID_C100_DRAFT_V3_INPUT_COURT_ADMIN_JSON = "C100_Dummy_Draft_admin_CaseDetails_v3.json";
-
-    private static final String TEST_C100_SUBMITTED_JSON = "C100_submitted_dummy_case.json";
 
     public Map<String, Object> initiateCaseCreation(String authorisation, CallbackRequest callbackRequest) throws Exception {
         if (isAuthorized(authorisation)) {
@@ -279,7 +263,7 @@ public class TestingSupportService {
     private String loadCaseDetailsInDraftStage(CaseData initialCaseData) throws Exception {
         String requestBody;
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
-            requestBody = ResourceLoader.loadJson(TEST_C100_SUBMITTED_JSON);
+            requestBody = ResourceLoader.loadJson(VALID_C100_DRAFT_V3_INPUT_JSON);
         } else {
             requestBody = ResourceLoader.loadJson(VALID_FL401_DRAFT_INPUT_JSON);
         }
@@ -470,4 +454,57 @@ public class TestingSupportService {
             && Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation));
     }
 
+    public CaseDetails createCcdCase(String authorisation, String s2sToken, String jsonBody) {
+        if (isAuthorized(authorisation, s2sToken)) {
+            try {
+                CaseDetails caseDetails = objectMapper.readValue(
+                    jsonBody,
+                    CaseDetails.class
+                );
+
+                CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+                String cosApis2sToken = authTokenGenerator.generate();
+                UserDetails userDetails = idamClient.getUserDetails(authorisation);
+
+                EventRequestData eventRequestData = EventRequestData.builder()
+                    .userId(userDetails.getId())
+                    .jurisdictionId(JURISDICTION)
+                    .caseTypeId(CASE_TYPE)
+                    .eventId(SOLICITOR_CREATE.getId())
+                    .ignoreWarning(true)
+                    .build();
+
+                StartEventResponse startEventResponse = ccdCoreCaseDataService.startSubmitCreate(
+                    authorisation,
+                    cosApis2sToken,
+                    eventRequestData,
+                    true
+                );
+
+                Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
+                Iterables.removeIf(caseDataMap.values(), Objects::isNull);
+                CaseDataContent caseDataContent = CaseDataContent.builder()
+                    .eventToken(startEventResponse.getToken())
+                    .event(Event.builder()
+                               .id(startEventResponse.getEventId())
+                               .build())
+                    .data(caseDataMap)
+                    .build();
+
+                return ccdCoreCaseDataService.submitCreate(
+                    authorisation,
+                    cosApis2sToken,
+                    userDetails.getId(),
+                    caseDataContent,
+                    true
+                );
+            } catch (JsonProcessingException e) {
+                log.error("Exception happened in parsing json request body {}", e.getMessage());
+            }
+
+            return null;
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
 }
