@@ -113,6 +113,14 @@ public class TestingSupportControllerTest {
     }
 
     @Test
+    public void testCreateCustomTsSupportCase() throws Exception {
+        String testBody = "test body";
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        testingSupportController.createCustomTsSupportCase(authToken, s2sToken, testBody);
+        verify(testingSupportService, times(1)).createCcdCase(Mockito.anyString(), Mockito.anyString(), Mockito.matches(testBody));
+    }
+
+    @Test
     public void testExeptionForaboutToSubmitCaseCreation() {
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
         assertExpectedException(() -> {
@@ -183,6 +191,16 @@ public class TestingSupportControllerTest {
         assertExpectedException(() -> {
             testingSupportController.aboutToSubmitCaseCreationCourtNav(authToken, s2sToken, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
+    }
+
+    @Test
+    public void testExceptionForCreateCustomTsSupportCase() {
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(() -> testingSupportController.createCustomTsSupportCase(
+            authToken,
+            s2sToken,
+            "test body"
+        ), RuntimeException.class, "Invalid Client");
     }
 
     @Test

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
@@ -16,7 +17,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -64,6 +67,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -73,6 +77,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATA_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TESTING_SUPPORT_LD_FLAG_ENABLED;
+import static uk.gov.hmcts.reform.prl.enums.Event.SOLICITOR_CREATE;
 import static uk.gov.hmcts.reform.prl.enums.Event.TS_ADMIN_APPLICATION_NOC;
 import static uk.gov.hmcts.reform.prl.enums.Event.TS_CA_URGENT_CASE;
 import static uk.gov.hmcts.reform.prl.enums.Event.TS_SOLICITOR_APPLICATION;
@@ -135,6 +140,12 @@ public class TestingSupportServiceTest {
 
     @Mock
     private TaskListService taskListService;
+
+    @Mock
+    private CcdCoreCaseDataService ccdCoreCaseDataService;
+
+    @Mock
+    IdamClient idamClient;
 
     private CourtNavFl401 courtNavFl401;
 
@@ -740,6 +751,33 @@ public class TestingSupportServiceTest {
         assertEquals(12345678L,caseDataMapResponse.get(CASE_DATA_ID));
     }
 
+    @Test
+    public void testCreateCcdCase() throws Exception {
+        caseData = CaseData.builder()
+            .id(12345678L)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .build();
+        caseDataMap = caseData.toMap(new ObjectMapper());
+        caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseDataMap)
+            .build();
+
+        when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(caseDetails);
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        when(authTokenGenerator.generate()).thenReturn("token");
+        when(idamClient.getUserDetails(anyString())).thenReturn(new UserDetails("123", "test@test.com", "Steve", "Holt", Collections.emptyList()));
+        StartEventResponse dummyStartEventResponse = StartEventResponse.builder().caseDetails(caseDetails).eventId(SOLICITOR_CREATE.getId()).token("s2sToken").build();
+        when(ccdCoreCaseDataService.startSubmitCreate(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyBoolean())).thenReturn(dummyStartEventResponse);
+        when(objectMapper.convertValue(any(), (TypeReference<Object>) any())).thenReturn(caseDataMap);
+        when(ccdCoreCaseDataService.submitCreate(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyBoolean())).thenReturn(caseDetails);
+
+        CaseDetails updatedCaseDetails = testingSupportService.createCcdCase(auth, s2sAuth, "test body");
+        assertEquals(Optional.of(12345678L), Optional.of(updatedCaseDetails.getId()));
+    }
+
     @Test(expected = RuntimeException.class)
     public void testCreateDummyCourtNavCase_InvalidClientLD_disabled() throws Exception {
         when(launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)).thenReturn(false);
@@ -815,6 +853,18 @@ public class TestingSupportServiceTest {
     public void testCreateDummyLiPC100CaseWithBody_InvalidAuthorisation() throws Exception {
         when(authorisationService.authoriseUser(anyString())).thenReturn(false);
         testingSupportService.createDummyLiPC100CaseWithBody(auth, s2sAuth, "test body");
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testCreateCcdCase_InvalidS2S() throws Exception {
+        when(authorisationService.authoriseService(anyString())).thenReturn(false);
+        testingSupportService.createCcdCase(auth, s2sAuth, "test body");
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testCreateCcdCase_InvalidAuthorisation() throws Exception {
+        when(authorisationService.authoriseUser(anyString())).thenReturn(false);
+        testingSupportService.createCcdCase(auth, s2sAuth, "test body");
     }
 
     @Test(expected = RuntimeException.class)
