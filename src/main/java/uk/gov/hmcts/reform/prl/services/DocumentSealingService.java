@@ -26,6 +26,7 @@ import java.util.Map;
 import static org.apache.pdfbox.pdmodel.PDPageContentStream.AppendMode.APPEND;
 import static org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject.createFromByteArray;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DUMMY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REGION_WALES;
 import static uk.gov.hmcts.reform.prl.utils.ResourceReader.readBytes;
 
 @Service
@@ -60,7 +61,7 @@ public class DocumentSealingService {
             s2sToken
         );
 
-        byte[] seal = readBytes(getCourtSealImage(caseData.getCourtSeal()));
+        byte[] seal = readBytes(getCourtSealImage(caseData.getCaseManagementLocation().getRegion()));
         byte[] sealedDocument = addSealToDocument(downloadedPdf, seal);
 
         Map<String, Object> tempCaseDetails = new HashMap<>();
@@ -114,19 +115,13 @@ public class DocumentSealingService {
         return Math.round(POINTS_PER_MM * mm);
     }
 
-    private static String getCourtSealImage(String seal) {
+    private static String getCourtSealImage(String region) {
         String courtSeal = "";
-        switch (seal) {
-            case USER_IMAGE_COURT_SEAL_BILINGUAL:
-                courtSeal = COURT_SEAL_BILINGUAL;
-                break;
-            case USER_IMAGE_COURT_SEAL:
-                courtSeal = COURT_SEAL;
-                break;
-            default:
-                break;
+        if (region.equals(REGION_WALES)) {
+            courtSeal = COURT_SEAL_BILINGUAL;
+        } else {
+            courtSeal = COURT_SEAL;
         }
-
         return courtSeal;
     }
 }
