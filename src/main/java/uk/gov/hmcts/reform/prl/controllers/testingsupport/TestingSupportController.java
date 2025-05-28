@@ -250,7 +250,7 @@ public class TestingSupportController {
         @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
-    public CaseDetails createCustomTSSupportCase(
+    public CaseDetails createCustomTsSupportCase(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody String jsonBody
