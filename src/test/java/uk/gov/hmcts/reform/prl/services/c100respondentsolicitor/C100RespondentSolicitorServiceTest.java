@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
@@ -92,7 +93,7 @@ import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.reviewdocument.ReviewDocumentService;
-import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -167,8 +168,10 @@ public class C100RespondentSolicitorServiceTest {
     ObjectMapper objectMapper;
 
     @Mock
-    CaseSummaryTabService caseSummaryTab;
+    AllTabServiceImpl allTabService;
 
+    @Mock
+    private StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
 
     @Mock
     CcdDataStoreService ccdDataStoreService;
@@ -1147,6 +1150,8 @@ public class C100RespondentSolicitorServiceTest {
         callbackRequest.setEventId("c100ResSolConsentingToApplicationA");
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(false);
 
+        when(allTabService.getStartAllTabsUpdate(Mockito.anyString()))
+            .thenReturn(startAllTabsUpdateDataContent);
         Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
             TEST_AUTH_TOKEN, callbackRequest
         );
@@ -1215,7 +1220,8 @@ public class C100RespondentSolicitorServiceTest {
                     any(PartyDetails.class)
                 ))
                 .thenReturn(updated);
-
+            when(allTabService.getStartAllTabsUpdate(Mockito.anyString()))
+                .thenReturn(startAllTabsUpdateDataContent);
             Map<String, Object> result =
                 respondentSolicitorService.submitC7ResponseForActiveRespondent("auth", cb);
 
@@ -1280,6 +1286,8 @@ public class C100RespondentSolicitorServiceTest {
 
         callbackRequest.setEventId("c100ResSolConsentingToApplicationA");
 
+        when(allTabService.getStartAllTabsUpdate(Mockito.anyString()))
+            .thenReturn(startAllTabsUpdateDataContent);
 
         Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
             TEST_AUTH_TOKEN, callbackRequest
@@ -1365,7 +1373,8 @@ public class C100RespondentSolicitorServiceTest {
                 .roles(List.of("caseworker-privatelaw-solicitor")).build();
             String respondent = eventsAndResp.split(HYPHEN_SEPARATOR)[1];
             when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
-
+            when(allTabService.getStartAllTabsUpdate(Mockito.anyString()))
+                .thenReturn(startAllTabsUpdateDataContent);
             Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
                 TEST_AUTH_TOKEN, callbackRequest
             );
@@ -1417,7 +1426,8 @@ public class C100RespondentSolicitorServiceTest {
             Mockito.any(CaseData.class)
         )).thenReturn(documentLanguage);
 
-
+        when(allTabService.getStartAllTabsUpdate(Mockito.anyString()))
+            .thenReturn(startAllTabsUpdateDataContent);
         Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
             TEST_AUTH_TOKEN, callbackRequest
         );
@@ -2482,8 +2492,8 @@ public class C100RespondentSolicitorServiceTest {
             when(objectMapper.convertValue(any(Map.class), eq(CaseData.class)))
                 .thenAnswer(invocation -> caseData);
 
-            when(caseSummaryTab.updateTab(any(CaseData.class)))
-                .thenReturn(Collections.emptyMap());
+            when(allTabService.getStartAllTabsUpdate(Mockito.anyString()))
+                .thenReturn(startAllTabsUpdateDataContent);
 
             CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
                 .CallbackRequest.builder()
