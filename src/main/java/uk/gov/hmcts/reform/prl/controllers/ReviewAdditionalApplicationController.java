@@ -118,21 +118,20 @@ public class ReviewAdditionalApplicationController extends AbstractCallbackContr
         List<String> errors = new ArrayList<>();
         if (caseData.getReviewAdditionalApplicationWrapper() != null
             && YesOrNo.No.equals(caseData.getReviewAdditionalApplicationWrapper().getIsAdditionalApplicationReviewed())) {
-            errors.add("Please review other applications");
+            errors.add("Please review this applications");
         } else if (caseData.getReviewAdditionalApplicationWrapper() == null
             || caseData.getReviewAdditionalApplicationWrapper().getIsAdditionalApplicationReviewed() == null) {
             errors.add("Have you reviewed the additional application? is required");
+        } else if (caseData.getReviewAdditionalApplicationWrapper() != null
+            && YesOrNo.Yes.equals(caseData.getReviewAdditionalApplicationWrapper().getIsAdditionalApplicationReviewed())) {
+            caseData.setChooseSendOrReply(SEND);
+            return populateApplication(caseData, authorisation);
         }
         return CallbackResponse.builder().data(caseData).errors(errors).build();
     }
 
-    @PostMapping("/review-additional-application/populate-application")
-    public CallbackResponse populateApplication(@RequestHeader("Authorization")
-                                                          @Parameter(hidden = true) String authorisation,
-                                                          @RequestBody CallbackRequest callbackRequest) {
+    private CallbackResponse populateApplication(CaseData caseData, String authorisation) {
 
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<String> errors = new ArrayList<>();
         if (REPLY.equals(caseData.getChooseSendOrReply())) {
             if (isEmpty(getOpenMessages(caseData.getSendOrReplyMessage().getMessages()))) {
@@ -142,7 +141,8 @@ public class ReviewAdditionalApplicationController extends AbstractCallbackContr
             }
         } else {
             caseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, authorisation);
-            if (caseData.getReviewAdditionalApplicationWrapper().getSelectedAdditionalApplicationsBundle() != null) {
+            if (caseData.getReviewAdditionalApplicationWrapper() != null
+                && caseData.getReviewAdditionalApplicationWrapper().getSelectedAdditionalApplicationsBundle() != null) {
                 Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
                 String applicationCode = reviewAdditionalApplicationService
                     .getApplicationBundleDynamicCode(caseData.getReviewAdditionalApplicationWrapper()
