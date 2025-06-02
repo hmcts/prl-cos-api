@@ -448,28 +448,6 @@ public class ReviewAdditionalApplicationControllerTest {
     }
 
     @Test
-    public void testSendOrReplyToMessagesSubmitForReply() {
-
-        caseDataMap = new HashMap<>();
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(12345L)
-            .state(State.SUBMITTED_PAID.getValue())
-            .data(caseDataMap)
-            .build();
-
-        CaseData caseData = CaseData.builder().id(12345L)
-            .chooseSendOrReply(REPLY)
-            .reviewAdditionalApplicationWrapper(ReviewAdditionalApplicationWrapper.builder().isAdditionalApplicationReviewed(
-                Yes).build())
-            .build();
-
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        controller.aboutToSubmitReviewAdditionalApplication(auth, callbackRequest);
-        verify(sendAndReplyCommonService).replyMessages(auth, caseData, caseDataMap);
-    }
-
-    @Test
     public void testSendOrReplyToMessagesSubmitIfAdditionalApplicationIsNotReviewed() {
 
         caseDataMap = new HashMap<>();

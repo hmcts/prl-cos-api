@@ -39,13 +39,10 @@ import java.util.Map;
 import java.util.Objects;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
-import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage.temporaryFieldsAboutToStart;
 import static uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage.temporaryFieldsAboutToSubmit;
-import static uk.gov.hmcts.reform.prl.services.SendAndReplyService.getOpenMessages;
 
 @Slf4j
 @SuppressWarnings({"squid:S5665"})
@@ -133,13 +130,7 @@ public class ReviewAdditionalApplicationController extends AbstractCallbackContr
     private CallbackResponse populateApplication(CaseData caseData, String authorisation) {
 
         List<String> errors = new ArrayList<>();
-        if (REPLY.equals(caseData.getChooseSendOrReply())) {
-            if (isEmpty(getOpenMessages(caseData.getSendOrReplyMessage().getMessages()))) {
-                errors.add("There are no messages to respond to.");
-            } else {
-                caseData = sendAndReplyService.populateMessageReplyFields(caseData, authorisation);
-            }
-        } else {
+        if (SEND.equals(caseData.getChooseSendOrReply())) {
             caseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, authorisation);
             if (caseData.getReviewAdditionalApplicationWrapper() != null
                 && caseData.getReviewAdditionalApplicationWrapper().getSelectedAdditionalApplicationsBundle() != null) {
@@ -165,13 +156,12 @@ public class ReviewAdditionalApplicationController extends AbstractCallbackContr
                                                                             @RequestBody CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        caseData.setChooseSendOrReply(SEND);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         if (caseData.getReviewAdditionalApplicationWrapper() != null
             && YesOrNo.Yes.equals(caseData.getReviewAdditionalApplicationWrapper().getIsAdditionalApplicationReviewed())) {
             if (caseData.getChooseSendOrReply().equals(SEND)) {
                 sendAndReplyCommonService.sendMessages(authorisation, caseData, caseDataMap);
-            } else {
-                sendAndReplyCommonService.replyMessages(authorisation, caseData, caseDataMap);
             }
         }
 
