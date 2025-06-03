@@ -44,14 +44,14 @@ def versions = [
   //  jsonPathAssert               : '2.2.0',
   junit                        : '5.10.3',
   junitPlatform                : '5.7.2',
-  lombok                       : '1.18.36',
+  lombok                       : '1.18.38',
   pact                         : '4.1.11',
   pitest                       : '1.16.3',
   puppyCrawl                   : '8.45.1',
   reformsJavaLogging           : '6.1.8',
   sendLetterClient             : '4.0.4',
   serenity                     : '4.2.16',
-  serenityCucumber             : '4.2.22',
+  serenityCucumber             : '4.2.30',
   serviceTokenGenerator        : '4.1.2',
   sonarPitest                  : '0.5',
   springSecurityCrypto         : '5.8.16',
@@ -292,8 +292,8 @@ configurations.configureEach {
     force 'org.bouncycastle:bcpkix-jdk18on:1.80'
     force 'org.springframework.security:spring-security-rsa:1.1.5'
     force 'org.springframework.security:spring-security-crypto:5.8.16'
-    force 'ch.qos.logback:logback-classic:1.5.16'
-    force 'ch.qos.logback:logback-core:1.5.16'
+    force 'ch.qos.logback:logback-classic:1.5.18'
+    force 'ch.qos.logback:logback-core:1.5.18'
   }
 }
 
@@ -342,7 +342,7 @@ dependencies {
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-bootstrap', version: versions.springCloud
   implementation group: 'org.apache.httpcomponents', name: 'fluent-hc', version: versions.httpComponents
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-loadbalancer', version: versions.springCloud
-  implementation group: 'org.springframework.retry', name: 'spring-retry', version: '2.0.11'
+  implementation group: 'org.springframework.retry', name: 'spring-retry', version: '2.0.12'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: versions.reformsJavaLogging
   implementation group: 'com.github.hmcts.java-logging', name: 'logging-appinsights', version: versions.reformsJavaLogging
@@ -400,8 +400,8 @@ dependencies {
     implementation group: 'com.warrenstrange', name: 'googleauth', version: '1.5.0'
   }
 
-  implementation(group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.16')
-  implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.16')
+  implementation(group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.18')
+  implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.18')
   implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version:'7.4'
 
   runtimeOnly('org.springframework.boot:spring-boot-devtools')
