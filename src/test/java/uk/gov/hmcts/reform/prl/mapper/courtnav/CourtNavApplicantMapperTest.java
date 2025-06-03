@@ -40,24 +40,24 @@ class CourtNavApplicantMapperTest {
             .build();
 
         ApplicantsDetails input = ApplicantsDetails.builder()
-            .applicantFirstName("Jane")
-            .applicantLastName("Doe")
-            .applicantOtherNames("JD")
-            .applicantDateOfBirth(new CourtNavDate(1, 1, 1990))
-            .applicantGender(female)
-            .applicantAddress(testAddress)
-            .applicantEmailAddress("jane@example.com")
-            .applicantPhoneNumber("0123456789")
+            .firstName("Jane")
+            .lastName("Doe")
+            .previousName("JD")
+            .dateOfBirth(new CourtNavDate(1, 1, 1990))
+            .gender(female)
+            .address(testAddress)
+            .email("jane@example.com")
+            .phoneNumber("0123456789")
             .applicantPreferredContact(List.of(PreferredContactEnum.email))
             .applicantContactInstructions("Don't call after 5")
-            .legalRepresentativeFirstName("Solicitor")
-            .legalRepresentativeLastName("Smith")
-            .legalRepresentativePhone("02070000000")
-            .legalRepresentativeReference("REF123")
-            .legalRepresentativeFirm("Law & Co")
-            .legalRepresentativeEmail("solicitor@example.com")
-            .legalRepresentativeAddress(testAddress)
-            .legalRepresentativeDx("DX12345")
+            .representativeFirstName("Solicitor")
+            .representativeLastName("Smith")
+            .solicitorTelephone("02070000000")
+            .solicitorReference("REF123")
+            .solicitorFirmName("Law & Co")
+            .solicitorEmail("solicitor@example.com")
+            .solicitorAddress(testAddress)
+            .dxNumber("DX12345")
             .shareContactDetailsWithRespondent(false)
             .build();
 
@@ -90,10 +90,10 @@ class CourtNavApplicantMapperTest {
     @Test
     void shouldHandleNullAddressAndContactFieldsSafely() {
         ApplicantsDetails input = ApplicantsDetails.builder()
-            .applicantFirstName("Test")
-            .applicantLastName("User")
-            .applicantDateOfBirth(new CourtNavDate(12, 12, 2000))
-            .applicantGender(male)
+            .firstName("Test")
+            .lastName("User")
+            .dateOfBirth(new CourtNavDate(12, 12, 2000))
+            .gender(male)
             .shareContactDetailsWithRespondent(true)
             .build();
 
@@ -117,12 +117,12 @@ class CourtNavApplicantMapperTest {
             .build();
 
         ApplicantsDetails input = ApplicantsDetails.builder()
-            .applicantFirstName("Alex")
-            .applicantLastName("Taylor")
-            .applicantDateOfBirth(new CourtNavDate(5, 5, 1995))
-            .applicantGender(Gender.other)
-            .applicantGenderOther("Non-binary")
-            .applicantAddress(address)
+            .firstName("Alex")
+            .lastName("Taylor")
+            .dateOfBirth(new CourtNavDate(5, 5, 1995))
+            .gender(Gender.other)
+            .otherGender("Non-binary")
+            .address(address)
             .shareContactDetailsWithRespondent(false)
             .build();
 

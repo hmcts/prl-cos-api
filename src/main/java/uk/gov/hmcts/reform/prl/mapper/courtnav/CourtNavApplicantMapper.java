@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnu
 import java.time.LocalDate;
 import java.util.UUID;
 
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -28,45 +27,47 @@ public class CourtNavApplicantMapper {
     public PartyDetails map(ApplicantsDetails applicant) {
 
         ContactPreferences contactPreferences = null;
-        if (isNotEmpty(applicant.getApplicantPreferredContact())) {
-            contactPreferences = applicant.getApplicantPreferredContact()
-                .contains(PreferredContactEnum.email) ? ContactPreferences.email : ContactPreferences.post;
+        if (applicant.getApplicantPreferredContact() != null
+            && !applicant.getApplicantPreferredContact().isEmpty()) {
+            contactPreferences = applicant.getApplicantPreferredContact().contains(PreferredContactEnum.email)
+                ? ContactPreferences.email
+                : ContactPreferences.post;
         }
 
         return PartyDetails.builder()
-            .firstName(applicant.getApplicantFirstName())
-            .lastName(applicant.getApplicantLastName())
-            .previousName(applicant.getApplicantOtherNames())
-            .dateOfBirth(LocalDate.parse(applicant.getApplicantDateOfBirth().mergeDate()))
-            .gender(applicant.getApplicantGender())
-            .otherGender(Gender.other.equals(applicant.getApplicantGender())
-                             ? applicant.getApplicantGenderOther()
+            .firstName(applicant.getFirstName())
+            .lastName(applicant.getLastName())
+            .previousName(applicant.getPreviousName())
+            .dateOfBirth(LocalDate.parse(applicant.getDateOfBirth().mergeDate()))
+            .gender(applicant.getGender())
+            .otherGender(Gender.other.equals(applicant.getGender())
+                             ? applicant.getOtherGender()
                              : null)
-            .address(null != applicant.getApplicantAddress()
-                         ? courtNavAddressMapper.map(applicant.getApplicantAddress()) : null)
-            .isAddressConfidential(ObjectUtils.isNotEmpty(applicant.getApplicantAddress())
+            .address(null != applicant.getEmail()
+                         ? courtNavAddressMapper.map(applicant.getAddress()) : null)
+            .isAddressConfidential(ObjectUtils.isNotEmpty(applicant.getAddress())
                                        && !applicant.isShareContactDetailsWithRespondent() ? Yes : No)
-            .canYouProvideEmailAddress(YesOrNo.valueOf(null != applicant.getApplicantEmailAddress() ? "Yes" : "No"))
-            .email(applicant.getApplicantEmailAddress())
-            .isEmailAddressConfidential(StringUtils.isNotEmpty(applicant.getApplicantEmailAddress())
+            .canYouProvideEmailAddress(YesOrNo.valueOf(null != applicant.getEmail() ? "Yes" : "No"))
+            .email(applicant.getEmail())
+            .isEmailAddressConfidential(StringUtils.isNotEmpty(applicant.getEmail())
                                             && !applicant.isShareContactDetailsWithRespondent() ? Yes : No)
-            .phoneNumber(applicant.getApplicantPhoneNumber())
-            .isPhoneNumberConfidential(StringUtils.isNotEmpty(applicant.getApplicantPhoneNumber())
+            .phoneNumber(applicant.getPhoneNumber())
+            .isPhoneNumberConfidential(StringUtils.isNotEmpty(applicant.getPhoneNumber())
                                            && !applicant.isShareContactDetailsWithRespondent() ? Yes : No)
             .applicantPreferredContact(applicant.getApplicantPreferredContact())
             .applicantContactInstructions(applicant.getApplicantContactInstructions())
-            .representativeFirstName(applicant.getLegalRepresentativeFirstName())
-            .representativeLastName(applicant.getLegalRepresentativeLastName())
-            .solicitorTelephone(applicant.getLegalRepresentativePhone())
-            .solicitorReference(applicant.getLegalRepresentativeReference())
+            .representativeFirstName(applicant.getSolicitorFirmName())
+            .representativeLastName(applicant.getRepresentativeLastName())
+            .solicitorTelephone(applicant.getSolicitorTelephone())
+            .solicitorReference(applicant.getSolicitorReference())
             .contactPreferences(contactPreferences)
             .solicitorOrg(Organisation.builder()
-                              .organisationName(applicant.getLegalRepresentativeFirm())
+                              .organisationName(applicant.getSolicitorFirmName())
                               .build())
-            .solicitorEmail(applicant.getLegalRepresentativeEmail())
-            .solicitorAddress(null != applicant.getLegalRepresentativeAddress()
-                                  ? courtNavAddressMapper.map(applicant.getLegalRepresentativeAddress()) : null)
-            .dxNumber(applicant.getLegalRepresentativeDx())
+            .solicitorEmail(applicant.getSolicitorEmail())
+            .solicitorAddress(null != applicant.getSolicitorAddress()
+                                  ? courtNavAddressMapper.map(applicant.getSolicitorAddress()) : null)
+            .dxNumber(applicant.getDxNumber())
             .partyId(UUID.randomUUID())
             .build();
     }
