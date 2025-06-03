@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.FL401Proceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBailConditionDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.court.Court;
-import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
@@ -63,8 +62,6 @@ public class FL401ApplicationMapper {
     private final RespondentBehaviourMapper respondentBehaviourMapper;
     private final StatementOfTruthMapper statementOfTruthMapper;
     private final AttendHearingMapper attendHearingMapper;
-
-    private Court court = null;
 
     public CaseData mapCourtNavData(CourtNavFl401 courtNavCaseData, String authorization) throws NotFoundException {
         CaseData caseData = CaseData.builder()
@@ -133,48 +130,47 @@ public class FL401ApplicationMapper {
     }
 
     private CaseData populateCourtDetailsForCourtNavCase(String authorization, CaseData caseData,
-                                                          String epimsId) throws NotFoundException {
-        Optional<CourtVenue> courtVenue = Optional.empty();
+                                                         String epimsId) throws NotFoundException {
+
         //1. get court details from provided epimsId request
-        if (!StringUtils.isEmpty(epimsId)) {
-            courtVenue = getCourtVenue(authorization, epimsId);
-        }
+        Optional<CourtVenue> courtVenue = getCourtVenueIfAvailable(authorization, epimsId);
+
         //2. if not found check launch-darkly flag and populate default Swansea court Id.
-        if (launchDarklyClient.isFeatureEnabled(PrlLaunchDarklyFlagConstants.COURTNAV_SWANSEA_COURT_MAPPING)
-            && courtVenue.isEmpty()) {
+        if (courtVenue.isEmpty() && launchDarklyClient.isFeatureEnabled(
+            PrlLaunchDarklyFlagConstants.COURTNAV_SWANSEA_COURT_MAPPING)) {
             epimsId = COURTNAV_DUMMY_BASE_LOCATION_ID;
-            courtVenue = getCourtVenue(authorization, epimsId);
+            courtVenue = getCourtVenueIfAvailable(authorization, epimsId);
         }
-        //3. if court details found then populate court information and case management location.
+
+        // populate court information
         if (courtVenue.isPresent()) {
-            caseData = caseData.toBuilder()
-                .courtName(courtVenue.get().getCourtName())
+            CourtVenue venue = courtVenue.get();
+            return caseData.toBuilder()
+                .courtName(venue.getCourtName())
                 .caseManagementLocation(CaseManagementLocation.builder()
-                                            .region(courtVenue.get().getRegionId())
+                                            .region(venue.getRegionId())
                                             .baseLocation(epimsId)
-                                            .regionName(courtVenue.get().getRegion())
-                                            .baseLocationName(courtVenue.get().getCourtName()).build())
-                .isCafcass(CaseUtils.cafcassFlag(courtVenue.get().getRegionId()))
+                                            .regionName(venue.getRegion())
+                                            .baseLocationName(venue.getCourtName())
+                                            .build())
+                .isCafcass(CaseUtils.cafcassFlag(venue.getRegionId()))
                 .courtId(epimsId)
-                .courtSeal(courtSealFinderService.getCourtSeal(courtVenue.get().getRegionId()))
-                .build();
-        } else {
-            // 4. populate court details from fact-finder Api.
-            caseData = caseData.toBuilder()
-                .courtName(getCourtName(caseData))
-                .courtEmailAddress(getCourtEmailAddress(court))
+                .courtSeal(courtSealFinderService.getCourtSeal(venue.getRegionId()))
                 .build();
         }
-        return caseData;
+
+        // Fallback to fact API
+        Court court = courtFinderService.getNearestFamilyCourt(caseData);
+        return caseData.toBuilder()
+            .courtName(court.getCourtName())
+            .courtEmailAddress(String.valueOf(courtFinderService.getEmailAddress(court)))
+            .build();
     }
 
-    private Optional<CourtVenue> getCourtVenue(String authToken, String epmsId) {
-        Optional<CourtVenue> courtVenue;
-        courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(
-            epmsId,
-            authToken
-        );
-        return courtVenue;
+    private Optional<CourtVenue> getCourtVenueIfAvailable(String authToken, String epimsId) {
+        return StringUtils.isEmpty(epimsId)
+            ? Optional.empty()
+            : locationRefDataService.getCourtDetailsFromEpimmsId(epimsId, authToken);
     }
 
     private RespondentBailConditionDetails getRespondentBailConditionDetails(CourtNavFl401 courtNavCaseData) {
@@ -211,17 +207,6 @@ public class FL401ApplicationMapper {
             + courtNavCaseData.getFl401().getCourtNavRespondent().getLastName();
 
         return applicantName + " & " + respondentName;
-    }
-
-    private String getCourtName(CaseData caseData) throws NotFoundException {
-        court = courtFinderService.getNearestFamilyCourt(caseData);
-        return court.getCourtName();
-    }
-
-    private String getCourtEmailAddress(Court court1) {
-
-        Optional<CourtEmailAddress> courtEmailAddress = courtFinderService.getEmailAddress(court1);
-        return String.valueOf(courtEmailAddress);
     }
 
     private List<Element<FL401Proceedings>> getOngoingProceedings(List<CourtProceedings> ongoingCourtProceedings) {
