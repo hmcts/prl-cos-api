@@ -204,8 +204,8 @@ public class FL401ApplicationMapper {
 
     private String getCaseName(CourtNavFl401 courtNavCaseData) {
 
-        String applicantName = courtNavCaseData.getFl401().getApplicantDetails().getApplicantFirstName() + " "
-            + courtNavCaseData.getFl401().getApplicantDetails().getApplicantLastName();
+        String applicantName = courtNavCaseData.getFl401().getApplicantDetails().getFirstName() + " "
+            + courtNavCaseData.getFl401().getApplicantDetails().getLastName();
 
         String respondentName = courtNavCaseData.getFl401().getCourtNavRespondent().getFirstName() + " "
             + courtNavCaseData.getFl401().getCourtNavRespondent().getLastName();

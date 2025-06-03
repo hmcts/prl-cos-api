@@ -152,20 +152,20 @@ class FL401ApplicationMapperTest {
             .build();
 
         applicantsDetails = ApplicantsDetails.builder()
-            .applicantFirstName("courtnav Applicant")
-            .applicantLastName("test")
-            .applicantDateOfBirth(CourtNavDate.builder()
+            .firstName("courtnav Applicant")
+            .lastName("test")
+            .dateOfBirth(CourtNavDate.builder()
                                       .day(10)
                                       .month(9)
                                       .year(1992)
                                       .build())
-            .applicantGender(Gender.female)
+            .gender(Gender.female)
             .shareContactDetailsWithRespondent(false)
-            .applicantEmailAddress("test@courtNav.com")
-            .applicantPhoneNumber("12345678907")
-            .applicantHasLegalRepresentative(false)
+            .email("test@courtNav.com")
+            .phoneNumber("12345678907")
+            .hasLegalRepresentative(false)
             .applicantPreferredContact(List.of(PreferredContactEnum.email))
-            .applicantAddress(CourtNavAddress.builder()
+            .address(CourtNavAddress.builder()
                                   .addressLine1("55 Test Street")
                                   .postTown("Town")
                                   .postCode("LU1 5ET")
@@ -1083,15 +1083,13 @@ class FL401ApplicationMapperTest {
     @Test
     void testCourtnavApplicantDetailsHasNoConfidentialInfo() throws NotFoundException {
 
-        applicantsDetails = applicantsDetails.toBuilder()
-            .applicantGender(Gender.female)
-            .shareContactDetailsWithRespondent(true)
-            .applicantAddress(CourtNavAddress.builder()
+        applicantsDetails.setGender(Gender.female);
+        applicantsDetails.setShareContactDetailsWithRespondent(true);
+        applicantsDetails.setAddress(CourtNavAddress.builder()
                                   .addressLine1("55 Test Street")
                                   .postTown("Town")
                                   .postCode("LU1 5ET")
-                                  .build())
-            .build();
+                                  .build());
 
         courtNavFl401 = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
@@ -1528,7 +1526,7 @@ class FL401ApplicationMapperTest {
     @Test
     void testCourtNavContactInfirmation() throws NotFoundException {
 
-        applicantsDetails = applicantsDetails.toBuilder().applicantContactInstructions("Test").build();
+        applicantsDetails.setApplicantContactInstructions("Test");
         courtNavFl401 = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
                        .beforeStart(beforeStart)
