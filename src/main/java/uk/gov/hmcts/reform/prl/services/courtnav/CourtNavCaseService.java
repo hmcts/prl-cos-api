@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -53,7 +52,7 @@ import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsSe
 
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor
 public class CourtNavCaseService {
 
     protected static final String[] ALLOWED_FILE_TYPES = {"pdf", "jpeg", "jpg", "doc", "docx", "bmp", "png", "tiff", "txt", "tif"};
@@ -133,7 +132,7 @@ public class CourtNavCaseService {
             QuarantineLegalDoc courtNavQuarantineLegalDoc = getCourtNavQuarantineDocument(
                 document.getOriginalFilename(),
                 tempCaseData,
-                uploadResponse.getDocuments().get(0),
+                uploadResponse.getDocuments().getFirst(),
                 typeOfDocument
             );
 
@@ -277,9 +276,8 @@ public class CourtNavCaseService {
             caseData
         );
 
-        /** Tech debt: need to pick this extra transaction as a tech debt.
-         *  In the previous one, case data conversion is removing multiple must to have fields.
-         **/
+         // Tech debt: need to pick this extra transaction as a tech debt.
+         // In the previous one, case data conversion is removing multiple must to have fields.
         updateCommonSetUpForNoCAndCaseFlags(caseId);
         log.info("**********************Tab refresh, CC setup and CourtNav case creation complete**************************");
     }
