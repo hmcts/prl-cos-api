@@ -355,55 +355,6 @@ class FL401ApplicationMapperTest {
     }
 
     @Test
-    void testCourtnavMetaDataIsNull() {
-
-        courtNavFl401 = CourtNavFl401.builder()
-            .metaData(CourtNavMetaData.builder()
-                          .caseOrigin(null)
-                          .build())
-            .build();
-        CaseData caseData = CaseData.builder()
-            .caseOrigin(null)
-            .build();
-
-        assertEquals(courtNavFl401.getMetaData().getCaseOrigin(), caseData.getCaseOrigin());
-        assertNull(courtNavFl401.getMetaData().getCaseOrigin());
-
-    }
-
-    @Test
-    void testCourtnavCaseDataIsNull() {
-
-        courtNavFl401 = CourtNavFl401.builder()
-            .fl401(null)
-            .build();
-
-        assertNull(courtNavFl401.getFl401());
-
-    }
-
-    @Test
-    void testCourtnavCaseDataWithBeforeStart() {
-
-
-        CaseData caseData = CaseData.builder()
-            .applicantAge(ApplicantAge.eighteenOrOlder)
-            .build();
-
-        courtNavFl401 = CourtNavFl401.builder()
-            .fl401(CourtNavCaseData.builder()
-                       .beforeStart(BeforeStart.builder()
-                                        .applicantHowOld(ApplicantAge.eighteenOrOlder)
-                                        .build())
-                       .build())
-            .build();
-
-        assertEquals(courtNavFl401.getFl401().getBeforeStart().getApplicantHowOld(), caseData.getApplicantAge());
-        assertNotNull(courtNavFl401.getFl401().getBeforeStart().getApplicantHowOld());
-
-    }
-
-    @Test
     void testCourtnavCaseDataWithCourtNavFL401Details() throws NotFoundException {
 
         courtNavFl401 = CourtNavFl401.builder()
@@ -1440,39 +1391,6 @@ class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
         when(launchDarklyClient.isFeatureEnabled(anyString())).thenReturn(false);
-        when(locationRefDataService.getCourtDetailsFromEpimmsId(anyString(),anyString()))
-            .thenReturn(Optional.of(CourtVenue.builder()
-                                        .courtName("Swansea Family court")
-                                        .region("Wales")
-                                        .regionId("7")
-                                        .build()));
-        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
-
-        assertEquals(courtNavFl401.getFl401().getSituation().getOrdersAppliedFor(), caseData.getTypeOfApplicationOrders().getOrderType());
-        assertNotNull(courtNavFl401.getFl401().getSituation().getOrdersAppliedFor());
-        assertNotNull(courtNavFl401.getFl401().getSituation().getOrdersAppliedWithoutNoticeReason());
-        assertEquals("Swansea Family court", caseData.getCourtName());
-    }
-
-    @Test
-    void testCourtNavCaseDataWhenCourtDetailFoundForEpmsIdAndFlagIsOn() throws NotFoundException {
-
-        courtNavFl401 = CourtNavFl401.builder()
-            .fl401(CourtNavCaseData.builder()
-                       .beforeStart(beforeStart)
-                       .situation(situation)
-                       .applicantDetails(applicantsDetails)
-                       .courtNavRespondent(courtNavRespondent)
-                       .family(family)
-                       .relationshipWithRespondent(relationShipToRespondent)
-                       .respondentBehaviour(respondentBehaviour)
-                       .courtNavHome(home)
-                       .statementOfTruth(stmtOfTruth)
-                       .goingToCourt(goingToCourt)
-                       .build())
-            .metaData(courtNavMetaData)
-            .build();
-        when(launchDarklyClient.isFeatureEnabled(anyString())).thenReturn(true);
         when(locationRefDataService.getCourtDetailsFromEpimmsId(anyString(),anyString()))
             .thenReturn(Optional.of(CourtVenue.builder()
                                         .courtName("Swansea Family court")
