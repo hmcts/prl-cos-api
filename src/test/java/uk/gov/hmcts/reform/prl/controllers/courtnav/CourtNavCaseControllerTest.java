@@ -21,12 +21,13 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.BeforeStart;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavHome;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavMetaData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
+import uk.gov.hmcts.reform.prl.services.courtnav.CourtLocationService;
 import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
 
 import java.util.Collections;
@@ -46,8 +47,6 @@ import static uk.gov.hmcts.reform.prl.utils.TestConstants.CAFCASS_USER_ROLE;
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CourtNavCaseControllerTest {
 
-    private static final String FILE_NAME = "fileName";
-    private static final String CONTENT_TYPE = "application/json";
     private static final String AUTH = "auth";
 
     @InjectMocks
@@ -55,6 +54,9 @@ public class CourtNavCaseControllerTest {
 
     @Mock
     private AuthorisationService authorisationService;
+
+    @Mock
+    private CourtLocationService courtLocationService;
 
     @Mock
     private CourtNavCaseService courtNavCaseService;
@@ -96,12 +98,19 @@ public class CourtNavCaseControllerTest {
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
             1234567891234567L).data(Map.of("id", "1234567891234567")).build());
+
         CourtNavFl401 courtNavCaseData = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
-                       .beforeStart(BeforeStart.builder().applicantHowOld(
-                           ApplicantAge.eighteenOrOlder).build()).build())
+                       .beforeStart(BeforeStart.builder()
+                                        .applicantHowOld(ApplicantAge.eighteenOrOlder)
+                                        .build())
+                       .build())
+            .metaData(CourtNavMetaData.builder()
+                          .courtSpecialRequirements("234946")
+                          .build())
             .build();
-        when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData,"Bearer:test")).thenReturn(caseData);
+
+        when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData)).thenReturn(caseData);
 
         ResponseEntity response = courtNavCaseController.createCase("Bearer:test", "s2s token", courtNavCaseData);
         assertEquals(CREATED, response.getStatusCode());
@@ -154,7 +163,7 @@ public class CourtNavCaseControllerTest {
     }
 
     @Test
-    public void shouldGetForbiddenWhenCalledWithInvalidToken() throws Exception {
+    public void shouldGetForbiddenWhenCalledWithInvalidToken() {
         CaseData caseData = CaseData.builder()
             .applicantCaseName("test")
             .build();
@@ -166,12 +175,12 @@ public class CourtNavCaseControllerTest {
                        .beforeStart(BeforeStart.builder().applicantHowOld(
                            ApplicantAge.eighteenOrOlder).build()).build())
             .build();
-        when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData,"Bearer:test")).thenReturn(caseData);
+        when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData)).thenReturn(caseData);
         assertThrows(ResponseStatusException.class, () -> courtNavCaseController.createCase("Bearer:test", "s2s token", courtNavCaseData));
     }
 
     @Test
-    public void shouldGetForbiddenWhenCalledWithInvalidS2SToken() throws Exception {
+    public void shouldGetForbiddenWhenCalledWithInvalidS2SToken() {
         CaseData caseData = CaseData.builder()
             .applicantCaseName("test")
             .build();
@@ -183,7 +192,7 @@ public class CourtNavCaseControllerTest {
                        .beforeStart(BeforeStart.builder().applicantHowOld(
                            ApplicantAge.eighteenOrOlder).build()).build())
             .build();
-        when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData,"Bearer:test")).thenReturn(caseData);
+        when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData)).thenReturn(caseData);
         assertThrows(ResponseStatusException.class, () -> courtNavCaseController.createCase("Bearer:test", "s2s token", courtNavCaseData));
 
     }
@@ -252,16 +261,19 @@ public class CourtNavCaseControllerTest {
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
             1234567891234567L).data(Map.of("id", "1234567891234567")).build());
+
         CourtNavFl401 courtNavCaseData = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
-                       .beforeStart(BeforeStart.builder().applicantHowOld(
-                           ApplicantAge.eighteenOrOlder).build())
-                       .courtNavHome(CourtNavHome.builder()
-                                    .wantToHappenWithFamilyHome(Collections.emptyList())
-                                    .build())
+                       .beforeStart(BeforeStart.builder()
+                                        .applicantHowOld(ApplicantAge.eighteenOrOlder)
+                                        .build())
                        .build())
+            .metaData(CourtNavMetaData.builder()
+                          .courtSpecialRequirements("234946")
+                          .build())
             .build();
-        when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData,"Bearer:test")).thenReturn(caseData);
+
+        when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData)).thenReturn(caseData);
 
         ResponseEntity<Object> response = courtNavCaseController.createCase("Bearer:test", "s2s token", courtNavCaseData);
         assertEquals(201,  response.getStatusCode().value());
