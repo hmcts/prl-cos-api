@@ -1,21 +1,13 @@
 package uk.gov.hmcts.reform.prl.mapper.courtnav;
 
-import javassist.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.court.Court;
-import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
-import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ApplicantsDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.BeforeStart;
@@ -49,14 +41,11 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnu
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreviousOrIntendedResidentAtAddressEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.SpecialMeasuresEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.WithoutNoticeReasonEnum;
-import uk.gov.hmcts.reform.prl.services.CourtFinderService;
-import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -64,10 +53,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
+import static uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.BehaviourTowardsApplicantEnum.comingNearHome;
+import static uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.BehaviourTowardsChildrenEnum.beingViolentOrThreatening;
 
 @SpringBootTest
 class FL401ApplicationMapperTest {
@@ -75,16 +63,6 @@ class FL401ApplicationMapperTest {
     @Autowired
     private FL401ApplicationMapper fl401ApplicationMapper;
 
-    @MockBean
-    private CourtFinderService courtFinderService;
-
-    @MockBean
-    private LaunchDarklyClient launchDarklyClient;
-
-    @MockBean
-    private LocationRefDataService locationRefDataService;
-
-    private Court court;
     private CourtNavFl401 courtNavFl401;
 
     private Situation situation;
@@ -103,10 +81,6 @@ class FL401ApplicationMapperTest {
 
     @BeforeEach
     void setUp() {
-        court = Court.builder()
-            .courtName("testcourt")
-            .build();
-
         beforeStart = BeforeStart.builder()
             .applicantHowOld(ApplicantAge.eighteenOrOlder)
             .build();
@@ -239,10 +213,10 @@ class FL401ApplicationMapperTest {
             .build();
 
         List<BehaviourTowardsApplicantEnum> behaviourTowardsApplicantEnum = new ArrayList<>();
-        behaviourTowardsApplicantEnum.add(BehaviourTowardsApplicantEnum.comingNearHome);
+        behaviourTowardsApplicantEnum.add(comingNearHome);
 
         List<BehaviourTowardsChildrenEnum> behaviourTowardsChildrenEnum = new ArrayList<>();
-        behaviourTowardsChildrenEnum.add(BehaviourTowardsChildrenEnum.beingViolentOrThreatening);
+        behaviourTowardsChildrenEnum.add(beingViolentOrThreatening);
 
         respondentBehaviour = CourtNavRespondentBehaviour.builder()
             .applyingForMonMolestationOrder(true)
@@ -350,12 +324,10 @@ class FL401ApplicationMapperTest {
             .courtSpecialRequirements("test special court")
             .hasDraftOrder(false)
             .build();
-
-
     }
 
     @Test
-    void testCourtnavCaseDataWithCourtNavFL401Details() throws NotFoundException {
+    void testCourtnavCaseDataWithCourtNavFL401Details() {
 
         courtNavFl401 = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
@@ -373,26 +345,15 @@ class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
-            .address("test court address")
-            .description("court desc")
-            .explanation("court explanation")
-            .build();
-        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
-        when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
-
-        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
+        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
         assertEquals(courtNavFl401.getFl401().getSituation().getOrdersAppliedFor(), caseData.getTypeOfApplicationOrders().getOrderType());
         assertNotNull(courtNavFl401.getFl401().getSituation().getOrdersAppliedFor());
         assertNotNull(courtNavFl401.getFl401().getSituation().getOrdersAppliedWithoutNoticeReason());
-
-        verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
-
     }
 
     @Test
-    void testCourtnavCaseDataWithCourtNavFL401DetailsWithOccupationalOrder() throws NotFoundException {
+    void testCourtnavCaseDataWithCourtNavFL401DetailsWithOccupationalOrder() {
 
         courtNavFl401 = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
@@ -410,26 +371,16 @@ class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
-            .address("test court address")
-            .description("court desc")
-            .explanation("court explanation")
-            .build();
-        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
-        when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
-
-        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
+        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
         assertEquals(courtNavFl401.getFl401().getSituation().getOrdersAppliedFor(), caseData.getTypeOfApplicationOrders().getOrderType());
         assertNotNull(courtNavFl401.getFl401().getSituation().getOrdersAppliedFor());
         assertNotNull(courtNavFl401.getFl401().getSituation().getOrdersAppliedWithoutNoticeReason());
-
-        verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
-
     }
 
+
     @Test
-    void testCourtnavMetaDataCourtnavApprovedAsFalse() throws NotFoundException {
+    void testCourtnavMetaDataCourtnavApprovedAsFalse() {
 
         courtNavMetaData = CourtNavMetaData.builder()
             .courtNavApproved(false)
@@ -455,27 +406,15 @@ class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
-            .address("test court address")
-            .description("court desc")
-            .explanation("court explanation")
-            .build();
-
-        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
-        when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
-
-        fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
-
-        verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
+        fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
         assertFalse(courtNavFl401.getMetaData().isCourtNavApproved());
         assertTrue(courtNavFl401.getMetaData().isHasDraftOrder());
         assertNotNull(courtNavFl401.getMetaData().getCaseOrigin());
-
     }
 
     @Test
-    void testCourtnavOrdersAppliedWithoutNoticeAsFalse() throws NotFoundException {
+    void testCourtnavOrdersAppliedWithoutNoticeAsFalse() {
 
         situation = situation.toBuilder()
             .ordersAppliedWithoutNotice(false)
@@ -498,18 +437,7 @@ class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
-            .address("test court address")
-            .description("court desc")
-            .explanation("court explanation")
-            .build();
-
-        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
-        when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
-
-        fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
-
-        verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
+        fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
         assertFalse(courtNavFl401.getFl401().getSituation().isOrdersAppliedWithoutNotice());
         assertFalse(courtNavFl401.getFl401().getSituation().isBailConditionsOnRespondent());
@@ -517,7 +445,7 @@ class FL401ApplicationMapperTest {
     }
 
     @Test
-    void testCourtnavFamilyAsApplicant() throws NotFoundException {
+    void testCourtnavFamilyAsApplicant() {
 
         family = Family.builder()
             .whoApplicationIsFor(ApplicationCoverEnum.applicantOnly)
@@ -542,25 +470,13 @@ class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
-            .address("test court address")
-            .description("court desc")
-            .explanation("court explanation")
-            .build();
-
-        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
-        when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
-
-        fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
-
-        verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
+        fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
         assertEquals("Applicant Only", courtNavFl401.getFl401().getFamily().getWhoApplicationIsFor().getDisplayedValue());
-
     }
 
     @Test
-    void testCourtnavRelationShipDescriptionAsNoneOfTheAbove() throws NotFoundException {
+    void testCourtnavRelationShipDescriptionAsNoneOfTheAbove() {
 
         relationShipToRespondent = CourtNavRelationShipToRespondent.builder()
             .relationshipDescription(ApplicantRelationshipDescriptionEnum.noneOfAbove)
@@ -588,28 +504,16 @@ class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
-            .address("test court address")
-            .description("court desc")
-            .explanation("court explanation")
-            .build();
-
-        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
-        when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
-
-        fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
-
-        verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
+        fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
         assertEquals(
             "None of the above",
             courtNavFl401.getFl401().getRelationshipWithRespondent().getRelationshipDescription()
                 .getDisplayedValue());
-
     }
 
     @Test
-    void testCourtnavGoingToCourtInterpreterNeeds() throws NotFoundException {
+    void testCourtnavGoingToCourtInterpreterNeeds() {
 
         List<SpecialMeasuresEnum> specialMeasuresEnum = new ArrayList<>();
         specialMeasuresEnum.add(SpecialMeasuresEnum.separateWaitingRoom);
@@ -639,25 +543,14 @@ class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
-            .address("test court address")
-            .description("court desc")
-            .explanation("court explanation")
-            .build();
-
-        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
-        when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
-
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
-
-        verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
         assertEquals(YesOrNo.Yes, caseData1.getAttendHearing().getIsInterpreterNeeded());
         assertEquals(YesOrNo.Yes, caseData1.getAttendHearing().getIsDisabilityPresent());
     }
 
     @Test
-    void testCourtnavGoingToCourtWithNoSpecialMeasures() throws NotFoundException {
+    void testCourtnavGoingToCourtWithNoSpecialMeasures() {
 
         goingToCourt = GoingToCourt.builder()
             .isInterpreterRequired(true)
@@ -684,18 +577,7 @@ class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
-            .address("test court address")
-            .description("court desc")
-            .explanation("court explanation")
-            .build();
-
-        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
-        when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
-
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
-
-        verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
         assertEquals(YesOrNo.Yes, caseData1.getAttendHearing().getIsInterpreterNeeded());
         assertEquals(YesOrNo.Yes, caseData1.getAttendHearing().getIsDisabilityPresent());
@@ -704,7 +586,7 @@ class FL401ApplicationMapperTest {
     }
 
     @Test
-    void testCourtnavOngoingCourtProceedings() throws NotFoundException {
+    void testCourtnavOngoingCourtProceedings() {
 
         List<CourtProceedings> courtProceedings = new ArrayList<>();
         courtProceedings.add(CourtProceedings.builder()
@@ -713,8 +595,6 @@ class FL401ApplicationMapperTest {
                                  .caseType("testType1")
                                  .nameOfCourt("testcourt1")
                                  .build());
-
-        List<ProtectedChild> protectedChildren = new ArrayList<>();
 
         ProtectedChild child = ProtectedChild.builder()
             .fullName("child1")
@@ -727,11 +607,10 @@ class FL401ApplicationMapperTest {
             .relationship("mother")
             .respondentRelationship("uncle")
             .build();
-        protectedChildren.add(child);
 
         family = Family.builder()
             .whoApplicationIsFor(ApplicationCoverEnum.applicantAndChildren)
-            .protectedChildren(protectedChildren)
+            .protectedChildren(List.of(child))
             .anyOngoingCourtProceedings(true)
             .ongoingCourtProceedings(courtProceedings)
             .build();
@@ -752,29 +631,16 @@ class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
-            .address("test court address")
-            .description("court desc")
-            .explanation("court explanation")
-            .build();
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
-        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
-        when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
 
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
-
-        verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
-
-        assertEquals(
-            YesNoDontKnow.yes,
-            caseData1.getFl401OtherProceedingDetails().getHasPrevOrOngoingOtherProceeding()
-        );
+        assertEquals(yes, caseData1.getFl401OtherProceedingDetails().getHasPrevOrOngoingOtherProceeding());
         assertNotNull(caseData1.getFl401OtherProceedingDetails().getFl401OtherProceedings());
 
     }
 
     @Test
-    void testCourtnavHomeChildrenIsNull() throws NotFoundException {
+    void testCourtnavHomeChildrenIsNull() {
 
         home1 = home1.toBuilder()
             .childrenApplicantResponsibility(null)
@@ -797,25 +663,13 @@ class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
-            .address("test court address")
-            .description("court desc")
-            .explanation("court explanation")
-            .build();
-
-        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
-        when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
-
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
-
-        verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
         assertEquals(YesOrNo.No, caseData1.getHome().getDoAnyChildrenLiveAtAddress());
-
     }
 
     @Test
-    void testCourtnavHomePreviouslyLivedAtThisAddressAsNeither() throws NotFoundException {
+    void testCourtnavHomePreviouslyLivedAtThisAddressAsNeither() {
 
         home1 = home1.toBuilder()
             .previouslyLivedAtAddress(null)
@@ -838,26 +692,14 @@ class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
-            .address("test court address")
-            .description("court desc")
-            .explanation("court explanation")
-            .build();
-
-        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
-        when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
-
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
-
-        verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
         assertNull(caseData1.getHome().getEverLivedAtTheAddress());
         assertNull(caseData1.getHome().getIntendToLiveAtTheAddress());
-
     }
 
     @Test
-    void testCourtnavHomeLivingStituationAsNull() throws NotFoundException {
+    void testCourtnavHomeLivingStituationAsNull() {
 
         home1 = home1.toBuilder()
             .wantToHappenWithLivingSituation(null)
@@ -880,26 +722,14 @@ class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
-            .address("test court address")
-            .description("court desc")
-            .explanation("court explanation")
-            .build();
-
-        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
-        when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
-
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
-
-        verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
         assertNull(caseData1.getHome().getLivingSituation());
         assertNull(caseData1.getHome().getFamilyHome());
-
     }
 
     @Test
-    void testCourtnavHomeNameOnRentalAgreementAsNull() throws NotFoundException {
+    void testCourtnavHomeNameOnRentalAgreementAsNull() {
 
         home1 = home1.toBuilder()
             .propertyIsRented(false)
@@ -924,18 +754,7 @@ class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
-            .address("test court address")
-            .description("court desc")
-            .explanation("court explanation")
-            .build();
-
-        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
-        when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
-
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
-
-        verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
         assertNull(caseData1.getHome().getLandlords());
         assertNull(caseData1.getHome().getMortgages());
@@ -943,7 +762,7 @@ class FL401ApplicationMapperTest {
     }
 
     @Test
-    void testCourtnavHomeMortagageAndRentDetailsAsFalse() throws NotFoundException {
+    void testCourtnavHomeMortagageAndRentDetailsAsFalse() {
 
         home1 = home1.toBuilder()
             .propertyIsRented(false)
@@ -968,18 +787,7 @@ class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
-            .address("test court address")
-            .description("court desc")
-            .explanation("court explanation")
-            .build();
-
-        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
-        when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
-
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
-
-        verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
         assertEquals(YesOrNo.No, caseData1.getHome().getIsPropertyRented());
         assertNull(caseData1.getHome().getHowIsThePropertyAdapted());
@@ -988,11 +796,10 @@ class FL401ApplicationMapperTest {
         assertEquals(YesOrNo.No, caseData1.getHome().getIsPropertyAdapted());
         assertEquals(YesOrNo.No, caseData1.getHome().getDoesApplicantHaveHomeRights());
         assertNull(caseData1.getHome().getLandlords());
-
     }
 
     @Test
-    void testCourtnavFamilyHomeEmptyListDoesNotCauseNullPE() throws NotFoundException {
+    void testCourtnavFamilyHomeEmptyListDoesNotCauseNullPE() {
 
         home1 = home1.toBuilder()
             .wantToHappenWithFamilyHome(Collections.emptyList())
@@ -1014,25 +821,14 @@ class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
-            .address("test court address")
-            .description("court desc")
-            .explanation("court explanation")
-            .build();
-
-        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
-        when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
-
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
-
-        verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
         assertNotNull(caseData1.getHome().getLivingSituation());
-        assertDoesNotThrow(() -> fl401ApplicationMapper.mapCourtNavData(courtNavFl401, "Bearer:test"));
+        assertDoesNotThrow(() -> fl401ApplicationMapper.mapCourtNavData(courtNavFl401));
     }
 
     @Test
-    void testCourtnavApplicantDetailsHasNoConfidentialInfo() throws NotFoundException {
+    void testCourtnavApplicantDetailsHasNoConfidentialInfo() {
 
         applicantsDetails.setGender(Gender.female);
         applicantsDetails.setShareContactDetailsWithRespondent(true);
@@ -1058,27 +854,15 @@ class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
-            .address("test court address")
-            .description("court desc")
-            .explanation("court explanation")
-            .build();
-
-        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
-        when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
-
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
-
-        verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
         assertEquals(YesOrNo.No, caseData1.getApplicantsFL401().getIsAddressConfidential());
         assertEquals(YesOrNo.No, caseData1.getApplicantsFL401().getIsEmailAddressConfidential());
         assertEquals(YesOrNo.No, caseData1.getApplicantsFL401().getIsPhoneNumberConfidential());
-
     }
 
     @Test
-    void testCourtnavRespondentDetailsHasNullInfo() throws NotFoundException {
+    void testCourtnavRespondentDetailsHasNullInfo() {
 
         courtNavRespondent = CourtNavRespondent.builder()
             .firstName("resp test")
@@ -1106,27 +890,15 @@ class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
-            .address("test court address")
-            .description("court desc")
-            .explanation("court explanation")
-            .build();
-
-        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
-        when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
-
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
-
-        verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
         assertEquals(YesOrNo.No, caseData1.getRespondentsFL401().getCanYouProvideEmailAddress());
         assertEquals(YesOrNo.No, caseData1.getRespondentsFL401().getCanYouProvidePhoneNumber());
         assertEquals(YesOrNo.No, caseData1.getRespondentsFL401().getIsCurrentAddressKnown());
-
     }
 
     @Test
-    void testCourtnavRelationShiptoRespondentHasRelationEndDate() throws NotFoundException {
+    void testCourtnavRelationShiptoRespondentHasRelationEndDate() {
 
         relationShipToRespondent = CourtNavRelationShipToRespondent.builder()
             .relationshipDescription(ApplicantRelationshipDescriptionEnum.formerlyMarriedOrCivil)
@@ -1166,29 +938,15 @@ class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
-            .address("test court address")
-            .description("court desc")
-            .explanation("court explanation")
-            .build();
-
-        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
-        when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
-
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
-
-        verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
         assertEquals(
             LocalDate.parse(courtNavFl401.getFl401().getRelationshipWithRespondent().getRelationshipEndDate().mergeDate()),
             caseData1.getRespondentRelationDateInfoObject().getRelationStartAndEndComplexType().getRelationshipDateComplexEndDate());
-
     }
 
     @Test
-    void testCourtnavFamilyParentalResponsibilityAsFalse() throws NotFoundException {
-
-        List<ProtectedChild> protectedChildren = new ArrayList<>();
+    void testCourtnavFamilyParentalResponsibilityAsFalse() {
 
         ProtectedChild child = ProtectedChild.builder()
             .fullName("child1")
@@ -1201,11 +959,10 @@ class FL401ApplicationMapperTest {
             .relationship("mother")
             .respondentRelationship("uncle")
             .build();
-        protectedChildren.add(child);
 
         family = Family.builder()
             .whoApplicationIsFor(ApplicationCoverEnum.applicantAndChildren)
-            .protectedChildren(protectedChildren)
+            .protectedChildren(List.of(child))
             .anyOngoingCourtProceedings(false)
             .ongoingCourtProceedings(null)
             .build();
@@ -1226,34 +983,19 @@ class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
-            .address("test court address")
-            .description("court desc")
-            .explanation("court explanation")
-            .build();
-
-        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
-        when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
-
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
-
-        verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
-
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
         assertNotNull(caseData1.getApplicantChildDetails());
     }
 
     @Test
-    void testCourtnavRespondentBehaviourTowardsApplicantAsNull() throws NotFoundException {
-
-        List<BehaviourTowardsChildrenEnum> behaviourTowardsChildrenEnum = new ArrayList<>();
-        behaviourTowardsChildrenEnum.add(BehaviourTowardsChildrenEnum.beingViolentOrThreatening);
+    void testCourtnavRespondentBehaviourTowardsApplicantAsNull() {
 
         respondentBehaviour = CourtNavRespondentBehaviour.builder()
             .applyingForMonMolestationOrder(true)
             .stopBehaviourAnythingElse("abc")
             .stopBehaviourTowardsApplicant(null)
-            .stopBehaviourTowardsChildren(behaviourTowardsChildrenEnum)
+            .stopBehaviourTowardsChildren(List.of(beingViolentOrThreatening))
             .build();
 
         courtNavFl401 = CourtNavFl401.builder()
@@ -1272,33 +1014,19 @@ class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
-            .address("test court address")
-            .description("court desc")
-            .explanation("court explanation")
-            .build();
-
-        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
-        when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
-
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
-        verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
         assertNull(courtNavFl401.getFl401().getRespondentBehaviour().getStopBehaviourTowardsApplicant());
         assertNull(caseData1.getRespondentBehaviourData().getApplicantWantToStopFromRespondentDoing());
-
     }
 
     @Test
-    void testCourtnavRespondentBehaviourTowardsChildrenAsNull() throws NotFoundException {
-
-        List<BehaviourTowardsApplicantEnum> behaviourTowardsApplicantEnum = new ArrayList<>();
-        behaviourTowardsApplicantEnum.add(BehaviourTowardsApplicantEnum.comingNearHome);
+    void testCourtnavRespondentBehaviourTowardsChildrenAsNull() {
 
         respondentBehaviour = CourtNavRespondentBehaviour.builder()
             .applyingForMonMolestationOrder(true)
             .stopBehaviourAnythingElse("abc")
-            .stopBehaviourTowardsApplicant(behaviourTowardsApplicantEnum)
+            .stopBehaviourTowardsApplicant(List.of(comingNearHome))
             .stopBehaviourTowardsChildren(null)
             .build();
 
@@ -1319,94 +1047,14 @@ class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
-            .address("test court address")
-            .description("court desc")
-            .explanation("court explanation")
-            .build();
-
-        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
-        when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
-
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
-
-        verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
         assertNull(courtNavFl401.getFl401().getRespondentBehaviour().getStopBehaviourTowardsChildren());
         assertNull(caseData1.getRespondentBehaviourData().getApplicantWantToStopFromRespondentDoingToChild());
-
     }
 
     @Test
-    void testCourtNavCaseDataWhenPopulateDefaultCaseFlagIsOn() throws NotFoundException {
-
-        courtNavFl401 = CourtNavFl401.builder()
-            .fl401(CourtNavCaseData.builder()
-                       .beforeStart(beforeStart)
-                       .situation(situation)
-                       .applicantDetails(applicantsDetails)
-                       .courtNavRespondent(courtNavRespondent)
-                       .family(family)
-                       .relationshipWithRespondent(relationShipToRespondent)
-                       .respondentBehaviour(respondentBehaviour)
-                       .courtNavHome(home)
-                       .statementOfTruth(stmtOfTruth)
-                       .goingToCourt(goingToCourt)
-                       .build())
-            .metaData(courtNavMetaData)
-            .build();
-        when(launchDarklyClient.isFeatureEnabled(anyString())).thenReturn(true);
-        when(locationRefDataService.getCourtDetailsFromEpimmsId("234946","Bearer:test"))
-            .thenReturn(Optional.of(CourtVenue.builder()
-                                        .courtName("Swansea Family court")
-                                        .region("Wales")
-                                        .regionId("7")
-                                        .build()));
-        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
-
-        assertEquals(courtNavFl401.getFl401().getSituation().getOrdersAppliedFor(), caseData.getTypeOfApplicationOrders().getOrderType());
-        assertNotNull(courtNavFl401.getFl401().getSituation().getOrdersAppliedFor());
-        assertNotNull(courtNavFl401.getFl401().getSituation().getOrdersAppliedWithoutNoticeReason());
-        assertEquals("Swansea Family court", caseData.getCourtName());
-        assertEquals("234946", caseData.getCourtId());
-
-    }
-
-    @Test
-    void testCourtNavCaseDataWhenCourtDetailFoundForEpmsId() throws NotFoundException {
-
-        courtNavFl401 = CourtNavFl401.builder()
-            .fl401(CourtNavCaseData.builder()
-                       .beforeStart(beforeStart)
-                       .situation(situation)
-                       .applicantDetails(applicantsDetails)
-                       .courtNavRespondent(courtNavRespondent)
-                       .family(family)
-                       .relationshipWithRespondent(relationShipToRespondent)
-                       .respondentBehaviour(respondentBehaviour)
-                       .courtNavHome(home)
-                       .statementOfTruth(stmtOfTruth)
-                       .goingToCourt(goingToCourt)
-                       .build())
-            .metaData(courtNavMetaData)
-            .build();
-        when(launchDarklyClient.isFeatureEnabled(anyString())).thenReturn(false);
-        when(locationRefDataService.getCourtDetailsFromEpimmsId(anyString(),anyString()))
-            .thenReturn(Optional.of(CourtVenue.builder()
-                                        .courtName("Swansea Family court")
-                                        .region("Wales")
-                                        .regionId("7")
-                                        .build()));
-        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
-
-        assertEquals(courtNavFl401.getFl401().getSituation().getOrdersAppliedFor(), caseData.getTypeOfApplicationOrders().getOrderType());
-        assertNotNull(courtNavFl401.getFl401().getSituation().getOrdersAppliedFor());
-        assertNotNull(courtNavFl401.getFl401().getSituation().getOrdersAppliedWithoutNoticeReason());
-        assertEquals("Swansea Family court", caseData.getCourtName());
-    }
-
-    @Test
-    void testCourtNavCaseDataWhenPopulateDefaultCaseFlagIsOff() throws NotFoundException {
+    void testCourtNavCaseDataWhenPopulateDefaultCaseFlagIsOff() {
 
         courtNavFl401 = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
@@ -1425,26 +1073,19 @@ class FL401ApplicationMapperTest {
                           .courtSpecialRequirements(null)
                           .build())
             .build();
-        CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
-            .address("test court address")
-            .description("court desc")
-            .explanation("court explanation")
-            .build();
-        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
-        when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
-        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
+
+        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
         assertEquals(courtNavFl401.getFl401().getSituation().getOrdersAppliedFor(), caseData.getTypeOfApplicationOrders().getOrderType());
         assertNotNull(courtNavFl401.getFl401().getSituation().getOrdersAppliedFor());
         assertNotNull(courtNavFl401.getFl401().getSituation().getOrdersAppliedWithoutNoticeReason());
-        verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
     }
 
-
     @Test
-    void testCourtNavContactInfirmation() throws NotFoundException {
+    void testCourtNavContactInformation() {
 
         applicantsDetails.setApplicantContactInstructions("Test");
+
         courtNavFl401 = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
                        .beforeStart(beforeStart)
@@ -1462,8 +1103,9 @@ class FL401ApplicationMapperTest {
                           .courtSpecialRequirements(null)
                           .build())
             .build();
-        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
-        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401, "Bearer:test");
+
+        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+
         assertEquals("Test", caseData.getDaApplicantContactInstructions());
     }
 
