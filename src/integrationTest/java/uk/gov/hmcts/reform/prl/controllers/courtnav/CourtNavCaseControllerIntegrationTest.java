@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
+import uk.gov.hmcts.reform.prl.services.courtnav.CourtLocationService;
 import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
 import uk.gov.hmcts.reform.prl.util.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.util.ServiceAuthenticationGenerator;
@@ -55,8 +56,6 @@ public class CourtNavCaseControllerIntegrationTest {
     @Value("${case.orchestration.service.base.uri}")
     protected String serviceUrl;
 
-    private final String caseEndpoint = "/case";
-
     private static final String VALID_REQUEST_BODY = "requests/courtnav-request.json";
 
     @Autowired
@@ -82,6 +81,9 @@ public class CourtNavCaseControllerIntegrationTest {
 
     @MockBean
     FL401ApplicationMapper fl401ApplicationMapper;
+
+    @MockBean
+    CourtLocationService courtLocationService;
 
     @MockBean
     CourtNavCaseService courtNavCaseService;
@@ -123,7 +125,8 @@ public class CourtNavCaseControllerIntegrationTest {
 
         Mockito.when(authorisationService.authoriseUser(any())).thenReturn(true);
         Mockito.when(authorisationService.authoriseService(any())).thenReturn(true);
-        Mockito.when(fl401ApplicationMapper.mapCourtNavData(any(), any())).thenReturn(CaseData.builder().build());
+        Mockito.when(fl401ApplicationMapper.mapCourtNavData(any())).thenReturn(CaseData.builder().build());
+        Mockito.when(courtLocationService.populateCourtLocation(any(), any(), any())).thenReturn(CaseData.builder().build());
         Mockito.when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(12345L).build());
         Mockito.doNothing().when(courtNavCaseService).refreshTabs(any(), any());
 
@@ -140,7 +143,7 @@ public class CourtNavCaseControllerIntegrationTest {
     public void testCreateCaseReturn400() throws Exception {
         Mockito.when(authorisationService.authoriseUser(any())).thenReturn(true);
         Mockito.when(authorisationService.authoriseService(any())).thenReturn(true);
-        Mockito.when(fl401ApplicationMapper.mapCourtNavData(any(), any())).thenReturn(CaseData.builder().build());
+        Mockito.when(fl401ApplicationMapper.mapCourtNavData(any())).thenReturn(CaseData.builder().build());
         Mockito.when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(12345L).build());
         Mockito.doNothing().when(courtNavCaseService).refreshTabs(any(), any());
 
