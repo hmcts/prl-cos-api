@@ -126,7 +126,7 @@ public class CourtNavCaseControllerIntegrationTest {
         Mockito.when(authorisationService.authoriseUser(any())).thenReturn(true);
         Mockito.when(authorisationService.authoriseService(any())).thenReturn(true);
         Mockito.when(fl401ApplicationMapper.mapCourtNavData(any())).thenReturn(CaseData.builder().build());
-        Mockito.when(courtLocationService.populateCourtLocation(any(), any(), any())).thenReturn(CaseData.builder().build());
+        Mockito.when(courtLocationService.populateCourtLocation(any(), any())).thenReturn(CaseData.builder().build());
         Mockito.when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(12345L).build());
         Mockito.doNothing().when(courtNavCaseService).refreshTabs(any(), any());
 
