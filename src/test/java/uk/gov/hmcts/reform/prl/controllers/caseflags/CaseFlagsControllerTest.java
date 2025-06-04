@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsWaService;
@@ -56,9 +57,14 @@ public class CaseFlagsControllerTest {
     @Test
     public void testReviewLangAndSmAboutToStart() {
         when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
-        CallbackRequest callbackRequest = CallbackRequest.builder().build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(
+                CaseDetails.builder()
+                    .data(Map.of())
+                    .build())
+            .build();
         caseFlagsController
-            .handleAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, CLIENT_CONTEXT,CallbackRequest.builder().build());
+            .handleAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, CLIENT_CONTEXT,callbackRequest);
         verify(caseFlagsService, times(1)).prepareSelectedReviewLangAndSmReq(Map.of(), CLIENT_CONTEXT);
         verify(authorisationService, times(1)).isAuthorized(AUTH_TOKEN, SERVICE_TOKEN);
     }
@@ -66,7 +72,6 @@ public class CaseFlagsControllerTest {
     @Test
     public void testReviewLangAndSmAboutToStartWhenAuthorisationFails() {
         when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(false);
-        CallbackRequest callbackRequest = CallbackRequest.builder().build();
         assertThrows(RuntimeException.class, () -> {
             caseFlagsController
                 .handleAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, CLIENT_CONTEXT,CallbackRequest.builder().build());
