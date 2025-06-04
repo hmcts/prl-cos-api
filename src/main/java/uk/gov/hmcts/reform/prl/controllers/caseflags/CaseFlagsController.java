@@ -17,12 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsWaService;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.util.UUID;
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -33,6 +32,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 public class CaseFlagsController {
     private final AuthorisationService authorisationService;
     private final CaseFlagsWaService caseFlagsWaService;
+    private final CaseFlagsService caseFlagService;
 
     @PostMapping(path = "/setup-wa-task", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to validate case creator to decide on the WA task")
@@ -57,21 +57,22 @@ public class CaseFlagsController {
     }
 
     @PostMapping(path = "/review-lang-sm/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to validate case creator to decide on the WA task")
+    @Operation(description = "Callback to set selected case note")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
-    public void handleAboutToStart(
+    public AboutToStartOrSubmitCallbackResponse handleAboutToStart(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
-            UUID uuid = UUID.fromString(waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties().getCaseNoteId());
+            Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+            caseFlagService.prepareSelectedReviewLangAndSmReq(caseDataMap, clientContext);
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
