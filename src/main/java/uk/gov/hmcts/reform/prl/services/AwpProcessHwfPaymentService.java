@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -48,7 +47,6 @@ import java.util.concurrent.TimeUnit;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_ADDTIONAL_APPLICATION_BUNDLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ADDITIONAL_APPLICATION_COLLECTION_ID;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.HWF_PROCESS_AWP_STATUS_UPDATE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -139,9 +137,6 @@ public class AwpProcessHwfPaymentService {
             }
             log.info("All Hwf AwP payments processed? " + allCitizenAwpWithHwfHasBeenProcessed);
             caseDataUpdated.put(AWP_ADDTIONAL_APPLICATION_BUNDLE, caseData.getAdditionalApplicationsBundle());
-            if (!CollectionUtils.isNotEmpty(caseData.getAdditionalApplicationsBundle())) {
-                caseDataUpdated.put(WA_ADDITIONAL_APPLICATION_COLLECTION_ID, caseData.getAdditionalApplicationsBundle().get(0).getId());
-            }
             caseDataUpdated.put(
                 "hwfRequestedForAdditionalApplicationsFlag",
                 YesOrNo.Yes.equals(allCitizenAwpWithHwfHasBeenProcessed) ? YesOrNo.No : caseData.getHwfRequestedForAdditionalApplicationsFlag()
