@@ -1,32 +1,22 @@
 package uk.gov.hmcts.reform.prl.mapper.courtnav;
 
-import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401Proceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBailConditionDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
-import uk.gov.hmcts.reform.prl.models.court.Court;
-import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtProceedings;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicationCoverEnum;
-import uk.gov.hmcts.reform.prl.services.CourtFinderService;
-import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
-import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
@@ -35,7 +25,6 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -46,12 +35,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor
 public class FL401ApplicationMapper {
 
-    public static final String COURTNAV_DUMMY_BASE_LOCATION_ID = "234946";
-
-    private final CourtFinderService courtFinderService;
-    private final LaunchDarklyClient launchDarklyClient;
-    private final LocationRefDataService locationRefDataService;
-    private final CourtSealFinderService courtSealFinderService;
     private final CourtNavApplicantMapper courtNavApplicantMapper;
     private final CourtNavRespondentMapper courtNavRespondentMapper;
     private final CourtNavHomeMapper courtNavHomeMapper;
@@ -63,7 +46,7 @@ public class FL401ApplicationMapper {
     private final StatementOfTruthMapper statementOfTruthMapper;
     private final AttendHearingMapper attendHearingMapper;
 
-    public CaseData mapCourtNavData(CourtNavFl401 courtNavCaseData, String authorization) throws NotFoundException {
+    public CaseData mapCourtNavData(CourtNavFl401 courtNavCaseData) {
         CaseData caseData = CaseData.builder()
             .isCourtNavCase(Yes)
             .state(State.SUBMITTED_PAID)
@@ -121,56 +104,9 @@ public class FL401ApplicationMapper {
             .respondentName(caseData.getRespondentsFL401().getLabelForDynamicList())
             .build();
 
-        caseData = populateCourtDetailsForCourtNavCase(authorization, caseData,
-                                                        courtNavCaseData.getMetaData().getCourtSpecialRequirements());
         caseData = caseData.setDateSubmittedDate();
 
         return caseData;
-
-    }
-
-    private CaseData populateCourtDetailsForCourtNavCase(String authorization, CaseData caseData,
-                                                         String epimsId) throws NotFoundException {
-
-        //1. get court details from provided epimsId request
-        Optional<CourtVenue> courtVenue = getCourtVenueIfAvailable(authorization, epimsId);
-
-        //2. if not found check launch-darkly flag and populate default Swansea court Id.
-        if (courtVenue.isEmpty() && launchDarklyClient.isFeatureEnabled(
-            PrlLaunchDarklyFlagConstants.COURTNAV_SWANSEA_COURT_MAPPING)) {
-            epimsId = COURTNAV_DUMMY_BASE_LOCATION_ID;
-            courtVenue = getCourtVenueIfAvailable(authorization, epimsId);
-        }
-
-        // populate court information
-        if (courtVenue.isPresent()) {
-            CourtVenue venue = courtVenue.get();
-            return caseData.toBuilder()
-                .courtName(venue.getCourtName())
-                .caseManagementLocation(CaseManagementLocation.builder()
-                                            .region(venue.getRegionId())
-                                            .baseLocation(epimsId)
-                                            .regionName(venue.getRegion())
-                                            .baseLocationName(venue.getCourtName())
-                                            .build())
-                .isCafcass(CaseUtils.cafcassFlag(venue.getRegionId()))
-                .courtId(epimsId)
-                .courtSeal(courtSealFinderService.getCourtSeal(venue.getRegionId()))
-                .build();
-        }
-
-        // Fallback to fact API
-        Court court = courtFinderService.getNearestFamilyCourt(caseData);
-        return caseData.toBuilder()
-            .courtName(court.getCourtName())
-            .courtEmailAddress(String.valueOf(courtFinderService.getEmailAddress(court)))
-            .build();
-    }
-
-    private Optional<CourtVenue> getCourtVenueIfAvailable(String authToken, String epimsId) {
-        return StringUtils.isEmpty(epimsId)
-            ? Optional.empty()
-            : locationRefDataService.getCourtDetailsFromEpimmsId(epimsId, authToken);
     }
 
     private RespondentBailConditionDetails getRespondentBailConditionDetails(CourtNavFl401 courtNavCaseData) {
@@ -222,7 +158,6 @@ public class FL401ApplicationMapper {
             fl401ProceedingList.add(element(f));
         }
         return fl401ProceedingList;
-
     }
 
 }
