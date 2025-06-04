@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.courtnav;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.court.Court;
@@ -26,20 +27,18 @@ public class CourtLocationService {
     private final CourtSealFinderService courtSealFinderService;
     private final LocationRefDataService locationRefDataService;
 
-    public CaseData getLocation(String auth, CaseData caseData, String epimsId) throws NotFoundException {
-
-
-        Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(epimsId, auth);
-
-        if (courtVenue.isPresent()) {
-            caseData = getLocationFromRefData(caseData, courtVenue.get(), epimsId);
-        } else {
-            caseData = getLocationFromFactApi(caseData);
+    public CaseData populateCourtLocation(String auth, CaseData caseData, String epimsId) throws NotFoundException {
+        if (StringUtils.isNotBlank(epimsId)) {
+            Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(epimsId, auth);
+            if (courtVenue.isPresent()) {
+                return populateFromEpimsId(caseData, courtVenue.get(), epimsId);
+            }
         }
-        return caseData;
+
+        return populateFromPostcode(caseData);
     }
 
-    private CaseData getLocationFromRefData(CaseData caseData, CourtVenue venue, String epimsId) {
+    private CaseData populateFromEpimsId(CaseData caseData, CourtVenue venue, String epimsId) {
         return caseData.toBuilder()
             .courtName(venue.getCourtName())
             .courtId(epimsId)
@@ -54,9 +53,11 @@ public class CourtLocationService {
             .build();
     }
 
-    private CaseData getLocationFromFactApi(CaseData caseData) throws NotFoundException {
+    private CaseData populateFromPostcode(CaseData caseData) throws NotFoundException {
         Court court = courtFinderService.getNearestFamilyCourt(caseData);
-        String email = courtFinderService.getEmailAddress(court).map(CourtEmailAddress::getAddress).orElse(null);
+        String email = courtFinderService.getEmailAddress(court)
+            .map(CourtEmailAddress::getAddress)
+            .orElse(null);
 
         return caseData.toBuilder()
             .courtName(court.getCourtName())
@@ -64,5 +65,3 @@ public class CourtLocationService {
             .build();
     }
 }
-
-
