@@ -57,6 +57,7 @@ public class CourtNavCaseController {
         @ApiResponse(responseCode = "201", description = "Case is created"),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "403", description = "Forbidden"),
+        @ApiResponse(responseCode = "422", description = "Unprocessable entity"),
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Object> createCase(
@@ -65,10 +66,11 @@ public class CourtNavCaseController {
         @Valid @RequestBody CourtNavFl401 inputData
     ) throws Exception {
 
-        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
-            authorisationService.authoriseService(serviceAuthorization))) {
+        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
+            && Boolean.TRUE.equals(authorisationService.authoriseService(serviceAuthorization))) {
             CaseData caseData = fl401ApplicationMapper.mapCourtNavData(inputData);
             courtLocationService.populateCourtLocation(authorisation, caseData);
+            courtNavCaseService.validateCaseManagementLocation(caseData);
             CaseDetails caseDetails = courtNavCaseService.createCourtNavCase(authorisation, caseData);
             log.info("Case has been created {}", caseDetails.getId());
             courtNavCaseService.refreshTabs(authorisation, String.valueOf(caseDetails.getId()));
