@@ -27,7 +27,9 @@ public class CourtLocationService {
     private final CourtSealFinderService courtSealFinderService;
     private final LocationRefDataService locationRefDataService;
 
-    public CaseData populateCourtLocation(String auth, CaseData caseData, String epimsId) throws NotFoundException {
+    public CaseData populateCourtLocation(String auth, CaseData caseData) throws NotFoundException {
+        String epimsId = caseData.getSpecialCourtName();
+
         if (StringUtils.isNotBlank(epimsId)) {
             Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(epimsId, auth);
             if (courtVenue.isPresent()) {
