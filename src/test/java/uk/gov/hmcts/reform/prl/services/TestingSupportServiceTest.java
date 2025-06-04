@@ -731,7 +731,7 @@ public class TestingSupportServiceTest {
             .build();
         when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(courtNavFl401);
         when(systemUserService.getSysUserToken()).thenReturn(s2sAuth);
-        when(fl401ApplicationMapper.mapCourtNavData(any(),any()))
+        when(fl401ApplicationMapper.mapCourtNavData(any()))
             .thenReturn(caseData);
         when(courtNavCaseService.createCourtNavCase(any(),any()))
             .thenReturn(caseDetails);
@@ -772,7 +772,7 @@ public class TestingSupportServiceTest {
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(COURT_ADMIN_ROLE))
                                                                      .build());
-        when(fl401ApplicationMapper.mapCourtNavData(any(),any()))
+        when(fl401ApplicationMapper.mapCourtNavData(any()))
             .thenReturn(caseData);
         when(systemUserService.getSysUserToken()).thenReturn(auth);
         when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(caseDetails);

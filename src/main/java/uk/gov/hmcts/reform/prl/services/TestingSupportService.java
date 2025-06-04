@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -247,11 +246,11 @@ public class TestingSupportService {
     }
 
     private Map<String, Object> updateCaseDetailsForCourtNav(CaseDetails initialCaseDetails,
-                                                             CourtNavFl401 dummyCaseDetails) throws NotFoundException {
+                                                             CourtNavFl401 dummyCaseDetails) {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         if (dummyCaseDetails != null) {
             String systemAuthorisation = systemUserService.getSysUserToken();
-            CaseData fl401CourtNav = fl401ApplicationMapper.mapCourtNavData(dummyCaseDetails, systemAuthorisation);
+            CaseData fl401CourtNav = fl401ApplicationMapper.mapCourtNavData(dummyCaseDetails);
             CaseDetails caseDetails = courtNavCaseService.createCourtNavCase(
                 systemAuthorisation,
                 fl401CourtNav
