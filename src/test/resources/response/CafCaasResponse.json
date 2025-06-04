@@ -2087,7 +2087,10 @@
             "value" : {
               "personRelationshipToChild" : "test"
             }
-          } ]
+          } ],
+          "isAddressConfidential": "No",
+          "isEmailAddressConfidential": "No",
+          "isPhoneNumberConfidential": "No"
         }
       }, {
         "id" : "ca2f2ca2-6b71-4224-8cb5-ad7f5829d9cb",
@@ -2283,6 +2286,40 @@
           } ]
         } ]
       },
+      "otherPeopleInTheCaseTable" : [ {
+        "id" : "cf21026f-2f2c-486d-8da5-e2f40ed5f5ca",
+        "value" : {
+          "firstName" : "other",
+          "lastName" : "people",
+          "isDateOfBirthKnown" : "Yes",
+          "dateOfBirth" : "1952-01-11",
+          "gender" : "female",
+          "isPlaceOfBirthKnown" : "Yes",
+          "placeOfBirth" : "London",
+          "isCurrentAddressKnown" : "Yes",
+          "address" : {
+            "AddressLine1" : "Solar Power Inc",
+            "AddressLine2" : "2 Kingdom Street",
+            "PostTown" : "London",
+            "Country" : "United Kingdom",
+            "PostCode" : "W2 6BD"
+          },
+          "canYouProvideEmailAddress" : "Yes",
+          "email" : "dfgsdgds@test.com",
+          "canYouProvidePhoneNumber" : "Yes",
+          "phoneNumber" : "4645645654",
+          "relationshipToChild" : [ {
+            "id" : "5a3bf772-3885-4c43-8691-894c90f0e11e",
+            "value" : {
+              "personRelationshipToChild" : "test"
+            }
+          } ],
+          "isAddressConfidential": "Yes",
+          "isEmailAddressConfidential": "Yes",
+          "isPhoneNumberConfidential": "Yes"
+        }
+      }
+      ],
       "submitAndPayDownloadApplicationLink" : {
         "document_filename" : "Draft_C100_application.pdf",
         "document_id" : "fca8a877-fe0e-4517-aacd-b1def28741e2"
