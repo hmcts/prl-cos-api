@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -29,7 +30,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.Situation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantRelationshipDescriptionEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ContractEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnum;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.WithoutNoticeReasonEnum;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -65,21 +65,12 @@ class FL401ApplicationMapperTest {
     private FL401ApplicationMapper fl401ApplicationMapper;
 
     private CourtNavFl401 courtNavFl401;
-
     private Situation situation;
     private Situation situation1;
-    private ApplicantsDetails applicantsDetails;
-    private CourtNavRespondent courtNavRespondent;
-    private CourtNavRelationShipToRespondent relationShipToRespondent;
-    private Family family;
     private CourtNavHome home;
-    private CourtNavRespondentBehaviour respondentBehaviour;
-    private CourtNavMetaData courtNavMetaData;
 
     @BeforeEach
     void setUp() {
-        List<WithoutNoticeReasonEnum> withoutNoticeReasonEnum = List.of(riskOfSignificantHarm);
-
         situation = Situation.builder()
             .ordersAppliedFor(List.of(nonMolestationOrder))
             .ordersAppliedWithoutNotice(true)
@@ -91,7 +82,7 @@ class FL401ApplicationMapperTest {
                                        .month(9)
                                        .year(1996)
                                        .build())
-            .ordersAppliedWithoutNoticeReason(withoutNoticeReasonEnum)
+            .ordersAppliedWithoutNoticeReason(List.of(riskOfSignificantHarm))
             .build();
 
         situation1 = Situation.builder()
@@ -105,10 +96,10 @@ class FL401ApplicationMapperTest {
                                        .month(9)
                                        .year(1996)
                                        .build())
-            .ordersAppliedWithoutNoticeReason(withoutNoticeReasonEnum)
+            .ordersAppliedWithoutNoticeReason(List.of(riskOfSignificantHarm))
             .build();
 
-        applicantsDetails = ApplicantsDetails.builder()
+        ApplicantsDetails applicantsDetails = ApplicantsDetails.builder()
             .firstName("courtnav Applicant")
             .lastName("test")
             .dateOfBirth(CourtNavDate.builder()
@@ -129,7 +120,7 @@ class FL401ApplicationMapperTest {
                          .build())
             .build();
 
-        courtNavRespondent = CourtNavRespondent.builder()
+        CourtNavRespondent courtNavRespondent = CourtNavRespondent.builder()
             .firstName("resp test")
             .lastName("fl401")
             .dateOfBirth(CourtNavDate.builder()
@@ -147,31 +138,7 @@ class FL401ApplicationMapperTest {
             .phoneNumber("12345670987")
             .build();
 
-        family = Family.builder()
-            .whoApplicationIsFor(applicantAndChildren)
-            .protectedChildren(List.of(
-                ProtectedChild.builder()
-                    .fullName("child1")
-                    .dateOfBirth(CourtNavDate.builder()
-                                     .day(10)
-                                     .month(9)
-                                     .year(2016)
-                                     .build())
-                    .parentalResponsibility(true)
-                    .relationship("mother")
-                    .respondentRelationship("uncle")
-                    .build()))
-            .anyOngoingCourtProceedings(false)
-            .ongoingCourtProceedings(List.of(
-                CourtProceedings.builder()
-                    .caseDetails("testcase1")
-                    .caseNumber("1234567")
-                    .caseType("testType1")
-                    .nameOfCourt("testcourt1")
-                    .build()))
-            .build();
-
-        relationShipToRespondent = CourtNavRelationShipToRespondent.builder()
+        CourtNavRelationShipToRespondent relationShipToRespondent = CourtNavRelationShipToRespondent.builder()
             .relationshipDescription(formerlyMarriedOrCivil)
             .ceremonyDate(CourtNavDate.builder()
                               .day(10)
@@ -189,7 +156,7 @@ class FL401ApplicationMapperTest {
             .anyChildren(false)
             .build();
 
-        respondentBehaviour = CourtNavRespondentBehaviour.builder()
+        CourtNavRespondentBehaviour respondentBehaviour = CourtNavRespondentBehaviour.builder()
             .applyingForMonMolestationOrder(true)
             .stopBehaviourAnythingElse("abc")
             .stopBehaviourTowardsApplicant(List.of(comingNearHome))
@@ -251,12 +218,36 @@ class FL401ApplicationMapperTest {
             .anySpecialMeasures(List.of(separateWaitingRoom))
             .build();
 
-        courtNavMetaData = CourtNavMetaData.builder()
+        CourtNavMetaData courtNavMetaData = CourtNavMetaData.builder()
             .courtNavApproved(true)
             .caseOrigin("courtnav")
             .numberOfAttachments(4)
             .courtSpecialRequirements("test special court")
             .hasDraftOrder(false)
+            .build();
+
+        Family family = Family.builder()
+            .whoApplicationIsFor(applicantAndChildren)
+            .protectedChildren(List.of(
+                ProtectedChild.builder()
+                    .fullName("child1")
+                    .dateOfBirth(CourtNavDate.builder()
+                                     .day(10)
+                                     .month(9)
+                                     .year(2016)
+                                     .build())
+                    .parentalResponsibility(true)
+                    .relationship("mother")
+                    .respondentRelationship("uncle")
+                    .build()))
+            .anyOngoingCourtProceedings(false)
+            .ongoingCourtProceedings(List.of(
+                CourtProceedings.builder()
+                    .caseDetails("testcase1")
+                    .caseNumber("1234567")
+                    .caseType("testType1")
+                    .nameOfCourt("testcourt1")
+                    .build()))
             .build();
 
         courtNavFl401 = CourtNavFl401.builder()
@@ -482,7 +473,7 @@ class FL401ApplicationMapperTest {
             .respondentRelationship("uncle")
             .build();
 
-        family = family.toBuilder()
+        Family family = Family.builder()
             .whoApplicationIsFor(applicantAndChildren)
             .protectedChildren(List.of(child))
             .anyOngoingCourtProceedings(true)
@@ -634,18 +625,19 @@ class FL401ApplicationMapperTest {
 
     @Test
     void testCourtnavApplicantDetailsHasNoConfidentialInfo() {
-
-        applicantsDetails.setGender(female);
-        applicantsDetails.setShareContactDetailsWithRespondent(true);
-        applicantsDetails.setAddress(CourtNavAddress.builder()
-                                         .addressLine1("55 Test Street")
-                                         .postTown("Town")
-                                         .postCode("LU1 5ET")
-                                         .build());
+        ApplicantsDetails applicant = ApplicantsDetails.builder()
+            .gender(Gender.female)
+            .shareContactDetailsWithRespondent(true)
+            .address(CourtNavAddress.builder()
+                         .addressLine1("55 Test Street")
+                         .postTown("Town")
+                         .postCode("LU1 5ET")
+                         .build())
+            .build();
 
         courtNavFl401 = courtNavFl401.toBuilder()
             .fl401(courtNavFl401.getFl401().toBuilder()
-                       .applicantDetails(applicantsDetails)
+                       .applicantDetails(applicant)
                        .situation(situation1)
                        .courtNavHome(home)
                        .build())
@@ -660,7 +652,7 @@ class FL401ApplicationMapperTest {
 
     @Test
     void testCourtnavRespondentDetailsHasNullInfo() {
-        courtNavRespondent = courtNavRespondent.toBuilder()
+        CourtNavRespondent courtNavRespondent = CourtNavRespondent.builder()
             .firstName("resp test")
             .lastName("fl401")
             .dateOfBirth(null)
@@ -686,8 +678,8 @@ class FL401ApplicationMapperTest {
     }
 
     @Test
-    void testCourtnavRelationShiptoRespondentHasRelationEndDate() {
-        relationShipToRespondent = relationShipToRespondent.toBuilder()
+    void testCourtnavRelationShipToRespondentHasRelationEndDate() {
+        CourtNavRelationShipToRespondent relationShipToRespondent = CourtNavRelationShipToRespondent.builder()
             .relationshipDescription(formerlyMarriedOrCivil)
             .ceremonyDate(CourtNavDate.builder().day(10).month(9).year(1999).build())
             .relationshipEndDate(CourtNavDate.builder().day(10).month(9).year(2011).build())
@@ -727,7 +719,7 @@ class FL401ApplicationMapperTest {
             .respondentRelationship("uncle")
             .build();
 
-        family = family.toBuilder()
+        Family family = Family.builder()
             .whoApplicationIsFor(applicantAndChildren)
             .protectedChildren(List.of(child))
             .anyOngoingCourtProceedings(false)
@@ -749,7 +741,7 @@ class FL401ApplicationMapperTest {
 
     @Test
     void testCourtnavRespondentBehaviourTowardsApplicantAsNull() {
-        respondentBehaviour = respondentBehaviour.toBuilder()
+        CourtNavRespondentBehaviour respondentBehaviour = CourtNavRespondentBehaviour.builder()
             .applyingForMonMolestationOrder(true)
             .stopBehaviourAnythingElse("abc")
             .stopBehaviourTowardsApplicant(null)
@@ -772,7 +764,7 @@ class FL401ApplicationMapperTest {
 
     @Test
     void testCourtnavRespondentBehaviourTowardsChildrenAsNull() {
-        respondentBehaviour = respondentBehaviour.toBuilder()
+        CourtNavRespondentBehaviour respondentBehaviour = CourtNavRespondentBehaviour.builder()
             .applyingForMonMolestationOrder(true)
             .stopBehaviourAnythingElse("abc")
             .stopBehaviourTowardsApplicant(List.of(comingNearHome))
@@ -796,7 +788,7 @@ class FL401ApplicationMapperTest {
     @Test
     void testCourtNavCaseDataWhenPopulateDefaultCaseFlagIsOff() {
         courtNavFl401 = courtNavFl401.toBuilder()
-            .metaData(courtNavMetaData.toBuilder()
+            .metaData(CourtNavMetaData.builder()
                           .courtSpecialRequirements(null)
                           .build())
             .fl401(courtNavFl401.getFl401().toBuilder()
@@ -814,16 +806,20 @@ class FL401ApplicationMapperTest {
 
     @Test
     void testCourtNavContactInformation() {
-        applicantsDetails.setApplicantContactInstructions("Test");
+        ApplicantsDetails applicant = ApplicantsDetails.builder()
+            .applicantContactInstructions("Test")
+            .build();
 
         courtNavFl401 = courtNavFl401.toBuilder()
-            .metaData(courtNavMetaData.toBuilder()
+            .metaData(CourtNavMetaData.builder()
                           .courtSpecialRequirements(null)
                           .build())
             .fl401(courtNavFl401.getFl401().toBuilder()
                        .situation(situation)
-                       .courtNavHome(CourtNavHome.builder().applyingForOccupationOrder(false).build())
-                       .applicantDetails(applicantsDetails)
+                       .courtNavHome(CourtNavHome.builder()
+                                         .applyingForOccupationOrder(false)
+                                         .build())
+                       .applicantDetails(applicant)
                        .build())
             .build();
 
