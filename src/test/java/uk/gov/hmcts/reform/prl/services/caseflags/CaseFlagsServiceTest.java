@@ -12,10 +12,12 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 
 import java.time.LocalDateTime;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsService.IS_REVIEW_LANG_AND_SM_REQ_REVIEWED;
+import static uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsService.PLEASE_REVIEW_THE_LANGUAGE_AND_SM_REQUEST;
 import static uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsService.SELECTED_REVIEW_LANG_AND_SM_REQ;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -85,6 +87,14 @@ public class CaseFlagsServiceTest {
         }
         """;
 
+    private static final String CASE_DATA_WITH_REVIEW = """
+        {
+          "id": 1748881230535856,
+          "isReviewLangAndSmReqReviewed": "Yes"
+        }
+        """;
+
+
     @Before
     public void setUp() {
         objectMapper.findAndRegisterModules();
@@ -107,8 +117,24 @@ public class CaseFlagsServiceTest {
                            .dateAdded("2025-06-02")
                            .dateCreated(LocalDateTime.parse("2025-06-02T17:16:46.227744028"))
                            .build());
+    }
 
-        assertThat(caseDataMap.get(IS_REVIEW_LANG_AND_SM_REQ_REVIEWED))
-            .isEqualTo(YesOrNo.No);
+    @Test
+    public void testWhenLangAndSmReqIsReviewed() throws JsonProcessingException {
+        Map<String, Object> caseDataMap = objectMapper.readValue(CASE_DATA_WITH_REVIEW, new TypeReference<>() {});
+        List<String> langAndSmReqReviewed = caseFlagsService.isLangAndSmReqReviewed(caseDataMap);
+        assertThat(langAndSmReqReviewed).isEmpty();
+    }
+
+    @Test
+    public void testWhenLangAndSmReqIsNotReviewed() throws JsonProcessingException {
+        List<String> langAndSmReqReviewed = caseFlagsService.isLangAndSmReqReviewed(Map.of());
+        assertThat(langAndSmReqReviewed).contains(PLEASE_REVIEW_THE_LANGUAGE_AND_SM_REQUEST);
+    }
+
+    @Test
+    public void testWhenLangAndSmReqReviewedIsNo() throws JsonProcessingException {
+        List<String> langAndSmReqReviewed = caseFlagsService.isLangAndSmReqReviewed(Map.of(IS_REVIEW_LANG_AND_SM_REQ_REVIEWED,  YesOrNo.No));
+        assertThat(langAndSmReqReviewed).contains(PLEASE_REVIEW_THE_LANGUAGE_AND_SM_REQUEST);
     }
 }
