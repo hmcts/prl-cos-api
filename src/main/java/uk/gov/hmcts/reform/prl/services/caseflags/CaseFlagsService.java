@@ -20,7 +20,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 @Service
 public class CaseFlagsService {
 
-    public static final String ADD_CASE_NOTE_TYPE = "addCaseNoteType";
+    public static final String SELECTED_REVIEW_LANG_AND_SM_REQ = "selectedReviewLangAndSmReq";
     public static final String IS_REVIEW_LANG_AND_SM_REQ_REVIEWED = "isReviewLangAndSmReqReviewed";
     private final ObjectMapper objectMapper;
 
@@ -39,7 +39,7 @@ public class CaseFlagsService {
             .findFirst()
             .ifPresent(element ->
                            caseDataMap.put(
-                               ADD_CASE_NOTE_TYPE,
+                               SELECTED_REVIEW_LANG_AND_SM_REQ,
                                element.getValue()
                            ));
 
