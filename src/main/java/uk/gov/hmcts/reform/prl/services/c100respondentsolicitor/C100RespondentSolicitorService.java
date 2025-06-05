@@ -986,19 +986,34 @@ public class C100RespondentSolicitorService {
 
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
         Optional<SolicitorRole> solicitorRole = getSolicitorRole(callbackRequest);
-        Element<PartyDetails> representedRespondent = null;
+        Element<PartyDetails> representedRespondent;
 
         if (solicitorRole.isPresent()) {
             representedRespondent = findSolicitorRepresentedRespondents(callbackRequest, solicitorRole.get());
+        } else {
+            representedRespondent = null;
         }
 
-        if (representedRespondent != null && representedRespondent.getValue() != null
-            && PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        if (representedRespondent != null && representedRespondent.getValue() != null && PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(
+                caseData.getCaseTypeOfApplication())) {
 
-            final Element<PartyDetails> respondentFinal = representedRespondent;
+            if (representedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm() != null
+                    && representedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm()
+                    .getResponseToAllegationsOfHarmDocument() != null) {
+
+                quarantineLegalDocList.add(getQuarantineLegalDocuments(
+                    updatedUserDetails,
+                        representedRespondent.getValue().getResponse()
+                                .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmDocument(),
+                    "respondentC1AResponse", "Respondent C1A response",
+                        representedRespondent.getValue().getLabelForDynamicList(),
+                        String.valueOf(representedRespondent.getId())));
+            }
+
+            updateListWithPreviousOrderDocuments(updatedUserDetails, quarantineLegalDocList, representedRespondent);
 
             Element<PartyDetails> updatedRespondentFromCallback = caseData.getRespondents().stream()
-                .filter(r -> r.getId().equals(respondentFinal.getId()))
+                .filter(r -> r.getId().equals(representedRespondent.getId()))
                 .findFirst()
                 .orElse(representedRespondent);
 
@@ -1007,24 +1022,14 @@ public class C100RespondentSolicitorService {
                 updatedRespondentFromCallback.getValue()
             );
 
-            if (merged.getResponse() != null
-                && merged.getResponse().getResponseToAllegationsOfHarm() != null
-                && merged.getResponse().getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmDocument() != null) {
-
-                quarantineLegalDocList.add(getQuarantineLegalDocuments(
-                    updatedUserDetails,
-                    merged.getResponse().getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmDocument(),
-                    "respondentC1AResponse", "Respondent C1A response",
-                    merged.getLabelForDynamicList(),
-                    String.valueOf(representedRespondent.getId())
-                ));
-            }
-
-            updateListWithPreviousOrderDocuments(updatedUserDetails, quarantineLegalDocList, representedRespondent);
-
             PartyDetails amended = merged.toBuilder()
-                .response(merged.getResponse().toBuilder()
-                              .c7ResponseSubmitted(Yes)
+                    .response(representedRespondent.getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes)
+                            .responseToAllegationsOfHarm(ResponseToAllegationsOfHarm.builder()
+                                    .responseToAllegationsOfHarmYesOrNoResponse(
+                                            representedRespondent.getValue()
+                                                    .getResponse().getResponseToAllegationsOfHarm()
+                                                    .getResponseToAllegationsOfHarmYesOrNoResponse())
+                                    .build())
                               .respondentExistingProceedings(getAmendedProceedings(representedRespondent))
                               .build())
                 .build();
@@ -1032,7 +1037,7 @@ public class C100RespondentSolicitorService {
             amended = updatedRefugeData(amended);
             caseData = updateRefugeDocumentList(caseData, amended);
 
-            String party = merged.getLabelForDynamicList();
+            String party = representedRespondent.getValue().getLabelForDynamicList();
             caseData.getRespondents().set(
                 caseData.getRespondents().indexOf(representedRespondent),
                 element(representedRespondent.getId(), amended)
@@ -1040,15 +1045,13 @@ public class C100RespondentSolicitorService {
 
             confidentialityC8RefugeService.processRefugeDocumentsC7ResponseSubmission(
                 updatedCaseData,
-                merged,
+                representedRespondent.getValue(),
                 caseData.getRefugeDocuments(),
                 caseData.getHistoricalRefugeDocuments(),
                 caseData.getRespondents().indexOf(representedRespondent) + 1
             );
-
-            String createdBy = StringUtils.isEmpty(merged.getRepresentativeFullNameForCaseFlags())
-                ? party : merged.getRepresentativeFullNameForCaseFlags() + SOLICITOR;
-
+            String createdBy = StringUtils.isEmpty(representedRespondent.getValue().getRepresentativeFullNameForCaseFlags())
+                    ? party : representedRespondent.getValue().getRepresentativeFullNameForCaseFlags() + SOLICITOR;
             updatedCaseData.put(RESPONDENTS, caseData.getRespondents());
 
             Map<String, Object> dataMap = generateRespondentDocsAndUpdateCaseData(
