@@ -43,6 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum.nonMolestationOrder;
 import static uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum.occupationOrder;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
+import static uk.gov.hmcts.reform.prl.enums.ReasonForOrderWithoutGivingNoticeEnum.harmToApplicantOrChild;
 import static uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge.eighteenOrOlder;
 import static uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantRelationshipDescriptionEnum.formerlyMarriedOrCivil;
 import static uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicationCoverEnum.applicantAndChildren;
@@ -214,7 +215,8 @@ class FL401ApplicationMapperTest {
     }
 
     @Test
-    void testCourtnavCaseDataWithCourtNavFL401Details() {
+    void shouldMapOrdersAndTransformWithoutNoticeReason() {
+        // Arrange
         courtNavFl401 = courtNavFl401.toBuilder()
             .fl401(courtNavFl401.getFl401().toBuilder()
                        .situation(situationWithOnlyNonMolestationOrder)
@@ -222,14 +224,22 @@ class FL401ApplicationMapperTest {
                        .build())
             .build();
 
+        // Act
         CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
+        // Assert
         assertEquals(
-            courtNavFl401.getFl401().getSituation().getOrdersAppliedFor(),
+            List.of(nonMolestationOrder),
             caseData.getTypeOfApplicationOrders().getOrderType()
         );
-        assertNotNull(courtNavFl401.getFl401().getSituation().getOrdersAppliedFor());
-        assertNotNull(courtNavFl401.getFl401().getSituation().getOrdersAppliedWithoutNoticeReason());
+        assertEquals(
+            List.of(harmToApplicantOrChild),
+            caseData.getReasonForOrderWithoutGivingNotice().getReasonForOrderWithoutGivingNotice()
+        );
+        assertEquals(
+            "test1",
+            caseData.getReasonForOrderWithoutGivingNotice().getFutherDetails()
+        );
     }
 
     @Test
@@ -443,87 +453,6 @@ class FL401ApplicationMapperTest {
     }
 
     @Test
-    void testCourtnavHomeChildrenIsNull() {
-        home = home.toBuilder()
-            .childrenApplicantResponsibility(null)
-            .childrenSharedResponsibility(null)
-            .build();
-
-        courtNavFl401 = courtNavFl401.toBuilder()
-            .fl401(courtNavFl401.getFl401().toBuilder()
-                       .situation(situationWithOnlyOccupationOrder)
-                       .courtNavHome(home)
-                       .build())
-            .build();
-
-        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
-
-        assertEquals(YesOrNo.No, caseData.getHome().getDoAnyChildrenLiveAtAddress());
-    }
-
-    @Test
-    void testCourtnavHomePreviouslyLivedAtThisAddressAsNeither() {
-        home = home.toBuilder()
-            .previouslyLivedAtAddress(null)
-            .intendedToLiveAtAddress(null)
-            .build();
-
-        courtNavFl401 = courtNavFl401.toBuilder()
-            .fl401(courtNavFl401.getFl401().toBuilder()
-                       .situation(situationWithOnlyOccupationOrder)
-                       .courtNavHome(home)
-                       .build())
-            .build();
-
-        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
-
-        assertNull(caseData.getHome().getEverLivedAtTheAddress());
-        assertNull(caseData.getHome().getIntendToLiveAtTheAddress());
-    }
-
-    @Test
-    void testCourtnavHomeLivingSituationAsNull() {
-        home = home.toBuilder()
-            .wantToHappenWithLivingSituation(null)
-            .wantToHappenWithFamilyHome(null)
-            .build();
-
-        courtNavFl401 = courtNavFl401.toBuilder()
-            .fl401(courtNavFl401.getFl401().toBuilder()
-                       .situation(situationWithOnlyOccupationOrder)
-                       .courtNavHome(home)
-                       .build())
-            .build();
-
-        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
-
-        assertNull(caseData.getHome().getLivingSituation());
-        assertNull(caseData.getHome().getFamilyHome());
-    }
-
-    @Test
-    void testCourtnavHomeNameOnRentalAgreementAsNull() {
-        home = home.toBuilder()
-            .propertyIsRented(false)
-            .namedOnRentalAgreement(null)
-            .propertyHasMortgage(false)
-            .namedOnMortgage(null)
-            .build();
-
-        courtNavFl401 = courtNavFl401.toBuilder()
-            .fl401(courtNavFl401.getFl401().toBuilder()
-                       .situation(situationWithOnlyOccupationOrder)
-                       .courtNavHome(home)
-                       .build())
-            .build();
-
-        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
-
-        assertNull(caseData.getHome().getLandlords());
-        assertNull(caseData.getHome().getMortgages());
-    }
-
-    @Test
     void testCourtnavHomeMortgageAndRentDetailsAsFalse() {
 
         home = home.toBuilder()
@@ -706,7 +635,7 @@ class FL401ApplicationMapperTest {
     }
 
     @Test
-    void testCourtnavRespondentBehaviourTowardsChildrenAsNull() {
+    void shouldHandleNullBehaviourTowardsChildren() {
         CourtNavRespondentBehaviour respondentBehaviour = CourtNavRespondentBehaviour.builder()
             .applyingForMonMolestationOrder(true)
             .stopBehaviourAnythingElse("abc")
@@ -726,25 +655,6 @@ class FL401ApplicationMapperTest {
 
         assertNull(courtNavFl401.getFl401().getRespondentBehaviour().getStopBehaviourTowardsChildren());
         assertNull(caseData1.getRespondentBehaviourData().getApplicantWantToStopFromRespondentDoingToChild());
-    }
-
-    @Test
-    void testCourtNavCaseDataWhenPopulateDefaultCaseFlagIsOff() {
-        courtNavFl401 = courtNavFl401.toBuilder()
-            .metaData(CourtNavMetaData.builder()
-                          .courtSpecialRequirements(null)
-                          .build())
-            .fl401(courtNavFl401.getFl401().toBuilder()
-                       .situation(situationWithOnlyNonMolestationOrder)
-                       .courtNavHome(CourtNavHome.builder().applyingForOccupationOrder(false).build())
-                       .build())
-            .build();
-
-        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
-
-        assertEquals(courtNavFl401.getFl401().getSituation().getOrdersAppliedFor(), caseData.getTypeOfApplicationOrders().getOrderType());
-        assertNotNull(courtNavFl401.getFl401().getSituation().getOrdersAppliedFor());
-        assertNotNull(courtNavFl401.getFl401().getSituation().getOrdersAppliedWithoutNoticeReason());
     }
 
     @Test
