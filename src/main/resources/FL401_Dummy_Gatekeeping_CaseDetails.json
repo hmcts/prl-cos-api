@@ -1346,7 +1346,7 @@
           "communicationSupportOther": null,
           "safetyArrangementsDetails": null
         },
-        "safeToCallOption": null,
+        "safeToCallOption": "10am and 12am",
         "keepDetailsPrivate": {
           "confidentiality": null,
           "confidentialityList": [
