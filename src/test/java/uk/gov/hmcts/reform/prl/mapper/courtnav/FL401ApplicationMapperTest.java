@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipOptionsEnum;
-import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -65,41 +64,22 @@ class FL401ApplicationMapperTest {
     private FL401ApplicationMapper fl401ApplicationMapper;
 
     private CourtNavFl401 courtNavFl401;
-    private Situation situation;
-    private Situation situation1;
+    private Situation situationWithOnlyNonMolestationOrder;
+    private Situation situationWithOnlyOccupationOrder;
+    private ApplicantsDetails applicantsDetails;
     private CourtNavHome home;
 
     @BeforeEach
     void setUp() {
-        situation = Situation.builder()
+        situationWithOnlyNonMolestationOrder = situationBuilder()
             .ordersAppliedFor(List.of(nonMolestationOrder))
-            .ordersAppliedWithoutNotice(true)
-            .additionalDetailsForCourt("test details")
-            .bailConditionsOnRespondent(true)
-            .ordersAppliedWithoutNoticeReasonDetails("test1")
-            .bailConditionsEndDate(CourtNavDate.builder()
-                                       .day(8)
-                                       .month(9)
-                                       .year(1996)
-                                       .build())
-            .ordersAppliedWithoutNoticeReason(List.of(riskOfSignificantHarm))
             .build();
 
-        situation1 = Situation.builder()
+        situationWithOnlyOccupationOrder = situationBuilder()
             .ordersAppliedFor(List.of(occupationOrder))
-            .ordersAppliedWithoutNotice(true)
-            .additionalDetailsForCourt("test details")
-            .bailConditionsOnRespondent(true)
-            .ordersAppliedWithoutNoticeReasonDetails("test1")
-            .bailConditionsEndDate(CourtNavDate.builder()
-                                       .day(8)
-                                       .month(9)
-                                       .year(1996)
-                                       .build())
-            .ordersAppliedWithoutNoticeReason(List.of(riskOfSignificantHarm))
             .build();
 
-        ApplicantsDetails applicantsDetails = ApplicantsDetails.builder()
+        applicantsDetails = ApplicantsDetails.builder()
             .firstName("courtnav Applicant")
             .lastName("test")
             .dateOfBirth(CourtNavDate.builder()
@@ -269,7 +249,7 @@ class FL401ApplicationMapperTest {
     void testCourtnavCaseDataWithCourtNavFL401Details() {
         courtNavFl401 = courtNavFl401.toBuilder()
             .fl401(courtNavFl401.getFl401().toBuilder()
-                       .situation(situation)
+                       .situation(situationWithOnlyNonMolestationOrder)
                        .courtNavHome(CourtNavHome.builder().applyingForOccupationOrder(false).build())
                        .build())
             .build();
@@ -288,7 +268,7 @@ class FL401ApplicationMapperTest {
     void testCourtnavCaseDataWithCourtNavFL401DetailsWithOccupationalOrder() {
         courtNavFl401 = courtNavFl401.toBuilder()
             .fl401(courtNavFl401.getFl401().toBuilder()
-                       .situation(situation1)
+                       .situation(situationWithOnlyOccupationOrder)
                        .courtNavHome(home)
                        .build())
             .build();
@@ -315,7 +295,7 @@ class FL401ApplicationMapperTest {
 
         courtNavFl401 = courtNavFl401.toBuilder()
             .fl401(courtNavFl401.getFl401().toBuilder()
-                       .situation(situation1)
+                       .situation(situationWithOnlyOccupationOrder)
                        .courtNavHome(home)
                        .build())
             .metaData(overriddenMetaData)
@@ -330,7 +310,7 @@ class FL401ApplicationMapperTest {
 
     @Test
     void testCourtnavOrdersAppliedWithoutNoticeAsFalse() {
-        Situation updatedSituation = situation.toBuilder()
+        Situation updatedSituation = situationWithOnlyNonMolestationOrder.toBuilder()
             .ordersAppliedWithoutNotice(false)
             .bailConditionsOnRespondent(false)
             .build();
@@ -361,7 +341,7 @@ class FL401ApplicationMapperTest {
             .fl401(courtNavFl401.getFl401().toBuilder()
                        .family(updatedFamily)
                        .courtNavHome(home)
-                       .situation(situation)
+                       .situation(situationWithOnlyNonMolestationOrder)
                        .build())
             .build();
 
@@ -389,7 +369,7 @@ class FL401ApplicationMapperTest {
             .fl401(courtNavFl401.getFl401().toBuilder()
                        .relationshipWithRespondent(updatedRelationship)
                        .courtNavHome(home)
-                       .situation(situation)
+                       .situation(situationWithOnlyNonMolestationOrder)
                        .build())
             .build();
 
@@ -416,7 +396,7 @@ class FL401ApplicationMapperTest {
         courtNavFl401 = courtNavFl401.toBuilder()
             .fl401(courtNavFl401.getFl401().toBuilder()
                        .courtNavHome(home)
-                       .situation(situation)
+                       .situation(situationWithOnlyNonMolestationOrder)
                        .goingToCourt(customGoingToCourt.toBuilder().interpreterDialect(null).build())
                        .build())
             .build();
@@ -442,7 +422,7 @@ class FL401ApplicationMapperTest {
             .fl401(courtNavFl401.getFl401().toBuilder()
                        .goingToCourt(noSpecialMeasures)
                        .courtNavHome(home)
-                       .situation(situation)
+                       .situation(situationWithOnlyNonMolestationOrder)
                        .build())
             .build();
 
@@ -484,7 +464,7 @@ class FL401ApplicationMapperTest {
             .fl401(courtNavFl401.getFl401().toBuilder()
                        .family(family)
                        .courtNavHome(home)
-                       .situation(situation)
+                       .situation(situationWithOnlyNonMolestationOrder)
                        .build())
             .build();
 
@@ -503,7 +483,7 @@ class FL401ApplicationMapperTest {
 
         courtNavFl401 = courtNavFl401.toBuilder()
             .fl401(courtNavFl401.getFl401().toBuilder()
-                       .situation(situation1)
+                       .situation(situationWithOnlyOccupationOrder)
                        .courtNavHome(home)
                        .build())
             .build();
@@ -522,7 +502,7 @@ class FL401ApplicationMapperTest {
 
         courtNavFl401 = courtNavFl401.toBuilder()
             .fl401(courtNavFl401.getFl401().toBuilder()
-                       .situation(situation1)
+                       .situation(situationWithOnlyOccupationOrder)
                        .courtNavHome(home)
                        .build())
             .build();
@@ -542,7 +522,7 @@ class FL401ApplicationMapperTest {
 
         courtNavFl401 = courtNavFl401.toBuilder()
             .fl401(courtNavFl401.getFl401().toBuilder()
-                       .situation(situation1)
+                       .situation(situationWithOnlyOccupationOrder)
                        .courtNavHome(home)
                        .build())
             .build();
@@ -564,7 +544,7 @@ class FL401ApplicationMapperTest {
 
         courtNavFl401 = courtNavFl401.toBuilder()
             .fl401(courtNavFl401.getFl401().toBuilder()
-                       .situation(situation1)
+                       .situation(situationWithOnlyOccupationOrder)
                        .courtNavHome(home)
                        .build())
             .build();
@@ -587,7 +567,7 @@ class FL401ApplicationMapperTest {
 
         courtNavFl401 = courtNavFl401.toBuilder()
             .fl401(courtNavFl401.getFl401().toBuilder()
-                       .situation(situation1)
+                       .situation(situationWithOnlyOccupationOrder)
                        .courtNavHome(home)
                        .build())
             .build();
@@ -612,7 +592,7 @@ class FL401ApplicationMapperTest {
 
         courtNavFl401 = courtNavFl401.toBuilder()
             .fl401(courtNavFl401.getFl401().toBuilder()
-                       .situation(situation1)
+                       .situation(situationWithOnlyOccupationOrder)
                        .courtNavHome(home)
                        .build())
             .build();
@@ -625,20 +605,19 @@ class FL401ApplicationMapperTest {
 
     @Test
     void testCourtnavApplicantDetailsHasNoConfidentialInfo() {
-        ApplicantsDetails applicant = ApplicantsDetails.builder()
-            .gender(Gender.female)
-            .shareContactDetailsWithRespondent(true)
-            .address(CourtNavAddress.builder()
-                         .addressLine1("55 Test Street")
-                         .postTown("Town")
-                         .postCode("LU1 5ET")
-                         .build())
-            .build();
+
+        applicantsDetails.setGender(female);
+        applicantsDetails.setShareContactDetailsWithRespondent(true);
+        applicantsDetails.setAddress(CourtNavAddress.builder()
+                                         .addressLine1("55 Test Street")
+                                         .postTown("Town")
+                                         .postCode("LU1 5ET")
+                                         .build());
 
         courtNavFl401 = courtNavFl401.toBuilder()
             .fl401(courtNavFl401.getFl401().toBuilder()
-                       .applicantDetails(applicant)
-                       .situation(situation1)
+                       .applicantDetails(applicantsDetails)
+                       .situation(situationWithOnlyOccupationOrder)
                        .courtNavHome(home)
                        .build())
             .build();
@@ -665,7 +644,7 @@ class FL401ApplicationMapperTest {
         courtNavFl401 = courtNavFl401.toBuilder()
             .fl401(courtNavFl401.getFl401().toBuilder()
                        .courtNavRespondent(courtNavRespondent)
-                       .situation(situation1)
+                       .situation(situationWithOnlyOccupationOrder)
                        .courtNavHome(home)
                        .build())
             .build();
@@ -691,7 +670,7 @@ class FL401ApplicationMapperTest {
 
         courtNavFl401 = courtNavFl401.toBuilder()
             .fl401(courtNavFl401.getFl401().toBuilder()
-                       .situation(situation1)
+                       .situation(situationWithOnlyOccupationOrder)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .courtNavHome(home)
                        .build())
@@ -729,7 +708,7 @@ class FL401ApplicationMapperTest {
         courtNavFl401 = courtNavFl401.toBuilder()
             .fl401(courtNavFl401.getFl401().toBuilder()
                        .family(family)
-                       .situation(situation1)
+                       .situation(situationWithOnlyOccupationOrder)
                        .courtNavHome(home)
                        .build())
             .build();
@@ -752,7 +731,7 @@ class FL401ApplicationMapperTest {
             .fl401(courtNavFl401.getFl401().toBuilder()
                        .respondentBehaviour(respondentBehaviour)
                        .courtNavHome(home)
-                       .situation(situation)
+                       .situation(situationWithOnlyNonMolestationOrder)
                        .build())
             .build();
 
@@ -775,7 +754,7 @@ class FL401ApplicationMapperTest {
             .fl401(courtNavFl401.getFl401().toBuilder()
                        .respondentBehaviour(respondentBehaviour)
                        .courtNavHome(home)
-                       .situation(situation)
+                       .situation(situationWithOnlyNonMolestationOrder)
                        .build())
             .build();
 
@@ -792,7 +771,7 @@ class FL401ApplicationMapperTest {
                           .courtSpecialRequirements(null)
                           .build())
             .fl401(courtNavFl401.getFl401().toBuilder()
-                       .situation(situation)
+                       .situation(situationWithOnlyNonMolestationOrder)
                        .courtNavHome(CourtNavHome.builder().applyingForOccupationOrder(false).build())
                        .build())
             .build();
@@ -806,20 +785,16 @@ class FL401ApplicationMapperTest {
 
     @Test
     void testCourtNavContactInformation() {
-        ApplicantsDetails applicant = ApplicantsDetails.builder()
-            .applicantContactInstructions("Test")
-            .build();
+        applicantsDetails.setApplicantContactInstructions("Test");
 
         courtNavFl401 = courtNavFl401.toBuilder()
             .metaData(CourtNavMetaData.builder()
                           .courtSpecialRequirements(null)
                           .build())
             .fl401(courtNavFl401.getFl401().toBuilder()
-                       .situation(situation)
-                       .courtNavHome(CourtNavHome.builder()
-                                         .applyingForOccupationOrder(false)
-                                         .build())
-                       .applicantDetails(applicant)
+                       .situation(situationWithOnlyNonMolestationOrder)
+                       .courtNavHome(CourtNavHome.builder().applyingForOccupationOrder(false).build())
+                       .applicantDetails(applicantsDetails)
                        .build())
             .build();
 
@@ -827,4 +802,19 @@ class FL401ApplicationMapperTest {
 
         assertEquals("Test", caseData.getDaApplicantContactInstructions());
     }
+
+    private Situation.SituationBuilder situationBuilder() {
+        return Situation.builder()
+            .ordersAppliedWithoutNotice(true)
+            .additionalDetailsForCourt("test details")
+            .bailConditionsOnRespondent(true)
+            .ordersAppliedWithoutNoticeReasonDetails("test1")
+            .bailConditionsEndDate(CourtNavDate.builder()
+                                       .day(8)
+                                       .month(9)
+                                       .year(1996)
+                                       .build())
+            .ordersAppliedWithoutNoticeReason(List.of(riskOfSignificantHarm));
+    }
+
 }
