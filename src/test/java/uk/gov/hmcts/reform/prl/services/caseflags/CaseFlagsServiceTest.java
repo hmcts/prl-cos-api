@@ -15,7 +15,7 @@ import java.util.Base64;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsService.ADD_CASE_NOTE_TYPE;
+import static uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsService.SELECTED_REVIEW_LANG_AND_SM_REQ;
 import static uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsService.IS_REVIEW_LANG_AND_SM_REQ_REVIEWED;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -99,7 +99,7 @@ public class CaseFlagsServiceTest {
 
         caseFlagsService.prepareSelectedReviewLangAndSmReq(caseDataMap, new String(encode));
 
-        assertThat(caseDataMap.get(ADD_CASE_NOTE_TYPE))
+        assertThat(caseDataMap.get(SELECTED_REVIEW_LANG_AND_SM_REQ))
             .isEqualTo(CaseNoteDetails.builder()
                            .user("Family Private law user")
                            .subject("Support needs request")
