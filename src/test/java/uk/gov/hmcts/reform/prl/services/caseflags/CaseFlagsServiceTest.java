@@ -15,8 +15,8 @@ import java.util.Base64;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsService.SELECTED_REVIEW_LANG_AND_SM_REQ;
 import static uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsService.IS_REVIEW_LANG_AND_SM_REQ_REVIEWED;
+import static uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsService.SELECTED_REVIEW_LANG_AND_SM_REQ;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CaseFlagsServiceTest {
