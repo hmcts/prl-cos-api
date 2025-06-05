@@ -312,6 +312,7 @@ public class ConfidentialityTabService {
                        .address(addressSet ? applicant.getAddress() : null)
                        .phoneNumber(phoneSet ? applicant.getPhoneNumber() : null)
                        .email(emailSet ? applicant.getEmail() : null)
+                       .safeTimeToCall(applicant.getResponse().getSafeToCallOption())
                        .build()).build();
     }
 
