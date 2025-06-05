@@ -7,9 +7,11 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401Proceedings;
+import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBailConditionDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -23,7 +25,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -56,108 +57,116 @@ public class FL401ApplicationMapper {
             .hasDraftOrder(courtNavCaseData.getMetaData().isHasDraftOrder() ? Yes : No)
             .numberOfAttachments(String.valueOf(courtNavCaseData.getMetaData().getNumberOfAttachments()))
             .specialCourtName(courtNavCaseData.getMetaData().getCourtSpecialRequirements())
-            .applicantAge(ApplicantAge.getValue(String.valueOf(courtNavCaseData.getFl401().getBeforeStart().getApplicantHowOld())))
-            .applicantCaseName(getCaseName(courtNavCaseData))
-            .typeOfApplicationOrders(TypeOfApplicationOrders.builder()
-                                         .orderType(courtNavCaseData.getFl401().getSituation().getOrdersAppliedFor())
-                                         .build())
+            .applicantAge(buildApplicantAge(courtNavCaseData))
+            .applicantCaseName(buildCaseName(courtNavCaseData))
+            .typeOfApplicationOrders(buildTypeOfApplicationOrders(courtNavCaseData))
             .orderWithoutGivingNoticeToRespondent(orderWithoutNoticeMapper.map(courtNavCaseData))
             .reasonForOrderWithoutGivingNotice(orderWithoutNoticeMapper.mapReasonForWithoutNotice(courtNavCaseData))
             .anyOtherDtailsForWithoutNoticeOrder(orderWithoutNoticeMapper.mapOtherDetails(courtNavCaseData))
-            .bailDetails(getRespondentBailConditionDetails(courtNavCaseData))
+            .bailDetails(buildBailConditionDetails(courtNavCaseData))
             .applicantsFL401(courtNavApplicantMapper.map(courtNavCaseData.getFl401().getApplicantDetails()))
             .respondentsFL401(courtNavRespondentMapper.map(courtNavCaseData.getFl401().getCourtNavRespondent()))
-            .applicantFamilyDetails(ApplicantFamilyDetails.builder()
-                                        .doesApplicantHaveChildren(courtNavCaseData.getFl401().getFamily()
-                                                                       .getWhoApplicationIsFor()
-                                                                       .equals(ApplicationCoverEnum.applicantOnly)
-                                                                       ? No : Yes)
-                                        .build())
-            .applicantChildDetails(!courtNavCaseData.getFl401().getFamily()
-                .getWhoApplicationIsFor().equals(ApplicationCoverEnum.applicantOnly)
-                                       ? applicantChildMapper.map(
-                                           courtNavCaseData.getFl401().getFamily().getProtectedChildren()) : null)
+            .applicantFamilyDetails(buildApplicantFamilyDetails(courtNavCaseData))
+            .applicantChildDetails(buildApplicantChildDetails(courtNavCaseData))
             .respondentBehaviourData(respondentBehaviourMapper.map(courtNavCaseData))
             .respondentRelationObject(applicantRelationshipMapper.mapRelationType(courtNavCaseData))
             .respondentRelationDateInfoObject(applicantRelationshipMapper.mapRelationDates(courtNavCaseData))
             .respondentRelationOptions(applicantRelationshipMapper.mapRelationOptions(courtNavCaseData))
-            .home(courtNavCaseData.getFl401().getCourtNavHome() != null
-                      ? courtNavHomeMapper.map(courtNavCaseData.getFl401().getCourtNavHome())
-                      : null)
+            .home(mapHomeIfPresent(courtNavCaseData))
             .fl401StmtOfTruth(statementOfTruthMapper.map(courtNavCaseData))
             .attendHearing(attendHearingMapper.map(courtNavCaseData)
                                .toBuilder()
                                .interpreterNeeds(interpreterNeedsMapper.map(courtNavCaseData))
                                .build())
-            .fl401OtherProceedingDetails(getFl401OtherProceedingDetails(courtNavCaseData))
+            .fl401OtherProceedingDetails(buildOtherProceedings(courtNavCaseData))
             .build();
-        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
 
-        caseData = caseData.toBuilder()
+        return enrichWithCaseMetadata(caseData);
+    }
+
+    private ApplicantAge buildApplicantAge(CourtNavFl401 source) {
+        return ApplicantAge.getValue(String.valueOf(
+            source.getFl401().getBeforeStart().getApplicantHowOld()
+        ));
+    }
+
+    private String buildCaseName(CourtNavFl401 source) {
+        String applicantName = source.getFl401().getApplicantDetails().getFirstName() + " " +
+            source.getFl401().getApplicantDetails().getLastName();
+        String respondentName = source.getFl401().getCourtNavRespondent().getFirstName() + " " +
+            source.getFl401().getCourtNavRespondent().getLastName();
+        return applicantName + " & " + respondentName;
+    }
+
+    private TypeOfApplicationOrders buildTypeOfApplicationOrders(CourtNavFl401 source) {
+        return TypeOfApplicationOrders.builder()
+            .orderType(source.getFl401().getSituation().getOrdersAppliedFor())
+            .build();
+    }
+
+    private ApplicantFamilyDetails buildApplicantFamilyDetails(CourtNavFl401 source) {
+        boolean hasChildren = !ApplicationCoverEnum.applicantOnly.equals(
+            source.getFl401().getFamily().getWhoApplicationIsFor()
+        );
+        return ApplicantFamilyDetails.builder()
+            .doesApplicantHaveChildren(hasChildren ? Yes : No)
+            .build();
+    }
+
+    private List<Element<ApplicantChild>> buildApplicantChildDetails(CourtNavFl401 source) {
+        return !ApplicationCoverEnum.applicantOnly.equals(source.getFl401().getFamily().getWhoApplicationIsFor())
+            ? applicantChildMapper.map(source.getFl401().getFamily().getProtectedChildren())
+            : null;
+    }
+
+    private RespondentBailConditionDetails buildBailConditionDetails(CourtNavFl401 source) {
+        boolean hasConditions = source.getFl401().getSituation().isBailConditionsOnRespondent();
+        return RespondentBailConditionDetails.builder()
+            .isRespondentAlreadyInBailCondition(hasConditions ? YesNoDontKnow.yes : YesNoDontKnow.no)
+            .bailConditionEndDate(hasConditions
+                                      ? LocalDate.parse(source.getFl401().getSituation().getBailConditionsEndDate().mergeDate())
+                                      : null)
+            .build();
+    }
+
+    private Home mapHomeIfPresent(CourtNavFl401 source) {
+        return source.getFl401().getCourtNavHome() != null
+            ? courtNavHomeMapper.map(source.getFl401().getCourtNavHome())
+            : null;
+    }
+
+    private FL401OtherProceedingDetails buildOtherProceedings(CourtNavFl401 source) {
+        boolean hasProceedings = source.getFl401().getFamily().isAnyOngoingCourtProceedings();
+        return FL401OtherProceedingDetails.builder()
+            .hasPrevOrOngoingOtherProceeding(hasProceedings ? YesNoDontKnow.yes : YesNoDontKnow.no)
+            .fl401OtherProceedings(hasProceedings
+                                       ? mapProceedings(source.getFl401().getFamily().getOngoingCourtProceedings())
+                                       : null)
+            .build();
+    }
+
+    private List<Element<FL401Proceedings>> mapProceedings(List<CourtProceedings> proceedings) {
+        return proceedings.stream()
+            .map(p -> element(FL401Proceedings.builder()
+                                  .nameOfCourt(p.getNameOfCourt())
+                                  .caseNumber(p.getCaseNumber())
+                                  .typeOfCase(p.getCaseType())
+                                  .anyOtherDetails(p.getCaseDetails())
+                                  .build()))
+            .toList();
+    }
+
+    private CaseData enrichWithCaseMetadata(CaseData caseData) {
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+        return caseData.toBuilder()
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
             .caseSubmittedTimeStamp(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime))
             .daApplicantContactInstructions(CaseUtils.getContactInstructions(caseData.getApplicantsFL401()))
-            //PRL-6951 - Fix to display case type, applicant name, respondent name in case list table(XUI)
             .selectedCaseTypeID(PrlAppsConstants.FL401_CASE_TYPE)
             .applicantName(caseData.getApplicantsFL401().getLabelForDynamicList())
             .respondentName(caseData.getRespondentsFL401().getLabelForDynamicList())
-            .build();
-
-        caseData = caseData.setDateSubmittedDate();
-
-        return caseData;
+            .build()
+            .setDateSubmittedDate();
     }
-
-    private RespondentBailConditionDetails getRespondentBailConditionDetails(CourtNavFl401 courtNavCaseData) {
-        return RespondentBailConditionDetails.builder()
-            .isRespondentAlreadyInBailCondition(courtNavCaseData
-                                                    .getFl401()
-                                                    .getSituation().isBailConditionsOnRespondent()
-                                                    ? YesNoDontKnow.yes : YesNoDontKnow.no)
-            .bailConditionEndDate(courtNavCaseData.getFl401().getSituation().isBailConditionsOnRespondent()
-                                      ? LocalDate.parse(courtNavCaseData
-                                                            .getFl401()
-                                                            .getSituation()
-                                                            .getBailConditionsEndDate()
-                                                            .mergeDate()) : null)
-            .build();
-    }
-
-    private FL401OtherProceedingDetails getFl401OtherProceedingDetails(CourtNavFl401 courtNavCaseData) {
-        return FL401OtherProceedingDetails.builder()
-            .hasPrevOrOngoingOtherProceeding(courtNavCaseData.getFl401().getFamily().isAnyOngoingCourtProceedings()
-                                                 ? YesNoDontKnow.yes : YesNoDontKnow.no)
-            .fl401OtherProceedings(courtNavCaseData.getFl401().getFamily().isAnyOngoingCourtProceedings()
-                                       ? getOngoingProceedings(courtNavCaseData.getFl401()
-                                                                   .getFamily().getOngoingCourtProceedings()) : null)
-            .build();
-    }
-
-    private String getCaseName(CourtNavFl401 courtNavCaseData) {
-
-        String applicantName = courtNavCaseData.getFl401().getApplicantDetails().getFirstName() + " "
-            + courtNavCaseData.getFl401().getApplicantDetails().getLastName();
-
-        String respondentName = courtNavCaseData.getFl401().getCourtNavRespondent().getFirstName() + " "
-            + courtNavCaseData.getFl401().getCourtNavRespondent().getLastName();
-
-        return applicantName + " & " + respondentName;
-    }
-
-    private List<Element<FL401Proceedings>> getOngoingProceedings(List<CourtProceedings> ongoingCourtProceedings) {
-
-        List<Element<FL401Proceedings>> fl401ProceedingList = new ArrayList<>();
-        for (CourtProceedings courtProceedings : ongoingCourtProceedings) {
-            FL401Proceedings f = FL401Proceedings.builder()
-                .nameOfCourt(courtProceedings.getNameOfCourt())
-                .caseNumber(courtProceedings.getCaseNumber())
-                .typeOfCase(courtProceedings.getCaseType())
-                .anyOtherDetails(courtProceedings.getCaseDetails())
-                .build();
-            fl401ProceedingList.add(element(f));
-        }
-        return fl401ProceedingList;
-    }
-
 }
