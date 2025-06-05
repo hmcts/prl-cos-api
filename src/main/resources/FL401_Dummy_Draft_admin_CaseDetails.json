@@ -1233,7 +1233,7 @@
           "communicationSupportOther": null,
           "safetyArrangementsDetails": null
         },
-        "safeToCallOption": null,
+        "safeToCallOption": "7pm",
         "keepDetailsPrivate": {
           "confidentiality": null,
           "confidentialityList": [
