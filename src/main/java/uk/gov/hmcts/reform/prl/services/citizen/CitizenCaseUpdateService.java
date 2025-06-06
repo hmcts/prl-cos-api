@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
 import uk.gov.hmcts.reform.prl.mapper.citizen.awp.CitizenAwpMapper;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.LanguageSupportCaseNotesRequest;
 import uk.gov.hmcts.reform.prl.models.citizen.awp.CitizenAwpRequest;
@@ -54,6 +55,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.READY_FOR_DELETION_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_CASE_NOTE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
@@ -292,10 +294,26 @@ public class CitizenCaseUpdateService {
             startAllTabsUpdateDataContent.userDetails()
         );
         Map<String, Object> caseNotesMap = new HashMap<>();
+
+        List<Element<CaseNoteDetails>> caseNoteDetails = addCaseNoteService.getCaseNoteDetails(
+            dbCaseData,
+            currentCaseNoteDetails
+        );
+
         caseNotesMap.put(
             CASE_NOTES,
-            addCaseNoteService.getCaseNoteDetails(dbCaseData, currentCaseNoteDetails)
+            caseNoteDetails
         );
+
+        caseNoteDetails.stream()
+            .filter(caseNoteDetailsElement -> currentCaseNoteDetails.equals(caseNoteDetailsElement.getValue()))
+            .findFirst()
+            .map(Element::getId)
+            .ifPresent(id ->
+                           caseNotesMap.put(
+                               WA_CASE_NOTE_ID,
+                               id
+                           ));
 
         allTabService.submitUpdateForSpecificUserEvent(
             startAllTabsUpdateDataContent.authorisation(),
