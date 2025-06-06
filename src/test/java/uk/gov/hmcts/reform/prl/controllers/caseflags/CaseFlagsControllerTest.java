@@ -8,12 +8,15 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsWaService;
 
+import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -77,5 +80,23 @@ public class CaseFlagsControllerTest {
                 .handleAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, CLIENT_CONTEXT,CallbackRequest.builder().build());
         });
         verify(caseFlagsService, never()).prepareSelectedReviewLangAndSmReq(Map.of(), CLIENT_CONTEXT);
+    }
+
+
+    @Test
+    public void testHandleMidEventWithErrors() {
+        List<String> errors = List.of("Please select");
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(
+                CaseDetails.builder()
+                    .data(Map.of())
+                    .build())
+            .build();
+        when(caseFlagsService.isLangAndSmReqReviewed(Map.of()))
+            .thenReturn(errors);
+        CallbackResponse callbackResponse = caseFlagsController
+            .handleMidEvent(AUTH_TOKEN, callbackRequest);
+        assertThat(callbackResponse.getErrors()).containsAll(errors);
+        verify(caseFlagsService, times(1)).isLangAndSmReqReviewed(Map.of());
     }
 }
