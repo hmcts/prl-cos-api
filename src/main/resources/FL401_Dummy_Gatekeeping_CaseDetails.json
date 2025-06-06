@@ -1346,7 +1346,7 @@
           "communicationSupportOther": null,
           "safetyArrangementsDetails": null
         },
-        "safeToCallOption": null,
+        "safeToCallOption": "10am and 12am",
         "keepDetailsPrivate": {
           "confidentiality": null,
           "confidentialityList": [
@@ -1518,7 +1518,7 @@
       "isAtAddressLessThan5Years": null,
       "isPhoneNumberConfidential": "Yes",
       "isEmailAddressConfidential": "Yes",
-      "applicantContactInstructions": null,
+      "applicantContactInstructions": "testing",
       "respondentLivedWithApplicant": null,
       "doTheyHaveLegalRepresentation": "yes",
       "addressLivedLessThan5YearsDetails": null,

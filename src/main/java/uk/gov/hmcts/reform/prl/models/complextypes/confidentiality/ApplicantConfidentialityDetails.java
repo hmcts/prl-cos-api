@@ -12,5 +12,4 @@ public class ApplicantConfidentialityDetails {
     private final String email;
     private final String phoneNumber;
     private final Address address;
-
 }
