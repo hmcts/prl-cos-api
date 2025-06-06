@@ -99,4 +99,40 @@ public class CaseFlagsControllerTest {
         assertThat(aboutToStartOrSubmitCallbackResponse.getErrors()).containsAll(errors);
         verify(caseFlagsService, times(1)).isLangAndSmReqReviewed(Map.of());
     }
+
+    @Test
+    public void testHandleAboutToSubmitEventWithErrors() {
+        List<String> errors = List.of("Please select");
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(
+                CaseDetails.builder()
+                    .data(Map.of())
+                    .build())
+            .build();
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
+        when(caseFlagsService.isLangAndSmReqReviewed(Map.of()))
+            .thenReturn(errors);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = caseFlagsController
+            .handleAboutToSubmit(AUTH_TOKEN, SERVICE_TOKEN, CLIENT_CONTEXT,callbackRequest);
+        assertThat(aboutToStartOrSubmitCallbackResponse.getErrors()).containsAll(errors);
+        verify(caseFlagsService, times(1)).isLangAndSmReqReviewed(Map.of());
+    }
+
+    @Test
+    public void testHandleAboutToSubmitEventInvalidClientId() {
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(
+                CaseDetails.builder()
+                    .data(Map.of())
+                    .build())
+            .build();
+
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(false);
+        assertThrows(RuntimeException.class, () -> {
+            caseFlagsController
+                .handleAboutToSubmit(AUTH_TOKEN, SERVICE_TOKEN, CLIENT_CONTEXT,callbackRequest);
+        });
+        verify(caseFlagsService, never()).isLangAndSmReqReviewed(Map.of());
+    }
 }
+
