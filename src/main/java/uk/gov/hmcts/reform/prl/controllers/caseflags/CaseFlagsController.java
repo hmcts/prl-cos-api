@@ -86,19 +86,16 @@ public class CaseFlagsController {
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
-    public void checkWorkAllocationTaskStatus(
+    public AboutToStartOrSubmitCallbackResponse checkWorkAllocationTaskStatus(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            caseFlagsWaService.checkWorkAllocationTaskStatus(
-                authorisation,
-                callbackRequest
-            );
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDataMap)
+            .build();
     }
 
 }
