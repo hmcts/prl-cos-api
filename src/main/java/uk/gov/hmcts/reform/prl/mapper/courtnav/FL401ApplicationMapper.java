@@ -91,10 +91,10 @@ public class FL401ApplicationMapper {
     }
 
     private String buildCaseName(CourtNavFl401 source) {
-        String applicantName = source.getFl401().getApplicantDetails().getFirstName() + " " +
-            source.getFl401().getApplicantDetails().getLastName();
-        String respondentName = source.getFl401().getCourtNavRespondent().getFirstName() + " " +
-            source.getFl401().getCourtNavRespondent().getLastName();
+        String applicantName = source.getFl401().getApplicantDetails().getFirstName() + " "
+            + source.getFl401().getApplicantDetails().getLastName();
+        String respondentName = source.getFl401().getCourtNavRespondent().getFirstName() + " "
+            + source.getFl401().getCourtNavRespondent().getLastName();
         return applicantName + " & " + respondentName;
     }
 
