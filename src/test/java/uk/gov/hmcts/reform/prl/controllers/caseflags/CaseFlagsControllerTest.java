@@ -6,9 +6,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsWaService;
@@ -94,9 +94,9 @@ public class CaseFlagsControllerTest {
             .build();
         when(caseFlagsService.isLangAndSmReqReviewed(Map.of()))
             .thenReturn(errors);
-        CallbackResponse callbackResponse = caseFlagsController
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = caseFlagsController
             .handleMidEvent(AUTH_TOKEN, callbackRequest);
-        assertThat(callbackResponse.getErrors()).containsAll(errors);
+        assertThat(aboutToStartOrSubmitCallbackResponse.getErrors()).containsAll(errors);
         verify(caseFlagsService, times(1)).isLangAndSmReqReviewed(Map.of());
     }
 }
