@@ -1800,8 +1800,8 @@ public class C100RespondentSolicitorServiceTest {
                 .respondents(respondentList)
                 .respondentSolicitorData(RespondentSolicitorData.builder()
                                              .respondentAllegationsOfHarmData(allegationsOfHarmData)
-                                             .hasRespondentAttendedMiam(No)
-                                             .respondentWillingToAttendMiam(No)
+                                             .hasRespondentAttendedMiam(yesOrNo)
+                                             .respondentWillingToAttendMiam(yesOrNo)
                                              .respondentReasonNotAttendingMiam("test")
                                              .build())
                 .build();
@@ -2523,7 +2523,7 @@ public class C100RespondentSolicitorServiceTest {
 
             when(respondentAllegationOfHarmService.updateChildAbusesForDocmosis(any())).thenReturn(
                 childAbuseBehaviourList);
-            UserDetails userDetails = UserDetails.builder().forename("test")
+            UserDetails userDetails = UserDetails.builder().forename("test").surname("testSurname")
                 .roles(List.of("caseworker-privatelaw-solicitor")).build();
             when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
             Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
@@ -2996,9 +2996,6 @@ public class C100RespondentSolicitorServiceTest {
             .confidentiality(Yes)
             .build();
 
-        RespondentSolicitorData respondentSolicitorData = RespondentSolicitorData.builder()
-            .keepContactDetailsPrivate(keepDetailsPrivate)
-            .build();
 
         CaseData caseData = CaseData.builder()
             .respondentSolicitorData(RespondentSolicitorData.builder()
