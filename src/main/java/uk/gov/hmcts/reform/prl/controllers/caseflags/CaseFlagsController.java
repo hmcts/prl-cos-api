@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
+import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.datamigration.caseflag.CaseFlag;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -72,6 +73,20 @@ public class CaseFlagsController {
                                                                    @RequestBody CallbackRequest callbackRequest) {
         CaseFlag caseFlag = refDataUserService.retrieveCaseFlags(systemUserService.getSysUserToken(), FLAG_TYPE);
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        if (caseData.getAllPartyFlags() != null) {
+            if (!"Requested".equals(caseData.getAllPartyFlags().getCaApplicant1ExternalFlags()
+                                       .getDetails().getLast().getValue().getStatus())) {
+                caseData.getAllPartyFlags().setCaApplicant1ExternalFlags(Flags.builder().build());
+            }
+            if (!"Requested".equals(caseData.getAllPartyFlags().getCaApplicant2ExternalFlags()
+                                        .getDetails().getLast().getValue().getStatus())) {
+                caseData.getAllPartyFlags().setCaApplicant2ExternalFlags(Flags.builder().build());
+            }
+            if (!"Requested".equals(caseData.getAllPartyFlags().getCaApplicant3ExternalFlags()
+                                        .getDetails().getLast().getValue().getStatus())) {
+                caseData.getAllPartyFlags().setCaApplicant3ExternalFlags(Flags.builder().build());
+            }
+        }
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
 
         return AboutToStartOrSubmitCallbackResponse.builder()
