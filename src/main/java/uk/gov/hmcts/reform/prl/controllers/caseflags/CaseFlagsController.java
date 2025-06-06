@@ -94,4 +94,26 @@ public class CaseFlagsController {
         List<String> errors = caseFlagService.isLangAndSmReqReviewed(caseData);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).errors(errors).build();
     }
+
+    @PostMapping(path = "/review-lang-sm/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to set selected case note")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+            List<String> errors = caseFlagService.isLangAndSmReqReviewed(caseData);
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).errors(errors).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
 }
