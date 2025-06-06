@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsWaService;
@@ -87,12 +86,12 @@ public class CaseFlagsController {
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
-    public CallbackResponse handleMidEvent(
+    public AboutToStartOrSubmitCallbackResponse handleMidEvent(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         List<String> errors = caseFlagService.isLangAndSmReqReviewed(caseData);
-        return CallbackResponse.builder().errors(errors).build();
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).errors(errors).build();
     }
 }
