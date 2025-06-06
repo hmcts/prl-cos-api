@@ -81,7 +81,7 @@ public class CaseFlagsController {
     }
 
     @PostMapping(path = "/review-lang-sm/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to set selected case note")
+    @Operation(description = "Callback to verify request is reviewed")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
@@ -89,17 +89,10 @@ public class CaseFlagsController {
     @SecurityRequirement(name = "Bearer Authentication")
     public CallbackResponse handleMidEvent(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-            List<String> errors = caseFlagService.isLangAndSmReqReviewed(caseData);
-            return CallbackResponse.builder().errors(errors).build();
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
+        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        List<String> errors = caseFlagService.isLangAndSmReqReviewed(caseData);
+        return CallbackResponse.builder().errors(errors).build();
     }
-
-
 }
