@@ -4,9 +4,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.complextypes.FL401Proceedings;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AttendHearing;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ApplicantsDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.BeforeStart;
@@ -26,7 +27,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.Family;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.GoingToCourt;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ProtectedChild;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.Situation;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantRelationshipDescriptionEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ContractEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnum;
 
@@ -34,18 +34,23 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipEnum.noneOfTheAbove;
+import static uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipOptionsEnum.cousin;
+import static uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum.applicantStopFromRespondentEnum_Value_8;
+import static uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum.applicantStopFromRespondentDoingToChildEnum_Value_1;
 import static uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum.nonMolestationOrder;
 import static uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum.occupationOrder;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.ReasonForOrderWithoutGivingNoticeEnum.harmToApplicantOrChild;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge.eighteenOrOlder;
 import static uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantRelationshipDescriptionEnum.formerlyMarriedOrCivil;
+import static uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantRelationshipDescriptionEnum.noneOfAbove;
 import static uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicationCoverEnum.applicantAndChildren;
 import static uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicationCoverEnum.applicantOnly;
 import static uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.BehaviourTowardsApplicantEnum.comingNearHome;
@@ -72,151 +77,16 @@ class FL401ApplicationMapperTest {
 
     @BeforeEach
     void setUp() {
-        CourtNavAddress applicantAddress = CourtNavAddress.builder()
-            .addressLine1("55 Test Street")
-            .postTown("Town")
-            .postCode("LU1 5ET")
-            .build();
-
-        situationWithOnlyNonMolestationOrder = situationBuilder()
-            .ordersAppliedFor(List.of(nonMolestationOrder))
-            .build();
-
-        situationWithOnlyOccupationOrder = situationBuilder()
-            .ordersAppliedFor(List.of(occupationOrder))
-            .build();
-
-        applicantsDetails = ApplicantsDetails.builder()
-            .firstName("courtnav Applicant")
-            .lastName("test")
-            .dateOfBirth(new CourtNavDate(10, 9, 1992))
-            .gender(female)
-            .shareContactDetailsWithRespondent(false)
-            .email("test@courtNav.com")
-            .phoneNumber("12345678907")
-            .hasLegalRepresentative(false)
-            .applicantPreferredContact(List.of(PreferredContactEnum.email))
-            .address(applicantAddress)
-            .build();
-
-        CourtNavRespondent courtNavRespondent = CourtNavRespondent.builder()
-            .firstName("resp test")
-            .lastName("fl401")
-            .dateOfBirth(new CourtNavDate(10, 9, 1989))
-            .email("test@resp.com")
-            .address(applicantAddress)
-            .respondentLivesWithApplicant(true)
-            .phoneNumber("12345670987")
-            .build();
-
-        CourtNavRelationShipToRespondent relationShipToRespondent = CourtNavRelationShipToRespondent.builder()
-            .relationshipDescription(formerlyMarriedOrCivil)
-            .ceremonyDate(new CourtNavDate(10, 9, 1999))
-            .relationshipEndDate(null)
-            .relationshipStartDate(new CourtNavDate(10, 9, 1998))
-            .respondentsRelationshipToApplicant(null)
-            .respondentsRelationshipToApplicantOther(null)
-            .anyChildren(false)
-            .build();
-
-        CourtNavRespondentBehaviour respondentBehaviour = CourtNavRespondentBehaviour.builder()
-            .applyingForMonMolestationOrder(true)
-            .stopBehaviourAnythingElse("abc")
-            .stopBehaviourTowardsApplicant(List.of(comingNearHome))
-            .stopBehaviourTowardsChildren(List.of(beingViolentOrThreatening))
-            .build();
-
-        home = CourtNavHome.builder()
-            .applyingForOccupationOrder(true)
-            .occupationOrderAddress(applicantAddress)
-            .currentlyLivesAtAddress(List.of(other))
-            .currentlyLivesAtAddressOther("test")
-            .previouslyLivedAtAddress(applicant)
-            .intendedToLiveAtAddress(applicant)
-            .childrenApplicantResponsibility(List.of(new ChildAtAddress("test child", 3)))
-            .childrenSharedResponsibility(List.of(new ChildAtAddress("test child", 5)))
-            .propertySpeciallyAdapted(true)
-            .propertyHasMortgage(true)
-            .namedOnMortgage(List.of(ContractEnum.other))
-            .namedOnMortgageOther("test")
-            .mortgageNumber("2345678")
-            .mortgageLenderName("test mort")
-            .mortgageLenderAddress(CourtNavAddress.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .propertyIsRented(true)
-            .namedOnRentalAgreement(List.of(ContractEnum.other))
-            .namedOnRentalAgreementOther("test")
-            .landlordName("landlord")
-            .landlordAddress(CourtNavAddress.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .haveHomeRights(true)
-            .wantToHappenWithLivingSituation(List.of(stayInHome))
-            .wantToHappenWithFamilyHome(List.of(respondentToPayRentMortgage))
-            .anythingElseForCourtToConsider("test court details")
-            .build();
-
-        CourtNavStatementOfTruth statementOfTruth = CourtNavStatementOfTruth.builder()
-            .declaration(List.of(applicantConfirm))
-            .signature("appl sign")
-            .signatureDate(new CourtNavDate(10, 6, 2022))
-            .signatureFullName("Applicant Courtnav")
-            .representativeFirmName("courtnav_application")
-            .representativePositionHeld("courtnav_application")
-            .build();
-
-        GoingToCourt goingToCourt = GoingToCourt.builder()
-            .isInterpreterRequired(false)
-            .interpreterLanguage(null)
-            .interpreterDialect(null)
-            .anyDisabilityNeeds(false)
-            .disabilityNeedsDetails(null)
-            .anySpecialMeasures(List.of(separateWaitingRoom))
-            .build();
-
-        CourtNavMetaData courtNavMetaData = CourtNavMetaData.builder()
-            .courtNavApproved(true)
-            .caseOrigin("courtnav")
-            .numberOfAttachments(4)
-            .courtSpecialRequirements("test special court")
-            .hasDraftOrder(false)
-            .build();
-
-        Family family = Family.builder()
-            .whoApplicationIsFor(applicantAndChildren)
-            .protectedChildren(List.of(
-                ProtectedChild.builder()
-                    .fullName("child1")
-                    .dateOfBirth(new CourtNavDate(10, 9, 2016))
-                    .parentalResponsibility(true)
-                    .relationship("mother")
-                    .respondentRelationship("uncle")
-                    .build()))
-            .anyOngoingCourtProceedings(false)
-            .ongoingCourtProceedings(List.of(
-                CourtProceedings.builder()
-                    .caseDetails("testcase1")
-                    .caseNumber("1234567")
-                    .caseType("testType1")
-                    .nameOfCourt("testcourt1")
-                    .build()))
-            .build();
-
-        courtNavFl401 = CourtNavFl401.builder()
-            .fl401(CourtNavCaseData.builder()
-                       .beforeStart(new BeforeStart(eighteenOrOlder))
-                       .applicantDetails(applicantsDetails)
-                       .courtNavRespondent(courtNavRespondent)
-                       .family(family)
-                       .relationshipWithRespondent(relationShipToRespondent)
-                       .respondentBehaviour(respondentBehaviour)
-                       .statementOfTruth(statementOfTruth)
-                       .goingToCourt(goingToCourt)
-                       .build())
-            .metaData(courtNavMetaData)
-            .build();
+        CourtNavAddress applicantAddress = buildApplicantAddress();
+        situationWithOnlyNonMolestationOrder = buildSituation(List.of(nonMolestationOrder));
+        situationWithOnlyOccupationOrder = buildSituation(List.of(occupationOrder));
+        applicantsDetails = buildApplicantsDetails(applicantAddress);
+        home = buildCourtNavHome(applicantAddress);
+        courtNavFl401 = buildCourtNavFl401(applicantAddress);
     }
 
     @Test
-    void shouldMapOrdersAndTransformWithoutNoticeReason() {
-        // Arrange
+    void shouldMapSituationToOrderTypesAndWithoutNoticeReasonDetails() {
         courtNavFl401 = courtNavFl401.toBuilder()
             .fl401(courtNavFl401.getFl401().toBuilder()
                        .situation(situationWithOnlyNonMolestationOrder)
@@ -224,10 +94,8 @@ class FL401ApplicationMapperTest {
                        .build())
             .build();
 
-        // Act
         CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
-        // Assert
         assertEquals(
             List.of(nonMolestationOrder),
             caseData.getTypeOfApplicationOrders().getOrderType()
@@ -243,7 +111,7 @@ class FL401ApplicationMapperTest {
     }
 
     @Test
-    void testCourtnavCaseDataWithCourtNavFL401DetailsWithOccupationalOrder() {
+    void shouldMapOccupationOrderAndPreserveWithoutNoticeReason() {
         courtNavFl401 = courtNavFl401.toBuilder()
             .fl401(courtNavFl401.getFl401().toBuilder()
                        .situation(situationWithOnlyOccupationOrder)
@@ -253,16 +121,16 @@ class FL401ApplicationMapperTest {
 
         CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
+        assertEquals(List.of(FL401OrderTypeEnum.occupationOrder),
+                     caseData.getTypeOfApplicationOrders().getOrderType());
         assertEquals(
-            courtNavFl401.getFl401().getSituation().getOrdersAppliedFor(),
-            caseData.getTypeOfApplicationOrders().getOrderType()
+            List.of(harmToApplicantOrChild),
+            caseData.getReasonForOrderWithoutGivingNotice().getReasonForOrderWithoutGivingNotice()
         );
-        assertNotNull(courtNavFl401.getFl401().getSituation().getOrdersAppliedFor());
-        assertNotNull(courtNavFl401.getFl401().getSituation().getOrdersAppliedWithoutNoticeReason());
     }
 
     @Test
-    void testCourtnavMetaDataApprovedAsFalse() {
+    void shouldMapMetadataFieldsWhenCourtNavApprovedIsFalse() {
         CourtNavMetaData overriddenMetaData = CourtNavMetaData.builder()
             .courtNavApproved(false)
             .caseOrigin("courtnav")
@@ -279,15 +147,17 @@ class FL401ApplicationMapperTest {
             .metaData(overriddenMetaData)
             .build();
 
-        fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
-        assertFalse(courtNavFl401.getMetaData().isCourtNavApproved());
-        assertTrue(courtNavFl401.getMetaData().isHasDraftOrder());
-        assertNotNull(courtNavFl401.getMetaData().getCaseOrigin());
+        assertEquals(No, caseData.getCourtNavApproved());
+        assertEquals(Yes, caseData.getHasDraftOrder());
+        assertEquals("courtnav", caseData.getCaseOrigin());
+        assertEquals("test", caseData.getSpecialCourtName());
+        assertEquals("4", caseData.getNumberOfAttachments());
     }
 
     @Test
-    void testCourtnavOrdersAppliedWithoutNoticeAsFalse() {
+    void shouldMapOrdersAppliedWithoutNoticeAndBailConditionFlagsAsFalse() {
         Situation updatedSituation = situationWithOnlyNonMolestationOrder.toBuilder()
             .ordersAppliedWithoutNotice(false)
             .bailConditionsOnRespondent(false)
@@ -300,14 +170,15 @@ class FL401ApplicationMapperTest {
                        .build())
             .build();
 
-        fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
-        assertFalse(courtNavFl401.getFl401().getSituation().isOrdersAppliedWithoutNotice());
-        assertFalse(courtNavFl401.getFl401().getSituation().isBailConditionsOnRespondent());
+        assertNull(caseData.getReasonForOrderWithoutGivingNotice());
+        assertEquals(YesNoDontKnow.no, caseData.getBailDetails().getIsRespondentAlreadyInBailCondition());
+        assertNull(caseData.getBailDetails().getBailConditionEndDate());
     }
 
     @Test
-    void testCourtnavFamilyAsApplicant() {
+    void shouldMapFamilyAsApplicantOnlyWithNoChildrenOrOngoingProceedings() {
         Family updatedFamily = Family.builder()
             .whoApplicationIsFor(applicantOnly)
             .protectedChildren(null)
@@ -323,22 +194,22 @@ class FL401ApplicationMapperTest {
                        .build())
             .build();
 
-        fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
-        assertEquals(
-            "Applicant Only",
-            courtNavFl401.getFl401().getFamily().getWhoApplicationIsFor().getDisplayedValue()
-        );
+        assertEquals(No, caseData.getApplicantFamilyDetails().getDoesApplicantHaveChildren());
+        assertNull(caseData.getApplicantChildDetails());
+        assertEquals(YesNoDontKnow.no, caseData.getFl401OtherProceedingDetails().getHasPrevOrOngoingOtherProceeding());
+        assertNull(caseData.getFl401OtherProceedingDetails().getFl401OtherProceedings());
     }
 
     @Test
-    void testCourtnavRelationShipDescriptionAsNoneOfTheAbove() {
+    void shouldMapRelationshipDescriptionAsNoneOfTheAbove() {
         CourtNavRelationShipToRespondent updatedRelationship = CourtNavRelationShipToRespondent.builder()
-            .relationshipDescription(ApplicantRelationshipDescriptionEnum.noneOfAbove)
+            .relationshipDescription(noneOfAbove)
             .ceremonyDate(null)
             .relationshipEndDate(null)
             .relationshipStartDate(null)
-            .respondentsRelationshipToApplicant(ApplicantRelationshipOptionsEnum.cousin)
+            .respondentsRelationshipToApplicant(cousin)
             .respondentsRelationshipToApplicantOther(null)
             .anyChildren(false)
             .build();
@@ -351,69 +222,56 @@ class FL401ApplicationMapperTest {
                        .build())
             .build();
 
-        fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
         assertEquals(
-            "None of the above",
-            courtNavFl401.getFl401().getRelationshipWithRespondent().getRelationshipDescription()
-                .getDisplayedValue()
+            noneOfTheAbove,
+            caseData.getRespondentRelationObject().getApplicantRelationship()
         );
+
+        assertEquals(
+            cousin,
+            caseData.getRespondentRelationOptions().getApplicantRelationshipOptions()
+        );
+
+        assertNull(caseData.getRespondentRelationDateInfoObject());
     }
 
     @Test
-    void testCourtnavGoingToCourtInterpreterNeeds() {
+    void shouldMapInterpreterAndDisabilityNeedsFromGoingToCourt() {
         GoingToCourt customGoingToCourt = GoingToCourt.builder()
             .isInterpreterRequired(true)
-            .interpreterLanguage("test")
-            .interpreterDialect("test")
+            .interpreterLanguage("language")
+            .interpreterDialect("dialect")
             .anyDisabilityNeeds(true)
-            .disabilityNeedsDetails("test")
+            .disabilityNeedsDetails("disability details")
             .anySpecialMeasures(List.of(separateWaitingRoom))
             .build();
 
         courtNavFl401 = courtNavFl401.toBuilder()
             .fl401(courtNavFl401.getFl401().toBuilder()
-                       .courtNavHome(home)
                        .situation(situationWithOnlyNonMolestationOrder)
-                       .goingToCourt(customGoingToCourt.toBuilder().interpreterDialect(null).build())
+                       .courtNavHome(home)
+                       .goingToCourt(customGoingToCourt)
                        .build())
             .build();
 
         CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
-        assertEquals(YesOrNo.Yes, caseData.getAttendHearing().getIsInterpreterNeeded());
-        assertEquals(YesOrNo.Yes, caseData.getAttendHearing().getIsDisabilityPresent());
+        AttendHearing hearing = caseData.getAttendHearing();
+
+        assertEquals(Yes, hearing.getIsInterpreterNeeded());
+        assertEquals(Yes, hearing.getIsDisabilityPresent());
+        assertEquals("disability details", hearing.getAdjustmentsRequired());
+
+        assertEquals(1, hearing.getInterpreterNeeds().size());
+        assertEquals("language - dialect", hearing.getInterpreterNeeds().getFirst().getValue().getLanguage());
+
+        assertEquals("A separate waiting room in the court building", hearing.getSpecialArrangementsRequired());
     }
 
     @Test
-    void testCourtnavGoingToCourtWithNoSpecialMeasures() {
-        GoingToCourt noSpecialMeasures = GoingToCourt.builder()
-            .isInterpreterRequired(true)
-            .interpreterLanguage("test")
-            .interpreterDialect("test")
-            .anyDisabilityNeeds(true)
-            .disabilityNeedsDetails("test")
-            .anySpecialMeasures(null)
-            .build();
-
-        courtNavFl401 = courtNavFl401.toBuilder()
-            .fl401(courtNavFl401.getFl401().toBuilder()
-                       .goingToCourt(noSpecialMeasures)
-                       .courtNavHome(home)
-                       .situation(situationWithOnlyNonMolestationOrder)
-                       .build())
-            .build();
-
-        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
-
-        assertEquals(YesOrNo.Yes, caseData.getAttendHearing().getIsInterpreterNeeded());
-        assertEquals(YesOrNo.Yes, caseData.getAttendHearing().getIsDisabilityPresent());
-        assertNull(courtNavFl401.getFl401().getGoingToCourt().getAnySpecialMeasures());
-        assertNull(caseData.getAttendHearing().getSpecialArrangementsRequired());
-    }
-
-    @Test
-    void testCourtnavOngoingCourtProceedings() {
+    void shouldMapOngoingCourtProceedingsWhenPresent() {
         List<CourtProceedings> courtProceedings = List.of(
             CourtProceedings.builder()
                 .caseDetails("testcase1")
@@ -425,7 +283,7 @@ class FL401ApplicationMapperTest {
 
         ProtectedChild child = ProtectedChild.builder()
             .fullName("child1")
-            .dateOfBirth(CourtNavDate.builder().day(10).month(9).year(2016).build())
+            .dateOfBirth(new CourtNavDate(10, 9, 2016))
             .parentalResponsibility(true)
             .relationship("mother")
             .respondentRelationship("uncle")
@@ -448,14 +306,24 @@ class FL401ApplicationMapperTest {
 
         CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
-        assertEquals(YesNoDontKnow.yes, caseData.getFl401OtherProceedingDetails().getHasPrevOrOngoingOtherProceeding());
-        assertNotNull(caseData.getFl401OtherProceedingDetails().getFl401OtherProceedings());
+        assertEquals(YesNoDontKnow.yes,
+                     caseData.getFl401OtherProceedingDetails().getHasPrevOrOngoingOtherProceeding());
+
+        assertThat(caseData.getFl401OtherProceedingDetails().getFl401OtherProceedings())
+            .hasSize(1);
+
+        FL401Proceedings proceeding = caseData.getFl401OtherProceedingDetails()
+            .getFl401OtherProceedings().getFirst().getValue();
+
+        assertEquals("testcourt1", proceeding.getNameOfCourt());
+        assertEquals("1234567", proceeding.getCaseNumber());
+        assertEquals("testType1", proceeding.getTypeOfCase());
+        assertEquals("testcase1", proceeding.getAnyOtherDetails());
     }
 
     @Test
-    void testCourtnavHomeMortgageAndRentDetailsAsFalse() {
-
-        home = home.toBuilder()
+    void shouldMapHomeDetailsCorrectlyWhenAllFlagsAreFalse() {
+        CourtNavHome updatedHome = home.toBuilder()
             .propertyIsRented(false)
             .propertyHasMortgage(false)
             .haveHomeRights(false)
@@ -465,24 +333,24 @@ class FL401ApplicationMapperTest {
         courtNavFl401 = courtNavFl401.toBuilder()
             .fl401(courtNavFl401.getFl401().toBuilder()
                        .situation(situationWithOnlyOccupationOrder)
-                       .courtNavHome(home)
+                       .courtNavHome(updatedHome)
                        .build())
             .build();
 
         CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
-        assertEquals(YesOrNo.No, caseData.getHome().getIsPropertyRented());
-        assertNull(caseData.getHome().getHowIsThePropertyAdapted());
-        assertEquals(YesOrNo.No, caseData.getHome().getIsThereMortgageOnProperty());
-        assertNull(caseData.getHome().getMortgages());
-        assertEquals(YesOrNo.No, caseData.getHome().getIsPropertyAdapted());
-        assertEquals(YesOrNo.No, caseData.getHome().getDoesApplicantHaveHomeRights());
+        assertEquals(No, caseData.getHome().getIsPropertyRented());
+        assertEquals(No, caseData.getHome().getIsThereMortgageOnProperty());
+        assertEquals(No, caseData.getHome().getDoesApplicantHaveHomeRights());
+        assertEquals(No, caseData.getHome().getIsPropertyAdapted());
+
         assertNull(caseData.getHome().getLandlords());
+        assertNull(caseData.getHome().getMortgages());
+        assertNull(caseData.getHome().getHowIsThePropertyAdapted());
     }
 
     @Test
-    void testCourtnavFamilyHomeEmptyListDoesNotCauseNullPE() {
-
+    void shouldNotThrowWhenFamilyHomeListIsEmpty() {
         home = home.toBuilder()
             .wantToHappenWithFamilyHome(Collections.emptyList())
             .build();
@@ -494,15 +362,13 @@ class FL401ApplicationMapperTest {
                        .build())
             .build();
 
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
-        assertNotNull(caseData1.getHome().getLivingSituation());
-        assertDoesNotThrow(() -> fl401ApplicationMapper.mapCourtNavData(courtNavFl401));
+        assertNotNull(caseData.getHome().getLivingSituation());
     }
 
     @Test
-    void testCourtnavApplicantDetailsHasNoConfidentialInfo() {
-
+    void shouldMarkApplicantContactDetailsAsNotConfidentialWhenShared() {
         applicantsDetails.setGender(female);
         applicantsDetails.setShareContactDetailsWithRespondent(true);
         applicantsDetails.setAddress(CourtNavAddress.builder()
@@ -519,15 +385,15 @@ class FL401ApplicationMapperTest {
                        .build())
             .build();
 
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
-        assertEquals(YesOrNo.No, caseData1.getApplicantsFL401().getIsAddressConfidential());
-        assertEquals(YesOrNo.No, caseData1.getApplicantsFL401().getIsEmailAddressConfidential());
-        assertEquals(YesOrNo.No, caseData1.getApplicantsFL401().getIsPhoneNumberConfidential());
+        assertEquals(No, caseData.getApplicantsFL401().getIsAddressConfidential());
+        assertEquals(No, caseData.getApplicantsFL401().getIsEmailAddressConfidential());
+        assertEquals(No, caseData.getApplicantsFL401().getIsPhoneNumberConfidential());
     }
 
     @Test
-    void testCourtnavRespondentDetailsHasNullInfo() {
+    void shouldSetRespondentContactFlagsToNoWhenInfoIsMissing() {
         CourtNavRespondent courtNavRespondent = CourtNavRespondent.builder()
             .firstName("resp test")
             .lastName("fl401")
@@ -546,15 +412,19 @@ class FL401ApplicationMapperTest {
                        .build())
             .build();
 
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
-        assertEquals(YesOrNo.No, caseData1.getRespondentsFL401().getCanYouProvideEmailAddress());
-        assertEquals(YesOrNo.No, caseData1.getRespondentsFL401().getCanYouProvidePhoneNumber());
-        assertEquals(YesOrNo.No, caseData1.getRespondentsFL401().getIsCurrentAddressKnown());
+        assertEquals(No, caseData.getRespondentsFL401().getCanYouProvideEmailAddress());
+        assertEquals(No, caseData.getRespondentsFL401().getCanYouProvidePhoneNumber());
+        assertEquals(No, caseData.getRespondentsFL401().getIsCurrentAddressKnown());
+
+        assertNull(caseData.getRespondentsFL401().getEmail());
+        assertNull(caseData.getRespondentsFL401().getPhoneNumber());
+        assertNull(caseData.getRespondentsFL401().getAddress());
     }
 
     @Test
-    void testCourtnavRelationShipToRespondentHasRelationEndDate() {
+    void shouldMapRelationshipEndDateWhenPresent() {
         CourtNavRelationShipToRespondent relationShipToRespondent = CourtNavRelationShipToRespondent.builder()
             .relationshipDescription(formerlyMarriedOrCivil)
             .relationshipStartDate(new CourtNavDate(10, 9, 1998))
@@ -573,11 +443,13 @@ class FL401ApplicationMapperTest {
                        .build())
             .build();
 
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
         assertEquals(
             LocalDate.parse(relationShipToRespondent.getRelationshipEndDate().mergeDate()),
-            caseData1.getRespondentRelationDateInfoObject().getRelationStartAndEndComplexType().getRelationshipDateComplexEndDate()
+            caseData.getRespondentRelationDateInfoObject()
+                .getRelationStartAndEndComplexType()
+                .getRelationshipDateComplexEndDate()
         );
     }
 
@@ -606,13 +478,13 @@ class FL401ApplicationMapperTest {
                        .build())
             .build();
 
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
-        assertNotNull(caseData1.getApplicantChildDetails());
+        assertNotNull(caseData.getApplicantChildDetails());
     }
 
     @Test
-    void testCourtnavRespondentBehaviourTowardsApplicantAsNull() {
+    void shouldNotMapBehaviourTowardsApplicantWhenNull() {
         CourtNavRespondentBehaviour respondentBehaviour = CourtNavRespondentBehaviour.builder()
             .applyingForMonMolestationOrder(true)
             .stopBehaviourAnythingElse("abc")
@@ -628,14 +500,17 @@ class FL401ApplicationMapperTest {
                        .build())
             .build();
 
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
-        assertNull(courtNavFl401.getFl401().getRespondentBehaviour().getStopBehaviourTowardsApplicant());
-        assertNull(caseData1.getRespondentBehaviourData().getApplicantWantToStopFromRespondentDoing());
+        assertNull(caseData.getRespondentBehaviourData().getApplicantWantToStopFromRespondentDoing());
+        assertEquals(
+            List.of(applicantStopFromRespondentDoingToChildEnum_Value_1),
+            caseData.getRespondentBehaviourData().getApplicantWantToStopFromRespondentDoingToChild()
+        );
     }
 
     @Test
-    void shouldHandleNullBehaviourTowardsChildren() {
+    void shouldNotMapBehaviourTowardsChildrenWhenNull() {
         CourtNavRespondentBehaviour respondentBehaviour = CourtNavRespondentBehaviour.builder()
             .applyingForMonMolestationOrder(true)
             .stopBehaviourAnythingElse("abc")
@@ -651,14 +526,17 @@ class FL401ApplicationMapperTest {
                        .build())
             .build();
 
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
-        assertNull(courtNavFl401.getFl401().getRespondentBehaviour().getStopBehaviourTowardsChildren());
-        assertNull(caseData1.getRespondentBehaviourData().getApplicantWantToStopFromRespondentDoingToChild());
+        assertEquals(
+            List.of(applicantStopFromRespondentEnum_Value_8),
+            caseData.getRespondentBehaviourData().getApplicantWantToStopFromRespondentDoing()
+        );
+        assertNull(caseData.getRespondentBehaviourData().getApplicantWantToStopFromRespondentDoingToChild());
     }
 
     @Test
-    void testCourtNavContactInformation() {
+    void shouldMapApplicantContactInstructionsFromCourtNavDetails() {
         applicantsDetails.setApplicantContactInstructions("Test");
 
         courtNavFl401 = courtNavFl401.toBuilder()
@@ -677,6 +555,64 @@ class FL401ApplicationMapperTest {
         assertEquals("Test", caseData.getDaApplicantContactInstructions());
     }
 
+    private CourtNavAddress buildApplicantAddress() {
+        return CourtNavAddress.builder()
+            .addressLine1("55 Test Street")
+            .postTown("Town")
+            .postCode("LU1 5ET")
+            .build();
+    }
+
+    private Situation buildSituation(List<FL401OrderTypeEnum> orders) {
+        return situationBuilder()
+            .ordersAppliedFor(orders)
+            .build();
+    }
+
+    private ApplicantsDetails buildApplicantsDetails(CourtNavAddress address) {
+        return ApplicantsDetails.builder()
+            .firstName("courtnav Applicant")
+            .lastName("test")
+            .dateOfBirth(new CourtNavDate(10, 9, 1992))
+            .gender(female)
+            .shareContactDetailsWithRespondent(false)
+            .email("test@courtNav.com")
+            .phoneNumber("12345678907")
+            .hasLegalRepresentative(false)
+            .applicantPreferredContact(List.of(PreferredContactEnum.email))
+            .address(address)
+            .build();
+    }
+
+    private CourtNavHome buildCourtNavHome(CourtNavAddress address) {
+        return CourtNavHome.builder()
+            .applyingForOccupationOrder(true)
+            .occupationOrderAddress(address)
+            .currentlyLivesAtAddress(List.of(other))
+            .currentlyLivesAtAddressOther("test")
+            .previouslyLivedAtAddress(applicant)
+            .intendedToLiveAtAddress(applicant)
+            .childrenApplicantResponsibility(List.of(new ChildAtAddress("test child", 3)))
+            .childrenSharedResponsibility(List.of(new ChildAtAddress("test child", 5)))
+            .propertySpeciallyAdapted(true)
+            .propertyHasMortgage(true)
+            .namedOnMortgage(List.of(ContractEnum.other))
+            .namedOnMortgageOther("test")
+            .mortgageNumber("2345678")
+            .mortgageLenderName("test mort")
+            .mortgageLenderAddress(CourtNavAddress.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .propertyIsRented(true)
+            .namedOnRentalAgreement(List.of(ContractEnum.other))
+            .namedOnRentalAgreementOther("test")
+            .landlordName("landlord")
+            .landlordAddress(CourtNavAddress.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .haveHomeRights(true)
+            .wantToHappenWithLivingSituation(List.of(stayInHome))
+            .wantToHappenWithFamilyHome(List.of(respondentToPayRentMortgage))
+            .anythingElseForCourtToConsider("test court details")
+            .build();
+    }
+
     private Situation.SituationBuilder situationBuilder() {
         return Situation.builder()
             .ordersAppliedWithoutNotice(true)
@@ -685,5 +621,112 @@ class FL401ApplicationMapperTest {
             .ordersAppliedWithoutNoticeReasonDetails("test1")
             .bailConditionsEndDate(new CourtNavDate(8, 9, 1996))
             .ordersAppliedWithoutNoticeReason(List.of(riskOfSignificantHarm));
+    }
+
+    private BeforeStart buildBeforeStart() {
+        return new BeforeStart(eighteenOrOlder);
+    }
+
+    private CourtNavRespondent buildRespondent(CourtNavAddress address) {
+        return CourtNavRespondent.builder()
+            .firstName("resp test")
+            .lastName("fl401")
+            .dateOfBirth(new CourtNavDate(10, 9, 1989))
+            .email("test@resp.com")
+            .address(address)
+            .respondentLivesWithApplicant(true)
+            .phoneNumber("12345670987")
+            .build();
+    }
+
+    private CourtNavRelationShipToRespondent buildRelationship() {
+        return CourtNavRelationShipToRespondent.builder()
+            .relationshipDescription(formerlyMarriedOrCivil)
+            .ceremonyDate(new CourtNavDate(10, 9, 1999))
+            .relationshipEndDate(null)
+            .relationshipStartDate(new CourtNavDate(10, 9, 1998))
+            .respondentsRelationshipToApplicant(null)
+            .respondentsRelationshipToApplicantOther(null)
+            .anyChildren(false)
+            .build();
+    }
+
+    private CourtNavRespondentBehaviour buildRespondentBehaviour() {
+        return CourtNavRespondentBehaviour.builder()
+            .applyingForMonMolestationOrder(true)
+            .stopBehaviourAnythingElse("abc")
+            .stopBehaviourTowardsApplicant(List.of(comingNearHome))
+            .stopBehaviourTowardsChildren(List.of(beingViolentOrThreatening))
+            .build();
+    }
+
+    private CourtNavStatementOfTruth buildStatementOfTruth() {
+        return CourtNavStatementOfTruth.builder()
+            .declaration(List.of(applicantConfirm))
+            .signature("appl sign")
+            .signatureDate(new CourtNavDate(10, 6, 2022))
+            .signatureFullName("Applicant Courtnav")
+            .representativeFirmName("courtnav_application")
+            .representativePositionHeld("courtnav_application")
+            .build();
+    }
+
+    private GoingToCourt buildGoingToCourt() {
+        return GoingToCourt.builder()
+            .isInterpreterRequired(false)
+            .interpreterLanguage(null)
+            .interpreterDialect(null)
+            .anyDisabilityNeeds(false)
+            .disabilityNeedsDetails(null)
+            .anySpecialMeasures(List.of(separateWaitingRoom))
+            .build();
+    }
+
+    private CourtNavMetaData buildMetaData() {
+        return CourtNavMetaData.builder()
+            .courtNavApproved(true)
+            .caseOrigin("courtnav")
+            .numberOfAttachments(4)
+            .courtSpecialRequirements("test special court")
+            .hasDraftOrder(false)
+            .build();
+    }
+
+    private Family buildFamily() {
+        return Family.builder()
+            .whoApplicationIsFor(applicantAndChildren)
+            .protectedChildren(List.of(
+                ProtectedChild.builder()
+                    .fullName("child1")
+                    .dateOfBirth(new CourtNavDate(10, 9, 2016))
+                    .parentalResponsibility(true)
+                    .relationship("mother")
+                    .respondentRelationship("uncle")
+                    .build()))
+            .anyOngoingCourtProceedings(false)
+            .ongoingCourtProceedings(List.of(
+                CourtProceedings.builder()
+                    .caseDetails("testcase1")
+                    .caseNumber("1234567")
+                    .caseType("testType1")
+                    .nameOfCourt("testcourt1")
+                    .build()))
+            .build();
+    }
+
+    private CourtNavFl401 buildCourtNavFl401(CourtNavAddress applicantAddress) {
+        return CourtNavFl401.builder()
+            .fl401(CourtNavCaseData.builder()
+                       .beforeStart(buildBeforeStart())
+                       .applicantDetails(applicantsDetails)
+                       .courtNavRespondent(buildRespondent(applicantAddress))
+                       .family(buildFamily())
+                       .relationshipWithRespondent(buildRelationship())
+                       .respondentBehaviour(buildRespondentBehaviour())
+                       .statementOfTruth(buildStatementOfTruth())
+                       .goingToCourt(buildGoingToCourt())
+                       .build())
+            .metaData(buildMetaData())
+            .build();
     }
 }
