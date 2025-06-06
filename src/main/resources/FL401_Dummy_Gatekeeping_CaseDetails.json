@@ -1518,7 +1518,7 @@
       "isAtAddressLessThan5Years": null,
       "isPhoneNumberConfidential": "Yes",
       "isEmailAddressConfidential": "Yes",
-      "applicantContactInstructions": null,
+      "applicantContactInstructions": "testing",
       "respondentLivedWithApplicant": null,
       "doTheyHaveLegalRepresentation": "yes",
       "addressLivedLessThan5YearsDetails": null,
