@@ -303,7 +303,7 @@ core_case_data:
 auth:
   idam:
     client:
-      baseUrl: http://localhost:5000
+      baseUrl: https://idam-api.aat.platform.hmcts.net
   provider:
     service:
       client:
