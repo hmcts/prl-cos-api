@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.caseflags;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -17,8 +18,17 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
+import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.datamigration.caseflag.CaseFlag;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsWaService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -27,8 +37,13 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @RequiredArgsConstructor
 @RequestMapping("/caseflags")
 public class CaseFlagsController {
+    private static final String FLAG_TYPE = "PARTY";
+
     private final AuthorisationService authorisationService;
     private final CaseFlagsWaService caseFlagsWaService;
+    protected final ObjectMapper objectMapper;
+    private final RefDataUserService refDataUserService;
+    private final SystemUserService systemUserService;
 
     @PostMapping(path = "/setup-wa-task", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to validate case creator to decide on the WA task")
@@ -51,4 +66,51 @@ public class CaseFlagsController {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
+
+    @PostMapping("/about-to-start")
+    public AboutToStartOrSubmitCallbackResponse handleAboutToStart(@RequestHeader("Authorization")
+                                                                   @Parameter(hidden = true) String authorisation,
+                                                                   @RequestBody CallbackRequest callbackRequest) {
+        CaseFlag caseFlag = refDataUserService.retrieveCaseFlags(systemUserService.getSysUserToken(), FLAG_TYPE);
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        if (caseData.getAllPartyFlags() != null) {
+            if (!"Requested".equals(caseData.getAllPartyFlags().getCaApplicant1ExternalFlags()
+                                       .getDetails().getLast().getValue().getStatus())) {
+                caseData.getAllPartyFlags().setCaApplicant1ExternalFlags(Flags.builder().build());
+            }
+            if (!"Requested".equals(caseData.getAllPartyFlags().getCaApplicant2ExternalFlags()
+                                        .getDetails().getLast().getValue().getStatus())) {
+                caseData.getAllPartyFlags().setCaApplicant2ExternalFlags(Flags.builder().build());
+            }
+            if (!"Requested".equals(caseData.getAllPartyFlags().getCaApplicant3ExternalFlags()
+                                        .getDetails().getLast().getValue().getStatus())) {
+                caseData.getAllPartyFlags().setCaApplicant3ExternalFlags(Flags.builder().build());
+            }
+        }
+        Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
+
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDataMap)
+            .build();
+    }
+
+    @PostMapping(path = "/check-wa-task-status", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to check the work allocation status to decide if the task should be closed or not")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse checkWorkAllocationTaskStatus(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDataMap)
+            .build();
+    }
+
 }
