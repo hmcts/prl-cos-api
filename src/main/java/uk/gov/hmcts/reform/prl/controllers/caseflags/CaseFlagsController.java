@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,18 +19,13 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
-import uk.gov.hmcts.reform.prl.models.caseflags.AllPartyFlags;
-import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.datamigration.caseflag.CaseFlag;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsWaService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -42,7 +36,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @RequiredArgsConstructor
 @RequestMapping("/caseflags")
 public class CaseFlagsController {
-    private static final String FLAG_TYPE = "PARTY";
     public static final String REQUESTED = "Requested";
 
     private final AuthorisationService authorisationService;
@@ -77,32 +70,14 @@ public class CaseFlagsController {
     public AboutToStartOrSubmitCallbackResponse handleAboutToStart(@RequestHeader("Authorization")
                                                                    @Parameter(hidden = true) String authorisation,
                                                                    @RequestBody CallbackRequest callbackRequest) {
-        CaseFlag caseFlag = refDataUserService.retrieveCaseFlags(systemUserService.getSysUserToken(), FLAG_TYPE);
+
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        AllPartyFlags allPartyFlags = caseData.getAllPartyFlags();
-        List<String> errors = new ArrayList<>();
-        try {
-            if (allPartyFlags != null) {
-                Field[] fields = allPartyFlags.getClass().getDeclaredFields();
-                for (Field field : fields) {
-                    field.setAccessible(true);
-                    Object value = field.get(allPartyFlags);
-                    Flags typeValue = (Flags) value;
-                    if (typeValue != null && typeValue.getDetails() != null
-                        && CollectionUtils.isNotEmpty(typeValue.getDetails())) {
-                        if (!REQUESTED.equals(typeValue.getDetails().getFirst().getValue().getStatus())) {
-                            field.set(allPartyFlags, Flags.builder().build());
-                        }
-                    }
-                }
-            }
-        } catch (IllegalAccessException e) {
-            errors.add(e.getMessage());
-        }
+        caseFlagsWaService.filterRequestedCaseLevelFlags(caseData.getCaseFlags());
+        caseFlagsWaService.filterRequestedPartyFlags(caseData.getAllPartyFlags());
+
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
 
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .errors(errors)
             .data(caseDataMap)
             .build();
     }
@@ -119,48 +94,8 @@ public class CaseFlagsController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-
-        CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
-        AllPartyFlags allPartyFlagsBefore = caseDataBefore.getAllPartyFlags();
-        AllPartyFlags allPartyFlags = caseData.getAllPartyFlags();
-
-        List<String> errors = new ArrayList<>();
-        try {
-            if (allPartyFlags != null & allPartyFlagsBefore != null) {
-                Field[] fieldsBefore = allPartyFlagsBefore.getClass().getDeclaredFields();
-                Field[] fields = allPartyFlags.getClass().getDeclaredFields();
-                int requestedFlagsCountBefore = 0;
-                int requestedFlagsCount = 0;
-                for (Field field : fieldsBefore) {
-                    field.setAccessible(true);
-                    Flags fieldValue = (Flags) field.get(allPartyFlagsBefore);
-                    if (fieldValue != null && CollectionUtils.isNotEmpty(fieldValue.getDetails())) {
-                        if (REQUESTED.equals(fieldValue.getDetails().getFirst().getValue().getStatus())) {
-                            requestedFlagsCountBefore++;
-                        }
-                    }
-                }
-
-                for (Field field : fields) {
-                    field.setAccessible(true);
-                    Flags fieldValue = (Flags) field.get(allPartyFlags);
-                    if (fieldValue != null && CollectionUtils.isNotEmpty(fieldValue.getDetails())) {
-                        if (REQUESTED.equals(fieldValue.getDetails().getFirst().getValue().getStatus())) {
-                            requestedFlagsCount++;
-                        }
-                    }
-                }
-
-                if (requestedFlagsCountBefore == requestedFlagsCount) {
-                    errors.add("Please select the status of flag other than Requested");
-                }
-            }
-        } catch (IllegalAccessException e) {
-            errors.add(e.getMessage());
-        }
-
+        List<String> errors = caseFlagsWaService.validateAllFlags(caseData);
 
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
         return AboutToStartOrSubmitCallbackResponse.builder()
