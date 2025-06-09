@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.caseflags;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.EventService;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,6 +30,7 @@ import java.util.stream.Collectors;
 public class CaseFlagsWaService {
     private static final String REQUESTED = "Requested";
     private final EventService eventPublisher;
+    private final ObjectMapper objectMapper;
 
     public void setUpWaTaskForCaseFlagsEventHandler(String authorisation, CallbackRequest callbackRequest) {
         CaseFlagsEvent caseFlagsEvent = CaseFlagsEvent.builder()
@@ -65,11 +69,15 @@ public class CaseFlagsWaService {
 
     public void filterRequestedCaseLevelFlags(Flags caseLevelFlags) {
         if (caseLevelFlags != null && CollectionUtils.isNotEmpty(caseLevelFlags.getDetails())) {
-            caseLevelFlags.getDetails().stream().forEach(flagDetail -> {
-                if (!REQUESTED.equals(flagDetail.getValue().getStatus())) {
-                    caseLevelFlags.getDetails().remove(flagDetail);
+            List<Element<FlagDetail>> flagDetails = deepCopyArray(caseLevelFlags.getDetails(),
+                                                                  new TypeReference<List<Element<FlagDetail>>>() {});
+            if (CollectionUtils.isNotEmpty(flagDetails)) {
+                for (Element<FlagDetail> flagDetail : flagDetails) {
+                    if (!REQUESTED.equals(flagDetail.getValue().getStatus())) {
+                        caseLevelFlags.getDetails().remove(flagDetail);
+                    }
                 }
-            });
+            }
         }
     }
 
@@ -111,5 +119,13 @@ public class CaseFlagsWaService {
             .filter(Objects::nonNull)
             .flatMap(List::stream)
             .collect(Collectors.toList());
+    }
+
+    public <T> T deepCopyArray(T object, TypeReference<T> typeReference) {
+        try {
+            return objectMapper.readValue(objectMapper.writeValueAsString(object), typeReference);
+        } catch (IOException e) {
+            throw new IllegalStateException();
+        }
     }
 }
