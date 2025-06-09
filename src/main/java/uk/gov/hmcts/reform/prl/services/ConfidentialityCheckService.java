@@ -121,10 +121,10 @@ public class ConfidentialityCheckService {
                 }
             });
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            findAndShowC8RefugeDocs(caseDataMap, caseData.getApplicantsFL401(), "appAC8RefugeDocument");
             ResponseDocuments responseDocumentA = getRespondentDoc(findLatestC8Document(caseData.getRespondentC8Document(),
                     caseData.getRespondentC8(), 0));
             caseDataMap.put("appAC8RefugeDocument", responseDocumentA.getRespondentC8Document());
+            findAndShowC8RefugeDocs(caseDataMap, caseData.getApplicantsFL401(), "appAC8RefugeDocument");
         }
     }
 
