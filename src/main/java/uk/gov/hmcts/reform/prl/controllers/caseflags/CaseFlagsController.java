@@ -119,9 +119,42 @@ public class CaseFlagsController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
+
+        CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        AllPartyFlags allPartyFlagsBefore = caseDataBefore.getAllPartyFlags();
+        AllPartyFlags allPartyFlags = caseData.getAllPartyFlags();
+
+        List<String> errors = new ArrayList<>();
+        try {
+            if (allPartyFlags != null & allPartyFlagsBefore != null) {
+                Field[] fieldsBefore = allPartyFlagsBefore.getClass().getDeclaredFields();
+                Field[] fields = allPartyFlags.getClass().getDeclaredFields();
+                for (int i = 0; i < fieldsBefore.length; i++) {
+                    fieldsBefore[i].setAccessible(true);
+                    fields[i].setAccessible(true);
+                    Flags fieldValueBefore = (Flags) fieldsBefore[i].get(allPartyFlagsBefore);
+                    Flags fieldValue = (Flags) fields[i].get(allPartyFlags);
+                    if (fieldValue != null && CollectionUtils.isNotEmpty(fieldValue.getDetails())) {
+                        if (!fieldValueBefore.getDetails().getFirst().getValue().getStatus()
+                            .equals(fieldValue.getDetails().getFirst().getValue().getStatus())) {
+                            if (REQUESTED.equals(fieldValue.getDetails().getFirst().getValue().getStatus())) {
+                                errors.add("Please select the status of flag other than Requested");
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (IllegalAccessException e) {
+            errors.add(e.getMessage());
+        }
+
+
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
         return AboutToStartOrSubmitCallbackResponse.builder()
+            .errors(errors)
             .data(caseDataMap)
             .build();
     }
