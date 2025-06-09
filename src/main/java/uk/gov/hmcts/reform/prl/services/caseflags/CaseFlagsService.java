@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.caseflags;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -23,6 +24,7 @@ import java.util.UUID;
 import static java.util.function.Predicate.not;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class CaseFlagsService {
@@ -77,6 +79,7 @@ public class CaseFlagsService {
     public List<String> validateNewCaseFlagStatus(Map<String, Object> caseDataBefore,
                                                   Map<String, Object> caseDataCurrent) {
         List<String> errors = new ArrayList<>();
+        log.info("validateNewCaseFlagStatus");
         Flags caseFlagsBefore = objectMapper.convertValue(
             caseDataBefore.get(CASE_FLAGS), new TypeReference<>() {
             }
@@ -90,15 +93,16 @@ public class CaseFlagsService {
             caseDataCurrent.get(CASE_FLAGS), new TypeReference<>() {
             }
         );
-
+        log.info("caseFlagsBefore {} caseFlagsCurrent {}", flagDetailsBefore, caseFlagsCurrent);
         caseFlagsCurrent.getDetails()
             .stream()
             .filter(not(flagDetailsBefore::contains))
             .map(Element::getValue)
+            .peek(flagDetail -> log.info("flagDetail : {}", flagDetail))
             .filter(flagDetail -> REQUESTED.equals(flagDetail.status))
             .findFirst()
             .ifPresent(flagDetail -> errors.add(REQUESTED_STATUS_IS_NOT_ALLOWED));
-
+        log.info("errors {}", errors);
         return errors;
     }
 }
