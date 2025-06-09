@@ -131,20 +131,30 @@ public class CaseFlagsController {
             if (allPartyFlags != null & allPartyFlagsBefore != null) {
                 Field[] fieldsBefore = allPartyFlagsBefore.getClass().getDeclaredFields();
                 Field[] fields = allPartyFlags.getClass().getDeclaredFields();
-                for (int i = 0; i < fieldsBefore.length; i++) {
-                    fieldsBefore[i].setAccessible(true);
-                    fields[i].setAccessible(true);
-                    Flags fieldValueBefore = (Flags) fieldsBefore[i].get(allPartyFlagsBefore);
-                    Flags fieldValue = (Flags) fields[i].get(allPartyFlags);
+                int requestedFlagsCountBefore = 0;
+                int requestedFlagsCount = 0;
+                for (Field field : fieldsBefore) {
+                    field.setAccessible(true);
+                    Flags fieldValue = (Flags) field.get(allPartyFlagsBefore);
                     if (fieldValue != null && CollectionUtils.isNotEmpty(fieldValue.getDetails())) {
-                        if (!fieldValueBefore.getDetails().getFirst().getValue().getStatus()
-                            .equals(fieldValue.getDetails().getFirst().getValue().getStatus())) {
-                            if (REQUESTED.equals(fieldValue.getDetails().getFirst().getValue().getStatus())) {
-                                errors.add("Please select the status of flag other than Requested");
-                                break;
-                            }
+                        if (REQUESTED.equals(fieldValue.getDetails().getFirst().getValue().getStatus())) {
+                            requestedFlagsCountBefore++;
                         }
                     }
+                }
+
+                for (Field field : fields) {
+                    field.setAccessible(true);
+                    Flags fieldValue = (Flags) field.get(allPartyFlags);
+                    if (fieldValue != null && CollectionUtils.isNotEmpty(fieldValue.getDetails())) {
+                        if (REQUESTED.equals(fieldValue.getDetails().getFirst().getValue().getStatus())) {
+                            requestedFlagsCount++;
+                        }
+                    }
+                }
+
+                if (requestedFlagsCountBefore == requestedFlagsCount) {
+                    errors.add("Please select the status of flag other than Requested");
                 }
             }
         } catch (IllegalAccessException e) {
