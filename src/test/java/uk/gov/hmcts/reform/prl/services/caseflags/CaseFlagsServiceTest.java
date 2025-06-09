@@ -295,6 +295,8 @@ public class CaseFlagsServiceTest {
                            .dateAdded("2025-06-02")
                            .dateCreated(LocalDateTime.parse("2025-06-02T17:16:46.227744028"))
                            .build());
+
+        assertThat(caseDataMap.get(IS_REVIEW_LANG_AND_SM_REQ_REVIEWED)).isNull();
     }
 
     @Test
