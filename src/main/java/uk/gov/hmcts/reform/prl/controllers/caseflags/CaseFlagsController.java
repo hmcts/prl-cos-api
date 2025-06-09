@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
+import uk.gov.hmcts.reform.prl.models.caseflags.AllPartyFlags;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.datamigration.caseflag.CaseFlag;
@@ -28,6 +29,9 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsWaService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -38,10 +42,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @RequestMapping("/caseflags")
 public class CaseFlagsController {
     private static final String FLAG_TYPE = "PARTY";
+    public static final String REQUESTED = "Requested";
 
     private final AuthorisationService authorisationService;
     private final CaseFlagsWaService caseFlagsWaService;
-    protected final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
     private final RefDataUserService refDataUserService;
     private final SystemUserService systemUserService;
 
@@ -73,23 +78,29 @@ public class CaseFlagsController {
                                                                    @RequestBody CallbackRequest callbackRequest) {
         CaseFlag caseFlag = refDataUserService.retrieveCaseFlags(systemUserService.getSysUserToken(), FLAG_TYPE);
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        if (caseData.getAllPartyFlags() != null) {
-            if (!"Requested".equals(caseData.getAllPartyFlags().getCaApplicant1ExternalFlags()
-                                       .getDetails().getLast().getValue().getStatus())) {
-                caseData.getAllPartyFlags().setCaApplicant1ExternalFlags(Flags.builder().build());
+        AllPartyFlags allPartyFlags = caseData.getAllPartyFlags();
+        List<String> errors = new ArrayList<>();
+        try {
+            if (allPartyFlags != null) {
+                Field[] fields = allPartyFlags.getClass().getDeclaredFields();
+                for (Field field : fields) {
+                    field.setAccessible(true);
+                    Object value = field.get(allPartyFlags);
+                    Flags typeValue = (Flags) value;
+                    if (typeValue != null && typeValue.getDetails() != null) {
+                        if (!REQUESTED.equals(typeValue.getDetails().getLast().getValue().getStatus())) {
+                            field.set(allPartyFlags, Flags.builder().build());
+                        }
+                    }
+                }
             }
-            if (!"Requested".equals(caseData.getAllPartyFlags().getCaApplicant2ExternalFlags()
-                                        .getDetails().getLast().getValue().getStatus())) {
-                caseData.getAllPartyFlags().setCaApplicant2ExternalFlags(Flags.builder().build());
-            }
-            if (!"Requested".equals(caseData.getAllPartyFlags().getCaApplicant3ExternalFlags()
-                                        .getDetails().getLast().getValue().getStatus())) {
-                caseData.getAllPartyFlags().setCaApplicant3ExternalFlags(Flags.builder().build());
-            }
+        } catch (IllegalAccessException e) {
+            errors.add(e.getMessage());
         }
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
 
         return AboutToStartOrSubmitCallbackResponse.builder()
+            .errors(errors)
             .data(caseDataMap)
             .build();
     }
