@@ -87,16 +87,44 @@ public class ConfidentialityCheckService {
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             caseData.getApplicants().forEach(eachApp -> {
                 switch (caseData.getApplicants().indexOf(eachApp)) {
-                    case 0 -> findAndShowC8RefugeDocs(caseDataMap, eachApp.getValue(), "appAC8RefugeDocument");
-                    case 1 -> findAndShowC8RefugeDocs(caseDataMap, eachApp.getValue(), "appBC8RefugeDocument");
-                    case 2 -> findAndShowC8RefugeDocs(caseDataMap, eachApp.getValue(), "appCC8RefugeDocument");
-                    case 3 -> findAndShowC8RefugeDocs(caseDataMap, eachApp.getValue(), "appDC8RefugeDocument");
-                    case 4 -> findAndShowC8RefugeDocs(caseDataMap, eachApp.getValue(), "appEC8RefugeDocument");
+                    case 0 -> {
+                        ResponseDocuments responseDocumentA = getRespondentDoc(findLatestC8Document(caseData.getRespondentC8Document(),
+                                caseData.getRespondentC8(), 0));
+                        caseDataMap.put("appAC8RefugeDocument", responseDocumentA.getRespondentC8Document());
+                        findAndShowC8RefugeDocs(caseDataMap, eachApp.getValue(), "appAC8RefugeDocument");
+                    }
+                    case 1 -> {
+                        ResponseDocuments responseDocumentB = getRespondentDoc(findLatestC8Document(caseData.getRespondentC8Document(),
+                                caseData.getRespondentC8(), 1));
+                        caseDataMap.put("appBC8RefugeDocument", responseDocumentB.getRespondentC8Document());
+                        findAndShowC8RefugeDocs(caseDataMap, eachApp.getValue(), "appBC8RefugeDocument");
+                    }
+                    case 2 -> {
+                        ResponseDocuments responseDocumentC = getRespondentDoc(findLatestC8Document(caseData.getRespondentC8Document(),
+                                 caseData.getRespondentC8(), 2));
+                        caseDataMap.put("appCC8RefugeDocument", responseDocumentC.getRespondentC8Document());
+                        findAndShowC8RefugeDocs(caseDataMap, eachApp.getValue(), "appCC8RefugeDocument");
+                    }
+                    case 3 -> {
+                        ResponseDocuments responseDocumentD = getRespondentDoc(findLatestC8Document(caseData.getRespondentC8Document(),
+                                caseData.getRespondentC8(), 3));
+                        caseDataMap.put("appDC8RefugeDocument", responseDocumentD.getRespondentC8Document());
+                        findAndShowC8RefugeDocs(caseDataMap, eachApp.getValue(), "appDC8RefugeDocument");
+                    }
+                    case 4 -> {
+                        ResponseDocuments responseDocumentE = getRespondentDoc(findLatestC8Document(caseData.getRespondentC8Document(),
+                                caseData.getRespondentC8(), 4));
+                        caseDataMap.put("appEC8RefugeDocument", responseDocumentE.getRespondentC8Document());
+                        findAndShowC8RefugeDocs(caseDataMap, eachApp.getValue(), "appEC8RefugeDocument");
+                    }
                     default -> log.info("Applicant is out of index here");
                 }
             });
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             findAndShowC8RefugeDocs(caseDataMap, caseData.getApplicantsFL401(), "appAC8RefugeDocument");
+            ResponseDocuments responseDocumentA = getRespondentDoc(findLatestC8Document(caseData.getRespondentC8Document(),
+                    caseData.getRespondentC8(), 0));
+            caseDataMap.put("appAC8RefugeDocument", responseDocumentA.getRespondentC8Document());
         }
     }
 
