@@ -55,6 +55,9 @@ public class CaseFlagsService {
                                SELECTED_REVIEW_LANG_AND_SM_REQ,
                                element.getValue()
                            ));
+        caseDataMap.put(
+            IS_REVIEW_LANG_AND_SM_REQ_REVIEWED,
+            null);
     }
 
     public List<String> isLangAndSmReqReviewed(Map<String, Object> caseDataMap) {
