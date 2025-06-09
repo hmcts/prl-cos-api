@@ -316,6 +316,23 @@ public class CaseFlagsServiceTest {
         assertThat(langAndSmReqReviewed).contains(PLEASE_REVIEW_THE_LANGUAGE_AND_SM_REQUEST);
     }
 
+    @Test
+    public void validateNewCaseFlagActiveStatus() throws JsonProcessingException {
+        Map<String, Object> caseDataBefore = objectMapper.readValue(
+            CASE_DATA_BEFORE_3, new TypeReference<>() {
+            }
+        );
+
+        String currentCaseData = CASE_DATA_CURRENT.replace("<status>", "Active");
+
+        Map<String, Object> caseDataCurrent = objectMapper.readValue(
+            currentCaseData, new TypeReference<>() {
+            }
+        );
+
+        List<String> errors = caseFlagsService.validateNewCaseFlagStatus(caseDataBefore, caseDataCurrent);
+        assertThat(errors).isEmpty();
+    }
 
     @ParameterizedTest
     @ValueSource(strings = {CASE_DATA_BEFORE_1, CASE_DATA_BEFORE_2})
@@ -354,7 +371,7 @@ public class CaseFlagsServiceTest {
     }
 
     @Test
-    public void validateNewCaseFlagReviewedStatus() throws JsonProcessingException {
+    public void validateNewCaseFlagRequestedStatus() throws JsonProcessingException {
         Map<String, Object> caseDataBefore = objectMapper.readValue(
             CASE_DATA_BEFORE_3, new TypeReference<>() {
             }
@@ -369,23 +386,5 @@ public class CaseFlagsServiceTest {
 
         List<String> errors = caseFlagsService.validateNewCaseFlagStatus(caseDataBefore, caseDataCurrent);
         assertThat(errors).contains(REQUESTED_STATUS_IS_NOT_ALLOWED);
-    }
-
-    @Test
-    public void validateNewCaseFlagActiveStatus() throws JsonProcessingException {
-        Map<String, Object> caseDataBefore = objectMapper.readValue(
-            CASE_DATA_BEFORE_3, new TypeReference<>() {
-            }
-        );
-
-        String currentCaseData = CASE_DATA_CURRENT.replace("<status>", "Active");
-
-        Map<String, Object> caseDataCurrent = objectMapper.readValue(
-            currentCaseData, new TypeReference<>() {
-            }
-        );
-
-        List<String> errors = caseFlagsService.validateNewCaseFlagStatus(caseDataBefore, caseDataCurrent);
-        assertThat(errors).isEmpty();
     }
 }
