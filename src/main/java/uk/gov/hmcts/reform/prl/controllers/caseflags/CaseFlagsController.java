@@ -96,7 +96,7 @@ public class CaseFlagsController {
     }
 
     @PostMapping(path = "/review-lang-sm/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to set selected case note")
+    @Operation(description = "Callback to validate newly added case flag status")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
@@ -105,13 +105,13 @@ public class CaseFlagsController {
     public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-            List<String> errors = caseFlagService.isLangAndSmReqReviewed(caseData);
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).errors(errors).build();
+            Map<String, Object> caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
+            Map<String, Object> caseDataCurrent = callbackRequest.getCaseDetails().getData();
+            List<String> errors = caseFlagService.validateNewCaseFlagStatus(caseDataBefore, caseDataCurrent);
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataCurrent).errors(errors).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

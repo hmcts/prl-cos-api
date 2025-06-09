@@ -104,18 +104,24 @@ public class CaseFlagsControllerTest {
     public void testHandleAboutToSubmitEventWithErrors() {
         List<String> errors = List.of("Please select");
         CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetailsBefore(
+                CaseDetails.builder()
+                    .data(Map.of())
+                    .build()
+            )
             .caseDetails(
                 CaseDetails.builder()
                     .data(Map.of())
                     .build())
             .build();
+
         when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
-        when(caseFlagsService.isLangAndSmReqReviewed(Map.of()))
+        when(caseFlagsService.validateNewCaseFlagStatus(Map.of(), Map.of()))
             .thenReturn(errors);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = caseFlagsController
-            .handleAboutToSubmit(AUTH_TOKEN, SERVICE_TOKEN, CLIENT_CONTEXT,callbackRequest);
+            .handleAboutToSubmit(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
         assertThat(aboutToStartOrSubmitCallbackResponse.getErrors()).containsAll(errors);
-        verify(caseFlagsService, times(1)).isLangAndSmReqReviewed(Map.of());
+        verify(caseFlagsService, times(1)).validateNewCaseFlagStatus(Map.of(), Map.of());
     }
 
     @Test
@@ -130,7 +136,7 @@ public class CaseFlagsControllerTest {
         when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(false);
         assertThrows(RuntimeException.class, () -> {
             caseFlagsController
-                .handleAboutToSubmit(AUTH_TOKEN, SERVICE_TOKEN, CLIENT_CONTEXT,callbackRequest);
+                .handleAboutToSubmit(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
         });
         verify(caseFlagsService, never()).isLangAndSmReqReviewed(Map.of());
     }
