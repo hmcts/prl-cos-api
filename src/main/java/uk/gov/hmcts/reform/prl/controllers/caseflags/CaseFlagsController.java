@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -87,8 +88,9 @@ public class CaseFlagsController {
                     field.setAccessible(true);
                     Object value = field.get(allPartyFlags);
                     Flags typeValue = (Flags) value;
-                    if (typeValue != null && typeValue.getDetails() != null) {
-                        if (!REQUESTED.equals(typeValue.getDetails().getLast().getValue().getStatus())) {
+                    if (typeValue != null && typeValue.getDetails() != null
+                        && CollectionUtils.isNotEmpty(typeValue.getDetails())) {
+                        if (!REQUESTED.equals(typeValue.getDetails().getFirst().getValue().getStatus())) {
                             field.set(allPartyFlags, Flags.builder().build());
                         }
                     }
