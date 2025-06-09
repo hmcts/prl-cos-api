@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,6 +28,7 @@ import java.util.Map;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/caseflags")
@@ -107,6 +109,7 @@ public class CaseFlagsController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
+        log.info("/review-lang-sm/about-to-submit");
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             Map<String, Object> caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
             Map<String, Object> caseDataCurrent = callbackRequest.getCaseDetails().getData();
