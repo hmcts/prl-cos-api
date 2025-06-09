@@ -338,11 +338,15 @@ public class CitizenPartyDetailsMapper {
                     caseData.getApplicantsFL401(),
                     caseEvent, caseData.getNewChildDetails()
                 );
+
+                if (partyDetails.getResponse() != null && partyDetails.getResponse().getSafeToCallOption() != null) {
+                    partyDetails = partyDetails.toBuilder()
+                            .applicantContactInstructions(partyDetails.getResponse().getSafeToCallOption())
+                                .build();
+                }
+
                 caseData = caseData.toBuilder().applicantsFL401(partyDetails).build();
                 caseDataMapToBeUpdated.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
-                if (partyDetails.getResponse().getSafeToCallOption() != null) {
-                    caseDataMapToBeUpdated.put("daApplicantContactInstructions", partyDetails.getResponse().getSafeToCallOption());
-                }
                 return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
             }
         } else {
