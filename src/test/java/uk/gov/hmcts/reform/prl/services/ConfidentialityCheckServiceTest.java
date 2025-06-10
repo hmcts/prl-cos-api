@@ -453,8 +453,8 @@ public class ConfidentialityCheckServiceTest {
     @Test
     public void processOtherPeopleC8DocumentsC100NullOtherPartyList() {
         List<Element<PartyDetails>> otherPeople = null;
-
         List<Element<PartyDetails>> applicants = new ArrayList<>();
+
         Document applicant1RefugeDocument = Document.builder().documentFileName("applicant 1 C8 Refuge Form").build();
         Document applicant2RefugeDocument = Document.builder().documentFileName("applicant 2 C8 Refuge Form").build();
         Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder()
