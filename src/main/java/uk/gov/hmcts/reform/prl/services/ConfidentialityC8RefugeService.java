@@ -439,7 +439,7 @@ public class ConfidentialityC8RefugeService {
         return refugeConfidentialDocumentsRecord;
     }
 
-    public RefugeConfidentialDocumentsRecord processC8RefugeDocumentsChangesForC100(
+    private RefugeConfidentialDocumentsRecord processC8RefugeDocumentsChangesForC100(
         CaseData caseData,
         Optional<List<Element<PartyDetails>>> partyDetailsWrappedList,
         Optional<List<Element<PartyDetails>>> partyDetailsListWrappedBefore,
