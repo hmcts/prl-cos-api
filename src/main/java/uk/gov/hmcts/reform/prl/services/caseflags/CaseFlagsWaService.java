@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.events.CaseFlagsEvent;
-import uk.gov.hmcts.reform.prl.events.WorkAllocationTaskStatusEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseflags.AllPartyFlags;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
@@ -38,14 +37,6 @@ public class CaseFlagsWaService {
             .callbackRequest(callbackRequest)
             .build();
         eventPublisher.publishEvent(caseFlagsEvent);
-    }
-
-    public void checkWorkAllocationTaskStatus(String authorisation, CallbackRequest callbackRequest) {
-        WorkAllocationTaskStatusEvent checkWaTaskStatusEvent = WorkAllocationTaskStatusEvent.builder()
-            .authorisation(authorisation)
-            .callbackRequest(callbackRequest)
-            .build();
-        eventPublisher.publishEvent(checkWaTaskStatusEvent);
     }
 
     public void filterRequestedPartyFlags(AllPartyFlags allPartyFlags) {
