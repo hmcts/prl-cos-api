@@ -10,8 +10,8 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsWaService;
+import uk.gov.hmcts.reform.prl.services.caseflags.FlagsService;
 
 import java.util.List;
 import java.util.Map;
@@ -34,7 +34,7 @@ public class CaseFlagsControllerTest {
     @Mock
     private CaseFlagsWaService caseFlagsWaService;
     @Mock
-    private CaseFlagsService caseFlagsService;
+    private FlagsService flagsService;
     @InjectMocks
     private CaseFlagsController caseFlagsController;
 
@@ -68,7 +68,7 @@ public class CaseFlagsControllerTest {
             .build();
         caseFlagsController
             .handleAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, CLIENT_CONTEXT,callbackRequest);
-        verify(caseFlagsService, times(1)).prepareSelectedReviewLangAndSmReq(Map.of(), CLIENT_CONTEXT);
+        verify(flagsService, times(1)).prepareSelectedReviewLangAndSmReq(Map.of(), CLIENT_CONTEXT);
         verify(authorisationService, times(1)).isAuthorized(AUTH_TOKEN, SERVICE_TOKEN);
     }
 
@@ -79,7 +79,7 @@ public class CaseFlagsControllerTest {
             caseFlagsController
                 .handleAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, CLIENT_CONTEXT,CallbackRequest.builder().build());
         });
-        verify(caseFlagsService, never()).prepareSelectedReviewLangAndSmReq(Map.of(), CLIENT_CONTEXT);
+        verify(flagsService, never()).prepareSelectedReviewLangAndSmReq(Map.of(), CLIENT_CONTEXT);
     }
 
 
@@ -92,12 +92,12 @@ public class CaseFlagsControllerTest {
                     .data(Map.of())
                     .build())
             .build();
-        when(caseFlagsService.isLangAndSmReqReviewed(Map.of()))
+        when(flagsService.isLangAndSmReqReviewed(Map.of()))
             .thenReturn(errors);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = caseFlagsController
             .handleMidEvent(AUTH_TOKEN, callbackRequest);
         assertThat(aboutToStartOrSubmitCallbackResponse.getErrors()).containsAll(errors);
-        verify(caseFlagsService, times(1)).isLangAndSmReqReviewed(Map.of());
+        verify(flagsService, times(1)).isLangAndSmReqReviewed(Map.of());
     }
 
     @Test
@@ -116,12 +116,12 @@ public class CaseFlagsControllerTest {
             .build();
 
         when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
-        when(caseFlagsService.validateNewCaseFlagStatus(Map.of(), Map.of()))
+        when(flagsService.validateNewFlagStatus(Map.of(), Map.of()))
             .thenReturn(errors);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = caseFlagsController
             .handleAboutToSubmit(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
         assertThat(aboutToStartOrSubmitCallbackResponse.getErrors()).containsAll(errors);
-        verify(caseFlagsService, times(1)).validateNewCaseFlagStatus(Map.of(), Map.of());
+        verify(flagsService, times(1)).validateNewFlagStatus(Map.of(), Map.of());
     }
 
     @Test
@@ -138,7 +138,7 @@ public class CaseFlagsControllerTest {
             caseFlagsController
                 .handleAboutToSubmit(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
         });
-        verify(caseFlagsService, never()).isLangAndSmReqReviewed(Map.of());
+        verify(flagsService, never()).isLangAndSmReqReviewed(Map.of());
     }
 }
 

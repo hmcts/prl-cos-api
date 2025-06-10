@@ -19,15 +19,15 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsService.IS_REVIEW_LANG_AND_SM_REQ_REVIEWED;
-import static uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsService.PLEASE_REVIEW_THE_LANGUAGE_AND_SM_REQUEST;
-import static uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsService.REQUESTED_STATUS_IS_NOT_ALLOWED;
-import static uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsService.SELECTED_REVIEW_LANG_AND_SM_REQ;
+import static uk.gov.hmcts.reform.prl.services.caseflags.FlagsService.IS_REVIEW_LANG_AND_SM_REQ_REVIEWED;
+import static uk.gov.hmcts.reform.prl.services.caseflags.FlagsService.PLEASE_REVIEW_THE_LANGUAGE_AND_SM_REQUEST;
+import static uk.gov.hmcts.reform.prl.services.caseflags.FlagsService.REQUESTED_STATUS_IS_NOT_ALLOWED;
+import static uk.gov.hmcts.reform.prl.services.caseflags.FlagsService.SELECTED_REVIEW_LANG_AND_SM_REQ;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CaseFlagsServiceTest {
     ObjectMapper objectMapper = new ObjectMapper();
-    private CaseFlagsService caseFlagsService;
+    private FlagsService flagsService;
 
     private static final String CLIENT_CONTEXT = """
         {
@@ -264,6 +264,192 @@ public class CaseFlagsServiceTest {
         }
         """;
 
+    private static final String CASE_DATA_WITH_CASE_APPLICANT_1_FLAGS_BEFORE = """
+        {
+          "id": 1749209054695128,
+          "caseFlags": {
+            "details": [
+              {
+                "id": "2f78d61d-0a38-4288-9a10-1b6bb012fe0b",
+                "value": {
+                  "name": "Complex Case",
+                  "path": [
+                    {
+                      "id": "d60813fa-0630-41f6-b94a-012fe46292fa",
+                      "value": "Case"
+                    }
+                  ],
+                  "status": "Active",
+                  "name_cy": "Achos Cymhleth",
+                  "flagCode": "CF0002",
+                  "subTypeKey": null,
+                  "flagComment": "test",
+                  "subTypeValue": null,
+                  "flagComment_cy": null,
+                  "dateTimeCreated": "2025-06-09T11:02:09.598Z",
+                  "hearingRelevant": "Yes",
+                  "subTypeValue_cy": null,
+                  "otherDescription": null,
+                  "flagUpdateComment": "ttt",
+                  "availableExternally": "No",
+                  "otherDescription_cy": null
+                }
+              }
+            ],
+            "groupId": null,
+            "partyName": null,
+            "roleOnCase": null,
+            "visibility": null
+          },
+          "caApplicant1InternalFlags": {
+              "details": [
+                {
+                  "id": "130049ef-38ff-48d5-8d07-9e742ac85a11",
+                  "value": {
+                    "name": "Screening witness from accused",
+                    "path": [
+                      {
+                        "id": "ecff55ac-896d-4f7f-a057-b9e6ed93f3d5",
+                        "value": "Party"
+                      },
+                      {
+                        "id": "71aec611-83c7-496c-923a-d42c73820fff",
+                        "value": "Special measure"
+                      }
+                    ],
+                    "status": "Requested",
+                    "name_cy": "Sgrinio tyst rhag y diffynnydd",
+                    "flagCode": "SM0002",
+                    "subTypeKey": null,
+                    "flagComment": "testing",
+                    "subTypeValue": null,
+                    "flagComment_cy": null,
+                    "dateTimeCreated": "2025-06-09T17:01:21.508Z",
+                    "hearingRelevant": "Yes",
+                    "subTypeValue_cy": null,
+                    "otherDescription": null,
+                    "flagUpdateComment": "",
+                    "availableExternally": "No",
+                    "otherDescription_cy": null
+                  }
+                }
+              ],
+              "groupId": "caApplicant1",
+              "partyName": "John Doe",
+              "roleOnCase": "Applicant 1",
+              "visibility": "Internal"
+            }
+        }
+        """;
+
+    private static final String CASE_DATA_WITH_CASE_APPLICANT_1_FLAGS_CURRENT = """
+        {
+          "id": 1749209054695128,
+          "caseFlags": {
+            "details": [
+              {
+                "id": "2f78d61d-0a38-4288-9a10-1b6bb012fe0b",
+                "value": {
+                  "name": "Complex Case",
+                  "path": [
+                    {
+                      "id": "d60813fa-0630-41f6-b94a-012fe46292fa",
+                      "value": "Case"
+                    }
+                  ],
+                  "status": "Active",
+                  "name_cy": "Achos Cymhleth",
+                  "flagCode": "CF0002",
+                  "subTypeKey": null,
+                  "flagComment": "test",
+                  "subTypeValue": null,
+                  "flagComment_cy": null,
+                  "dateTimeCreated": "2025-06-09T11:02:09.598Z",
+                  "hearingRelevant": "Yes",
+                  "subTypeValue_cy": null,
+                  "otherDescription": null,
+                  "flagUpdateComment": "ttt",
+                  "availableExternally": "No",
+                  "otherDescription_cy": null
+                }
+              }
+            ],
+            "groupId": null,
+            "partyName": null,
+            "roleOnCase": null,
+            "visibility": null
+          },
+          "caApplicant1InternalFlags": {
+              "details": [
+                {
+                  "id": "fb9b4c1d-a6e7-488d-8a8b-7e033d910956",
+                  "value": {
+                    "name": "Evidence by live link",
+                    "path": [
+                      {
+                        "id": "f75b6c11-e063-44f8-9ef5-7ce78e20841c",
+                        "value": "Party"
+                      },
+                      {
+                        "id": "510763d4-f79c-437d-8846-5e6f489ebe6b",
+                        "value": "Special measure"
+                      }
+                    ],
+                    "status": "<status>",
+                    "name_cy": "Tystiolaeth drwy gyswllt byw",
+                    "flagCode": "SM0003",
+                    "subTypeKey": null,
+                    "flagComment": "test",
+                    "subTypeValue": null,
+                    "flagComment_cy": null,
+                    "dateTimeCreated": "2025-06-10T09:08:23.351Z",
+                    "hearingRelevant": "Yes",
+                    "subTypeValue_cy": null,
+                    "otherDescription": null,
+                    "flagUpdateComment": "",
+                    "availableExternally": "No",
+                    "otherDescription_cy": null
+                  }
+                },
+                {
+                  "id": "130049ef-38ff-48d5-8d07-9e742ac85a11",
+                  "value": {
+                    "name": "Screening witness from accused",
+                    "path": [
+                      {
+                        "id": "ecff55ac-896d-4f7f-a057-b9e6ed93f3d5",
+                        "value": "Party"
+                      },
+                      {
+                        "id": "71aec611-83c7-496c-923a-d42c73820fff",
+                        "value": "Special measure"
+                      }
+                    ],
+                    "status": "Requested",
+                    "name_cy": "Sgrinio tyst rhag y diffynnydd",
+                    "flagCode": "SM0002",
+                    "subTypeKey": null,
+                    "flagComment": "testing",
+                    "subTypeValue": null,
+                    "flagComment_cy": null,
+                    "dateTimeCreated": "2025-06-09T17:01:21.508Z",
+                    "hearingRelevant": "Yes",
+                    "subTypeValue_cy": null,
+                    "otherDescription": null,
+                    "flagUpdateComment": "",
+                    "availableExternally": "No",
+                    "otherDescription_cy": null
+                  }
+                }
+              ],
+              "groupId": "caApplicant1",
+              "partyName": "John Doe",
+              "roleOnCase": "Applicant 1",
+              "visibility": "Internal"
+            }
+        }
+        """;
+
     @BeforeEach
     public void setUpBeforeEach() {
         setUp();
@@ -276,7 +462,7 @@ public class CaseFlagsServiceTest {
 
     private void setUp() {
         objectMapper.findAndRegisterModules();
-        caseFlagsService = new CaseFlagsService(objectMapper);
+        flagsService = new FlagsService(objectMapper);
     }
 
     @Test
@@ -285,7 +471,7 @@ public class CaseFlagsServiceTest {
         byte[] encode = encoder.encode(CLIENT_CONTEXT.getBytes());
         Map<String, Object> caseDataMap = objectMapper.readValue(CASE_DATA, new TypeReference<>() {});
 
-        caseFlagsService.prepareSelectedReviewLangAndSmReq(caseDataMap, new String(encode));
+        flagsService.prepareSelectedReviewLangAndSmReq(caseDataMap, new String(encode));
 
         assertThat(caseDataMap.get(SELECTED_REVIEW_LANG_AND_SM_REQ))
             .isEqualTo(CaseNoteDetails.builder()
@@ -302,19 +488,19 @@ public class CaseFlagsServiceTest {
     @Test
     public void testWhenLangAndSmReqIsReviewed() throws JsonProcessingException {
         Map<String, Object> caseDataMap = objectMapper.readValue(CASE_DATA_WITH_REVIEW, new TypeReference<>() {});
-        List<String> langAndSmReqReviewed = caseFlagsService.isLangAndSmReqReviewed(caseDataMap);
+        List<String> langAndSmReqReviewed = flagsService.isLangAndSmReqReviewed(caseDataMap);
         assertThat(langAndSmReqReviewed).isEmpty();
     }
 
     @Test
     public void testWhenLangAndSmReqIsNotReviewed() throws JsonProcessingException {
-        List<String> langAndSmReqReviewed = caseFlagsService.isLangAndSmReqReviewed(Map.of());
+        List<String> langAndSmReqReviewed = flagsService.isLangAndSmReqReviewed(Map.of());
         assertThat(langAndSmReqReviewed).contains(PLEASE_REVIEW_THE_LANGUAGE_AND_SM_REQUEST);
     }
 
     @Test
     public void testWhenLangAndSmReqReviewedIsNo() throws JsonProcessingException {
-        List<String> langAndSmReqReviewed = caseFlagsService.isLangAndSmReqReviewed(Map.of(IS_REVIEW_LANG_AND_SM_REQ_REVIEWED,  YesOrNo.No));
+        List<String> langAndSmReqReviewed = flagsService.isLangAndSmReqReviewed(Map.of(IS_REVIEW_LANG_AND_SM_REQ_REVIEWED, YesOrNo.No));
         assertThat(langAndSmReqReviewed).contains(PLEASE_REVIEW_THE_LANGUAGE_AND_SM_REQUEST);
     }
 
@@ -332,7 +518,7 @@ public class CaseFlagsServiceTest {
             }
         );
 
-        List<String> errors = caseFlagsService.validateNewCaseFlagStatus(caseDataBefore, caseDataCurrent);
+        List<String> errors = flagsService.validateNewFlagStatus(caseDataBefore, caseDataCurrent);
         assertThat(errors).isEmpty();
     }
 
@@ -350,7 +536,7 @@ public class CaseFlagsServiceTest {
             }
         );
 
-        List<String> errors = caseFlagsService.validateNewCaseFlagStatus(caseDataBefore, caseDataCurrent);
+        List<String> errors = flagsService.validateNewFlagStatus(caseDataBefore, caseDataCurrent);
         assertThat(errors).isEmpty();
     }
 
@@ -368,7 +554,7 @@ public class CaseFlagsServiceTest {
             }
         );
 
-        List<String> errors = caseFlagsService.validateNewCaseFlagStatus(caseDataBefore, caseDataCurrent);
+        List<String> errors = flagsService.validateNewFlagStatus(caseDataBefore, caseDataCurrent);
         assertThat(errors).contains(REQUESTED_STATUS_IS_NOT_ALLOWED);
     }
 
@@ -386,7 +572,43 @@ public class CaseFlagsServiceTest {
             }
         );
 
-        List<String> errors = caseFlagsService.validateNewCaseFlagStatus(caseDataBefore, caseDataCurrent);
+        List<String> errors = flagsService.validateNewFlagStatus(caseDataBefore, caseDataCurrent);
         assertThat(errors).contains(REQUESTED_STATUS_IS_NOT_ALLOWED);
+    }
+
+    @Test
+    public void validateNewApplicantFlagRequestedStatus() throws JsonProcessingException {
+        Map<String, Object> caseDataBefore = objectMapper.readValue(
+            CASE_DATA_WITH_CASE_APPLICANT_1_FLAGS_BEFORE, new TypeReference<>() {
+            }
+        );
+
+        String currentCaseData = CASE_DATA_WITH_CASE_APPLICANT_1_FLAGS_CURRENT.replace("<status>", "Requested");
+
+        Map<String, Object> caseDataCurrent = objectMapper.readValue(
+            currentCaseData, new TypeReference<>() {
+            }
+        );
+
+        List<String> errors = flagsService.validateNewFlagStatus(caseDataBefore, caseDataCurrent);
+        assertThat(errors).contains(REQUESTED_STATUS_IS_NOT_ALLOWED);
+    }
+
+    @Test
+    public void validateNewApplicantFlagActiveStatus() throws JsonProcessingException {
+        Map<String, Object> caseDataBefore = objectMapper.readValue(
+            CASE_DATA_WITH_CASE_APPLICANT_1_FLAGS_BEFORE, new TypeReference<>() {
+            }
+        );
+
+        String currentCaseData = CASE_DATA_WITH_CASE_APPLICANT_1_FLAGS_CURRENT.replace("<status>", "Active");
+
+        Map<String, Object> caseDataCurrent = objectMapper.readValue(
+            currentCaseData, new TypeReference<>() {
+            }
+        );
+
+        List<String> errors = flagsService.validateNewFlagStatus(caseDataBefore, caseDataCurrent);
+        assertThat(errors).isEmpty();
     }
 }

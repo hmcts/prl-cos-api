@@ -19,8 +19,8 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsWaService;
+import uk.gov.hmcts.reform.prl.services.caseflags.FlagsService;
 
 import java.util.List;
 import java.util.Map;
@@ -35,7 +35,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 public class CaseFlagsController {
     private final AuthorisationService authorisationService;
     private final CaseFlagsWaService caseFlagsWaService;
-    private final CaseFlagsService caseFlagService;
+    private final FlagsService flagsService;
 
     @PostMapping(path = "/setup-wa-task", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to validate case creator to decide on the WA task")
@@ -74,7 +74,7 @@ public class CaseFlagsController {
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
-            caseFlagService.prepareSelectedReviewLangAndSmReq(caseDataMap, clientContext);
+            flagsService.prepareSelectedReviewLangAndSmReq(caseDataMap, clientContext);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -93,12 +93,12 @@ public class CaseFlagsController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        List<String> errors = caseFlagService.isLangAndSmReqReviewed(caseData);
+        List<String> errors = flagsService.isLangAndSmReqReviewed(caseData);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).errors(errors).build();
     }
 
     @PostMapping(path = "/review-lang-sm/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to validate newly added case flag status")
+    @Operation(description = "Callback to validate newly added flag status")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
@@ -113,7 +113,7 @@ public class CaseFlagsController {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             Map<String, Object> caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
             Map<String, Object> caseDataCurrent = callbackRequest.getCaseDetails().getData();
-            List<String> errors = caseFlagService.validateNewCaseFlagStatus(caseDataBefore, caseDataCurrent);
+            List<String> errors = flagsService.validateNewFlagStatus(caseDataBefore, caseDataCurrent);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataCurrent).errors(errors).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
