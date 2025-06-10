@@ -442,14 +442,20 @@ public class ConfidentialityC8RefugeServiceTest {
             .builder()
             .applicants(applicantList)
             .build();
-        assertEquals(new RefugeConfidentialDocumentsRecord(List.of(), List.of()), confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, ""));
+        assertEquals(
+            new RefugeConfidentialDocumentsRecord(List.of(), List.of()),
+            confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, "")
+        );
     }
 
     @Test
     public void processC8RefugeDocumentsOnAmendForC100OnSubmit() {
         CaseData caseDataBefore = CaseData.builder().build();
         CaseData caseData = CaseData.builder().build();
-        assertEquals(new RefugeConfidentialDocumentsRecord(List.of(), List.of()), confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, ""));
+        assertEquals(
+            new RefugeConfidentialDocumentsRecord(List.of(), List.of()),
+            confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, "")
+        );
     }
 
     @Test
@@ -871,7 +877,8 @@ public class ConfidentialityC8RefugeServiceTest {
     @Test
     public void testprocessC8RefugeDocumentsOnAmendForC100WithForApplicant() {
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(refugePartyDetails1).build();
-        Element<PartyDetails> wrappedApplicant2 = Element.<PartyDetails>builder().value(refugePartyDetails1NotConfidential).build();
+        Element<PartyDetails> wrappedApplicant2 = Element.<PartyDetails>builder().value(
+            refugePartyDetails1NotConfidential).build();
 
 
         RefugeConfidentialDocuments refugeConfidentialDocuments = RefugeConfidentialDocuments.builder().partyType(
@@ -902,7 +909,11 @@ public class ConfidentialityC8RefugeServiceTest {
             .build();
 
 
-        RefugeConfidentialDocumentsRecord value = confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(caseData, caseDataBefore, "amendApplicantsDetails");
+        RefugeConfidentialDocumentsRecord value = confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(
+            caseData,
+            caseDataBefore,
+            "amendApplicantsDetails"
+        );
         System.out.print("value: " + value);
 
         assertNotNull(value);
@@ -945,10 +956,12 @@ public class ConfidentialityC8RefugeServiceTest {
         System.out.print("result: " + result);
         assertNull(result);
     }
+
     @Test
     public void testProcessC8RefugeDocumentsChangesForC100UpdatedApplicant() {
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(refugePartyDetails1).build();
-        Element<PartyDetails> wrappedApplicant2 = Element.<PartyDetails>builder().value(refugePartyDetails1NotConfidential).build();
+        Element<PartyDetails> wrappedApplicant2 = Element.<PartyDetails>builder().value(
+            refugePartyDetails1NotConfidential).build();
 
         List<Element<PartyDetails>> partyDetailsWrappedList = Collections.singletonList(wrappedApplicant);
         List<Element<PartyDetails>> partyDetailsWrappedList2 = Collections.singletonList(wrappedApplicant2);
@@ -982,35 +995,4 @@ public class ConfidentialityC8RefugeServiceTest {
         System.out.print("result: " + result);
         assertNull(result);
     }
-
-//    @Test
-//    public void testProcessC8RefugeDocumentsChangesForC100() {
-//        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(refugePartyDetails1).build();
-//        Element<PartyDetails> updatedWrappedApplicants = wrappedApplicants
-//            .map(applicant -> {
-//                PartyDetails updatedPartyDetails = applicant.getValue().toBuilder()
-//                    .isAddressConfidential(YesOrNo.No)
-//                    .isPhoneNumberConfidential(YesOrNo.No)
-//                    .isEmailAddressConfidential(YesOrNo.No)
-//                    .build();
-//                return Element.<PartyDetails>builder()
-//                    .id(applicant.getId())
-//                    .value(updatedPartyDetails)
-//                    .build();
-//            })
-//            .collect(java.util.stream.Collectors.toList());
-//
-//        List<Element<PartyDetails>> partyDetailsWrappedListBefore = Collections.singletonList(wrappedApplicants);
-//        List<Element<PartyDetails>> partyDetailsWrappedList = Collections.singletonList(updatedWrappedApplicants);
-//
-//        RefugeConfidentialDocumentsRecord result = confidentialityC8RefugeService.processC8RefugeDocumentsChangesForC100(
-//            caseData,
-//            partyDetailsWrappedList,
-//            partyDetailsWrappedListBefore,
-//            handlerParameters,
-//            null
-//        );
-//
-//        assertNotNull(result);
-//    }
 }
