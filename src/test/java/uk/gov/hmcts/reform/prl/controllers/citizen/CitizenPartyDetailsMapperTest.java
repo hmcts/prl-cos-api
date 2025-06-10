@@ -712,5 +712,40 @@ public class CitizenPartyDetailsMapperTest {
         assertNotNull(updatedPartyDetailsBasedOnEvent);
 
     }
+
+    @Test
+    public void testMapUpdatedPartyDetailsCaseEventConfirmDetailsWithSafeTimeToCall() throws IOException {
+        setUpDa();
+        updateCaseData = CitizenUpdatedCaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .partyDetails(PartyDetails.builder()
+                              .firstName("Test")
+                              .lastName("User")
+                              .isAtAddressLessThan5Years(YesOrNo.Yes)
+                              .isAtAddressLessThan5YearsWithDontKnow(YesNoDontKnow.yes)
+                              .response(Response.builder().build())
+                              .user(User.builder()
+                                        .email("test@gmail.com")
+                                        .idamId("123")
+                                        .solicitorRepresented(YesOrNo.Yes)
+                                        .build())
+                              .response(Response.builder().safeToCallOption("7pm").build())
+                              .citizenSosObject(CitizenSos.builder()
+                                                    .partiesServed(List.of("123,234,1234"))
+                                                    .build())
+                              .build())
+            .partyType(PartyEnum.applicant)
+            .build();
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(
+            caseData,
+            updateCaseData,
+            CaseEvent.CONFIRM_YOUR_DETAILS,
+            authToken
+        );
+        assertEquals("7pm", citizenUpdatePartyDataContent.updatedCaseDataMap().get("daApplicantContactInstructions"));
+        assertEquals("7pm", citizenUpdatePartyDataContent.updatedCaseData().getApplicantsFL401().getResponse().getSafeToCallOption());
+        assertNotNull(citizenUpdatePartyDataContent);
+    }
 }
+
 
