@@ -47,9 +47,7 @@ public class CaseFlagsWaService {
                     try {
                         Flags flagsValue = (Flags) field.get(allPartyFlags);
                         if (CollectionUtils.isNotEmpty(flagsValue.getDetails())) {
-                            if (!REQUESTED.equals(flagsValue.getDetails().getFirst().getValue().getStatus())) {
-                                field.set(allPartyFlags, Flags.builder().build());
-                            }
+                            filterRequestedCaseLevelFlags(flagsValue);
                         }
                     } catch (IllegalAccessException e) {
                         // ignore it
