@@ -778,7 +778,6 @@ public class ConfidentialityC8RefugeServiceTest {
 
     @Test
     public void processRefugeDocumentsOnSubmitFL401() {
-        // Todo
         PartyDetails applicant = PartyDetails
             .builder()
             .liveInRefuge(YesOrNo.Yes)
