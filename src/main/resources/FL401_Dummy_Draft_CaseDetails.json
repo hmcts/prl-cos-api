@@ -1212,7 +1212,7 @@
           "communicationSupportOther": null,
           "safetyArrangementsDetails": null
         },
-        "safeToCallOption": "8pm",
+        "safeToCallOption": null,
         "keepDetailsPrivate": {
           "confidentiality": null,
           "confidentialityList": [
