@@ -47,6 +47,9 @@ public class CaseFlagsWaService {
                     try {
                         Flags flagsValue = (Flags) field.get(allPartyFlags);
                         filterRequestedCaseLevelFlags(flagsValue);
+                        if (CollectionUtils.isEmpty(flagsValue.getDetails())) {
+                            field.set(allPartyFlags, Flags.builder().build());
+                        }
                     } catch (IllegalAccessException e) {
                         // ignore it
                     }
@@ -68,8 +71,7 @@ public class CaseFlagsWaService {
         }
     }
 
-    public List<String> validateAllFlags(CaseData caseData) {
-        List<String> errors = new ArrayList<>();
+    public Element<FlagDetail> validateAllFlags(CaseData caseData) {
         List<Element<FlagDetail>> allFlagsDetails = new ArrayList<>();
         allFlagsDetails.addAll(caseData.getCaseFlags().getDetails());
         allFlagsDetails.addAll(extractAllPartyFlagDetails(caseData.getAllPartyFlags()));
@@ -80,11 +82,8 @@ public class CaseFlagsWaService {
                                              detail.getValue().getDateTimeModified()).reversed())
             .toList();
 
-        FlagDetail mostRecentlyModified = sortedAllFlagsDetails.get(0).getValue();
-        if (REQUESTED.equals(mostRecentlyModified.getStatus())) {
-            errors.add("Please select the status of flag other than Requested");
-        }
-        return errors;
+        Element<FlagDetail> mostRecentlyModified = sortedAllFlagsDetails.get(0);
+        return mostRecentlyModified;
     }
 
     private List<Element<FlagDetail>> extractAllPartyFlagDetails(AllPartyFlags allPartyFlags) {

@@ -20,12 +20,15 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsWaService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -35,6 +38,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @RestController
 @RequestMapping("/caseflags")
 public class CaseFlagsController extends AbstractCallbackController {
+    private static final String REQUESTED = "Requested";
 
     private final AuthorisationService authorisationService;
     private final CaseFlagsWaService caseFlagsWaService;
@@ -99,8 +103,15 @@ public class CaseFlagsController extends AbstractCallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
+        CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        List<String> errors = caseFlagsWaService.validateAllFlags(caseData);
+        Element<FlagDetail> mostRecentlyModified = caseFlagsWaService.validateAllFlags(caseData);
+        List<String> errors = new ArrayList<>();
+        if (REQUESTED.equals(mostRecentlyModified.getValue().getStatus())) {
+            errors.add("Please select the status of flag other than Requested");
+        } else {
+            caseData.setAllPartyFlags(caseDataBefore.getAllPartyFlags());
+        }
 
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
         return AboutToStartOrSubmitCallbackResponse.builder()
