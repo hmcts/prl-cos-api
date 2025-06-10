@@ -4,67 +4,24 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
 
-
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Getter
-@Setter
 @Builder(toBuilder = true)
 public class CourtNavCaseData implements MappableObject {
 
-    private final BeforeStart beforeStart;
-
-
-    private final Situation situation;
-
-
-    /**
-     * Applicant details.
-     */
-    private final ApplicantsDetails applicantDetails;
-
-    /**
-     * Respondent Details.
-     */
-    private final CourtNavRespondent courtNavRespondent;
-
-    /**
-     * Applicant's Family.
-     */
-    private final Family family;
-
-    /**
-     * Relationship to Respondent.
-     */
-    private final CourtNavRelationShipToRespondent relationshipWithRespondent;
-
-
-    /**
-     * Respondent's Behaviour.
-     */
-    private final CourtNavRespondentBehaviour respondentBehaviour;
-
-    /**
-     * Home.
-     */
-    private final CourtNavHome courtNavHome;
-
-
-    /**
-     * Statement of truth.
-     */
-    private final CourtNavStatementOfTruth statementOfTruth;
-
-
-    /**
-     * Going to court.
-     */
-    private final GoingToCourt goingToCourt;
-
-
+    private BeforeStart beforeStart;
+    private Situation situation;
+    private ApplicantsDetails applicantDetails;
+    private CourtNavRespondent courtNavRespondent;
+    private Family family;
+    private CourtNavRelationShipToRespondent relationshipWithRespondent;
+    private CourtNavRespondentBehaviour respondentBehaviour;
+    private CourtNavHome courtNavHome;
+    private CourtNavStatementOfTruth statementOfTruth;
+    private GoingToCourt goingToCourt;
 }
