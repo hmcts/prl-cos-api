@@ -110,6 +110,7 @@ public class CaseFlagsController extends AbstractCallbackController {
         if (REQUESTED.equals(mostRecentlyModified.getValue().getStatus())) {
             errors.add("Please select the status of flag other than Requested");
         } else {
+            caseData.setCaseFlags(caseDataBefore.getCaseFlags());
             caseData.setAllPartyFlags(caseDataBefore.getAllPartyFlags());
         }
 
