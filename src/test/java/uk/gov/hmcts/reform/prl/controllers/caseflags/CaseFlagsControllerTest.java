@@ -116,12 +116,12 @@ public class CaseFlagsControllerTest {
             .build();
 
         when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
-        when(flagsService.validateNewFlagStatus(Map.of(), Map.of()))
+        when(flagsService.validateNewFlagStatus(Map.of()))
             .thenReturn(errors);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = caseFlagsController
             .handleAboutToSubmit(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
         assertThat(aboutToStartOrSubmitCallbackResponse.getErrors()).containsAll(errors);
-        verify(flagsService, times(1)).validateNewFlagStatus(Map.of(), Map.of());
+        verify(flagsService, times(1)).validateNewFlagStatus(Map.of());
     }
 
     @Test
