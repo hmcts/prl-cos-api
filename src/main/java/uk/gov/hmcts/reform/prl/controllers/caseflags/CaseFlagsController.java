@@ -109,11 +109,9 @@ public class CaseFlagsController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        log.info("/review-lang-sm/about-to-submit");
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            Map<String, Object> caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
             Map<String, Object> caseDataCurrent = callbackRequest.getCaseDetails().getData();
-            List<String> errors = flagsService.validateNewFlagStatus(caseDataBefore, caseDataCurrent);
+            List<String> errors = flagsService.validateNewFlagStatus(caseDataCurrent);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataCurrent).errors(errors).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

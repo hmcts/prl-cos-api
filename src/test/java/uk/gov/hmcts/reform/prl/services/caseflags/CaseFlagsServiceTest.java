@@ -5,9 +5,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
@@ -98,66 +95,6 @@ public class CaseFlagsServiceTest {
         }
         """;
 
-    private static final String CASE_DATA_BEFORE_1 = """
-        {
-          "id": 1749209054695128
-        }
-        """;
-
-    private static final String CASE_DATA_BEFORE_2 = """
-        {
-          "id": 1749209054695128,
-          "caseFlags": {
-              "details": [],
-              "groupId": null,
-              "partyName": null,
-              "roleOnCase": null,
-              "visibility": null
-            }
-        }
-        """;
-
-    private static final String CASE_DATA_BEFORE_3 = """
-        {
-          "id": 1749209054695128,
-          "caseFlags": {
-            "details": [
-              {
-                "id": "3378d61d-0a38-4288-9a10-1b6bb012fe0b",
-                "value": {
-                  "name": "Complex Case",
-                  "path": [
-                    {
-                      "id": "d60813fa-0630-41f6-b94a-012fe46292fa",
-                      "value": "Case"
-                    }
-                  ],
-                  "status": "Active",
-                  "name_cy": "Achos Cymhleth",
-                  "flagCode": "CF0002",
-                  "subTypeKey": null,
-                  "flagComment": "test",
-                  "subTypeValue": null,
-                  "flagComment_cy": null,
-                  "dateTimeCreated": "2025-06-09T11:02:09.598Z",
-                  "hearingRelevant": "Yes",
-                  "subTypeValue_cy": null,
-                  "otherDescription": null,
-                  "flagUpdateComment": "ttt",
-                  "availableExternally": "No",
-                  "otherDescription_cy": null
-                }
-              }
-            ],
-            "groupId": null,
-            "partyName": null,
-            "roleOnCase": null,
-            "visibility": null
-          }
-        }
-        """;
-
-
     private static final String CASE_DATA_CURRENT = """
         {
           "id": 1749209054695128,
@@ -221,124 +158,6 @@ public class CaseFlagsServiceTest {
             "roleOnCase": null,
             "visibility": null
           }
-        }
-        """;
-
-    private static final String CASE_DATA_CURRENT_SINGLE = """
-        {
-          "id": 1749209054695128,
-          "caseFlags": {
-            "details": [
-              {
-                "id": "2f78d61d-0a38-4288-9a10-1b6bb012fe0b",
-                "value": {
-                  "name": "Complex Case",
-                  "path": [
-                    {
-                      "id": "d60813fa-0630-41f6-b94a-012fe46292fa",
-                      "value": "Case"
-                    }
-                  ],
-                  "status": "<status>",
-                  "name_cy": "Achos Cymhleth",
-                  "flagCode": "CF0002",
-                  "subTypeKey": null,
-                  "flagComment": "test",
-                  "subTypeValue": null,
-                  "flagComment_cy": null,
-                  "dateTimeCreated": "2025-06-09T11:02:09.598Z",
-                  "hearingRelevant": "Yes",
-                  "subTypeValue_cy": null,
-                  "otherDescription": null,
-                  "flagUpdateComment": "ttt",
-                  "availableExternally": "No",
-                  "otherDescription_cy": null
-                }
-              }
-            ],
-            "groupId": null,
-            "partyName": null,
-            "roleOnCase": null,
-            "visibility": null
-          }
-        }
-        """;
-
-    private static final String CASE_DATA_WITH_CASE_APPLICANT_1_FLAGS_BEFORE = """
-        {
-          "id": 1749209054695128,
-          "caseFlags": {
-            "details": [
-              {
-                "id": "2f78d61d-0a38-4288-9a10-1b6bb012fe0b",
-                "value": {
-                  "name": "Complex Case",
-                  "path": [
-                    {
-                      "id": "d60813fa-0630-41f6-b94a-012fe46292fa",
-                      "value": "Case"
-                    }
-                  ],
-                  "status": "Active",
-                  "name_cy": "Achos Cymhleth",
-                  "flagCode": "CF0002",
-                  "subTypeKey": null,
-                  "flagComment": "test",
-                  "subTypeValue": null,
-                  "flagComment_cy": null,
-                  "dateTimeCreated": "2025-06-09T11:02:09.598Z",
-                  "hearingRelevant": "Yes",
-                  "subTypeValue_cy": null,
-                  "otherDescription": null,
-                  "flagUpdateComment": "ttt",
-                  "availableExternally": "No",
-                  "otherDescription_cy": null
-                }
-              }
-            ],
-            "groupId": null,
-            "partyName": null,
-            "roleOnCase": null,
-            "visibility": null
-          },
-          "caApplicant1InternalFlags": {
-              "details": [
-                {
-                  "id": "130049ef-38ff-48d5-8d07-9e742ac85a11",
-                  "value": {
-                    "name": "Screening witness from accused",
-                    "path": [
-                      {
-                        "id": "ecff55ac-896d-4f7f-a057-b9e6ed93f3d5",
-                        "value": "Party"
-                      },
-                      {
-                        "id": "71aec611-83c7-496c-923a-d42c73820fff",
-                        "value": "Special measure"
-                      }
-                    ],
-                    "status": "Requested",
-                    "name_cy": "Sgrinio tyst rhag y diffynnydd",
-                    "flagCode": "SM0002",
-                    "subTypeKey": null,
-                    "flagComment": "testing",
-                    "subTypeValue": null,
-                    "flagComment_cy": null,
-                    "dateTimeCreated": "2025-06-09T17:01:21.508Z",
-                    "hearingRelevant": "Yes",
-                    "subTypeValue_cy": null,
-                    "otherDescription": null,
-                    "flagUpdateComment": "",
-                    "availableExternally": "No",
-                    "otherDescription_cy": null
-                  }
-                }
-              ],
-              "groupId": "caApplicant1",
-              "partyName": "John Doe",
-              "roleOnCase": "Applicant 1",
-              "visibility": "Internal"
-            }
         }
         """;
 
@@ -458,17 +277,8 @@ public class CaseFlagsServiceTest {
         }
         """;
 
-    @BeforeEach
-    public void setUpBeforeEach() {
-        setUp();
-    }
-
     @Before
-    public void setUpBefore() {
-        setUp();
-    }
-
-    private void setUp() {
+    public void setUp() {
         objectMapper.findAndRegisterModules();
         flagsService = new FlagsService(objectMapper);
     }
@@ -514,11 +324,6 @@ public class CaseFlagsServiceTest {
 
     @Test
     public void validateNewCaseFlagActiveStatus() throws JsonProcessingException {
-        Map<String, Object> caseDataBefore = objectMapper.readValue(
-            CASE_DATA_BEFORE_3, new TypeReference<>() {
-            }
-        );
-
         String currentCaseData = CASE_DATA_CURRENT.replace("<status>", "Active");
 
         Map<String, Object> caseDataCurrent = objectMapper.readValue(
@@ -526,53 +331,12 @@ public class CaseFlagsServiceTest {
             }
         );
 
-        List<String> errors = flagsService.validateNewFlagStatus(caseDataBefore, caseDataCurrent);
+        List<String> errors = flagsService.validateNewFlagStatus(caseDataCurrent);
         assertThat(errors).isEmpty();
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {CASE_DATA_BEFORE_1, CASE_DATA_BEFORE_2})
-    public void validateNewCaseFlagActiveStatus(String dataCaseDataBefore) throws JsonProcessingException {
-        Map<String, Object> caseDataBefore = objectMapper.readValue(
-            dataCaseDataBefore, new TypeReference<>() {
-            }
-        );
-
-        String currentCaseData = CASE_DATA_CURRENT_SINGLE.replace("<status>", "Active");
-        Map<String, Object> caseDataCurrent = objectMapper.readValue(
-            currentCaseData, new TypeReference<>() {
-            }
-        );
-
-        List<String> errors = flagsService.validateNewFlagStatus(caseDataBefore, caseDataCurrent);
-        assertThat(errors).isEmpty();
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {CASE_DATA_BEFORE_1, CASE_DATA_BEFORE_2})
-    public void validateNewCaseFlagRequestedStatus(String dataCaseDataBefore) throws JsonProcessingException {
-        Map<String, Object> caseDataBefore = objectMapper.readValue(
-            dataCaseDataBefore, new TypeReference<>() {
-            }
-        );
-
-        String currentCaseData = CASE_DATA_CURRENT_SINGLE.replace("<status>", "Requested");
-        Map<String, Object> caseDataCurrent = objectMapper.readValue(
-            currentCaseData, new TypeReference<>() {
-            }
-        );
-
-        List<String> errors = flagsService.validateNewFlagStatus(caseDataBefore, caseDataCurrent);
-        assertThat(errors).contains(REQUESTED_STATUS_IS_NOT_ALLOWED);
     }
 
     @Test
     public void validateNewCaseFlagRequestedStatus() throws JsonProcessingException {
-        Map<String, Object> caseDataBefore = objectMapper.readValue(
-            CASE_DATA_BEFORE_3, new TypeReference<>() {
-            }
-        );
-
         String currentCaseData = CASE_DATA_CURRENT.replace("<status>", "Requested");
 
         Map<String, Object> caseDataCurrent = objectMapper.readValue(
@@ -580,17 +344,12 @@ public class CaseFlagsServiceTest {
             }
         );
 
-        List<String> errors = flagsService.validateNewFlagStatus(caseDataBefore, caseDataCurrent);
+        List<String> errors = flagsService.validateNewFlagStatus(caseDataCurrent);
         assertThat(errors).contains(REQUESTED_STATUS_IS_NOT_ALLOWED);
     }
 
     @Test
     public void validateNewApplicantFlagRequestedStatus() throws JsonProcessingException {
-        Map<String, Object> caseDataBefore = objectMapper.readValue(
-            CASE_DATA_WITH_CASE_APPLICANT_1_FLAGS_BEFORE, new TypeReference<>() {
-            }
-        );
-
         String currentCaseData = CASE_DATA_WITH_CASE_APPLICANT_1_FLAGS_CURRENT.replace("<status>", "Requested");
 
         Map<String, Object> caseDataCurrent = objectMapper.readValue(
@@ -598,17 +357,12 @@ public class CaseFlagsServiceTest {
             }
         );
 
-        List<String> errors = flagsService.validateNewFlagStatus(caseDataBefore, caseDataCurrent);
+        List<String> errors = flagsService.validateNewFlagStatus(caseDataCurrent);
         assertThat(errors).contains(REQUESTED_STATUS_IS_NOT_ALLOWED);
     }
 
     @Test
     public void validateNewApplicantFlagActiveStatus() throws JsonProcessingException {
-        Map<String, Object> caseDataBefore = objectMapper.readValue(
-            CASE_DATA_WITH_CASE_APPLICANT_1_FLAGS_BEFORE, new TypeReference<>() {
-            }
-        );
-
         String currentCaseData = CASE_DATA_WITH_CASE_APPLICANT_1_FLAGS_CURRENT.replace("<status>", "Active");
 
         Map<String, Object> caseDataCurrent = objectMapper.readValue(
@@ -616,7 +370,7 @@ public class CaseFlagsServiceTest {
             }
         );
 
-        List<String> errors = flagsService.validateNewFlagStatus(caseDataBefore, caseDataCurrent);
+        List<String> errors = flagsService.validateNewFlagStatus(caseDataCurrent);
         assertThat(errors).isEmpty();
     }
 }

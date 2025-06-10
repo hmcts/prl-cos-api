@@ -79,11 +79,8 @@ public class FlagsService {
     }
 
 
-    public List<String> validateNewFlagStatus(Map<String, Object> caseDataBefore,
-                                              Map<String, Object> caseDataCurrent) {
+    public List<String> validateNewFlagStatus(Map<String, Object> caseDataCurrent) {
         List<String> errors = new ArrayList<>();
-        log.info("validateNewFlagStatus");
-
 
         getAllFlagsToValidate().stream()
             .map(flag -> objectMapper.convertValue(
@@ -99,7 +96,6 @@ public class FlagsService {
             .filter(flagDetail -> REQUESTED.equals(flagDetail.status))
             .ifPresent(flagDetail -> errors.add(REQUESTED_STATUS_IS_NOT_ALLOWED));
 
-        log.info("errors {}", errors);
         return errors;
     }
 
