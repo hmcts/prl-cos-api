@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -21,7 +22,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Arrays.asList;
-import static java.util.function.Predicate.not;
+import static java.util.Comparator.comparing;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 
 @Slf4j
@@ -83,14 +84,6 @@ public class FlagsService {
         List<String> errors = new ArrayList<>();
         log.info("validateNewFlagStatus");
 
-        List<Element<FlagDetail>> flagsBefore = getAllFlagsToValidate().stream()
-            .map(flag -> objectMapper.convertValue(
-                caseDataBefore.get(flag), new TypeReference<Flags>() {
-                }
-            ))
-            .filter(Objects::nonNull)
-            .flatMap(flags -> flags.getDetails().stream())
-            .toList();
 
         getAllFlagsToValidate().stream()
             .map(flag -> objectMapper.convertValue(
@@ -98,12 +91,12 @@ public class FlagsService {
                 }
             ))
             .filter(Objects::nonNull)
-            .flatMap(flags -> flags.getDetails().stream())
-            .filter(not(flagsBefore::contains))
+            .map(Flags::getDetails)
+            .filter(Objects::nonNull)
+            .flatMap(Collection::stream)
             .map(Element::getValue)
-            .peek(flagDetail -> log.info("flagDetail : {}", flagDetail))
+            .max(comparing(FlagDetail::getDateTimeCreated))
             .filter(flagDetail -> REQUESTED.equals(flagDetail.status))
-            .findAny()
             .ifPresent(flagDetail -> errors.add(REQUESTED_STATUS_IS_NOT_ALLOWED));
 
         log.info("errors {}", errors);

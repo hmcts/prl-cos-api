@@ -206,7 +206,7 @@ public class CaseFlagsServiceTest {
                   "flagComment": "test",
                   "subTypeValue": null,
                   "flagComment_cy": null,
-                  "dateTimeCreated": "2025-06-09T11:02:09.598Z",
+                  "dateTimeCreated": "2025-06-09T11:04:09.598Z",
                   "hearingRelevant": "Yes",
                   "subTypeValue_cy": null,
                   "otherDescription": null,
@@ -446,7 +446,15 @@ public class CaseFlagsServiceTest {
               "partyName": "John Doe",
               "roleOnCase": "Applicant 1",
               "visibility": "Internal"
-            }
+            },
+            "caApplicant2ExternalFlags": {
+                "details": [],
+                "groupId": "caApplicant2",
+                "partyName": "Martina Graham",
+                "roleOnCase": "Applicant 2",
+                "visibility": "External"
+             },
+             "caApplicant3ExternalFlags": {}
         }
         """;
 
