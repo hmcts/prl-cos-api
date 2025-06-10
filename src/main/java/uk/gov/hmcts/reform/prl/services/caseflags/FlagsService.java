@@ -14,26 +14,25 @@ import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.util.Arrays.asList;
 import static java.util.function.Predicate.not;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class CaseFlagsService {
+public class FlagsService {
 
     public static final String SELECTED_REVIEW_LANG_AND_SM_REQ = "selectedReviewLangAndSmReq";
     public static final String IS_REVIEW_LANG_AND_SM_REQ_REVIEWED = "isReviewLangAndSmReqReviewed";
     public static final String PLEASE_REVIEW_THE_LANGUAGE_AND_SM_REQUEST = "Please review the Language and SM Request";
     public static final String REQUESTED = "Requested";
-    public static final String CASE_FLAGS = "caseFlags";
     public static final String REQUESTED_STATUS_IS_NOT_ALLOWED = "Requested status is not allowed";
     private final ObjectMapper objectMapper;
 
@@ -79,33 +78,93 @@ public class CaseFlagsService {
     }
 
 
-    public List<String> validateNewCaseFlagStatus(Map<String, Object> caseDataBefore,
-                                                  Map<String, Object> caseDataCurrent) {
+    public List<String> validateNewFlagStatus(Map<String, Object> caseDataBefore,
+                                              Map<String, Object> caseDataCurrent) {
         List<String> errors = new ArrayList<>();
-        log.info("validateNewCaseFlagStatus");
-        Flags caseFlagsBefore = objectMapper.convertValue(
-            caseDataBefore.get(CASE_FLAGS), new TypeReference<>() {
-            }
-        );
+        log.info("validateNewFlagStatus");
 
-        List<Element<FlagDetail>> flagDetailsBefore = Optional.ofNullable(caseFlagsBefore)
-            .map(Flags::getDetails)
-            .orElse(Collections.emptyList());
+        List<Element<FlagDetail>> flagsBefore = getAllFlagsToValidate().stream()
+            .map(flag -> objectMapper.convertValue(
+                caseDataBefore.get(flag), new TypeReference<Flags>() {
+                }
+            ))
+            .filter(Objects::nonNull)
+            .flatMap(flags -> flags.getDetails().stream())
+            .toList();
 
-        Flags caseFlagsCurrent = objectMapper.convertValue(
-            caseDataCurrent.get(CASE_FLAGS), new TypeReference<>() {
-            }
-        );
-        log.info("caseFlagsBefore {} caseFlagsCurrent {}", flagDetailsBefore, caseFlagsCurrent);
-        caseFlagsCurrent.getDetails()
-            .stream()
-            .filter(not(flagDetailsBefore::contains))
+        getAllFlagsToValidate().stream()
+            .map(flag -> objectMapper.convertValue(
+                caseDataCurrent.get(flag), new TypeReference<Flags>() {
+                }
+            ))
+            .filter(Objects::nonNull)
+            .flatMap(flags -> flags.getDetails().stream())
+            .filter(not(flagsBefore::contains))
             .map(Element::getValue)
             .peek(flagDetail -> log.info("flagDetail : {}", flagDetail))
             .filter(flagDetail -> REQUESTED.equals(flagDetail.status))
-            .findFirst()
+            .findAny()
             .ifPresent(flagDetail -> errors.add(REQUESTED_STATUS_IS_NOT_ALLOWED));
+
         log.info("errors {}", errors);
         return errors;
+    }
+
+
+
+    private static List<String> getAllFlagsToValidate() {
+        return asList(
+            "caseFlags",
+            "caApplicant1InternalFlags",
+            "caApplicantSolicitor1InternalFlags",
+            "caApplicant2InternalFlags",
+            "caApplicantSolicitor2InternalFlags",
+            "caApplicant3InternalFlags",
+            "caApplicantSolicitor3InternalFlags",
+            "caApplicant4InternalFlags",
+            "caApplicantSolicitor4InternalFlags",
+            "caApplicant5InternalFlags",
+            "caApplicantSolicitor5InternalFlags",
+            "caRespondent1InternalFlags",
+            "caRespondentSolicitor1InternalFlags",
+            "caRespondent2InternalFlags",
+            "caRespondentSolicitor2InternalFlags",
+            "caRespondent3InternalFlags",
+            "caRespondentSolicitor3InternalFlags",
+            "caRespondent4InternalFlags",
+            "caRespondentSolicitor4InternalFlags",
+            "caRespondent5InternalFlags",
+            "caRespondentSolicitor5InternalFlags",
+            "caOtherParty1InternalFlags",
+            "caOtherParty2InternalFlags",
+            "caOtherParty3InternalFlags",
+            "caOtherParty4InternalFlags",
+            "caOtherParty5InternalFlags",
+            "caApplicant1ExternalFlags",
+            "caApplicantSolicitor1ExternalFlags",
+            "caApplicant2ExternalFlags",
+            "caApplicantSolicitor2ExternalFlags",
+            "caApplicant3ExternalFlags",
+            "caApplicantSolicitor3ExternalFlags",
+            "caApplicant4ExternalFlags",
+            "caApplicantSolicitor4ExternalFlags",
+            "caApplicant5ExternalFlags",
+            "caApplicantSolicitor5ExternalFlags",
+            "caRespondent1ExternalFlags",
+            "caRespondentSolicitor1ExternalFlags",
+            "caRespondent2ExternalFlags",
+            "caRespondentSolicitor2ExternalFlags",
+            "caRespondent3ExternalFlags",
+            "caRespondentSolicitor3ExternalFlags",
+            "caRespondent4ExternalFlags",
+            "caRespondentSolicitor4ExternalFlags",
+            "caRespondent5ExternalFlags",
+            "caRespondentSolicitor5ExternalFlags",
+            "caOtherParty1ExternalFlags",
+            "caOtherParty2ExternalFlags",
+            "caOtherParty3ExternalFlags",
+            "caOtherParty4ExternalFlags",
+            "caOtherParty5ExternalFlags"
+        );
     }
 }
