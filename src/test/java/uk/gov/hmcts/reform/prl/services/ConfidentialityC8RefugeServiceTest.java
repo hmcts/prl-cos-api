@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -441,14 +442,14 @@ public class ConfidentialityC8RefugeServiceTest {
             .builder()
             .applicants(applicantList)
             .build();
-        assertNull(confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, ""));
+        assertEquals(new RefugeConfidentialDocumentsRecord(List.of(), List.of()), confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, ""));
     }
 
     @Test
     public void processC8RefugeDocumentsOnAmendForC100OnSubmit() {
         CaseData caseDataBefore = CaseData.builder().build();
         CaseData caseData = CaseData.builder().build();
-        assertNull(confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, ""));
+        assertEquals(new RefugeConfidentialDocumentsRecord(List.of(), List.of()), confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, ""));
     }
 
     @Test
