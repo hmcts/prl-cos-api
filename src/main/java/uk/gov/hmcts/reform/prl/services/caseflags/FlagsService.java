@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
@@ -18,7 +17,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Arrays.asList;
@@ -32,7 +30,6 @@ public class FlagsService {
 
     public static final String SELECTED_REVIEW_LANG_AND_SM_REQ = "selectedReviewLangAndSmReq";
     public static final String IS_REVIEW_LANG_AND_SM_REQ_REVIEWED = "isReviewLangAndSmReqReviewed";
-    public static final String PLEASE_REVIEW_THE_LANGUAGE_AND_SM_REQUEST = "Please review the Language and SM Request";
     public static final String REQUESTED = "Requested";
     public static final String REQUESTED_STATUS_IS_NOT_ALLOWED = "Requested status is not allowed";
     private final ObjectMapper objectMapper;
@@ -59,25 +56,6 @@ public class FlagsService {
             IS_REVIEW_LANG_AND_SM_REQ_REVIEWED,
             null);
     }
-
-    public List<String> isLangAndSmReqReviewed(Map<String, Object> caseDataMap) {
-        List<String> errors = new ArrayList<>();
-        YesOrNo yesOrNo = Optional.ofNullable(caseDataMap.get(IS_REVIEW_LANG_AND_SM_REQ_REVIEWED))
-            .filter(Objects::nonNull)
-            .map(object -> objectMapper.convertValue(
-                caseDataMap.get(IS_REVIEW_LANG_AND_SM_REQ_REVIEWED),
-                new TypeReference<YesOrNo>() {
-                }
-            ))
-            .filter(value -> value.equals(YesOrNo.Yes))
-            .orElse(YesOrNo.No);
-
-        if (yesOrNo.equals(YesOrNo.No)) {
-            errors.add(PLEASE_REVIEW_THE_LANGUAGE_AND_SM_REQUEST);
-        }
-        return errors;
-    }
-
 
     public List<String> validateNewFlagStatus(Map<String, Object> caseDataCurrent) {
         List<String> errors = new ArrayList<>();
