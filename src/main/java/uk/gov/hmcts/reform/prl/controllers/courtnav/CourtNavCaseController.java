@@ -66,19 +66,21 @@ public class CourtNavCaseController {
         @Valid @RequestBody CourtNavFl401 inputData
     ) throws Exception {
 
-        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
-            && Boolean.TRUE.equals(authorisationService.authoriseService(serviceAuthorization))) {
-            CaseData caseData = fl401ApplicationMapper.mapCourtNavData(inputData);
-            caseData = courtLocationService.populateCourtLocation(authorisation, caseData);
-            courtNavCaseService.validateCaseManagementLocation(caseData);
-            CaseDetails caseDetails = courtNavCaseService.createCourtNavCase(authorisation, caseData);
-            log.info("Case has been created {}", caseDetails.getId());
-            courtNavCaseService.refreshTabs(authorisation, String.valueOf(caseDetails.getId()));
-            return ResponseEntity.status(HttpStatus.CREATED).body(new CaseCreationResponse(
-                String.valueOf(caseDetails.getId())));
-        } else {
+        if (!authorisationService.authoriseUser(authorisation)
+            || !authorisationService.authoriseService(serviceAuthorization)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
+
+        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(inputData);
+        caseData = courtLocationService.populateCourtLocation(authorisation, caseData);
+        courtNavCaseService.validateCaseManagementLocation(caseData);
+        CaseDetails caseDetails = courtNavCaseService.createCourtNavCase(authorisation, caseData);
+
+        log.info("Case has been created {}", caseDetails.getId());
+        courtNavCaseService.refreshTabs(authorisation, String.valueOf(caseDetails.getId()));
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(new CaseCreationResponse(String.valueOf(caseDetails.getId())));
     }
 
 
