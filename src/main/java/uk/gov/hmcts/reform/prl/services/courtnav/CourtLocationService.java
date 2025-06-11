@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services.courtnav;
 
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
@@ -18,7 +17,6 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.util.Optional;
 
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CourtLocationService {
@@ -32,12 +30,7 @@ public class CourtLocationService {
 
         if (StringUtils.isNotBlank(epimsId)) {
             Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(epimsId, auth);
-            log.info("about to map court venue");
             if (courtVenue.isPresent()) {
-                log.info("Region: {}", courtVenue.get().getRegionId());
-                log.info("Region name: {}", courtVenue.get().getRegion());
-                log.info("epims: {}", epimsId);
-                log.info("court name: {}", courtVenue.get().getCourtName());
                 return populateFromEpimsId(caseData, courtVenue.get(), epimsId);
             }
         }
