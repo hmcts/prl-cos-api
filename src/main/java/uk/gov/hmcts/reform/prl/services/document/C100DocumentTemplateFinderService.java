@@ -13,8 +13,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSI
 @Slf4j
 public class C100DocumentTemplateFinderService {
 
-
-
     @Value("${document.templates.c100.c100_final_template}")
     protected String c100FinalTemplate;
 
@@ -33,10 +31,8 @@ public class C100DocumentTemplateFinderService {
     @Value("${document.templates.c100.c100_final_welsh_template_v3}")
     protected String c100FinalWelshTemplateV3;
 
-
     @Value("${document.templates.c100.c100_draft_template}")
     protected String c100DraftTemplate;
-
 
     @Value("${document.templates.c100.c100_draft_welsh_template}")
     protected String c100DraftWelshTemplate;
@@ -44,13 +40,11 @@ public class C100DocumentTemplateFinderService {
     @Value("${document.templates.c100.c100_draft_template_v2}")
     protected String c100DraftTemplateV2;
 
-
     @Value("${document.templates.c100.c100_draft_welsh_template_v2}")
     protected String c100DraftWelshTemplateV2;
 
     @Value("${document.templates.c100.c100_draft_template_v3}")
     protected String c100DraftTemplateV3;
-
 
     @Value("${document.templates.c100.c100_draft_welsh_template_v3}")
     protected String c100DraftWelshTemplateV3;
