@@ -20,7 +20,7 @@ import static uk.gov.hmcts.reform.prl.services.caseflags.FlagsService.REQUESTED_
 import static uk.gov.hmcts.reform.prl.services.caseflags.FlagsService.SELECTED_REVIEW_LANG_AND_SM_REQ;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CaseFlagsServiceTest {
+public class FlagsServiceTest {
     ObjectMapper objectMapper = new ObjectMapper();
     private FlagsService flagsService;
 
@@ -283,8 +283,7 @@ public class CaseFlagsServiceTest {
 
     @Test
     public void testPrepareSelectedReviewLangAndSmReq() throws JsonProcessingException {
-        Base64.Encoder encoder = Base64.getEncoder();
-        byte[] encode = encoder.encode(CLIENT_CONTEXT.getBytes());
+        byte[] encode = Base64.getEncoder().encode(CLIENT_CONTEXT.getBytes());
         Map<String, Object> caseDataMap = objectMapper.readValue(CASE_DATA, new TypeReference<>() {});
 
         flagsService.prepareSelectedReviewLangAndSmReq(caseDataMap, new String(encode));
