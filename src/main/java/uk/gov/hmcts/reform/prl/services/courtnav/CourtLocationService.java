@@ -29,13 +29,10 @@ public class CourtLocationService {
 
     public CaseData populateCourtLocation(String auth, CaseData caseData) throws NotFoundException {
         String epimsId = caseData.getSpecialCourtName();
-        log.info("Populating court location for epims id {}", epimsId);
 
         if (StringUtils.isNotBlank(epimsId)) {
             Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(epimsId, auth);
             if (courtVenue.isPresent()) {
-                log.info("Mapping court location for court {}", courtVenue);
-                log.info("Mapping court location for court {}", courtVenue.get().getCourtName());
                 return populateFromEpimsId(caseData, courtVenue.get(), epimsId);
             }
         }
