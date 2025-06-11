@@ -61,7 +61,7 @@ class CourtLocationServiceTest {
 
         assertEquals("Swansea Family Court", result.getCourtName());
         assertEquals(EPIMS_ID, result.getCourtId());
-        assertEquals("7", result.getCaseManagementLocation().getRegionId());
+        assertEquals("7", result.getCaseManagementLocation().getRegion());
         assertEquals("sealImage", result.getCourtSeal());
     }
 
