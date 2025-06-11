@@ -1,17 +1,22 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnum;
 
 import java.util.List;
 
-
+@NoArgsConstructor
+@AllArgsConstructor
 @Data
 @Builder
-public class ApplicantsDetails {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class CourtNavApplicant {
 
     @JsonProperty("applicantFirstName")
     private String firstName;
@@ -31,7 +36,6 @@ public class ApplicantsDetails {
     @JsonProperty("applicantGenderOther")
     private String otherGender;
 
-    @JsonProperty("isShareContactDetailsWithRespondent")
     private boolean shareContactDetailsWithRespondent;
 
     @JsonProperty("applicantPhoneNumber")
@@ -45,7 +49,6 @@ public class ApplicantsDetails {
 
     @JsonProperty("applicantPreferredContact")
     private List<PreferredContactEnum> applicantPreferredContact;
-
 
     @JsonProperty("applicantAddress")
     private CourtNavAddress address;

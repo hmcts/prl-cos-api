@@ -4,21 +4,18 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
-@Data
+@NoArgsConstructor
 @AllArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@Getter
-@Setter
+@Data
 @Builder(toBuilder = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CourtNavMetaData {
 
-    private final String caseOrigin;
-    private final boolean courtNavApproved;
-    private final boolean hasDraftOrder;
-    private final int numberOfAttachments;
-    private final String courtSpecialRequirements;
-
+    private String caseOrigin;
+    private Boolean courtNavApproved;
+    private Boolean hasDraftOrder;
+    private Integer numberOfAttachments;
+    private String courtSpecialRequirements;
 }
