@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers.caseflags;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
