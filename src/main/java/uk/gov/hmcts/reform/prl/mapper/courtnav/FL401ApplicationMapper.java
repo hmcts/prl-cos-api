@@ -73,7 +73,7 @@ public class FL401ApplicationMapper {
             .respondentRelationDateInfoObject(applicantRelationshipMapper.mapRelationDates(courtNavCaseData))
             .respondentRelationOptions(applicantRelationshipMapper.mapRelationOptions(courtNavCaseData))
             .home(mapHomeIfPresent(courtNavCaseData))
-            .fl401StmtOfTruth(statementOfTruthMapper.map(courtNavCaseData))
+            .fl401StmtOfTruth(statementOfTruthMapper.map(courtNavCaseData.getFl401().getStatementOfTruth()))
             .attendHearing(attendHearingMapper.map(courtNavCaseData)
                                .toBuilder()
                                .interpreterNeeds(interpreterNeedsMapper.map(courtNavCaseData))
