@@ -103,20 +103,20 @@ public class CaseFlagsController extends AbstractCallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
+
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Element<FlagDetail> mostRecentlyModified = caseFlagsWaService.validateAllFlags(caseData);
         List<String> errors = new ArrayList<>();
+        Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
         if (REQUESTED.equals(mostRecentlyModified.getValue().getStatus())) {
             errors.add("Please select the status of flag other than Requested");
-        } else {
-            caseData.setCaseFlags(caseDataBefore.getCaseFlags());
-            caseData.setAllPartyFlags(caseDataBefore.getAllPartyFlags());
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .errors(errors)
+                .data(caseDataMap)
+                .build();
         }
 
-        Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .errors(errors)
             .data(caseDataMap)
             .build();
     }
