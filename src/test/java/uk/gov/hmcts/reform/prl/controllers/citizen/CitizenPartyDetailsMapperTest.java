@@ -742,9 +742,9 @@ public class CitizenPartyDetailsMapperTest {
             CaseEvent.CONFIRM_YOUR_DETAILS,
             authToken
         );
+        assertNotNull(citizenUpdatePartyDataContent);
         assertEquals("7pm", citizenUpdatePartyDataContent.updatedCaseDataMap().get("daApplicantContactInstructions"));
         assertEquals("7pm", citizenUpdatePartyDataContent.updatedCaseData().getApplicantsFL401().getResponse().getSafeToCallOption());
-        assertNotNull(citizenUpdatePartyDataContent);
     }
 }
 
