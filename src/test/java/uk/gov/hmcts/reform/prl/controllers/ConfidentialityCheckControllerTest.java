@@ -36,8 +36,8 @@ import java.util.Map;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
-import static org.testng.AssertJUnit.assertNull;
 import static uk.gov.hmcts.reform.prl.controllers.ConfidentialityCheckController.NO_PACKS_AVAILABLE_FOR_CONFIDENTIAL_DETAILS_CHECK;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -191,7 +191,7 @@ public class ConfidentialityCheckControllerTest {
             .caseDetails(CaseDetails.builder()
                              .id(12345L)
                              .data(caseDetails).build()).build();
-        assertNull("test", confidentialityCheckController.handleAboutToSubmit(authToken,s2sToken, callbackRequest).getData().get("test"));
+        assertNull(confidentialityCheckController.handleAboutToSubmit(authToken,s2sToken, callbackRequest).getData().get("test"));
     }
 
     @Test

@@ -24,13 +24,12 @@ import uk.gov.hmcts.reform.sendletter.api.SendLetterResponse;
 import uk.gov.hmcts.reform.sendletter.api.proxy.SendLetterApiProxy;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(PactConsumerTestExt.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -88,7 +87,7 @@ public class SendLetterApiConsumerTest {
         additionalData.put(LETTER_TYPE_KEY, "ApplicationPack");
         additionalData.put(CASE_IDENTIFIER_KEY, caseId);
         additionalData.put(CASE_REFERENCE_NUMBER_KEY, caseId);
-        additionalData.put(RECIPIENTS, Arrays.asList("Mary Richards"));
+        additionalData.put(RECIPIENTS, List.of("Mary Richards"));
 
         List<String> documents = new ArrayList<>();
         String documentInBytes = ResourceLoader.loadJson(VALID_REQUEST_BODY_DOC);

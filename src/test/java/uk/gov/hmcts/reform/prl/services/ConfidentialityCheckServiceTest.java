@@ -480,7 +480,7 @@ public class ConfidentialityCheckServiceTest {
             .applicants(applicants)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
-        
+
         Map<String, Object> caseDetails = new HashMap<>();
         confidentialityCheckService.processOtherC8Documents(caseDetails, caseData);
 
