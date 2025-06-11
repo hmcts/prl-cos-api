@@ -58,6 +58,21 @@ public class CaseFlagsWaService {
         }
     }
 
+    public void setSelectedFlags(CaseData caseData) {
+        Flags selectedFlag = deepCopy(caseData.getAllPartyFlags().getCaApplicant1ExternalFlags(), Flags.class);
+        if (selectedFlag != null && CollectionUtils.isNotEmpty(selectedFlag.getDetails())) {
+            List<Element<FlagDetail>> details = selectedFlag.getDetails().stream()
+                .filter(Objects::nonNull)
+                .filter(e -> REQUESTED.equals(e.getValue().getStatus()))
+                .collect(Collectors.toList());
+
+            if (CollectionUtils.isNotEmpty(details)) {
+                selectedFlag.setDetails(details);
+            }
+            caseData.setSelectedFlags(selectedFlag);
+        }
+    }
+
     public void filterRequestedCaseLevelFlags(Flags caseLevelFlags) {
         if (caseLevelFlags != null && CollectionUtils.isNotEmpty(caseLevelFlags.getDetails())) {
             List<Element<FlagDetail>> flagDetails = deepCopyArray(caseLevelFlags.getDetails(),
@@ -111,6 +126,14 @@ public class CaseFlagsWaService {
     public <T> T deepCopyArray(T object, TypeReference<T> typeReference) {
         try {
             return objectMapper.readValue(objectMapper.writeValueAsString(object), typeReference);
+        } catch (IOException e) {
+            throw new IllegalStateException();
+        }
+    }
+
+    public <T> T deepCopy(T object, Class<T> objectClass) {
+        try {
+            return objectMapper.readValue(objectMapper.writeValueAsString(object), objectClass);
         } catch (IOException e) {
             throw new IllegalStateException();
         }

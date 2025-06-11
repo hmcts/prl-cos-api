@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.caseflags;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -81,6 +82,7 @@ public class CaseFlagsController extends AbstractCallbackController {
                                                                    @RequestBody CallbackRequest callbackRequest) {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        caseFlagsWaService.setSelectedFlags(caseData);
         caseFlagsWaService.filterRequestedCaseLevelFlags(caseData.getCaseFlags());
         caseFlagsWaService.filterRequestedPartyFlags(caseData.getAllPartyFlags());
 
