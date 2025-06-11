@@ -55,7 +55,7 @@ def versions = [
   springSecurityCrypto         : '5.8.16',
   springSecurityRsa            : '1.1.5',
   springBoot                   : '3.5.0',
-  springCloud                  : '4.1.4',
+  springCloud                  : '4.3.0',
   tomcat                       : '10.1.26',
   unirest                      : '1.4.9',
   ccdCaseDocumentAmClient      : '1.59.2',
@@ -401,12 +401,11 @@ dependencies {
 
   runtimeOnly('org.springframework.boot:spring-boot-devtools')
 
-
-    testImplementation group: 'org.awaitility', name: 'awaitility', version: versions.awaitility
-    testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: versions.springCloud
-    testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test') {
-    exclude(module: 'commons-logging')
-    exclude(module: 'android-json')
+  testImplementation group: 'org.awaitility', name: 'awaitility', version: versions.awaitility
+  testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: versions.springCloud
+  testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test') {
+  exclude(module: 'commons-logging')
+  exclude(module: 'android-json')
   }
 
   testImplementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
@@ -471,12 +470,10 @@ dependencies {
   contractTestImplementation group: 'com.google.guava', name: 'guava', version: versions.guava
   contractTestImplementation group: 'au.com.dius.pact.consumer', name: 'junit5', version: versions.pact
   contractTestImplementation group: 'au.com.dius.pact.consumer', name: 'java8', version: versions.pact
+  contractTestImplementation group: 'org.apache.httpcomponents', name: 'httpclient', version: versions.httpComponents
   contractTestRuntimeOnly group: 'com.google.guava', name: 'guava', version: versions.guava
   contractTestRuntimeOnly group: 'au.com.dius.pact.consumer', name: 'junit5', version: versions.pact
   contractTestRuntimeOnly group: 'au.com.dius.pact.consumer', name: 'java8', version: versions.pact
-
-  contractTestImplementation group: 'org.apache.httpcomponents', name: 'httpclient', version: versions.httpComponents
-
 
   contractTestImplementation sourceSets.main.runtimeClasspath
   contractTestImplementation sourceSets.test.runtimeClasspath
@@ -494,8 +491,8 @@ dependencies {
   implementation group:'org.codehaus.sonar-plugins', name:'sonar-pitest-plugin', version: versions.sonarPitest
 }
 
-task fortifyScan(type: JavaExec)  {
-  main = "uk.gov.hmcts.fortifyclient.FortifyClientMainApp"
+tasks.register('fortifyScan', JavaExec) {
+  mainClass = "uk.gov.hmcts.fortifyclient.FortifyClientMainApp"
   classpath += sourceSets.test.runtimeClasspath
   jvmArgs = ['--add-opens=java.base/java.lang.reflect=ALL-UNNAMED']
 }
