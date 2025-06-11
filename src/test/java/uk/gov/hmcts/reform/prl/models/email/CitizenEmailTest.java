@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.email;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenEmail;
 
 import static org.hamcrest.MatcherAssert.assertThat;

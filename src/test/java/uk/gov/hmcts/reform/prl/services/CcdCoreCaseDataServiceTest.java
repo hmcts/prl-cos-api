@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
@@ -19,12 +19,12 @@ import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CcdCoreCaseDataServiceTest {
 
     private final String jurisdiction = "PRIVATELAW";
@@ -46,7 +46,7 @@ public class CcdCoreCaseDataServiceTest {
     @InjectMocks
     CcdCoreCaseDataService coreCaseDataService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         startEventResponse = buildStartEventResponse(eventName, eventToken);
         Map<String, Object> eventData = Map.of("A", "B");

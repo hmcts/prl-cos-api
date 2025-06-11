@@ -1,12 +1,12 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -33,11 +33,11 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AmendOrderServiceTest {
 
     @InjectMocks
@@ -65,7 +65,7 @@ public class AmendOrderServiceTest {
     private List<Element<OrderDetails>> orderList;
     private CaseData caseData;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         originalOrder = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
             .documentFileName("filename.pdf")

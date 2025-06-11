@@ -3,13 +3,13 @@ package uk.gov.hmcts.reform.prl.controllers.managecafcassaccess;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -21,14 +21,14 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.controllers.managecafcassaccess.ManageCafcassAccessController.CAFCASS_ALLOWED_HEADER;
 import static uk.gov.hmcts.reform.prl.controllers.managecafcassaccess.ManageCafcassAccessController.CAFCASS_NOT_ALLOWED_HEADER;
 
 @Slf4j
-@RunWith(MockitoJUnitRunner.Silent.class)
+@ExtendWith(MockitoExtension.class)
 public class ManageCafcassAccessControllerTest {
 
     @InjectMocks

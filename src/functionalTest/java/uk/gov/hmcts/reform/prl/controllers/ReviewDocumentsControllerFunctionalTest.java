@@ -9,9 +9,9 @@ import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -44,7 +44,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 
 @Slf4j
 @SpringBootTest
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringRunner.class)
 @ContextConfiguration
 public class ReviewDocumentsControllerFunctionalTest {
 
@@ -84,7 +84,7 @@ public class ReviewDocumentsControllerFunctionalTest {
     private String requestBodyForCourtAdmin;
 
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         objectMapper.registerModule(new JavaTimeModule());
         requestBodyForSolitior = ResourceLoader.loadJson(REVIEW_DOCUMENT_REQUEST_SOLICITOR);

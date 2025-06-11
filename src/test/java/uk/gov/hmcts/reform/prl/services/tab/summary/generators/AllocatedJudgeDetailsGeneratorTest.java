@@ -1,8 +1,8 @@
 package uk.gov.hmcts.reform.prl.services.tab.summary.generators;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.AllocatedJudgeTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.TierOfJudiciaryEnum;
@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.generator.AllocatedJudgeDeta
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
+@ExtendWith(MockitoExtension.class)
 public class AllocatedJudgeDetailsGeneratorTest {
 
     private final AllocatedJudgeDetailsGenerator generator = new AllocatedJudgeDetailsGenerator();

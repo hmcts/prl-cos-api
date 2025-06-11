@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.prl.tasks;
 
 import com.google.common.collect.ImmutableMap;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.prl.framework.context.DefaultTaskContext;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 

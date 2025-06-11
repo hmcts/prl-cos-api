@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -13,12 +13,13 @@ import uk.gov.hmcts.reform.prl.services.HelpWithFeesService;
 
 import java.util.Arrays;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
+@ExtendWith(MockitoExtension.class)
 public class HelpWithFeesControllerTest {
 
     public static final String AUTH_TOKEN = "Bearer TestAuthToken";
@@ -37,7 +38,7 @@ public class HelpWithFeesControllerTest {
 
     private CallbackRequest callbackRequest;
 
-    @Before
+    @BeforeEach
     public void setup() {
         caseDetails = CaseDetails.builder()
             .id(123L)
@@ -54,10 +55,14 @@ public class HelpWithFeesControllerTest {
         verify(helpWithFeesService, times(1)).handleAboutToStart(caseDetails);
     }
 
-    @Test(expected = RuntimeException.class)
-    public void test_HelpWithFeesAboutToStartThrowsException() {
+    @Test
+    void test_HelpWithFeesAboutToStartThrowsException() {
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
-        helpWithFeesController.handleAboutToStart(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+
+        assertThrows(RuntimeException.class, () -> {
+            helpWithFeesController.handleAboutToStart(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+        });
+
         verifyNoInteractions(helpWithFeesService);
     }
 
@@ -68,10 +73,14 @@ public class HelpWithFeesControllerTest {
         verify(helpWithFeesService, times(1)).setCaseStatus(callbackRequest, AUTH_TOKEN);
     }
 
-    @Test(expected = RuntimeException.class)
-    public void test_HelpWithFeesAboutToSubmitThrowsException() {
+    @Test
+    void test_HelpWithFeesAboutToSubmitThrowsException() {
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
-        helpWithFeesController.handleAboutToSubmit(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+
+        assertThrows(RuntimeException.class, () -> {
+            helpWithFeesController.handleAboutToSubmit(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+        });
+
         verifyNoInteractions(helpWithFeesService);
     }
 
@@ -82,10 +91,14 @@ public class HelpWithFeesControllerTest {
         verify(helpWithFeesService, times(1)).handleSubmitted();
     }
 
-    @Test(expected = RuntimeException.class)
-    public void test_HelpWithFeesHandleSubmittedThrowsException() throws Exception {
+    @Test
+    void test_HelpWithFeesHandleSubmittedThrowsException() {
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
-        helpWithFeesController.handleSubmitted(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+
+        assertThrows(RuntimeException.class, () -> {
+            helpWithFeesController.handleSubmitted(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+        });
+
         verifyNoInteractions(helpWithFeesService);
     }
 
@@ -96,10 +109,14 @@ public class HelpWithFeesControllerTest {
         verify(helpWithFeesService, times(1)).populateHwfDynamicData(callbackRequest.getCaseDetails());
     }
 
-    @Test(expected = RuntimeException.class)
-    public void test_populateHwfDynamicDataThrowsException() {
+    @Test
+    void test_populateHwfDynamicDataThrowsException() {
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
-        helpWithFeesController.populateHwfDynamicData(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+
+        assertThrows(RuntimeException.class, () -> {
+            helpWithFeesController.populateHwfDynamicData(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+        });
+
         verifyNoInteractions(helpWithFeesService);
     }
 
@@ -118,11 +135,14 @@ public class HelpWithFeesControllerTest {
         verify(helpWithFeesService, times(1)).checkForManagerApproval(callbackRequest.getCaseDetails());
     }
 
-    @Test(expected = RuntimeException.class)
-    public void test_checkForManagerApprovalThrowsException() {
+    @Test
+    void test_checkForManagerApprovalThrowsException() {
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
-        helpWithFeesController.checkForManagerApproval(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+
+        assertThrows(RuntimeException.class, () -> {
+            helpWithFeesController.checkForManagerApproval(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+        });
+
         verifyNoInteractions(helpWithFeesService);
     }
-
 }

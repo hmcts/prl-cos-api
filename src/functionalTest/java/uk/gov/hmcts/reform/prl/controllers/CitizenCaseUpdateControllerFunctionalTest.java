@@ -8,8 +8,8 @@ import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.FixMethodOrder;
 import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,7 +28,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @Slf4j
 @Ignore
 @SpringBootTest
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringRunner.class)
 @ContextConfiguration
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class CitizenCaseUpdateControllerFunctionalTest {

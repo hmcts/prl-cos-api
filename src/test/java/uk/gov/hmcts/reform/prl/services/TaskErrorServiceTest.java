@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.EventErrorsEnum;
 import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
@@ -35,7 +35,7 @@ public class TaskErrorServiceTest {
     EventErrorsEnum error2 = TYPE_OF_APPLICATION_ERROR;
     String errorString2 = TYPE_OF_APPLICATION_ERROR.toString();
 
-    @Before
+    @BeforeEach
     public void setUp() {
         taskErrorService = new TaskErrorService();
         taskErrorService.addEventError(event, error, errorString);

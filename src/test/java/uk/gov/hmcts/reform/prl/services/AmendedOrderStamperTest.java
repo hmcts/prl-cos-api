@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -24,7 +24,7 @@ import java.time.LocalTime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AmendedOrderStamperTest {
 
     @Mock
@@ -46,7 +46,7 @@ public class AmendedOrderStamperTest {
 
 
 
-    @Before
+    @BeforeEach
     public void init() {
         when(authTokenGenerator.generate()).thenReturn("s2s");
         when(time.now()).thenReturn(LocalDateTime.of(FIXED_DATE, LocalTime.now()));

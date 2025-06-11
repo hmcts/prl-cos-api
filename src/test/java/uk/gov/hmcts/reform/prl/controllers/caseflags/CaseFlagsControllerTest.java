@@ -1,16 +1,18 @@
 package uk.gov.hmcts.reform.prl.controllers.caseflags;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsWaService;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+@ExtendWith(MockitoExtension.class)
 public class CaseFlagsControllerTest {
 
     public static final String AUTH_TOKEN = "auth-token";
@@ -33,11 +35,16 @@ public class CaseFlagsControllerTest {
             .setUpWaTaskForCaseFlagsEventHandler(Mockito.any(),Mockito.any());
     }
 
-    @Test(expected = RuntimeException.class)
-    public void tesSetUpWaTaskForCaseFlags2WhenAuthorisationFails() {
-
+    @Test
+    void tesSetUpWaTaskForCaseFlags2WhenAuthorisationFails() {
         Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(false);
-        caseFlagsController
-            .setUpWaTaskForCaseFlags2(AUTH_TOKEN, SERVICE_TOKEN, CallbackRequest.builder().build());
+
+        assertThrows(RuntimeException.class, () -> {
+            caseFlagsController.setUpWaTaskForCaseFlags2(
+                AUTH_TOKEN,
+                SERVICE_TOKEN,
+                CallbackRequest.builder().build()
+            );
+        });
     }
 }

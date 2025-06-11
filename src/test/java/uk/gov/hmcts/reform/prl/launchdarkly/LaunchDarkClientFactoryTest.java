@@ -1,8 +1,8 @@
 package uk.gov.hmcts.reform.prl.launchdarkly;
 
 import com.launchdarkly.sdk.server.interfaces.LDClientInterface;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarkClientFactory;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class LaunchDarkClientFactoryTest {
     private LaunchDarkClientFactory factory;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         factory = new LaunchDarkClientFactory();
     }

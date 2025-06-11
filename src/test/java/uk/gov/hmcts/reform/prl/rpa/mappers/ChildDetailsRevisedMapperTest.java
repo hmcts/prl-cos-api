@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.prl.rpa.mappers;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -15,10 +15,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ChildDetailsRevisedMapperTest {
 
     @InjectMocks
@@ -29,7 +29,7 @@ public class ChildDetailsRevisedMapperTest {
 
     List<OrderTypeEnum> appliedFor;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         appliedFor = new ArrayList<>();
         appliedFor.add(OrderTypeEnum.childArrangementsOrder);

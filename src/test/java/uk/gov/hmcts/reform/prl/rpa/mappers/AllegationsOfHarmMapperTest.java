@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.prl.rpa.mappers;
 
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -18,9 +18,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AllegationsOfHarmMapperTest {
 
     @InjectMocks
@@ -35,7 +35,7 @@ public class AllegationsOfHarmMapperTest {
 
     Behaviours behaviours;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         physicalAbuseVictim = new ArrayList<>();
         physicalAbuseVictim.add(ApplicantOrChildren.applicants);

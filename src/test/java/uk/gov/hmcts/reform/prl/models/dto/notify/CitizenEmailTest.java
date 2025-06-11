@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.dto.notify;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.prl.utils.CitizenEmailProvider;
 import uk.gov.hmcts.reform.prl.utils.EmailTemplateVarsProvider;
 

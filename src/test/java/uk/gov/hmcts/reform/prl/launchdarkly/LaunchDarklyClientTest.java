@@ -2,11 +2,11 @@ package uk.gov.hmcts.reform.prl.launchdarkly;
 
 import com.launchdarkly.sdk.LDContext;
 import com.launchdarkly.sdk.server.interfaces.LDClientInterface;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarkClientFactory;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 
@@ -17,7 +17,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class LaunchDarklyClientTest {
     private static final String SDK_KEY = "fake key";
     private static final String FAKE_FEATURE = "fake feature";
@@ -33,7 +33,7 @@ public class LaunchDarklyClientTest {
 
     private LaunchDarklyClient launchDarklyClient;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(ldClientFactory.create(eq(SDK_KEY), anyBoolean())).thenReturn(ldClient);
         launchDarklyClient = new LaunchDarklyClient(ldClientFactory, SDK_KEY, true);

@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentEventErrorsEnum;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
@@ -31,7 +31,7 @@ public class RespondentTaskErrorServiceTest {
     String errorString = ALLEGATIONS_OF_HARM_ERROR.toString();
 
 
-    @Before
+    @BeforeEach
     public void setUp() {
         respondentTaskErrorService = new RespondentTaskErrorService();
         respondentTaskErrorService.addEventError(event, error, errorString);

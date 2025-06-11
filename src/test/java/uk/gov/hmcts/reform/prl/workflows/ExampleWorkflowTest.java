@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.prl.workflows;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.tasks.emails.ExampleEmailTask;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsProvider;
@@ -14,7 +14,7 @@ import static org.hamcrest.Matchers.is;
 import static uk.gov.hmcts.reform.prl.utils.Verificators.mockTasksExecution;
 import static uk.gov.hmcts.reform.prl.utils.Verificators.verifyTaskWasCalled;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ExampleWorkflowTest {
 
     @Mock

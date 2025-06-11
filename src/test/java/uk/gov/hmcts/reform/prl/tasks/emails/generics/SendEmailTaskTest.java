@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.prl.tasks.emails.generics;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.framework.context.TaskContext;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_EMAIL;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class SendEmailTaskTest {
 
     public static final EmailTemplateNames EMAIL_TEMPLATE_ID = EmailTemplateNames.EXAMPLE;
@@ -34,7 +34,7 @@ public class SendEmailTaskTest {
 
     private SendEmailTask task;
 
-    @Before
+    @BeforeEach
     public void getSendEmailTaskInstance() {
         task = new SendEmailTask(emailService) {
             @Override

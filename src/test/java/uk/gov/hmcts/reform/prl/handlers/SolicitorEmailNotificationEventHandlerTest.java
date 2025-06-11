@@ -2,13 +2,13 @@ package uk.gov.hmcts.reform.prl.handlers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.events.SolicitorNotificationEmailEvent;
@@ -17,13 +17,13 @@ import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 
-import java.util.Map;
 import javax.json.JsonValue;
+import java.util.Map;
 
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
+@ExtendWith(MockitoExtension.class)
 @Slf4j
 public class SolicitorEmailNotificationEventHandlerTest {
     @Mock
@@ -40,7 +40,7 @@ public class SolicitorEmailNotificationEventHandlerTest {
 
     private SolicitorNotificationEmailEvent solicitorNotificationEmailEvent;
 
-    @Before
+    @BeforeEach
     public void init() {
         solicitorNotificationEmailEvent
             = SolicitorNotificationEmailEvent.builder()

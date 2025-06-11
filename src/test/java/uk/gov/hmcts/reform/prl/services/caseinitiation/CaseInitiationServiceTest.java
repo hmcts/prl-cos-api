@@ -1,14 +1,14 @@
 package uk.gov.hmcts.reform.prl.services.caseinitiation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -35,7 +35,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.services.caseinitiation.CaseInitiationService.COURT_LIST;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
+@ExtendWith(MockitoExtension.class)
 public class CaseInitiationServiceTest {
 
     public static final String AUTHORISATION = "Bearer token";
@@ -61,7 +61,7 @@ public class CaseInitiationServiceTest {
     private Map<String, Object> caseDataMap;
     public static final String CASE_ID = "1234567891234567";
 
-    @Before
+    @BeforeEach
     public void setup() {
         caseDataMap = new HashMap<>();
         caseDetails = CaseDetails.builder()

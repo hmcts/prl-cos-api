@@ -2,13 +2,13 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
@@ -32,14 +32,14 @@ import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @PropertySource(value = "classpath:application.yaml")
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class FeeAndPayServiceRequestControllerTest {
 
     private MockMvc mockMvc;
@@ -80,7 +80,7 @@ public class FeeAndPayServiceRequestControllerTest {
     public static final String HWF_SUPPRESSION_ERROR_MESSAGE =
         "Help with Fees is not yet available in Family Private Law digital service. Select 'No' to continue with your application";
 
-    @Before
+    @BeforeEach
     public void setUp() {
         errorList = new ArrayList<>();
         paymentServiceResponse = PaymentServiceResponse.builder()

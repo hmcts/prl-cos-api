@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.prl.services.document;
 
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -13,7 +13,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSI
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class C100DocumentTemplateFinderServiceTest {
 
 
@@ -23,7 +23,7 @@ public class C100DocumentTemplateFinderServiceTest {
     CaseData caseData;
 
 
-    @Before
+    @BeforeEach
     public void setUp() {
         ReflectionTestUtils.setField(c100DocumentTemplateFinderService, "c100FinalTemplate", "c100FinalTemplate");
         ReflectionTestUtils.setField(c100DocumentTemplateFinderService, "c100FinalWelshTemplate", "c100FinalWelshTemplate");

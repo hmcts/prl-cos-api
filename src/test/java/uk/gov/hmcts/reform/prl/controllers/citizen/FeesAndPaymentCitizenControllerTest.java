@@ -1,9 +1,8 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -24,8 +23,8 @@ import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
 
 import java.math.BigDecimal;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FETCH_FEE_INVALID_APPLICATION_TYPE;
@@ -57,7 +56,7 @@ public class FeesAndPaymentCitizenControllerTest {
     public static final String APPLICANT_NAME = "APPLICANT_NAME";
 
 
-    @Before
+    @BeforeEach
     public void setUp() {
 
         MockitoAnnotations.openMocks(this);
@@ -76,7 +75,7 @@ public class FeesAndPaymentCitizenControllerTest {
         when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
         when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
         feesAndPaymentCitizenController.fetchFeesAmount(authToken, s2sToken);
-        Assert.assertEquals(feeResponseForCitizen.getAmount(), feeResponse.getAmount().toString());
+        assertEquals(feeResponseForCitizen.getAmount(), feeResponse.getAmount().toString());
     }
 
     @Test
@@ -276,10 +275,12 @@ public class FeesAndPaymentCitizenControllerTest {
         assertEquals(feeResponseForCitizen, actualResponse);
     }
 
-    @Test(expected = RuntimeException.class)
-    public void testFetchFeeInvalidClient() {
+    @Test
+    void testFetchFeeInvalidClient() {
         when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.FALSE);
-        feesAndPaymentCitizenController.fetchFee(s2sToken, anyString());
-    }
 
+        assertThrows(RuntimeException.class, () -> {
+            feesAndPaymentCitizenController.fetchFee(s2sToken, anyString());
+        });
+    }
 }

@@ -1,9 +1,9 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import org.junit.Before;
 import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -29,7 +29,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 /*
    These test cases will be enabled once we have merged and integrated with Fee and Pay on Demo environment.
 */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
 @Ignore
 public class FeeAndPayServiceRequestControllerFunctionalTest {
@@ -44,7 +44,7 @@ public class FeeAndPayServiceRequestControllerFunctionalTest {
 
     private static final String CREATE_SERVICE_REQUEST = "requests/call-back-controller-about-to-submit-case-creation.json";
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }

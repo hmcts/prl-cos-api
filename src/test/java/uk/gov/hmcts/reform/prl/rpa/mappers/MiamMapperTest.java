@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.prl.rpa.mappers;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.enums.MiamDomesticViolenceChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamOtherGroundsChecklistEnum;
@@ -16,9 +16,9 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
 
 import java.util.ArrayList;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class MiamMapperTest {
 
     @InjectMocks
@@ -28,7 +28,7 @@ public class MiamMapperTest {
     ArrayList<MiamDomesticViolenceChecklistEnum> miamDomesticViolenceChecklistEnum;
     ArrayList<MiamUrgencyReasonChecklistEnum> miamUrgencyReasonChecklistEnum;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         miamExemptionsChecklistEnum = new ArrayList<>();
         miamExemptionsChecklistEnum.add(MiamExemptionsChecklistEnum.previousMIAMattendance);

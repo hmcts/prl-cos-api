@@ -1,13 +1,13 @@
 package uk.gov.hmcts.reform.prl.handlers;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
@@ -46,7 +46,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
+@ExtendWith(MockitoExtension.class)
 @Slf4j
 public class TransferToAnotherCourtEventHandlerTest {
 
@@ -77,7 +77,7 @@ public class TransferToAnotherCourtEventHandlerTest {
 
     private TransferToAnotherCourtEvent noTransferToAnotherCourtEvent;
 
-    @Before
+    @BeforeEach
     public void init() {
         PartyDetails applicant1 = PartyDetails.builder()
             .firstName("af1").lastName("al1")

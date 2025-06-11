@@ -2,9 +2,9 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,7 +28,7 @@ import static uk.gov.hmcts.reform.prl.util.TestConstants.TEST_AUTH_TOKEN;
 
 @Slf4j
 @SpringBootTest
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringRunner.class)
 @ContextConfiguration
 public class CaseInitiationControllerIntegrationTest {
 
@@ -43,7 +43,7 @@ public class CaseInitiationControllerIntegrationTest {
     @MockBean
     AuthorisationService authorisationService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }

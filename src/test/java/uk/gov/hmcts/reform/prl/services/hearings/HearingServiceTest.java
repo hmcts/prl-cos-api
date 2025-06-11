@@ -4,14 +4,14 @@ import feign.FeignException;
 import feign.Request;
 import feign.Response;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -49,7 +49,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class HearingServiceTest {
 
     @Value("#{'${hearing_component.futureHearingStatus}'.split(',')}")
@@ -91,7 +91,7 @@ public class HearingServiceTest {
     PartyDetails applicant;
     PartyDetails respondent;
 
-    @Before
+    @BeforeEach
     public void init() {
 
         LocalDateTime hearingStartDate = LocalDateTime.now().plusDays(5);

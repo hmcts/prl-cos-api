@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.prl.utils.caseflags;
 
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -20,7 +20,7 @@ import java.util.UUID;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
+@ExtendWith(MockitoExtension.class)
 @SuppressWarnings({"java:S5976"})
 public class PartyLevelCaseFlagsGeneratorTest {
 
@@ -32,7 +32,7 @@ public class PartyLevelCaseFlagsGeneratorTest {
     private CaseDetails caseDetails;
     private Map<String, Object> caseDataMap;
 
-    @Before
+    @BeforeEach
     public void setup() {
         caseDataMap = new HashMap<>();
         caseDetails = CaseDetails.builder()

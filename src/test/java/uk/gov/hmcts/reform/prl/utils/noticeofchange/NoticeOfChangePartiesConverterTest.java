@@ -1,17 +1,17 @@
 package uk.gov.hmcts.reform.prl.utils.noticeofchange;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeParties;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
+@ExtendWith(MockitoExtension.class)
 public class NoticeOfChangePartiesConverterTest {
 
     @InjectMocks
@@ -19,7 +19,7 @@ public class NoticeOfChangePartiesConverterTest {
 
     PartyDetails partyDetails;
 
-    @Before
+    @BeforeEach
     public void setUp() {
 
         partyDetails =

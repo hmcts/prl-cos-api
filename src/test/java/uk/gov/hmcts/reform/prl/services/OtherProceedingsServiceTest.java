@@ -2,11 +2,11 @@ package uk.gov.hmcts.reform.prl.services;
 
 
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.enums.ProceedingsEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
+@ExtendWith(MockitoExtension.class)
 public class OtherProceedingsServiceTest {
 
     @InjectMocks
@@ -29,7 +29,7 @@ public class OtherProceedingsServiceTest {
 
     ArrayList<TypeOfOrderEnum> typeOfOrder;
 
-    @Before
+    @BeforeEach
     public void setUp() {
 
         typeOfOrder = new ArrayList<>();

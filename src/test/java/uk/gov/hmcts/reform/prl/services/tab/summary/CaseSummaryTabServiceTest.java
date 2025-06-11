@@ -2,13 +2,13 @@ package uk.gov.hmcts.reform.prl.services.tab.summary;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.CaseSummary;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.OtherProceedings;
@@ -31,12 +31,12 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CaseSummaryTabServiceTest {
 
     @InjectMocks
@@ -93,7 +93,7 @@ public class CaseSummaryTabServiceTest {
 
     private static final String[] EMPTY_ARRAY = {};
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(allocatedJudgeDetailsGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY0);
         when(refugeCaseGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY1);

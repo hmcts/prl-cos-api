@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
@@ -21,11 +21,11 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
+@ExtendWith(MockitoExtension.class)
 public class ResponseSubmitCheckerTest {
 
     @InjectMocks
@@ -70,7 +70,7 @@ public class ResponseSubmitCheckerTest {
 
     PartyDetails emptyRespondent;
 
-    @Before
+    @BeforeEach
     public void setup() {
         emptyRespondent = PartyDetails.builder().build();
 

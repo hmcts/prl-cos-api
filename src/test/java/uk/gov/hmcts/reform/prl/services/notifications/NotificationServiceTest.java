@@ -1,14 +1,14 @@
 package uk.gov.hmcts.reform.prl.services.notifications;
 
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -39,7 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.awaitility.Awaitility.await;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -59,7 +59,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_CA
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
+@ExtendWith(MockitoExtension.class)
 public class NotificationServiceTest {
 
     @InjectMocks
@@ -92,7 +92,7 @@ public class NotificationServiceTest {
     private boolean isCaseTypeIdC100 = true;
     private String uploaderRole;
 
-    @Before
+    @BeforeEach
     public void init() {
         when(systemUserService.getSysUserToken()).thenReturn("auth");
         uploaderRole = CITIZEN;

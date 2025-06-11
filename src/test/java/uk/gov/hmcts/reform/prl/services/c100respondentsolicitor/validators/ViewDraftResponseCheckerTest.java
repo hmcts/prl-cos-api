@@ -1,15 +1,15 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
+@ExtendWith(MockitoExtension.class)
 public class ViewDraftResponseCheckerTest {
 
     @InjectMocks
@@ -17,7 +17,7 @@ public class ViewDraftResponseCheckerTest {
 
     PartyDetails respondent;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         respondent = PartyDetails.builder().build();
     }

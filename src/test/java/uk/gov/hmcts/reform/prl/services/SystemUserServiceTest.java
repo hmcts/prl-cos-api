@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.microsoft.applicationinsights.boot.dependencies.apachecommons.lang3.RandomStringUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.OAuth2Configuration;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
@@ -17,7 +17,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
+@ExtendWith(MockitoExtension.class)
 public class SystemUserServiceTest {
     private static final String USERNAME = "username";
     private static final String PASSWORD = "password";
@@ -35,7 +35,7 @@ public class SystemUserServiceTest {
 
     String token = "";
 
-    @Before
+    @BeforeEach
     public void setUp() {
         systemUserService = new SystemUserService(auth, userConfig, idamClient);
         token = RandomStringUtils.randomAlphanumeric(10);

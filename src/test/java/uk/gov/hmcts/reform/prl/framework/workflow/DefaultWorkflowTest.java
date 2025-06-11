@@ -2,24 +2,25 @@ package uk.gov.hmcts.reform.prl.framework.workflow;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.framework.context.DefaultTaskContext;
 import uk.gov.hmcts.reform.prl.framework.exceptions.TaskException;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.framework.task.Task;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DefaultWorkflowTest {
 
     private DefaultWorkflow<String> defaultWorkflow;
     private String payload;
 
-    @Before
+    @BeforeEach
     public void setup() {
         defaultWorkflow = new DefaultWorkflow<>();
         payload = "";
@@ -79,17 +80,24 @@ public class DefaultWorkflowTest {
         assertEquals("testValue", defaultWorkflow.execute(tasks, payload, pair));
     }
 
-    @Test(expected = NullPointerException.class)
-    public void executeShouldThrowExceptionWithNoTasks() throws Exception {
-        defaultWorkflow.execute(null, payload);
+    @Test
+    void executeShouldThrowExceptionWithNoTasks() throws Exception {
+        assertThrows(NullPointerException.class, () -> {
+            defaultWorkflow.execute(null, payload);
+        });
     }
 
-    @Test(expected = WorkflowException.class)
-    public void executeShouldThrowExceptionWhenATaskExceptionIsThrown() throws Exception {
-        Task[] tasks = new Task[] { (context, payload) -> {
-            throw new TaskException("Error"); }
+    @Test
+    void executeShouldThrowExceptionWhenATaskExceptionIsThrown() throws Exception {
+        Task[] tasks = new Task[] {
+            (context, payload) -> {
+                throw new TaskException("Error");
+            }
         };
-        defaultWorkflow.execute(tasks, payload);
+
+        assertThrows(WorkflowException.class, () -> {
+            defaultWorkflow.execute(tasks, payload);
+        });
     }
 
     @Test

@@ -1,9 +1,10 @@
 package uk.gov.hmcts.reform.prl.utils;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class EmailObfuscatorTest {
 
@@ -20,23 +21,31 @@ public class EmailObfuscatorTest {
         assertThat(EmailObfuscator.obfuscate("abcdef@example.com"), is("a***f@example.com"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void obfuscateNullShouldThrowException() {
-        EmailObfuscator.obfuscate(null);
+    @Test
+    void obfuscateNullShouldThrowException() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            EmailObfuscator.obfuscate(null);
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void obfuscateEmptyStringShouldThrowException() {
-        EmailObfuscator.obfuscate("");
+    @Test
+    void obfuscateEmptyStringShouldThrowException() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            EmailObfuscator.obfuscate("");
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void obfuscateTooShortEmailShouldThrowException() {
-        EmailObfuscator.obfuscate("@example.com");
+    @Test
+    void obfuscateTooShortEmailShouldThrowException() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            EmailObfuscator.obfuscate("@example.com");
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void obfuscateInvalidEmailShouldThrowException() {
-        EmailObfuscator.obfuscate("example.com");
+    @Test
+    void obfuscateInvalidEmailShouldThrowException() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            EmailObfuscator.obfuscate("example.com");
+        });
     }
 }

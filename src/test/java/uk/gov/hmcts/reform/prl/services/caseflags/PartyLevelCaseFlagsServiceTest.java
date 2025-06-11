@@ -2,13 +2,13 @@ package uk.gov.hmcts.reform.prl.services.caseflags;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
@@ -44,7 +44,7 @@ import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.CAR
 import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.DAAPPLICANTSOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.DARESPONDENTSOLICITOR;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class PartyLevelCaseFlagsServiceTest {
 
     public static final String CASE_ID = "1234567891234567";
@@ -74,7 +74,7 @@ public class PartyLevelCaseFlagsServiceTest {
     private static final String AMEND_RESPONDENT_DETAILS = "amendRespondentsDetails";
     private static final String AMEND_OTHER_PEOPLE_IN_THE_CASE = "amendOtherPeopleInTheCaseRevised";
 
-    @Before
+    @BeforeEach
     public void setup() {
         caseDataMap = new HashMap<>();
         caseDetails = CaseDetails.builder()
