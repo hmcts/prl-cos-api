@@ -7,11 +7,12 @@ import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ApplicantsDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavAddress;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavApplicant;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavDate;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnum;
 
+import java.lang.reflect.Field;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -21,16 +22,21 @@ import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.Gender.male;
 
 class CourtNavApplicantMapperTest {
+
     private CourtNavApplicantMapper courtNavApplicantMapper;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         CourtNavAddressMapper addressMapper = Mappers.getMapper(CourtNavAddressMapper.class);
-        courtNavApplicantMapper = new CourtNavApplicantMapper(addressMapper);
+        courtNavApplicantMapper = Mappers.getMapper(CourtNavApplicantMapper.class);
+
+        Field field = courtNavApplicantMapper.getClass().getDeclaredField("courtNavAddressMapper");
+        field.setAccessible(true);
+        field.set(courtNavApplicantMapper, addressMapper);
     }
 
     @Test
-    void shouldMapFullApplicantDetailsCorrectly() {
+    void shouldMapFullApplicantCorrectly() {
         CourtNavAddress testAddress = CourtNavAddress.builder()
             .addressLine1("1 Main St")
             .postTown("Townsville")
@@ -39,7 +45,7 @@ class CourtNavApplicantMapperTest {
             .county("County")
             .build();
 
-        ApplicantsDetails input = ApplicantsDetails.builder()
+        CourtNavApplicant input = CourtNavApplicant.builder()
             .firstName("Jane")
             .lastName("Doe")
             .previousName("JD")
@@ -89,7 +95,7 @@ class CourtNavApplicantMapperTest {
 
     @Test
     void shouldHandleNullAddressAndContactFieldsSafely() {
-        ApplicantsDetails input = ApplicantsDetails.builder()
+        CourtNavApplicant input = CourtNavApplicant.builder()
             .firstName("Test")
             .lastName("User")
             .dateOfBirth(new CourtNavDate(12, 12, 2000))
@@ -116,7 +122,7 @@ class CourtNavApplicantMapperTest {
             .county("County")
             .build();
 
-        ApplicantsDetails input = ApplicantsDetails.builder()
+        CourtNavApplicant input = CourtNavApplicant.builder()
             .firstName("Alex")
             .lastName("Taylor")
             .dateOfBirth(new CourtNavDate(5, 5, 1995))
