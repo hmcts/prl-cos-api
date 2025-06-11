@@ -50,7 +50,7 @@ public class CaseFlagsControllerFunctionalTest {
             .body(requestBody)
             .when()
             .contentType("application/json")
-            .post("/caseflags/review-additional-application/about-to-start")
+            .post("/caseflags/review-lang-sm/about-to-start")
             .then()
             .assertThat().statusCode(200);
     }
