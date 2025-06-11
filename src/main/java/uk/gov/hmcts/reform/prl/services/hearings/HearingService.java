@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services.hearings;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -33,10 +32,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor
 public class HearingService {
-
-    private List<CaseLinkedData> caseLinkedData;
 
     private final AuthTokenGenerator authTokenGenerator;
 
@@ -84,6 +81,7 @@ public class HearingService {
 
 
     public List<CaseLinkedData> getCaseLinkedData(String userToken, CaseLinkedRequest caseLinkedRequest) {
+        List<CaseLinkedData> caseLinkedData = Collections.emptyList();
 
         try {
             caseLinkedData = hearingApiClient.getCaseLinkedData(userToken, authTokenGenerator.generate(), caseLinkedRequest);
