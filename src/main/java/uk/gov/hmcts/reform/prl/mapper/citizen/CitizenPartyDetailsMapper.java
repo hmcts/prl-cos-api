@@ -339,8 +339,13 @@ public class CitizenPartyDetailsMapper {
                     caseEvent, caseData.getNewChildDetails()
                 );
                 caseData = caseData.toBuilder().applicantsFL401(partyDetails).build();
-                if (partyDetails.getResponse() != null && partyDetails.getResponse().getSafeToCallOption() != null) {
-                    caseDataMapToBeUpdated.put("daApplicantContactInstructions", partyDetails.getResponse().getSafeToCallOption());
+                if (partyDetails.getResponse() != null) {
+                    String safeToCallOption = partyDetails.getResponse().getSafeToCallOption();
+                    if (safeToCallOption != null && !safeToCallOption.trim().isEmpty()) {
+                        caseDataMapToBeUpdated.put("daApplicantContactInstructions", partyDetails.getResponse().getSafeToCallOption());
+                    } else {
+                        caseDataMapToBeUpdated.remove("daApplicantContactInstructions");
+                    }
                 }
                 caseDataMapToBeUpdated.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
                 return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
