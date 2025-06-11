@@ -41,7 +41,7 @@ public class CourtNavCaseControllerFunctionalTest {
     @MockBean
     private FL401ApplicationMapper fl401ApplicationMapper;
     @MockBean
-    protected CourtNavCaseService courtNavCaseServic;
+    protected CourtNavCaseService courtNavCaseService;
     @MockBean
     private AuthorisationService authorisationService;
     @Autowired
