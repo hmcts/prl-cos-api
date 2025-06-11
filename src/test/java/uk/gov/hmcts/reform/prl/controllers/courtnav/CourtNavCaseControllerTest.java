@@ -102,7 +102,7 @@ public class CourtNavCaseControllerTest {
         CourtNavFl401 courtNavCaseData = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
                        .beforeStart(BeforeStart.builder()
-                                        .applicantHowOld(ApplicantAge.eighteenOrOlder)
+                                        .applicantAge(ApplicantAge.eighteenOrOlder)
                                         .build())
                        .build())
             .metaData(CourtNavMetaData.builder()
@@ -172,7 +172,7 @@ public class CourtNavCaseControllerTest {
             1234567891234567L).data(Map.of("id", "1234567891234567")).build());
         CourtNavFl401 courtNavCaseData = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
-                       .beforeStart(BeforeStart.builder().applicantHowOld(
+                       .beforeStart(BeforeStart.builder().applicantAge(
                            ApplicantAge.eighteenOrOlder).build()).build())
             .build();
         when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData)).thenReturn(caseData);
@@ -189,7 +189,7 @@ public class CourtNavCaseControllerTest {
             1234567891234567L).data(Map.of("id", "1234567891234567")).build());
         CourtNavFl401 courtNavCaseData = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
-                       .beforeStart(BeforeStart.builder().applicantHowOld(
+                       .beforeStart(BeforeStart.builder().applicantAge(
                            ApplicantAge.eighteenOrOlder).build()).build())
             .build();
         when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData)).thenReturn(caseData);
@@ -201,7 +201,7 @@ public class CourtNavCaseControllerTest {
     public void shouldNotCreateCaseWhenCalledWithInvalidS2SToken() throws Exception {
         CourtNavFl401 courtNavCaseData = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
-                       .beforeStart(BeforeStart.builder().applicantHowOld(
+                       .beforeStart(BeforeStart.builder().applicantAge(
                            ApplicantAge.eighteenOrOlder).build()).build())
             .build();
         ResponseEntity response = courtNavCaseController
@@ -265,7 +265,7 @@ public class CourtNavCaseControllerTest {
         CourtNavFl401 courtNavCaseData = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
                        .beforeStart(BeforeStart.builder()
-                                        .applicantHowOld(ApplicantAge.eighteenOrOlder)
+                                        .applicantAge(ApplicantAge.eighteenOrOlder)
                                         .build())
                        .build())
             .metaData(CourtNavMetaData.builder()
