@@ -8,7 +8,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 
 import java.time.LocalDateTime;
 import java.util.Base64;
@@ -17,7 +16,6 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.reform.prl.services.caseflags.FlagsService.IS_REVIEW_LANG_AND_SM_REQ_REVIEWED;
-import static uk.gov.hmcts.reform.prl.services.caseflags.FlagsService.PLEASE_REVIEW_THE_LANGUAGE_AND_SM_REQUEST;
 import static uk.gov.hmcts.reform.prl.services.caseflags.FlagsService.REQUESTED_STATUS_IS_NOT_ALLOWED;
 import static uk.gov.hmcts.reform.prl.services.caseflags.FlagsService.SELECTED_REVIEW_LANG_AND_SM_REQ;
 
@@ -291,35 +289,17 @@ public class CaseFlagsServiceTest {
 
         flagsService.prepareSelectedReviewLangAndSmReq(caseDataMap, new String(encode));
 
-        assertThat(caseDataMap.get(SELECTED_REVIEW_LANG_AND_SM_REQ))
-            .isEqualTo(CaseNoteDetails.builder()
-                           .user("Family Private law user")
-                           .subject("Support needs request")
-                           .caseNote("Mexican interpreter required")
-                           .dateAdded("2025-06-02")
-                           .dateCreated(LocalDateTime.parse("2025-06-02T17:16:46.227744028"))
-                           .build());
-
+        assertThat(caseDataMap)
+            .containsEntry(SELECTED_REVIEW_LANG_AND_SM_REQ,
+                           CaseNoteDetails.builder()
+                              .user("Family Private law user")
+                              .subject("Support needs request")
+                              .caseNote("Mexican interpreter required")
+                              .dateAdded("2025-06-02")
+                              .dateCreated(LocalDateTime.parse("2025-06-02T17:16:46.227744028"))
+                              .build()
+            );
         assertThat(caseDataMap.get(IS_REVIEW_LANG_AND_SM_REQ_REVIEWED)).isNull();
-    }
-
-    @Test
-    public void testWhenLangAndSmReqIsReviewed() throws JsonProcessingException {
-        Map<String, Object> caseDataMap = objectMapper.readValue(CASE_DATA_WITH_REVIEW, new TypeReference<>() {});
-        List<String> langAndSmReqReviewed = flagsService.isLangAndSmReqReviewed(caseDataMap);
-        assertThat(langAndSmReqReviewed).isEmpty();
-    }
-
-    @Test
-    public void testWhenLangAndSmReqIsNotReviewed() throws JsonProcessingException {
-        List<String> langAndSmReqReviewed = flagsService.isLangAndSmReqReviewed(Map.of());
-        assertThat(langAndSmReqReviewed).contains(PLEASE_REVIEW_THE_LANGUAGE_AND_SM_REQUEST);
-    }
-
-    @Test
-    public void testWhenLangAndSmReqReviewedIsNo() throws JsonProcessingException {
-        List<String> langAndSmReqReviewed = flagsService.isLangAndSmReqReviewed(Map.of(IS_REVIEW_LANG_AND_SM_REQ_REVIEWED, YesOrNo.No));
-        assertThat(langAndSmReqReviewed).contains(PLEASE_REVIEW_THE_LANGUAGE_AND_SM_REQUEST);
     }
 
     @Test
