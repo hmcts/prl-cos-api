@@ -1,24 +1,37 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ConsentEnum;
 
 import java.util.List;
 
+@NoArgsConstructor
+@AllArgsConstructor
 @Data
 @Builder(toBuilder = true)
-@Getter
-@Setter
-@AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CourtNavStatementOfTruth {
-    private final List<ConsentEnum> declaration;
-    private final String signature;
-    private final CourtNavDate signatureDate;
-    private final String signatureFullName;
-    private final String representativeFirmName;
-    private final String representativePositionHeld;
+
+    @JsonProperty("declaration")
+    private List<ConsentEnum> applicantConsent;
+
+    @JsonProperty("signature")
+    private String signature;
+
+    @JsonProperty("signatureDate")
+    private CourtNavDate date;
+
+    @JsonProperty("signatureFullName")
+    private String fullname;
+
+    @JsonProperty("representativeFirmName")
+    private String nameOfFirm;
+
+    @JsonProperty("representativePositionHeld")
+    private String signOnBehalf;
 }

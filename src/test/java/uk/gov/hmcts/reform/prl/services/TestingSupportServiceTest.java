@@ -294,7 +294,7 @@ public class TestingSupportServiceTest {
 
         courtNavFl401 = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
-                       .beforeStart(BeforeStart.builder().applicantHowOld(
+                       .beforeStart(BeforeStart.builder().applicantAge(
                            ApplicantAge.eighteenOrOlder).build()).build())
             .build();
 

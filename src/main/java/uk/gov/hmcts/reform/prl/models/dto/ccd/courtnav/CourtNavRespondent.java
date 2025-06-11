@@ -1,31 +1,31 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 
+@NoArgsConstructor
+@AllArgsConstructor
 @Data
 @Builder(toBuilder = true)
-@Getter
-@Setter
-@AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CourtNavRespondent {
 
     @JsonProperty("respondentFirstName")
-    private final String firstName;
+    private String firstName;
 
     @JsonProperty("respondentLastName")
-    private final String lastName;
+    private String lastName;
 
     @JsonProperty("respondentOtherNames")
-    private final String previousName;
+    private String previousName;
 
     @JsonProperty("respondentDateOfBirth")
-    private final CourtNavDate dateOfBirth;
+    private CourtNavDate dateOfBirth;
 
     @JsonProperty("respondentPhoneNumber")
     private String phoneNumber;
@@ -37,5 +37,5 @@ public class CourtNavRespondent {
     private CourtNavAddress address;
 
     @JsonProperty("respondentLivesWithApplicant")
-    private final boolean respondentLivesWithApplicant;
+    private boolean respondentLivesWithApplicant;
 }

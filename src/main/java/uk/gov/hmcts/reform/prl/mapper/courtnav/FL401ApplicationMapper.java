@@ -53,8 +53,8 @@ public class FL401ApplicationMapper {
             .state(State.SUBMITTED_PAID)
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .caseOrigin(courtNavCaseData.getMetaData().getCaseOrigin())
-            .courtNavApproved(courtNavCaseData.getMetaData().isCourtNavApproved() ? Yes : No)
-            .hasDraftOrder(courtNavCaseData.getMetaData().isHasDraftOrder() ? Yes : No)
+            .courtNavApproved(Boolean.TRUE.equals(courtNavCaseData.getMetaData().getCourtNavApproved()) ? Yes : No)
+            .hasDraftOrder(Boolean.TRUE.equals(courtNavCaseData.getMetaData().getHasDraftOrder()) ? Yes : No)
             .numberOfAttachments(String.valueOf(courtNavCaseData.getMetaData().getNumberOfAttachments()))
             .specialCourtName(courtNavCaseData.getMetaData().getCourtSpecialRequirements())
             .applicantAge(buildApplicantAge(courtNavCaseData))
@@ -64,7 +64,7 @@ public class FL401ApplicationMapper {
             .reasonForOrderWithoutGivingNotice(orderWithoutNoticeMapper.mapReasonForWithoutNotice(courtNavCaseData))
             .anyOtherDtailsForWithoutNoticeOrder(orderWithoutNoticeMapper.mapOtherDetails(courtNavCaseData))
             .bailDetails(buildBailConditionDetails(courtNavCaseData))
-            .applicantsFL401(courtNavApplicantMapper.map(courtNavCaseData.getFl401().getApplicantDetails()))
+            .applicantsFL401(courtNavApplicantMapper.map(courtNavCaseData.getFl401().getCourtNavApplicant()))
             .respondentsFL401(courtNavRespondentMapper.map(courtNavCaseData.getFl401().getCourtNavRespondent()))
             .applicantFamilyDetails(buildApplicantFamilyDetails(courtNavCaseData))
             .applicantChildDetails(buildApplicantChildDetails(courtNavCaseData))
@@ -73,7 +73,7 @@ public class FL401ApplicationMapper {
             .respondentRelationDateInfoObject(applicantRelationshipMapper.mapRelationDates(courtNavCaseData))
             .respondentRelationOptions(applicantRelationshipMapper.mapRelationOptions(courtNavCaseData))
             .home(mapHomeIfPresent(courtNavCaseData))
-            .fl401StmtOfTruth(statementOfTruthMapper.map(courtNavCaseData))
+            .fl401StmtOfTruth(statementOfTruthMapper.map(courtNavCaseData.getFl401().getStatementOfTruth()))
             .attendHearing(attendHearingMapper.map(courtNavCaseData)
                                .toBuilder()
                                .interpreterNeeds(interpreterNeedsMapper.map(courtNavCaseData))
@@ -86,13 +86,13 @@ public class FL401ApplicationMapper {
 
     private ApplicantAge buildApplicantAge(CourtNavFl401 source) {
         return ApplicantAge.getValue(String.valueOf(
-            source.getFl401().getBeforeStart().getApplicantHowOld()
+            source.getFl401().getBeforeStart().getApplicantAge()
         ));
     }
 
     private String buildCaseName(CourtNavFl401 source) {
-        String applicantName = source.getFl401().getApplicantDetails().getFirstName() + " "
-            + source.getFl401().getApplicantDetails().getLastName();
+        String applicantName = source.getFl401().getCourtNavApplicant().getFirstName() + " "
+            + source.getFl401().getCourtNavApplicant().getLastName();
         String respondentName = source.getFl401().getCourtNavRespondent().getFirstName() + " "
             + source.getFl401().getCourtNavRespondent().getLastName();
         return applicantName + " & " + respondentName;

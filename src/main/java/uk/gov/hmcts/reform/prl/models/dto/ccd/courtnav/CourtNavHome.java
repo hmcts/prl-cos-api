@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ContractEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.CurrentResidentAtAddressEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.FamilyHomeOutcomeEnum;
@@ -13,36 +13,36 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreviousOrIntendedR
 
 import java.util.List;
 
+@NoArgsConstructor
+@AllArgsConstructor
 @Data
 @Builder(toBuilder = true)
-@Getter
-@Setter
-@AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CourtNavHome {
 
-    private final boolean applyingForOccupationOrder;
-    private final CourtNavAddress occupationOrderAddress;
-    private final List<CurrentResidentAtAddressEnum> currentlyLivesAtAddress;
-    private final String currentlyLivesAtAddressOther;
-    private final PreviousOrIntendedResidentAtAddressEnum previouslyLivedAtAddress;
-    private final PreviousOrIntendedResidentAtAddressEnum intendedToLiveAtAddress;
-    private final List<ChildAtAddress> childrenApplicantResponsibility;
-    private final List<ChildAtAddress> childrenSharedResponsibility;
-    private final boolean propertySpeciallyAdapted;
-    private final String propertySpeciallyAdaptedDetails;
-    private final boolean propertyHasMortgage;
-    private final List<ContractEnum> namedOnMortgage;
-    private final String namedOnMortgageOther;
-    private final String mortgageNumber;
-    private final String mortgageLenderName;
-    private final CourtNavAddress mortgageLenderAddress;
-    private final boolean propertyIsRented;
-    private final List<ContractEnum> namedOnRentalAgreement;
-    private final String namedOnRentalAgreementOther;
-    private final String landlordName;
-    private final CourtNavAddress landlordAddress;
-    private final boolean haveHomeRights;
-    private final List<LivingSituationOutcomeEnum> wantToHappenWithLivingSituation;
-    private final List<FamilyHomeOutcomeEnum> wantToHappenWithFamilyHome;
-    private final String anythingElseForCourtToConsider;
+    private boolean applyingForOccupationOrder;
+    private CourtNavAddress occupationOrderAddress;
+    private List<CurrentResidentAtAddressEnum> currentlyLivesAtAddress;
+    private String currentlyLivesAtAddressOther;
+    private PreviousOrIntendedResidentAtAddressEnum previouslyLivedAtAddress;
+    private PreviousOrIntendedResidentAtAddressEnum intendedToLiveAtAddress;
+    private List<ChildAtAddress> childrenApplicantResponsibility;
+    private List<ChildAtAddress> childrenSharedResponsibility;
+    private boolean propertySpeciallyAdapted;
+    private String propertySpeciallyAdaptedDetails;
+    private boolean propertyHasMortgage;
+    private List<ContractEnum> namedOnMortgage;
+    private String namedOnMortgageOther;
+    private String mortgageNumber;
+    private String mortgageLenderName;
+    private CourtNavAddress mortgageLenderAddress;
+    private boolean propertyIsRented;
+    private List<ContractEnum> namedOnRentalAgreement;
+    private String namedOnRentalAgreementOther;
+    private String landlordName;
+    private CourtNavAddress landlordAddress;
+    private boolean haveHomeRights;
+    private List<LivingSituationOutcomeEnum> wantToHappenWithLivingSituation;
+    private List<FamilyHomeOutcomeEnum> wantToHappenWithFamilyHome;
+    private String anythingElseForCourtToConsider;
 }
