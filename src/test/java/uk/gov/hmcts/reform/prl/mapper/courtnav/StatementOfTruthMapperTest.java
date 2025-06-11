@@ -24,19 +24,19 @@ class StatementOfTruthMapperTest {
     @Test
     void shouldMapFullStatementOfTruthCorrectly() {
         CourtNavStatementOfTruth statement = CourtNavStatementOfTruth.builder()
-            .declaration(List.of(ConsentEnum.applicantConfirm, ConsentEnum.legalAidConfirm))
+            .applicantConsent(List.of(ConsentEnum.applicantConfirm, ConsentEnum.legalAidConfirm))
             .signature("John Smith")
-            .signatureFullName("John Alexander Smith")
-            .signatureDate(new CourtNavDate(1, 12, 2024))
-            .representativeFirmName("Legal Legends LLP")
-            .representativePositionHeld("Solicitor")
+            .fullname("John Alexander Smith")
+            .date(new CourtNavDate(1, 12, 2024))
+            .nameOfFirm("Legal Legends LLP")
+            .signOnBehalf("Solicitor")
             .build();
 
         CourtNavFl401 source = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder().statementOfTruth(statement).build())
             .build();
 
-        StatementOfTruth result = mapper.map(source);
+        StatementOfTruth result = mapper.map(source.getFl401().getStatementOfTruth());
 
         assertNotNull(result);
         assertEquals("John Smith", result.getSignature());

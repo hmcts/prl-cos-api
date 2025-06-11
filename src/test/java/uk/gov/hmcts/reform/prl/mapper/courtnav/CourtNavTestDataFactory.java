@@ -151,12 +151,12 @@ final class CourtNavTestDataFactory {
 
     static CourtNavStatementOfTruth buildStatementOfTruth() {
         return CourtNavStatementOfTruth.builder()
-            .declaration(List.of(applicantConfirm))
+            .applicantConsent(List.of(applicantConfirm))
             .signature("appl sign")
-            .signatureDate(new CourtNavDate(10, 6, 2022))
-            .signatureFullName("Applicant Courtnav")
-            .representativeFirmName("courtnav_application")
-            .representativePositionHeld("courtnav_application")
+            .date(new CourtNavDate(10, 6, 2022))
+            .fullname("Applicant Courtnav")
+            .nameOfFirm("courtnav_application")
+            .signOnBehalf("courtnav_application")
             .build();
     }
 
