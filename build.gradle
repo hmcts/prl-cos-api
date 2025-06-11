@@ -42,8 +42,6 @@ def versions = [
   jacksonDatatypeJsr           : '2.18.3',
   jsonAssert                   : '1.5.3',
   //  jsonPathAssert               : '2.2.0',
-  junit                        : '5.10.3',
-  junitPlatform                : '5.7.2',
   lombok                       : '1.18.38',
   pact                         : '4.1.11',
   pitest                       : '1.16.3',
@@ -318,15 +316,12 @@ dependencies {
   implementation 'org.testng:testng:7.10.2'
   implementation 'org.testng:testng:7.10.2'
   implementation 'org.testng:testng:7.10.2'
-  implementation 'org.junit.jupiter:junit-jupiter:5.10.3'
-  implementation 'org.junit.jupiter:junit-jupiter:5.10.3'
   annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
   implementation("org.projectlombok:lombok:${versions.lombok}")
   testImplementation("org.projectlombok:lombok:${versions.lombok}")
   annotationProcessor("org.projectlombok:lombok:${versions.lombok}")
   testAnnotationProcessor("org.projectlombok:lombok:${versions.lombok}")
 
-  implementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: versions.junit
   implementation group: 'com.sun.xml.bind', name: 'jaxb-osgi', version: '4.0.5'
   implementation group: 'com.github.kirviq', name: 'dumbster', version: versions.dumbster
   implementation group: 'com.puppycrawl.tools', name: 'checkstyle', version: versions.puppyCrawl
@@ -412,8 +407,6 @@ dependencies {
     testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test') {
     exclude(module: 'commons-logging')
     exclude(module: 'android-json')
-    exclude module: 'junit'
-    exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
 
   testImplementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
@@ -435,7 +428,6 @@ dependencies {
   integrationTestImplementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: versions.jacksonDatatypeJsr
   integrationTestImplementation group: 'com.mashape.unirest', name: 'unirest-java', version: versions.unirest
   integrationTestImplementation group: 'io.github.openfeign', name: 'feign-httpclient', version: versions.feignHttpClient
-  integrationTestImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: versions.junit
   integrationTestImplementation group: 'net.serenity-bdd', name: 'serenity-core', version: versions.serenity
   integrationTestImplementation group: 'net.serenity-bdd', name: 'serenity-cucumber', version: versions.serenityCucumber
   integrationTestImplementation group: 'net.serenity-bdd', name: 'serenity-junit', version: versions.serenity
@@ -485,16 +477,6 @@ dependencies {
 
   contractTestImplementation group: 'org.apache.httpcomponents', name: 'httpclient', version: versions.httpComponents
 
-  implementation 'org.junit.vintage:junit-vintage-engine:5.10.3'
-  testRuntimeOnly "org.junit.platform:junit-platform-commons:1.10.3"
-
-  contractTestRuntimeOnly(platform('org.junit:junit-bom:5.10.3'))
-  contractTestImplementation("org.junit.jupiter:junit-jupiter-api:5.10.3")
-  contractTestRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
-  testRuntimeOnly(platform('org.junit:junit-bom:5.10.3'))
-  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
-  testImplementation 'org.apiguardian:apiguardian-api:1.1.2'
-  contractTestImplementation('org.junit.jupiter:junit-jupiter-api:5.10.3')
 
   contractTestImplementation sourceSets.main.runtimeClasspath
   contractTestImplementation sourceSets.test.runtimeClasspath
