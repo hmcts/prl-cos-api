@@ -32,7 +32,12 @@ public class CourtLocationService {
 
         if (StringUtils.isNotBlank(epimsId)) {
             Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(epimsId, auth);
+            log.info("about to map court venue");
             if (courtVenue.isPresent()) {
+                log.info("Region: {}", courtVenue.get().getRegionId());
+                log.info("Region name: {}", courtVenue.get().getRegion());
+                log.info("epims: {}", epimsId);
+                log.info("court name: {}", courtVenue.get().getCourtName());
                 return populateFromEpimsId(caseData, courtVenue.get(), epimsId);
             }
         }
