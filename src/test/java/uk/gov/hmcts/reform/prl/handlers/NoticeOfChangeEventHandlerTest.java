@@ -37,6 +37,7 @@ import static org.apache.commons.lang3.RandomUtils.nextLong;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -321,4 +322,69 @@ public class NoticeOfChangeEventHandlerTest {
                                            Mockito.any(),
                                            Mockito.any(), Mockito.any());
     }
+
+    @Test
+    public void shouldFallbackToPostWhenLiPPrefersEmailButNoAddress() {
+        // 1) LiP with no email, preferring email, but **with** a postal address
+        PartyDetails noEmailLip = applicant1.toBuilder()
+            .email(null)
+            .contactPreferences(ContactPreferences.email)
+            .address(Address.builder()
+                         .addressLine1("1 High Street")
+                         .postTown("London")
+                         .postCode("E1 1AA")
+                         .build())
+            .build();
+        Element<PartyDetails> lipElement = element(noEmailLip);
+
+        // 2) Match caseInvite by the same ID
+        CaseInvite invite = CaseInvite.builder()
+            .partyId(lipElement.getId())
+            .accessCode("FALLBACK123")
+            .build();
+        Element<CaseInvite> inviteElement = element(invite);
+
+        // 3) Rebuild CaseData
+        caseData = CaseData.builder()
+            .id(caseData.getId())
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(lipElement))
+            .respondents(List.of(element(respondent2)))
+            .caseInvites(List.of(inviteElement))
+            .othersToNotify(Collections.emptyList())
+            .build();
+
+        // 4) Rebuild event with non-null accessCode
+        noticeOfChangeEvent = noticeOfChangeEvent.toBuilder()
+            .caseData(caseData)
+            .representedPartyIndex(0)
+            .representing(CAAPPLICANT)
+            .accessCode("FALLBACK123")
+            .build();
+
+        // 5) Feature flag on
+        when(launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER))
+            .thenReturn(true);
+
+        // 6) Stub document providers
+        when(serviceOfApplicationPostService.getCoverSheets(
+            any(CaseData.class),
+            anyString(),
+            any(Address.class),
+            anyString(),
+            anyString()
+        )).thenReturn(Collections.emptyList());
+        // generateAccessCodeLetter already stubbed in @Before to return non-empty list
+
+        // Act
+        noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);
+
+        // Assert: fallback to bulk print
+        verify(bulkPrintService, times(1))
+            .send(anyString(), anyString(), anyString(), anyList(), anyString());
+
+        // And still notify at least one solicitor via email
+        verify(emailService, atLeastOnce()).send(anyString(), any(), any(), any());
+    }
+
 }

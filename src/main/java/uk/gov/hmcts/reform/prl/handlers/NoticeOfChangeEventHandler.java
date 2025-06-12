@@ -175,6 +175,7 @@ public class NoticeOfChangeEventHandler {
 
     private void sendEmailToSolicitor(CaseData caseData, NoticeOfChangeEvent event, EmailTemplateNames emailTemplateName) {
         if (null != event.getSolicitorEmailAddress()) {
+            log.info("Sending solicitor email {} on case id {}", event.getSolicitorEmailAddress(), caseData.getId());
             emailService.send(
                 event.getSolicitorEmailAddress(),
                 emailTemplateName,
@@ -233,7 +234,7 @@ public class NoticeOfChangeEventHandler {
                 accessCode = caseInvite.getAccessCode();
             }
         }
-        if (null != accessCode && launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)) {
+        if (null != accessCode) {
             //PRL-5300 - send email/post to LiP based on contact pref
             sendNotificationToLitigant(caseData, event, partyElement, accessCode);
 
@@ -249,31 +250,41 @@ public class NoticeOfChangeEventHandler {
     }
 
 
-    private void sendNotificationToLitigant(CaseData caseData,
-                                            NoticeOfChangeEvent event,
-                                            Element<PartyDetails> party, String accessCode) {
+    private void sendNotificationToLitigant(
+        CaseData caseData,
+        NoticeOfChangeEvent event,
+        Element<PartyDetails> party,
+        String accessCode
+    ) {
         log.info("*** Send notifications to LiP after legal rep is removed ***");
-        if (null != party && null != party.getValue()) {
-            if (ContactPreferences.email.equals(party.getValue().getContactPreferences())) {
+        if (party != null && party.getValue() != null) {
+            String lipEmail = party.getValue().getEmail();
+            ContactPreferences pref = party.getValue().getContactPreferences();
+            boolean hasEmail = lipEmail != null && !lipEmail.isBlank();
+            boolean wantsEmail = ContactPreferences.email.equals(pref);
+
+            if (wantsEmail && hasEmail) {
                 log.info("Send email to LiP");
-                //PRL-3215 - send email to LiP
-                sendEmailToLitigant(caseData,
-                                    event,
-                                    EmailTemplateNames.CA_DA_APPLICANT_REMOVE_RESPONDENT_NOC,
-                                    true,
-                                    party,
-                                    accessCode
+                sendEmailToLitigant(
+                    caseData,
+                    event,
+                    EmailTemplateNames.CA_DA_APPLICANT_REMOVE_RESPONDENT_NOC,
+                    true,
+                    party,
+                    accessCode
                 );
             } else {
+                if (hasEmail && !wantsEmail) {
+                    log.info("LiP has an email address but prefers post");
+                } else if (!hasEmail && wantsEmail) {
+                    log.warn("LiP prefers email but no address—falling back to post");
+                }
                 log.info("Send post to LiP via bulk print");
-                sendPostViaBulkprint(caseData,
-                                     party,
-                                     accessCode
-                );
+                sendPostViaBulkprint(caseData, party, accessCode);
             }
-
         }
     }
+
 
     private void sendPostViaBulkprint(CaseData caseData,
                                       Element<PartyDetails> party,
