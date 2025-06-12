@@ -345,7 +345,7 @@ public class CitizenPartyDetailsMapper {
                         caseDataMapToBeUpdated.put("daApplicantContactInstructions", safeToCallOption);
                     } else if (safeToCallOption != null && safeToCallOption == "3") {
                         caseDataMapToBeUpdated.put("daApplicantContactInstructions", null);
-                    }else {
+                    } else {
                         caseDataMapToBeUpdated.remove("daApplicantContactInstructions");
                     }
                 }
