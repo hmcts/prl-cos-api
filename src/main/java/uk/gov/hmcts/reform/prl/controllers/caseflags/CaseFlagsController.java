@@ -20,12 +20,14 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
+import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsWaService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -100,10 +102,22 @@ public class CaseFlagsController extends AbstractCallbackController {
     ) {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        caseData.getAllPartyFlags().setCaApplicant1ExternalFlags(caseData.getSelectedFlags());
+        List<String> errors = caseFlagsWaService.validateAllFlags(caseData.getSelectedFlags());
+        Flags flagToUpdate = caseData.getAllPartyFlags().getCaApplicant1ExternalFlags();
+        if (errors.isEmpty()) {
+            for (int i = 0; i < flagToUpdate.getDetails().size(); i++) {
+                if (flagToUpdate.getDetails().get(i).getId().toString()
+                    .equals(caseData.getSelectedFlags().getDetails().getFirst().getId().toString())) {
+                    flagToUpdate.getDetails().set(i, caseData.getSelectedFlags().getDetails().getFirst());
+                    break;
+                }
+            }
+        }
+
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
 
         return AboutToStartOrSubmitCallbackResponse.builder()
+            .errors(errors)
             .data(caseDataMap)
             .build();
     }

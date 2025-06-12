@@ -102,6 +102,17 @@ public class CaseFlagsWaService {
         return mostRecentlyModified;
     }
 
+    public List<String> validateAllFlags(Flags selectedFlag) {
+        List<String> errorMessages = new ArrayList<>();
+        if (selectedFlag != null) {
+            if (selectedFlag.getDetails().stream().anyMatch(e -> REQUESTED.equals(e.getValue().getStatus()))) {
+                errorMessages.add("Please select status other than Requested");
+                return errorMessages;
+            }
+        }
+        return errorMessages;
+    }
+
     private List<Element<FlagDetail>> extractAllPartyFlagDetails(AllPartyFlags allPartyFlags) {
         if (allPartyFlags == null) {
             return Collections.emptyList();
