@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetailsMeta;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.CoverLetterMap;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
@@ -916,6 +917,15 @@ public class CaseUtils {
         return null;
     }
 
+    public static String getAdditionalApplicationId(WaMapper waMapper) {
+        if (null != waMapper) {
+            if (null != waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties()) {
+                return waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties().getAdditionalApplicationId();
+            }
+        }
+        return null;
+    }
+
     public static DraftOrder getDraftOrderFromCollectionId(List<Element<DraftOrder>> draftOrderCollection, UUID draftOrderId) {
         if (CollectionUtils.isNotEmpty(draftOrderCollection)) {
             return draftOrderCollection.stream()
@@ -923,6 +933,19 @@ public class CaseUtils {
                 .map(Element::getValue)
                 .findFirst()
                 .orElseThrow(() -> new UnsupportedOperationException("Could not find order"));
+        }
+        return null;
+    }
+
+    public static AdditionalApplicationsBundle getAdditionalApplicationFromCollectionId(
+                                            List<Element<AdditionalApplicationsBundle>> additionalApplicationCollection,
+                                            UUID additionalApplicationId) {
+        if (CollectionUtils.isNotEmpty(additionalApplicationCollection)) {
+            return additionalApplicationCollection.stream()
+                .filter(element -> element.getId().equals(additionalApplicationId))
+                .map(Element::getValue)
+                .findFirst()
+                .orElseThrow(() -> new UnsupportedOperationException("Could not find additional application"));
         }
         return null;
     }
