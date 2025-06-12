@@ -100,11 +100,10 @@ public class RestrictedCaseAccessControllerTest {
 
         when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
 
-        uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse response = restrictedCaseAccessController
-           .changeCaseAccess(AUTH_TOKEN, SERVICE_TOKEN, CallbackRequest.builder().build());
+        uk.gov.hmcts.reform.prl.models.ccd.AboutToStartOrSubmitCallbackResponse response = restrictedCaseAccessController
+            .changeCaseAccess(AUTH_TOKEN, SERVICE_TOKEN, CallbackRequest.builder().build());
 
-       assertEquals(AboutToStartOrSubmitCallbackResponse.class, response.getClass());
-
+        assertEquals(uk.gov.hmcts.reform.prl.models.ccd.AboutToStartOrSubmitCallbackResponse.class, response.getClass());
         verify(restrictedCaseAccessService,Mockito.times(1))
             .changeCaseAccess(Mockito.any());
 
@@ -112,7 +111,7 @@ public class RestrictedCaseAccessControllerTest {
     }
 
     @Test
-    public void testChangeCaseAccessError() {
+    void testChangeCaseAccessError() {
 
         when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(false);
 
@@ -127,7 +126,7 @@ public class RestrictedCaseAccessControllerTest {
     }
 
     @Test
-    public void testRestrictedCaseAccessAboutToStartWithNoAccess() {
+    void testRestrictedCaseAccessAboutToStartWithNoAccess() {
 
         when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
         Map<String, Object> caseDataUpdated = new HashMap<>();
@@ -143,7 +142,7 @@ public class RestrictedCaseAccessControllerTest {
     }
 
     @Test
-    public void testRestrictedCaseAccessAboutToStartWithAccess() {
+    void testRestrictedCaseAccessAboutToStartWithAccess() {
 
         when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
         when(restrictedCaseAccessService.retrieveAssignedUserRoles(Mockito.any())).thenReturn(new HashMap<>());
@@ -155,7 +154,7 @@ public class RestrictedCaseAccessControllerTest {
     }
 
     @Test
-    public void testRestrictedCaseAccessAboutToStartError() {
+   void testRestrictedCaseAccessAboutToStartError() {
 
         when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(false);
 
