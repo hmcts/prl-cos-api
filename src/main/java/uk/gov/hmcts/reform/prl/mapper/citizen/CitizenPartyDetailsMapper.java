@@ -342,12 +342,13 @@ public class CitizenPartyDetailsMapper {
                 if (partyDetails.getResponse() != null) {
                     String safeToCallOption = partyDetails.getResponse().getSafeToCallOption();
                     if (safeToCallOption != null && !safeToCallOption.trim().isEmpty()) {
-                        caseDataMapToBeUpdated.put("daApplicantContactInstructions", partyDetails.getResponse().getSafeToCallOption());
+                        caseDataMapToBeUpdated.put("daApplicantContactInstructions", safeToCallOption);
                     } else {
-                        caseDataMapToBeUpdated.put("daApplicantContactInstructions", null);
+                        caseDataMapToBeUpdated.remove("daApplicantContactInstructions");
                     }
                 }
                 caseDataMapToBeUpdated.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
+                System.out.println("Final map: " + caseDataMapToBeUpdated);
                 return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
             }
         } else {
