@@ -852,7 +852,43 @@
           "cafcassOfficerPosition": null,
           "cafcassOfficerEmailAddress": null,
           "cafcassOfficerOtherPosition": null,
-          "parentalResponsibilityDetails": "Child's father and was married to the mother when child was born"
+          "parentalResponsibilityDetails": "Child's father and was married to the mother when child was born",
+          "whoDoesTheChildLiveWith": {
+            "value": {
+              "code": "7663081e-778d-4317-b278-7642b740d317",
+              "label": "John Doe - Ministry Of Justice, Seventh Floor 102 Petty France, SW1H 9AJ"
+            },
+            "list_items": [
+              {
+                "code": "7663081e-778d-4317-b278-7642b740d317",
+                "label": "John Doe - Ministry Of Justice, Seventh Floor 102 Petty France, SW1H 9AJ"
+              },
+              {
+                "code": "0016cff5-17f0-42af-bea4-0b04ca74c9ec",
+                "label": "Jeremy Anderson - Buckingham Palace, SW1A 1AA"
+              },
+              {
+                "code": "7e9028ba-534c-42bb-bb04-e67b6551b4bd",
+                "label": "Martina Graham - Victoria Coach Station Ltd, 164 Buckingham Palace Road, SW1W 9TP"
+              },
+              {
+                "code": "e406bcc3-3c91-45db-9dcc-3a5c14930851",
+                "label": "Mary Richards"
+              },
+              {
+                "code": "8d5140d5-18eb-4278-b41c-2a6fabdf4491",
+                "label": "Elise Lynn"
+              },
+              {
+                "code": "62614c4a-4faf-48c0-abfd-c579ef700fd4",
+                "label": "David Carman"
+              },
+              {
+                "code": "6bb5e9ac-df97-4593-8b22-3969dc0bb4e1",
+                "label": "Sam Nolan"
+              }
+            ]
+          }
         }
       },
       {
@@ -875,7 +911,43 @@
           "cafcassOfficerPosition": null,
           "cafcassOfficerEmailAddress": null,
           "cafcassOfficerOtherPosition": null,
-          "parentalResponsibilityDetails": "Child's father and was married to the mother when child was born"
+          "parentalResponsibilityDetails": "Child's father and was married to the mother when child was born",
+          "whoDoesTheChildLiveWith": {
+            "value": {
+              "code": "7663081e-778d-4317-b278-7642b740d317",
+              "label": "John Doe - Ministry Of Justice, Seventh Floor 102 Petty France, SW1H 9AJ"
+            },
+            "list_items": [
+              {
+                "code": "7663081e-778d-4317-b278-7642b740d317",
+                "label": "John Doe - Ministry Of Justice, Seventh Floor 102 Petty France, SW1H 9AJ"
+              },
+              {
+                "code": "0016cff5-17f0-42af-bea4-0b04ca74c9ec",
+                "label": "Jeremy Anderson - Buckingham Palace, SW1A 1AA"
+              },
+              {
+                "code": "7e9028ba-534c-42bb-bb04-e67b6551b4bd",
+                "label": "Martina Graham - Victoria Coach Station Ltd, 164 Buckingham Palace Road, SW1W 9TP"
+              },
+              {
+                "code": "e406bcc3-3c91-45db-9dcc-3a5c14930851",
+                "label": "Mary Richards"
+              },
+              {
+                "code": "8d5140d5-18eb-4278-b41c-2a6fabdf4491",
+                "label": "Elise Lynn"
+              },
+              {
+                "code": "62614c4a-4faf-48c0-abfd-c579ef700fd4",
+                "label": "David Carman"
+              },
+              {
+                "code": "6bb5e9ac-df97-4593-8b22-3969dc0bb4e1",
+                "label": "Sam Nolan"
+              }
+            ]
+          }
         }
       },
       {
@@ -898,7 +970,43 @@
           "cafcassOfficerPosition": null,
           "cafcassOfficerEmailAddress": null,
           "cafcassOfficerOtherPosition": null,
-          "parentalResponsibilityDetails": "Child's father and was married to the mother when child was born"
+          "parentalResponsibilityDetails": "Child's father and was married to the mother when child was born",
+          "whoDoesTheChildLiveWith": {
+            "value": {
+              "code": "7663081e-778d-4317-b278-7642b740d317",
+              "label": "John Doe - Ministry Of Justice, Seventh Floor 102 Petty France, SW1H 9AJ"
+            },
+            "list_items": [
+              {
+                "code": "7663081e-778d-4317-b278-7642b740d317",
+                "label": "John Doe - Ministry Of Justice, Seventh Floor 102 Petty France, SW1H 9AJ"
+              },
+              {
+                "code": "0016cff5-17f0-42af-bea4-0b04ca74c9ec",
+                "label": "Jeremy Anderson - Buckingham Palace, SW1A 1AA"
+              },
+              {
+                "code": "7e9028ba-534c-42bb-bb04-e67b6551b4bd",
+                "label": "Martina Graham - Victoria Coach Station Ltd, 164 Buckingham Palace Road, SW1W 9TP"
+              },
+              {
+                "code": "e406bcc3-3c91-45db-9dcc-3a5c14930851",
+                "label": "Mary Richards"
+              },
+              {
+                "code": "8d5140d5-18eb-4278-b41c-2a6fabdf4491",
+                "label": "Elise Lynn"
+              },
+              {
+                "code": "62614c4a-4faf-48c0-abfd-c579ef700fd4",
+                "label": "David Carman"
+              },
+              {
+                "code": "6bb5e9ac-df97-4593-8b22-3969dc0bb4e1",
+                "label": "Sam Nolan"
+              }
+            ]
+          }
         }
       },
       {
@@ -921,7 +1029,43 @@
           "cafcassOfficerPosition": null,
           "cafcassOfficerEmailAddress": null,
           "cafcassOfficerOtherPosition": null,
-          "parentalResponsibilityDetails": "Child's father and was married to the mother when child was born"
+          "parentalResponsibilityDetails": "Child's father and was married to the mother when child was born",
+          "whoDoesTheChildLiveWith": {
+            "value": {
+              "code": "7663081e-778d-4317-b278-7642b740d317",
+              "label": "John Doe - Ministry Of Justice, Seventh Floor 102 Petty France, SW1H 9AJ"
+            },
+            "list_items": [
+              {
+                "code": "7663081e-778d-4317-b278-7642b740d317",
+                "label": "John Doe - Ministry Of Justice, Seventh Floor 102 Petty France, SW1H 9AJ"
+              },
+              {
+                "code": "0016cff5-17f0-42af-bea4-0b04ca74c9ec",
+                "label": "Jeremy Anderson - Buckingham Palace, SW1A 1AA"
+              },
+              {
+                "code": "7e9028ba-534c-42bb-bb04-e67b6551b4bd",
+                "label": "Martina Graham - Victoria Coach Station Ltd, 164 Buckingham Palace Road, SW1W 9TP"
+              },
+              {
+                "code": "e406bcc3-3c91-45db-9dcc-3a5c14930851",
+                "label": "Mary Richards"
+              },
+              {
+                "code": "8d5140d5-18eb-4278-b41c-2a6fabdf4491",
+                "label": "Elise Lynn"
+              },
+              {
+                "code": "62614c4a-4faf-48c0-abfd-c579ef700fd4",
+                "label": "David Carman"
+              },
+              {
+                "code": "6bb5e9ac-df97-4593-8b22-3969dc0bb4e1",
+                "label": "Sam Nolan"
+              }
+            ]
+          }
         }
       },
       {
@@ -944,7 +1088,43 @@
           "cafcassOfficerPosition": null,
           "cafcassOfficerEmailAddress": null,
           "cafcassOfficerOtherPosition": null,
-          "parentalResponsibilityDetails": "To the third person"
+          "parentalResponsibilityDetails": "To the third person",
+          "whoDoesTheChildLiveWith": {
+            "value": {
+              "code": "7663081e-778d-4317-b278-7642b740d317",
+              "label": "John Doe - Ministry Of Justice, Seventh Floor 102 Petty France, SW1H 9AJ"
+            },
+            "list_items": [
+              {
+                "code": "7663081e-778d-4317-b278-7642b740d317",
+                "label": "John Doe - Ministry Of Justice, Seventh Floor 102 Petty France, SW1H 9AJ"
+              },
+              {
+                "code": "0016cff5-17f0-42af-bea4-0b04ca74c9ec",
+                "label": "Jeremy Anderson - Buckingham Palace, SW1A 1AA"
+              },
+              {
+                "code": "7e9028ba-534c-42bb-bb04-e67b6551b4bd",
+                "label": "Martina Graham - Victoria Coach Station Ltd, 164 Buckingham Palace Road, SW1W 9TP"
+              },
+              {
+                "code": "e406bcc3-3c91-45db-9dcc-3a5c14930851",
+                "label": "Mary Richards"
+              },
+              {
+                "code": "8d5140d5-18eb-4278-b41c-2a6fabdf4491",
+                "label": "Elise Lynn"
+              },
+              {
+                "code": "62614c4a-4faf-48c0-abfd-c579ef700fd4",
+                "label": "David Carman"
+              },
+              {
+                "code": "6bb5e9ac-df97-4593-8b22-3969dc0bb4e1",
+                "label": "Sam Nolan"
+              }
+            ]
+          }
         }
       }
     ],
