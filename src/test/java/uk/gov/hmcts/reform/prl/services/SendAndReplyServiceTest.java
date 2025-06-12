@@ -5,6 +5,7 @@ import feign.FeignException;
 import feign.Request;
 import feign.Response;
 import org.apache.commons.collections.ListUtils;
+import org.assertj.core.api.Assertions;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Before;
@@ -15,14 +16,18 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.Document;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
@@ -3470,6 +3475,125 @@ public class SendAndReplyServiceTest {
                 No).sendMessageToCafcass(No).build();
         boolean atLeastOnePartySelected = sendAndReplyService.atLeastOnePartySelectedForExternalMessage(message);
         assertEquals(false, atLeastOnePartySelected);
+    }
+
+    @Test
+    public void testHandleSubmittedSendAndReplyWhenRespToMesgSendAndNo() {
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        Message message = Message.builder().isReplying(YesOrNo.Yes).build();
+
+        caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .respondToMessage(YesOrNo.No)
+                    .messages(messages)
+                    .messages(messages)
+                    .sendMessageObject(Message.builder()
+                                           .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                                           .build())
+                    .build())
+            .messageReply(message)
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyService.sendAndReplySubmitted(callbackRequest);
+        Assertions.assertThat(response.getStatusCode().value()).isEqualTo(200);
+    }
+
+    @Test
+    public void testHandleSubmittedSendAndReplyWhenRespToMesgNo() {
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        Message message = Message.builder().isReplying(YesOrNo.Yes).build();
+
+        caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(REPLY)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .respondToMessage(YesOrNo.No)
+                    .messages(messages)
+                    .messages(messages)
+                    .build())
+            .messageReply(message)
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyService.sendAndReplySubmitted(callbackRequest);
+        Assertions.assertThat(response.getStatusCode().value()).isEqualTo(200);
+    }
+
+    @Test
+    public void testHandSubmittedSendAndReplyWhenRespondToMessageYes() {
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        Message message = Message.builder().isReplying(YesOrNo.Yes).build();
+
+        caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(REPLY)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .respondToMessage(YesOrNo.Yes)
+                    .messages(messages)
+                    .build())
+            .messageReply(message)
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyService.sendAndReplySubmitted(callbackRequest);
+        Assertions.assertThat(response.getStatusCode().value()).isEqualTo(200);
+
+    }
+
+    @Test
+    public void testClearDynamicLists() {
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        Message message = Message.builder().isReplying(YesOrNo.Yes).build();
+
+        caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(REPLY)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(Message.builder()
+                                           .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
+                                           .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
+                                           .messageAbout(MessageAboutEnum.APPLICATION)
+                                           .sendReplyJudgeName(JudicialUser.builder().personalCode("123").build())
+                                           .messageContent("some msg content")
+                                           .build())
+                    .respondToMessage(YesOrNo.No)
+                    .messages(messages)
+                    .build())
+            .messageReply(message)
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .build();
+
+        CaseData caseDataAfterReset = CaseData.builder().id(12345L)
+            .chooseSendOrReply(REPLY)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(Message.builder()
+                                           .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
+                                           .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
+                                           .messageAbout(MessageAboutEnum.APPLICATION)
+                                           .messageContent("some msg content")
+                                           .sendReplyJudgeName(JudicialUser.builder().build())
+                                           .build())
+                    .respondToMessage(YesOrNo.No)
+                    .messages(messages)
+                    .build())
+            .messageReply(message)
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        sendAndReplyService.clearDynamicLists(callbackRequest);
+        assertNull(caseDataAfterReset.getSendOrReplyMessage().getSendMessageObject().getSendReplyJudgeName().getIdamId());
     }
 
     public static uk.gov.hmcts.reform.ccd.document.am.model.Document testDocument() {
