@@ -19,4 +19,6 @@ public class AdditionalProperties {
     private String orderId;
     @JsonProperty("caseNoteId")
     private String caseNoteId;
+    @JsonProperty("additionalApplicationId")
+    private String additionalApplicationId;
 }
