@@ -5,10 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -62,6 +64,7 @@ import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelec
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.noticeofchange.NoticeOfChangePartiesConverter;
 import uk.gov.hmcts.reform.prl.utils.noticeofchange.RespondentPolicyConverter;
 
@@ -75,6 +78,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -333,7 +337,7 @@ public class NoticeOfChangePartiesServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn("test");
         when(systemUserService.getUserId("test")).thenReturn("test");
         when(ccdCoreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, "test")).thenReturn(EventRequestData.builder().build());
-        when(ccdCoreCaseDataService.startUpdate("test", EventRequestData.builder().build(), "12345678", true)).thenReturn(
+        when(ccdCoreCaseDataService.startUpdate(anyString(), any(EventRequestData.class), anyString(), eq(true))).thenReturn(
             StartEventResponse.builder().caseDetails(caseDetails).build());
         when(organisationService.getOrganisationSolicitorDetails("test", changeOrganisationRequest
             .getOrganisationToAdd().getOrganisationID())).thenReturn(
@@ -1449,63 +1453,45 @@ public class NoticeOfChangePartiesServiceTest {
 
 
     @Test
-    public void testSubmittedStopRepresentingWithAccessCode() {
-        List<Element<PartyDetails>> applicant = new ArrayList<>();
-        Element partyDetailsElement = element(partyDetails);
-        UUID uuid = partyDetailsElement.getId();
-        applicant.add(partyDetailsElement);
-        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
-            .code(partyDetailsElement.getId().toString())
-            .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
+    public void shouldPublishRemovalEventWithOldSolicitorDetails() throws Exception {
+        PartyDetails oldPartyDetails = PartyDetails.builder()
+            .representativeFirstName("Old")
+            .representativeLastName("Solicitor")
+            .solicitorEmail("old@sol.test")
             .build();
-        CaseInvite caseInvite = CaseInvite.builder().partyId(uuid).accessCode("123").build();
-        List<CaseEventDetail> caseEvents = List.of(
-            CaseEventDetail.builder().stateId(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue()).build(),
-            CaseEventDetail.builder().stateId(State.SUBMITTED_PAID.getValue()).build(),
-            CaseEventDetail.builder().stateId(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()).build()
+        Element<PartyDetails> oldElement = ElementUtils.element(UUID.randomUUID(), oldPartyDetails);
+
+        PartyDetails newPartyDetails = PartyDetails.builder()
+            .representativeFirstName("New")
+            .representativeLastName("Solicitor")
+            .solicitorEmail(null)     // removed
+            .build();
+        Element<PartyDetails> newElement = ElementUtils.element(oldElement.getId(), newPartyDetails);
+
+        Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedMap = Map.of(
+            Optional.of(SolicitorRole.C100RESPONDENTSOLICITOR1),
+            newElement
         );
 
-        when(systemUserService.getSysUserToken()).thenReturn("test");
-        when(systemUserService.getUserId("test")).thenReturn("test");
-        when(ccdCoreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, "test")).thenReturn(EventRequestData.builder().build());
+        ReflectionTestUtils.invokeMethod(
+            noticeOfChangePartiesService,
+            "sendEmailAndUpdateCaseData",
+            selectedMap,
+            "999"
+        );
 
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<NoticeOfChangeEvent> captor =
+            ArgumentCaptor.forClass(NoticeOfChangeEvent.class);
+        verify(eventPublisher, times(1)).publishEvent(captor.capture());
 
-        CaseData caseData = CaseData.builder()
-            .id(12345678L)
-            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .applicants(applicant)
-            .caseInvites(List.of(element(caseInvite)))
-            .solStopRepChooseParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
-                dynamicListElement)).build())
-            .build();
-
-        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
-
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(12345678L)
-            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-            .data(caseData.toMap(new ObjectMapper()))
-            .build();
-
-
-        when(ccdCoreCaseDataService.startUpdate("test", EventRequestData.builder().build(), "12345678", true)).thenReturn(
-            StartEventResponse.builder().caseDetails(caseDetails).build());
-        when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
-        when(ccdCoreCaseDataService.findCaseById("test", "12345678")).thenReturn(caseDetails);
-        when(partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
-            any(),
-            anyInt(),
-            any(),
-            anyBoolean()
-        )).thenReturn(caseData);
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails)
-            .caseDetailsBefore(caseDetails)
-            .build();
-
-        noticeOfChangePartiesService.submittedStopRepresenting(callbackRequest);
-        verify(eventPublisher, times(1)).publishEvent(Mockito.any(NoticeOfChangeEvent.class));
+        NoticeOfChangeEvent evt = captor.getValue();
+        assertEquals("Old Solicitor",      evt.getSolicitorName());
+        assertEquals("old@sol.test",       evt.getSolicitorEmailAddress());
+        assertEquals(
+            TypeOfNocEventEnum.removeLegalRepresentation.getDisplayedValue(),
+            evt.getTypeOfEvent()
+        );
     }
 
 }
