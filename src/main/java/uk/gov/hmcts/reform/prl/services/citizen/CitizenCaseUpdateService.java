@@ -72,7 +72,7 @@ public class CitizenCaseUpdateService {
     private final AllTabServiceImpl allTabService;
     private final CitizenPartyDetailsMapper citizenPartyDetailsMapper;
     private final ObjectMapper objectMapper;
-    private final AddService addCaseNoteService;
+    private final AddCaseNoteService addCaseNoteService;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     private final MiamPolicyUpgradeService miamPolicyUpgradeService;
     private final MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
