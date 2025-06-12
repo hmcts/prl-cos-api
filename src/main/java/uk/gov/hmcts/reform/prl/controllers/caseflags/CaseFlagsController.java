@@ -20,16 +20,12 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsWaService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -82,8 +78,6 @@ public class CaseFlagsController extends AbstractCallbackController {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseFlagsWaService.setSelectedFlags(caseData);
-        caseFlagsWaService.filterRequestedCaseLevelFlags(caseData.getCaseFlags());
-        caseFlagsWaService.filterRequestedPartyFlags(caseData.getAllPartyFlags());
 
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
 
@@ -106,16 +100,8 @@ public class CaseFlagsController extends AbstractCallbackController {
     ) {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Element<FlagDetail> mostRecentlyModified = caseFlagsWaService.validateAllFlags(caseData);
-        List<String> errors = new ArrayList<>();
+        caseData.getAllPartyFlags().setCaApplicant1ExternalFlags(caseData.getSelectedFlags());
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
-        if (REQUESTED.equals(mostRecentlyModified.getValue().getStatus())) {
-            errors.add("Please select the status of flag other than Requested");
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .errors(errors)
-                .data(caseDataMap)
-                .build();
-        }
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataMap)
