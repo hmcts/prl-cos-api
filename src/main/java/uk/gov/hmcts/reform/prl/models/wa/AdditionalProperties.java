@@ -17,6 +17,8 @@ import lombok.extern.jackson.Jacksonized;
 public class AdditionalProperties {
     @JsonProperty("orderId")
     private String orderId;
+    @JsonProperty("caseNoteId")
+    private String caseNoteId;
     @JsonProperty("additionalApplicationId")
     private String additionalApplicationId;
 }
