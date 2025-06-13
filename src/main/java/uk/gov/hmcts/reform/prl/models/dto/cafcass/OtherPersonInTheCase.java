@@ -35,5 +35,9 @@ public class OtherPersonInTheCase {
     private String email;
     private YesOrNo canYouProvidePhoneNumber;
     private String phoneNumber;
+    private YesOrNo isAddressConfidential;
+    private YesOrNo isEmailAddressConfidential;
+    private  YesOrNo isPhoneNumberConfidential;
+
 
 }
