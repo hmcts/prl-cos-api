@@ -161,10 +161,6 @@ allprojects {
       dependencySet(group: 'commons-fileupload', version: '1.5') {
         entry 'commons-fileupload'
       }
-      //CVE-2023-24998
-      dependencySet(group: 'commons-fileupload', version: '1.5') {
-        entry 'commons-fileupload'
-      }
       //CVE-2022-45688
       dependencySet(group: 'org.json', version: '20231013') {
         entry 'json'
@@ -346,7 +342,6 @@ dependencies {
   implementation group: 'uk.gov.service.notify', name: 'notifications-java-client', version: versions.hmctsNotify
   implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: versions.httpComponents
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-quartz', version: versions.springBoot
-  implementation group: 'uk.gov.service.notify', name: 'notifications-java-client', version: versions.hmctsNotify
   implementation group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.1.1'
   implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '3.0.4'
   implementation group: 'com.github.hmcts', name:'ccd-case-document-am-client', version: versions.ccdCaseDocumentAmClient
