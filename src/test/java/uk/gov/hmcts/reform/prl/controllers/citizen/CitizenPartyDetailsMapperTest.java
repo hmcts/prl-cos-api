@@ -45,6 +45,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
@@ -745,6 +746,40 @@ public class CitizenPartyDetailsMapperTest {
         assertNotNull(citizenUpdatePartyDataContent);
         assertEquals("7pm", citizenUpdatePartyDataContent.updatedCaseDataMap().get("daApplicantContactInstructions"));
         assertEquals("7pm", citizenUpdatePartyDataContent.updatedCaseData().getApplicantsFL401().getResponse().getSafeToCallOption());
+    }
+
+    @Test
+    public void testMapUpdatedPartyDetailsWithSafeTimeToCallEmptyString() throws IOException {
+        setUpDa();
+        updateCaseData = CitizenUpdatedCaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .partyDetails(PartyDetails.builder()
+                              .firstName("Test")
+                              .lastName("User")
+                              .isAtAddressLessThan5Years(YesOrNo.Yes)
+                              .isAtAddressLessThan5YearsWithDontKnow(YesNoDontKnow.yes)
+                              .response(Response.builder().build())
+                              .user(User.builder()
+                                        .email("test@gmail.com")
+                                        .idamId("123")
+                                        .solicitorRepresented(YesOrNo.Yes)
+                                        .build())
+                              .response(Response.builder().safeToCallOption("").build())
+                              .citizenSosObject(CitizenSos.builder()
+                                                    .partiesServed(List.of("123,234,1234"))
+                                                    .build())
+                              .build())
+            .partyType(PartyEnum.applicant)
+            .build();
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(
+            caseData,
+            updateCaseData,
+            CaseEvent.CONFIRM_YOUR_DETAILS,
+            authToken
+        );
+        assertNotNull(citizenUpdatePartyDataContent);
+        assertNull(citizenUpdatePartyDataContent.updatedCaseDataMap().get("daApplicantContactInstructions"));
+        assertEquals("", citizenUpdatePartyDataContent.updatedCaseData().getApplicantsFL401().getResponse().getSafeToCallOption());
     }
 }
 
