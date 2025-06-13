@@ -25,3 +25,4 @@ src/main/resources/application.yaml
 /bin/ccd-config-PRL-local.xlsx
 /bin/
 /.mirrord/mirrord.json
+pacts/
