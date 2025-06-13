@@ -60,20 +60,36 @@ public class CaseFlagsWaService {
     }
 
     public void setSelectedFlags(CaseData caseData) {
+        AllPartyFlags allPartyFlags = caseData.getAllPartyFlags();
         List<Element<Flags>> selectedFlagsList = new ArrayList<>();
-        Flags selectedFlag = deepCopy(caseData.getAllPartyFlags().getCaApplicant1ExternalFlags(), Flags.class);
-        if (selectedFlag != null && CollectionUtils.isNotEmpty(selectedFlag.getDetails())) {
-            List<Element<FlagDetail>> details = selectedFlag.getDetails().stream()
-                .filter(Objects::nonNull)
-                .filter(e -> REQUESTED.equals(e.getValue().getStatus()))
-                .collect(Collectors.toList());
+        Arrays.stream(allPartyFlags.getClass().getDeclaredFields())
+            .filter(field -> field.getType().equals(Flags.class))
+            .forEach(field -> {
+                field.setAccessible(true);
+                try {
+                    Flags selectedFlag = deepCopy((Flags) field.get(allPartyFlags), Flags.class);
+                    selectedFlagsList.add(ElementUtils.element(selectedFlag));
+                } catch (IllegalAccessException e) {
+                    // ignore
+                }
+            });
 
-            if (CollectionUtils.isNotEmpty(details)) {
-                selectedFlag.setDetails(details);
-                selectedFlagsList.add(ElementUtils.element(selectedFlag));
+        List<Element<FlagDetail>> allFlagsDetails = extractAllPartyFlagDetails(allPartyFlags);
+
+        allFlagsDetails.stream().forEach(flagDetail -> {
+            if (!REQUESTED.equals(flagDetail.getValue().getStatus())) {
+                selectedFlagsList.forEach(selectedFlag -> {
+                    selectedFlag.getValue().getDetails().remove(flagDetail);
+                });
             }
-            caseData.setSelectedFlags(selectedFlagsList);
-        }
+        });
+
+        List<Element<Flags>> finalList = selectedFlagsList.stream()
+            .filter(f -> CollectionUtils.isNotEmpty(f.getValue().getDetails()))
+            .toList();
+
+
+        caseData.setSelectedFlags(finalList);
     }
 
     public void filterRequestedCaseLevelFlags(Flags caseLevelFlags) {
