@@ -38,7 +38,6 @@ import java.nio.file.Files;
     }
 )
 @ContextConfiguration
-@SuppressWarnings("PMD")
 public class CaseDocumentControllerFunctionalTest {
 
     @Autowired
