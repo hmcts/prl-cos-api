@@ -380,8 +380,8 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> stringObjectMap = new HashMap<>();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(ElementUtils.element(
-            caseData.getDraftOrderCollection().get(0).getId(),
-            caseData.getDraftOrderCollection().get(0).getValue().toBuilder().otherDetails(OtherDraftOrderDetails.builder()
+            caseData.getDraftOrderCollection().getFirst().getId(),
+            caseData.getDraftOrderCollection().getFirst().getValue().toBuilder().otherDetails(OtherDraftOrderDetails.builder()
                                                                                               .dateCreated(LocalDateTime.now())
                                                                                               .createdBy("test title")
                                                                                               .reviewRequiredBy(
@@ -411,8 +411,8 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> stringObjectMap = new HashMap<>();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(ElementUtils.element(
-            caseData.getDraftOrderCollection().get(0).getId(),
-            caseData.getDraftOrderCollection().get(0).getValue().toBuilder().otherDetails(OtherDraftOrderDetails.builder()
+            caseData.getDraftOrderCollection().getFirst().getId(),
+            caseData.getDraftOrderCollection().getFirst().getValue().toBuilder().otherDetails(OtherDraftOrderDetails.builder()
                                                                                               .dateCreated(LocalDateTime.now())
                                                                                               .createdBy("test title")
                                                                                               .reviewRequiredBy(
@@ -559,8 +559,8 @@ public class DraftAnOrderServiceTest {
     public void testGetDraftOrderDynamicListForJudge() {
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(ElementUtils.element(
-            caseData.getDraftOrderCollection().get(0).getId(),
-            caseData.getDraftOrderCollection().get(0).getValue().toBuilder().otherDetails(OtherDraftOrderDetails.builder()
+            caseData.getDraftOrderCollection().getFirst().getId(),
+            caseData.getDraftOrderCollection().getFirst().getValue().toBuilder().otherDetails(OtherDraftOrderDetails.builder()
                                                                                               .dateCreated(LocalDateTime.now())
                                                                                               .createdBy("test title")
                                                                                               .isJudgeApprovalNeeded(No)
@@ -592,8 +592,8 @@ public class DraftAnOrderServiceTest {
     public void testGetDraftOrderDynamicListForJudge_OldCases() {
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(ElementUtils.element(
-            caseData.getDraftOrderCollection().get(0).getId(),
-            caseData.getDraftOrderCollection().get(0).getValue().toBuilder().otherDetails(OtherDraftOrderDetails.builder()
+            caseData.getDraftOrderCollection().getFirst().getId(),
+            caseData.getDraftOrderCollection().getFirst().getValue().toBuilder().otherDetails(OtherDraftOrderDetails.builder()
                                                                                               .dateCreated(LocalDateTime.now())
                                                                                               .createdBy("test title")
                                                                                               .reviewRequiredBy(
@@ -1328,7 +1328,7 @@ public class DraftAnOrderServiceTest {
 
         assertEquals(
             JudgeOrMagistrateTitleEnum.districtJudge,
-            ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).get(0).getValue().getJudgeOrMagistrateTitle()
+            ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).getFirst().getValue().getJudgeOrMagistrateTitle()
         );
     }
 
@@ -1495,7 +1495,7 @@ public class DraftAnOrderServiceTest {
 
         assertEquals(
             Yes,
-            ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).get(0).getValue().getIsAutoHearingReqPending()
+            ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).getFirst().getValue().getIsAutoHearingReqPending()
         );
     }
 
@@ -1554,7 +1554,7 @@ public class DraftAnOrderServiceTest {
 
         assertEquals(
             Yes,
-            ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).get(0).getValue().getIsAutoHearingReqPending()
+            ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).getFirst().getValue().getIsAutoHearingReqPending()
         );
     }
 
@@ -3675,7 +3675,7 @@ public class DraftAnOrderServiceTest {
             authToken,
             PrlAppsConstants.ENGLISH
         );
-        assertEquals("This order is not available to be drafted", response.getErrors().get(0));
+        assertEquals("This order is not available to be drafted", response.getErrors().getFirst());
         //assertEquals(1, response.getData().get("children").size());
 
     }
@@ -3712,7 +3712,7 @@ public class DraftAnOrderServiceTest {
             authToken,
             PrlAppsConstants.WELSH
         );
-        assertEquals("Nid yw’r gorchymyn hwn ar gael i’w drafftio", response.getErrors().get(0));
+        assertEquals("Nid yw’r gorchymyn hwn ar gael i’w drafftio", response.getErrors().getFirst());
         //assertEquals(1, response.getData().get("children").size());
 
     }
@@ -4230,7 +4230,7 @@ public class DraftAnOrderServiceTest {
             PrlAppsConstants.ENGLISH
         );
         assertEquals(1, response.getErrors().size());
-        assertEquals(ORDER_NOT_AVAILABLE_FL401, response.getErrors().get(0));
+        assertEquals(ORDER_NOT_AVAILABLE_FL401, response.getErrors().getFirst());
     }
 
     @Test
@@ -4264,7 +4264,7 @@ public class DraftAnOrderServiceTest {
             PrlAppsConstants.WELSH
         );
         assertEquals(1, response.getErrors().size());
-        assertEquals(ORDER_NOT_AVAILABLE_FL401_WELSH, response.getErrors().get(0));
+        assertEquals(ORDER_NOT_AVAILABLE_FL401_WELSH, response.getErrors().getFirst());
     }
 
     @Test
@@ -4298,7 +4298,7 @@ public class DraftAnOrderServiceTest {
             PrlAppsConstants.ENGLISH
         );
         assertEquals(1, response.getErrors().size());
-        assertEquals("This order is not available to be drafted", response.getErrors().get(0));
+        assertEquals("This order is not available to be drafted", response.getErrors().getFirst());
 
     }
 
@@ -4333,7 +4333,7 @@ public class DraftAnOrderServiceTest {
             PrlAppsConstants.ENGLISH
         );
         assertEquals(1, response.getErrors().size());
-        assertEquals("This order is not available to be drafted", response.getErrors().get(0));
+        assertEquals("This order is not available to be drafted", response.getErrors().getFirst());
 
     }
 
@@ -4536,7 +4536,7 @@ public class DraftAnOrderServiceTest {
 
         assertEquals(
             JudgeOrMagistrateTitleEnum.districtJudge,
-            ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).get(0).getValue().getJudgeOrMagistrateTitle()
+            ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).getFirst().getValue().getJudgeOrMagistrateTitle()
         );
     }
 
@@ -4973,8 +4973,8 @@ public class DraftAnOrderServiceTest {
     public void testGetDraftOrderDynamicListForManager() {
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(ElementUtils.element(
-            caseData.getDraftOrderCollection().get(0).getId(),
-            caseData.getDraftOrderCollection().get(0).getValue().toBuilder().otherDetails(OtherDraftOrderDetails.builder()
+            caseData.getDraftOrderCollection().getFirst().getId(),
+            caseData.getDraftOrderCollection().getFirst().getValue().toBuilder().otherDetails(OtherDraftOrderDetails.builder()
                                                                                               .dateCreated(LocalDateTime.now())
                                                                                               .createdBy("test title")
                                                                                               .isJudgeApprovalNeeded(No)
@@ -5180,7 +5180,7 @@ public class DraftAnOrderServiceTest {
                 PrlAppsConstants.ENGLISH
             );
             assertEquals(1, response.getErrors().size());
-            assertEquals("This order is not available to be drafted", response.getErrors().get(0));
+            assertEquals("This order is not available to be drafted", response.getErrors().getFirst());
 
         }
 
@@ -5221,7 +5221,7 @@ public class DraftAnOrderServiceTest {
                 PrlAppsConstants.ENGLISH
             );
             assertEquals(1, response.getErrors().size());
-            assertEquals("This order is not available to be drafted", response.getErrors().get(0));
+            assertEquals("This order is not available to be drafted", response.getErrors().getFirst());
         }
     }
 
@@ -5591,7 +5591,7 @@ public class DraftAnOrderServiceTest {
         assertNotNull(caseDataMap);
         assertNotNull(caseDataMap.get("draftOrderCollection"));
         List<Element<DraftOrder>> updatedDraftOrderCollection =  (List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection");
-        DraftOrder updatedDraftOrder = updatedDraftOrderCollection.get(0).getValue();
+        DraftOrder updatedDraftOrder = updatedDraftOrderCollection.getFirst().getValue();
         assertNotNull(updatedDraftOrder.getHearingsType());
         assertEquals("Yes", String.valueOf(updatedDraftOrder.getWasTheOrderApprovedAtHearing()));
         assertEquals("Yes", String.valueOf(updatedDraftOrder.getOtherDetails().getIsJudgeApprovalNeeded()));
@@ -5648,7 +5648,7 @@ public class DraftAnOrderServiceTest {
         assertNotNull(caseDataMap);
         assertNotNull(caseDataMap.get("draftOrderCollection"));
         List<Element<DraftOrder>> updatedDraftOrderCollection =  (List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection");
-        DraftOrder updatedDraftOrder = updatedDraftOrderCollection.get(0).getValue();
+        DraftOrder updatedDraftOrder = updatedDraftOrderCollection.getFirst().getValue();
         assertNotNull(updatedDraftOrder.getHearingsType());
         assertEquals("Yes", String.valueOf(updatedDraftOrder.getWasTheOrderApprovedAtHearing()));
         assertEquals("No", String.valueOf(updatedDraftOrder.getOtherDetails().getIsJudgeApprovalNeeded()));
@@ -5696,10 +5696,10 @@ public class DraftAnOrderServiceTest {
         assertNotNull(caseDataMap);
         assertNotNull(caseDataMap.get("draftOrderCollection"));
         List<Element<DraftOrder>> updatedDraftOrderCollection =  (List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection");
-        DraftOrder updatedDraftOrder = updatedDraftOrderCollection.get(0).getValue();
+        DraftOrder updatedDraftOrder = updatedDraftOrderCollection.getFirst().getValue();
         assertNotNull(updatedDraftOrder.getManageOrderHearingDetails());
         assertEquals(dateReservedWithListAssit.getDisplayedValue(),
-                     updatedDraftOrder.getManageOrderHearingDetails().get(0).getValue().getHearingDateConfirmOptionEnum().getDisplayedValue());
+                     updatedDraftOrder.getManageOrderHearingDetails().getFirst().getValue().getHearingDateConfirmOptionEnum().getDisplayedValue());
     }
 
     @Test
@@ -5964,10 +5964,10 @@ public class DraftAnOrderServiceTest {
         assertNotNull(caseDataMap);
         assertNotNull(caseDataMap.get("draftOrderCollection"));
         List<Element<DraftOrder>> updatedDraftOrderCollection =  (List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection");
-        DraftOrder updatedDraftOrder = updatedDraftOrderCollection.get(0).getValue();
+        DraftOrder updatedDraftOrder = updatedDraftOrderCollection.getFirst().getValue();
         assertNotNull(updatedDraftOrder.getManageOrderHearingDetails());
         assertEquals(dateReservedWithListAssit.getDisplayedValue(),
-                     updatedDraftOrder.getManageOrderHearingDetails().get(0).getValue().getHearingDateConfirmOptionEnum().getDisplayedValue());
+                     updatedDraftOrder.getManageOrderHearingDetails().getFirst().getValue().getHearingDateConfirmOptionEnum().getDisplayedValue());
     }
 
     @Test
@@ -6020,9 +6020,9 @@ public class DraftAnOrderServiceTest {
         assertNotNull(caseDataMap);
         assertNotNull(caseDataMap.get("draftOrderCollection"));
         List<Element<DraftOrder>> updatedDraftOrderCollection =  (List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection");
-        DraftOrder updatedDraftOrder = updatedDraftOrderCollection.get(0).getValue();
+        DraftOrder updatedDraftOrder = updatedDraftOrderCollection.getFirst().getValue();
         assertNotNull(updatedDraftOrder.getManageOrderHearingDetails());
         assertEquals(dateReservedWithListAssit.getDisplayedValue(),
-                     updatedDraftOrder.getManageOrderHearingDetails().get(0).getValue().getHearingDateConfirmOptionEnum().getDisplayedValue());
+                     updatedDraftOrder.getManageOrderHearingDetails().getFirst().getValue().getHearingDateConfirmOptionEnum().getDisplayedValue());
     }
 }

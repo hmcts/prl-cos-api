@@ -78,8 +78,8 @@ public class DocumentUploadConsumerTest {
         UploadResponse response = caseDocumentClientApi.uploadDocuments(BEARER_TOKEN, SERVICE_AUTHORIZATION_HEADER,
                  buildDocumentUploadRequest());
         Assertions.assertNotNull(response);
-        assertEquals(RESTRICTED, response.getDocuments().get(0).classification);
-        assertEquals(DOCUMENT_NAME, response.getDocuments().get(0).originalDocumentName);
+        assertEquals(RESTRICTED, response.getDocuments().getFirst().classification);
+        assertEquals(DOCUMENT_NAME, response.getDocuments().getFirst().originalDocumentName);
     }
 
     private DocumentUploadRequest buildDocumentUploadRequest() throws Exception {

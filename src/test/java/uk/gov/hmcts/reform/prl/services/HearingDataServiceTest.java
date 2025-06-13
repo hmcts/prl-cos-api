@@ -238,8 +238,8 @@ public class HearingDataServiceTest {
         when(refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse, HEARINGTYPE)).thenReturn(
             listHearingTypes);
         List<DynamicListElement> expectedResponse = hearingDataService.prePopulateHearingType(authToken);
-        assertEquals("ABA5-REV", expectedResponse.get(0).getCode());
-        assertEquals("Review", expectedResponse.get(0).getLabel());
+        assertEquals("ABA5-REV", expectedResponse.getFirst().getCode());
+        assertEquals("Review", expectedResponse.getFirst().getLabel());
     }
 
     @Test()
@@ -547,7 +547,7 @@ public class HearingDataServiceTest {
             hearingDataService.getHearingDataForOtherOrders(listWithoutNoticeHearingDetails,
                                                             hearingDataPrePopulatedDynamicLists,
                                                             caseData);
-        assertEquals("Test", expectedResponse.get(0).getValue().getHearingJudgePersonalCode());
+        assertEquals("Test", expectedResponse.getFirst().getValue().getHearingJudgePersonalCode());
     }
 
 
@@ -663,8 +663,8 @@ public class HearingDataServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         List<DynamicListElement> expectedResponse = hearingDataService.getLinkedCases(authToken, caseData);
-        assertEquals("1677767515750127_123",expectedResponse.get(0).getCode());
-        assertEquals("1677767515750127_test - 08 Nov 2023",expectedResponse.get(0).getLabel());
+        assertEquals("1677767515750127_123",expectedResponse.getFirst().getCode());
+        assertEquals("1677767515750127_test - 08 Nov 2023",expectedResponse.getFirst().getLabel());
     }
 
     @Test()
@@ -708,8 +708,8 @@ public class HearingDataServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         List<DynamicListElement> expectedResponse = hearingDataService.getLinkedCases(authToken, caseData);
-        assertEquals("1677767515750127_123", expectedResponse.get(0).getCode());
-        assertEquals("1677767515750127_test - 08 Nov 2023", expectedResponse.get(0).getLabel());
+        assertEquals("1677767515750127_123", expectedResponse.getFirst().getCode());
+        assertEquals("1677767515750127_test - 08 Nov 2023", expectedResponse.getFirst().getLabel());
     }
 
     @Test()
@@ -726,7 +726,7 @@ public class HearingDataServiceTest {
 
         assertEquals(
             null,
-            ((LinkedHashMap) ((LinkedHashMap) listWithoutNoticeHeardetailsObj.get(0)).get("value")).get(CUSTOM_DETAILS)
+            ((LinkedHashMap) ((LinkedHashMap) listWithoutNoticeHeardetailsObj.getFirst()).get("value")).get(CUSTOM_DETAILS)
         );
 
     }
@@ -745,7 +745,7 @@ public class HearingDataServiceTest {
 
         assertEquals(
             null,
-            ((LinkedHashMap) ((LinkedHashMap) listWithoutNoticeHeardetailsObj.get(0)).get("value")).get(CUSTOM_DETAILS)
+            ((LinkedHashMap) ((LinkedHashMap) listWithoutNoticeHeardetailsObj.getFirst()).get("value")).get(CUSTOM_DETAILS)
         );
 
     }
@@ -763,7 +763,7 @@ public class HearingDataServiceTest {
         List<DynamicListElement> dynamicListElementList = hearingDataService.getLinkedCasesDynamicList(authToken,
                                                                                                        caseId);
 
-        assertEquals("testCaseRefNo", (dynamicListElementList.get(0).getCode()));
+        assertEquals("testCaseRefNo", (dynamicListElementList.getFirst().getCode()));
 
     }
 
@@ -798,7 +798,7 @@ public class HearingDataServiceTest {
         when(refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse, HEARINGTYPE)).thenReturn(
             listHearingTypes);
         List<DynamicListElement> expectedResponse = hearingDataService.prePopulateHearingType(authToken);
-        assertNull(expectedResponse.get(0).getCode());
+        assertNull(expectedResponse.getFirst().getCode());
     }
 
     @Test()
@@ -815,7 +815,7 @@ public class HearingDataServiceTest {
         when(refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse,
                                                                  HEARINGTYPE)).thenThrow(new RuntimeException());
         List<DynamicListElement> expectedResponse = hearingDataService.prePopulateHearingType(authToken);
-        assertNull(expectedResponse.get(0).getCode());
+        assertNull(expectedResponse.getFirst().getCode());
     }
 
     @Test
@@ -909,7 +909,7 @@ public class HearingDataServiceTest {
             "testAuth"
         );
         assertNotNull(hearingDataForSelectedHearing);
-        assert (hearingDataForSelectedHearing.get(0).getValue().getHearingdataFromHearingTab().get(0).getValue().getHearingTime().equals(
+        assert (hearingDataForSelectedHearing.getFirst().getValue().getHearingdataFromHearingTab().getFirst().getValue().getHearingTime().equals(
             "10:00 AM"));
     }
 
@@ -967,7 +967,7 @@ public class HearingDataServiceTest {
             "testAuth"
         );
         assertNotNull(hearingDataForSelectedHearing);
-        assert (hearingDataForSelectedHearing.get(0).getValue().getHearingdataFromHearingTab().get(0).getValue().getHearingTime().equals(
+        assert (hearingDataForSelectedHearing.getFirst().getValue().getHearingdataFromHearingTab().getFirst().getValue().getHearingTime().equals(
             "10:00 AM"));
     }
 

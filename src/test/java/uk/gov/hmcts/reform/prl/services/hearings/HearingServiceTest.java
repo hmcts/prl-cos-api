@@ -174,8 +174,8 @@ public class HearingServiceTest {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         Hearings hearingsResp = hearingService.getHearings(auth, caseReferenceNumber);
 
-        assertNotNull(hearingsResp.getCaseHearings().get(0).getNextHearingDate());
-        assertEquals(true,hearingsResp.getCaseHearings().get(0).isUrgentFlag());
+        assertNotNull(hearingsResp.getCaseHearings().getFirst().getNextHearingDate());
+        assertEquals(true,hearingsResp.getCaseHearings().getFirst().isUrgentFlag());
     }
 
     @Test
@@ -221,7 +221,7 @@ public class HearingServiceTest {
         Hearings response =
             hearingService.getHearings(auth, caseReferenceNumber);
 
-        Assert.assertEquals("", response.getCaseHearings().get(0).getHearingTypeValue());
+        Assert.assertEquals("", response.getCaseHearings().getFirst().getHearingTypeValue());
 
     }
 
@@ -306,7 +306,7 @@ public class HearingServiceTest {
         Hearings response =
             hearingService.getFutureHearings(auth, caseReferenceNumber);
 
-        Assert.assertEquals("2030006118", response.getCaseHearings().get(0).getHearingID().toString());
+        Assert.assertEquals("2030006118", response.getCaseHearings().getFirst().getHearingID().toString());
     }
 
     @Test

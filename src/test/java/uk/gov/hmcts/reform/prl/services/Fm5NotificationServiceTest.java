@@ -152,9 +152,9 @@ public class Fm5NotificationServiceTest {
 
         //verify
         Assert.assertFalse(notifications.isEmpty());
-        Assert.assertNotNull(notifications.get(0).getValue().getPartyId());
-        assertEquals(PartyType.APPLICANT_SOLICITOR, notifications.get(0).getValue().getPartyType());
-        assertEquals(NotificationType.SENDGRID_EMAIL, notifications.get(0).getValue().getNotificationType());
+        Assert.assertNotNull(notifications.getFirst().getValue().getPartyId());
+        assertEquals(PartyType.APPLICANT_SOLICITOR, notifications.getFirst().getValue().getPartyType());
+        assertEquals(NotificationType.SENDGRID_EMAIL, notifications.getFirst().getValue().getNotificationType());
     }
 
     @Test
@@ -164,9 +164,9 @@ public class Fm5NotificationServiceTest {
 
         //verify
         Assert.assertFalse(notifications.isEmpty());
-        Assert.assertNotNull(notifications.get(0).getValue().getPartyId());
-        assertEquals(PartyType.RESPONDENT_SOLICITOR, notifications.get(0).getValue().getPartyType());
-        assertEquals(NotificationType.SENDGRID_EMAIL, notifications.get(0).getValue().getNotificationType());
+        Assert.assertNotNull(notifications.getFirst().getValue().getPartyId());
+        assertEquals(PartyType.RESPONDENT_SOLICITOR, notifications.getFirst().getValue().getPartyType());
+        assertEquals(NotificationType.SENDGRID_EMAIL, notifications.getFirst().getValue().getNotificationType());
     }
 
     @Test
@@ -176,10 +176,10 @@ public class Fm5NotificationServiceTest {
 
         //verify
         Assert.assertFalse(notifications.isEmpty());
-        Assert.assertNotNull(notifications.get(0).getValue().getPartyId());
-        assertEquals(PartyType.APPLICANT_SOLICITOR, notifications.get(0).getValue().getPartyType());
+        Assert.assertNotNull(notifications.getFirst().getValue().getPartyId());
+        assertEquals(PartyType.APPLICANT_SOLICITOR, notifications.getFirst().getValue().getPartyType());
         assertEquals(PartyType.RESPONDENT_SOLICITOR, notifications.get(1).getValue().getPartyType());
-        assertEquals(NotificationType.SENDGRID_EMAIL, notifications.get(0).getValue().getNotificationType());
+        assertEquals(NotificationType.SENDGRID_EMAIL, notifications.getFirst().getValue().getNotificationType());
     }
 
     @Test
@@ -207,8 +207,8 @@ public class Fm5NotificationServiceTest {
 
         //verify
         Assert.assertFalse(notifications.isEmpty());
-        Assert.assertNotNull(notifications.get(0).getValue().getPartyId());
-        assertEquals(PartyType.APPLICANT, notifications.get(0).getValue().getPartyType());
+        Assert.assertNotNull(notifications.getFirst().getValue().getPartyId());
+        assertEquals(PartyType.APPLICANT, notifications.getFirst().getValue().getPartyType());
         assertEquals(1, notifications.size());
     }
 
@@ -226,8 +226,8 @@ public class Fm5NotificationServiceTest {
 
         //verify
         Assert.assertFalse(notifications.isEmpty());
-        Assert.assertNotNull(notifications.get(0).getValue().getPartyId());
-        assertEquals(PartyType.RESPONDENT, notifications.get(0).getValue().getPartyType());
+        Assert.assertNotNull(notifications.getFirst().getValue().getPartyId());
+        assertEquals(PartyType.RESPONDENT, notifications.getFirst().getValue().getPartyType());
         assertEquals(1, notifications.size());
     }
 
@@ -245,8 +245,8 @@ public class Fm5NotificationServiceTest {
 
         //verify
         Assert.assertFalse(notifications.isEmpty());
-        Assert.assertNotNull(notifications.get(0).getValue().getPartyId());
-        assertEquals(PartyType.APPLICANT, notifications.get(0).getValue().getPartyType());
+        Assert.assertNotNull(notifications.getFirst().getValue().getPartyId());
+        assertEquals(PartyType.APPLICANT, notifications.getFirst().getValue().getPartyType());
         assertEquals(1, notifications.size());
     }
 
@@ -264,8 +264,8 @@ public class Fm5NotificationServiceTest {
 
         //verify
         Assert.assertFalse(notifications.isEmpty());
-        Assert.assertNotNull(notifications.get(0).getValue().getPartyId());
-        assertEquals(PartyType.RESPONDENT, notifications.get(0).getValue().getPartyType());
+        Assert.assertNotNull(notifications.getFirst().getValue().getPartyId());
+        assertEquals(PartyType.RESPONDENT, notifications.getFirst().getValue().getPartyType());
         assertEquals(1, notifications.size());
     }
 
@@ -296,9 +296,9 @@ public class Fm5NotificationServiceTest {
 
         //verify
         Assert.assertFalse(notifications.isEmpty());
-        Assert.assertNotNull(notifications.get(0).getValue().getPartyId());
-        assertEquals(PartyType.RESPONDENT_SOLICITOR, notifications.get(0).getValue().getPartyType());
-        assertEquals(NotificationType.SENDGRID_EMAIL, notifications.get(0).getValue().getNotificationType());
+        Assert.assertNotNull(notifications.getFirst().getValue().getPartyId());
+        assertEquals(PartyType.RESPONDENT_SOLICITOR, notifications.getFirst().getValue().getPartyType());
+        assertEquals(NotificationType.SENDGRID_EMAIL, notifications.getFirst().getValue().getNotificationType());
     }
 
     @Test
@@ -319,8 +319,8 @@ public class Fm5NotificationServiceTest {
 
         //verify
         Assert.assertFalse(notifications.isEmpty());
-        Assert.assertNotNull(notifications.get(0).getValue().getPartyId());
-        assertEquals(PartyType.APPLICANT, notifications.get(0).getValue().getPartyType());
+        Assert.assertNotNull(notifications.getFirst().getValue().getPartyId());
+        assertEquals(PartyType.APPLICANT, notifications.getFirst().getValue().getPartyType());
         assertEquals(1, notifications.size());
     }
 
@@ -361,8 +361,8 @@ public class Fm5NotificationServiceTest {
 
         //verify
         Assert.assertFalse(notifications.isEmpty());
-        Assert.assertNotNull(notifications.get(0).getValue().getPartyId());
-        assertEquals(PartyType.RESPONDENT, notifications.get(0).getValue().getPartyType());
+        Assert.assertNotNull(notifications.getFirst().getValue().getPartyId());
+        assertEquals(PartyType.RESPONDENT, notifications.getFirst().getValue().getPartyType());
         assertEquals(1, notifications.size());
     }
 

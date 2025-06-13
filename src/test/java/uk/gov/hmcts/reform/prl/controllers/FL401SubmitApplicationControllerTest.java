@@ -291,7 +291,7 @@ public class FL401SubmitApplicationControllerTest {
         verify(fl401StatementOfTruthAndSubmitChecker, times(1)).hasMandatoryCompleted(caseData);
         Assertions.assertEquals(1, callbackResponseTest.getErrors().size());
         Assertions.assertEquals("Statement of truth and submit is not allowed for this case unless "
-                                    + "you finish all the mandatory events", callbackResponseTest.getErrors().get(0));
+                                    + "you finish all the mandatory events", callbackResponseTest.getErrors().getFirst());
 
     }
 

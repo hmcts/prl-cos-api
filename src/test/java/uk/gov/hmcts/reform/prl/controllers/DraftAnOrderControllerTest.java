@@ -202,7 +202,7 @@ public class DraftAnOrderControllerTest {
 
         Assert.assertEquals(
             "This order is not available to be drafted",
-            draftAnOrderController.populateHeader(authToken, s2sToken, PrlAppsConstants.ENGLISH, callbackRequest).getErrors().get(0)
+            draftAnOrderController.populateHeader(authToken, s2sToken, PrlAppsConstants.ENGLISH, callbackRequest).getErrors().getFirst()
         );
     }
 
@@ -230,7 +230,7 @@ public class DraftAnOrderControllerTest {
             "This order is not available to be drafted")).build());
         Assert.assertEquals(
             "This order is not available to be drafted",
-            draftAnOrderController.populateHeader(authToken, s2sToken, PrlAppsConstants.ENGLISH, callbackRequest).getErrors().get(0)
+            draftAnOrderController.populateHeader(authToken, s2sToken, PrlAppsConstants.ENGLISH, callbackRequest).getErrors().getFirst()
         );
     }
 
@@ -457,7 +457,7 @@ public class DraftAnOrderControllerTest {
         AboutToStartOrSubmitCallbackResponse response = draftAnOrderController.populateFl404Fields(authToken,s2sToken,
             PrlAppsConstants.ENGLISH,callbackRequest);
         Assert.assertEquals(MANDATORY_JUDGE,
-                            response.getErrors().get(0));
+                            response.getErrors().getFirst());
     }
 
     @Test
@@ -484,7 +484,7 @@ public class DraftAnOrderControllerTest {
         AboutToStartOrSubmitCallbackResponse response = draftAnOrderController.populateFl404Fields(authToken,s2sToken,
             PrlAppsConstants.ENGLISH,callbackRequest);
         Assert.assertEquals(MANDATORY_MAGISTRATE,
-                            response.getErrors().get(0));
+                            response.getErrors().getFirst());
     }
 
     @Test
@@ -635,7 +635,7 @@ public class DraftAnOrderControllerTest {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         Assert.assertEquals(
             "Please select at least one options from below",
-            draftAnOrderController.populateSdoFields(authToken, s2sToken, PrlAppsConstants.ENGLISH, callbackRequest).getErrors().get(0)
+            draftAnOrderController.populateSdoFields(authToken, s2sToken, PrlAppsConstants.ENGLISH, callbackRequest).getErrors().getFirst()
         );
 
     }
@@ -709,7 +709,7 @@ public class DraftAnOrderControllerTest {
 
         Assert.assertEquals(
             "Please select at least one options from below",
-            draftAnOrderController.populateDioFields(authToken, s2sToken, callbackRequest).getErrors().get(0)
+            draftAnOrderController.populateDioFields(authToken, s2sToken, callbackRequest).getErrors().getFirst()
         );
 
     }
@@ -1005,7 +1005,7 @@ public class DraftAnOrderControllerTest {
 
         assertNotNull(callbackResponse);
         assertNotNull(callbackResponse.getErrors());
-        assertEquals("Please provide at least one hearing details", callbackResponse.getErrors().get(0));
+        assertEquals("Please provide at least one hearing details", callbackResponse.getErrors().getFirst());
     }
 
     @Test
@@ -1043,7 +1043,7 @@ public class DraftAnOrderControllerTest {
 
         assertNotNull(callbackResponse);
         assertNotNull(callbackResponse.getErrors());
-        assertEquals("Please provide at least one hearing details", callbackResponse.getErrors().get(0));
+        assertEquals("Please provide at least one hearing details", callbackResponse.getErrors().getFirst());
     }
 
     @Test
@@ -1086,7 +1086,7 @@ public class DraftAnOrderControllerTest {
 
         assertNotNull(callbackResponse);
         assertNotNull(callbackResponse.getErrors());
-        assertEquals("Only one hearing can be created", callbackResponse.getErrors().get(0));
+        assertEquals("Only one hearing can be created", callbackResponse.getErrors().getFirst());
     }
 
     @Test
@@ -1132,7 +1132,7 @@ public class DraftAnOrderControllerTest {
 
         assertNotNull(callbackResponse);
         assertNotNull(callbackResponse.getErrors());
-        assertEquals("HearingType cannot be empty, please select a hearingType", callbackResponse.getErrors().get(0));
+        assertEquals("HearingType cannot be empty, please select a hearingType", callbackResponse.getErrors().getFirst());
         assertEquals("Please enter numeric value for Hearing estimated days", callbackResponse.getErrors().get(1));
         assertEquals("Please enter numeric value for Hearing estimated hours", callbackResponse.getErrors().get(2));
         assertEquals("Please enter numeric value for Hearing estimated minutes", callbackResponse.getErrors().get(3));
@@ -1172,7 +1172,7 @@ public class DraftAnOrderControllerTest {
 
         assertNotNull(callbackResponse);
         assertNotNull(callbackResponse.getErrors());
-        assertEquals("Please select either applicant or participant section", callbackResponse.getErrors().get(0));
+        assertEquals("Please select either applicant or participant section", callbackResponse.getErrors().getFirst());
     }
 
     @Test

@@ -141,7 +141,7 @@ public class FeeAndPayServiceRequestControllerTest {
         when(feeAndPayServiceRequestService.validateSuppressedHelpWithFeesCheck(any(), any())).thenCallRealMethod();
         Assert.assertEquals(
             HWF_SUPPRESSION_ERROR_MESSAGE,
-            feeAndPayServiceRequestController.helpWithFeesValidator(authToken, PrlAppsConstants.ENGLISH, callbackRequest).getErrors().get(0)
+            feeAndPayServiceRequestController.helpWithFeesValidator(authToken, PrlAppsConstants.ENGLISH, callbackRequest).getErrors().getFirst()
         );
     }
 
@@ -163,7 +163,7 @@ public class FeeAndPayServiceRequestControllerTest {
         when(feeAndPayServiceRequestService.validateSuppressedHelpWithFeesCheck(any(), any())).thenCallRealMethod();
         Assert.assertEquals(
             HWF_SUPPRESSION_ERROR_MESSAGE,
-            feeAndPayServiceRequestController.helpWithFeesValidator(authToken, PrlAppsConstants.ENGLISH, callbackRequest).getErrors().get(0)
+            feeAndPayServiceRequestController.helpWithFeesValidator(authToken, PrlAppsConstants.ENGLISH, callbackRequest).getErrors().getFirst()
         );
     }
 
