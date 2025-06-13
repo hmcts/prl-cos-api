@@ -98,7 +98,7 @@ public class CaseInviteManagerTest {
         CaseData actualCaseData = caseInviteManager.sendAccessCodeNotificationEmail(caseData);
 
         assertEquals(2, actualCaseData.getCaseInvites().size());
-        assertEquals("abc1@de.com", actualCaseData.getCaseInvites().get(0).getValue()
+        assertEquals("abc1@de.com", actualCaseData.getCaseInvites().getFirst().getValue()
             .getCaseInviteEmail());
         assertEquals("abc2@de.com", actualCaseData.getCaseInvites().get(1).getValue()
             .getCaseInviteEmail());
@@ -112,7 +112,7 @@ public class CaseInviteManagerTest {
             "FL401").build());
 
         assertEquals(2, actualCaseData.getCaseInvites().size());
-        assertEquals("abc1@de.com", actualCaseData.getCaseInvites().get(0).getValue()
+        assertEquals("abc1@de.com", actualCaseData.getCaseInvites().getFirst().getValue()
             .getCaseInviteEmail());
         assertEquals("abc2@de.com", actualCaseData.getCaseInvites().get(1).getValue()
             .getCaseInviteEmail());
@@ -125,7 +125,7 @@ public class CaseInviteManagerTest {
         CaseData actualCaseData = caseInviteManager.reGeneratePinAndSendNotificationEmail(caseData);
 
         assertEquals(2, actualCaseData.getCaseInvites().size());
-        assertEquals("abc1@de.com", actualCaseData.getCaseInvites().get(0).getValue()
+        assertEquals("abc1@de.com", actualCaseData.getCaseInvites().getFirst().getValue()
             .getCaseInviteEmail());
         assertEquals("abc2@de.com", actualCaseData.getCaseInvites().get(1).getValue()
             .getCaseInviteEmail());
@@ -138,7 +138,7 @@ public class CaseInviteManagerTest {
             "FL401").build());
 
         assertEquals(2, actualCaseData.getCaseInvites().size());
-        assertEquals("abc1@de.com", actualCaseData.getCaseInvites().get(0).getValue()
+        assertEquals("abc1@de.com", actualCaseData.getCaseInvites().getFirst().getValue()
             .getCaseInviteEmail());
         assertEquals("abc2@de.com", actualCaseData.getCaseInvites().get(1).getValue()
             .getCaseInviteEmail());

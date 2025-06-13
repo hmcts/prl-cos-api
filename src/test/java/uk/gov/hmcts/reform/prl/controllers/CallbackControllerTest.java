@@ -3221,7 +3221,7 @@ public class CallbackControllerTest {
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
             .fetchRoleAssignmentForUser(authToken, CallbackRequest.builder().build());
         assertEquals("The selected user does not have right roles to assign this case",
-            aboutToStartOrSubmitCallbackResponse.getErrors().get(0));
+            aboutToStartOrSubmitCallbackResponse.getErrors().getFirst());
     }
 
     @Test
@@ -3443,7 +3443,7 @@ public class CallbackControllerTest {
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
             .validateUrgentCaseCreation(authToken, s2sToken, CallbackRequest.builder().build());
         assertEquals("Sorry unable to create any urgent cases now",
-                     aboutToStartOrSubmitCallbackResponse.getErrors().get(0));
+                     aboutToStartOrSubmitCallbackResponse.getErrors().getFirst());
     }
 
     @Test

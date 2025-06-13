@@ -383,7 +383,7 @@ public class CaseDataServiceTest {
 
         caseDataService.filterCancelledHearingsBeforeListing(listOfHearings);
 
-        assertEquals(2, listOfHearings.get(0).getCaseHearings().size());
+        assertEquals(2, listOfHearings.getFirst().getCaseHearings().size());
 
     }
 
@@ -473,9 +473,9 @@ public class CaseDataServiceTest {
         privateMethod.setAccessible(true);
         privateMethod.invoke(caseDataService, cafCassResponse);
 
-        assertEquals("test", cafCassResponse.getCases().get(0).getCaseData().getOtherDocuments().get(0).getValue().getDocumentName());
-        assertNull(cafCassResponse.getCases().get(0).getCaseData().getCourtStaffUploadDocListDocTab());
-        assertNull(cafCassResponse.getCases().get(0).getCaseData().getCafcassUploadDocListDocTab());
+        assertEquals("test", cafCassResponse.getCases().getFirst().getCaseData().getOtherDocuments().getFirst().getValue().getDocumentName());
+        assertNull(cafCassResponse.getCases().getFirst().getCaseData().getCourtStaffUploadDocListDocTab());
+        assertNull(cafCassResponse.getCases().getFirst().getCaseData().getCafcassUploadDocListDocTab());
 
     }
 

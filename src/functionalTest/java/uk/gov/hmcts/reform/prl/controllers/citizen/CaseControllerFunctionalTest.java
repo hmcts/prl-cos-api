@@ -211,8 +211,8 @@ public class CaseControllerFunctionalTest {
 
         Assert.assertNotNull(responseData);
         Assert.assertNotNull(responseData.getOtherPartyInTheCaseRevised());
-        Assert.assertNotNull(responseData.getOtherPartyInTheCaseRevised().get(0));
-        Assert.assertEquals("Andrew",responseData.getOtherPartyInTheCaseRevised().get(0).getValue().getFirstName());
-        Assert.assertEquals("Smith",responseData.getOtherPartyInTheCaseRevised().get(0).getValue().getLastName());
+        Assert.assertNotNull(responseData.getOtherPartyInTheCaseRevised().getFirst());
+        Assert.assertEquals("Andrew",responseData.getOtherPartyInTheCaseRevised().getFirst().getValue().getFirstName());
+        Assert.assertEquals("Smith",responseData.getOtherPartyInTheCaseRevised().getFirst().getValue().getLastName());
     }
 }
