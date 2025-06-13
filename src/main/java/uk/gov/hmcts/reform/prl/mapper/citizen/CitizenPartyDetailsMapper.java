@@ -348,7 +348,6 @@ public class CitizenPartyDetailsMapper {
                     }
                 }
                 caseDataMapToBeUpdated.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
-                System.out.println("Final map: " + caseDataMapToBeUpdated);
                 return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
             }
         } else {
