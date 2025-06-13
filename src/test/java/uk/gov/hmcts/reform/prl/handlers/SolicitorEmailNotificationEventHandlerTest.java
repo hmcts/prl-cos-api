@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.events.SolicitorNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
+import uk.gov.hmcts.reform.prl.mapper.rpa.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 
