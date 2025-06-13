@@ -3,12 +3,12 @@ package uk.gov.hmcts.reform.prl.tasks.emails.generics;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
-import uk.gov.hmcts.reform.prl.framework.context.TaskContext;
-import uk.gov.hmcts.reform.prl.framework.task.Task;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.EmailService;
+import uk.gov.hmcts.reform.prl.tasks.Task;
+import uk.gov.hmcts.reform.prl.tasks.TaskContext;
 
 @Slf4j
 @RequiredArgsConstructor

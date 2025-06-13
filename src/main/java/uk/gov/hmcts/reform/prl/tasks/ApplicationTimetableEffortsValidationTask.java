@@ -1,9 +1,7 @@
 package uk.gov.hmcts.reform.prl.tasks;
 
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.prl.framework.context.TaskContext;
-import uk.gov.hmcts.reform.prl.framework.exceptions.TaskException;
-import uk.gov.hmcts.reform.prl.framework.task.Task;
+import uk.gov.hmcts.reform.prl.exception.TaskException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 
 import java.util.Map;
