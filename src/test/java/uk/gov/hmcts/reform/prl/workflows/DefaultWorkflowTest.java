@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.framework.workflow;
+package uk.gov.hmcts.reform.prl.workflows;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -6,10 +6,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.prl.framework.context.DefaultTaskContext;
-import uk.gov.hmcts.reform.prl.framework.exceptions.TaskException;
-import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
-import uk.gov.hmcts.reform.prl.framework.task.Task;
+import uk.gov.hmcts.reform.prl.exception.TaskException;
+import uk.gov.hmcts.reform.prl.exception.WorkflowException;
+import uk.gov.hmcts.reform.prl.tasks.DefaultTaskContext;
+import uk.gov.hmcts.reform.prl.tasks.Task;
 
 import static org.junit.Assert.assertEquals;
 

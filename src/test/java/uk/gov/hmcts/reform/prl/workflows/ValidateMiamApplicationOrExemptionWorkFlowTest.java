@@ -8,7 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
+import uk.gov.hmcts.reform.prl.exception.WorkflowException;
 import uk.gov.hmcts.reform.prl.tasks.ValidateMiamApplicationOrExemptionTask;
 
 import static org.mockito.ArgumentMatchers.any;

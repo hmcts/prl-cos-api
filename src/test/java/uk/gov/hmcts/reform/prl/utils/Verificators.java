@@ -3,10 +3,10 @@ package uk.gov.hmcts.reform.prl.utils;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.mockito.InOrder;
-import uk.gov.hmcts.reform.prl.framework.context.TaskContext;
-import uk.gov.hmcts.reform.prl.framework.exceptions.TaskException;
-import uk.gov.hmcts.reform.prl.framework.task.Task;
+import uk.gov.hmcts.reform.prl.exception.TaskException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.tasks.Task;
+import uk.gov.hmcts.reform.prl.tasks.TaskContext;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;

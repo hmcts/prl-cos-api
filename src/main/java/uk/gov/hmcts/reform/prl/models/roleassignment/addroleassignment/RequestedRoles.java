@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.Attributes;
 
 import java.time.Instant;
 import java.util.List;
