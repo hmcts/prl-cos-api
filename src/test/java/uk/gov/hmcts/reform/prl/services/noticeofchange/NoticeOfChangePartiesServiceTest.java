@@ -40,7 +40,6 @@ import uk.gov.hmcts.reform.prl.models.SolicitorUser;
 import uk.gov.hmcts.reform.prl.models.caseaccess.CaseUser;
 import uk.gov.hmcts.reform.prl.models.caseaccess.FindUserCaseRolesResponse;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
-import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
