@@ -9,7 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -64,7 +64,7 @@ public class HearingsManagementControllerTest {
     private AllTabServiceImpl allTabService;
 
     private HearingRequest hearingRequest;
-    @MockBean
+    @MockitoBean
     private State state;
 
     private NextHearingDateRequest nextHearingDateRequest;

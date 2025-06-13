@@ -9,12 +9,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
@@ -68,27 +68,27 @@ public class CaseDocumentControllerIntegrationTest {
     @Autowired
     private WebApplicationContext webApplicationContext;
 
-    @MockBean
+    @MockitoBean
     DocumentGenService documentGenService;
 
-    @MockBean
+    @MockitoBean
     UploadDocumentService uploadService;
 
-    @MockBean
+    @MockitoBean
     AuthorisationService authorisationService;
 
-    @MockBean
+    @MockitoBean
     CoreCaseDataApi coreCaseDataApi;
-    @MockBean
+    @MockitoBean
     IdamClient idamClient;
 
-    @MockBean
+    @MockitoBean
     CaseService caseService;
 
-    @MockBean
+    @MockitoBean
     EmailService emailService;
 
-    @MockBean
+    @MockitoBean
     CitizenDocumentService citizenDocumentService;
 
     @Autowired

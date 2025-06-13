@@ -49,7 +49,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(SpringExtension.class)
 @PactTestFor(providerName = "s2s_auth", port = "5000")
 @SpringBootTest
-@EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.authorisation"})
+@EnableFeignClients(basePackages = {
+    "uk.gov.hmcts.reform.authorisation",
+    "uk.gov.hmcts.reform.idam.client"
+})
 public class ServiceAuthConsumerTest {
 
     private static final String AUTHORISATION_TOKEN = "Bearer someAuthorisationToken";

@@ -28,8 +28,8 @@ import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.testng.AssertJUnit.assertNotNull;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HomeCheckerTest {
