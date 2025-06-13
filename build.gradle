@@ -19,7 +19,7 @@ plugins {
   id 'org.sonarqube' version '5.1.0.4882'
   id 'org.springframework.boot' version '3.3.5'
   id 'au.com.dius.pact' version '4.2.6'
-  id 'com.github.hmcts.rse-cft-lib' version '0.19.1592'
+  id 'com.github.hmcts.rse-cft-lib' version '0.19.1687'
 }
 
 def versions = [
@@ -48,11 +48,11 @@ def versions = [
   pact                         : '4.1.11',
   pitest                       : '1.16.3',
   puppyCrawl                   : '8.45.1',
-  reformsJavaLogging           : '6.1.8',
-  sendLetterClient             : '4.0.4',
+  reformsJavaLogging           : '6.1.9',
+  sendLetterClient             : '5.0.4',
   serenity                     : '4.2.16',
   serenityCucumber             : '4.2.30',
-  serviceTokenGenerator        : '4.1.2',
+  serviceTokenGenerator        : '5.3.2',
   sonarPitest                  : '0.5',
   springSecurityCrypto         : '5.8.16',
   springSecurityRsa            : '1.1.5',
@@ -112,9 +112,9 @@ allprojects {
   repositories {
     mavenLocal()
     mavenCentral()
-    jcenter()
-    maven { url 'https://jitpack.io' }
-    maven { url 'https://repo.spring.io/libs-milestone' }
+    maven {
+      url 'https://pkgs.dev.azure.com/hmcts/Artifacts/_packaging/hmcts-lib/maven/v1'
+    }
   }
 
   dependencyManagement {
@@ -343,7 +343,7 @@ dependencies {
   implementation group: 'org.apache.httpcomponents', name: 'fluent-hc', version: versions.httpComponents
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-loadbalancer', version: versions.springCloud
   implementation group: 'org.springframework.retry', name: 'spring-retry', version: '2.0.12'
-  implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
+  implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '5.1.0'
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: versions.reformsJavaLogging
   implementation group: 'com.github.hmcts.java-logging', name: 'logging-appinsights', version: versions.reformsJavaLogging
   implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.24.3'
@@ -356,7 +356,7 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-quartz', version: versions.springBoot
   implementation group: 'uk.gov.service.notify', name: 'notifications-java-client', version: versions.hmctsNotify
   implementation group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.1.1'
-  implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '2.1.1'
+  implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '3.0.4'
   implementation group: 'com.github.hmcts', name:'ccd-case-document-am-client', version: versions.ccdCaseDocumentAmClient
   implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
 
@@ -364,9 +364,7 @@ dependencies {
   implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '8.15.3'
   implementation group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
   implementation group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
-  implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
   implementation group: 'com.sendgrid', name: 'sendgrid-java', version: '4.10.3'
-  implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
   implementation group: 'commons-net', name: 'commons-net', version: '3.11.1'
 //  //implementation group: 'uk.gov.hmcts.reform.auth', name: 'auth-checker-lib', version: '2.1.4'
 //
@@ -504,7 +502,7 @@ dependencies {
 
 
   integrationTestImplementation(sourceSets.test.output)
-  testImplementation 'com.github.hmcts:fortify-client:1.4.8:all'
+  testImplementation 'com.github.hmcts:fortify-client:1.4.9:all'
   testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.36'
 
   implementation group: 'org.pitest', name: 'pitest', version: versions.pitest
