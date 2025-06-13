@@ -59,6 +59,7 @@ public class CaseFlagsWaService {
     }
 
     public void setSelectedFlags(CaseData caseData) {
+        List<Flags> selectedFlagsList = new ArrayList<>();
         Flags selectedFlag = deepCopy(caseData.getAllPartyFlags().getCaApplicant1ExternalFlags(), Flags.class);
         if (selectedFlag != null && CollectionUtils.isNotEmpty(selectedFlag.getDetails())) {
             List<Element<FlagDetail>> details = selectedFlag.getDetails().stream()
@@ -68,8 +69,9 @@ public class CaseFlagsWaService {
 
             if (CollectionUtils.isNotEmpty(details)) {
                 selectedFlag.setDetails(details);
+                selectedFlagsList.add(selectedFlag);
             }
-            caseData.setSelectedFlags(selectedFlag);
+            caseData.setSelectedFlags(selectedFlagsList);
         }
     }
 

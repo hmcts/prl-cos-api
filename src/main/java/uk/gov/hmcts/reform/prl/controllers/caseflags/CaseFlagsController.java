@@ -102,13 +102,13 @@ public class CaseFlagsController extends AbstractCallbackController {
     ) {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        List<String> errors = caseFlagsWaService.validateAllFlags(caseData.getSelectedFlags());
+        List<String> errors = caseFlagsWaService.validateAllFlags(caseData.getSelectedFlags().get(0));
         Flags flagToUpdate = caseData.getAllPartyFlags().getCaApplicant1ExternalFlags();
         if (errors.isEmpty()) {
             for (int i = 0; i < flagToUpdate.getDetails().size(); i++) {
                 if (flagToUpdate.getDetails().get(i).getId().toString()
-                    .equals(caseData.getSelectedFlags().getDetails().getFirst().getId().toString())) {
-                    flagToUpdate.getDetails().set(i, caseData.getSelectedFlags().getDetails().getFirst());
+                    .equals(caseData.getSelectedFlags().get(0).getDetails().getFirst().getId().toString())) {
+                    flagToUpdate.getDetails().set(i, caseData.getSelectedFlags().get(0).getDetails().getFirst());
                     break;
                 }
             }
