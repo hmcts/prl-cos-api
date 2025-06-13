@@ -10,8 +10,8 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
@@ -89,31 +89,31 @@ public class ManageOrderControllerIntegrationTest {
     @Autowired
     private WebApplicationContext webApplicationContext;
 
-    @MockBean
+    @MockitoBean
     ManageOrderService manageOrderService;
 
-    @MockBean
+    @MockitoBean
     ManageOrderEmailService manageOrderEmailService;
 
-    @MockBean
+    @MockitoBean
     AmendOrderService amendOrderService;
 
-    @MockBean
+    @MockitoBean
     RefDataUserService refDataUserService;
 
-    @MockBean
+    @MockitoBean
     HearingDataService hearingDataService;
 
-    @MockBean
+    @MockitoBean
     AuthorisationService authorisationService;
 
-    @MockBean
+    @MockitoBean
     AllTabServiceImpl allTabService;
 
-    @MockBean
+    @MockitoBean
     RoleAssignmentService roleAssignmentService;
 
-    @MockBean
+    @MockitoBean
     HearingService hearingService;
 
     @Autowired

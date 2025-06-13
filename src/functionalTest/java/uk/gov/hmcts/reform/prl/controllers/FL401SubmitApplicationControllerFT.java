@@ -5,8 +5,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
@@ -42,16 +42,16 @@ public class FL401SubmitApplicationControllerFT {
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
-    @MockBean
+    @MockitoBean
     private CourtFinderService courtFinderService;
 
-    @MockBean
+    @MockitoBean
     private UserService userService;
 
-    @MockBean
+    @MockitoBean
     private SolicitorEmailService solicitorEmailService;
 
-    @MockBean
+    @MockitoBean
     private CaseWorkerEmailService caseWorkerEmailService;
 
     private static final String FL401_ABOUT_TO_SUBMIT_CREATION = "requests/fl401-submit-application-controller-validation.json";
