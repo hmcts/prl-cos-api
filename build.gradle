@@ -1,13 +1,3 @@
-buildscript {
-  repositories {
-    mavenCentral()
-  }
-  dependencies {
-    classpath("net.serenity-bdd:serenity-gradle-plugin:2.4.34")
-  }
-}
-
-
 plugins {
   id 'application'
   id 'checkstyle'
@@ -49,8 +39,6 @@ def versions = [
   puppyCrawl                   : '8.45.1',
   reformsJavaLogging           : '6.1.9',
   sendLetterClient             : '5.0.4',
-  serenity                     : '4.2.16',
-  serenityCucumber             : '4.2.30',
   serviceTokenGenerator        : '5.3.2',
   sonarPitest                  : '0.5',
   springSecurityCrypto         : '5.8.16',
@@ -184,7 +172,6 @@ allprojects {
   }
 }
 
-apply plugin: 'net.serenity-bdd.aggregator'
 
 group = 'uk.gov.hmcts.reform.prl'
 version = '0.0.1'
@@ -403,11 +390,6 @@ dependencies {
   testImplementation group: 'io.rest-assured', name: 'json-path', version: '5.5.5'
   testImplementation group: 'io.rest-assured', name: 'xml-path', version: '5.5.5'
   testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
-  testImplementation group: 'net.serenity-bdd', name: 'serenity-core', version: versions.serenity
-  testImplementation group: 'net.serenity-bdd', name: 'serenity-cucumber', version: versions.serenityCucumber
-  testImplementation group: 'net.serenity-bdd', name: 'serenity-junit', version: versions.serenity
-  testImplementation group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: versions.serenity
-  testImplementation group: 'net.serenity-bdd', name: 'serenity-spring', version: versions.serenity
   testImplementation group: 'com.github.mifmif', name: 'generex', version: '1.0.2'
 
 
@@ -417,11 +399,6 @@ dependencies {
   integrationTestImplementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: versions.jacksonDatatypeJsr
   integrationTestImplementation group: 'com.mashape.unirest', name: 'unirest-java', version: versions.unirest
   integrationTestImplementation group: 'io.github.openfeign', name: 'feign-httpclient', version: versions.feignHttpClient
-  integrationTestImplementation group: 'net.serenity-bdd', name: 'serenity-core', version: versions.serenity
-  integrationTestImplementation group: 'net.serenity-bdd', name: 'serenity-cucumber', version: versions.serenityCucumber
-  integrationTestImplementation group: 'net.serenity-bdd', name: 'serenity-junit', version: versions.serenity
-  integrationTestImplementation group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: versions.serenity
-  integrationTestImplementation group: 'net.serenity-bdd', name: 'serenity-spring', version: versions.serenity
   integrationTestImplementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
   integrationTestImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   integrationTestImplementation group: 'org.skyscreamer', name: 'jsonassert', version: versions.jsonAssert
@@ -533,8 +510,6 @@ task nightlyFunctional(type: Test, description: 'Runs the Nightly Only Functiona
 
   setTestClassesDirs(sourceSets.integrationTest.output.classesDirs)
   setClasspath(sourceSets.integrationTest.runtimeClasspath)
-
-  finalizedBy aggregate
 }
 
 pitest {

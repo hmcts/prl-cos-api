@@ -67,7 +67,6 @@ withNightlyPipeline(type, product, component) {
   enableFullFunctionalTest(200)
 
   afterAlways('fullFunctionalTest') {
-    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: 'build/reports/**/*'
   }
 

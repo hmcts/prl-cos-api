@@ -1,17 +1,14 @@
 package uk.gov.hmcts.reform.prl;
 
+import lombok.extern.slf4j.Slf4j;
 import io.restassured.response.Response;
 import jakarta.annotation.PostConstruct;
-import lombok.extern.slf4j.Slf4j;
-import net.serenitybdd.junit.runners.SerenityRunner;
-import net.serenitybdd.junit.spring.integration.SpringIntegrationMethodRule;
-import net.serenitybdd.rest.SerenityRest;
 import org.assertj.core.util.Strings;
-import org.junit.Rule;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.prl.models.CreateUserRequest;
 import uk.gov.hmcts.reform.prl.models.UserCode;
 
@@ -21,9 +18,10 @@ import java.net.URL;
 import java.util.Base64;
 import java.util.UUID;
 
+import static io.restassured.RestAssured.given;
 
 @Slf4j
-@RunWith(SerenityRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {ServiceContextConfiguration.class})
 public abstract class IntegrationTest {
 
@@ -74,15 +72,8 @@ public abstract class IntegrationTest {
 
     private int responseCode;
 
-    @Rule
-    public SpringIntegrationMethodRule springMethodIntegration;
-
     private static String userToken = null;
     private String username;
-
-    public IntegrationTest() {
-        this.springMethodIntegration = new SpringIntegrationMethodRule();
-    }
 
     @PostConstruct
     public void init() {
@@ -120,8 +111,7 @@ public abstract class IntegrationTest {
     }
 
     public String getAuthorizationToken() {
-        String authToken = getUserToken();
-        return authToken;
+        return getUserToken();
     }
 
     public void createCaseworkerUserInIdam(String username, String password) {
@@ -133,9 +123,7 @@ public abstract class IntegrationTest {
             .roles(new UserCode[]{UserCode.builder().code("caseworker-privatelaw-solicitor").build()})
             .build();
 
-        Response userResponse = null;
-
-        userResponse = SerenityRest.given()
+        Response userResponse =  given()
             .header("Content-Type", "application/json")
             .body(ResourceLoader.objectToJson(userRequest))
             .post(idamCreateUrl());
@@ -155,7 +143,7 @@ public abstract class IntegrationTest {
         final String authHeader = "Basic " + new String(Base64.getEncoder().encode(userLoginDetails.getBytes()));
         Response response = null;
 
-        response = SerenityRest.given()
+        response = given()
             .header("Authorization", authHeader)
             .header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE)
             .relaxedHTTPSValidation()
@@ -168,7 +156,7 @@ public abstract class IntegrationTest {
                                                 + " body: " + response.getBody().prettyPrint());
         }
 
-        response = SerenityRest.given()
+        response = given()
             .header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE)
             .relaxedHTTPSValidation()
             .post(idamTokenUrl(response.getBody().path("code")));

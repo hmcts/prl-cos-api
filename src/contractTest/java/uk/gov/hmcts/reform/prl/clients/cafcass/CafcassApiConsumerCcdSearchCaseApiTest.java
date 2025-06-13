@@ -10,7 +10,6 @@ import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.core.model.annotations.PactFolder;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.restassured.http.ContentType;
-import net.serenitybdd.rest.SerenityRest;
 import org.apache.http.client.fluent.Executor;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
@@ -33,6 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonBody;
+import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static uk.gov.hmcts.reform.prl.clients.util.TestConstants.CAFCASS_AUTHORISATION_HEADER;
 import static uk.gov.hmcts.reform.prl.clients.util.TestConstants.CAFCASS_CCD_CASE_TYPE_ID_QUERY_PARAM;
@@ -117,9 +117,7 @@ public class CafcassApiConsumerCcdSearchCaseApiTest {
     @JsonIgnoreProperties(ignoreUnknown = true)
     @PactTestFor(pactMethod = CAFCASS_GET_PACT_METHOD)
     public void verifySearchCasesByDateRange(MockServer mockServer) {
-        String actualResponseBody =
-                SerenityRest
-                        .given()
+        String actualResponseBody = given()
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .header(CAFCASS_AUTHORISATION_HEADER, CAFCASS_TEST_AUTH_TOKEN)
                         .header(CAFCASS_SERVICE_AUTHORISATION_HEADER, CAFCASS_TEST_SERVICE_AUTH_TOKEN)

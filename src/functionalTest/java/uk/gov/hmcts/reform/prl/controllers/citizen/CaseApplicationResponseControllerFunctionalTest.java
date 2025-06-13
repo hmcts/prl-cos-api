@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
-import net.serenitybdd.rest.SerenityRest;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeAll;
@@ -22,6 +21,7 @@ import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
+import static io.restassured.RestAssured.with;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
@@ -75,7 +75,7 @@ public class CaseApplicationResponseControllerFunctionalTest {
     }
 
     public RequestSpecification getMultipleAuthHeaders() {
-        return SerenityRest.with()
+        return with()
             .relaxedHTTPSValidation()
             .baseUri(cosApiUrl)
             .header("Content-Type", APPLICATION_JSON_VALUE)
