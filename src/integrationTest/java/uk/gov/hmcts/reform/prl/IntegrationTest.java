@@ -1,8 +1,8 @@
 package uk.gov.hmcts.reform.prl;
 
-import lombok.extern.slf4j.Slf4j;
 import io.restassured.response.Response;
 import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.util.Strings;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Value;
