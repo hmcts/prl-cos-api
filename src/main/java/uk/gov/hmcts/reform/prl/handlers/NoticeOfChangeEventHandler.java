@@ -35,7 +35,6 @@ import java.util.UUID;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
-import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER;
 
 @Slf4j
 @Component
