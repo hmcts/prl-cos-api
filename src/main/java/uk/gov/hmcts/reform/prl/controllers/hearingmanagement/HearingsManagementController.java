@@ -76,20 +76,6 @@ public class HearingsManagementController extends AbstractCallbackController {
         }
     }
 
-    //TODO: DONT COMMIT THIS CHANGE
-    @PutMapping(path = "testing/hearing-management-state-update/{caseState}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "fis service call to update the state of case")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback processed.",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = CallbackResponse.class))),
-        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public void testingCaseStateUpdateByHearingManagement(@RequestHeader("serviceAuthorization") String s2sToken,
-                                                   @RequestBody HearingRequest hearingRequest,
-                                                   @PathVariable("caseState") State caseState) throws Exception {
-
-        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest,caseState);
-    }
-
     @PutMapping(path = "/hearing-management-next-hearing-date-update", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "updates the next hearing date in the prl to and send the status of update")
     @ApiResponses(value = {
