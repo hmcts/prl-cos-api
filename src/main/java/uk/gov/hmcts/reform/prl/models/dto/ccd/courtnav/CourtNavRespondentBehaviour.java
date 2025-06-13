@@ -1,24 +1,24 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.BehaviourTowardsApplicantEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.BehaviourTowardsChildrenEnum;
 
 import java.util.List;
 
+@NoArgsConstructor
+@AllArgsConstructor
 @Data
 @Builder(toBuilder = true)
-@Getter
-@Setter
-@AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CourtNavRespondentBehaviour {
 
-    private final boolean applyingForMonMolestationOrder;
-    private final List<BehaviourTowardsApplicantEnum> stopBehaviourTowardsApplicant;
-    private final List<BehaviourTowardsChildrenEnum> stopBehaviourTowardsChildren;
-    private final String stopBehaviourAnythingElse;
+    private boolean applyingForMonMolestationOrder;
+    private List<BehaviourTowardsApplicantEnum> stopBehaviourTowardsApplicant;
+    private List<BehaviourTowardsChildrenEnum> stopBehaviourTowardsChildren;
+    private String stopBehaviourAnythingElse;
 }
