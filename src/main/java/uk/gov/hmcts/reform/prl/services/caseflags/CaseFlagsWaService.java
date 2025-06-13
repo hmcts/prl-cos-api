@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.EventService;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -59,7 +60,7 @@ public class CaseFlagsWaService {
     }
 
     public void setSelectedFlags(CaseData caseData) {
-        List<Flags> selectedFlagsList = new ArrayList<>();
+        List<Element<Flags>> selectedFlagsList = new ArrayList<>();
         Flags selectedFlag = deepCopy(caseData.getAllPartyFlags().getCaApplicant1ExternalFlags(), Flags.class);
         if (selectedFlag != null && CollectionUtils.isNotEmpty(selectedFlag.getDetails())) {
             List<Element<FlagDetail>> details = selectedFlag.getDetails().stream()
@@ -69,7 +70,7 @@ public class CaseFlagsWaService {
 
             if (CollectionUtils.isNotEmpty(details)) {
                 selectedFlag.setDetails(details);
-                selectedFlagsList.add(selectedFlag);
+                selectedFlagsList.add(ElementUtils.element(selectedFlag));
             }
             caseData.setSelectedFlags(selectedFlagsList);
         }
