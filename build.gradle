@@ -1,5 +1,6 @@
 plugins {
   id 'application'
+  id 'java'
   id 'checkstyle'
   id 'com.github.ben-manes.versions' version '0.51.0'
   id 'info.solidsoft.pitest' version '1.15.0'
@@ -55,16 +56,6 @@ def versions = [
 allprojects {
 
   def springBootVersion = versions.springBoot
-
-  apply plugin: 'checkstyle'
-  apply plugin: 'com.github.ben-manes.versions'
-  apply plugin: 'io.spring.dependency-management'
-  apply plugin: 'jacoco'
-  apply plugin: 'java'
-  apply plugin: 'org.owasp.dependencycheck'
-
-  group = 'uk.gov.hmcts.reform.prl'
-  version = '0.0.1'
 
   checkstyle.toolVersion = '9.2.1'
   checkstyle.configFile = new File(rootDir, "config/checkstyle/checkstyle.xml")
@@ -172,11 +163,11 @@ allprojects {
   }
 }
 
-
-group = 'uk.gov.hmcts.reform.prl'
-version = '0.0.1'
-
-mainClassName = 'uk.gov.hmcts.reform.prl.Application'
+application {
+  group = 'uk.gov.hmcts.reform.prl'
+  version = '0.0.1'
+  mainClass = 'uk.gov.hmcts.reform.prl.Application'
+}
 
 bootJar {
   getArchiveFileName().set(provider {
