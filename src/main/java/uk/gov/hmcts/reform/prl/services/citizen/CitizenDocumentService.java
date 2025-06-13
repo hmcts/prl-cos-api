@@ -83,7 +83,7 @@ public class CitizenDocumentService {
                     updatedCaseData,
                     updatedCaseDataMap,
                     CITIZEN,
-                    quarantineLegalDocs.get(0)
+                    quarantineLegalDocs.getFirst()
                 );
 
                 moveCitizenDocumentsToQuarantineTab(

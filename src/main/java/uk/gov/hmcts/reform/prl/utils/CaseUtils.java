@@ -863,7 +863,7 @@ public class CaseUtils {
 
     public static String getApplicantNameForDaOrderSelectedForCaCase(CaseData caseData) {
         PartyDetails applicant1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-            ? caseData.getApplicants().get(0).getValue() : caseData.getApplicantsFL401();
+            ? caseData.getApplicants().getFirst().getValue() : caseData.getApplicantsFL401();
         return String.format(PrlAppsConstants.FORMAT, applicant1.getFirstName(),
                              applicant1.getLastName()
         );
@@ -872,13 +872,13 @@ public class CaseUtils {
 
     public static String getApplicantReferenceForDaOrderSelectedForCaCase(CaseData caseData) {
         PartyDetails applicant1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-            ? caseData.getApplicants().get(0).getValue() : caseData.getApplicantsFL401();
+            ? caseData.getApplicants().getFirst().getValue() : caseData.getApplicantsFL401();
         return applicant1.getSolicitorReference();
     }
 
     public static String getRespondentForDaOrderSelectedForCaCase(CaseData caseData) {
         PartyDetails respondent1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-            ? caseData.getRespondents().get(0).getValue() : caseData.getRespondentsFL401();
+            ? caseData.getRespondents().getFirst().getValue() : caseData.getRespondentsFL401();
         return String.format(
             PrlAppsConstants.FORMAT, respondent1.getFirstName(),
             respondent1.getLastName()
@@ -887,7 +887,7 @@ public class CaseUtils {
 
     public static LocalDate getRespondentDobForDaOrderSelectedForCaCase(CaseData caseData) {
         PartyDetails respondent1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-            ? caseData.getRespondents().get(0).getValue() : caseData.getRespondentsFL401();
+            ? caseData.getRespondents().getFirst().getValue() : caseData.getRespondentsFL401();
         if (ofNullable(respondent1.getDateOfBirth()).isPresent()) {
             return respondent1.getDateOfBirth();
         }

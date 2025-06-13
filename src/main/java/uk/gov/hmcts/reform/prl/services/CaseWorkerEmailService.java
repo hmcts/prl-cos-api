@@ -174,7 +174,7 @@ public class CaseWorkerEmailService {
                 .map(PartyDetails::getSolicitorEmail)
                 .toList();
 
-            email = applicantEmailList.get(0);
+            email = applicantEmailList.getFirst();
 
             if (applicants.size() > 1) {
                 email = caseData.getApplicantSolicitorEmailAddress();

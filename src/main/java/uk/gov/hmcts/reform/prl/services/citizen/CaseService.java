@@ -215,8 +215,8 @@ public class CaseService {
         String caseName = null;
         if (null != c100RebuildApplicantDetailsElements
             && null != c100RebuildRespondentDetailsElements.getRespondentDetails()) {
-            caseName = c100RebuildApplicantDetailsElements.getApplicants().get(0).getApplicantLastName() + " V "
-                + c100RebuildRespondentDetailsElements.getRespondentDetails().get(0).getLastName();
+            caseName = c100RebuildApplicantDetailsElements.getApplicants().getFirst().getApplicantLastName() + " V "
+                + c100RebuildRespondentDetailsElements.getRespondentDetails().getFirst().getLastName();
         }
 
         return caseName;
@@ -1066,14 +1066,14 @@ public class CaseService {
         notifMap.put(IS_NEW, multipleOrdersServed.stream().anyMatch(CitizenDocuments::isNew));
         notifMap.put(IS_FINAL, multipleOrdersServed.stream().anyMatch(CitizenDocuments::isFinal));
         notifMap.put(IS_MULTIPLE, multipleOrdersServed.size() > 1);
-        notifMap.put(ORDER_TYPE_ID, citizenOrders.get(0).getOrderTypeId());
-        notifMap.put(ORDER_MADE_DATE, citizenOrders.get(0).getMadeDate());
+        notifMap.put(ORDER_TYPE_ID, citizenOrders.getFirst().getOrderTypeId());
+        notifMap.put(ORDER_MADE_DATE, citizenOrders.getFirst().getMadeDate());
 
-        if (citizenOrders.get(0).isPersonalService()) {
+        if (citizenOrders.getFirst().isPersonalService()) {
             //personal service by unrepresented applicant lip
             notifMap.put(IS_PERSONAL, true);
             if (SERVED_PARTY_APPLICANT.equals(partyType) // applicant party type check
-                && !citizenOrders.get(0).isSosCompleted()) {
+                && !citizenOrders.getFirst().isSosCompleted()) {
                 //CRNF3 Applicant before SOS
                 citizenNotifications.addAll(getNotifications(caseData, NotificationNames.ORDER_PERSONAL_APPLICANT, notifMap));
             } else if (SERVED_PARTY_RESPONDENT.equals(partyType)) { // respondent party type check
@@ -1084,7 +1084,7 @@ public class CaseService {
             //personal service by Court admin/bailiff & non-personal service
             notifMap.put(IS_PERSONAL, false);
             if (SERVED_PARTY_APPLICANT.equals(partyType) // applicant party type check
-                && citizenOrders.get(0).isSosCompleted()) {
+                && citizenOrders.getFirst().isSosCompleted()) {
                 //Once SOS is completed for all respondents
                 //CA - CAN11, DA - DN6
                 citizenNotifications.addAll(getNotifications(caseData, NotificationNames.ORDER_SOS_CA_CB_APPLICANT, notifMap));
@@ -1115,13 +1115,13 @@ public class CaseService {
 
     private List<CitizenDocuments> getMultipleOrdersServed(List<CitizenDocuments> citizenOrders) {
         List<CitizenDocuments> multipleOrdersServed = new ArrayList<>();
-        multipleOrdersServed.add(citizenOrders.get(0));
+        multipleOrdersServed.add(citizenOrders.getFirst());
 
-        if (citizenOrders.get(0).isMultiple()) {
+        if (citizenOrders.getFirst().isMultiple()) {
             for (int i = 1; i < citizenOrders.size(); i++) {
-                if (null != citizenOrders.get(0).getServedDateTime()
+                if (null != citizenOrders.getFirst().getServedDateTime()
                     && null != citizenOrders.get(i).getServedDateTime()
-                    && citizenOrders.get(0).getServedDateTime().toLocalDate()
+                    && citizenOrders.getFirst().getServedDateTime().toLocalDate()
                     .equals(citizenOrders.get(i).getServedDateTime().toLocalDate())) {
                     multipleOrdersServed.add(citizenOrders.get(i));
                 }
@@ -1150,7 +1150,7 @@ public class CaseService {
                                      List<CitizenNotification> citizenNotifications,
                                      UserDetails userDetails,
                                      Map<String, String> partyIdAndType) {
-        CitizenDocuments citizenAppPack = citizenDocumentsManagement.getCitizenApplicationPacks().get(0);
+        CitizenDocuments citizenAppPack = citizenDocumentsManagement.getCitizenApplicationPacks().getFirst();
         //SOA Applicant - personal service(unrepresented applicant) pending sos.
         if (CollectionUtils.isNotEmpty(citizenAppPack.getApplicantSoaPack())
             && SERVED_PARTY_APPLICANT.equals(partyIdAndType.get(PARTY_TYPE)) //logged in party is applicant
@@ -1192,7 +1192,7 @@ public class CaseService {
         if (SERVED_PARTY_APPLICANT.equals(partyType) //logged in party is applicant
             && isSosCompletedPostSoa(caseData)
             && !isAnyOrderServedPostSos(caseData, citizenDocumentsManagement.getCitizenOrders())) {
-            CitizenDocuments citizenAppPack = citizenDocumentsManagement.getCitizenApplicationPacks().get(0);
+            CitizenDocuments citizenAppPack = citizenDocumentsManagement.getCitizenApplicationPacks().getFirst();
             //SOS by Court admin/Court bailiff
             if (PERSONAL_SERVICE_SERVED_BY_CA.equals(citizenAppPack.getWhoIsResponsible())
                 || PERSONAL_SERVICE_SERVED_BY_BAILIFF.equals(citizenAppPack.getWhoIsResponsible())) {
@@ -1354,7 +1354,7 @@ public class CaseService {
                                                              proceeding.getUploadRelevantOrder(),
                                                              PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION,
                                                              SERVED_PARTY_APPLICANT,
-                                                             caseData.getApplicants().get(0).getId()
+                                                             caseData.getApplicants().getFirst().getId()
                                                          ))
                                                          .toList());
             }

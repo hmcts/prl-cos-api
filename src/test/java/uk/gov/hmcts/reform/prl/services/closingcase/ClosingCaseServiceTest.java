@@ -350,7 +350,7 @@ public class ClosingCaseServiceTest {
             .build();
         List<String> errorList = closingCaseService.validateChildDetails(callbackRequest);
         assertFalse(errorList.isEmpty());
-        assertEquals(errorList.get(0), "Children details are altered");
+        assertEquals(errorList.getFirst(), "Children details are altered");
     }
 
     @Test
