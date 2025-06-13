@@ -2093,7 +2093,7 @@ public class UpdatePartyDetailsServiceTest {
         Map<String, Object> updatedCaseData = updatePartyDetailsService.setDefaultEmptyChildDetails(caseData);
         List<Element<Child>> updatedChildDetails = (List<Element<Child>>) updatedCaseData.get("children");
         assertEquals(1, updatedChildDetails.size());
-        assertEquals(Child.builder().build(), updatedChildDetails.get(0).getValue());
+        assertEquals(Child.builder().build(), updatedChildDetails.getFirst().getValue());
     }
 
     @Test

@@ -93,7 +93,7 @@ public class ServiceOfDocumentsControllerTest {
 
         assertNotNull(aboutToStartOrSubmitCallbackResponse);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getErrors());
-        assertEquals(UN_SERVED_DOCUMENTS_PRESENT_ERROR, aboutToStartOrSubmitCallbackResponse.getErrors().get(0));
+        assertEquals(UN_SERVED_DOCUMENTS_PRESENT_ERROR, aboutToStartOrSubmitCallbackResponse.getErrors().getFirst());
     }
 
     @Test
@@ -129,7 +129,7 @@ public class ServiceOfDocumentsControllerTest {
 
         assertNotNull(aboutToStartOrSubmitCallbackResponse);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getErrors());
-        assertEquals(NO_DOCUMENTS_SELECTED_ERROR, aboutToStartOrSubmitCallbackResponse.getErrors().get(0));
+        assertEquals(NO_DOCUMENTS_SELECTED_ERROR, aboutToStartOrSubmitCallbackResponse.getErrors().getFirst());
     }
 
     @Test

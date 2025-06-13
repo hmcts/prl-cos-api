@@ -478,7 +478,7 @@ public class SendAndReplyServiceTest {
 
     @Test
     public void testThatNumberOfClosedMessagesIncreasesAndOpenDecreases() {
-        UUID messageToClose = caseData.getSendOrReplyDto().getOpenMessages().get(0).getId();
+        UUID messageToClose = caseData.getSendOrReplyDto().getOpenMessages().getFirst().getId();
         long countOpen = caseData.getSendOrReplyDto().getOpenMessages().stream()
             .filter(m -> m.getValue().getStatus().equals(OPEN))
             .count();
@@ -686,7 +686,7 @@ public class SendAndReplyServiceTest {
 
         when(hearingDataService.getLinkedCasesDynamicList(anyString(), anyString())).thenReturn(dynamicListElementList);
         DynamicList linkedCasesDynamicList = sendAndReplyService.getLinkedCasesDynamicList(anyString(), anyString());
-        assertEquals("testCaseRefNo", linkedCasesDynamicList.getListItems().get(0).getLabel());
+        assertEquals("testCaseRefNo", linkedCasesDynamicList.getListItems().getFirst().getLabel());
     }
 
     @Test
@@ -804,7 +804,7 @@ public class SendAndReplyServiceTest {
 
         assertNotNull(updatedCaseData);
         assertEquals("123 - hearingType1", updatedCaseData.getSendOrReplyMessage().getSendMessageObject()
-            .getFutureHearingsList().getListItems().get(0).getCode());
+            .getFutureHearingsList().getListItems().getFirst().getCode());
     }
 
     @Test
@@ -846,7 +846,7 @@ public class SendAndReplyServiceTest {
 
         assertNotNull(updatedCaseData);
         assertEquals("categoryId->documentURL", updatedCaseData.getSendOrReplyMessage()
-            .getSendMessageObject().getSubmittedDocumentsList().getListItems().get(0).getCode());
+            .getSendMessageObject().getSubmittedDocumentsList().getListItems().getFirst().getCode());
     }
 
     @Test
@@ -1152,7 +1152,7 @@ public class SendAndReplyServiceTest {
                                                                     data.getSendOrReplyMessage().getSendMessageObject(), auth);
 
         assertEquals("some message while sending",message.getMessageContent());
-        assertEquals(internalMessageDoc, message.getInternalMessageAttachDocs().get(0).getValue());
+        assertEquals(internalMessageDoc, message.getInternalMessageAttachDocs().getFirst().getValue());
     }
 
     @Test
@@ -1223,7 +1223,7 @@ public class SendAndReplyServiceTest {
 
         assertEquals("some message while sending",message.getMessageContent());
         assertEquals(3, message.getInternalMessageAttachDocs().size());
-        assertEquals(internalMessageDoc, message.getInternalMessageAttachDocs().get(0).getValue());
+        assertEquals(internalMessageDoc, message.getInternalMessageAttachDocs().getFirst().getValue());
     }
 
     @Test
@@ -1287,7 +1287,7 @@ public class SendAndReplyServiceTest {
                                                                     data.getSendOrReplyMessage().getSendMessageObject(), auth);
 
         assertEquals("some message while sending",message.getMessageContent());
-        assertEquals(internalMessageDoc, message.getInternalMessageAttachDocs().get(0).getValue());
+        assertEquals(internalMessageDoc, message.getInternalMessageAttachDocs().getFirst().getValue());
     }
 
     @Test
@@ -1364,7 +1364,7 @@ public class SendAndReplyServiceTest {
 
         assertEquals("some message while sending",message.getMessageContent());
         assertEquals(4, message.getInternalMessageAttachDocs().size());
-        assertEquals(internalMessageDoc, message.getInternalMessageAttachDocs().get(0).getValue());
+        assertEquals(internalMessageDoc, message.getInternalMessageAttachDocs().getFirst().getValue());
     }
 
     @Test
@@ -1702,7 +1702,7 @@ public class SendAndReplyServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             dynamicList,
             objectMapper
-        )).thenReturn(messagesWithOneAdded.get(0).getId());
+        )).thenReturn(messagesWithOneAdded.getFirst().getId());
         CaseData data = sendAndReplyService.populateMessageReplyFields(caseData, auth);
         assertNotNull(data);
     }
@@ -1721,7 +1721,7 @@ public class SendAndReplyServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             dynamicList,
             objectMapper
-        )).thenReturn(listOfOpenMessages.get(0).getId());
+        )).thenReturn(listOfOpenMessages.getFirst().getId());
         CaseData data = sendAndReplyService.populateMessageReplyFields(caseData, auth);
         assertNotNull(data.getSendOrReplyMessage().getMessageReplyTable());
 
@@ -1744,10 +1744,10 @@ public class SendAndReplyServiceTest {
                     .build())
             .build();
         when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(
-            openMessagesListWithReplyHistory.get(0).getId());
+            openMessagesListWithReplyHistory.getFirst().getId());
         CaseData updatedCaseData = sendAndReplyService.populateMessageReplyFields(caseData, auth);
         String messageTo = updatedCaseData.getSendOrReplyMessage().getMessages()
-            .get(0).getValue().getReplyHistory().get(0).getValue().getMessageTo();
+            .getFirst().getValue().getReplyHistory().getFirst().getValue().getMessageTo();
 
         assertEquals("testRecipient1@email.com", messageTo);
     }
@@ -1757,7 +1757,7 @@ public class SendAndReplyServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             dynamicList,
             objectMapper
-        )).thenReturn(listOfOpenMessages.get(0).getId());
+        )).thenReturn(listOfOpenMessages.getFirst().getId());
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .sendOrReplyMessage(
@@ -1837,10 +1837,10 @@ public class SendAndReplyServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             dynamicList,
             objectMapper
-        )).thenReturn(openMessagesList.get(0).getId());
+        )).thenReturn(openMessagesList.getFirst().getId());
         List<Element<Message>> msgList = sendAndReplyService.replyAndAppendMessageHistory(caseData, auth, caseDataMap);
 
-        assertEquals(1,msgList.get(0).getValue().getReplyHistory().size());
+        assertEquals(1,msgList.getFirst().getValue().getReplyHistory().size());
     }
 
     @Test
@@ -1906,10 +1906,10 @@ public class SendAndReplyServiceTest {
             .sendOrReplyMessage(sendOrReplyMessage)
             .build();
 
-        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesList.get(0).getId());
+        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesList.getFirst().getId());
         List<Element<Message>> msgList = sendAndReplyService.replyAndAppendMessageHistory(caseData7, auth, caseDataMap);
 
-        assertEquals(1, msgList.get(0).getValue().getReplyHistory().size());
+        assertEquals(1, msgList.getFirst().getValue().getReplyHistory().size());
     }
 
     @Test
@@ -1943,10 +1943,10 @@ public class SendAndReplyServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             dynamicList,
             objectMapper
-        )).thenReturn(openMessagesList.get(0).getId());
+        )).thenReturn(openMessagesList.getFirst().getId());
         List<Element<Message>> msgList = sendAndReplyService.replyAndAppendMessageHistory(caseData, auth, caseDataMap);
 
-        assertEquals(2, msgList.get(0).getValue().getReplyHistory().size());
+        assertEquals(2, msgList.getFirst().getValue().getReplyHistory().size());
     }
 
     @Test
@@ -2738,7 +2738,7 @@ public class SendAndReplyServiceTest {
                     ).build())
             .build();
 
-        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesList.get(0).getId());
+        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesList.getFirst().getId());
         Map<String, Object> stringObjectMap = caseData1.toMap(new ObjectMapper());
 
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(serviceAuthToken,
@@ -2787,7 +2787,7 @@ public class SendAndReplyServiceTest {
                     ).build())
             .build();
 
-        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesList.get(0).getId());
+        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesList.getFirst().getId());
         Map<String, Object> stringObjectMap = caseData2.toMap(new ObjectMapper());
 
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(serviceAuthToken,
@@ -2827,7 +2827,7 @@ public class SendAndReplyServiceTest {
                     ).build())
             .build();
 
-        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesList.get(0).getId());
+        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesList.getFirst().getId());
         Map<String, Object> stringObjectMap = caseData1.toMap(new ObjectMapper());
 
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(serviceAuthToken,
@@ -2866,7 +2866,7 @@ public class SendAndReplyServiceTest {
                     ).build())
             .build();
 
-        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesList.get(0).getId());
+        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesList.getFirst().getId());
         Map<String, Object> stringObjectMap = caseData1.toMap(new ObjectMapper());
 
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(serviceAuthToken,
@@ -3010,14 +3010,14 @@ public class SendAndReplyServiceTest {
                     .build())
             .build();
 
-        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesListWithReplyHistory.get(0).getId());
+        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesListWithReplyHistory.getFirst().getId());
         CaseData updatedCaseData = sendAndReplyService.populateMessageReplyFields(data, auth);
 
         SendReplyTempDoc expectedSendReplyTempDocument = SendReplyTempDoc.builder().attachedTime(dateTime).document(internalMessageDoc).build();
 
         assertEquals("testRecipient1@email.com", updatedCaseData.getSendOrReplyMessage().getMessages()
-            .get(0).getValue().getReplyHistory().get(0).getValue().getMessageTo());
-        assertEquals(expectedSendReplyTempDocument, updatedCaseData.getSendOrReplyMessage().getInternalMessageAttachDocsList().get(0).getValue());
+            .getFirst().getValue().getReplyHistory().getFirst().getValue().getMessageTo());
+        assertEquals(expectedSendReplyTempDocument, updatedCaseData.getSendOrReplyMessage().getInternalMessageAttachDocsList().getFirst().getValue());
     }
 
     @Test
@@ -3063,14 +3063,14 @@ public class SendAndReplyServiceTest {
                     .build())
             .build();
 
-        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesListWithReplyHistory.get(0).getId());
+        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesListWithReplyHistory.getFirst().getId());
         CaseData updatedCaseData = sendAndReplyService.populateMessageReplyFields(data, auth);
 
         SendReplyTempDoc expectedSendReplyTempDocument = SendReplyTempDoc.builder().attachedTime(dateTime).document(internalMessageDoc).build();
 
         assertEquals("testRecipient1@email.com", updatedCaseData.getSendOrReplyMessage().getMessages()
-            .get(0).getValue().getReplyHistory().get(0).getValue().getMessageTo());
-        assertEquals(expectedSendReplyTempDocument, updatedCaseData.getSendOrReplyMessage().getInternalMessageAttachDocsList().get(0).getValue());
+            .getFirst().getValue().getReplyHistory().getFirst().getValue().getMessageTo());
+        assertEquals(expectedSendReplyTempDocument, updatedCaseData.getSendOrReplyMessage().getInternalMessageAttachDocsList().getFirst().getValue());
     }
 
     @Test
@@ -3437,7 +3437,7 @@ public class SendAndReplyServiceTest {
             .replyMessageDynamicList(dynamicList)
             .build();
 
-        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(listOfOpenMessages.get(0).getId());
+        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(listOfOpenMessages.getFirst().getId());
         String returnString = sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseDataMessage, REPLY);
         assertEquals(dynamicList.getValueCode(), returnString);
     }

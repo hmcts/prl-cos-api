@@ -326,8 +326,8 @@ public class SolicitorEmailServiceTest {
             .email("test@demo.com")
             .build();
 
-        String email = (!applicantList.isEmpty() && applicantList.get(0).getEmail() != null) ? String.valueOf(
-            applicantList.get(0).getEmail())
+        String email = (!applicantList.isEmpty() && applicantList.getFirst().getEmail() != null) ? String.valueOf(
+            applicantList.getFirst().getEmail())
             : userDetails.getEmail();
 
         Map<String, Object> data = new HashMap<>();
@@ -371,8 +371,8 @@ public class SolicitorEmailServiceTest {
             .email("test@demo.com")
             .build();
 
-        String email = (!applicantList.isEmpty() && applicantList.get(0).getEmail() != null) ? String.valueOf(
-            applicantList.get(0).getEmail())
+        String email = (!applicantList.isEmpty() && applicantList.getFirst().getEmail() != null) ? String.valueOf(
+            applicantList.getFirst().getEmail())
             : userDetails.getEmail();
 
         Map<String, Object> data = new HashMap<>();
@@ -608,8 +608,8 @@ public class SolicitorEmailServiceTest {
             .email("test@demo.com")
             .build();
 
-        String email = (!applicantList.isEmpty() && applicantList.get(0).getEmail() != null) ? String.valueOf(
-            applicantList.get(0).getEmail())
+        String email = (!applicantList.isEmpty() && applicantList.getFirst().getEmail() != null) ? String.valueOf(
+            applicantList.getFirst().getEmail())
             : userDetails.getEmail();
 
         Map<String, Object> data = new HashMap<>();
@@ -655,8 +655,8 @@ public class SolicitorEmailServiceTest {
             .email("test@demo.com")
             .build();
 
-        String email = (!applicantList.isEmpty() && applicantList.get(0).getEmail() != null) ? String.valueOf(
-            applicantList.get(0).getEmail())
+        String email = (!applicantList.isEmpty() && applicantList.getFirst().getEmail() != null) ? String.valueOf(
+            applicantList.getFirst().getEmail())
             : userDetails.getEmail();
 
         Map<String, Object> data = new HashMap<>();

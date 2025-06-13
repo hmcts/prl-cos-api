@@ -126,7 +126,7 @@ public class RespondentsCheckerTest {
         PartyDetails respondent = PartyDetails.builder().build();
         List<Optional<?>> fields = new ArrayList<>();
         respondentsChecker.isGenderCompleted(respondent,fields);
-        Assert.assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
+        Assert.assertFalse(fields.size() > 1 && !fields.getFirst().isEmpty());
     }
 
     @Test
@@ -138,7 +138,7 @@ public class RespondentsCheckerTest {
             .build();
         List<Optional<?>> fields = new ArrayList<>();
         respondentsChecker.isGenderCompleted(respondent,fields);
-        Assert.assertTrue(fields.size() > 1 && !fields.get(0).isEmpty());
+        Assert.assertTrue(fields.size() > 1 && !fields.getFirst().isEmpty());
 
     }
 
@@ -147,7 +147,7 @@ public class RespondentsCheckerTest {
         PartyDetails respondent = PartyDetails.builder().build();
         List<Optional<?>> fields = new ArrayList<>();
         respondentsChecker.isPlaceOfBirthCompleted(respondent,fields);
-        Assert.assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
+        Assert.assertFalse(fields.size() > 1 && !fields.getFirst().isEmpty());
     }
 
     @Test
@@ -160,7 +160,7 @@ public class RespondentsCheckerTest {
 
         List<Optional<?>> fields = new ArrayList<>();
         respondentsChecker.isPlaceOfBirthCompleted(respondent,fields);
-        Assert.assertTrue(fields.size() > 1 && !fields.get(0).isEmpty());
+        Assert.assertTrue(fields.size() > 1 && !fields.getFirst().isEmpty());
 
     }
 
@@ -169,7 +169,7 @@ public class RespondentsCheckerTest {
         PartyDetails respondent = PartyDetails.builder().build();
         List<Optional<?>> fields = new ArrayList<>();
         respondentsChecker.isCurrentAddressCompleted(respondent,fields);
-        Assert.assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
+        Assert.assertFalse(fields.size() > 1 && !fields.getFirst().isEmpty());
     }
 
     @Test
@@ -183,7 +183,7 @@ public class RespondentsCheckerTest {
 
         List<Optional<?>> fields = new ArrayList<>();
         respondentsChecker.isCurrentAddressCompleted(respondent,fields);
-        Assert.assertTrue(fields.size() > 1 && !fields.get(0).isEmpty());
+        Assert.assertTrue(fields.size() > 1 && !fields.getFirst().isEmpty());
 
     }
 
@@ -192,7 +192,7 @@ public class RespondentsCheckerTest {
         PartyDetails respondent = PartyDetails.builder().build();
         List<Optional<?>> fields = new ArrayList<>();
         respondentsChecker.isCanYouProvideEmailAddressCompleted(respondent,fields);
-        Assert.assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
+        Assert.assertFalse(fields.size() > 1 && !fields.getFirst().isEmpty());
     }
 
     @Test
@@ -204,7 +204,7 @@ public class RespondentsCheckerTest {
 
         List<Optional<?>> fields = new ArrayList<>();
         respondentsChecker.isCanYouProvideEmailAddressCompleted(respondent,fields);
-        Assert.assertTrue(fields.size() > 1 && !fields.get(0).isEmpty());
+        Assert.assertTrue(fields.size() > 1 && !fields.getFirst().isEmpty());
 
     }
 
@@ -213,7 +213,7 @@ public class RespondentsCheckerTest {
         PartyDetails respondent = PartyDetails.builder().build();
         List<Optional<?>> fields = new ArrayList<>();
         respondentsChecker.isAtAddressLessThan5YearsCompleted(respondent,fields);
-        Assert.assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
+        Assert.assertFalse(fields.size() > 1 && !fields.getFirst().isEmpty());
     }
 
     @Test
@@ -225,7 +225,7 @@ public class RespondentsCheckerTest {
 
         List<Optional<?>> fields = new ArrayList<>();
         respondentsChecker.isAtAddressLessThan5YearsCompleted(respondent,fields);
-        Assert.assertTrue(fields.size() > 1 && !fields.get(0).isEmpty());
+        Assert.assertTrue(fields.size() > 1 && !fields.getFirst().isEmpty());
 
     }
 
@@ -234,7 +234,7 @@ public class RespondentsCheckerTest {
         PartyDetails respondent = PartyDetails.builder().build();
         List<Optional<?>> fields = new ArrayList<>();
         respondentsChecker.isDoTheyHaveLegalRepresentationCompleted(respondent,fields);
-        Assert.assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
+        Assert.assertFalse(fields.size() > 1 && !fields.getFirst().isEmpty());
     }
 
     @Test
@@ -246,7 +246,7 @@ public class RespondentsCheckerTest {
 
         List<Optional<?>> fields = new ArrayList<>();
         respondentsChecker.isDoTheyHaveLegalRepresentationCompleted(respondent,fields);
-        Assert.assertTrue(fields.size() > 1 && !fields.get(0).isEmpty());
+        Assert.assertTrue(fields.size() > 1 && !fields.getFirst().isEmpty());
 
     }
 

@@ -129,9 +129,9 @@ public class UploadDocumentService {
                     .dateCreated(LocalDate.now())
                     .documentRequestedByCourt(documentRequest)
                     .citizenDocument(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-                                         .documentUrl(uploadResponse.getDocuments().get(0).links.self.href)
-                                         .documentBinaryUrl(uploadResponse.getDocuments().get(0).links.binary.href)
-                                         .documentHash(uploadResponse.getDocuments().get(0).hashToken)
+                                         .documentUrl(uploadResponse.getDocuments().getFirst().links.self.href)
+                                         .documentBinaryUrl(uploadResponse.getDocuments().getFirst().links.binary.href)
+                                         .documentHash(uploadResponse.getDocuments().getFirst().hashToken)
                                          .documentFileName(file.getOriginalFilename())
                                          .build()).build();
             }

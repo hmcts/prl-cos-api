@@ -196,7 +196,7 @@ public class ReviewDocumentsControllerFunctionalTest {
                                                                      CASE_TYPE, JURISDICTION, newArrayList(file)
         );
 
-        uk.gov.hmcts.reform.ccd.document.am.model.Document stampedDocument = response.getDocuments().get(0);
+        uk.gov.hmcts.reform.ccd.document.am.model.Document stampedDocument = response.getDocuments().getFirst();
 
         return DocumentResponse.builder().status("Success").document(Document.builder()
                                                                                          .documentBinaryUrl(stampedDocument.links.binary.href)

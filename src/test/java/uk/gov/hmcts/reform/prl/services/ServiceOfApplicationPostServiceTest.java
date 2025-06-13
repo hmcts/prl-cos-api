@@ -555,8 +555,8 @@ public class ServiceOfApplicationPostServiceTest {
         assertNotNull(caseDataResponse);
         assertEquals(12345,caseDataResponse.getId());
         assertNotNull(caseDataResponse.getRespondents());
-        assertEquals("John", caseDataResponse.getRespondents().get(0).getValue().getFirstName());
-        assertEquals("Smith", caseDataResponse.getRespondents().get(0).getValue().getLastName());
+        assertEquals("John", caseDataResponse.getRespondents().getFirst().getValue().getFirstName());
+        assertEquals("Smith", caseDataResponse.getRespondents().getFirst().getValue().getLastName());
     }
 
     @Test
@@ -579,9 +579,9 @@ public class ServiceOfApplicationPostServiceTest {
         List<GeneratedDocumentInfo> uploadedDocumentsList =
             serviceOfApplicationPostService.getUploadedDocumentsServiceOfApplication(caseData);
         assertNotNull(uploadedDocumentsList);
-        assertEquals("documentUrl", uploadedDocumentsList.get(0).getUrl());
-        assertEquals("documentBinaryUrl", uploadedDocumentsList.get(0).getBinaryUrl());
-        assertEquals("documentHash", uploadedDocumentsList.get(0).getHashToken());
+        assertEquals("documentUrl", uploadedDocumentsList.getFirst().getUrl());
+        assertEquals("documentBinaryUrl", uploadedDocumentsList.getFirst().getBinaryUrl());
+        assertEquals("documentHash", uploadedDocumentsList.getFirst().getHashToken());
         assertEquals("documentUrl1", uploadedDocumentsList.get(1).getUrl());
         assertEquals("documentBinaryUrl1", uploadedDocumentsList.get(1).getBinaryUrl());
         assertEquals("documentHash1", uploadedDocumentsList.get(1).getHashToken());

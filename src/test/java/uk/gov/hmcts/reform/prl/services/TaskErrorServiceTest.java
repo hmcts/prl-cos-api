@@ -113,7 +113,7 @@ public class TaskErrorServiceTest {
 
         List<EventValidationErrors> actualList = taskErrorServ.getEventErrors(caseData);
 
-        assertEquals(actualList.get(0), expectedList.get(0));
+        assertEquals(actualList.getFirst(), expectedList.getFirst());
         assertEquals(actualList.get(1), expectedList.get(1));
 
     }

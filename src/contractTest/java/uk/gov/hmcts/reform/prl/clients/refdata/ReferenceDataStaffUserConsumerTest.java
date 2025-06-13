@@ -94,8 +94,8 @@ public class ReferenceDataStaffUserConsumerTest {
             RD_STAFF_FIRST_PAGE
         ).getBody();
         assertNotNull(staffResponseList);
-        assertEquals("Rama",staffResponseList.get(0).getStaffProfile().getLastName());
-        assertEquals("crd_func_test_2.0_rdcc_3831_107@justice.gov.uk",staffResponseList.get(0).getStaffProfile().getEmailId());
+        assertEquals("Rama",staffResponseList.getFirst().getStaffProfile().getLastName());
+        assertEquals("crd_func_test_2.0_rdcc_3831_107@justice.gov.uk",staffResponseList.getFirst().getStaffProfile().getEmailId());
     }
 
 }
