@@ -64,7 +64,7 @@ public class CourtFinderService {
         if (serviceArea != null
             && !serviceArea.getCourts().isEmpty()) {
             return getCourtDetails(serviceArea.getCourts()
-                                       .get(0)
+                                       .getFirst()
                                        .getCourtSlug());
         } else {
             return null;
@@ -111,22 +111,22 @@ public class CourtFinderService {
                 .findFirst() : Optional.empty();
 
         if (!childrenAndApplicantRelation.isEmpty() && YesOrNo.Yes.equals(childrenAndApplicantRelation.get().getChildLivesWith())) {
-            return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
+            return getPostcodeFromWrappedParty(caseData.getApplicants().getFirst());
         } else if (!childrenAndRespondentRelation.isEmpty() && YesOrNo.Yes.equals(childrenAndRespondentRelation.get().getChildLivesWith())) {
-            if (ofNullable(getPostcodeFromWrappedParty(caseData.getRespondents().get(0))).isEmpty()) {
-                return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
+            if (ofNullable(getPostcodeFromWrappedParty(caseData.getRespondents().getFirst())).isEmpty()) {
+                return getPostcodeFromWrappedParty(caseData.getApplicants().getFirst());
             }
-            return getPostcodeFromWrappedParty(caseData.getRespondents().get(0));
+            return getPostcodeFromWrappedParty(caseData.getRespondents().getFirst());
         } else if (!childrenAndOtherPeopleRelation.isEmpty() && YesOrNo.Yes.equals(childrenAndOtherPeopleRelation.get().getChildLivesWith())) {
             if (partyDetails.isPresent() && getPostCodeOtherPerson(partyDetails.get()).isEmpty()) {
-                return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
+                return getPostcodeFromWrappedParty(caseData.getApplicants().getFirst());
             }
             if (!partyDetails.isEmpty()) {
                 return getPostCodeOtherPerson(partyDetails.get());
             }
         }
         //default to the applicant postcode
-        return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
+        return getPostcodeFromWrappedParty(caseData.getApplicants().getFirst());
     }
 
     public String getCorrectPartyPostcode(CaseData caseData) throws NotFoundException {
@@ -146,20 +146,20 @@ public class CourtFinderService {
         Child child = childOptional.get();
 
         if (child.getChildLiveWith().contains(applicant)) {
-            return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
+            return getPostcodeFromWrappedParty(caseData.getApplicants().getFirst());
         } else if (child.getChildLiveWith().contains(respondent)) {
-            if (ofNullable(getPostcodeFromWrappedParty(caseData.getRespondents().get(0))).isEmpty()) {
-                return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
+            if (ofNullable(getPostcodeFromWrappedParty(caseData.getRespondents().getFirst())).isEmpty()) {
+                return getPostcodeFromWrappedParty(caseData.getApplicants().getFirst());
             }
-            return getPostcodeFromWrappedParty(caseData.getRespondents().get(0));
+            return getPostcodeFromWrappedParty(caseData.getRespondents().getFirst());
         } else if (child.getChildLiveWith().contains(anotherPerson) && ofNullable(getFirstOtherPerson(child)).isPresent()) {
             if (getPostCode(getFirstOtherPerson(child)).isEmpty()) {
-                return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
+                return getPostcodeFromWrappedParty(caseData.getApplicants().getFirst());
             }
             return getFirstOtherPerson(child).getAddress().getPostCode();
         }
         //default to the applicant postcode
-        return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
+        return getPostcodeFromWrappedParty(caseData.getApplicants().getFirst());
     }
 
 
@@ -196,7 +196,7 @@ public class CourtFinderService {
             .stream()
             .map(Element::getValue)
             .toList()
-            .get(0);
+            .getFirst();
 
     }
 

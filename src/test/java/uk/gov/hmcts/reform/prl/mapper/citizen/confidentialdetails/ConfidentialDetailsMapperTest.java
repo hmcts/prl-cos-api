@@ -174,8 +174,8 @@ public class ConfidentialDetailsMapperTest {
             .caseTypeOfApplication(C100_CASE_TYPE).build();
         CaseData caseDataCheck = confidentialDetailsMapper.mapConfidentialData(caseData, true);
         assertNotNull(caseDataCheck.getRespondentConfidentialDetails());
-        assertEquals(partyDetails1.getFirstName(),caseDataCheck.getRespondentConfidentialDetails().get(0).getValue().getFirstName());
-        assertEquals(partyDetails1.getLiveInRefuge(),caseDataCheck.getRespondents().get(0).getValue().getLiveInRefuge());
+        assertEquals(partyDetails1.getFirstName(),caseDataCheck.getRespondentConfidentialDetails().getFirst().getValue().getFirstName());
+        assertEquals(partyDetails1.getLiveInRefuge(),caseDataCheck.getRespondents().getFirst().getValue().getLiveInRefuge());
 
     }
 
@@ -215,7 +215,7 @@ public class ConfidentialDetailsMapperTest {
             .caseTypeOfApplication(FL401_CASE_TYPE).build();
         CaseData caseDataCheck = confidentialDetailsMapper.mapConfidentialData(caseData, true);
         assertNotNull(caseDataCheck.getRespondentConfidentialDetails());
-        assertEquals(partyDetails.getFirstName(),caseDataCheck.getRespondentConfidentialDetails().get(0).getValue().getFirstName());
+        assertEquals(partyDetails.getFirstName(),caseDataCheck.getRespondentConfidentialDetails().getFirst().getValue().getFirstName());
         assertEquals(partyDetails.getLiveInRefuge(),caseDataCheck.getRespondentsFL401().getLiveInRefuge());
 
     }
@@ -249,7 +249,7 @@ public class ConfidentialDetailsMapperTest {
             .caseTypeOfApplication(FL401_CASE_TYPE).build();
         CaseData caseDataCheck = confidentialDetailsMapper.mapConfidentialData(caseData, true);
         assertNotNull(caseDataCheck.getRespondentConfidentialDetails());
-        assertEquals(partyDetails.getFirstName(),caseDataCheck.getRespondentConfidentialDetails().get(0).getValue().getFirstName());
+        assertEquals(partyDetails.getFirstName(),caseDataCheck.getRespondentConfidentialDetails().getFirst().getValue().getFirstName());
         assertEquals(partyDetails.getLiveInRefuge(),caseDataCheck.getRespondentsFL401().getLiveInRefuge());
 
     }
