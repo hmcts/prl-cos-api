@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,7 +24,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class Fm5ReminderControllerTest {
+class Fm5ReminderControllerTest {
 
     public static final String AUTH_TOKEN = "Bearer TestAuthToken";
     public static final String S2S_TOKEN = "s2s AuthToken";
@@ -41,21 +40,23 @@ public class Fm5ReminderControllerTest {
 
 
     @Test
-    public void test_Fm5ReminderNotification() {
+    void test_Fm5ReminderNotification() {
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
         fm5ReminderController.sendFm5ReminderNotifications(18L, AUTH_TOKEN, S2S_TOKEN);
         verify(fm5ReminderService, times(1)).sendFm5ReminderNotifications(18L);
     }
 
-    @Test(expected = RuntimeException.class)
-    public void test_Fm5ReminderNotificationThrowsException() {
-        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
-        fm5ReminderController.sendFm5ReminderNotifications(18L, AUTH_TOKEN, S2S_TOKEN);
-        verifyNoInteractions(fm5ReminderService);
+    @Test
+    void test_Fm5ReminderNotificationThrowsException() {
+        assertThrows(RuntimeException.class, () -> {
+            when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+            fm5ReminderController.sendFm5ReminderNotifications(18L, AUTH_TOKEN, S2S_TOKEN);
+            verifyNoInteractions(fm5ReminderService);
+        });
     }
 
     @Test
-    public void test_FetchFm5ReminderEligibleCases() {
+    void test_FetchFm5ReminderEligibleCases() {
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
         List<CaseDetails> caseDetailsList = new ArrayList<>();
         caseDetailsList.add(CaseDetails.builder().build());
@@ -68,7 +69,7 @@ public class Fm5ReminderControllerTest {
     }
 
     @Test
-    public void test_FetchFm5ReminderEligibleCasesWhenCaseDetailsEmpty() {
+    void test_FetchFm5ReminderEligibleCasesWhenCaseDetailsEmpty() {
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
         when(fm5ReminderService.retrieveCasesInHearingStatePendingFm5Reminders()).thenReturn(null);
         ResponseEntity response = fm5ReminderController.fetchFm5ReminderEligibleCases(18L, AUTH_TOKEN, S2S_TOKEN);
@@ -77,20 +78,12 @@ public class Fm5ReminderControllerTest {
     }
 
     @Test
-    public void test_FetchFm5ReminderEligibleCasesWhenNoAuthorization() {
+    void test_FetchFm5ReminderEligibleCasesWhenNoAuthorization() {
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
-        assertExpectedException(
-            () -> {
-                fm5ReminderController.fetchFm5ReminderEligibleCases(18L, AUTH_TOKEN, S2S_TOKEN);
-            }, RuntimeException.class, "Invalid Client"
-        );
 
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
+            fm5ReminderController.fetchFm5ReminderEligibleCases(18L, AUTH_TOKEN, S2S_TOKEN);
+        });
+        assertEquals("Invalid Client", ex.getMessage());
     }
-
-    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
-                                                                 String expectedMessage) {
-        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
-        assertEquals(expectedMessage, exception.getMessage());
-    }
-
 }

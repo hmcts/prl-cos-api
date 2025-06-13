@@ -2,9 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,9 +15,9 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
-@Slf4j
 @SpringBootTest
 @ContextConfiguration
 public class AddCafcassOfficerControllerFunctionalTest {
@@ -32,19 +30,15 @@ public class AddCafcassOfficerControllerFunctionalTest {
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
-    private static final String C100_SEND_TO_GATEKEEPERJUDGE = "requests/call-back-controller-send-to-gatekeeperForJudge.json";
-
-
     private final String targetInstance =
         StringUtils.defaultIfBlank(
-            System.getenv("TEST_URL"),
-            "http://localhost:4044"
+            System.getenv("TEST_URL"), "http://localhost:4044"
         );
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
     @Test
-    public void givenRequestBody_whenAdd_cafcass_officer_about_to_submit_then200Response() throws Exception {
+    public void givenValidRequestBodyWhenSubmittingCafcassOfficerThenReturns200() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
 
         AboutToStartOrSubmitCallbackResponse response =  request
@@ -66,7 +60,7 @@ public class AddCafcassOfficerControllerFunctionalTest {
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
-        Assert.assertNotNull(response.getData().get("newChildDetails"));
+        assertNotNull(response.getData().get("newChildDetails"));
 
     }
 }

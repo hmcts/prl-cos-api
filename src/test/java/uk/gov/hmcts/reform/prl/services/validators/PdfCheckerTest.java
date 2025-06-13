@@ -16,36 +16,36 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @ExtendWith(MockitoExtension.class)
-public class PdfCheckerTest {
+class PdfCheckerTest {
 
     @InjectMocks
     PdfChecker pdfChecker;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    public void whenNoCaseDataFinishedShouldReturnFalse() {
+    void whenNoCaseDataFinishedShouldReturnFalse() {
         CaseData caseData = CaseData.builder().build();
         assertFalse(pdfChecker.isFinished(caseData));
     }
 
     @Test
-    public void whenNoCaseDataStartedShouldReturnFalse() {
+    void whenNoCaseDataStartedShouldReturnFalse() {
         CaseData caseData = CaseData.builder().build();
         assertFalse(pdfChecker.isStarted(caseData));
     }
 
     @Test
-    public void whenNoCaseDataHasMandatoryCompletedShouldReturnFalse() {
+    void whenNoCaseDataHasMandatoryCompletedShouldReturnFalse() {
         CaseData caseData = CaseData.builder().build();
         assertFalse(pdfChecker.hasMandatoryCompleted(caseData));
     }
 
     @Test
-    public void whenCaseDataPresentFinishedShouldReturnFalse() {
+    void whenCaseDataPresentFinishedShouldReturnFalse() {
         CaseData caseData = CaseData.builder().applicantCaseName("Test Name")
             .isCaseUrgent(Yes)
             .allegationOfHarm(AllegationOfHarm.builder()
@@ -59,7 +59,7 @@ public class PdfCheckerTest {
     }
 
     @Test
-    public void whenCaseDataPresentStartedShouldReturnFalse() {
+    void whenCaseDataPresentStartedShouldReturnFalse() {
         CaseData caseData = CaseData.builder().applicantCaseName("Test Name")
             .isCaseUrgent(Yes)
             .allegationOfHarm(AllegationOfHarm.builder()
@@ -72,7 +72,7 @@ public class PdfCheckerTest {
     }
 
     @Test
-    public void whenCaseDataPresentHasMandatoryCompletedShouldReturnFalse() {
+    void whenCaseDataPresentHasMandatoryCompletedShouldReturnFalse() {
         CaseData caseData = CaseData.builder().applicantCaseName("Test Name")
             .isCaseUrgent(Yes)
             .allegationOfHarm(AllegationOfHarm.builder()
@@ -85,7 +85,7 @@ public class PdfCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+    void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
         assertNotNull(pdfChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

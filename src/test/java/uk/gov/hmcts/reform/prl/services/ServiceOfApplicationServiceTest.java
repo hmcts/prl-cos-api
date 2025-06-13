@@ -134,7 +134,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @ExtendWith(MockitoExtension.class)
-public class ServiceOfApplicationServiceTest {
+class ServiceOfApplicationServiceTest {
 
     public static final String COURT_COURT_ADMIN = "Court - court admin";
 
@@ -227,7 +227,7 @@ public class ServiceOfApplicationServiceTest {
     List<Element<CoverLetterMap>> coverletterMap;
 
     @BeforeEach
-    public void setup() throws Exception {
+    void setup() throws Exception {
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder()
                                                                              .forename("solicitorResp")
                                                                              .surname("test").build());
@@ -299,7 +299,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testListOfOrdersCreated() {
+    void testListOfOrdersCreated() {
         List<String> createdOrders = List.of("Blank order (FL404B)",
                                              "Standard directions order",
                                              "Blank order or directions (C21)",
@@ -325,7 +325,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testCollapasableGettingPopulated() {
+    void testCollapasableGettingPopulated() {
 
         String responseMap = serviceOfApplicationService.getCollapsableOfSentDocuments();
 
@@ -334,7 +334,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendViaPostNotInvoked() {
+    void testSendViaPostNotInvoked() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("FL401")
@@ -349,7 +349,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testConfidentialyCheckSuccess() {
+    void testConfidentialyCheckSuccess() {
 
         serviceOfApplicationSoa = serviceOfApplicationSoa.toBuilder()
             .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
@@ -384,7 +384,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testConfidentialyCheckSuccessForNonPersonalService() {
+    void testConfidentialyCheckSuccessForNonPersonalService() {
 
         callbackRequestSoa = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
@@ -410,7 +410,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testConfidentialyCheckFailed() {
+    void testConfidentialyCheckFailed() {
 
         serviceOfApplicationSoa = serviceOfApplicationSoa.toBuilder()
             .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
@@ -459,7 +459,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testsendNotificationsForUnServedPacks() {
+    void testsendNotificationsForUnServedPacks() {
         caseDataSoa = caseDataSoa.toBuilder().id(12345L)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .applicants(parties)
@@ -496,7 +496,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testsendNotificationsForUnServedLaPack() {
+    void testsendNotificationsForUnServedLaPack() {
         List<Element<ServedApplicationDetails>> servedApplDetailsList = new ArrayList<>();
         servedApplDetailsList.add(element(ServedApplicationDetails.builder().servedAt(testString).build()));
         CaseData caseData = CaseData.builder().id(12345L)
@@ -528,7 +528,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testsendNotificationsForUnServedRespondentPackSolicitor() {
+    void testsendNotificationsForUnServedRespondentPackSolicitor() {
         List<Element<ServedApplicationDetails>> servedApplDetailsList = new ArrayList<>();
         servedApplDetailsList.add(element(ServedApplicationDetails.builder().servedAt(testString).build()));
         List<Element<PartyDetails>> applicants = parties;
@@ -552,7 +552,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testsendNotificationsForUnServedRespondentPacks() {
+    void testsendNotificationsForUnServedRespondentPacks() {
         parties = parties.stream()
             .peek(party -> party.getValue().setContactPreferences(ContactPreferences.email))
             .toList();
@@ -581,7 +581,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testgeneratePacksForConfidentialCheck() {
+    void testgeneratePacksForConfidentialCheck() {
         CaseData caseData = CaseData.builder().id(12345L)
             .applicants(parties)
             .respondents(parties)
@@ -613,7 +613,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testgeneratePacksForConfidentialCheckPersonal() {
+    void testgeneratePacksForConfidentialCheckPersonal() {
         DynamicList documentList = DynamicList.builder().value(DynamicListElement.builder().code(UUID.randomUUID()).build()).build();
 
         DocumentListForLa documentListForLa = DocumentListForLa.builder().documentsListForLa(documentList).build();
@@ -653,7 +653,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testgeneratePacksForConfidentialCitizenPersonal() {
+    void testgeneratePacksForConfidentialCitizenPersonal() {
         DynamicList documentList = DynamicList.builder().value(DynamicListElement.builder().code(UUID.randomUUID()).build()).build();
 
         DocumentListForLa documentListForLa = DocumentListForLa.builder().documentsListForLa(documentList).build();
@@ -693,7 +693,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testgeneratePacksForConfidentialCheckPersonalApplicantLegalRep() {
+    void testgeneratePacksForConfidentialCheckPersonalApplicantLegalRep() {
         DynamicList documentList = DynamicList.builder().value(DynamicListElement.builder().code(UUID.randomUUID()).build()).build();
 
         DocumentListForLa documentListForLa = DocumentListForLa.builder().documentsListForLa(documentList).build();
@@ -733,7 +733,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testgenerateAccessCodeLetter() {
+    void testgenerateAccessCodeLetter() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -763,17 +763,17 @@ public class ServiceOfApplicationServiceTest {
             .build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
-        assertNotNull(serviceOfApplicationService.generateAccessCodeLetter(authorization, caseData,parties.get(0),
+        assertNotNull(serviceOfApplicationService.generateAccessCodeLetter(authorization, caseData,parties.getFirst(),
                                                                            caseInvite, template));
     }
 
     @Test
-    public void testgetCollapsableOfSentDocumentsFL401() {
+    void testgetCollapsableOfSentDocumentsFL401() {
         assertNotNull(serviceOfApplicationService.getCollapsableOfSentDocumentsFL401());
     }
 
     @Test
-    public void testgetCafcassNo() {
+    void testgetCafcassNo() {
         CaseData caseData = CaseData.builder().id(12345L)
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .build();
@@ -781,7 +781,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testgetCafcassNoC100() {
+    void testgetCafcassNoC100() {
         CaseData caseData = CaseData.builder().id(12345L)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .build();
@@ -789,7 +789,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testgetCafcassYesC100() {
+    void testgetCafcassYesC100() {
         CaseData caseData = CaseData.builder().id(12345L)
             .isCafcass(YesOrNo.Yes)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -798,7 +798,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testHandleAboutToSubmit() {
+    void testHandleAboutToSubmit() {
         List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
         caseInviteList.add(element(caseInvite1));
 
@@ -807,8 +807,8 @@ public class ServiceOfApplicationServiceTest {
             CaseData caseData = CaseData.builder().id(12345L)
                 .applicants(parties)
                 .respondents(parties)
-                .applicantsFL401(parties.get(0).getValue())
-                .respondentsFL401(parties.get(0).getValue())
+                .applicantsFL401(parties.getFirst().getValue())
+                .respondentsFL401(parties.getFirst().getValue())
                 .caseInvites(caseInviteList)
                 .caseTypeOfApplication(caseType)
                 .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
@@ -851,7 +851,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSoaServeToRespondentOptionsNoC100() {
+    void testSendNotificationForSoaServeToRespondentOptionsNoC100() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -936,7 +936,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSoaServeToRespondentOptionsApplicantsDontMatch() {
+    void testSendNotificationForSoaServeToRespondentOptionsApplicantsDontMatch() {
 
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
@@ -1043,7 +1043,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSoaWithNoRecipientsC100() {
+    void testSendNotificationForSoaWithNoRecipientsC100() {
 
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
@@ -1120,7 +1120,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSoaServeToRespondentOptionsNoAndLegalRepYesC100() {
+    void testSendNotificationForSoaServeToRespondentOptionsNoAndLegalRepYesC100() {
 
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
@@ -1196,7 +1196,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSoaFL401() {
+    void testSendNotificationForSoaFL401() {
 
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
@@ -1257,7 +1257,7 @@ public class ServiceOfApplicationServiceTest {
 
 
     @Test
-    public void testSendNotificationForSoaCitizenC100() {
+    void testSendNotificationForSoaCitizenC100() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -1309,7 +1309,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSoaCitizenFL401() {
+    void testSendNotificationForSoaCitizenFL401() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -1356,7 +1356,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSoaCitizenFL401Solicitor() {
+    void testSendNotificationForSoaCitizenFL401Solicitor() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -1407,7 +1407,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSoaCitizenC100Solicitor() {
+    void testSendNotificationForSoaCitizenC100Solicitor() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicants(parties)
@@ -1440,7 +1440,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSoaCitizenC100SolicitorOtherPeopleNull() {
+    void testSendNotificationForSoaCitizenC100SolicitorOtherPeopleNull() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -1488,7 +1488,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSoaCaseFieldsMap() {
+    void testSoaCaseFieldsMap() {
 
         final String cafcassCymruEmailAddress = "cafcassCymruEmailAddress@email.com";
         List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
@@ -1548,7 +1548,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSoaCaseFieldsMapC100() {
+    void testSoaCaseFieldsMapC100() {
 
         final String cafcassCymruEmailAddress = "cafcassCymruEmailAddress@email.com";
         List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
@@ -1632,7 +1632,7 @@ public class ServiceOfApplicationServiceTest {
 
 
     @Test
-    public void testSoaCaseFieldsMap_scenario2() {
+    void testSoaCaseFieldsMap_scenario2() {
         final String cafcassCymruEmailAddress = "cafcassCymruEmailAddress@email.com";
         List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
         caseInviteList.add(element(caseInvite1));
@@ -1703,7 +1703,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSoaCaseFieldsMap_scenario3() {
+    void testSoaCaseFieldsMap_scenario3() {
 
         final String cafcassCymruEmailAddress = "cafcassCymruEmailAddress@email.com";
         List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
@@ -1776,7 +1776,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSoaCaseFieldsMap_scenario4() {
+    void testSoaCaseFieldsMap_scenario4() {
 
         final String cafcassCymruEmailAddress = "cafcassCymruEmailAddress@email.com";
         List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
@@ -1850,7 +1850,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSoaCaseFieldsMap_scenario5() {
+    void testSoaCaseFieldsMap_scenario5() {
 
         final String cafcassCymruEmailAddress = "cafcassCymruEmailAddress@email.com";
         List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
@@ -1923,7 +1923,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSoaCaseFieldsMap_scenario6() {
+    void testSoaCaseFieldsMap_scenario6() {
 
         final String cafcassCymruEmailAddress = "cafcassCymruEmailAddress@email.com";
         List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
@@ -1998,7 +1998,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSoaCaseFieldsMap_scenario7() {
+    void testSoaCaseFieldsMap_scenario7() {
 
         final String cafcassCymruEmailAddress = "cafcassCymruEmailAddress@email.com";
         List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
@@ -2072,7 +2072,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSoaCaseFieldsMap_scenario8() {
+    void testSoaCaseFieldsMap_scenario8() {
 
         final String cafcassCymruEmailAddress = "cafcassCymruEmailAddress@email.com";
         List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
@@ -2158,13 +2158,13 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testHandleSoaSubmitted() {
+    void testHandleSoaSubmitted() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("Test Case 45678")
             .applicantsFL401(PartyDetails.builder()
                                  .build())
-            .respondentsFL401(parties.get(0).getValue())
+            .respondentsFL401(parties.getFirst().getValue())
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .soaServeToRespondentOptions(YesNoNotApplicable.No)
@@ -2199,7 +2199,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testHandleConfidentialSoaSubmitted() {
+    void testHandleConfidentialSoaSubmitted() {
         PartyDetails partydetails = PartyDetails.builder()
             .partyId(UUID.fromString(TEST_UUID))
             .firstName("firstName")
@@ -2259,14 +2259,14 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testHandleSoaSubmittedConfidential() throws Exception {
+    void testHandleSoaSubmittedConfidential() throws Exception {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("Test Case 45678")
             .applicantsFL401(PartyDetails.builder()
                                  .partyId(testUuid)
                                  .build())
-            .respondentsFL401(parties.get(0).getValue())
+            .respondentsFL401(parties.getFirst().getValue())
             .c8Document(Document.builder().build())
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
@@ -2302,7 +2302,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testHandleSoaSubmittedForNonConfidential() throws Exception {
+    void testHandleSoaSubmittedForNonConfidential() throws Exception {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("Test Case 45678")
@@ -2349,7 +2349,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testHandleSoaSubmittedForConfidential() {
+    void testHandleSoaSubmittedForConfidential() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("Test Case 45678")
@@ -2394,7 +2394,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testGetSelectedDocumentFromDynamicListReturnsNull() {
+    void testGetSelectedDocumentFromDynamicListReturnsNull() {
         uk.gov.hmcts.reform.ccd.client.model.Document documents =
             new uk.gov.hmcts.reform.ccd.client.model
                 .Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
@@ -2412,7 +2412,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testGetSelectedDocumentFromDynamicListWithCategories() {
+    void testGetSelectedDocumentFromDynamicListWithCategories() {
         uk.gov.hmcts.reform.ccd.client.model.Document documents =
             new uk.gov.hmcts.reform.ccd.client.model
                 .Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
@@ -2433,7 +2433,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testGetSelectedDocumentFromDynamicList() {
+    void testGetSelectedDocumentFromDynamicList() {
         uk.gov.hmcts.reform.ccd.client.model.Document documents =
             new uk.gov.hmcts.reform.ccd.client.model
                 .Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
@@ -2453,7 +2453,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationsWhenUnServedPackPresentAndContactPreferenceIsDigital() {
+    void testSendNotificationsWhenUnServedPackPresentAndContactPreferenceIsDigital() {
 
         PartyDetails partyDetails1 = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test").build())
@@ -2527,12 +2527,12 @@ public class ServiceOfApplicationServiceTest {
             .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         System.out.println(updatedcaseData.getFinalServedApplicationDetailsList());
-        assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
-        assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
+        assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getServedBy());
+        assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getWhoIsResponsible());
     }
 
     @Test
-    public void testSendNotificationsWhenUnServedPackDaLipEmail() {
+    void testSendNotificationsWhenUnServedPackDaLipEmail() {
 
         PartyDetails partyDetails = PartyDetails.builder()
             .solicitorEmail("abc")
@@ -2579,11 +2579,11 @@ public class ServiceOfApplicationServiceTest {
         CaseData updatedcaseData = serviceOfApplicationService
             .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
-        assertEquals(UNREPRESENTED_APPLICANT, updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
+        assertEquals(UNREPRESENTED_APPLICANT, updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getWhoIsResponsible());
     }
 
     @Test
-    public void testSendNotificationsWhenUnServedPackDaLipPost() {
+    void testSendNotificationsWhenUnServedPackDaLipPost() {
 
         PartyDetails partyDetails = PartyDetails.builder()
             .solicitorEmail("abc")
@@ -2630,12 +2630,12 @@ public class ServiceOfApplicationServiceTest {
         CaseData updatedcaseData = serviceOfApplicationService
             .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
-        assertEquals(UNREPRESENTED_APPLICANT, updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
-        assertEquals("By post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
+        assertEquals(UNREPRESENTED_APPLICANT, updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getWhoIsResponsible());
+        assertEquals("By post", updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getModeOfService());
     }
 
     @Test
-    public void testSendNotificationsWhenUnServedPackPresentAndContactPreferenceIsPost() {
+    void testSendNotificationsWhenUnServedPackPresentAndContactPreferenceIsPost() {
 
         String[] caseTypes = {"C100", "FL401"};
         for (String caseType : caseTypes) {
@@ -2679,8 +2679,8 @@ public class ServiceOfApplicationServiceTest {
                 .caseTypeOfApplication(caseType)
                 .applicants(partyElementList)
                 .respondents(partyElementList)
-                .applicantsFL401(partyElementList.get(0).getValue())
-                .respondentsFL401(partyElementList.get(0).getValue())
+                .applicantsFL401(partyElementList.getFirst().getValue())
+                .respondentsFL401(partyElementList.getFirst().getValue())
                 .caseInvites(caseInviteList)
                 .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder()
                                                     .specialArrangementsLetter(Document.builder().build())
@@ -2732,17 +2732,17 @@ public class ServiceOfApplicationServiceTest {
             assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
             assertEquals(
                 "solicitorResp test",
-                updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy()
+                updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getServedBy()
             );
             assertEquals(
                 "Court",
-                updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible()
+                updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getWhoIsResponsible()
             );
         }
     }
 
     @Test
-    public void testSendNotificationsWhenUnServedPackPresentAndNoCasInvitesPresent() {
+    void testSendNotificationsWhenUnServedPackPresentAndNoCasInvitesPresent() {
 
         PartyDetails partyDetails1 = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test").build())
@@ -2817,13 +2817,13 @@ public class ServiceOfApplicationServiceTest {
         CaseData updatedcaseData = serviceOfApplicationService
             .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
-        assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
-        assertEquals("By email", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
-        assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
+        assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getServedBy());
+        assertEquals("By email", updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getModeOfService());
+        assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getWhoIsResponsible());
     }
 
     @Test
-    public void testSendNotificationsWhenUnServedPackC100Personal() {
+    void testSendNotificationsWhenUnServedPackC100Personal() {
 
         PartyDetails partyDetails1 = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test").build())
@@ -2897,13 +2897,13 @@ public class ServiceOfApplicationServiceTest {
         CaseData updatedcaseData = serviceOfApplicationService
             .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
-        assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
-        assertEquals("By email", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
-        assertEquals("Applicant solicitor", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
+        assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getServedBy());
+        assertEquals("By email", updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getModeOfService());
+        assertEquals("Applicant solicitor", updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getWhoIsResponsible());
     }
 
     @Test
-    public void testHandleSoaSubmittedWithC8() {
+    void testHandleSoaSubmittedWithC8() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("Test Case 45678")
@@ -2949,7 +2949,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSolicitorC100() {
+    void testSendNotificationForSolicitorC100() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -2999,7 +2999,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testGetNotificationPacks() {
+    void testGetNotificationPacks() {
         DynamicMultiSelectList dynamicMultiSelectListNotifications = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiselectListElement.builder().code(TEST_UUID)
                                .label("Blank order or directions (C21) - to withdraw application").build())).build();
@@ -3026,7 +3026,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSoaCitizenScenario1() {
+    void testSendNotificationForSoaCitizenScenario1() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -3099,7 +3099,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSoaCitizenScenario2() {
+    void testSendNotificationForSoaCitizenScenario2() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -3171,7 +3171,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSoaCitizenScenario3() {
+    void testSendNotificationForSoaCitizenScenario3() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -3244,7 +3244,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSoaCitizenScenario4() {
+    void testSendNotificationForSoaCitizenScenario4() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -3317,7 +3317,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSoaCitizenFL401Senario2() {
+    void testSendNotificationForSoaCitizenFL401Senario2() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -3369,7 +3369,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSoaCitizenC100Scenario1() {
+    void testSendNotificationForSoaCitizenC100Scenario1() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -3422,7 +3422,7 @@ public class ServiceOfApplicationServiceTest {
 
 
     @Test
-    public void checkC6AOrderExistenceForSoaParties_whenNoPeopleSelected() {
+    void checkC6AOrderExistenceForSoaParties_whenNoPeopleSelected() {
 
         ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder().soaOtherParties(
             DynamicMultiSelectList.builder().build()).build();
@@ -3445,7 +3445,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void checkC6AOrderExistenceForSoaParties_whenOtherPeopleSelected() {
+    void checkC6AOrderExistenceForSoaParties_whenOtherPeopleSelected() {
 
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder().code(
             "code").label("label").build();
@@ -3479,12 +3479,12 @@ public class ServiceOfApplicationServiceTest {
             callbackRequest
         );
 
-        assertEquals(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR, response.getErrors().get(0));
+        assertEquals(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR, response.getErrors().getFirst());
     }
 
 
     @Test
-    public void checkC6AOrderExistenceForSoaParties_whenC6aNotevenPresent() {
+    void checkC6AOrderExistenceForSoaParties_whenC6aNotevenPresent() {
 
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder().code(
             "code").label("label").build();
@@ -3518,28 +3518,28 @@ public class ServiceOfApplicationServiceTest {
             callbackRequest
         );
 
-        assertEquals(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR, response.getErrors().get(0));
+        assertEquals(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR, response.getErrors().getFirst());
     }
 
     @Test
-    public void testSoaValidationWhenSoaServeToRespondentOptionsIsNA() {
+    void testSoaValidationWhenSoaServeToRespondentOptionsIsNA() {
         AboutToStartOrSubmitCallbackResponse response = testSoaValidation(YesNoNotApplicable.NotApplicable,No,No,null,null);
         assertNotNull(response);
         assertNotNull(response.getErrors());
-        assertEquals(PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE, response.getErrors().get(0));
+        assertEquals(PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE, response.getErrors().getFirst());
     }
 
     @Test
-    public void testSoaValidationWhenNoCafcassServedOptions() {
+    void testSoaValidationWhenNoCafcassServedOptions() {
         AboutToStartOrSubmitCallbackResponse response = testSoaValidation(YesNoNotApplicable.NotApplicable, No, No, null,
                                                                           ManageOrders.builder().cafcassServedOptions(No).build());
         assertNotNull(response);
         assertNotNull(response.getErrors());
-        assertEquals(PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE, response.getErrors().get(0));
+        assertEquals(PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE, response.getErrors().getFirst());
     }
 
     @Test
-    public void testSoaValidationWhenCafcassServedOptionsSelected() {
+    void testSoaValidationWhenCafcassServedOptionsSelected() {
         AboutToStartOrSubmitCallbackResponse response = testSoaValidation(YesNoNotApplicable.NotApplicable, No, No, null,
                                                                           ManageOrders.builder().cafcassServedOptions(Yes).build());
         assertNotNull(response);
@@ -3547,21 +3547,21 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSoaValidationWhenSoaCafcassCymruServedOptionsIsYes() {
+    void testSoaValidationWhenSoaCafcassCymruServedOptionsIsYes() {
         AboutToStartOrSubmitCallbackResponse response = testSoaValidation(YesNoNotApplicable.NotApplicable,Yes,No,null,null);
         assertNotNull(response);
         assertNull(response.getErrors());
     }
 
     @Test
-    public void testSoaValidationWhensoaServeLocalAuthorityIsYes() {
+    void testSoaValidationWhensoaServeLocalAuthorityIsYes() {
         AboutToStartOrSubmitCallbackResponse response = testSoaValidation(YesNoNotApplicable.NotApplicable,No,Yes,null,null);
         assertNotNull(response);
         assertNull(response.getErrors());
     }
 
     @Test
-    public void testSoaValidationWhenSoaServeToRespondentOptionsIsNAandOtherPartiesSelectedToServe() {
+    void testSoaValidationWhenSoaServeToRespondentOptionsIsNAandOtherPartiesSelectedToServe() {
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder().code(
             "code").label("label").build();
 
@@ -3570,11 +3570,11 @@ public class ServiceOfApplicationServiceTest {
         AboutToStartOrSubmitCallbackResponse response = testSoaValidation(YesNoNotApplicable.NotApplicable, No,No,soaOtherParties,null);
         assertNotNull(response);
         assertNotNull(response.getErrors());
-        assertEquals(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR, response.getErrors().get(0));
+        assertEquals(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR, response.getErrors().getFirst());
     }
 
     @Test
-    public void testSoaValidationWhenSoaServeToRespondentOptionsIsNAandSoaOtherPartiesValuesIsEmpty() {
+    void testSoaValidationWhenSoaServeToRespondentOptionsIsNAandSoaOtherPartiesValuesIsEmpty() {
         DynamicMultiSelectList soaOtherParties = DynamicMultiSelectList.builder().build();
         AboutToStartOrSubmitCallbackResponse response = testSoaValidation(YesNoNotApplicable.NotApplicable, No,No,soaOtherParties,null);
         assertNotNull(response);
@@ -3582,12 +3582,12 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSoaValidationWhenSoaServeToRespondentOptionsIsNAandNoValueForSoaOtherParties() {
+    void testSoaValidationWhenSoaServeToRespondentOptionsIsNAandNoValueForSoaOtherParties() {
         DynamicMultiSelectList soaOtherParties = DynamicMultiSelectList.builder().build();
         AboutToStartOrSubmitCallbackResponse response = testSoaValidation(YesNoNotApplicable.NotApplicable, No,No,soaOtherParties,null);
         assertNotNull(response);
         assertNotNull(response.getErrors());
-        assertEquals(PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE, response.getErrors().get(0));
+        assertEquals(PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE, response.getErrors().getFirst());
     }
 
     private AboutToStartOrSubmitCallbackResponse testSoaValidation(YesNoNotApplicable yesOrNOforSoaServeToRespOptions,
@@ -3614,7 +3614,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSoaCitizenFL401SolicitorScenario2() {
+    void testSendNotificationForSoaCitizenFL401SolicitorScenario2() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -3666,7 +3666,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testsendNotificationsForUnServedResponsnetPacksFL401() {
+    void testsendNotificationsForUnServedResponsnetPacksFL401() {
         PartyDetails testParty = PartyDetails.builder()
             .partyId(UUID.randomUUID())
             .firstName(testString).lastName(testString).representativeFirstName(testString)
@@ -3715,7 +3715,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testHandleSoaSubmittedForConfidentialPersonalCaCb() {
+    void testHandleSoaSubmittedForConfidentialPersonalCaCb() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("Test Case 45678")
@@ -3758,7 +3758,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testHandleSoaSubmittedForConfidentialPersonalAppLip() {
+    void testHandleSoaSubmittedForConfidentialPersonalAppLip() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("Test Case 45678")
@@ -3799,7 +3799,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testHandleSoaSubmittedForC100ConfidentialPersonalCaCb() {
+    void testHandleSoaSubmittedForC100ConfidentialPersonalCaCb() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("Test Case 45678")
@@ -3839,7 +3839,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testsendNotificationsForUnServedApplicantResponsnetPacksFL401() {
+    void testsendNotificationsForUnServedApplicantResponsnetPacksFL401() {
         PartyDetails testParty = PartyDetails.builder()
             .partyId(UUID.randomUUID())
             .firstName(testString).lastName(testString).representativeFirstName(testString)
@@ -3878,7 +3878,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForLa() {
+    void testSendNotificationForLa() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -3960,7 +3960,7 @@ public class ServiceOfApplicationServiceTest {
 
 
     @Test
-    public void testSendNotificationForLaWithException() {
+    void testSendNotificationForLaWithException() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -4026,7 +4026,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testgetSelectedDocumentFromDynamicList() {
+    void testgetSelectedDocumentFromDynamicList() {
         uk.gov.hmcts.reform.ccd.client.model.Document document = new uk.gov.hmcts.reform.ccd.client.model.Document("documentURL",
                                                                                                                    "fileName",
                                                                                                                    "binaryUrl",
@@ -4045,7 +4045,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testgetSelectedDocumentUncategorisedDocs() {
+    void testgetSelectedDocumentUncategorisedDocs() {
         uk.gov.hmcts.reform.ccd.client.model.Document document = new uk.gov.hmcts.reform.ccd.client.model.Document("documentURL",
                                                                                                                    "fileName",
                                                                                                                    "binaryUrl",
@@ -4064,7 +4064,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testgetSelectedDocumentForSubCategoriesDocs() {
+    void testgetSelectedDocumentForSubCategoriesDocs() {
         uk.gov.hmcts.reform.ccd.client.model.Document document = new uk.gov.hmcts.reform.ccd.client.model.Document("documentURL",
                                                                                                                    "fileName",
                                                                                                                    "binaryUrl",
@@ -4086,7 +4086,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void checkC100SoaWaFieldsWhenConfidentialDetailsPresentForNonPersonalService() {
+    void checkC100SoaWaFieldsWhenConfidentialDetailsPresentForNonPersonalService() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .doTheyHaveLegalRepresentation(YesNoDontKnow.no).firstName("fn").lastName("ln").user(User.builder().build())
@@ -4115,7 +4115,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void checkC100SoaWaFieldsWhenConfidentialDetailsPresent() {
+    void checkC100SoaWaFieldsWhenConfidentialDetailsPresent() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
@@ -4148,7 +4148,7 @@ public class ServiceOfApplicationServiceTest {
 
 
     @Test
-    public void checkFL401SoaWaFieldsWhenConfidentialDetailsPresent() {
+    void checkFL401SoaWaFieldsWhenConfidentialDetailsPresent() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
@@ -4180,7 +4180,7 @@ public class ServiceOfApplicationServiceTest {
 
 
     @Test
-    public void checkFL401ConfidentialCheckWaFieldsWhenConfidentialDetailsPresent() {
+    void checkFL401ConfidentialCheckWaFieldsWhenConfidentialDetailsPresent() {
 
         ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder().applicationServedYesNo(Yes).unServedRespondentPack(
             SoaPack.builder().build()).build();
@@ -4197,7 +4197,7 @@ public class ServiceOfApplicationServiceTest {
 
 
     @Test
-    public void checkFL401ConfidentialCheckEventWaFieldsWhenConfidentialDetailsPresentAndOccupationOrderSelected() {
+    void checkFL401ConfidentialCheckEventWaFieldsWhenConfidentialDetailsPresentAndOccupationOrderSelected() {
 
         ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder().applicationServedYesNo(Yes).unServedRespondentPack(
             SoaPack.builder().build()).build();
@@ -4216,7 +4216,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void checkFL401ConfidentialCheckEventWaFieldsWhenConfidentialDetailsPresentAndOccupationOrderNotSelected() {
+    void checkFL401ConfidentialCheckEventWaFieldsWhenConfidentialDetailsPresentAndOccupationOrderNotSelected() {
 
         ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder().applicationServedYesNo(Yes).unServedRespondentPack(
             SoaPack.builder().build()).build();
@@ -4235,7 +4235,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationsWhenUnServedPackPresentAndContactPreferenceIsDigitalSendgrid() {
+    void testSendNotificationsWhenUnServedPackPresentAndContactPreferenceIsDigitalSendgrid() {
 
         String[] caseTypes = {"C100", "FL401"};
         for (String caseType : caseTypes) {
@@ -4284,8 +4284,8 @@ public class ServiceOfApplicationServiceTest {
                 .caseTypeOfApplication(caseType)
                 .applicants(partyElementList)
                 .respondents(partyElementList)
-                .applicantsFL401(partyElementList.get(0).getValue())
-                .respondentsFL401(partyElementList.get(0).getValue())
+                .applicantsFL401(partyElementList.getFirst().getValue())
+                .respondentsFL401(partyElementList.getFirst().getValue())
                 .caseInvites(caseInviteList)
                 .c1ADocument(Document.builder().build())
                 .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder()
@@ -4330,25 +4330,25 @@ public class ServiceOfApplicationServiceTest {
             assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
             assertEquals(
                 "solicitorResp test",
-                updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy()
+                updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getServedBy()
             );
             if (caseType.equalsIgnoreCase("C100")) {
                 assertEquals(
                     "By email",
-                    updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService()
+                    updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getModeOfService()
                 );
                 assertEquals(
                     "Court",
-                    updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible()
+                    updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getWhoIsResponsible()
                 );
             } else {
                 assertEquals(
                     "By email",
-                    updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService()
+                    updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getModeOfService()
                 );
                 assertEquals(
                     "Court",
-                    updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible()
+                    updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getWhoIsResponsible()
                 );
             }
 
@@ -4356,7 +4356,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testHandleSoaSubmittedForC100ConfidentialPersonalCourtBailiff() {
+    void testHandleSoaSubmittedForC100ConfidentialPersonalCourtBailiff() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("Test Case 45678")
@@ -4404,7 +4404,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationDaPersonalApplicantLipSendGridEmail() {
+    void testSendNotificationDaPersonalApplicantLipSendGridEmail() {
         PartyDetails partyDetails = PartyDetails.builder()
             .partyId(UUID.fromString(TEST_UUID))
             .gender(Gender.male)
@@ -4441,7 +4441,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationDaPersonalApplicantLipGovNotifyEmail() {
+    void testSendNotificationDaPersonalApplicantLipGovNotifyEmail() {
         PartyDetails partyDetails = PartyDetails.builder()
             .partyId(UUID.fromString(TEST_UUID))
             .gender(Gender.male)
@@ -4478,7 +4478,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationDaPersonalApplicantLipPost() {
+    void testSendNotificationDaPersonalApplicantLipPost() {
         PartyDetails partyDetails = PartyDetails.builder()
             .partyId(UUID.fromString(TEST_UUID))
             .gender(Gender.male)
@@ -4516,7 +4516,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationDaPersonalCourtAdminPost() {
+    void testSendNotificationDaPersonalCourtAdminPost() {
         PartyDetails partyDetails = PartyDetails.builder()
             .partyId(UUID.fromString(TEST_UUID))
             .gender(Gender.male)
@@ -4554,7 +4554,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationDaPersonalCourtAdminSendGridEmail() {
+    void testSendNotificationDaPersonalCourtAdminSendGridEmail() {
         PartyDetails partyDetails = PartyDetails.builder()
             .partyId(UUID.fromString(TEST_UUID))
             .gender(Gender.male)
@@ -4591,7 +4591,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationDaPersonalCourtAdminGovNotifyEmail() {
+    void testSendNotificationDaPersonalCourtAdminGovNotifyEmail() {
         PartyDetails partyDetails = PartyDetails.builder()
             .partyId(UUID.fromString(TEST_UUID))
             .gender(Gender.male)
@@ -4630,7 +4630,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationDaCitizenNonPersonalService() {
+    void testSendNotificationDaCitizenNonPersonalService() {
         ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder()
             .soaServeToRespondentOptions(YesNoNotApplicable.No)
             .soaOtherParties(dynamicMultiSelectList)
@@ -4683,7 +4683,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationCaPersonalCourtAdminGovNotifyEmail() {
+    void testSendNotificationCaPersonalCourtAdminGovNotifyEmail() {
         PartyDetails partyDetails = PartyDetails.builder()
             .partyId(UUID.fromString(TEST_UUID))
             .gender(Gender.male)
@@ -4730,7 +4730,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationCouertNavDaPersonalCourtAdminPost() {
+    void testSendNotificationCouertNavDaPersonalCourtAdminPost() {
         QuarantineLegalDoc courtNavDocument = QuarantineLegalDoc.builder().documentType("WITNESS_STATEMENT").build();
         List<Element<QuarantineLegalDoc>> courtNavUploadedDocListDocs =  new ArrayList<>();
         courtNavUploadedDocListDocs.add(element(courtNavDocument));
@@ -4781,7 +4781,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testIsApplicantRepresentedFirstTimeWhenSoa_CA_withRepresentative() {
+    void testIsApplicantRepresentedFirstTimeWhenSoa_CA_withRepresentative() {
         List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
 
         PartyDetails testParty = PartyDetails.builder()
@@ -4828,7 +4828,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testIsApplicantRepresentedFirstTimeWhenSoa_CA_withOutAnyRepresentative() {
+    void testIsApplicantRepresentedFirstTimeWhenSoa_CA_withOutAnyRepresentative() {
 
         PartyDetails testParty = PartyDetails.builder()
             .firstName(testString).lastName(testString)
@@ -4875,7 +4875,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testIsApplicantRepresentedSecondAndSubsequentTimesWhenSoa_CA() {
+    void testIsApplicantRepresentedSecondAndSubsequentTimesWhenSoa_CA() {
 
         PartyDetails testParty = PartyDetails.builder()
             .firstName(testString).lastName(testString)
@@ -4922,7 +4922,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testIsApplicantRepresentedFirstTimeWhenSoa_DA_withRepresentative() {
+    void testIsApplicantRepresentedFirstTimeWhenSoa_DA_withRepresentative() {
 
         List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
 
@@ -4954,7 +4954,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testIsApplicantRepresentedFirstTimeWhenSoa_DA_withOutRepresentative() {
+    void testIsApplicantRepresentedFirstTimeWhenSoa_DA_withOutRepresentative() {
         List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
 
         PartyDetails testParty = PartyDetails.builder()
@@ -4984,7 +4984,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testIsApplicantRepresentedSecondAndSubsequentTimesWhenSoa_DA_withOrWithOutRepresentative() {
+    void testIsApplicantRepresentedSecondAndSubsequentTimesWhenSoa_DA_withOrWithOutRepresentative() {
         List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
 
         PartyDetails testParty = PartyDetails.builder()
@@ -5015,7 +5015,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testIsCaApplicantRepresentedWhenApplicantsIsPresentButEmpty() {
+    void testIsCaApplicantRepresentedWhenApplicantsIsPresentButEmpty() {
 
         parties = new ArrayList<>();
 
@@ -5033,7 +5033,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testIsCaApplicantRepresentedWhenApplicantsIsNotPresent() {
+    void testIsCaApplicantRepresentedWhenApplicantsIsNotPresent() {
 
         CaseData caseData = CaseData.builder().id(12345L)
             .applicants(null)
@@ -5049,7 +5049,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testAutoLinkCitizenCase() {
+    void testAutoLinkCitizenCase() {
         Map<String, Object> caseDataMap1 = new HashMap<>();
         caseDataMap1.put(IS_C8_CHECK_NEEDED,NO);
         caseDataMap1.put(IS_C8_CHECK_APPROVED,NO);
@@ -5137,7 +5137,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testAutoLinkCitizenCaseWhenUserAndPartyEmaildIdIsDifferent() {
+    void testAutoLinkCitizenCaseWhenUserAndPartyEmaildIdIsDifferent() {
         Map<String, Object> caseDataMap1 = new HashMap<>();
         caseDataMap1.put(IS_C8_CHECK_NEEDED,YES);
         caseDataMap1.put(IS_C8_CHECK_APPROVED,YES);
@@ -5157,7 +5157,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testAutoLinkCitizenCaseWhenC8CheckNeededAndApproved() {
+    void testAutoLinkCitizenCaseWhenC8CheckNeededAndApproved() {
         Map<String, Object> caseDataMap1 = new HashMap<>();
         caseDataMap1.put(IS_C8_CHECK_NEEDED,YES);
         caseDataMap1.put(IS_C8_CHECK_APPROVED,YES);
@@ -5177,7 +5177,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testAutoLinkCitizenCaseWhenUserInfoIsNotPresent() {
+    void testAutoLinkCitizenCaseWhenUserInfoIsNotPresent() {
         Map<String, Object> caseDataMap1 = new HashMap<>();
         caseDataMap1.put(IS_C8_CHECK_APPROVED,NO);
         PartyDetails testParty1 = PartyDetails.builder()
@@ -5205,7 +5205,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testAutoLinkCitizenCaseWhenCaseCreatedBySolicitor() {
+    void testAutoLinkCitizenCaseWhenCaseCreatedBySolicitor() {
         Map<String, Object> caseDataMap1 = new HashMap<>();
         caseDataMap1.put(IS_C8_CHECK_NEEDED,NO);
         serviceOfApplicationService.autoLinkCitizenCase(CaseData.builder().id(12345L)

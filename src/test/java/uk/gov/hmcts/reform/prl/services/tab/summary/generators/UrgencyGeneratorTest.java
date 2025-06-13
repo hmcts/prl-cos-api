@@ -16,7 +16,7 @@ public class UrgencyGeneratorTest {
     private final UrgencyGenerator generator = new UrgencyGenerator();
 
     @Test
-    public void testAllUrgencySelected() {
+    void testAllUrgencySelected() {
         CaseSummary caseSummary = generator.generate(CaseData.builder().caseTypeOfApplication("C100")
                                                          .isCaseUrgent(YesOrNo.Yes)
                                                          .doYouNeedAWithoutNoticeHearing(YesOrNo.Yes)
@@ -31,7 +31,7 @@ public class UrgencyGeneratorTest {
     }
 
     @Test
-    public void testNoUrgencySelected() {
+    void testNoUrgencySelected() {
         CaseSummary caseSummary = generator.generate(CaseData.builder().caseTypeOfApplication("C100")
                                                          .isCaseUrgent(YesOrNo.No)
                                                          .doYouNeedAWithoutNoticeHearing(YesOrNo.No)
@@ -46,7 +46,7 @@ public class UrgencyGeneratorTest {
     }
 
     @Test
-    public void testFlUrgencySelected() {
+    void testFlUrgencySelected() {
         WithoutNoticeOrderDetails withoutNoticeOrderDetails = new WithoutNoticeOrderDetails(YesOrNo.Yes);
         CaseSummary caseSummary = generator.generate(CaseData.builder().caseTypeOfApplication("FL401").orderWithoutGivingNoticeToRespondent(
             withoutNoticeOrderDetails).build());
@@ -60,7 +60,7 @@ public class UrgencyGeneratorTest {
 
 
     @Test
-    public void testFlUrgencyNotSelected() {
+    void testFlUrgencyNotSelected() {
         WithoutNoticeOrderDetails withoutNoticeOrderDetails = new WithoutNoticeOrderDetails(YesOrNo.No);
         CaseSummary caseSummary = generator.generate(CaseData.builder().caseTypeOfApplication("FL401").orderWithoutGivingNoticeToRespondent(
             withoutNoticeOrderDetails).build());

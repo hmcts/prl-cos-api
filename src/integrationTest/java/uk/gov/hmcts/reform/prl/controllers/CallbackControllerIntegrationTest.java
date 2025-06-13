@@ -11,9 +11,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -69,7 +69,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @SpringBootTest
-@ExtendWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration
 public class CallbackControllerIntegrationTest {
 
@@ -78,92 +78,92 @@ public class CallbackControllerIntegrationTest {
     @Autowired
     private WebApplicationContext webApplicationContext;
 
-    @MockBean
+    @MockitoBean
     CaseEventService caseEventService;
 
-    @MockBean
+    @MockitoBean
     ApplicationConsiderationTimetableValidationWorkflow applicationConsiderationTimetableValidationWorkflow;
 
-    @MockBean
+    @MockitoBean
     OrganisationService organisationService;
 
-    @MockBean
+    @MockitoBean
     ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
 
     @Autowired
     ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     AllTabServiceImpl allTabsService;
 
-    @MockBean
+    @MockitoBean
     CaseSummaryTabService caseSummaryTab;
 
-    @MockBean
+    @MockitoBean
     UserService userService;
 
-    @MockBean
+    @MockitoBean
     DocumentGenService documentGenService;
 
-    @MockBean
+    @MockitoBean
     SendgridService sendgridService;
 
-    @MockBean
+    @MockitoBean
     C100JsonMapper c100JsonMapper;
 
-    @MockBean
+    @MockitoBean
     CourtFinderService courtLocatorService;
 
-    @MockBean
+    @MockitoBean
     LocationRefDataService locationRefDataService;
 
-    @MockBean
+    @MockitoBean
     UpdatePartyDetailsService updatePartyDetailsService;
 
-    @MockBean
+    @MockitoBean
     PaymentRequestService paymentRequestService;
 
-    @MockBean
+    @MockitoBean
     ConfidentialityTabService confidentialityTabService;
 
-    @MockBean
+    @MockitoBean
     LaunchDarklyClient launchDarklyClient;
 
-    @MockBean
+    @MockitoBean
     RefDataUserService refDataUserService;
 
-    @MockBean
+    @MockitoBean
     GatekeepingDetailsService gatekeepingDetailsService;
 
-    @MockBean
+    @MockitoBean
     AuthorisationService authorisationService;
 
-    @MockBean
+    @MockitoBean
     AmendCourtService amendCourtService;
 
-    @MockBean
+    @MockitoBean
     EventService eventPublisher;
 
-    @MockBean
+    @MockitoBean
     ManageDocumentsService manageDocumentsService;
 
 
-    @MockBean
+    @MockitoBean
     RoleAssignmentService roleAssignmentService;
 
-    @MockBean
+    @MockitoBean
     RoleAssignmentApi roleAssignmentApi;
 
-    @MockBean
+    @MockitoBean
     AuthTokenGenerator authTokenGenerator;
 
-    @MockBean
+    @MockitoBean
     MiamPolicyUpgradeService miamPolicyUpgradeService;
 
-    @MockBean
+    @MockitoBean
     MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
 
-    @MockBean
+    @MockitoBean
     SystemUserService systemUserService;
 
     @BeforeEach

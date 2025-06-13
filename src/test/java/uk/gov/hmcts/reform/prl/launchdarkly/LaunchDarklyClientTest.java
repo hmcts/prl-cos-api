@@ -18,7 +18,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class LaunchDarklyClientTest {
+class LaunchDarklyClientTest {
     private static final String SDK_KEY = "fake key";
     private static final String FAKE_FEATURE = "fake feature";
 
@@ -34,19 +34,19 @@ public class LaunchDarklyClientTest {
     private LaunchDarklyClient launchDarklyClient;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         when(ldClientFactory.create(eq(SDK_KEY), anyBoolean())).thenReturn(ldClient);
         launchDarklyClient = new LaunchDarklyClient(ldClientFactory, SDK_KEY, true);
     }
 
     @Test
-    public void testFeatureEnabled() {
+    void testFeatureEnabled() {
         when(ldClient.boolVariation(eq(FAKE_FEATURE), any(LDContext.class), anyBoolean())).thenReturn(true);
         assertTrue(launchDarklyClient.isFeatureEnabled(FAKE_FEATURE, ldContext));
     }
 
     @Test
-    public void testFeatureDisabled() {
+    void testFeatureDisabled() {
         when(ldClient.boolVariation(eq(FAKE_FEATURE), any(LDContext.class), anyBoolean())).thenReturn(false);
         assertFalse(launchDarklyClient.isFeatureEnabled(FAKE_FEATURE, ldContext));
     }

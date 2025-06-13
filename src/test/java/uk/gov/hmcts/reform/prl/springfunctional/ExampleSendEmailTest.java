@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.prl.springfunctional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,8 +31,8 @@ import static uk.gov.hmcts.reform.prl.tasks.emails.ExampleEmailTaskTest.expected
 @PropertySource(value = "classpath:application.yaml")
 @AutoConfigureMockMvc
 @ExtendWith(SpringExtension.class)
-@Ignore
-public class ExampleSendEmailTest {
+@Disabled
+class ExampleSendEmailTest {
 
     private static final String API_URL = "/send-email";
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -44,7 +44,7 @@ public class ExampleSendEmailTest {
     private MockMvc webClient;
 
     @Test
-    public void emailShouldBeSent() throws Exception {
+    void emailShouldBeSent() throws Exception {
         callEndpointWithData();
 
         verify(emailService).send(

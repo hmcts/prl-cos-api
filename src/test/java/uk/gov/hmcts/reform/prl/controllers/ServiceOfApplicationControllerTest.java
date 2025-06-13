@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,7 +29,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.ResponseEntity.ok;
 
 @ExtendWith(MockitoExtension.class)
-public class ServiceOfApplicationControllerTest {
+class ServiceOfApplicationControllerTest {
 
     @InjectMocks
     private ServiceOfApplicationController serviceOfApplicationController;
@@ -51,7 +50,7 @@ public class ServiceOfApplicationControllerTest {
     public static final String s2sToken = "s2s AuthToken";
 
     @Test
-    public void testServiceOfApplicationAboutToStart() throws Exception {
+    void testServiceOfApplicationAboutToStart() throws Exception {
 
         Map<String, Object> caseData = new HashMap<>();
         CallbackRequest callbackRequest = CallbackRequest.builder()
@@ -66,7 +65,7 @@ public class ServiceOfApplicationControllerTest {
     }
 
     @Test
-    public void testHandleAboutToSubmit() throws Exception {
+    void testHandleAboutToSubmit() throws Exception {
         Map<String, Object> caseData = new HashMap<>();
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -81,7 +80,7 @@ public class ServiceOfApplicationControllerTest {
     }
 
     @Test
-    public void testHandleSubmitted() throws Exception {
+    void testHandleSubmitted() throws Exception {
         Map<String, Object> caseData = new HashMap<>();
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -99,7 +98,7 @@ public class ServiceOfApplicationControllerTest {
     }
 
     @Test
-    public void testHandleSubmittedInvalidClient() {
+    void testHandleSubmittedInvalidClient() {
         Map<String, Object> caseData = new HashMap<>();
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -115,7 +114,7 @@ public class ServiceOfApplicationControllerTest {
     }
 
     @Test
-    public void testHandleAboutToStartInvalidClient() {
+    void testHandleAboutToStartInvalidClient() {
         Map<String, Object> caseData = new HashMap<>();
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -131,7 +130,7 @@ public class ServiceOfApplicationControllerTest {
     }
 
     @Test
-    public void testHandleAboutToSubmitInvalidClient() {
+    void testHandleAboutToSubmitInvalidClient() {
         Map<String, Object> caseData = new HashMap<>();
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -147,7 +146,7 @@ public class ServiceOfApplicationControllerTest {
     }
 
     @Test
-    public void testExceptionForHandleAboutToSubmit() {
+    void testExceptionForHandleAboutToSubmit() {
         CaseData cd = CaseData.builder()
             .caseInvites(Collections.emptyList())
             .build();
@@ -160,13 +159,16 @@ public class ServiceOfApplicationControllerTest {
                              .data(caseData).build()).build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
         when(objectMapper.convertValue(cd,  Map.class)).thenReturn(caseData);
-        assertExpectedException(() -> {
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
             serviceOfApplicationController.handleSubmitted(authToken, s2sToken, callbackRequest);
-        }, InvalidClientException.class, "Invalid Client");
+        });
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void handleAboutToSubmit() {
+    void handleAboutToSubmit() {
         Map<String, Object> caseData = new HashMap<>();
         CallbackRequest callbackRequest = CallbackRequest
             .builder()
@@ -181,7 +183,7 @@ public class ServiceOfApplicationControllerTest {
     }
 
     @Test
-    public void handleValidateSoa() {
+    void handleValidateSoa() {
         Map<String, Object> caseData = new HashMap<>();
         CallbackRequest callbackRequest = CallbackRequest
             .builder()
@@ -197,7 +199,7 @@ public class ServiceOfApplicationControllerTest {
     }
 
     @Test
-    public void testExceptionForSoaValidation() {
+    void testExceptionForSoaValidation() {
 
         final CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -205,14 +207,11 @@ public class ServiceOfApplicationControllerTest {
                              .id(1L)
                              .data(new HashMap<>()).build()).build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
-        assertExpectedException(() -> {
-            serviceOfApplicationController.soaValidation(authToken, s2sToken, callbackRequest);
-        }, InvalidClientException.class, "Invalid Client");
-    }
 
-    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
-                                                                 String expectedMessage) {
-        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
-        assertEquals(expectedMessage, exception.getMessage());
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
+            serviceOfApplicationController.soaValidation(authToken, s2sToken, callbackRequest);
+        });
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 }

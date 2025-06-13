@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,9 +18,10 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 @ExtendWith(MockitoExtension.class)
-public class AddCaseNoteServiceTest {
+class AddCaseNoteServiceTest {
 
     @InjectMocks
     private AddCaseNoteService addCaseNoteService;
@@ -30,7 +30,7 @@ public class AddCaseNoteServiceTest {
     private ObjectMapper objectMapper;
 
     @Test
-    public void testPopulateHeader() {
+    void testPopulateHeader() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("FL401")
@@ -42,7 +42,7 @@ public class AddCaseNoteServiceTest {
     }
 
     @Test
-    public void testClearFields() {
+    void testClearFields() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("FL401")
@@ -56,12 +56,12 @@ public class AddCaseNoteServiceTest {
 
         addCaseNoteService.clearFields(caseDataUpdated);
 
-        assertEquals(null, caseDataUpdated.get("subject"));
-        assertEquals(null, caseDataUpdated.get("caseNote"));
+        assertNull(caseDataUpdated.get("subject"));
+        assertNull(caseDataUpdated.get("caseNote"));
     }
 
     @Test
-    public void testaddCaseNotes() {
+    void testAddCaseNotes() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("FL401")
@@ -74,14 +74,14 @@ public class AddCaseNoteServiceTest {
 
         List<Element<CaseNoteDetails>> result = addCaseNoteService.addCaseNoteDetails(caseData, userDetails);
 
-        Assertions.assertEquals(1, result.size());
-        Assertions.assertEquals("testSubject1", result.get(0).getValue().getSubject());
-        Assertions.assertEquals("testCaseNote1", result.get(0).getValue().getCaseNote());
-        Assertions.assertEquals("forename surname", result.get(0).getValue().getUser());
+        assertEquals(1, result.size());
+        assertEquals("testSubject1", result.getFirst().getValue().getSubject());
+        assertEquals("testCaseNote1", result.getFirst().getValue().getCaseNote());
+        assertEquals("forename surname", result.getFirst().getValue().getUser());
     }
 
     @Test
-    public void testaddCaseNotesWithExistingCaseNotes() {
+    void testAddCaseNotesWithExistingCaseNotes() {
         List<Element<CaseNoteDetails>> caseNotes = new ArrayList<>();
         caseNotes.add(ElementUtils.element(CaseNoteDetails.builder().dateCreated(LocalDateTime.now()).build()));
         CaseData caseData = CaseData.builder()
@@ -96,21 +96,20 @@ public class AddCaseNoteServiceTest {
 
         List<Element<CaseNoteDetails>> result = addCaseNoteService.addCaseNoteDetails(caseData, userDetails);
 
-        Assertions.assertEquals(2, result.size());
-        Assertions.assertEquals("testSubject1", result.get(0).getValue().getSubject());
-        Assertions.assertEquals("forename surname", result.get(0).getValue().getUser());
+        assertEquals(2, result.size());
+        assertEquals("testSubject1", result.getFirst().getValue().getSubject());
+        assertEquals("forename surname", result.getFirst().getValue().getUser());
     }
 
     @Test
-    public void testGetCurrentCaseNoteDetails() {
+    void testGetCurrentCaseNoteDetails() {
         UserDetails userDetails = UserDetails.builder().forename("forename").surname("surname").build();
         CaseNoteDetails result = addCaseNoteService.getCurrentCaseNoteDetails(
             "testSubject1",
             "testCaseNote1",
             userDetails
         );
-        Assertions.assertEquals("testSubject1", result.getSubject());
-        Assertions.assertEquals("testCaseNote1", result.getCaseNote());
+        assertEquals("testSubject1", result.getSubject());
+        assertEquals("testCaseNote1", result.getCaseNote());
     }
-
 }

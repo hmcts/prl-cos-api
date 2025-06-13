@@ -15,7 +15,7 @@ import static uk.gov.hmcts.reform.prl.utils.Verificators.mockTasksExecution;
 import static uk.gov.hmcts.reform.prl.utils.Verificators.verifyTaskWasCalled;
 
 @ExtendWith(MockitoExtension.class)
-public class ExampleWorkflowTest {
+class ExampleWorkflowTest {
 
     @Mock
     private ExampleEmailTask exampleEmailTask;
@@ -24,7 +24,7 @@ public class ExampleWorkflowTest {
     private ExampleWorkflow exampleWorkflow;
 
     @Test
-    public void shouldExecuteTask() throws Exception {
+    void shouldExecuteTask() throws Exception {
         CaseDetails caseDetails = CaseDetailsProvider.empty();
         mockTasksExecution(CaseDetailsProvider.empty(), exampleEmailTask);
 

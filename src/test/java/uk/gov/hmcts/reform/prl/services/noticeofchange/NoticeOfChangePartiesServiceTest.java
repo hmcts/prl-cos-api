@@ -88,7 +88,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
-public class NoticeOfChangePartiesServiceTest {
+class NoticeOfChangePartiesServiceTest {
     @InjectMocks
     NoticeOfChangePartiesService noticeOfChangePartiesService;
 
@@ -154,7 +154,7 @@ public class NoticeOfChangePartiesServiceTest {
     private StartEventResponse startEventResponse;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         partyDetails = PartyDetails.builder().representativeFirstName("Abc")
             .representativeLastName("Xyz")
             .gender(Gender.male)
@@ -219,7 +219,7 @@ public class NoticeOfChangePartiesServiceTest {
     }
 
     @Test
-    public void testGenerate() {
+    void testGenerate() {
 
         when(policyConverter.caGenerate(role, optionalParty))
             .thenReturn(organisationPolicy);
@@ -236,7 +236,7 @@ public class NoticeOfChangePartiesServiceTest {
     }
 
     @Test
-    public void testGenerateForDa() {
+    void testGenerateForDa() {
         when(policyConverter.caGenerate(role, optionalParty))
             .thenReturn(organisationPolicy);
         when(policyConverter.daGenerate(roleForDa, daParty))
@@ -252,7 +252,7 @@ public class NoticeOfChangePartiesServiceTest {
     }
 
     @Test
-    public void testGenerateWithBlankStrategy() {
+    void testGenerateWithBlankStrategy() {
 
         NoticeOfChangePartiesService
             .NoticeOfChangeAnswersPopulationStrategy strategy = NoticeOfChangePartiesService
@@ -265,7 +265,7 @@ public class NoticeOfChangePartiesServiceTest {
     }
 
     @Test
-    public void testGenerateWithBlankStrategyForDa() {
+    void testGenerateWithBlankStrategyForDa() {
 
         NoticeOfChangePartiesService
             .NoticeOfChangeAnswersPopulationStrategy strategy = NoticeOfChangePartiesService
@@ -278,7 +278,7 @@ public class NoticeOfChangePartiesServiceTest {
     }
 
     @Test
-    public void testApplyDecision() {
+    void testApplyDecision() {
         when(userService.getUserDetails("testAuth")).thenReturn(UserDetails.builder()
                                                                     .forename("solicitorResp")
                                                                     .surname("test").build());
@@ -289,7 +289,7 @@ public class NoticeOfChangePartiesServiceTest {
     }
 
     @Test
-    public void testNocRequestSubmittedForC100RespondentSolicitor() throws JsonProcessingException {
+    void testNocRequestSubmittedForC100RespondentSolicitor() throws JsonProcessingException {
         DynamicListElement dynamicListElement = DynamicListElement.builder()
             .code("[C100RESPONDENTSOLICITOR1]")
             .label("Respondent solicitor A")
@@ -363,7 +363,7 @@ public class NoticeOfChangePartiesServiceTest {
     }
 
     @Test
-    public void testNocRequestSubmittedForC100RespondentSolicitorWithResponse() throws JsonProcessingException {
+    void testNocRequestSubmittedForC100RespondentSolicitorWithResponse() throws JsonProcessingException {
         partyDetails = PartyDetails.builder().representativeFirstName("Abc")
             .representativeLastName("Xyz")
             .gender(Gender.male)
@@ -454,7 +454,7 @@ public class NoticeOfChangePartiesServiceTest {
 
 
     @Test
-    public void testNocRequestSubmittedForC100ApplicantSolicitor() throws JsonProcessingException {
+    void testNocRequestSubmittedForC100ApplicantSolicitor() throws JsonProcessingException {
         DynamicListElement dynamicListElement = DynamicListElement.builder()
             .code("[C100APPLICANTSOLICITOR1]")
             .label("Applicant solicitor A")
@@ -527,7 +527,7 @@ public class NoticeOfChangePartiesServiceTest {
     }
 
     @Test
-    public void testNocRequestSubmittedForC100ApplicantSolicitorThrowsError() throws JsonProcessingException {
+    void testNocRequestSubmittedForC100ApplicantSolicitorThrowsError() throws JsonProcessingException {
         List<Element<PartyDetails>> applicants = new ArrayList<>();
         applicants.add(element(partyDetails));
 
@@ -590,7 +590,7 @@ public class NoticeOfChangePartiesServiceTest {
     }
 
     @Test
-    public void testNocRequestSubmittedForFL401RespondentSolicitor() {
+    void testNocRequestSubmittedForFL401RespondentSolicitor() {
         DynamicListElement dynamicListElement = DynamicListElement.builder()
             .code("[FL401RESPONDENTSOLICITOR]")
             .label("Respondent solicitor A")
@@ -667,7 +667,7 @@ public class NoticeOfChangePartiesServiceTest {
     }
 
     @Test
-    public void testNocRequestSubmittedForFL401ApplicantSolicitor() throws JsonProcessingException {
+    void testNocRequestSubmittedForFL401ApplicantSolicitor() throws JsonProcessingException {
         DynamicListElement dynamicListElement = DynamicListElement.builder()
             .code("[APPLICANTSOLICITOR]")
             .label("Applicant solicitor A")
@@ -742,7 +742,7 @@ public class NoticeOfChangePartiesServiceTest {
     }
 
     @Test
-    public void testUpdateLegalRepresentation() {
+    void testUpdateLegalRepresentation() {
         DynamicListElement dynamicListElement = DynamicListElement.builder()
             .code("[C100RESPONDENTSOLICITOR1]")
             .label("Respondent solicitor A")
@@ -819,7 +819,7 @@ public class NoticeOfChangePartiesServiceTest {
     }
 
     @Test
-    public void testAboutToSubmitStopRepresentingForCaApplicant() {
+    void testAboutToSubmitStopRepresentingForCaApplicant() {
         List<Element<PartyDetails>> applicant = new ArrayList<>();
         Element partyDetailsElement = element(partyDetails);
         applicant.add(partyDetailsElement);
@@ -867,7 +867,7 @@ public class NoticeOfChangePartiesServiceTest {
     }
 
     @Test
-    public void testAboutToSubmitStopRepresentingForCaRespondent() {
+    void testAboutToSubmitStopRepresentingForCaRespondent() {
         List<Element<PartyDetails>> respondent = new ArrayList<>();
         Element partyDetailsElement = element(partyDetails);
         respondent.add(partyDetailsElement);
@@ -915,7 +915,7 @@ public class NoticeOfChangePartiesServiceTest {
     }
 
     @Test
-    public void testAboutToSubmitStopRepresentingForDaApplicant() {
+    void testAboutToSubmitStopRepresentingForDaApplicant() {
         DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
             .code(partyDetails.getPartyId().toString())
             .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
@@ -961,7 +961,7 @@ public class NoticeOfChangePartiesServiceTest {
     }
 
     @Test
-    public void testAboutToSubmitStopRepresentingForDaRespondent() {
+    void testAboutToSubmitStopRepresentingForDaRespondent() {
         DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
             .code(partyDetails.getPartyId().toString())
             .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
@@ -1006,7 +1006,7 @@ public class NoticeOfChangePartiesServiceTest {
     }
 
     @Test
-    public void testPopulateAboutToStartStopRepresentationCaApplicant() {
+    void testPopulateAboutToStartStopRepresentationCaApplicant() {
         DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
             .code(partyDetails.getPartyId().toString())
             .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
@@ -1059,7 +1059,7 @@ public class NoticeOfChangePartiesServiceTest {
     }
 
     @Test
-    public void testPopulateAboutToStartStopRepresentationCaRespondent() {
+    void testPopulateAboutToStartStopRepresentationCaRespondent() {
         DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
             .code(partyDetails.getPartyId().toString())
             .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
@@ -1112,7 +1112,7 @@ public class NoticeOfChangePartiesServiceTest {
     }
 
     @Test
-    public void testSubmittedStopRepresenting() {
+    void testSubmittedStopRepresenting() {
         List<Element<PartyDetails>> applicant = new ArrayList<>();
         Element partyDetailsElement = element(partyDetails);
         applicant.add(partyDetailsElement);
@@ -1169,7 +1169,7 @@ public class NoticeOfChangePartiesServiceTest {
     }
 
     @Test
-    public void testPopulateAboutToStartAdminRemoveLegalRepresentative() {
+    void testPopulateAboutToStartAdminRemoveLegalRepresentative() {
         DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
             .code(partyDetails.getPartyId().toString())
             .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
@@ -1220,7 +1220,7 @@ public class NoticeOfChangePartiesServiceTest {
     }
 
     @Test
-    public void testAboutToSubmitAdminRemoveLegalRepresentativeC100Respondent() {
+    void testAboutToSubmitAdminRemoveLegalRepresentativeC100Respondent() {
         List<Element<PartyDetails>> applicants = new ArrayList<>();
         applicants.add(element(partyDetailsNoRep));
 
@@ -1269,7 +1269,7 @@ public class NoticeOfChangePartiesServiceTest {
 
 
     @Test
-    public void testAboutToSubmitAdminRemoveLegalRepresentativeFL401Applicant() {
+    void testAboutToSubmitAdminRemoveLegalRepresentativeFL401Applicant() {
         DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
             .code(partyDetails.getPartyId().toString())
             .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
@@ -1309,7 +1309,7 @@ public class NoticeOfChangePartiesServiceTest {
     }
 
     @Test
-    public void testAboutToSubmitAdminRemoveLegalRepresentativeFL401Respondent() {
+    void testAboutToSubmitAdminRemoveLegalRepresentativeFL401Respondent() {
         DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
             .code(partyDetails.getPartyId().toString())
             .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
@@ -1350,7 +1350,7 @@ public class NoticeOfChangePartiesServiceTest {
     }
 
     @Test
-    public void testSubmittedAdminRemoveLegalRepresentative() {
+    void testSubmittedAdminRemoveLegalRepresentative() {
         DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
             .code(partyDetails.getPartyId().toString())
             .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
@@ -1449,7 +1449,7 @@ public class NoticeOfChangePartiesServiceTest {
 
 
     @Test
-    public void testSubmittedStopRepresentingWithAccessCode() {
+    void testSubmittedStopRepresentingWithAccessCode() {
         List<Element<PartyDetails>> applicant = new ArrayList<>();
         Element partyDetailsElement = element(partyDetails);
         UUID uuid = partyDetailsElement.getId();

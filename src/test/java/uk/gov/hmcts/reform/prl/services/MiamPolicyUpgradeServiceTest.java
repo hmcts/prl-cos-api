@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,10 +27,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class MiamPolicyUpgradeServiceTest {
+class MiamPolicyUpgradeServiceTest {
 
     @InjectMocks
     MiamPolicyUpgradeService miamPolicyUpgradeService;
@@ -40,7 +42,7 @@ public class MiamPolicyUpgradeServiceTest {
     ObjectMapper objectMapper;
 
     @Test
-    public void testPopulateMiamPolicyUpgradeDetailsEmptyCasedata() {
+    void testPopulateMiamPolicyUpgradeDetailsEmptyCasedata() {
         uk.gov.hmcts.reform.ccd
             .client.model.CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder().data(new HashMap<>()).build()).build();
@@ -48,12 +50,12 @@ public class MiamPolicyUpgradeServiceTest {
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder().build()).build());
         Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
-        Assert.assertNotNull(objectMap);
-        Assert.assertNull(objectMap.get("mpuDomesticAbuseEvidenceDocument"));
+        assertNotNull(objectMap);
+        assertNull(objectMap.get("mpuDomesticAbuseEvidenceDocument"));
     }
 
     @Test
-    public void testPopulateMiamPolicyUpgradeDetailsEmptyListOfExcemptions() {
+    void testPopulateMiamPolicyUpgradeDetailsEmptyListOfExcemptions() {
         uk.gov.hmcts.reform.ccd
             .client.model.CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder().data(new HashMap<>()).build()).build();
@@ -65,13 +67,13 @@ public class MiamPolicyUpgradeServiceTest {
                                                           .mpuClaimingExemptionMiam(YesOrNo.Yes)
                                                           .mpuExemptionReasons(new ArrayList<>()).build()).build());
         Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
-        Assert.assertNotNull(objectMap);
-        Assert.assertNotNull(objectMap.get("mpuClaimingExemptionMiam"));
-        Assert.assertNull(objectMap.get("mpuDomesticAbuseEvidenceDocument"));
+        assertNotNull(objectMap);
+        assertNotNull(objectMap.get("mpuClaimingExemptionMiam"));
+        assertNull(objectMap.get("mpuDomesticAbuseEvidenceDocument"));
     }
 
     @Test
-    public void testPopulateMiamPolicyUpgradeDetailsClaimingExcemptionFromMiamDomesticAbuseEvidenceProvided() {
+    void testPopulateMiamPolicyUpgradeDetailsClaimingExcemptionFromMiamDomesticAbuseEvidenceProvided() {
         uk.gov.hmcts.reform.ccd
             .client.model.CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder().data(new HashMap<>()).build()).build();
@@ -94,12 +96,12 @@ public class MiamPolicyUpgradeServiceTest {
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
         Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
-        Assert.assertNotNull(objectMap);
-        Assert.assertNotNull(objectMap.get("mpuDomesticAbuseEvidenceDocument"));
+        assertNotNull(objectMap);
+        assertNotNull(objectMap.get("mpuDomesticAbuseEvidenceDocument"));
     }
 
     @Test
-    public void testPopulateMiamPolicyUpgradeDetailsClaimingExcemptionFromMiamDomesticAbuseEvidenceNotProvided() {
+    void testPopulateMiamPolicyUpgradeDetailsClaimingExcemptionFromMiamDomesticAbuseEvidenceNotProvided() {
         uk.gov.hmcts.reform.ccd
             .client.model.CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder().data(new HashMap<>()).build()).build();
@@ -118,12 +120,12 @@ public class MiamPolicyUpgradeServiceTest {
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
         Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
-        Assert.assertNotNull(objectMap);
-        Assert.assertEquals("test", objectMap.get("mpuNoDomesticAbuseEvidenceReason"));
+        assertNotNull(objectMap);
+        assertEquals("test", objectMap.get("mpuNoDomesticAbuseEvidenceReason"));
     }
 
     @Test
-    public void testPopulateMiamPolicyUpgradeDetailsClaimingExcemptionFromMiamChildProtection() {
+    void testPopulateMiamPolicyUpgradeDetailsClaimingExcemptionFromMiamChildProtection() {
         uk.gov.hmcts.reform.ccd
             .client.model.CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder().data(new HashMap<>()).build()).build();
@@ -140,13 +142,13 @@ public class MiamPolicyUpgradeServiceTest {
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
         Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
-        Assert.assertNotNull(objectMap);
-        Assert.assertEquals(MiamPolicyUpgradeChildProtectionConcernEnum
+        assertNotNull(objectMap);
+        assertEquals(MiamPolicyUpgradeChildProtectionConcernEnum
             .mpuChildProtectionConcern_value_1, objectMap.get("mpuChildProtectionConcernReason"));
     }
 
     @Test
-    public void testPopulateMiamPolicyUpgradeDetailsClaimingExcemptionFromMiamUrgency() {
+    void testPopulateMiamPolicyUpgradeDetailsClaimingExcemptionFromMiamUrgency() {
         uk.gov.hmcts.reform.ccd
             .client.model.CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder().data(new HashMap<>()).build()).build();
@@ -163,13 +165,13 @@ public class MiamPolicyUpgradeServiceTest {
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
         Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
-        Assert.assertNotNull(objectMap);
-        Assert.assertEquals(MiamUrgencyReasonChecklistEnum
+        assertNotNull(objectMap);
+        assertEquals(MiamUrgencyReasonChecklistEnum
             .miamPolicyUpgradeUrgencyReason_Value_1, objectMap.get("mpuUrgencyReason"));
     }
 
     @Test
-    public void testPopulateMiamPolicyUpgradeDetailsClaimingExcemptionFromMiamPreviousReason1() {
+    void testPopulateMiamPolicyUpgradeDetailsClaimingExcemptionFromMiamPreviousReason1() {
         uk.gov.hmcts.reform.ccd
             .client.model.CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder().data(new HashMap<>()).build()).build();
@@ -187,12 +189,12 @@ public class MiamPolicyUpgradeServiceTest {
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
         Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
-        Assert.assertNotNull(objectMap);
-        Assert.assertEquals(Document.builder().build(), objectMap.get("mpuDocFromDisputeResolutionProvider"));
+        assertNotNull(objectMap);
+        assertEquals(Document.builder().build(), objectMap.get("mpuDocFromDisputeResolutionProvider"));
     }
 
     @Test
-    public void testPopulateMiamPolicyUpgradeDetailsClaimingExcemptionFromMiamPreviousReason2() {
+    void testPopulateMiamPolicyUpgradeDetailsClaimingExcemptionFromMiamPreviousReason2() {
         uk.gov.hmcts.reform.ccd
             .client.model.CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder().data(new HashMap<>()).build()).build();
@@ -211,12 +213,12 @@ public class MiamPolicyUpgradeServiceTest {
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
         Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
-        Assert.assertNotNull(objectMap);
-        Assert.assertEquals("test", objectMap.get("mpuMediatorDetails"));
+        assertNotNull(objectMap);
+        assertEquals("test", objectMap.get("mpuMediatorDetails"));
     }
 
     @Test
-    public void testPopulateMiamPolicyUpgradeDetailsClaimingExcemptionFromMiamPreviousReason2Certificate() {
+    void testPopulateMiamPolicyUpgradeDetailsClaimingExcemptionFromMiamPreviousReason2Certificate() {
         uk.gov.hmcts.reform.ccd
             .client.model.CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder().data(new HashMap<>()).build()).build();
@@ -235,12 +237,12 @@ public class MiamPolicyUpgradeServiceTest {
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
         Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
-        Assert.assertNotNull(objectMap);
-        Assert.assertEquals(Document.builder().build(), objectMap.get("mpuCertificateByMediator"));
+        assertNotNull(objectMap);
+        assertEquals(Document.builder().build(), objectMap.get("mpuCertificateByMediator"));
     }
 
     @Test
-    public void testPopulateMiamPolicyUpgradeDetailsClaimingExcemptionFromMiamOtherExcemption3() {
+    void testPopulateMiamPolicyUpgradeDetailsClaimingExcemptionFromMiamOtherExcemption3() {
         uk.gov.hmcts.reform.ccd
             .client.model.CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder().data(new HashMap<>()).build()).build();
@@ -258,12 +260,12 @@ public class MiamPolicyUpgradeServiceTest {
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
         Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
-        Assert.assertNotNull(objectMap);
-        Assert.assertEquals("test", objectMap.get("mpuApplicantUnableToAttendMiamReason1"));
+        assertNotNull(objectMap);
+        assertEquals("test", objectMap.get("mpuApplicantUnableToAttendMiamReason1"));
     }
 
     @Test
-    public void testPopulateMiamPolicyUpgradeDetailsClaimingExcemptionFromMiamOtherExcemption4() {
+    void testPopulateMiamPolicyUpgradeDetailsClaimingExcemptionFromMiamOtherExcemption4() {
         uk.gov.hmcts.reform.ccd
             .client.model.CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder().data(new HashMap<>()).build()).build();
@@ -281,12 +283,12 @@ public class MiamPolicyUpgradeServiceTest {
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
         Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
-        Assert.assertNotNull(objectMap);
-        Assert.assertEquals("test", objectMap.get("mpuApplicantUnableToAttendMiamReason1"));
+        assertNotNull(objectMap);
+        assertEquals("test", objectMap.get("mpuApplicantUnableToAttendMiamReason1"));
     }
 
     @Test
-    public void testPopulateMiamPolicyUpgradeDetailsClaimingExcemptionFromMiamOtherExcemption5() {
+    void testPopulateMiamPolicyUpgradeDetailsClaimingExcemptionFromMiamOtherExcemption5() {
         uk.gov.hmcts.reform.ccd
             .client.model.CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder().data(new HashMap<>()).build()).build();
@@ -304,15 +306,15 @@ public class MiamPolicyUpgradeServiceTest {
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
         Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
-        Assert.assertNotNull(objectMap);
-        Assert.assertEquals("test", objectMap.get("mpuApplicantUnableToAttendMiamReason2"));
+        assertNotNull(objectMap);
+        assertEquals("test", objectMap.get("mpuApplicantUnableToAttendMiamReason2"));
     }
 
     @Test
-    public void testUpdateMiamPolicyUpgradeDetails() {
+    void testUpdateMiamPolicyUpgradeDetails() {
         CaseData caseData = CaseData.builder().miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder().build()).build();
         Map<String, Object> objectMap = new HashMap<>();
         CaseData returnedCaseData = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(caseData, objectMap);
-        Assert.assertNotNull(returnedCaseData);
+        assertNotNull(returnedCaseData);
     }
 }

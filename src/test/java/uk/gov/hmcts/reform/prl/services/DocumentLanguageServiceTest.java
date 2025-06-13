@@ -15,12 +15,12 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @ExtendWith(MockitoExtension.class)
-public class DocumentLanguageServiceTest {
+class DocumentLanguageServiceTest {
 
     CaseData caseData;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         caseData = CaseData.builder()
             .welshLanguageRequirement(Yes)
             .build();
@@ -30,7 +30,7 @@ public class DocumentLanguageServiceTest {
     DocumentLanguageService documentLanguageService;
 
     @Test
-    public void whenWelshLanguageRequirementIsNotPresentIsGenEngReturnTrueAndIsGenWelshReturnFalse() {
+    void whenWelshLanguageRequirementIsNotPresentIsGenEngReturnTrueAndIsGenWelshReturnFalse() {
         caseData = CaseData.builder().build();
 
         assertTrue(documentLanguageService.docGenerateLang(caseData).isGenEng());
@@ -38,14 +38,14 @@ public class DocumentLanguageServiceTest {
     }
 
     @Test
-    public void whenWelshLanguageRequirementIsPresentAndEqualsToNoIsGenEngReturnTrueIsGenWelshReturnFalse() {
+    void whenWelshLanguageRequirementIsPresentAndEqualsToNoIsGenEngReturnTrueIsGenWelshReturnFalse() {
         caseData = CaseData.builder().welshLanguageRequirement(No).build();
         assertTrue(documentLanguageService.docGenerateLang(caseData).isGenEng());
         assertFalse(documentLanguageService.docGenerateLang(caseData).isGenWelsh());
     }
 
     @Test
-    public void whenWelshLanguageRequirementApplicationIsNotPresentIsGenEngReturnTrueAndIsGenWelshReturnFalse() {
+    void whenWelshLanguageRequirementApplicationIsNotPresentIsGenEngReturnTrueAndIsGenWelshReturnFalse() {
         caseData = caseData.toBuilder().build();
 
         assertTrue(documentLanguageService.docGenerateLang(caseData).isGenEng());
@@ -53,7 +53,7 @@ public class DocumentLanguageServiceTest {
     }
 
     @Test
-    public void whenApplicationLanguageIsEngReturnTrueAndIsGenWelshReturnFalse() {
+    void whenApplicationLanguageIsEngReturnTrueAndIsGenWelshReturnFalse() {
         caseData = caseData.toBuilder()
             .welshLanguageRequirementApplication(english)
             .build();
@@ -63,7 +63,7 @@ public class DocumentLanguageServiceTest {
     }
 
     @Test
-    public void whenApplicationLanguageIsWelshReturnTrueAndIsGenEngReturnFalse() {
+    void whenApplicationLanguageIsWelshReturnTrueAndIsGenEngReturnFalse() {
         caseData = caseData.toBuilder()
             .welshLanguageRequirementApplication(welsh)
             .build();
@@ -73,7 +73,7 @@ public class DocumentLanguageServiceTest {
     }
 
     @Test
-    public void whenApplicationLanguageIsEngAndNeedWelshIsYesReturnTrue() {
+    void whenApplicationLanguageIsEngAndNeedWelshIsYesReturnTrue() {
         caseData = caseData.toBuilder()
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
@@ -84,7 +84,7 @@ public class DocumentLanguageServiceTest {
     }
 
     @Test
-    public void whenApplicationLanguageIsEngAndNeedWelshIsNoReturnTrueFalse() {
+    void whenApplicationLanguageIsEngAndNeedWelshIsNoReturnTrueFalse() {
         caseData = caseData.toBuilder()
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(No)
@@ -95,7 +95,7 @@ public class DocumentLanguageServiceTest {
     }
 
     @Test
-    public void whenApplicationLanguageIsWelshAndNeedEngIsNoReturnTrueFalse() {
+    void whenApplicationLanguageIsWelshAndNeedEngIsNoReturnTrueFalse() {
         caseData = caseData.toBuilder()
             .welshLanguageRequirementApplication(welsh)
             .welshLanguageRequirementApplicationNeedEnglish(No)
@@ -106,7 +106,7 @@ public class DocumentLanguageServiceTest {
     }
 
     @Test
-    public void whenApplicationLanguageIsWelshAndNeedEngIsTesReturnTrueTrue() {
+    void whenApplicationLanguageIsWelshAndNeedEngIsTesReturnTrueTrue() {
         caseData = caseData.toBuilder()
             .welshLanguageRequirementApplication(welsh)
             .welshLanguageRequirementApplicationNeedEnglish(Yes)

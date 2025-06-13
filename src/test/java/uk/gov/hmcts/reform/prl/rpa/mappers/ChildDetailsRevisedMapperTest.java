@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-public class ChildDetailsRevisedMapperTest {
+class ChildDetailsRevisedMapperTest {
 
     @InjectMocks
     ChildDetailsRevisedMapper childDetailsRevisedMapper;
@@ -30,7 +30,7 @@ public class ChildDetailsRevisedMapperTest {
     List<OrderTypeEnum> appliedFor;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         appliedFor = new ArrayList<>();
         appliedFor.add(OrderTypeEnum.childArrangementsOrder);
         appliedFor.add(OrderTypeEnum.prohibitedStepsOrder);
@@ -39,14 +39,14 @@ public class ChildDetailsRevisedMapperTest {
     }
 
     @Test
-    public void testChildrenMapperWithEmptyValues() {
+    void testChildrenMapperWithEmptyValues() {
         children = Collections.emptyList();
         assertTrue(childDetailsRevisedMapper.map(null).isEmpty());
 
     }
 
     @Test
-    public void testChildrenMapperWithAllFields() {
+    void testChildrenMapperWithAllFields() {
 
         child = ChildDetailsRevised.builder().firstName("Lewis").lastName("Christine")
             .dateOfBirth(LocalDate.of(1990, 8, 1))
@@ -58,7 +58,7 @@ public class ChildDetailsRevisedMapperTest {
     }
 
     @Test
-    public void testChildrenMapperWithAllFieldsWithOtherGender() {
+    void testChildrenMapperWithAllFieldsWithOtherGender() {
 
         child = ChildDetailsRevised.builder().firstName("Lewis").lastName("Christine")
             .dateOfBirth(LocalDate.of(1990, 8, 1))
@@ -71,7 +71,7 @@ public class ChildDetailsRevisedMapperTest {
 
 
     @Test
-    public void testChildrenMapperWithSomeFields() {
+    void testChildrenMapperWithSomeFields() {
 
         child = ChildDetailsRevised.builder().firstName("Lewis").lastName("Christine")
             .dateOfBirth(LocalDate.of(1990, 8, 1))

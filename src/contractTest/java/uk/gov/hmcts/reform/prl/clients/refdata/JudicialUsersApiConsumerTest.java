@@ -91,7 +91,7 @@ public class JudicialUsersApiConsumerTest {
             judicialUsersList = judicialUserDetailsApi.getAllJudicialUserDetails(BEARER_TOKEN,SERVICE_AUTHORIZATION_HEADER,judicialUsersApiRequest);
 
         assertNotNull(judicialUsersList);
-        JudicialUsersApiResponse judicialUsersApiResponse = judicialUsersList.get(0);
+        JudicialUsersApiResponse judicialUsersApiResponse = judicialUsersList.getFirst();
         assertNotNull(judicialUsersApiResponse);
         assertEquals(judicialUsersApiResponse.getPersonalCode(),"49933940");
         assertEquals(judicialUsersApiResponse.getEmailId(),"49933940EMP-@ejudiciary.net");

@@ -60,7 +60,7 @@ import static uk.gov.hmcts.reform.prl.services.closingcase.ClosingCaseService.FI
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
-public class ClosingCaseServiceTest {
+class ClosingCaseServiceTest {
 
     @Mock
     private ObjectMapper objectMapper;
@@ -81,7 +81,7 @@ public class ClosingCaseServiceTest {
     ClosingCaseService closingCaseService;
 
     @Test
-    public void testPrePopulateChildDataForC100() {
+    void testPrePopulateChildDataForC100() {
         List<Element<ChildDetailsRevised>> newChildDetails = new ArrayList<>();
         ChildDetailsRevised childDetailsRevised1 = ChildDetailsRevised.builder()
             .firstName("Tom")
@@ -111,7 +111,7 @@ public class ClosingCaseServiceTest {
     }
 
     @Test
-    public void testPrePopulateChildDataForFL401() {
+    void testPrePopulateChildDataForFL401() {
         List<Element<ApplicantChild>> applicantChildDetail = new ArrayList<>();
         ApplicantChild child1 = ApplicantChild.builder()
             .fullName("Tom")
@@ -138,7 +138,7 @@ public class ClosingCaseServiceTest {
     }
 
     @Test
-    public void testPrePopulateChildDataForAlreadyClosedChildren() {
+    void testPrePopulateChildDataForAlreadyClosedChildren() {
         List<Element<ChildDetailsRevised>> newChildDetails = new ArrayList<>();
         ChildDetailsRevised childDetailsRevised1 = ChildDetailsRevised.builder()
             .firstName("Tom")
@@ -169,7 +169,7 @@ public class ClosingCaseServiceTest {
     }
 
     @Test
-    public void testPopulateSelectedChildWithFinalOutcomeForC100V3() {
+    void testPopulateSelectedChildWithFinalOutcomeForC100V3() {
 
         List<Element<ChildDetailsRevised>> newChildDetails = new ArrayList<>();
         ChildDetailsRevised childDetailsRevised1 = ChildDetailsRevised.builder()
@@ -204,7 +204,7 @@ public class ClosingCaseServiceTest {
     }
 
     @Test
-    public void testPopulateSelectedChildWithFinalOutcomeForC100V2() {
+    void testPopulateSelectedChildWithFinalOutcomeForC100V2() {
 
         List<Element<Child>> children = new ArrayList<>();
         Child child1 = Child.builder()
@@ -239,7 +239,7 @@ public class ClosingCaseServiceTest {
     }
 
     @Test
-    public void testPopulateSelectedChildWithFinalOutcomeForFL401() {
+    void testPopulateSelectedChildWithFinalOutcomeForFL401() {
 
         List<Element<ApplicantChild>> applicantChildDetail = new ArrayList<>();
         ApplicantChild child1 = ApplicantChild.builder()
@@ -281,7 +281,7 @@ public class ClosingCaseServiceTest {
     }
 
     @Test
-    public void testValidateChildDetailsForAllChildren() {
+    void testValidateChildDetailsForAllChildren() {
         List<Element<Child>> children = new ArrayList<>();
         Child child1 = Child.builder()
             .firstName("Tom")
@@ -319,7 +319,7 @@ public class ClosingCaseServiceTest {
     }
 
     @Test
-    public void testValidateChildDetails() {
+    void testValidateChildDetails() {
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder()
             .code(TEST_UUID)
             .label("test")
@@ -354,7 +354,7 @@ public class ClosingCaseServiceTest {
     }
 
     @Test
-    public void testClosingCaseForChildrenForC100V3() {
+    void testClosingCaseForChildrenForC100V3() {
         List<Element<ChildDetailsRevised>> newChildDetails = new ArrayList<>();
         ChildDetailsRevised childDetailsRevised1 = ChildDetailsRevised.builder()
             .firstName("Tom")
@@ -391,7 +391,7 @@ public class ClosingCaseServiceTest {
     }
 
     @Test
-    public void testClosingCaseForChildrenForC100V2() {
+    void testClosingCaseForChildrenForC100V2() {
         List<Element<Child>> children = new ArrayList<>();
         Child child1 = Child.builder()
             .firstName("Tom")
@@ -432,7 +432,7 @@ public class ClosingCaseServiceTest {
     }
 
     @Test
-    public void testClosingCaseForChildrenForFL401() {
+    void testClosingCaseForChildrenForFL401() {
         List<Element<ApplicantChild>> applicantChildDetail = new ArrayList<>();
         ApplicantChild child1 = ApplicantChild.builder()
             .fullName("Tom")
@@ -467,7 +467,7 @@ public class ClosingCaseServiceTest {
     }
 
     @Test
-    public void testUpdateChildDetailsInTab() {
+    void testUpdateChildDetailsInTab() {
         List<Element<ChildDetailsRevised>> newChildDetails = new ArrayList<>();
         ChildDetailsRevised childDetailsRevised1 = ChildDetailsRevised.builder()
             .firstName("Tom")
@@ -493,7 +493,7 @@ public class ClosingCaseServiceTest {
     }
 
     @Test
-    public void testUnAllocateCourtStaffs() {
+    void testUnAllocateCourtStaffs() {
         when(systemUserService.getSysUserToken()).thenReturn("test");
         when(authTokenGenerator.generate()).thenReturn("test");
 

@@ -85,13 +85,13 @@ public class HearingRequestDataMapper {
                 String.valueOf(caseData.getCreateSelectOrderOptions()),
                 caseData)) {
                 if (Optional.ofNullable(hearingData.getApplicantName1()).isEmpty()) {
-                    hearingData.setApplicantName1(concat(getPartyNameList(caseData.getApplicants()).get(0), " (Applicant1)"));
+                    hearingData.setApplicantName1(concat(getPartyNameList(caseData.getApplicants()).getFirst(), " (Applicant1)"));
                 }
                 if (Optional.ofNullable(hearingData.getRespondentName1()).isEmpty()) {
-                    hearingData.setRespondentName1(concat(getPartyNameList(caseData.getRespondents()).get(0), " (Respondent1)"));
+                    hearingData.setRespondentName1(concat(getPartyNameList(caseData.getRespondents()).getFirst(), " (Respondent1)"));
                 }
                 if (Optional.ofNullable(hearingData.getApplicantSolicitor1()).isEmpty()) {
-                    hearingData.setApplicantSolicitor1(concat(getApplicantSolicitorNameList(caseData.getApplicants()).get(0),
+                    hearingData.setApplicantSolicitor1(concat(getApplicantSolicitorNameList(caseData.getApplicants()).getFirst(),
                                                               " (Applicant solicitor)"));
                 }
             }

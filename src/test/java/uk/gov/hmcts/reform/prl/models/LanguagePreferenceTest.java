@@ -11,7 +11,7 @@ import static org.hamcrest.core.Is.is;
 public class LanguagePreferenceTest {
 
     @Test
-    public void getLanguagePreferenceShouldReturnDefaultValueWhenEmptyCaseData() {
+    void getLanguagePreferenceShouldReturnDefaultValueWhenEmptyCaseData() {
         assertThat(
             LanguagePreference.getLanguagePreference(CaseData.builder().build()),
             is(LanguagePreference.english)
@@ -19,7 +19,7 @@ public class LanguagePreferenceTest {
     }
 
     @Test
-    public void getLanguagePreferenceShouldReturnWelsh() {
+    void getLanguagePreferenceShouldReturnWelsh() {
         assertThat(
             LanguagePreference.getLanguagePreference(
                 CaseData.builder().languagePreferenceWelsh(YesOrNo.Yes).build()),
@@ -28,7 +28,7 @@ public class LanguagePreferenceTest {
     }
 
     @Test
-    public void getLanguagePreferenceShouldReturnEnglish() {
+    void getLanguagePreferenceShouldReturnEnglish() {
         assertThat(
             LanguagePreference.getLanguagePreference(
                 CaseData.builder().languagePreferenceWelsh(YesOrNo.No).build()),
@@ -37,7 +37,7 @@ public class LanguagePreferenceTest {
     }
 
     @Test
-    public void valuesShouldReturnListOfTwoElements() {
+    void valuesShouldReturnListOfTwoElements() {
         assertThat(LanguagePreference.values().length, is(2));
     }
 }

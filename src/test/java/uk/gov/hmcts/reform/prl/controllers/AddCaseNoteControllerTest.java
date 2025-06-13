@@ -1,14 +1,12 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
@@ -27,9 +25,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 
 @ExtendWith(MockitoExtension.class)
-public class AddCaseNoteControllerTest {
-
-    private MockMvc mockMvc;
+class AddCaseNoteControllerTest {
 
     @InjectMocks
     private AddCaseNoteController addCaseNoteController;
@@ -49,22 +45,15 @@ public class AddCaseNoteControllerTest {
     @Mock
     private AuthorisationService authorisationService;
 
-    public static final String authToken = "Bearer TestAuthToken";
-    public static final String s2sToken = "s2s AuthToken";
+    public static final String AUTH_TOKEN = "Bearer TestAuthToken";
+    public static final String S2S_TOKEN = "s2s AuthToken";
 
     @Test
-    public void testPopulateHeaderCaseNote() {
+    void testPopulateHeaderCaseNote() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .subject("newsubject")
             .caseNote("newcasenote")
-            .build();
-
-        UserDetails userDetails = UserDetails.builder()
-            .forename("forename1")
-            .surname("surname1")
-            .id("userid1234")
-            .email("test@gmail.com")
             .build();
 
         Map<String, Object> stringObjectMap = new HashMap<>();
@@ -73,20 +62,20 @@ public class AddCaseNoteControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
-        addCaseNoteController.populateHeader(authToken, s2sToken, callbackRequest);
+        addCaseNoteController.populateHeader(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         verify(addCaseNoteService, times(1))
             .populateHeader(caseData);
     }
 
     @Test
-    public void testSubmitCaseNote() {
+    void testSubmitCaseNote() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .subject("newsubject")
             .caseNote("newcasenote")
             .build();
 
-        UserDetails userDetails = UserDetails.builder()
+        userDetails = UserDetails.builder()
             .forename("forename1")
             .surname("surname1")
             .id("userid1234")
@@ -101,7 +90,7 @@ public class AddCaseNoteControllerTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        addCaseNoteController.submitCaseNote(authToken, s2sToken, callbackRequest);
+        addCaseNoteController.submitCaseNote(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
 
         verify(addCaseNoteService, times(1))
             .addCaseNoteDetails(caseData,userDetails);
@@ -109,61 +98,34 @@ public class AddCaseNoteControllerTest {
     }
 
     @Test
-    public void testExceptionForPopulateHeader() throws Exception {
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(C100_CASE_TYPE)
-            .subject("newsubject")
-            .caseNote("newcasenote")
-            .build();
-
-        UserDetails userDetails = UserDetails.builder()
-            .forename("forename1")
-            .surname("surname1")
-            .id("userid1234")
-            .email("test@gmail.com")
-            .build();
+    void testExceptionForPopulateHeader() {
 
         Map<String, Object> stringObjectMap = new HashMap<>();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            addCaseNoteController
-                .populateHeader(authToken, s2sToken, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
+            addCaseNoteController.populateHeader(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+        });
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testExceptionForSubmitCaseNote() throws Exception {
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(C100_CASE_TYPE)
-            .subject("newsubject")
-            .caseNote("newcasenote")
-            .build();
-
-        UserDetails userDetails = UserDetails.builder()
-            .forename("forename1")
-            .surname("surname1")
-            .id("userid1234")
-            .email("test@gmail.com")
-            .build();
+    void testExceptionForSubmitCaseNote() {
 
         Map<String, Object> stringObjectMap = new HashMap<>();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            addCaseNoteController.submitCaseNote(authToken, s2sToken, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
-    }
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
 
-    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
-                                                                 String expectedMessage) {
-        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
-        assertEquals(expectedMessage, exception.getMessage());
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
+            addCaseNoteController.submitCaseNote(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+        });
+        assertEquals("Invalid Client", ex.getMessage());
     }
 }

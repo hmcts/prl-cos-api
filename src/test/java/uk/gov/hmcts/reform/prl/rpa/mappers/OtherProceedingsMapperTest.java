@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-public class OtherProceedingsMapperTest {
+class OtherProceedingsMapperTest {
 
     @InjectMocks
     OtherProceedingsMapper otherProceedingsMapper;
@@ -29,7 +29,7 @@ public class OtherProceedingsMapperTest {
     ProceedingDetails proceedingDetails;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
 
         ArrayList<TypeOfOrderEnum> typeOfOrder = new ArrayList<>();
         typeOfOrder.add(TypeOfOrderEnum.emergencyProtectionOrder);
@@ -49,7 +49,7 @@ public class OtherProceedingsMapperTest {
 
 
     @Test
-    public void testOtherProceedingsMapperWithAllFields() {
+    void testOtherProceedingsMapperWithAllFields() {
         CaseData caseData = CaseData.builder().previousOrOngoingProceedingsForChildren(YesNoDontKnow.yes)
             .existingProceedings(existingProceedings).build();
         assertNotNull(otherProceedingsMapper.map(caseData));
@@ -57,7 +57,7 @@ public class OtherProceedingsMapperTest {
     }
 
     @Test
-    public void testOtherProceedingsMapperWithSomeFields() {
+    void testOtherProceedingsMapperWithSomeFields() {
         CaseData caseData = CaseData.builder().previousOrOngoingProceedingsForChildren(YesNoDontKnow.yes)
             .build();
         assertNotNull(otherProceedingsMapper.map(caseData));
@@ -65,7 +65,7 @@ public class OtherProceedingsMapperTest {
     }
 
     @Test
-    public void testEmptyExistingProceedings() {
+    void testEmptyExistingProceedings() {
         existingProceedings = Collections.emptyList();;
         assertTrue(otherProceedingsMapper.mapExistingProceedings(existingProceedings).isEmpty());
 

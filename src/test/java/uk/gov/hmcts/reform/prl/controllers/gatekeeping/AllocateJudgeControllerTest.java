@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.controllers.gatekeeping;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -40,7 +39,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-public class AllocateJudgeControllerTest {
+class AllocateJudgeControllerTest {
 
     @InjectMocks
     private AllocateJudgeController allocateJudgeController;
@@ -64,19 +63,18 @@ public class AllocateJudgeControllerTest {
     @Mock
     RoleAssignmentService roleAssignmentService;
 
-    public static final String authToken = "Bearer TestAuthToken";
-    public static final String s2sToken = "s2s AuthToken";
+    public static final String AUTH_TOKEN = "Bearer TestAuthToken";
+    public static final String S2S_TOKEN = "s2s AuthToken";
 
     @Test
-    public void shouldSeeLegalAdvisorDetails() throws Exception {
+    void shouldSeeLegalAdvisorDetails() {
         CaseData caseData = CaseData.builder()
-            .courtName("testcourt")
+            .courtName("test court")
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         CaseDetails caseDetails = CaseDetails.builder()
             .id(123L)
@@ -87,15 +85,15 @@ public class AllocateJudgeControllerTest {
             .caseDetails(caseDetails)
             .build();
         when(refDataUserService.getLegalAdvisorList()).thenReturn(List.of(DynamicListElement.builder().build()));
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = allocateJudgeController.prePopulateLegalAdvisorDetails(
-            authToken, s2sToken, callbackRequest);
+            AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         assertFalse(response.getData().containsKey("legalAdvisorList"));
     }
 
 
     @Test
-    public void shouldSeeAllocatedJudgeDetailsInSummaryTab() throws Exception {
+    void shouldSeeAllocatedJudgeDetailsInSummaryTab() throws Exception {
 
         AllocatedJudge allocatedJudge = AllocatedJudge.builder()
             .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
@@ -103,7 +101,7 @@ public class AllocateJudgeControllerTest {
             .build();
 
         CaseData caseData = CaseData.builder()
-            .courtName("testcourt")
+            .courtName("test court")
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
@@ -127,20 +125,25 @@ public class AllocateJudgeControllerTest {
         );
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviserList(), refDataUserService)).thenReturn(
+        when(allocatedJudgeService.getAllocatedJudgeDetails(
+            caseDataUpdated,
+            caseData.getLegalAdviserList(),
+            refDataUserService
+        )).thenReturn(
             allocatedJudge);
 
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        assertNotNull(allocateJudgeController.allocateJudge(authToken, s2sToken, callbackRequest));
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        assertNotNull(allocateJudgeController.allocateJudge(AUTH_TOKEN, S2S_TOKEN, callbackRequest));
 
     }
 
     @Test
-    public void shouldSeeAllocatedJudgeDetailsInSummaryTabIfSpecificJudgeSelected() throws Exception {
+    void shouldSeeAllocatedJudgeDetailsInSummaryTabIfSpecificJudgeSelected() throws Exception {
 
         DynamicList legalAdviserList = DynamicList.builder().value(DynamicListElement.builder()
-            .code("test1(test1@test.com)").label("test1(test1@test.com)").build()).build();
+                                                                       .code("test1(test1@test.com)").label(
+                "test1(test1@test.com)").build()).build();
 
         AllocatedJudge allocatedJudge = AllocatedJudge.builder()
             .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes)
@@ -150,7 +153,7 @@ public class AllocateJudgeControllerTest {
             .build();
 
         CaseData caseData = CaseData.builder()
-            .courtName("testcourt")
+            .courtName("test court")
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
@@ -174,17 +177,21 @@ public class AllocateJudgeControllerTest {
         );
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviserList(), refDataUserService)).thenReturn(
+        when(allocatedJudgeService.getAllocatedJudgeDetails(
+            caseDataUpdated,
+            caseData.getLegalAdviserList(),
+            refDataUserService
+        )).thenReturn(
             allocatedJudge);
 
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        assertNotNull(allocateJudgeController.allocateJudge(authToken, s2sToken, callbackRequest));
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        assertNotNull(allocateJudgeController.allocateJudge(AUTH_TOKEN, S2S_TOKEN, callbackRequest));
 
     }
 
     @Test
-    public void testExceptionForPrePopulateLegalAdvisorDetails() throws Exception {
+    void testExceptionForPrePopulateLegalAdvisorDetails() {
 
         AllocatedJudge allocatedJudge = AllocatedJudge.builder()
             .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
@@ -192,7 +199,7 @@ public class AllocateJudgeControllerTest {
             .build();
 
         CaseData caseData = CaseData.builder()
-            .courtName("testcourt")
+            .courtName("test court")
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
@@ -209,15 +216,18 @@ public class AllocateJudgeControllerTest {
                              .build())
             .build();
 
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            allocateJudgeController.prePopulateLegalAdvisorDetails(authToken,s2sToken,callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
 
+        RuntimeException ex = assertThrows(
+            RuntimeException.class, () ->
+                allocateJudgeController.prePopulateLegalAdvisorDetails(AUTH_TOKEN, S2S_TOKEN, callbackRequest)
+        );
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testExceptionForAllocatedJudge() throws Exception {
+    void testExceptionForAllocatedJudge() {
 
         AllocatedJudge allocatedJudge = AllocatedJudge.builder()
             .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
@@ -225,7 +235,7 @@ public class AllocateJudgeControllerTest {
             .build();
 
         CaseData caseData = CaseData.builder()
-            .courtName("testcourt")
+            .courtName("test court")
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
@@ -242,17 +252,12 @@ public class AllocateJudgeControllerTest {
                              .build())
             .build();
 
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            allocateJudgeController.allocateJudge(authToken,s2sToken,callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
 
+        RuntimeException ex = assertThrows(
+            RuntimeException.class, () -> allocateJudgeController.allocateJudge(AUTH_TOKEN, S2S_TOKEN, callbackRequest)
+        );
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
-
-    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
-                                                                 String expectedMessage) {
-        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
-        assertEquals(expectedMessage, exception.getMessage());
-    }
-
 }

@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-public class HomeCheckerTest {
+class HomeCheckerTest {
 
     @Mock
     private TaskErrorService taskErrorService;
@@ -44,7 +43,7 @@ public class HomeCheckerTest {
     private Home home;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         home = Home.builder()
             .doesApplicantHaveHomeRights(YesOrNo.Yes)
             .everLivedAtTheAddress(YesNoBothEnum.yesApplicant)
@@ -52,7 +51,7 @@ public class HomeCheckerTest {
     }
 
     @Test
-    public void whenHomePresentButNotCompleteThenIsFinishedReturnsFalse() {
+    void whenHomePresentButNotCompleteThenIsFinishedReturnsFalse() {
 
 
         CaseData caseData = CaseData.builder().home(home).build();
@@ -61,7 +60,7 @@ public class HomeCheckerTest {
     }
 
     @Test
-    public void whenHomeIsNotPresentThenIsFinishedReturnsFalse() {
+    void whenHomeIsNotPresentThenIsFinishedReturnsFalse() {
 
         CaseData caseData = CaseData.builder().home(null).build();
 
@@ -69,7 +68,7 @@ public class HomeCheckerTest {
     }
 
     @Test
-    public void whenHomeIsFilledThenIsFinishedReturnsFalse() {
+    void whenHomeIsFilledThenIsFinishedReturnsFalse() {
         Home homefull = Home.builder()
             .everLivedAtTheAddress(YesNoBothEnum.yesApplicant)
             .doesApplicantHaveHomeRights(YesOrNo.No)
@@ -87,7 +86,7 @@ public class HomeCheckerTest {
     }
 
     @Test
-    public void whenHomePresentThenIsStartedReturnsTrue() {
+    void whenHomePresentThenIsStartedReturnsTrue() {
 
         CaseData caseData = CaseData.builder().home(home).build();
 
@@ -95,7 +94,7 @@ public class HomeCheckerTest {
     }
 
     @Test
-    public void whenHomeIsNotPresentThenIsStartedReturnsFalse() {
+    void whenHomeIsNotPresentThenIsStartedReturnsFalse() {
 
         CaseData caseData = CaseData.builder().applicants(null).build();
 
@@ -103,7 +102,7 @@ public class HomeCheckerTest {
     }
 
     @Test
-    public void whenHomePresentButNotCompletedThenHasMandatoryReturnsFalse() {
+    void whenHomePresentButNotCompletedThenHasMandatoryReturnsFalse() {
 
         CaseData caseData = CaseData.builder().home(home).build();
 
@@ -111,7 +110,7 @@ public class HomeCheckerTest {
     }
 
     @Test
-    public void whenHomeIsNotPresentThenHasMandatoryReturnsFalse() {
+    void whenHomeIsNotPresentThenHasMandatoryReturnsFalse() {
 
         CaseData caseData = CaseData.builder().home(null).build();
 
@@ -119,7 +118,7 @@ public class HomeCheckerTest {
     }
 
     @Test
-    public void whenIncompleteAddressDataThenVerificationReturnsFalse() {
+    void whenIncompleteAddressDataThenVerificationReturnsFalse() {
         Address address = Address.builder()
             .addressLine2("Test")
             .country("UK")
@@ -129,7 +128,7 @@ public class HomeCheckerTest {
     }
 
     @Test
-    public void whenCompleteAddressDataThenVerificationReturnsTrue() {
+    void whenCompleteAddressDataThenVerificationReturnsTrue() {
         Address address = Address.builder()
             .addressLine1("Test")
             .addressLine2("Test")
@@ -144,7 +143,7 @@ public class HomeCheckerTest {
     }
 
     @Test
-    public void whenChildDetailsFilledThenReturnsTrue() {
+    void whenChildDetailsFilledThenReturnsTrue() {
         Address address = Address.builder()
             .addressLine1("Test")
             .addressLine2("Test")
@@ -159,7 +158,7 @@ public class HomeCheckerTest {
     }
 
     @Test
-    public void whenChildDetailsFilledAlongWithOtherThenIsFinishedReturnsTrue() {
+    void whenChildDetailsFilledAlongWithOtherThenIsFinishedReturnsTrue() {
         ChildrenLiveAtAddress childrenLiveAtAddress = ChildrenLiveAtAddress.builder()
             .keepChildrenInfoConfidential(YesOrNo.Yes)
             .childFullName("child")
@@ -187,7 +186,7 @@ public class HomeCheckerTest {
     }
 
     @Test
-    public void whenMortgageDetailsFilledAlongWithOtherThenIsFinishedReturnsTrue() {
+    void whenMortgageDetailsFilledAlongWithOtherThenIsFinishedReturnsTrue() {
         Address address = Address.builder().addressLine1("123").build();
         Mortgage mortgage = Mortgage.builder()
             .mortgageLenderName("Lender")
@@ -215,7 +214,7 @@ public class HomeCheckerTest {
     }
 
     @Test
-    public void whenLandlordDetailsFilledAlongWithOtherThenIsFinishedReturnsTrue() {
+    void whenLandlordDetailsFilledAlongWithOtherThenIsFinishedReturnsTrue() {
         Address address = Address.builder().addressLine1("123").build();
         Landlord rentedProperty = Landlord.builder()
             .landlordName("Landlord")
@@ -243,7 +242,7 @@ public class HomeCheckerTest {
     }
 
     @Test
-    public void whenDataPresentGetIntendToLiveAtTheAddressFieldsNotEmpty() {
+    void whenDataPresentGetIntendToLiveAtTheAddressFieldsNotEmpty() {
         Home homefull = Home.builder()
             .everLivedAtTheAddress(YesNoBothEnum.No)
             .intendToLiveAtTheAddress(YesNoBothEnum.yesBothOfThem)
@@ -256,11 +255,11 @@ public class HomeCheckerTest {
 
         List<Optional<?>> fields = new ArrayList<>();
         homeChecker.getIntendToLiveAtTheAddress(home, fields);
-        Assert.assertTrue(fields.size() >= 1 && !fields.get(0).isEmpty());
+        assertTrue(fields.size() >= 1 && !fields.getFirst().isEmpty());
     }
 
     @Test
-    public void whenNoDataGetIntendToLiveAtTheAddressFieldsIsEmpty() {
+    void whenNoDataGetIntendToLiveAtTheAddressFieldsIsEmpty() {
         Home homefull = Home.builder()
             .build();
         CaseData caseData = CaseData.builder()
@@ -271,11 +270,11 @@ public class HomeCheckerTest {
 
         List<Optional<?>> fields = new ArrayList<>();
         homeChecker.getIntendToLiveAtTheAddress(home, fields);
-        Assert.assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
+        assertFalse(fields.size() > 1 && !fields.getFirst().isEmpty());
     }
 
     @Test
-    public void whenNoDataGetDetailPeopleLivingAtThisAddressFieldsIsEmpty() {
+    void whenNoDataGetDetailPeopleLivingAtThisAddressFieldsIsEmpty() {
         Home homefull = Home.builder()
             .build();
         CaseData caseData = CaseData.builder()
@@ -284,11 +283,11 @@ public class HomeCheckerTest {
         Optional<Home> home = ofNullable(caseData.getHome());
         List<Optional<?>> fields = new ArrayList<>();
         homeChecker.getDetailPeopleLivingAtThisAddress(home,fields);
-        Assert.assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
+        assertFalse(fields.size() > 1 && !fields.getFirst().isEmpty());
     }
 
     @Test
-    public void whenDataPresentGetDetailPeopleLivingAtThisAddressFieldsIsNotEmpty() {
+    void whenDataPresentGetDetailPeopleLivingAtThisAddressFieldsIsNotEmpty() {
         Home homefull = Home.builder()
             .peopleLivingAtThisAddress(List.of(PeopleLivingAtThisAddressEnum.someoneElse))
             .textAreaSomethingElse("Testing")
@@ -301,11 +300,11 @@ public class HomeCheckerTest {
 
         List<Optional<?>> fields = new ArrayList<>();
         homeChecker.getDetailPeopleLivingAtThisAddress(home, fields);
-        Assert.assertTrue(fields.size() >= 1 && !fields.get(0).isEmpty());
+        assertTrue(fields.size() >= 1 && !fields.getFirst().isEmpty());
     }
 
     @Test
-    public void whenNoDataIsChildDetailsAreCompletedIsEmpty() {
+    void whenNoDataIsChildDetailsAreCompletedIsEmpty() {
         Home homefull = Home.builder()
             .build();
         CaseData caseData = CaseData.builder()
@@ -314,11 +313,11 @@ public class HomeCheckerTest {
         Optional<Home> home = ofNullable(caseData.getHome());
         List<Optional<?>> fields = new ArrayList<>();
         homeChecker.isChildDetailsAreCompleted(home,fields);
-        Assert.assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
+        assertFalse(fields.size() > 1 && !fields.getFirst().isEmpty());
     }
 
     @Test
-    public void whenNoDataPresentIsHowIsThePropertyAdaptedCompleteIsEmpty() {
+    void whenNoDataPresentIsHowIsThePropertyAdaptedCompleteIsEmpty() {
         Home homefull = Home.builder()
             .build();
         CaseData caseData = CaseData.builder()
@@ -327,11 +326,11 @@ public class HomeCheckerTest {
         Optional<Home> home = ofNullable(caseData.getHome());
         List<Optional<?>> fields = new ArrayList<>();
         homeChecker.isHowIsThePropertyAdaptedComplete(home,fields);
-        Assert.assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
+        assertFalse(fields.size() > 1 && !fields.getFirst().isEmpty());
     }
 
     @Test
-    public void whenDataPresentIsHowIsThePropertyAdaptedCompleteIsNotEmpty() {
+    void whenDataPresentIsHowIsThePropertyAdaptedCompleteIsNotEmpty() {
         Home homefull = Home.builder()
             .isPropertyAdapted(YesOrNo.Yes)
             .howIsThePropertyAdapted("testing")
@@ -344,11 +343,11 @@ public class HomeCheckerTest {
 
         List<Optional<?>> fields = new ArrayList<>();
         homeChecker.isHowIsThePropertyAdaptedComplete(home, fields);
-        Assert.assertTrue(fields.size() >= 1 && !fields.get(0).isEmpty());
+        assertTrue(fields.size() >= 1 && !fields.getFirst().isEmpty());
     }
 
     @Test
-    public void whenNoDataIsAddressPresentReturnTrue() {
+    void whenNoDataIsAddressPresentReturnTrue() {
         Address address = Address.builder()
             .addressLine1("Test")
             .addressLine2("Test")
@@ -372,7 +371,7 @@ public class HomeCheckerTest {
     }
 
     @Test
-    public void whenNoDataIsAddressPresentReturnFalse() {
+    void whenNoDataIsAddressPresentReturnFalse() {
         Home homefull = Home.builder()
             .build();
 
@@ -386,7 +385,7 @@ public class HomeCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+    void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
         assertNotNull(homeChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

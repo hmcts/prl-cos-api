@@ -45,7 +45,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_T
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-public class HwfProcessUpdateCaseStateServiceTest {
+class HwfProcessUpdateCaseStateServiceTest {
 
     private final String authToken = "authToken";
     private final String s2sAuthToken = "s2sAuthToken";
@@ -78,7 +78,7 @@ public class HwfProcessUpdateCaseStateServiceTest {
     private ArgumentCaptor<Map<String, Object>> caseDataUpdatedCaptor;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         when(systemUserService.getSysUserToken()).thenReturn(authToken);
         when(authTokenGenerator.generate()).thenReturn(s2sAuthToken);
 
@@ -122,7 +122,7 @@ public class HwfProcessUpdateCaseStateServiceTest {
     }
 
     @Test
-    public void testCheckHwfPaymentStatusAndUpdateCaseState() {
+    void testCheckHwfPaymentStatusAndUpdateCaseState() {
 
         hwfProcessUpdateCaseStateService.checkHwfPaymentStatusAndUpdateCaseState();
         verify(paymentRequestService, times(1))
@@ -139,7 +139,7 @@ public class HwfProcessUpdateCaseStateServiceTest {
     }
 
     @Test
-    public void testCheckHwfPaymentStatusAndUpdateCaseStateWithoutServiceRequest() {
+    void testCheckHwfPaymentStatusAndUpdateCaseStateWithoutServiceRequest() {
 
         caseData = CaseData.builder()
             .id(123L)
@@ -167,7 +167,7 @@ public class HwfProcessUpdateCaseStateServiceTest {
     }
 
     @Test
-    public void testCheckHwfPaymentStatusAndUpdateCaseStateWithEmptyList() {
+    void testCheckHwfPaymentStatusAndUpdateCaseStateWithEmptyList() {
         SearchResult searchResult = SearchResult.builder()
             .total(0)
             .build();

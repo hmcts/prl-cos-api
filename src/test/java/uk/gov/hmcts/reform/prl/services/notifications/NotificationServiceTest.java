@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.notifications;
 
-import org.junit.Assert;
-import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,6 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -60,7 +59,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
-public class NotificationServiceTest {
+class NotificationServiceTest {
 
     @InjectMocks
     NotificationService notificationService;
@@ -93,7 +92,7 @@ public class NotificationServiceTest {
     private String uploaderRole;
 
     @BeforeEach
-    public void init() {
+    void init() {
         when(systemUserService.getSysUserToken()).thenReturn("auth");
         uploaderRole = CITIZEN;
         Document doc1 = Document.builder().build();
@@ -182,7 +181,7 @@ public class NotificationServiceTest {
     }
 
     @Test
-    public void testNotificationsWhenRespondentSubmitsResponse_C7Application() {
+    void testNotificationsWhenRespondentSubmitsResponse_C7Application() {
         testNotificationsWhenRespondentSubmitsResponse(
             "respondentApplication",
             EmailTemplateNames.C7_NOTIFICATION_APPLICANT,
@@ -192,7 +191,7 @@ public class NotificationServiceTest {
     }
 
     @Test
-    public void testNotificationsWhenRespondentSubmitsResponseAndCaseTypeIdIsFL401() {
+    void testNotificationsWhenRespondentSubmitsResponseAndCaseTypeIdIsFL401() {
         isCaseTypeIdC100 = false;
         testNotificationsWhenRespondentSubmitsResponse(
             "respondentApplication",
@@ -204,7 +203,7 @@ public class NotificationServiceTest {
     }
 
     @Test
-    public void testNotificationsWhenRespondentSubmitsResponseAndCategoryIsApplicantC1AResponse() {
+    void testNotificationsWhenRespondentSubmitsResponseAndCategoryIsApplicantC1AResponse() {
 
         testNotificationsWhenRespondentSubmitsResponse(
             APPLICANT_C1A_RESPONSE,
@@ -215,7 +214,7 @@ public class NotificationServiceTest {
     }
 
     @Test
-    public void testNotificationsWhenBulkPrintExceptionOccurs() {
+    void testNotificationsWhenBulkPrintExceptionOccurs() {
         when(bulkPrintService.send(
             Mockito.anyString(),
             Mockito.anyString(),
@@ -231,15 +230,19 @@ public class NotificationServiceTest {
         when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(DocumentLanguage.builder().isGenEng(
             true).build());
 
-        assertExpectedException(() -> {
-            notificationService.sendNotifications(isCaseTypeIdC100 ? caseData : fl401CaseData,
-                                                  quarantineLegalDoc,
-                                                  uploaderRole);
-        }, RuntimeException.class);
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
+            notificationService.sendNotifications(
+                isCaseTypeIdC100 ? caseData : fl401CaseData,
+                quarantineLegalDoc,
+                uploaderRole
+            );
+        });
+
+        assertNotNull(ex.getMessage());
     }
 
     @Test
-    public void testNotificationsWhenUserRoleIsCourtNav() {
+    void testNotificationsWhenUserRoleIsCourtNav() {
         uploaderRole = COURTNAV;
         testNotificationsWhenRespondentSubmitsResponse(
             "respondentApplication",
@@ -252,7 +255,7 @@ public class NotificationServiceTest {
     }
 
     @Test
-    public void testNotificationsWhenUserRoleIsLegalProfessional() {
+    void testNotificationsWhenUserRoleIsLegalProfessional() {
         uploaderRole = LEGAL_PROFESSIONAL;
         testNotificationsWhenRespondentSubmitsResponse(
             "respondentApplication",
@@ -265,7 +268,7 @@ public class NotificationServiceTest {
     }
 
     @Test
-    public void testNotificationsWhenUserRoleIsCafcass() {
+    void testNotificationsWhenUserRoleIsCafcass() {
         uploaderRole = CAFCASS;
         testNotificationsWhenRespondentSubmitsResponse(
             "respondentApplication",
@@ -278,7 +281,7 @@ public class NotificationServiceTest {
     }
 
     @Test
-    public void testNotificationsWhenUserRoleIsCourtStaff() {
+    void testNotificationsWhenUserRoleIsCourtStaff() {
         uploaderRole = COURT_STAFF;
         testNotificationsWhenRespondentSubmitsResponse(
             "respondentApplication",
@@ -291,7 +294,7 @@ public class NotificationServiceTest {
     }
 
     @Test
-    public void testNotificationsWhenUserRoleIsBulkScan() {
+    void testNotificationsWhenUserRoleIsBulkScan() {
         uploaderRole = BULK_SCAN;
         testNotificationsWhenRespondentSubmitsResponse(
             "respondentApplication",
@@ -306,7 +309,7 @@ public class NotificationServiceTest {
 
 
     @Test
-    public void testNotificationsWhenSendGridNotificationExceptionOccurs() {
+    void testNotificationsWhenSendGridNotificationExceptionOccurs() {
 
         when(sendgridService.sendEmailUsingTemplateWithAttachments(
             Mockito.any(),
@@ -321,15 +324,19 @@ public class NotificationServiceTest {
         when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(DocumentLanguage.builder().isGenEng(
             true).build());
 
-        assertExpectedException(() -> {
-            notificationService.sendNotifications(isCaseTypeIdC100 ? caseData : fl401CaseData,
-                                                  quarantineLegalDoc,
-                                                  CITIZEN);
-        }, RuntimeException.class);
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
+            notificationService.sendNotifications(
+                isCaseTypeIdC100 ? caseData : fl401CaseData,
+                quarantineLegalDoc,
+                uploaderRole
+            );
+        });
+
+        assertNotNull(ex.getMessage());
     }
 
     @Test
-    public void testNotificationsWhenRespondentSubmitsResponse_C1AApplication() {
+    void testNotificationsWhenRespondentSubmitsResponse_C1AApplication() {
         testNotificationsWhenRespondentSubmitsResponse(
             "respondentC1AApplication",
             EmailTemplateNames.C1A_NOTIFICATION_APPLICANT,
@@ -339,7 +346,7 @@ public class NotificationServiceTest {
     }
 
     @Test
-    public void testNotificationsWhenRespondentSubmitsResponse_C1AResponse() {
+    void testNotificationsWhenRespondentSubmitsResponse_C1AResponse() {
         testNotificationsWhenRespondentSubmitsResponse(
             "respondentC1AResponse",
             EmailTemplateNames.C1A_RESPONSE_NOTIFICATION_APPLICANT,
@@ -348,7 +355,7 @@ public class NotificationServiceTest {
         );
     }
 
-    public void testNotificationsWhenRespondentSubmitsResponse(String category,
+    void testNotificationsWhenRespondentSubmitsResponse(String category,
                                                                EmailTemplateNames emailTemplate,
                                                                SendgridEmailTemplateNames sendGridEmailTemplate,
                                                                SendgridEmailTemplateNames solicitorEmailTemplate) {
@@ -388,7 +395,7 @@ public class NotificationServiceTest {
 
 
     @Test
-    public void testCafcassCymruNotifications_C7Application() {
+    void testCafcassCymruNotifications_C7Application() {
         testCafcassCymruNotifications(
             "respondentApplication",
             EmailTemplateNames.RESPONDENT_RESPONDED_CAFCASS
@@ -396,7 +403,7 @@ public class NotificationServiceTest {
     }
 
     @Test
-    public void testCafcassCymruNotifications_C1AApplication() {
+    void testCafcassCymruNotifications_C1AApplication() {
         testCafcassCymruNotifications(
             "respondentC1AApplication",
             EmailTemplateNames.RESPONDENT_ALLEGATIONS_OF_HARM_CAFCASS
@@ -404,14 +411,14 @@ public class NotificationServiceTest {
     }
 
     @Test
-    public void testCafcassCymruNotifications_C1AResponse() {
+    void testCafcassCymruNotifications_C1AResponse() {
         testCafcassCymruNotifications(
             "respondentC1AResponse",
             EmailTemplateNames.RESPONDENT_RESPONDED_ALLEGATIONS_OF_HARM_CAFCASS
         );
     }
 
-    public void testCafcassCymruNotifications(String category,
+    void testCafcassCymruNotifications(String category,
                                               EmailTemplateNames emailTemplate) {
 
         quarantineLegalDoc = quarantineLegalDoc.toBuilder()
@@ -447,7 +454,7 @@ public class NotificationServiceTest {
     }
 
     @Test
-    public void testSendNotificationsAsync() {
+    void testSendNotificationsAsync() {
         quarantineLegalDoc = quarantineLegalDoc.toBuilder()
             .categoryId("respondentApplication")
             .document(Document.builder().build())
@@ -477,10 +484,5 @@ public class NotificationServiceTest {
                 any(SendgridEmailConfig.class)
             );
         });
-    }
-
-    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass) {
-        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
-        Assert.assertNotNull(exception.getMessage());
     }
 }

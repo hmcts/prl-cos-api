@@ -34,7 +34,8 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @ExtendWith(MockitoExtension.class)
-public class AllegationsOfHarmRevisedCheckerTest {
+class AllegationsOfHarmRevisedCheckerTest {
+
     @Mock
     TaskErrorService taskErrorService;
 
@@ -45,7 +46,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     AllegationsOfHarmRevisedChecker allegationsOfHarmChecker;
 
     @Test
-    public void whenNoCaseDataThenIsStartedIsFalse() {
+    void whenNoCaseDataThenIsStartedIsFalse() {
         CaseData casedata = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder().build())
             .build();
@@ -54,7 +55,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     }
 
     @Test
-    public void whenPartialCaseDataThenIsStartedTrue() {
+    void whenPartialCaseDataThenIsStartedTrue() {
         CaseData casedata = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
                                   .newAllegationsOfHarmYesNo(Yes).build())
@@ -64,7 +65,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     }
 
     @Test
-    public void whenAllegationOfHarmSelectedNoIsStartedFalse() {
+    void whenAllegationOfHarmSelectedNoIsStartedFalse() {
         CaseData casedata = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
                                          .newAllegationsOfHarmYesNo(No)
@@ -76,7 +77,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
 
 
     @Test
-    public void whenNoCaseDataThenNotFinished() {
+    void whenNoCaseDataThenNotFinished() {
 
         CaseData casedata = CaseData.builder().allegationOfHarmRevised(AllegationOfHarmRevised.builder().build())
             .build();
@@ -87,7 +88,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     }
 
     @Test
-    public void finishedFieldsValidatedToTrue() {
+    void finishedFieldsValidatedToTrue() {
 
         CaseData casedata = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
@@ -100,7 +101,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     }
 
     @Test
-    public void validateAbusePresentFalse() {
+    void validateAbusePresentFalse() {
         CaseData casedata = CaseData.builder().allegationOfHarmRevised(AllegationOfHarmRevised.builder().build())
             .build();
 
@@ -110,7 +111,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataThenHasMandatoryFalse() {
+    void whenNoCaseDataThenHasMandatoryFalse() {
 
         CaseData casedata = CaseData.builder().allegationOfHarmRevised(AllegationOfHarmRevised.builder().build())
             .build();
@@ -120,7 +121,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     }
 
     @Test
-    public void whenFinishedCaseDataThenHasMandatoryFalse() {
+    void whenFinishedCaseDataThenHasMandatoryFalse() {
 
         CaseData casedata = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
@@ -132,7 +133,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataValidateFieldsReturnsFalse() {
+    void whenNoCaseDataValidateFieldsReturnsFalse() {
         CaseData caseData = CaseData.builder().allegationOfHarmRevised(AllegationOfHarmRevised.builder().build())
             .build();
 
@@ -140,7 +141,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataThenValidateOtherConcernsIsFalse() {
+    void whenNoCaseDataThenValidateOtherConcernsIsFalse() {
         CaseData caseData = CaseData.builder().allegationOfHarmRevised(AllegationOfHarmRevised.builder().build())
             .build();
 
@@ -148,7 +149,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     }
 
     @Test
-    public void whenOtherConcernsPresentThenValidateOtherConcernsTrue() {
+    void whenOtherConcernsPresentThenValidateOtherConcernsTrue() {
         CaseData caseData = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
                                   .newAllegationsOfHarmOtherConcerns(Yes)
@@ -161,7 +162,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
 
 
     @Test
-    public void whenNoCaseDataThenValidateSubstanceAbuseIsFalse() {
+    void whenNoCaseDataThenValidateSubstanceAbuseIsFalse() {
         CaseData caseData = CaseData.builder().allegationOfHarmRevised(AllegationOfHarmRevised.builder().build())
             .build();
 
@@ -169,7 +170,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     }
 
     @Test
-    public void whenOtherConcernsPresentThenValidateSubstanceAbuseTrue() {
+    void whenOtherConcernsPresentThenValidateSubstanceAbuseTrue() {
         CaseData caseData = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
                                          .newAllegationsOfHarmSubstanceAbuseYesNo(Yes)
@@ -180,7 +181,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataThenValidateChildContactIsFalse() {
+    void whenNoCaseDataThenValidateChildContactIsFalse() {
         CaseData caseData = CaseData.builder().allegationOfHarmRevised(AllegationOfHarmRevised.builder().build())
             .build();
 
@@ -190,7 +191,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     }
 
     @Test
-    public void whenChildContactPresentThenValidateChildContactTrue() {
+    void whenChildContactPresentThenValidateChildContactTrue() {
         CaseData caseData = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
                                   .newAgreeChildUnsupervisedTime(Yes)
@@ -202,7 +203,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     }
 
     @Test
-    public void whenNonMolestationOrderCurrentReturnTrue() {
+    void whenNonMolestationOrderCurrentReturnTrue() {
         CaseData caseData = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
                                   .newOrdersNonMolestation(Yes)
@@ -213,7 +214,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     }
 
     @Test
-    public void whenOccupationOrderCurrentReturnTrue() {
+    void whenOccupationOrderCurrentReturnTrue() {
         CaseData caseData = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
                                   .newOrdersOccupation(Yes)
@@ -224,7 +225,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     }
 
     @Test
-    public void whenForcedMarriageOrderCurrentReturnTrue() {
+    void whenForcedMarriageOrderCurrentReturnTrue() {
         CaseData caseData = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
                                   .newOrdersForcedMarriageProtection(Yes)
@@ -235,7 +236,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     }
 
     @Test
-    public void whenRestrainingOrderOrderCurrentReturnTrue() {
+    void whenRestrainingOrderOrderCurrentReturnTrue() {
         CaseData caseData = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
                                   .newOrdersRestraining(Yes)
@@ -246,7 +247,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     }
 
     @Test
-    public void whenOtherInjunctiveOrderCurrentReturnTrue() {
+    void whenOtherInjunctiveOrderCurrentReturnTrue() {
         CaseData caseData = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
                                   .newOrdersOtherInjunctive(Yes)
@@ -258,7 +259,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     }
 
     @Test
-    public void whenUndertakingOrderCurrentReturnTrue() {
+    void whenUndertakingOrderCurrentReturnTrue() {
         CaseData caseData = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
                                   .newOrdersUndertakingInPlace(Yes)
@@ -270,7 +271,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataThenAbductionSectionNotComplete() {
+    void whenNoCaseDataThenAbductionSectionNotComplete() {
 
         CaseData caseData = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
@@ -281,7 +282,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     }
 
     @Test
-    public void whenCaseDataPresentThenAbductionSectionReturnTrue() {
+    void whenCaseDataPresentThenAbductionSectionReturnTrue() {
 
         List<NewPassportPossessionEnum> abductionChildPassportPosessionList =
             new ArrayList<>();
@@ -311,7 +312,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
 
 
     @Test
-    public void whenCaseDataPresentThenAbductionSectionReturnFalse() {
+    void whenCaseDataPresentThenAbductionSectionReturnFalse() {
 
         List<NewPassportPossessionEnum> abductionChildPassportPosessionList =
             new ArrayList<>();
@@ -341,7 +342,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
 
 
     @Test
-    public void whenCaseDataPresentThenAbductionSectionReturnTrueWithNoPassport() {
+    void whenCaseDataPresentThenAbductionSectionReturnTrueWithNoPassport() {
         CaseData caseData = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
                                          .newAllegationsOfHarmChildAbductionYesNo(Yes)
@@ -361,7 +362,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
 
 
     @Test
-    public void whenDomesticBehaviourPresentButIncompleteReturnTure() {
+    void whenDomesticBehaviourPresentButIncompleteReturnTure() {
 
         DomesticAbuseBehaviours behaviour = DomesticAbuseBehaviours.builder()
             .typeOfAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
@@ -376,7 +377,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
 
 
     @Test
-    public void whenDomesticBehaviourPresentButIncompleteReturnFalse() {
+    void whenDomesticBehaviourPresentButIncompleteReturnFalse() {
 
         DomesticAbuseBehaviours behaviour = DomesticAbuseBehaviours.builder()
             .typeOfAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
@@ -388,44 +389,8 @@ public class AllegationsOfHarmRevisedCheckerTest {
         assertFalse(allegationsOfHarmChecker.validateDomesticAbuseBehaviours(behaviour));
     }
 
-
-
     @Test
-    public void whenChildBehaviourPresentButIncompleteReturnTure() {
-
-        DomesticAbuseBehaviours behaviour = DomesticAbuseBehaviours.builder()
-            .typeOfAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
-            .newAbuseNatureDescription("Test")
-            .newBehavioursStartDateAndLength("5 days")
-            .newBehavioursApplicantSoughtHelp(Yes)
-            .newBehavioursApplicantHelpSoughtWho("Who from")
-            .build();
-
-        assertTrue(allegationsOfHarmChecker.validateDomesticAbuseBehaviours(behaviour));
-    }
-
-
-    @Test
-    public void whenChildBehaviourPresentButIncompleteReturnFalse() {
-
-        DomesticAbuseBehaviours behaviour = DomesticAbuseBehaviours.builder()
-            .typeOfAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
-            .newBehavioursStartDateAndLength("5 days")
-            .newBehavioursApplicantSoughtHelp(Yes)
-            .newBehavioursApplicantHelpSoughtWho("Who from")
-            .build();
-
-        assertFalse(allegationsOfHarmChecker.validateDomesticAbuseBehaviours(behaviour));
-    }
-
-
-
-
-
-
-
-    @Test
-    public void whenAbuseInCompleteReturnFalse() {
+    void whenAbuseInCompleteReturnFalse() {
 
 
 
@@ -443,7 +408,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     }
 
     @Test
-    public void whenOrderPresentButIncompleteReturnsFalse() {
+    void whenOrderPresentButIncompleteReturnsFalse() {
         CaseData caseData = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
                                   .newOrdersRestraining(Yes)
@@ -454,7 +419,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     }
 
     @Test
-    public void whenOrderPresentAndCompleteMandatoryDataReturnTrue() {
+    void whenOrderPresentAndCompleteMandatoryDataReturnTrue() {
         CaseData caseData = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
                                   .newOrdersOtherInjunctiveCurrent(Yes)
@@ -465,21 +430,21 @@ public class AllegationsOfHarmRevisedCheckerTest {
     }
 
     @Test
-    public void whenNoDataIsSectionsFinishedReturnFalse() {
+    void whenNoDataIsSectionsFinishedReturnFalse() {
         CaseData caseData = CaseData.builder().allegationOfHarmRevised(AllegationOfHarmRevised.builder().build())
             .build();
         assertFalse(allegationsOfHarmChecker.isSectionsFinished(caseData,false,false,false));
     }
 
     @Test
-    public void whenIsSectionsFinishedTrue() {
+    void whenIsSectionsFinishedTrue() {
         CaseData caseData = CaseData.builder().allegationOfHarmRevised(AllegationOfHarmRevised.builder().build())
             .build();
         assertFalse(allegationsOfHarmChecker.isSectionsFinished(caseData,true,true,true));
     }
 
     @Test
-    public void whenNoDataIsPreviousOrdersFinishedReturnFalse() {
+    void whenNoDataIsPreviousOrdersFinishedReturnFalse() {
         CaseData caseData = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder().build())
 
@@ -503,7 +468,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     }
 
     @Test
-    public void whenDataPresentIsPreviousOrdersFinishedReturnFalse() {
+    void whenDataPresentIsPreviousOrdersFinishedReturnFalse() {
         CaseData caseData = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder().newOrdersNonMolestation(No)
                                   .newOrdersOccupation(No)
@@ -532,37 +497,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     }
 
     @Test
-    public void whenAllDataPresentIsPreviousOrdersFinishedReturnTrue() {
-        CaseData caseData = CaseData.builder()
-            .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
-                                  .newOrdersNonMolestation(No)
-                                  .newOrdersOccupation(No)
-                                  .newOrdersForcedMarriageProtection(No)
-                                  .newOrdersRestraining(No)
-                                  .newOrdersOtherInjunctive(No)
-                                  .newOrdersUndertakingInPlace(No).build())
-
-            .build();
-        AllegationOfHarmRevised allegationOfHarm = caseData.getAllegationOfHarmRevised();
-        Optional<YesOrNo> ordersNonMolestation = ofNullable(allegationOfHarm.getNewOrdersNonMolestation());
-        Optional<YesOrNo> ordersOccupation = ofNullable(allegationOfHarm.getNewOrdersOccupation());
-        Optional<YesOrNo> ordersForcedMarriageProtection = ofNullable(allegationOfHarm.getNewOrdersForcedMarriageProtection());
-        Optional<YesOrNo> ordersRestraining = ofNullable(allegationOfHarm.getNewOrdersRestraining());
-        Optional<YesOrNo> ordersOtherInjunctive = ofNullable(allegationOfHarm.getNewOrdersOtherInjunctive());
-        Optional<YesOrNo> ordersUndertakingInPlace = ofNullable(allegationOfHarm.getNewOrdersUndertakingInPlace());
-
-        assertTrue(allegationsOfHarmChecker.isPreviousOrdersFinished(
-            ordersNonMolestation,
-            ordersOccupation,
-            ordersForcedMarriageProtection,
-            ordersRestraining,
-            ordersOtherInjunctive,
-            ordersUndertakingInPlace
-        ));
-    }
-
-    @Test
-    public void whenPartialDataPresentAsYesIsPreviousOrdersFinishedReturnTrue() {
+    void whenPartialDataPresentAsYesIsPreviousOrdersFinishedReturnTrue() {
         CaseData caseData = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
                                   .newOrdersNonMolestation(Yes)
@@ -590,7 +525,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
 
 
     @Test
-    public void whenAllCaseDataPresentValidateFieldsReturnTrue() {
+    void whenAllCaseDataPresentValidateFieldsReturnTrue() {
 
         DomesticAbuseBehaviours domesticAbuseBehaviours = DomesticAbuseBehaviours.builder()
             .typeOfAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
@@ -681,7 +616,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     }
 
     @Test
-    public void testValidateFieldsReturnFalseForPhysicalAbuse() {
+    void testValidateFieldsReturnFalseForPhysicalAbuse() {
         ChildAbuse childAbuse = ChildAbuse.builder()
             .typeOfAbuse(ChildAbuseEnum.physicalAbuse)
             .abuseNatureDescription(null)
@@ -700,7 +635,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     }
 
     @Test
-    public void testValidateFieldsReturnFalseForPhsychologicalAbuse() {
+    void testValidateFieldsReturnFalseForPsychologicalAbuse() {
         ChildAbuse childAbuse = ChildAbuse.builder()
             .typeOfAbuse(ChildAbuseEnum.psychologicalAbuse)
             .abuseNatureDescription(null)
@@ -719,7 +654,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     }
 
     @Test
-    public void testValidateFieldsReturnFalseForSexualAbuse() {
+    void testValidateFieldsReturnFalseForSexualAbuse() {
         ChildAbuse childAbuse = ChildAbuse.builder()
             .typeOfAbuse(ChildAbuseEnum.sexualAbuse)
             .abuseNatureDescription(null)
@@ -738,7 +673,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     }
 
     @Test
-    public void testValidateFieldsReturnFalseForEmotionalAbuse() {
+    void testValidateFieldsReturnFalseForEmotionalAbuse() {
         ChildAbuse childAbuse = ChildAbuse.builder()
             .typeOfAbuse(ChildAbuseEnum.emotionalAbuse)
             .abuseNatureDescription(null)
@@ -758,7 +693,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
 
 
     @Test
-    public void testValidateFieldsReturnFalseForFinancialAbuse() {
+    void testValidateFieldsReturnFalseForFinancialAbuse() {
         ChildAbuse childAbuse = ChildAbuse.builder()
             .typeOfAbuse(ChildAbuseEnum.financialAbuse)
             .abuseNatureDescription(null)
@@ -777,7 +712,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     }
 
     @Test
-    public void testValidateChildAbuseBehaviours() {
+    void testValidateChildAbuseBehaviours() {
         AllegationOfHarmRevised allegationOfHarmRevised = AllegationOfHarmRevised.builder()
             .allChildrenAreRiskPhysicalAbuse(No)
             .allChildrenAreRiskPsychologicalAbuse(No)

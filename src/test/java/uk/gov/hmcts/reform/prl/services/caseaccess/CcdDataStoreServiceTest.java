@@ -18,7 +18,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class CcdDataStoreServiceTest {
+class CcdDataStoreServiceTest {
 
     @InjectMocks
     private CcdDataStoreService ccdDataStoreService;
@@ -36,7 +36,7 @@ public class CcdDataStoreServiceTest {
     private UserDetails userDetails;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
 
         userDetails = UserDetails.builder()
             .surname("Solicitor")
@@ -55,7 +55,7 @@ public class CcdDataStoreServiceTest {
     }
 
     @Test
-    public void testRemoveCreatorRole() {
+    void testRemoveCreatorRole() {
 
         this.ccdDataStoreService.removeCreatorRole("42", "ABC123");
         verify(this.userService, times(1)).getUserDetails(Mockito.anyString());
@@ -64,7 +64,7 @@ public class CcdDataStoreServiceTest {
     }
 
     @Test
-    public void testFindUserCaseRoles() {
+    void testFindUserCaseRoles() {
         this.ccdDataStoreService.findUserCaseRoles("42", "test");
         verify(this.userService, times(1)).getUserDetails(Mockito.anyString());
         verify(this.caseRoleClient, times(1)).findUserCaseRoles(Mockito.anyString(), Mockito.anyString(), Mockito.any());

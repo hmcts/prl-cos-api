@@ -81,7 +81,7 @@ import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_AUTHORIZATION;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_CASE_ID;
 
 @ExtendWith(MockitoExtension.class)
-public class ServiceOfDocumentsServiceTest {
+class ServiceOfDocumentsServiceTest {
 
     @InjectMocks
     ServiceOfDocumentsService serviceOfDocumentsService;
@@ -132,7 +132,7 @@ public class ServiceOfDocumentsServiceTest {
     private ConfidentialityCheckService confidentialityCheckService;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
 
         List<Element<Document>> documents = new ArrayList<>();
         Document document = Document.builder()
@@ -182,7 +182,7 @@ public class ServiceOfDocumentsServiceTest {
     }
 
     @Test
-    public void testHandleAboutToStart() {
+    void testHandleAboutToStart() {
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
         when(serviceOfApplicationService.checkIfPostalAddressMissedForRespondentAndOtherParties(any(CaseData.class))).thenReturn(
             EMPTY_STRING);
@@ -216,7 +216,7 @@ public class ServiceOfDocumentsServiceTest {
     }
 
     @Test
-    public void testHandleAboutToStartWhenFl401() {
+    void testHandleAboutToStartWhenFl401() {
 
         when(serviceOfApplicationService.checkIfPostalAddressMissedForRespondentAndOtherParties(any(CaseData.class))).thenReturn(
             EMPTY_STRING);
@@ -272,7 +272,7 @@ public class ServiceOfDocumentsServiceTest {
     }
 
     @Test
-    public void testHandleAboutToSubmitC100CasePersonalServiceForApplicantSolicitor() {
+    void testHandleAboutToSubmitC100CasePersonalServiceForApplicantSolicitor() {
         serviceOfDocuments = serviceOfDocuments.toBuilder()
             .sodServeToRespondentOptions(YesNoNotApplicable.Yes)
             .sodSolicitorServingRespondentsOptions(SodSolicitorServingRespondentsEnum.applicantLegalRepresentative)
@@ -292,7 +292,7 @@ public class ServiceOfDocumentsServiceTest {
     }
 
     @Test
-    public void testHandleAboutToSubmitC100CasePersonalServiceForApplicantSolicitorWhenSodServToResOptNA() {
+    void testHandleAboutToSubmitC100CasePersonalServiceForApplicantSolicitorWhenSodServToResOptNA() {
 
         ServiceOfDocuments serviceOfDocuments1 = ServiceOfDocuments.builder()
             .sodServeToRespondentOptions(YesNoNotApplicable.NotApplicable)
@@ -321,7 +321,7 @@ public class ServiceOfDocumentsServiceTest {
     }
 
     @Test
-    public void testHandleAboutToSubmitC100CasePersonalServiceForApplicantLip() {
+    void testHandleAboutToSubmitC100CasePersonalServiceForApplicantLip() {
         partyDetails = partyDetails.toBuilder()
             .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
             .solicitorEmail(null)
@@ -344,7 +344,7 @@ public class ServiceOfDocumentsServiceTest {
     }
 
     @Test
-    public void testHandleAboutToSubmitC100CaseNonPersonalService() {
+    void testHandleAboutToSubmitC100CaseNonPersonalService() {
         serviceOfDocuments = serviceOfDocuments.toBuilder()
             .sodServeToRespondentOptions(YesNoNotApplicable.No)
             .sodAdditionalRecipients(List.of(AdditionalRecipients.additionalRecipients))
@@ -365,7 +365,7 @@ public class ServiceOfDocumentsServiceTest {
     }
 
     @Test
-    public void testHandleSubmittedPersonalServiceForApplicantLip() {
+    void testHandleSubmittedPersonalServiceForApplicantLip() {
         partyDetails = partyDetails.toBuilder()
             .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
             .solicitorEmail(null)
@@ -410,7 +410,7 @@ public class ServiceOfDocumentsServiceTest {
     }
 
     @Test
-    public void testHandleSubmittedPersonalServiceForApplicantSolicitor() {
+    void testHandleSubmittedPersonalServiceForApplicantSolicitor() {
         sodPack = sodPack.toBuilder()
             .isPersonalService(YesOrNo.Yes)
             .servedBy(SodSolicitorServingRespondentsEnum.applicantLegalRepresentative
@@ -450,7 +450,7 @@ public class ServiceOfDocumentsServiceTest {
     }
 
     @Test
-    public void testHandleSubmittedNonPersonalServiceForApplicantSolicitor() {
+    void testHandleSubmittedNonPersonalServiceForApplicantSolicitor() {
         sodPack = sodPack.toBuilder()
             .isPersonalService(YesOrNo.No)
             .applicantIds(List.of(element(TEST_UUID)))
@@ -490,7 +490,7 @@ public class ServiceOfDocumentsServiceTest {
     }
 
     @Test
-    public void testHandleSubmittedNonPersonalServiceForLip() throws Exception {
+    void testHandleSubmittedNonPersonalServiceForLip() throws Exception {
         partyDetails = partyDetails.toBuilder()
             .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
             .solicitorEmail(null)
@@ -547,7 +547,7 @@ public class ServiceOfDocumentsServiceTest {
     }
 
     @Test
-    public void testHandleSubmittedNonPersonalServiceForLipContactPreferenceEmail() {
+    void testHandleSubmittedNonPersonalServiceForLipContactPreferenceEmail() {
         partyDetails = partyDetails.toBuilder()
             .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
             .solicitorEmail(null)
@@ -605,7 +605,7 @@ public class ServiceOfDocumentsServiceTest {
     }
 
     @Test
-    public void testHandleConfCheckAboutToStart() {
+    void testHandleConfCheckAboutToStart() {
         partyDetails = partyDetails.toBuilder()
             .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
             .solicitorEmail(null)
@@ -634,7 +634,7 @@ public class ServiceOfDocumentsServiceTest {
     }
 
     @Test
-    public void testHandleConfCheckAboutToStartWhenNoServiceOfDocs() {
+    void testHandleConfCheckAboutToStartWhenNoServiceOfDocs() {
         partyDetails = partyDetails.toBuilder()
             .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
             .solicitorEmail(null)
@@ -653,7 +653,7 @@ public class ServiceOfDocumentsServiceTest {
     }
 
     @Test
-    public void testHandleConfCheckAboutToStartWhenNoSdoUnServedPack() {
+    void testHandleConfCheckAboutToStartWhenNoSdoUnServedPack() {
         partyDetails = partyDetails.toBuilder()
             .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
             .solicitorEmail(null)
@@ -673,7 +673,7 @@ public class ServiceOfDocumentsServiceTest {
     }
 
     @Test
-    public void testHandleConfCheckAboutToStartWhenSodUnServedPackWithNoDocs() {
+    void testHandleConfCheckAboutToStartWhenSodUnServedPackWithNoDocs() {
         partyDetails = partyDetails.toBuilder()
             .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
             .solicitorEmail(null)
@@ -700,7 +700,7 @@ public class ServiceOfDocumentsServiceTest {
     }
 
     @Test
-    public void testHandleConfCheckAboutToSubmitForServiceOfDocumentsEvents() {
+    void testHandleConfCheckAboutToSubmitForServiceOfDocumentsEvents() {
         partyDetails = partyDetails.toBuilder()
             .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
             .solicitorEmail(null)
@@ -736,7 +736,7 @@ public class ServiceOfDocumentsServiceTest {
     }
 
     @Test
-    public void testHandleConfCheckAboutToSubmitForConfidentialCheckDocuments() {
+    void testHandleConfCheckAboutToSubmitForConfidentialCheckDocuments() {
         partyDetails = partyDetails.toBuilder()
             .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
             .solicitorEmail(null)
@@ -772,7 +772,7 @@ public class ServiceOfDocumentsServiceTest {
     }
 
     @Test
-    public void testHandleConfCheckSubmitted() {
+    void testHandleConfCheckSubmitted() {
         partyDetails = partyDetails.toBuilder()
             .partyId(UUID.randomUUID())
             .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
@@ -828,7 +828,7 @@ public class ServiceOfDocumentsServiceTest {
     }
 
     @Test
-    public void testHandleConfCheckSubmittedWhenNoDocumentsBeServed() {
+    void testHandleConfCheckSubmittedWhenNoDocumentsBeServed() {
         partyDetails = partyDetails.toBuilder()
             .partyId(UUID.randomUUID())
             .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
@@ -884,7 +884,7 @@ public class ServiceOfDocumentsServiceTest {
     }
 
     @Test
-    public void testValidateDocuments() {
+    void testValidateDocuments() {
         partyDetails = partyDetails.toBuilder()
             .build();
         Document document = Document.builder().documentUrl("url").documentFileName("docFileName")
@@ -923,7 +923,7 @@ public class ServiceOfDocumentsServiceTest {
     }
 
     @Test
-    public void testValidateDocumentsWhenSodAdditionalDocsListEmpty() {
+    void testValidateDocumentsWhenSodAdditionalDocsListEmpty() {
         partyDetails = partyDetails.toBuilder()
             .build();
         List<Element<DocumentsDynamicList>> documentsList = new ArrayList<>();
@@ -950,7 +950,7 @@ public class ServiceOfDocumentsServiceTest {
     }
 
     @Test
-    public void testValidateDocumentsWhenSodAdditionalDocsListEmptyAndSodDocsEmpty() {
+    void testValidateDocumentsWhenSodAdditionalDocsListEmptyAndSodDocsEmpty() {
         partyDetails = partyDetails.toBuilder()
             .build();
         List<Element<DocumentsDynamicList>> documentsList = new ArrayList<>();

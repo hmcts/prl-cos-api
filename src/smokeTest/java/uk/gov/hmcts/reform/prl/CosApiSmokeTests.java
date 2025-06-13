@@ -10,7 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
@@ -22,7 +22,7 @@ import static org.hamcrest.Matchers.hasKey;
  */
 @Slf4j
 @SpringBootTest
-@ExtendWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration
 public class CosApiSmokeTests {
 
@@ -33,13 +33,11 @@ public class CosApiSmokeTests {
     private final String userToken = "Bearer testToken";
     private final String s2sToken = "Bearer s2stoken";
 
-
     @Autowired
     protected IdamTokenGenerator  idamTokenGenerator;
 
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
-
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
@@ -47,9 +45,7 @@ public class CosApiSmokeTests {
             LOCALHOST_4044
         );
 
-
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
-
 
     @Test
     public void checkSolicitorCanAccessC100MiamExemptionEvent() throws Exception {
@@ -91,7 +87,6 @@ public class CosApiSmokeTests {
             .assertThat().statusCode(200);
     }
 
-
     @Test
     public void checkSendAndReplyMessageMidEvent() throws Exception {
         String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST);
@@ -120,6 +115,5 @@ public class CosApiSmokeTests {
             .then()
             .body("$", CoreMatchers.not(hasKey("openMessages")))
             .assertThat().statusCode(200);
-
     }
 }

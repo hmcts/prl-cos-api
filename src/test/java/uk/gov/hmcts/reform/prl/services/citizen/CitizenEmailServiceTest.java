@@ -24,7 +24,7 @@ import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.CITIZEN_CA
 
 @PropertySource(value = "classpath:application.yaml")
 @ExtendWith(MockitoExtension.class)
-public class CitizenEmailServiceTest {
+class CitizenEmailServiceTest {
 
     private static final String authToken = "Bearer TestAuthToken";
     private static final String emailId = "test@test.com";
@@ -42,7 +42,7 @@ public class CitizenEmailServiceTest {
     private CitizenEmailService citizenEmailService;
 
     @Test
-    public void sendCaseSubmissionEmail() throws NotFoundException {
+    void sendCaseSubmissionEmail() throws NotFoundException {
 
         //Given
         UserDetails userDetails = UserDetails.builder()
@@ -63,7 +63,7 @@ public class CitizenEmailServiceTest {
     }
 
     @Test
-    public void sendCaseWithdrawEmail() {
+    void sendCaseWithdrawEmail() {
 
         //Given
         UserDetails userDetails = UserDetails.builder()

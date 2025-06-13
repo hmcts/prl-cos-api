@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
-public class CitizenResponseControllerTest {
+class CitizenResponseControllerTest {
 
     @Mock
     private CitizenResponseService citizenResponseService;
@@ -51,7 +51,7 @@ public class CitizenResponseControllerTest {
 
 
     @Test
-    public void testGenerateC7DraftDocument() throws Exception {
+    void testGenerateC7DraftDocument() throws Exception {
 
         DocumentRequest documentRequest = DocumentRequest.builder().build();
 
@@ -65,7 +65,7 @@ public class CitizenResponseControllerTest {
     }
 
     @Test
-    public void testGenerateC7DraftDocumentWithAuthorizationError() {
+    void testGenerateC7DraftDocumentWithAuthorizationError() {
 
         DocumentRequest documentRequest = DocumentRequest.builder().build();
 
@@ -77,7 +77,7 @@ public class CitizenResponseControllerTest {
     }
 
     @Test
-    public void testGenerateC1ADraftDocument() throws Exception {
+    void testGenerateC1ADraftDocument() throws Exception {
 
         DocumentRequest documentRequest = DocumentRequest.builder().build();
 
@@ -91,7 +91,7 @@ public class CitizenResponseControllerTest {
     }
 
     @Test
-    public void testGenerateC1ADraftDocumentWithAuthorizationError() {
+    void testGenerateC1ADraftDocumentWithAuthorizationError() {
 
         DocumentRequest documentRequest = DocumentRequest.builder().build();
 
@@ -103,7 +103,7 @@ public class CitizenResponseControllerTest {
     }
 
     @Test
-    public void testSubmitAndGenerateC7WithExcdption() throws Exception {
+    void testSubmitAndGenerateC7WithExcdption() throws Exception {
 
         CitizenUpdatedCaseData citizenUpdatedCaseData = CitizenUpdatedCaseData.builder().build();
 
@@ -119,7 +119,7 @@ public class CitizenResponseControllerTest {
     }
 
     @Test
-    public void testSubmitAndGenerateC7() throws Exception {
+    void testSubmitAndGenerateC7() throws Exception {
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
 
@@ -138,7 +138,7 @@ public class CitizenResponseControllerTest {
     }
 
     @Test
-    public void testSubmitAndGenerateC7WithAuthorizationError() {
+    void testSubmitAndGenerateC7WithAuthorizationError() {
 
         CitizenUpdatedCaseData citizenUpdatedCaseData = CitizenUpdatedCaseData.builder().build();
 

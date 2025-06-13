@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-public class LitigationCapacityCheckerTest {
+class LitigationCapacityCheckerTest {
     @Mock
     TaskErrorService taskErrorService;
 
@@ -22,7 +22,7 @@ public class LitigationCapacityCheckerTest {
     LitigationCapacityChecker litigationCapacityChecker;
 
     @Test
-    public void mandatoryAlwaysFalse() {
+    void mandatoryAlwaysFalse() {
 
         CaseData caseData = CaseData.builder().build();
         boolean hasMandatory = litigationCapacityChecker.hasMandatoryCompleted(caseData);
@@ -30,28 +30,28 @@ public class LitigationCapacityCheckerTest {
     }
 
     @Test
-    public void notStartedWithoutFieldValues() {
+    void notStartedWithoutFieldValues() {
         CaseData caseData = CaseData.builder().build();
         boolean isStarted = litigationCapacityChecker.isStarted(caseData);
         assertFalse(isStarted);
     }
 
     @Test
-    public void startedWithFieldOtherFactors() {
+    void startedWithFieldOtherFactors() {
         CaseData caseData = CaseData.builder().litigationCapacityOtherFactors(YesOrNo.Yes).build();
         boolean isStarted = litigationCapacityChecker.isStarted(caseData);
         assertTrue(isStarted);
     }
 
     @Test
-    public void notFinishedWithNullLitigationValues() {
+    void notFinishedWithNullLitigationValues() {
         CaseData caseData = CaseData.builder().build();
         boolean isFinished = litigationCapacityChecker.isFinished(caseData);
         assertFalse(isFinished);
     }
 
     @Test
-    public void finishedWithLitigationOtherFactors() {
+    void finishedWithLitigationOtherFactors() {
         CaseData caseData = CaseData.builder()
             .litigationCapacityOtherFactors(YesOrNo.Yes)
             .litigationCapacityOtherFactorsDetails("")
@@ -61,7 +61,7 @@ public class LitigationCapacityCheckerTest {
     }
 
     @Test
-    public void finishedWithLitigationFactorsOrReferrals() {
+    void finishedWithLitigationFactorsOrReferrals() {
         CaseData caseData = CaseData.builder()
             .litigationCapacityOtherFactors(YesOrNo.No)
             .litigationCapacityFactors("Test")
@@ -72,7 +72,7 @@ public class LitigationCapacityCheckerTest {
     }
 
     @Test
-    public void finishedWithOtherFactorsAsNo() {
+    void finishedWithOtherFactorsAsNo() {
         CaseData caseData = CaseData.builder()
             .litigationCapacityOtherFactors(YesOrNo.No)
             .build();
@@ -81,7 +81,7 @@ public class LitigationCapacityCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+    void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
         assertNotNull(litigationCapacityChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

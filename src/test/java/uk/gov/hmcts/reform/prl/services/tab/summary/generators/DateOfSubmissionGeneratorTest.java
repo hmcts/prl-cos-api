@@ -18,7 +18,7 @@ public class DateOfSubmissionGeneratorTest {
     private final DateOfSubmissionGenerator generator = new DateOfSubmissionGenerator();
 
     @Test
-    public void testGenerate() {
+    void testGenerate() {
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         String format = DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime);
         String isoDateToSpecificFormat = CommonUtils.getIsoDateToSpecificFormat(format, "dd-MM-yyyy");

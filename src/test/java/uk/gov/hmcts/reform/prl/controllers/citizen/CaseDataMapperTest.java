@@ -1,9 +1,9 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
-import org.junit.Ignore;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,10 +29,10 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.prohibitedStepsOrder;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.specificIssueOrder;
 
 //TO BE DELETED - NOT IN USE
-@Ignore
+@Disabled
 @SuppressWarnings({"java:S1607"})
 @ExtendWith(MockitoExtension.class)
-public class CaseDataMapperTest {
+class CaseDataMapperTest {
 
     private static final String CASE_TYPE = "C100";
     private final ObjectMapper mapper = new ObjectMapper();
@@ -44,8 +44,8 @@ public class CaseDataMapperTest {
     private C100RebuildData c100RebuildData;
 
     @BeforeEach
-    public void setUp() throws IOException {
-        mapper.registerModule(new JSR310Module());
+    void setUp() throws IOException {
+        mapper.registerModule(new JavaTimeModule());
         c100RebuildData = C100RebuildData.builder()
             .c100RebuildInternationalElements(TestUtil.readFileFrom("classpath:c100-rebuild/ie.json"))
             .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn.json"))
@@ -72,8 +72,8 @@ public class CaseDataMapperTest {
     }
 
     @Test
-    @Ignore
-    public void testCaseDataMapper() throws IOException {
+    @Disabled
+    void testCaseDataMapper() throws IOException {
 
         //When
         CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData);
@@ -84,7 +84,7 @@ public class CaseDataMapperTest {
     }
 
     @Test
-    public void testCaseDataMapperForOrderTypeExtraFields() throws IOException {
+    void testCaseDataMapperForOrderTypeExtraFields() throws IOException {
 
         //Given
         CaseData caseData1 = caseData
@@ -106,8 +106,8 @@ public class CaseDataMapperTest {
     }
 
     @Test
-    @Ignore
-    public void testCaseDataMapperWhenNoOtherProceedingOrdersExist() throws IOException {
+    @Disabled
+    void testCaseDataMapperWhenNoOtherProceedingOrdersExist() throws IOException {
 
         //Given
         CaseData caseData1 = caseData
@@ -125,7 +125,7 @@ public class CaseDataMapperTest {
     }
 
     @Test
-    public void testCaseDataMapperForMiamExtraFields() throws IOException {
+    void testCaseDataMapperForMiamExtraFields() throws IOException {
 
         //Given
         CaseData caseData1 = caseData
@@ -145,7 +145,7 @@ public class CaseDataMapperTest {
     }
 
     @Test
-    public void testCaseDataMapperForChildDetail() throws IOException {
+    void testCaseDataMapperForChildDetail() throws IOException {
         //Given
         CaseData caseData1 = caseData.toBuilder()
             .c100RebuildData(c100RebuildData
@@ -163,7 +163,7 @@ public class CaseDataMapperTest {
     }
 
     @Test
-    public void testCaseDataMapperForOtherChildrenDetail() throws IOException {
+    void testCaseDataMapperForOtherChildrenDetail() throws IOException {
         //Given
         CaseData caseData1 = caseData.toBuilder()
             .c100RebuildData(c100RebuildData
@@ -181,7 +181,7 @@ public class CaseDataMapperTest {
     }
 
     @Test
-    public void testCaseDataMapperForOtherChildrenDetailNull() throws IOException {
+    void testCaseDataMapperForOtherChildrenDetailNull() throws IOException {
         //Given
         CaseData caseData1 = caseData.toBuilder()
                 .c100RebuildData(c100RebuildData
@@ -199,7 +199,7 @@ public class CaseDataMapperTest {
     }
 
     @Test
-    public void testCaseDataMapperReasonableAdjustmentsExtraFields() throws IOException {
+    void testCaseDataMapperReasonableAdjustmentsExtraFields() throws IOException {
         CaseData caseData1 = caseData.toBuilder()
             .c100RebuildData(c100RebuildData
                                  .toBuilder()
@@ -215,7 +215,7 @@ public class CaseDataMapperTest {
     }
 
     @Test
-    public void testCaseDataMapperForOtherPersonDetails() throws IOException {
+    void testCaseDataMapperForOtherPersonDetails() throws IOException {
         //Given
         CaseData caseData1 = caseData.toBuilder()
             .c100RebuildData(c100RebuildData
@@ -233,7 +233,7 @@ public class CaseDataMapperTest {
     }
 
     @Test
-    public void testCaseDataMapperForOtherPersonDetailsUnknownDoB() throws IOException {
+    void testCaseDataMapperForOtherPersonDetailsUnknownDoB() throws IOException {
         //Given
         CaseData caseData1 = caseData.toBuilder()
                 .c100RebuildData(c100RebuildData
@@ -251,7 +251,7 @@ public class CaseDataMapperTest {
     }
 
     @Test
-    public void testCaseDataMapperForRespondentDetails() throws IOException {
+    void testCaseDataMapperForRespondentDetails() throws IOException {
         //Given
         CaseData caseData1 = caseData.toBuilder()
                     .c100RebuildData(c100RebuildData
@@ -269,7 +269,7 @@ public class CaseDataMapperTest {
     }
 
     @Test
-    public void testCaseDataMapperWhenAllBlocksEmpty() throws IOException {
+    void testCaseDataMapperWhenAllBlocksEmpty() throws IOException {
 
         //When
         CaseData caseData1 = CaseData.builder()
@@ -285,7 +285,7 @@ public class CaseDataMapperTest {
     }
 
     @Test
-    public void testCaseDataMapperWhenUrgencyDataEmpty() throws IOException {
+    void testCaseDataMapperWhenUrgencyDataEmpty() throws IOException {
 
         //When
         CaseData caseData1 = caseData.toBuilder()

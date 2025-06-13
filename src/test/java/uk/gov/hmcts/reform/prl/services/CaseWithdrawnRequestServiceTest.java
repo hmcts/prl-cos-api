@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,11 +19,12 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
-public class CaseWitdrawnRequestServiceTest {
+class CaseWithdrawnRequestServiceTest {
 
     @InjectMocks
     CaseWithdrawnRequestService caseWithdrawnRequestService;
@@ -51,7 +51,7 @@ public class CaseWitdrawnRequestServiceTest {
 
 
     @Test
-    public void testCaseWithdrawnRequestSubmittedInIssueState() throws Exception {
+    void testCaseWithdrawnRequestSubmittedInIssueState() throws Exception {
         caseData = CaseData.builder()
             .id(12345678L)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -70,11 +70,11 @@ public class CaseWitdrawnRequestServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         SubmittedCallbackResponse response = caseWithdrawnRequestService.caseWithdrawnEmailNotification(callbackRequest, "testAuth");
-        Assert.assertEquals("# Cais i Dynnu Cais yn Ôl <br/> Requested Application Withdrawal", response.getConfirmationHeader());
+        assertEquals("# Cais i Dynnu Cais yn Ôl <br/> Requested Application Withdrawal", response.getConfirmationHeader());
     }
 
     @Test
-    public void testCaseWithdrawnRequestSubmittedInGateKeepingState() throws Exception {
+    void testCaseWithdrawnRequestSubmittedInGateKeepingState() throws Exception {
         caseData = CaseData.builder()
             .id(12345678L)
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
@@ -92,11 +92,11 @@ public class CaseWitdrawnRequestServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         SubmittedCallbackResponse response = caseWithdrawnRequestService.caseWithdrawnEmailNotification(callbackRequest, "testAuth");
-        Assert.assertEquals("# Cais wedi’i dynnu’n ôl <br/> Application withdrawn", response.getConfirmationHeader());
+        assertEquals("# Cais wedi’i dynnu’n ôl <br/> Application withdrawn", response.getConfirmationHeader());
     }
 
     @Test
-    public void testCaseWithdrawnRequestSubmittedInReturnState() throws Exception {
+    void testCaseWithdrawnRequestSubmittedInReturnState() throws Exception {
         caseData = CaseData.builder()
             .id(12345678L)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -114,11 +114,11 @@ public class CaseWitdrawnRequestServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         SubmittedCallbackResponse response = caseWithdrawnRequestService.caseWithdrawnEmailNotification(callbackRequest, "testAuth");
-        Assert.assertEquals("# Cais i Dynnu Cais yn Ôl <br/> Requested Application Withdrawal", response.getConfirmationHeader());
+        assertEquals("# Cais i Dynnu Cais yn Ôl <br/> Requested Application Withdrawal", response.getConfirmationHeader());
     }
 
     @Test
-    public void testCaseWithdrawnRequestSubmittedInPendingState() throws Exception {
+    void testCaseWithdrawnRequestSubmittedInPendingState() throws Exception {
         caseData = CaseData.builder()
             .id(12345678L)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -136,11 +136,11 @@ public class CaseWitdrawnRequestServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         SubmittedCallbackResponse response = caseWithdrawnRequestService.caseWithdrawnEmailNotification(callbackRequest, "testAuth");
-        Assert.assertEquals("# Cais wedi’i dynnu’n ôl <br/> Application withdrawn", response.getConfirmationHeader());
+        assertEquals("# Cais wedi’i dynnu’n ôl <br/> Application withdrawn", response.getConfirmationHeader());
     }
 
     @Test
-    public void testCaseWithdrawnRequestSubmittedInSubmittedState() throws Exception {
+    void testCaseWithdrawnRequestSubmittedInSubmittedState() throws Exception {
         caseData = CaseData.builder()
             .id(12345678L)
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
@@ -158,11 +158,11 @@ public class CaseWitdrawnRequestServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         SubmittedCallbackResponse response = caseWithdrawnRequestService.caseWithdrawnEmailNotification(callbackRequest, "testAuth");
-        Assert.assertEquals("# Cais wedi’i dynnu’n ôl <br/> Application withdrawn", response.getConfirmationHeader());
+        assertEquals("# Cais wedi’i dynnu’n ôl <br/> Application withdrawn", response.getConfirmationHeader());
     }
 
     @Test
-    public void testNoCaseWithdrawnRequest() throws Exception {
+    void testNoCaseWithdrawnRequest() throws Exception {
         caseData = CaseData.builder()
             .id(12345678L)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -180,6 +180,6 @@ public class CaseWitdrawnRequestServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         SubmittedCallbackResponse response = caseWithdrawnRequestService.caseWithdrawnEmailNotification(callbackRequest, "testAuth");
-        Assert.assertEquals("# Cais wedi’i dynnu’n ôl wedi’i ganslo<br/> Application withdrawn cancelled", response.getConfirmationHeader());
+        assertEquals("# Cais wedi’i dynnu’n ôl wedi’i ganslo<br/> Application withdrawn cancelled", response.getConfirmationHeader());
     }
 }

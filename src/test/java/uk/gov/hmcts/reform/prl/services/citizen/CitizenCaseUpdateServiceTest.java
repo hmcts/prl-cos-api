@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,6 +50,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -60,7 +63,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @ExtendWith(MockitoExtension.class)
-public class CitizenCaseUpdateServiceTest {
+class CitizenCaseUpdateServiceTest {
 
     @InjectMocks
     CitizenCaseUpdateService citizenCaseUpdateService;
@@ -108,7 +111,7 @@ public class CitizenCaseUpdateServiceTest {
     private static PartyDetails partyDetails;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -126,7 +129,7 @@ public class CitizenCaseUpdateServiceTest {
     }
 
     @Test
-    public void testUpdateCitizenPartyDetailsConfirmYourDetails() {
+    void testUpdateCitizenPartyDetailsConfirmYourDetails() {
         caseData = caseData.toBuilder()
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
@@ -150,12 +153,12 @@ public class CitizenCaseUpdateServiceTest {
         when(citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, CitizenUpdatedCaseData.builder().build(),
             CaseEvent.CONFIRM_YOUR_DETAILS, authToken)).thenReturn(citizenUpdatePartyDataContent);
         when(allTabService.updateAllTabsIncludingConfTab(caseId)).thenReturn(CaseDetails.builder().build());
-        Assert.assertNotNull(citizenCaseUpdateService.updateCitizenPartyDetails(authToken, caseId, "confirmYourDetails",
+        assertNotNull(citizenCaseUpdateService.updateCitizenPartyDetails(authToken, caseId, "confirmYourDetails",
             CitizenUpdatedCaseData.builder().build()));
     }
 
     @Test
-    public void testUpdateCitizenPartyDetailsCreateCase() {
+    void testUpdateCitizenPartyDetailsCreateCase() {
         caseData = caseData.toBuilder()
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
@@ -180,12 +183,12 @@ public class CitizenCaseUpdateServiceTest {
                                                               CITIZEN_CASE_CREATE, authToken)).thenReturn(citizenUpdatePartyDataContent);
         when(allTabService.submitUpdateForSpecificUserEvent(anyString(), anyString(), any(), any(), any(), any()))
             .thenReturn(CaseDetails.builder().build());
-        Assert.assertNotNull(citizenCaseUpdateService.updateCitizenPartyDetails(authToken, caseId, "citizenCreate",
+        assertNotNull(citizenCaseUpdateService.updateCitizenPartyDetails(authToken, caseId, "citizenCreate",
                                                                                 CitizenUpdatedCaseData.builder().build()));
     }
 
     @Test
-    public void testUpdateCitizenPartyDetailsReturnsNull() {
+    void testUpdateCitizenPartyDetailsReturnsNull() {
         caseData = caseData.toBuilder()
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
@@ -205,12 +208,12 @@ public class CitizenCaseUpdateServiceTest {
                                                                                                         caseDetails1, caseData, null);
         when(allTabService.getStartUpdateForSpecificUserEvent(caseId, "citizenCreate", authToken))
             .thenReturn(startAllTabsUpdateDataContent1);
-        Assert.assertNull(citizenCaseUpdateService.updateCitizenPartyDetails(authToken, caseId, "citizenCreate",
+        assertNull(citizenCaseUpdateService.updateCitizenPartyDetails(authToken, caseId, "citizenCreate",
                                                                              CitizenUpdatedCaseData.builder().build()));
     }
 
     @Test
-    public void testSaveDraftCitizenApplication() throws IOException {
+    void testSaveDraftCitizenApplication() throws IOException {
         C100RebuildData c100RebuildData = getC100RebuildData();
         caseData = caseData.toBuilder()
             .c100RebuildData(c100RebuildData)
@@ -235,12 +238,12 @@ public class CitizenCaseUpdateServiceTest {
             .thenReturn(startAllTabsUpdateDataContent1);
         when(allTabService.submitUpdateForSpecificUserEvent(any(), any(), any(), any(), any(), any()))
             .thenReturn(CaseDetails.builder().build());
-        Assert.assertNotNull(citizenCaseUpdateService.saveDraftCitizenApplication(caseId,
+        assertNotNull(citizenCaseUpdateService.saveDraftCitizenApplication(caseId,
                                                                                   caseData, authToken));
     }
 
     @Test
-    public void testDeleteApplication() throws IOException {
+    void testDeleteApplication() throws IOException {
         C100RebuildData c100RebuildData = getC100RebuildData();
 
         caseData = caseData.toBuilder()
@@ -265,11 +268,11 @@ public class CitizenCaseUpdateServiceTest {
         when(allTabService.getStartUpdateForSpecificUserEvent(caseId, "deleteApplication", authToken)).thenReturn(startAllTabsUpdateDataContent1);
         when(allTabService.submitUpdateForSpecificUserEvent(any(), any(), any(), any(), any(), any()))
             .thenReturn(CaseDetails.builder().build());
-        Assert.assertNotNull(citizenCaseUpdateService.deleteApplication(caseId, caseData, authToken));
+        assertNotNull(citizenCaseUpdateService.deleteApplication(caseId, caseData, authToken));
     }
 
     @Test
-    public void testSubmitApplication() throws IOException, NotFoundException {
+    void testSubmitApplication() throws IOException, NotFoundException {
         C100RebuildData c100RebuildData = getC100RebuildData();
         partyDetails = PartyDetails.builder().build();
         caseData = caseData.toBuilder()
@@ -309,7 +312,7 @@ public class CitizenCaseUpdateServiceTest {
             .thenReturn(CaseDetails.builder().id(12345L).build());
         when(courtLocatorService.getNearestFamilyCourt(any(CaseData.class)))
             .thenReturn(Court.builder().courtName("Test court").build());
-        Assert.assertNotNull(citizenCaseUpdateService.submitCitizenC100Application(
+        assertNotNull(citizenCaseUpdateService.submitCitizenC100Application(
             authToken,
             String.valueOf(caseId),
             "citizenSaveC100DraftInternal",
@@ -318,7 +321,7 @@ public class CitizenCaseUpdateServiceTest {
     }
 
     @Test
-    public void testSubmitApplicationNoCourtName() throws IOException, NotFoundException {
+    void testSubmitApplicationNoCourtName() throws IOException, NotFoundException {
         C100RebuildData c100RebuildData = getC100RebuildData();
         partyDetails = PartyDetails.builder().build();
         caseData = caseData.toBuilder()
@@ -358,7 +361,7 @@ public class CitizenCaseUpdateServiceTest {
             .thenReturn(CaseDetails.builder().id(12345L).build());
         when(courtLocatorService.getNearestFamilyCourt(any(CaseData.class)))
             .thenReturn(null);
-        Assert.assertNotNull(citizenCaseUpdateService.submitCitizenC100Application(
+        assertNotNull(citizenCaseUpdateService.submitCitizenC100Application(
             authToken,
             String.valueOf(caseId),
             "citizenSaveC100DraftInternal",
@@ -367,7 +370,7 @@ public class CitizenCaseUpdateServiceTest {
     }
 
     @Test
-    public void testWithdrawCaseApplication() throws IOException {
+    void testWithdrawCaseApplication() throws IOException {
         C100RebuildData c100RebuildData = getC100RebuildData();
         WithdrawApplication withdrawApplication = WithdrawApplication.builder()
             .withDrawApplication(YesOrNo.Yes)
@@ -387,11 +390,11 @@ public class CitizenCaseUpdateServiceTest {
         when(allTabService.submitUpdateForSpecificUserEvent(any(), any(), any(), any(), any(), any()))
             .thenReturn(CaseDetails.builder().build());
         when(allTabService.updateAllTabsIncludingConfTab(caseId)).thenReturn(CaseDetails.builder().build());
-        Assert.assertNotNull(citizenCaseUpdateService.withdrawCase(caseData, caseId, authToken));
+        assertNotNull(citizenCaseUpdateService.withdrawCase(caseData, caseId, authToken));
     }
 
     @Test
-    public void testaddLanguageSupportCaseNotes() throws IOException {
+    void testaddLanguageSupportCaseNotes() throws IOException {
         C100RebuildData c100RebuildData = getC100RebuildData();
         caseData = caseData.toBuilder()
             .c100RebuildData(c100RebuildData)
@@ -409,7 +412,7 @@ public class CitizenCaseUpdateServiceTest {
         LanguageSupportCaseNotesRequest languageSupportCaseNotesRequest = LanguageSupportCaseNotesRequest.builder().languageSupportNotes("test")
             .partyIdamId("1234567").build();
 
-        Assert.assertNotNull(citizenCaseUpdateService.addLanguageSupportCaseNotes(caseId, authToken,languageSupportCaseNotesRequest));
+        assertNotNull(citizenCaseUpdateService.addLanguageSupportCaseNotes(caseId, authToken,languageSupportCaseNotesRequest));
     }
 
     private static C100RebuildData getC100RebuildData() throws IOException {
@@ -432,7 +435,7 @@ public class CitizenCaseUpdateServiceTest {
     }
 
     @Test
-    public void testSaveCitizenAwpApplication() {
+    void testSaveCitizenAwpApplication() {
 
         CaseData updatedCaseData = caseData.toBuilder()
             .additionalApplicationsBundle(List.of(element(AdditionalApplicationsBundle.builder().build())))
@@ -447,16 +450,16 @@ public class CitizenCaseUpdateServiceTest {
 
         CaseDetails updatedCaseDetails = citizenCaseUpdateService.saveCitizenAwpApplication(authToken, caseId,
                                                                                             CitizenAwpRequest.builder().build());
-        Assert.assertNotNull(updatedCaseDetails);
-        Assert.assertNotNull(updatedCaseDetails.getData());
+        assertNotNull(updatedCaseDetails);
+        assertNotNull(updatedCaseDetails.getData());
         //noinspection unchecked
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle =
             (List<Element<AdditionalApplicationsBundle>>) updatedCaseDetails.getData().get("additionalApplicationsBundle");
-        Assert.assertFalse(additionalApplicationsBundle.isEmpty());
+        assertFalse(additionalApplicationsBundle.isEmpty());
         //noinspection unchecked
         List<Element<CitizenAwpPayment>> citizenAwpPayments =
             (List<Element<CitizenAwpPayment>>) updatedCaseDetails.getData().get("citizenAwpPayments");
-        Assert.assertTrue(citizenAwpPayments.isEmpty());
+        assertTrue(citizenAwpPayments.isEmpty());
     }
 }
 

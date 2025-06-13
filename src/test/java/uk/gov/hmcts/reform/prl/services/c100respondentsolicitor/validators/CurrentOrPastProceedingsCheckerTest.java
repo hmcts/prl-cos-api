@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,7 +40,7 @@ public class CurrentOrPastProceedingsCheckerTest {
     PartyDetails respondent;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
 
         RespondentProceedingDetails proceedingDetails = RespondentProceedingDetails.builder()
             .caseNumber("122344")
@@ -74,14 +73,14 @@ public class CurrentOrPastProceedingsCheckerTest {
     }
 
     @Test
-    public void isStartedTest() {
+    void isStartedTest() {
         boolean anyNonEmpty = currentOrPastProceedingsChecker.isStarted(respondent, true);
 
         assertTrue(anyNonEmpty);
     }
 
     @Test
-    public void isStartedNotTest() {
+    void isStartedNotTest() {
         respondent = null;
         boolean anyNonEmpty = currentOrPastProceedingsChecker.isStarted(respondent, true);
 
@@ -89,36 +88,24 @@ public class CurrentOrPastProceedingsCheckerTest {
     }
 
     @Test
-    public void hasMandatoryCompletedTest() {
+    void hasMandatoryCompletedTest() {
         boolean anyNonEmpty = currentOrPastProceedingsChecker.isFinished(respondent, true);
-        Assert.assertTrue(anyNonEmpty);
+        assertTrue(anyNonEmpty);
     }
 
     @Test
-    public void hasMandatoryCompletedWithoutRespdntExisProceedingAndPastProceedingTest() {
+    void hasMandatoryCompletedWithoutRespdntExisProceedingAndPastProceedingTest() {
         respondent = PartyDetails.builder()
             .response(Response
                           .builder()
                           .build())
             .build();
         boolean anyNonEmpty = currentOrPastProceedingsChecker.isFinished(respondent, true);
-        Assert.assertFalse(anyNonEmpty);
+        assertFalse(anyNonEmpty);
     }
 
     @Test
-    public void hasMandatoryCompletedPastProceedingAsNoTest() {
-        respondent = PartyDetails.builder()
-            .response(Response
-                          .builder()
-                          .currentOrPastProceedingsForChildren(YesNoDontKnow.no)
-                          .build())
-            .build();
-        boolean anyNonEmpty = currentOrPastProceedingsChecker.isFinished(respondent, true);
-        Assert.assertTrue(anyNonEmpty);
-    }
-
-    @Test
-    public void hasMandatoryNotCompletedPastProceedingAsEmptyValeuTest() {
+    void hasMandatoryCompletedPastProceedingAsNoTest() {
         respondent = PartyDetails.builder()
             .response(Response
                           .builder()
@@ -126,7 +113,19 @@ public class CurrentOrPastProceedingsCheckerTest {
                           .build())
             .build();
         boolean anyNonEmpty = currentOrPastProceedingsChecker.isFinished(respondent, true);
-        Assert.assertTrue(anyNonEmpty);
+        assertTrue(anyNonEmpty);
+    }
+
+    @Test
+    void hasMandatoryNotCompletedPastProceedingAsEmptyValeuTest() {
+        respondent = PartyDetails.builder()
+            .response(Response
+                          .builder()
+                          .currentOrPastProceedingsForChildren(YesNoDontKnow.no)
+                          .build())
+            .build();
+        boolean anyNonEmpty = currentOrPastProceedingsChecker.isFinished(respondent, true);
+        assertTrue(anyNonEmpty);
     }
 
 }

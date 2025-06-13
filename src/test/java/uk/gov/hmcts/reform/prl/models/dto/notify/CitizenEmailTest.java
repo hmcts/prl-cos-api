@@ -18,12 +18,12 @@ public class CitizenEmailTest {
     public static final String OTHER_CASE_ID = "123";
 
     @Test
-    public void builderShouldReturnValidObject() {
+    void builderShouldReturnValidObject() {
         assertThat(CitizenEmailProvider.empty(), is(instanceOf(EmailTemplateVars.class)));
     }
 
     @Test
-    public void objectShouldBeEqual() {
+    void objectShouldBeEqual() {
         assertThat(CitizenEmailProvider.empty(), is(equalTo(CitizenEmailProvider.empty())));
 
         assertThat(
@@ -38,7 +38,7 @@ public class CitizenEmailTest {
     }
 
     @Test
-    public void objectShouldBeNotEqual() {
+    void objectShouldBeNotEqual() {
         // different class, different id
         assertThat(
             CitizenEmailProvider.of(TEST_CASE_ID),

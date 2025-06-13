@@ -35,7 +35,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_RESPONDENTS;
 
 @ExtendWith(MockitoExtension.class)
-public class StatementOfServiceControllerTest {
+class StatementOfServiceControllerTest {
 
     @InjectMocks
     private StatementOfServiceController statementOfServiceController;
@@ -60,7 +60,7 @@ public class StatementOfServiceControllerTest {
     public static final String s2sToken = "s2s AuthToken";
 
     @BeforeEach
-    public void setup() {
+    void setup() {
 
         PartyDetails respondent = PartyDetails.builder()
             .lastName("TestLast")
@@ -80,7 +80,7 @@ public class StatementOfServiceControllerTest {
     }
 
     @Test
-    public void testToAboutToStartC100() {
+    void testToAboutToStartC100() {
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -131,7 +131,7 @@ public class StatementOfServiceControllerTest {
 
 
     @Test
-    public void testToAboutToStartForFL401() {
+    void testToAboutToStartForFL401() {
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -186,7 +186,7 @@ public class StatementOfServiceControllerTest {
     }
 
     @Test
-    public void testAboutToSubmitC100() {
+    void testAboutToSubmitC100() {
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -245,7 +245,7 @@ public class StatementOfServiceControllerTest {
     }
 
     @Test
-    public void testToRetrieveAllRespondentNamesForFL401() {
+    void testToRetrieveAllRespondentNamesForFL401() {
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -306,7 +306,7 @@ public class StatementOfServiceControllerTest {
     }
 
     @Test
-    public void testSubmittedConfirmationForApplicationPack() throws Exception {
+    void testSubmittedConfirmationForApplicationPack() throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -365,7 +365,7 @@ public class StatementOfServiceControllerTest {
     }
 
     @Test
-    public void testSubmittedConfirmationForOrder() throws Exception {
+    void testSubmittedConfirmationForOrder() throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -424,7 +424,7 @@ public class StatementOfServiceControllerTest {
     }
 
     @Test
-    public void testCitizenSoaSubmit() {
+    void testCitizenSoaSubmit() {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         assertNotNull(statementOfServiceController.citizenSoaSubmit("123456789", "Citizen-case-update",
@@ -432,7 +432,7 @@ public class StatementOfServiceControllerTest {
     }
 
     @Test
-    public void testCitizenSoaSubmitException() {
+    void testCitizenSoaSubmitException() {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(false);
         assertThrows(Exception.class, () -> {

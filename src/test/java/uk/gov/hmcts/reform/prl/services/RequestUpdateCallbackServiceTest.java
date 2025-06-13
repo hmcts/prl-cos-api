@@ -46,7 +46,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
-public class RequestUpdateCallbackServiceTest {
+class RequestUpdateCallbackServiceTest {
 
     private final String jurisdiction = "PRIVATELAW";
     private final String caseType = "PRLAPPS";
@@ -107,7 +107,7 @@ public class RequestUpdateCallbackServiceTest {
     private CaseDetails caseDetails;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         when(systemUserService.getUserId(authToken)).thenReturn(systemUserId);
         when(systemUserService.getSysUserToken()).thenReturn(authToken);
@@ -130,62 +130,72 @@ public class RequestUpdateCallbackServiceTest {
         when(partyLevelCaseFlagsService.generateC100AllPartyCaseFlags(any(), any())).thenCallRealMethod();
     }
 
-    @Test(expected = NullPointerException.class)
-    public void shouldStartAndSubmitEventWithCaseDetails() throws Exception {
-        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString())).thenReturn(caseDetails);
-        when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                     caseType, Long.toString(caseId), eventName
-        ))
-            .thenReturn(startEventResponse);
-        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
-            .ccdCaseNumber(caseId.toString())
-            .payment(PaymentDto.builder()
-                         .paymentAmount("123")
-                         .paymentMethod("cash")
-                         .paymentReference("reference")
-                         .caseReference("reference")
-                         .accountNumber("123445555")
-                         .build())
-            .build();
+    @Test
+    void shouldStartAndSubmitEventWithCaseDetails() throws Exception {
+        assertThrows(
+            NullPointerException.class, () -> {
+                when(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString())).thenReturn(caseDetails);
+                when(coreCaseDataApi.startEventForCaseWorker(
+                    authToken, serviceAuthToken, systemUserId, jurisdiction,
+                    caseType, Long.toString(caseId), eventName
+                ))
+                    .thenReturn(startEventResponse);
+                serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
+                    .ccdCaseNumber(caseId.toString())
+                    .payment(PaymentDto.builder()
+                                 .paymentAmount("123")
+                                 .paymentMethod("cash")
+                                 .paymentReference("reference")
+                                 .caseReference("reference")
+                                 .accountNumber("123445555")
+                                 .build())
+                    .build();
 
-        CaseData caseData = CaseData.builder().build();
+                CaseData caseData = CaseData.builder().build();
 
-        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
+                requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
 
-        verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                        caseType, Long.toString(caseId), eventName
-        );
-        verify(coreCaseDataApi).submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                         caseType, Long.toString(caseId), true,
-                                                         buildCaseDataContent(eventName, eventToken, null)
+                verify(coreCaseDataApi).startEventForCaseWorker(
+                    authToken, serviceAuthToken, systemUserId, jurisdiction,
+                    caseType, Long.toString(caseId), eventName
+                );
+                verify(coreCaseDataApi).submitEventForCaseWorker(
+                    authToken, serviceAuthToken, systemUserId, jurisdiction,
+                    caseType, Long.toString(caseId), true,
+                    buildCaseDataContent(eventName, eventToken, null)
+                );
+            }
         );
     }
 
     @Test
-    public void shouldNotStartOrSubmitEventWithoutCaseDetails() throws Exception {
+    void shouldNotStartOrSubmitEventWithoutCaseDetails() throws Exception {
 
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, "123")).thenReturn(caseDetails);
 
-        assertThrows(Exception.class, () -> {
-            serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
-                .ccdCaseNumber("123")
-                .serviceRequestStatus(
-                    "Paid").build();
+        assertThrows(
+            Exception.class, () -> {
+                serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
+                    .ccdCaseNumber("123")
+                    .serviceRequestStatus(
+                        "Paid").build();
 
-            requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
-        });
+                requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
+            }
+        );
 
     }
 
     @Test
-    public void shouldProcessCallback() throws Exception {
+    void shouldProcessCallback() throws Exception {
         CaseData caseData = CaseData.builder().id(1L)
             .paymentServiceRequestReferenceNumber("test-reference").build();
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString())).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(allTabService.updateAllTabsIncludingConfTab(Mockito.anyString())).thenReturn(caseDetails);
-        when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                     caseType, Long.toString(caseId), eventName
+        when(coreCaseDataApi.startEventForCaseWorker(
+            authToken, serviceAuthToken, systemUserId, jurisdiction,
+            caseType, Long.toString(caseId), eventName
         ))
             .thenReturn(startEventResponse);
         when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
@@ -208,14 +218,15 @@ public class RequestUpdateCallbackServiceTest {
     }
 
     @Test
-    public void shouldProcessCallbackNotPaid() throws Exception {
+    void shouldProcessCallbackNotPaid() throws Exception {
         CaseData caseData = CaseData.builder().id(1L)
             .paymentServiceRequestReferenceNumber("test-reference").build();
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString())).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(allTabService.updateAllTabsIncludingConfTab(Mockito.anyString())).thenReturn(caseDetails);
-        when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                     caseType, Long.toString(caseId), eventName
+        when(coreCaseDataApi.startEventForCaseWorker(
+            authToken, serviceAuthToken, systemUserId, jurisdiction,
+            caseType, Long.toString(caseId), eventName
         ))
             .thenReturn(startEventResponse);
         when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
@@ -238,7 +249,7 @@ public class RequestUpdateCallbackServiceTest {
     }
 
     @Test
-    public void shouldProcessPendingCallback() throws Exception {
+    void shouldProcessPendingCallback() throws Exception {
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
         additionalApplicationsBundle.add(element(AdditionalApplicationsBundle
                                                      .builder().payment(Payment.builder()
@@ -260,12 +271,14 @@ public class RequestUpdateCallbackServiceTest {
                 UrgencyTimeFrameType.WITHIN_2_DAYS).build())
             .build();
         CaseData caseData = CaseData.builder().id(1L).additionalApplicationsBundle(additionalApplicationsBundle)
-            .paymentServiceRequestReferenceNumber("test-reference").uploadAdditionalApplicationData(uploadAdditionalApplicationData).build();
+            .paymentServiceRequestReferenceNumber("test-reference").uploadAdditionalApplicationData(
+                uploadAdditionalApplicationData).build();
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString())).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(allTabService.updateAllTabsIncludingConfTab(Mockito.anyString())).thenReturn(caseDetails);
-        when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                     caseType, Long.toString(caseId), eventFailureName
+        when(coreCaseDataApi.startEventForCaseWorker(
+            authToken, serviceAuthToken, systemUserId, jurisdiction,
+            caseType, Long.toString(caseId), eventFailureName
         ))
             .thenReturn(startEventResponse);
         when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
@@ -288,14 +301,15 @@ public class RequestUpdateCallbackServiceTest {
     }
 
     @Test
-    public void shouldThrowExceptionForProcessCallback() throws Exception {
+    void shouldThrowExceptionForProcessCallback() throws Exception {
         CaseData caseData = CaseData.builder().id(1L)
             .paymentServiceRequestReferenceNumber("test-reference").build();
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString())).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(allTabService.updateAllTabsIncludingConfTab(Mockito.anyString())).thenReturn(caseDetails);
-        when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                     caseType, Long.toString(caseId), eventName
+        when(coreCaseDataApi.startEventForCaseWorker(
+            authToken, serviceAuthToken, systemUserId, jurisdiction,
+            caseType, Long.toString(caseId), eventName
         ))
             .thenReturn(startEventResponse);
         when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenThrow(new RuntimeException());

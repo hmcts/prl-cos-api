@@ -6,16 +6,15 @@ import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
 import org.junit.FixMethodOrder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
@@ -25,10 +24,14 @@ import uk.gov.hmcts.reform.prl.services.EditReturnedOrderService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 @Slf4j
 @SpringBootTest
-@ExtendWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class EditReturnedOrderControllerFunctionalTest {
@@ -42,7 +45,7 @@ public class EditReturnedOrderControllerFunctionalTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     private EditReturnedOrderService editReturnedOrderService;
 
     private static final String VALID_CAFCASS_REQUEST_JSON = "requests/cafcass-cymru-send-email-request.json";
@@ -75,8 +78,8 @@ public class EditReturnedOrderControllerFunctionalTest {
             .extract()
             .as(CaseDetails.class);
 
-        Assert.assertNotNull(caseDetails);
-        Assert.assertNotNull(caseDetails.getId());
+        assertNotNull(caseDetails);
+        assertNotNull(caseDetails.getId());
     }
 
     @Test
@@ -94,12 +97,12 @@ public class EditReturnedOrderControllerFunctionalTest {
             response.getBody().asString(),
             AboutToStartOrSubmitCallbackResponse.class
         );
-        Assert.assertTrue(res.getData().containsKey("rejectedOrdersDynamicList"));
+        assertTrue(res.getData().containsKey("rejectedOrdersDynamicList"));
         DynamicList rejectedOrdersDynamicList = objectMapper.convertValue(
             res.getData().get("rejectedOrdersDynamicList"),
             DynamicList.class
         );
-        Assert.assertNotNull(rejectedOrdersDynamicList);
+        assertNotNull(rejectedOrdersDynamicList);
     }
 
     @Test
@@ -117,12 +120,12 @@ public class EditReturnedOrderControllerFunctionalTest {
             response.getBody().asString(),
             AboutToStartOrSubmitCallbackResponse.class
         );
-        Assert.assertTrue(res.getData().containsKey("editOrderTextInstructions"));
+        assertTrue(res.getData().containsKey("editOrderTextInstructions"));
         String editOrderTextInstructions = objectMapper.convertValue(
             res.getData().get("editOrderTextInstructions"),
             String.class
         );
-        Assert.assertNotNull(editOrderTextInstructions);
+        assertNotNull(editOrderTextInstructions);
 
     }
 
@@ -143,7 +146,7 @@ public class EditReturnedOrderControllerFunctionalTest {
             response.getBody().asString(),
             SubmittedCallbackResponse.class
         );
-        Assert.assertEquals(res.getConfirmationHeader(), "# Gorchymyn drafft wedi’i ailgyflwyno<br/>Draft order resubmitted");
+        assertEquals(res.getConfirmationHeader(), "# Gorchymyn drafft wedi’i ailgyflwyno<br/>Draft order resubmitted");
 
     }
 }

@@ -9,13 +9,13 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(MockitoExtension.class)
-public class LitigationCapacityMapperTest {
+class LitigationCapacityMapperTest {
 
     @InjectMocks
     LitigationCapacityMapper litigationCapacityMapper;
 
     @Test
-    public void testLitigationCapacityMapperTest() {
+    void testLitigationCapacityMapperTest() {
         CaseData caseDataInput = CaseData.builder().litigationCapacityFactors("Litigation Capacity Factors")
             .litigationCapacityReferrals("Referrals")
             .litigationCapacityFactors("Other Factors").litigationCapacityOtherFactorsDetails("Other Factor Details")

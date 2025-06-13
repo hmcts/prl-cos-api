@@ -18,13 +18,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.http.HttpStatus.OK;
 
 @ExtendWith(MockitoExtension.class)
-public class CourtSpecificCalenderControllerTest {
+class CourtSpecificCalenderControllerTest {
 
     @InjectMocks
     private CourtSpecificCalenderController courtSpecificCalenderController;
 
     @Test
-    public void testGetBankHolidays() throws IOException {
+    void testGetBankHolidays() throws IOException {
         Resource resource = new ClassPathResource("/bank-holidays.json");
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());

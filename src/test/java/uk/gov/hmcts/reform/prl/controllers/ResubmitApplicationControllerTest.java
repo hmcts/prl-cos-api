@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,7 +12,6 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamDomesticAbuseChecklistEnum;
@@ -29,7 +27,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamPolicyUpgradeDetails;
-import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
@@ -77,34 +74,34 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_1;
 
 @ExtendWith(MockitoExtension.class)
-public class ResubmitApplicationControllerTest {
+class ResubmitApplicationControllerTest {
 
     @InjectMocks
-    ResubmitApplicationController resubmitApplicationController;
+    private ResubmitApplicationController resubmitApplicationController;
 
     @Mock
-    CaseEventService caseEventService;
+    private CaseEventService caseEventService;
 
     @Mock
-    SolicitorEmailService solicitorEmailService;
+    private SolicitorEmailService solicitorEmailService;
 
     @Mock
-    CaseWorkerEmailService caseWorkerEmailService;
+    private CaseWorkerEmailService caseWorkerEmailService;
 
     @Mock
-    AllTabServiceImpl allTabService;
+    private AllTabServiceImpl allTabService;
 
     @Mock
-    OrganisationService organisationService;
+    private OrganisationService organisationService;
 
     @Mock
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
     @Mock
-    DocumentGenService documentGenService;
+    private DocumentGenService documentGenService;
 
     @Mock
-    UserService userService;
+    private UserService userService;
 
     @Mock
     private CourtFinderService courtFinderService;
@@ -140,9 +137,9 @@ public class ResubmitApplicationControllerTest {
     @Mock
     private AuthorisationService authorisationService;
 
-    public static final String authToken = "Bearer TestAuthToken";
-    public static final String s2sToken = "s2s AuthToken";
-    public static final String currentDate = DateTimeFormatter.ISO_LOCAL_DATE.format(ZonedDateTime.now(ZoneId.of("Europe/London")));
+    public static final String AUTH_TOKEN = "Bearer TestAuthToken";
+    public static final String S2S_TOKEN = "s2s AuthToken";
+    public static final String CURRENT_DATE = DateTimeFormatter.ISO_LOCAL_DATE.format(ZonedDateTime.now(ZoneId.of("Europe/London")));
     @Mock
     MiamPolicyUpgradeService miamPolicyUpgradeService;
     @Mock
@@ -151,7 +148,7 @@ public class ResubmitApplicationControllerTest {
     SystemUserService systemUserService;
 
     @BeforeEach
-    public void init() throws Exception {
+    void init() {
         List<MiamExemptionsChecklistEnum> listMiamExemptionsChecklistEnum = new ArrayList<>();
         listMiamExemptionsChecklistEnum.add(MiamExemptionsChecklistEnum.mpuDomesticAbuse);
         listMiamExemptionsChecklistEnum.add(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance);
@@ -188,7 +185,7 @@ public class ResubmitApplicationControllerTest {
             .id(12345L)
             .courtEmailAddress("test@email.com")
             .allegationOfHarm(allegationOfHarm)
-            .courtName("testcourt")
+            .courtName("test court")
             .courtId("123")
             .build();
 
@@ -198,7 +195,7 @@ public class ResubmitApplicationControllerTest {
             .allegationOfHarm(allegationOfHarm)
             .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails)
             .caseTypeOfApplication("C100")
-            .courtName("testcourt")
+            .courtName("test court")
             .courtId("123")
             .taskListVersion(TASK_LIST_VERSION_V3)
             .build();
@@ -208,7 +205,7 @@ public class ResubmitApplicationControllerTest {
             .id(12345L)
             .state(State.SUBMITTED_PAID)
             .allegationOfHarm(allegationOfHarm)
-            .dateSubmitted(currentDate)
+            .dateSubmitted(CURRENT_DATE)
             .courtId("123")
             .build();
 
@@ -228,9 +225,9 @@ public class ResubmitApplicationControllerTest {
             .id(12345L)
             .state(State.SUBMITTED_PAID)
             .allegationOfHarm(allegationOfHarm)
-            .dateSubmitted(currentDate)
+            .dateSubmitted(CURRENT_DATE)
             .courtId("123")
-            .courtName("testcourt")
+            .courtName("test court")
             .build();
 
         caseDetails = CaseDetails.builder()
@@ -244,23 +241,15 @@ public class ResubmitApplicationControllerTest {
             .caseDetails(caseDetails)
             .build();
 
-        uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails prlCaseDetailsSubmitted = uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder()
-            .caseData(caseDataSubmitted)
-            .build();
-
-        uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails prlCaseDetailsIssued = uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder()
-            .caseData(caseDataIssued)
-            .build();
-
         court = Court.builder()
-            .courtName("testcourt")
+            .courtName("test court")
             .countyLocationCode(123)
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
     }
 
     @Test
-    public void whenLastEventWasSubmitted_thenSubmittedPathFollowed() throws Exception {
+    void whenLastEventWasSubmitted_thenSubmittedPathFollowed() throws Exception {
         List<CaseEventDetail> caseEvents = List.of(
             CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
             CaseEventDetail.builder().stateId(State.SUBMITTED_PAID.getValue()).build(),
@@ -271,7 +260,7 @@ public class ResubmitApplicationControllerTest {
         when(caseEventService.findEventsForCase(String.valueOf(caseDataSubmitted.getId()))).thenReturn(caseEvents);
         when(courtFinderService.getNearestFamilyCourt(caseDataSubmitted)).thenReturn(court);
 
-        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(authToken, s2sToken, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
 
         assertEquals(State.SUBMITTED_PAID, response.getData().get("state"));
         verify(allTabService).getAllTabsFields(caseDataReSubmitted);
@@ -279,7 +268,7 @@ public class ResubmitApplicationControllerTest {
     }
 
     @Test
-    public void whenLastEventWasSubmitted_thenSubmittedPathFollowed1() throws Exception {
+    void whenLastEventWasSubmitted_thenSubmittedPathFollowed1() throws Exception {
         List<CaseEventDetail> caseEvents = List.of(
             CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
             CaseEventDetail.builder().stateId(State.SUBMITTED_PAID.getValue()).build(),
@@ -289,16 +278,14 @@ public class ResubmitApplicationControllerTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDataGateKeepingMiam);
         when(caseEventService.findEventsForCase(String.valueOf(caseDataSubmitted.getId()))).thenReturn(caseEvents);
         when(miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(any(),any())).thenReturn(caseDataGateKeepingMiam);
-        when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
         when(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(any(),any())).thenReturn(caseDataGateKeepingMiam);
-        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(authToken, s2sToken, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
 
         assertEquals(State.SUBMITTED_PAID, response.getData().get("state"));
-
     }
 
     @Test
-    public void whenLastEventWasGatkepping_thenGatekeepingPathFollowed() throws Exception {
+    void whenLastEventWasGateKeeping_thenGatekeepingPathFollowed() throws Exception {
         List<CaseEventDetail> caseEvents = List.of(
             CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
             CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
@@ -307,14 +294,8 @@ public class ResubmitApplicationControllerTest {
             CaseEventDetail.builder().stateId(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()).build()
         );
 
-        DocumentLanguage documentLanguage = DocumentLanguage.builder()
-            .isGenEng(true)
-            .isGenWelsh(false)
-            .build();
-
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
-        when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
         when(organisationService.getApplicantOrganisationDetails(caseData)).thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataIssued);
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class)))
@@ -322,7 +303,7 @@ public class ResubmitApplicationControllerTest {
                                DOCUMENT_FIELD_C1A, "test",
                                DOCUMENT_FIELD_FINAL, "test"
             ));
-        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(authToken, s2sToken, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
 
         assertEquals(State.JUDICIAL_REVIEW, response.getData().get("state"));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8));
@@ -333,7 +314,7 @@ public class ResubmitApplicationControllerTest {
     }
 
     @Test
-    public void givenAllegationsOfHarmAndEnglish_whenLastEventWasIssued_thenIssuedPathFollowedAndCorrectDocsGenerated() throws Exception {
+    void givenAllegationsOfHarmAndEnglish_whenLastEventWasIssued_thenIssuedPathFollowedAndCorrectDocsGenerated() throws Exception {
         List<CaseEventDetail> caseEvents = List.of(
             CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
             CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
@@ -342,14 +323,8 @@ public class ResubmitApplicationControllerTest {
             CaseEventDetail.builder().stateId(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()).build()
         );
 
-        DocumentLanguage documentLanguage = DocumentLanguage.builder()
-            .isGenEng(true)
-            .isGenWelsh(false)
-            .build();
-
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
-        when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
         when(organisationService.getApplicantOrganisationDetails(caseData)).thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataIssued);
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class)))
@@ -357,7 +332,7 @@ public class ResubmitApplicationControllerTest {
                                DOCUMENT_FIELD_C1A, "test",
                                DOCUMENT_FIELD_FINAL, "test"
             ));
-        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(authToken, s2sToken, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
 
         assertEquals(State.CASE_ISSUED, response.getData().get("state"));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8));
@@ -368,7 +343,7 @@ public class ResubmitApplicationControllerTest {
     }
 
     @Test
-    public void givenNoAllegationsOfHarmAndWelsh_whenLastEventWasIssued_thenIssuedPathFollowedAndCorrectDocsGenerated() throws Exception {
+    void givenNoAllegationsOfHarmAndWelsh_whenLastEventWasIssued_thenIssuedPathFollowedAndCorrectDocsGenerated() throws Exception {
         AllegationOfHarm allegationOfHarmNo = AllegationOfHarm.builder()
             .allegationsOfHarmYesNo(No).build();
 
@@ -386,11 +361,6 @@ public class ResubmitApplicationControllerTest {
             CaseEventDetail.builder().stateId(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()).build()
         );
 
-        DocumentLanguage documentLanguage = DocumentLanguage.builder()
-            .isGenWelsh(true)
-            .isGenEng(false)
-            .build();
-
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDataNoAllegations);
         when(caseEventService.findEventsForCase(String.valueOf(caseDataNoAllegations.getId()))).thenReturn(caseEvents);
         when(courtFinderService.getNearestFamilyCourt(caseDataNoAllegations)).thenReturn(court);
@@ -404,8 +374,8 @@ public class ResubmitApplicationControllerTest {
 
 
         AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(
-            authToken,
-            s2sToken,
+            AUTH_TOKEN,
+            S2S_TOKEN,
             callbackRequest
         );
 
@@ -418,7 +388,7 @@ public class ResubmitApplicationControllerTest {
     }
 
     @Test
-    public void givenNoAllegationsOfHarmAndWelsh_whenLastEventWasIssued_thenIssuedPathFollowedAndCorrectDocsGeneratedForAllegationOfHarmRevised()
+    void givenNoAllegationsOfHarmAndWelsh_whenLastEventWasIssued_thenIssuedPathFollowedAndCorrectDocsGeneratedForAllegationOfHarmRevised()
             throws Exception {
         AllegationOfHarmRevised allegationOfHarmNo = AllegationOfHarmRevised.builder()
                 .newAllegationsOfHarmYesNo(No).build();
@@ -438,11 +408,6 @@ public class ResubmitApplicationControllerTest {
                 CaseEventDetail.builder().stateId(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()).build()
         );
 
-        DocumentLanguage documentLanguage = DocumentLanguage.builder()
-                .isGenWelsh(true)
-                .isGenEng(false)
-                .build();
-
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDataNoAllegations);
         when(caseEventService.findEventsForCase(String.valueOf(caseDataNoAllegations.getId()))).thenReturn(caseEvents);
         when(courtFinderService.getNearestFamilyCourt(caseDataNoAllegations)).thenReturn(court);
@@ -456,8 +421,8 @@ public class ResubmitApplicationControllerTest {
 
 
         AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(
-                authToken,
-                s2sToken,
+                AUTH_TOKEN,
+                S2S_TOKEN,
                 callbackRequest
         );
 
@@ -472,7 +437,7 @@ public class ResubmitApplicationControllerTest {
 
 
     @Test
-    public void givenAllegationsOfHarmAndWelsh_whenLastEventWasIssued_thenIssuedPathFollowedAndCorrectDocsGenerated() throws Exception {
+    void givenAllegationsOfHarmAndWelsh_whenLastEventWasIssued_thenIssuedPathFollowedAndCorrectDocsGenerated() throws Exception {
 
         List<CaseEventDetail> caseEvents = List.of(
             CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
@@ -482,14 +447,8 @@ public class ResubmitApplicationControllerTest {
             CaseEventDetail.builder().stateId(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()).build()
         );
 
-        DocumentLanguage documentLanguage = DocumentLanguage.builder()
-            .isGenWelsh(true)
-            .isGenEng(false)
-            .build();
-
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
-        when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
         when(organisationService.getApplicantOrganisationDetails(caseData)).thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataIssued);
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class)))
@@ -498,7 +457,7 @@ public class ResubmitApplicationControllerTest {
                                DOCUMENT_FIELD_C1A_WELSH, "test"
             ));
 
-        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(authToken, s2sToken, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
 
         assertEquals(State.CASE_ISSUED, response.getData().get("state"));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8_WELSH));
@@ -509,7 +468,7 @@ public class ResubmitApplicationControllerTest {
     }
 
     @Test
-    public void testResubmitForFl401() throws Exception {
+    void testResubmitForFl401() throws Exception {
         List<CaseEventDetail> caseEvents = List.of(
             CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
             CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
@@ -518,25 +477,22 @@ public class ResubmitApplicationControllerTest {
             CaseEventDetail.builder().stateId(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()).build()
         );
 
-        UserDetails userDetails = UserDetails.builder().build();
-
         when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController
-            .fl401resubmitApplication(authToken, s2sToken, callbackRequest);
+            .fl401resubmitApplication(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
 
         assertTrue(response.getData().containsKey("isNotificationSent"));
         assertTrue(response.getData().containsKey(STATE_FIELD));
         assertTrue(response.getData().containsKey(CASE_DATE_AND_TIME_SUBMITTED_FIELD));
         assertTrue(response.getData().containsKey(DATE_SUBMITTED_FIELD));
-        assertEquals(currentDate, response.getData().get(DATE_SUBMITTED_FIELD));
+        assertEquals(CURRENT_DATE, response.getData().get(DATE_SUBMITTED_FIELD));
 
     }
 
     @Test
-    public void testResubmitForFl401_whenGateKeeping() throws Exception {
+    void testResubmitForFl401_whenGateKeeping() throws Exception {
         List<CaseEventDetail> caseEvents = List.of(
             CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
             CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
@@ -554,14 +510,14 @@ public class ResubmitApplicationControllerTest {
             List.of(Element.builder().value(ChildConfidentialityDetails.builder().build()))
         ));
         when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
-        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(authToken, s2sToken, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         assertTrue(response.getData().containsKey("applicantsConfidentialDetails"));
         assertTrue(response.getData().containsKey("childrenConfidentialDetails"));
 
     }
 
     @Test
-    public void resubmitApplicationConfidentUpdateConfidentialityTabService() throws Exception {
+    void resubmitApplicationConfidentUpdateConfidentialityTabService() throws Exception {
         List<CaseEventDetail> caseEvents = List.of(
             CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
             CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
@@ -579,13 +535,13 @@ public class ResubmitApplicationControllerTest {
             List.of(Element.builder().value(ChildConfidentialityDetails.builder().build()))
         ));
         when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
-        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(authToken, s2sToken, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         assertTrue(response.getData().containsKey("applicantsConfidentialDetails"));
         assertTrue(response.getData().containsKey("childrenConfidentialDetails"));
     }
 
     @Test
-    public void testFl401resubmitApplication() throws Exception {
+    void testFl401resubmitApplication() throws Exception {
         List<CaseEventDetail> caseEvents = List.of(
             CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
             CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
@@ -593,73 +549,33 @@ public class ResubmitApplicationControllerTest {
             CaseEventDetail.builder().stateId(State.JUDICIAL_REVIEW.getValue()).build(),
             CaseEventDetail.builder().stateId(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()).build()
         );
-        when(organisationService.getApplicantOrganisationDetails(caseData)).thenReturn(caseData);
-        when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataIssued);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(confidentialityTabService.updateConfidentialityDetails(Mockito.any(CaseData.class))).thenReturn(Map.of(
-            "applicantsConfidentialDetails",
-            List.of(Element.builder().value(ApplicantConfidentialityDetails.builder().build())),
-            "childrenConfidentialDetails",
-            List.of(Element.builder().value(ChildConfidentialityDetails.builder().build()))
-        ));
         when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
-        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.fl401resubmitApplication(authToken, s2sToken, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response =
+            resubmitApplicationController.fl401resubmitApplication(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         assertTrue(response.getData().containsKey("fl401ConfidentialityCheckResubmit"));
     }
 
     @Test
-    public void testExceptionForResubmitApplicationConfidentUpdateConfidentialityTabService() throws Exception {
-        List<CaseEventDetail> caseEvents = List.of(
-            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
-            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
-            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
-            CaseEventDetail.builder().stateId(State.CASE_ISSUED.getValue()).build(),
-            CaseEventDetail.builder().stateId(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()).build()
-        );
-        when(organisationService.getApplicantOrganisationDetails(caseData)).thenReturn(caseData);
-        when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataIssued);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(confidentialityTabService.updateConfidentialityDetails(Mockito.any(CaseData.class))).thenReturn(Map.of(
-            "applicantsConfidentialDetails",
-            List.of(Element.builder().value(ApplicantConfidentialityDetails.builder().build())),
-            "childrenConfidentialDetails",
-            List.of(Element.builder().value(ChildConfidentialityDetails.builder().build()))
-        ));
-        when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            resubmitApplicationController.resubmitApplication(authToken, s2sToken, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+    void testExceptionForResubmitApplicationConfidentUpdateConfidentialityTabService() {
+
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
+            resubmitApplicationController.resubmitApplication(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+        });
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testExceptionForFl401resubmitApplication() throws Exception {
-        List<CaseEventDetail> caseEvents = List.of(
-            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
-            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
-            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
-            CaseEventDetail.builder().stateId(State.JUDICIAL_REVIEW.getValue()).build(),
-            CaseEventDetail.builder().stateId(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()).build()
-        );
-        when(organisationService.getApplicantOrganisationDetails(caseData)).thenReturn(caseData);
-        when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataIssued);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(confidentialityTabService.updateConfidentialityDetails(Mockito.any(CaseData.class))).thenReturn(Map.of(
-            "applicantsConfidentialDetails",
-            List.of(Element.builder().value(ApplicantConfidentialityDetails.builder().build())),
-            "childrenConfidentialDetails",
-            List.of(Element.builder().value(ChildConfidentialityDetails.builder().build()))
-        ));
-        when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            resubmitApplicationController.fl401resubmitApplication(authToken, s2sToken, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
-    }
+    void testExceptionForFl401resubmitApplication() {
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
 
-    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
-                                                                 String expectedMessage) {
-        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
-        assertEquals(expectedMessage, exception.getMessage());
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
+            resubmitApplicationController.fl401resubmitApplication(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+        });
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 }

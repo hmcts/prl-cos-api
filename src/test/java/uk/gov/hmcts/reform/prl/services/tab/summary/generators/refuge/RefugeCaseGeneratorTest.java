@@ -24,7 +24,7 @@ public class RefugeCaseGeneratorTest {
     PartyDetails refugePartyDetails;
 
     @Test
-    public void testGenerateForNoCaseType() {
+    void testGenerateForNoCaseType() {
         CaseSummary caseSummary = generator.generate(CaseData.builder()
             .build());
         assertThat(caseSummary).isEqualTo(CaseSummary.builder().refugeCase(RefugeCase
@@ -35,7 +35,7 @@ public class RefugeCaseGeneratorTest {
     }
 
     @Test
-    public void testGenerateForC100() {
+    void testGenerateForC100() {
         Address address = Address.builder()
             .addressLine1("test")
             .postCode("test")
@@ -65,7 +65,7 @@ public class RefugeCaseGeneratorTest {
     }
 
     @Test
-    public void testGenerateForC100NotRefuge() {
+    void testGenerateForC100NotRefuge() {
         Address address = Address.builder()
             .addressLine1("test")
             .postCode("test")
@@ -94,7 +94,7 @@ public class RefugeCaseGeneratorTest {
     }
 
     @Test
-    public void testGenerateForC100ApplicantLivesInReguge() {
+    void testGenerateForC100ApplicantLivesInReguge() {
         CaseSummary caseSummary = generator.generate(CaseData.builder()
             .caseTypeOfApplication("C100")
             .applicants(List.of(Element.<PartyDetails>builder().value(PartyDetails.builder()
@@ -108,7 +108,7 @@ public class RefugeCaseGeneratorTest {
     }
 
     @Test
-    public void testGenerateForC100RespondentLivesInReguge() {
+    void testGenerateForC100RespondentLivesInReguge() {
         CaseSummary caseSummary = generator.generate(CaseData.builder()
             .caseTypeOfApplication("C100")
             .respondents(List.of(Element.<PartyDetails>builder().value(PartyDetails.builder()
@@ -122,7 +122,7 @@ public class RefugeCaseGeneratorTest {
     }
 
     @Test
-    public void testGenerateForC100OtherPartyLivesInReguge() {
+    void testGenerateForC100OtherPartyLivesInReguge() {
         CaseSummary caseSummary = generator.generate(CaseData.builder()
             .caseTypeOfApplication("C100")
             .otherPartyInTheCaseRevised(List.of(Element.<PartyDetails>builder().value(PartyDetails.builder()
@@ -136,7 +136,7 @@ public class RefugeCaseGeneratorTest {
     }
 
     @Test
-    public void testGenerateForFL401NotRefuge() {
+    void testGenerateForFL401NotRefuge() {
         CaseSummary caseSummary = generator.generate(CaseData.builder()
                                                          .caseTypeOfApplication("FL401")
                                                          .applicantsFL401(refugePartyDetails)
@@ -149,7 +149,7 @@ public class RefugeCaseGeneratorTest {
     }
 
     @Test
-    public void testGenerateForFL401ApplicantRefuge() {
+    void testGenerateForFL401ApplicantRefuge() {
         CaseSummary caseSummary = generator.generate(CaseData.builder()
             .caseTypeOfApplication("FL401")
                 .applicantsFL401(PartyDetails.builder().liveInRefuge(YesOrNo.Yes).build())
@@ -162,7 +162,7 @@ public class RefugeCaseGeneratorTest {
     }
 
     @Test
-    public void testGenerateForFL401RespondentRefuge() {
+    void testGenerateForFL401RespondentRefuge() {
         CaseSummary caseSummary = generator.generate(CaseData.builder()
             .caseTypeOfApplication("FL401")
             .respondentsFL401(PartyDetails.builder().liveInRefuge(YesOrNo.Yes).build())

@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.migration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,7 +33,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_DRAFT_C1A;
 
 @ExtendWith(MockitoExtension.class)
-public class MigrationControllerTest {
+class MigrationControllerTest {
 
     @Mock
     AllTabServiceImpl tabService;
@@ -65,20 +64,20 @@ public class MigrationControllerTest {
 
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         caseDataMap = new HashMap<>();
         caseData = CaseData.builder()
-                .id(12345678L)
-                .state(State.SUBMITTED_PAID)
-                .build();
+            .id(12345678L)
+            .state(State.SUBMITTED_PAID)
+            .build();
         caseDetails = CaseDetails.builder()
-                .id(12345678L)
-                .state(State.SUBMITTED_PAID.getValue())
-                .data(caseDataMap)
-                .build();
+            .id(12345678L)
+            .state(State.SUBMITTED_PAID.getValue())
+            .data(caseDataMap)
+            .build();
         callbackRequest = CallbackRequest.builder()
-                .caseDetails(caseDetails)
-                .build();
+            .caseDetails(caseDetails)
+            .build();
         Map<String, Object> caseFlags = new HashMap<String, Object>();
         caseFlags.put("caApplicant1InternalFlags", Flags.builder().build());
         when(partyLevelCaseFlagsService.generatePartyCaseFlags(any(CaseData.class))).thenReturn(caseFlags);
@@ -89,39 +88,37 @@ public class MigrationControllerTest {
     }
 
     @Test
-    public void handleSubmitted() {
+    void handleSubmitted() {
         migrationController.handleSubmitted(callbackRequest, "testAuth");
         verify(tabService, times(1)).updateAllTabsIncludingConfTab(Mockito.anyString());
     }
 
     @Test
-    public void handleAboutSubmit() {
+    void handleAboutSubmit() {
         migrationController.handleAboutToSubmit("testAuth", callbackRequest);
         verify(partyLevelCaseFlagsService, times(1)).generatePartyCaseFlags(caseData);
     }
 
     @Test
-    public void handleSubmittedToRemoveDoc() {
+    void handleSubmittedToRemoveDoc() {
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = migrationController
-                .handleSubmittedToRemoveDoc(authToken, serviceAuth, callbackRequest);
+            .handleSubmittedToRemoveDoc(authToken, serviceAuth, callbackRequest);
         assertNull(response.getData().get(DOCUMENT_FIELD_C1A));
         assertNull(response.getData().get(DOCUMENT_FIELD_DRAFT_C1A));
     }
 
     @Test
-    public void handleSubmittedToRemoveDoc_1() {
+    void handleSubmittedToRemoveDoc_1() {
         when(authorisationService.isAuthorized(any(), any())).thenReturn(false);
         Mockito.when(authorisationService.isAuthorized(authToken, serviceAuth)).thenReturn(false);
-        assertExpectedException(() -> {
-            migrationController.handleSubmittedToRemoveDoc(authToken, serviceAuth, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
 
-    }
+        RuntimeException ex = assertThrows(
+            RuntimeException.class, () -> {
+                migrationController.handleSubmittedToRemoveDoc(authToken, serviceAuth, callbackRequest);
+            }
+        );
 
-    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
-                                                                 String expectedMessage) {
-        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
-        assertEquals(expectedMessage, exception.getMessage());
+        assertEquals("Invalid Client", ex.getMessage());
     }
 }

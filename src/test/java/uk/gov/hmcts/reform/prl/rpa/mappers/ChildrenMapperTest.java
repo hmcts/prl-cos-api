@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-public class ChildrenMapperTest {
+class ChildrenMapperTest {
 
     @InjectMocks
     ChildrenMapper childrenMapper;
@@ -40,7 +40,7 @@ public class ChildrenMapperTest {
     Address address;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         liveWith = new ArrayList<>();
         liveWith.add(LiveWithEnum.applicant);
         liveWith.add(LiveWithEnum.respondent);
@@ -63,14 +63,14 @@ public class ChildrenMapperTest {
     }
 
     @Test
-    public void testChildrenMapperWithEmptyValues() {
+    void testChildrenMapperWithEmptyValues() {
         children = Collections.emptyList();
         assertTrue(childrenMapper.map(children).isEmpty());
 
     }
 
     @Test
-    public void testChildrenMapperWithAllFields() {
+    void testChildrenMapperWithAllFields() {
 
         child = (Child.builder().firstName("Lewis").lastName("Christine")
             .dateOfBirth(LocalDate.of(1990, 8, 1))
@@ -86,7 +86,7 @@ public class ChildrenMapperTest {
     }
 
     @Test
-    public void testChildrenMapperWithSomeFields() {
+    void testChildrenMapperWithSomeFields() {
 
         child = (Child.builder().firstName("Lewis").lastName("Christine")
             .dateOfBirth(LocalDate.of(1990, 8, 1))

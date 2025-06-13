@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.cafcass;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,10 +17,11 @@ import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class CafcassCdamServiceTest {
+class CafcassCdamServiceTest {
 
     @Mock
     private AuthTokenGenerator authTokenGenerator;
@@ -38,7 +38,7 @@ public class CafcassCdamServiceTest {
     private CafcassCdamService cafcassCdamService;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
         uuid = randomUUID();
         authToken = "auth-token";
@@ -48,27 +48,27 @@ public class CafcassCdamServiceTest {
 
     @Test
     @DisplayName("test case for Case document API.")
-    public void testGetDocumentBinary() {
+    void testGetDocumentBinary() {
 
         when(caseDocumentClient.getDocumentBinary(authToken, s2sToken, uuid)).thenReturn(new ResponseEntity<Resource>(
             HttpStatus.OK));
 
         final ResponseEntity<Resource> response = cafcassCdamService.getDocument(authToken, s2sToken, uuid);
 
-        Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
 
     }
 
     @Test
     @DisplayName("test case for Case document API when document id is incorrect.")
-    public void testGetDocumentBinaryNotFound() {
+    void testGetDocumentBinaryNotFound() {
 
         when(caseDocumentClient.getDocumentBinary(authToken, s2sToken, uuid)).thenReturn(new ResponseEntity<Resource>(
             HttpStatus.NOT_FOUND));
 
         final ResponseEntity<Resource> response = cafcassCdamService.getDocument(authToken, s2sToken, uuid);
 
-        Assert.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
 
     }
 }

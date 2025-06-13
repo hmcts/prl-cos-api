@@ -3,13 +3,9 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import javassist.NotFoundException;
-import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -21,7 +17,6 @@ import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
-import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
@@ -35,7 +30,6 @@ import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,13 +38,14 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.TASK_LIST_V3_FLAG;
 
 @ExtendWith(MockitoExtension.class)
-public class CaseControllerTest {
+class CaseControllerTest {
 
     @InjectMocks
     private CaseController caseController;
@@ -83,22 +78,17 @@ public class CaseControllerTest {
     private LaunchDarklyClient launchDarklyClient;
 
     private CaseData caseData;
-    Address address;
-    @Rule
-    public ExpectedException expectedEx = ExpectedException.none();
 
-    private CitizenUpdatedCaseData citizenUpdatedCaseData;
-    public static final String authToken = "Bearer TestAuthToken";
-    public static final String servAuthToken = "Bearer TestServToken";
+    public static final String AUTH_TOKEN = "Bearer TestAuthToken";
+    public static final String S2S_TOKEN = "Bearer TestServToken";
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         objectMapper.registerModule(new JavaTimeModule());
-        when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
     }
 
     @Test
-    public void testGetCase() {
+    void testGetCase() {
 
         caseData = CaseData.builder()
             .id(1234567891234567L)
@@ -106,8 +96,7 @@ public class CaseControllerTest {
             .createdDate(LocalDateTime.now().minusDays(10))
             .build();
 
-        when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(true);
-        when(authTokenGenerator.generate()).thenReturn(servAuthToken);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule()));
         CaseDetails caseDetails = CaseDetails.builder().id(
@@ -115,63 +104,64 @@ public class CaseControllerTest {
 
         String caseId = "1234567891234567";
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(caseService.getCase(authToken, caseId)).thenReturn(caseDetails);
-        when(authTokenGenerator.generate()).thenReturn("servAuthToken");
-        when(authorisationService.authoriseUser(authToken)).thenReturn(true);
-        when(authorisationService.authoriseService(servAuthToken)).thenReturn(true);
-        UiCitizenCaseData caseData1 = caseController.getCase(caseId, authToken, servAuthToken);
+        when(caseService.getCase(AUTH_TOKEN, caseId)).thenReturn(caseDetails);
+        UiCitizenCaseData caseData1 = caseController.getCase(caseId, AUTH_TOKEN, S2S_TOKEN);
         assertEquals(caseData.getApplicantCaseName(), caseData1.getCaseData().getApplicantCaseName());
-
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void testGetCaseInvalidClient() {
-
-        caseData = CaseData.builder()
-            .id(1234567891234567L)
-            .applicantCaseName("test")
-            .createdDate(LocalDateTime.now().minusDays(10))
-            .build();
-
-        when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(false);
-
-        String caseId = "1234567891234567";
-        caseController.getCase(caseId, authToken, servAuthToken);
     }
 
     @Test
-    public void testGetCaseWithHearing() {
-
+    void testGetCaseInvalidClient() {
         caseData = CaseData.builder()
             .id(1234567891234567L)
             .applicantCaseName("test")
             .createdDate(LocalDateTime.now().minusDays(10))
             .build();
+
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+
         String caseId = "1234567891234567";
 
-        when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(true);
-        when(caseService.getCaseWithHearing(authToken, caseId, "test")).thenReturn(CaseDataWithHearingResponse.builder().build());
-
-
-        assertNotNull(caseController.retrieveCaseWithHearing(caseId, "test", authToken, servAuthToken));
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void testGetCaseWithHearingInvalidClient() {
-
-        caseData = CaseData.builder()
-            .id(1234567891234567L)
-            .applicantCaseName("test")
-            .createdDate(LocalDateTime.now().minusDays(10))
-            .build();
-        String caseId = "1234567891234567";
-
-        when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(false);
-        caseController.retrieveCaseWithHearing(caseId, "test", authToken, servAuthToken);
+        assertThrows(RuntimeException.class, () -> {
+            caseController.getCase(caseId, AUTH_TOKEN, S2S_TOKEN);
+        });
     }
 
     @Test
-    public void testCitizenUpdateCase() throws JsonProcessingException, NotFoundException {
+    void testGetCaseWithHearing() {
+
+        caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .applicantCaseName("test")
+            .createdDate(LocalDateTime.now().minusDays(10))
+            .build();
+        String caseId = "1234567891234567";
+
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
+        when(caseService.getCaseWithHearing(AUTH_TOKEN, caseId, "test")).thenReturn(CaseDataWithHearingResponse.builder().build());
+
+
+        assertNotNull(caseController.retrieveCaseWithHearing(caseId, "test", AUTH_TOKEN, S2S_TOKEN));
+    }
+
+    @Test
+    void testGetCaseWithHearingInvalidClient() {
+
+        caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .applicantCaseName("test")
+            .createdDate(LocalDateTime.now().minusDays(10))
+            .build();
+        String caseId = "1234567891234567";
+
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+
+        assertThrows(RuntimeException.class, () -> {
+            caseController.retrieveCaseWithHearing(caseId, "test", AUTH_TOKEN, S2S_TOKEN);
+        });
+    }
+
+    @Test
+    void testCitizenUpdateCase() throws JsonProcessingException {
 
         caseData = CaseData.builder()
             .id(1234567891234567L)
@@ -179,11 +169,9 @@ public class CaseControllerTest {
             .c100RebuildData(C100RebuildData.builder().c100RebuildApplicantDetails("").build())
             .build();
 
-        when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(true);
-        when(authTokenGenerator.generate()).thenReturn(servAuthToken);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
 
-
-        address = Address.builder()
+        Address address = Address.builder()
             .addressLine1("AddressLine1")
             .postTown("Xyz town")
             .postCode("AB1 2YZ")
@@ -212,25 +200,23 @@ public class CaseControllerTest {
         String eventId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(confidentialDetailsMapper.mapConfidentialData(caseData, true)).thenReturn(updatedCasedata);
-        when(authTokenGenerator.generate()).thenReturn("TestToken");
-        when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(true);
-        when(caseService.updateCase(caseData, authToken, caseId, eventId
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
+        when(caseService.updateCase(caseData, AUTH_TOKEN, caseId, eventId
         )).thenReturn(caseDetails);
         CaseData caseData1 = caseController.updateCase(
             caseData,
             caseId,
             eventId,
-            authToken,
-            servAuthToken,
+            AUTH_TOKEN,
+            S2S_TOKEN,
             "testAccessCode"
         );
         assertEquals(caseData.getApplicantCaseName(), caseData1.getApplicantCaseName());
 
     }
 
-    @Test(expected = RuntimeException.class)
-    public void testUpdateCaseInvalidClient() throws JsonProcessingException {
-
+    @Test
+    void testUpdateCaseInvalidClient() {
         caseData = CaseData.builder()
             .id(1234567891234567L)
             .applicantCaseName("test")
@@ -238,12 +224,15 @@ public class CaseControllerTest {
             .build();
         String caseId = "1234567891234567";
 
-        when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(false);
-        caseController.updateCase(caseData, caseId, "test", authToken, servAuthToken, "test");
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+
+        assertThrows(RuntimeException.class, () -> {
+            caseController.updateCase(caseData, caseId, "test", AUTH_TOKEN, S2S_TOKEN, "test");
+        });
     }
 
     @Test
-    public void testCitizenRetrieveCases() {
+    void testCitizenRetrieveCases() {
 
         List<CaseData> caseDataList = new ArrayList<>();
 
@@ -257,37 +246,34 @@ public class CaseControllerTest {
                              .applicantCaseName("test")
                              .build());
 
-        when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(true);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
 
-        List<CaseDetails> caseDetails = new ArrayList<>();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        caseDetails.add(CaseDetails.builder().id(
-            1234567891234567L).data(stringObjectMap).build());
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(caseService.retrieveCases(AUTH_TOKEN, S2S_TOKEN)).thenReturn(caseDataList);
 
         String userId = "12345";
         String role = "test role";
-
-        List<CaseData> caseDataList1 = new ArrayList<>();
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(caseService.retrieveCases(authToken, servAuthToken)).thenReturn(caseDataList);
-        caseDataList1 = caseController.retrieveCases(role, userId, authToken, servAuthToken);
+        List<CaseData> caseDataList1 = caseController.retrieveCases(role, userId, AUTH_TOKEN, S2S_TOKEN);
         assertNotNull(caseDataList1);
 
     }
 
-    @Test(expected = RuntimeException.class)
-    public void testRetrieveCaseInvalidClient() {
-
+    @Test
+    void testRetrieveCaseInvalidClient() {
         String caseId = "1234567891234567";
 
-        when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(false);
-        caseController.retrieveCases(caseId, caseId, authToken, servAuthToken);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+
+        assertThrows(RuntimeException.class, () -> {
+            caseController.retrieveCases(caseId, caseId, AUTH_TOKEN, S2S_TOKEN);
+        });
     }
 
     @Test
-    public void testretrieveCitizenCases() {
+    void testretrieveCitizenCases() {
         List<CaseData> caseDataList = new ArrayList<>();
 
         caseData = CaseData.builder()
@@ -300,7 +286,7 @@ public class CaseControllerTest {
                              .applicantCaseName("test")
                              .build());
 
-        when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(true);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
 
         List<CaseDetails> caseDetails = new ArrayList<>();
 
@@ -308,23 +294,25 @@ public class CaseControllerTest {
         caseDetails.add(CaseDetails.builder().id(
             1234567891234567L).data(stringObjectMap).build());
 
-        List<CitizenCaseData> citizenCaseDataList = new ArrayList<>();
-
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(caseService.retrieveCases(authToken, servAuthToken)).thenReturn(caseDataList);
-        citizenCaseDataList = caseController.retrieveCitizenCases(authToken, servAuthToken);
+        when(caseService.retrieveCases(AUTH_TOKEN, S2S_TOKEN)).thenReturn(caseDataList);
+
+        List<CitizenCaseData> citizenCaseDataList = caseController.retrieveCitizenCases(AUTH_TOKEN, S2S_TOKEN);
         assertNotNull(citizenCaseDataList);
     }
 
-    @Test(expected = RuntimeException.class)
-    public void testRetrieveCitizenCaseInvalidClient() {
+    @Test
+    void testRetrieveCitizenCaseInvalidClient() {
 
-        when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(false);
-        caseController.retrieveCitizenCases(authToken, servAuthToken);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+
+        assertThrows(RuntimeException.class, () -> {
+            caseController.retrieveCitizenCases(AUTH_TOKEN, S2S_TOKEN);
+        });
     }
 
     @Test
-    public void shouldCreateCase() {
+    void shouldCreateCase() {
         //Given
         caseData = CaseData.builder()
             .id(1234567891234567L)
@@ -336,80 +324,83 @@ public class CaseControllerTest {
             1234567891234567L).data(stringObjectMap).build();
 
         Mockito.when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        Mockito.when(caseService.createCase(caseData, authToken)).thenReturn(caseDetails);
-        when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(true);
-        Mockito.when(authTokenGenerator.generate()).thenReturn(servAuthToken);
+        Mockito.when(caseService.createCase(caseData, AUTH_TOKEN)).thenReturn(caseDetails);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
+
         //When
-        CaseData actualCaseData = caseController.createCase(authToken, servAuthToken, caseData);
+        CaseData actualCaseData = caseController.createCase(AUTH_TOKEN, S2S_TOKEN, caseData);
 
         //Then
         assertThat(actualCaseData).isEqualTo(caseData);
     }
 
-    @Test(expected = RuntimeException.class)
-    public void testCreateCaseInvalidClient() {
-
+    @Test
+    void testCreateCaseInvalidClient() {
         caseData = CaseData.builder()
             .id(1234567891234567L)
             .applicantCaseName("test")
             .createdDate(LocalDateTime.now().minusDays(10))
             .build();
 
-        when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(false);
-        caseController.createCase(authToken, servAuthToken, caseData);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+
+        assertThrows(RuntimeException.class, () -> {
+            caseController.createCase(AUTH_TOKEN, S2S_TOKEN, caseData);
+        });
     }
 
     @Test
-    public void testGetAllHearingsForCitizenCase() throws IOException {
+    void testGetAllHearingsForCitizenCase() {
         String caseId = "1234567891234567";
-        when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(true);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
 
-        Mockito.when(hearingService.getHearings(authToken, caseId)).thenReturn(
+        Mockito.when(hearingService.getHearings(AUTH_TOKEN, caseId)).thenReturn(
             Hearings.hearingsWith().build());
 
         Hearings hearingForCase = caseController.getAllHearingsForCitizenCase(
-            authToken, servAuthToken, caseId);
-        Assert.assertNotNull(hearingForCase);
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void testGetAllHearingsForCaseInvalidClient() {
-
-        when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(false);
-        caseController.getAllHearingsForCitizenCase(authToken, servAuthToken, "test");
+            AUTH_TOKEN, S2S_TOKEN, caseId);
+        assertNotNull(hearingForCase);
     }
 
     @Test
-    public void testFetchIdamAmRoles() throws IOException {
+    void testGetAllHearingsForCaseInvalidClient() {
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+
+        assertThrows(RuntimeException.class, () -> {
+            caseController.getAllHearingsForCitizenCase(AUTH_TOKEN, S2S_TOKEN, "test");
+        });
+    }
+
+    @Test
+    void testFetchIdamAmRoles() {
         String emailId = "test@email.com";
         Map<String, String> amRoles = new HashMap<>();
         amRoles.put("amRoles","case-worker");
-        Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
-        Mockito.when(caseService.fetchIdamAmRoles(authToken, emailId)).thenReturn(amRoles);
+        Mockito.when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Boolean.TRUE);
+        Mockito.when(caseService.fetchIdamAmRoles(AUTH_TOKEN, emailId)).thenReturn(amRoles);
 
         Map<String, String> roles = caseController.fetchIdamAmRoles(
-            authToken, emailId);
-        Assert.assertFalse(roles.isEmpty());
+            AUTH_TOKEN, emailId);
+        assertFalse(roles.isEmpty());
     }
 
     @Test
-    public void testFetchIdamAmRolesFails() throws IOException {
-
-        expectedEx.expect(RuntimeException.class);
-        expectedEx.expectMessage("Invalid Client");
-
+    void testFetchIdamAmRolesFails() {
         String emailId = "test@email.com";
         Map<String, String> amRoles = new HashMap<>();
-        amRoles.put("amRoles","case-worker");
-        Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
-        Mockito.when(caseService.fetchIdamAmRoles(authToken, emailId)).thenReturn(amRoles);
+        amRoles.put("amRoles", "case-worker");
 
-        Map<String, String> roles = caseController.fetchIdamAmRoles(
-            authToken, emailId);
+        Mockito.when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Boolean.FALSE);
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
+            caseController.fetchIdamAmRoles(AUTH_TOKEN, emailId);
+        });
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void shouldCreateC100Case() {
+    void shouldCreateC100Case() {
         //Given
         caseData = CaseData.builder()
             .id(1234567891234567L)
@@ -422,12 +413,11 @@ public class CaseControllerTest {
             1234567891234567L).data(stringObjectMap).build();
 
         Mockito.when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        Mockito.when(caseService.createCase(caseData, authToken)).thenReturn(caseDetails);
-        when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(true);
-        Mockito.when(authTokenGenerator.generate()).thenReturn(servAuthToken);
+        Mockito.when(caseService.createCase(caseData, AUTH_TOKEN)).thenReturn(caseDetails);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
         Mockito.when(launchDarklyClient.isFeatureEnabled(TASK_LIST_V3_FLAG)).thenReturn(true);
         //When
-        CaseData actualCaseData = caseController.createCase(authToken, servAuthToken, caseData);
+        CaseData actualCaseData = caseController.createCase(AUTH_TOKEN, S2S_TOKEN, caseData);
 
         //Then
         assertThat(actualCaseData).isEqualTo(caseData);

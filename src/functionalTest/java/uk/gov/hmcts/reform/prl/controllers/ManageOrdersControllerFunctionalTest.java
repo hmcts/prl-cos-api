@@ -5,18 +5,17 @@ import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Matchers;
-import org.junit.Assert;
 import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
@@ -34,13 +33,14 @@ import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @Slf4j
 @SpringBootTest
-@ExtendWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ManageOrdersControllerFunctionalTest {
@@ -62,13 +62,13 @@ public class ManageOrdersControllerFunctionalTest {
     @Autowired
     protected RoleAssignmentService roleAssignmentService;
 
-    @MockBean
+    @MockitoBean
     private ManageOrderService manageOrderService;
 
-    @MockBean
+    @MockitoBean
     private RoleAssignmentApi roleAssignmentApi;
 
-    @MockBean
+    @MockitoBean
     private HearingService hearingService;
 
     private static final String VALID_INPUT_JSON = "CallBackRequest.json";
@@ -164,8 +164,8 @@ public class ManageOrdersControllerFunctionalTest {
             .extract()
             .as(CaseDetails.class);
 
-        Assert.assertNotNull(caseDetails);
-        Assert.assertNotNull(caseDetails.getId());
+        assertNotNull(caseDetails);
+        assertNotNull(caseDetails.getId());
     }
 
     @Test
@@ -313,7 +313,7 @@ public class ManageOrdersControllerFunctionalTest {
     /**
      * Court Admin manageOrders journey - creates the order with one hearings with approval required.
      */
-    @Ignore
+    @Disabled
     @Test
     public void givenRequestBody_courtArdmin_judge_approval_required() throws Exception {
         String requestBody = ResourceLoader.loadJson(COURT_ADMIN_DRAFT_ORDER_JUDGE_APPROVAL_REQUIRED);
@@ -357,7 +357,7 @@ public class ManageOrdersControllerFunctionalTest {
     /**
      * Court Admin manageOrders journey - creates the order with many hearings with approval required.
      */
-    @Ignore
+    @Disabled
     @Test
     public void givenRequestBody_courtArdmin_judge_approval_requiredMultiple() throws Exception {
         String requestBody = ResourceLoader.loadJson(COURT_ADMIN_DRAFT_ORDER_JUDGE_APPROVAL_REQUIRED_MANY_HEARING);
@@ -651,7 +651,7 @@ public class ManageOrdersControllerFunctionalTest {
 
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void givenRequestBody_courtArdmin_judge_approval_required_sdo() throws Exception {
         String requestBody = ResourceLoader.loadJson(COURT_ADMIN_DRAFT_SDO_ORDER_JUDGE_APPROVAL_REQUIRED);

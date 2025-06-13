@@ -160,8 +160,8 @@ public class SolicitorEmailService {
             .map(PartyDetails::getSolicitorEmail)
             .toList();
 
-        solicitorEmail = (!applicantSolicitorEmailList.isEmpty() && null != applicantSolicitorEmailList.get(0)
-            && !applicantSolicitorEmailList.get(0).isEmpty() && applicantSolicitorEmailList.size() == 1) ? applicantSolicitorEmailList.get(
+        solicitorEmail = (!applicantSolicitorEmailList.isEmpty() && null != applicantSolicitorEmailList.getFirst()
+            && !applicantSolicitorEmailList.getFirst().isEmpty() && applicantSolicitorEmailList.size() == 1) ? applicantSolicitorEmailList.get(
             0)
             : userDetails.getEmail();
 
@@ -240,8 +240,8 @@ public class SolicitorEmailService {
             .map(PartyDetails::getSolicitorEmail)
             .toList();
 
-        solicitorEmail = (!applicantSolicitorEmailList.isEmpty() && null != applicantSolicitorEmailList.get(0)
-            && !applicantSolicitorEmailList.get(0).isEmpty() && applicantSolicitorEmailList.size() == 1) ? applicantSolicitorEmailList.get(
+        solicitorEmail = (!applicantSolicitorEmailList.isEmpty() && null != applicantSolicitorEmailList.getFirst()
+            && !applicantSolicitorEmailList.getFirst().isEmpty() && applicantSolicitorEmailList.size() == 1) ? applicantSolicitorEmailList.get(
             0)
             : userDetails.getEmail();
         emailService.send(

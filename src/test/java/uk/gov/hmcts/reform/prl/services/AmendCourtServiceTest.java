@@ -2,8 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Ignore;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,22 +27,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class AmendCourtServiceTest {
-
-    @Mock
-    private EmailService emailService;
+class AmendCourtServiceTest {
 
     @InjectMocks
     private AmendCourtService amendCourtService;
 
     @Mock
-    private CaseUtils caseUtils;
+    private EmailService emailService;
 
     @Mock
     private LocationRefDataService locationRefDataService;
@@ -53,16 +50,10 @@ public class AmendCourtServiceTest {
     private ObjectMapper objectMapper;
 
     @Mock
-    private CaseWorkerEmailService caseWorkerEmailService;
-
-    @Mock
     private C100IssueCaseService c100IssueCaseService;
 
     @Mock
     private CourtSealFinderService courtSealFinderService;
-
-    @Mock
-    private EventService eventService;
 
     @Mock
     private CaseSummaryTabService caseSummaryTab;
@@ -70,12 +61,10 @@ public class AmendCourtServiceTest {
     private CaseData caseData;
     private CallbackRequest callbackRequest;
     private Map<String, Object> caseDataMap;
-    private CourtVenue courtVenue;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         caseDataMap = new HashMap<>();
-        courtVenue = CourtVenue.builder().build();
         callbackRequest = CallbackRequest.builder()
                 .caseDetails(CaseDetails.builder().id(123L).state(State.CASE_ISSUED.getValue()).data(caseDataMap).build()).build();
         caseData = CaseData.builder()
@@ -83,50 +72,23 @@ public class AmendCourtServiceTest {
             .caseTypeOfApplication("C100")
             .courtList(DynamicList.builder().value(DynamicListElement.builder().code(":test@test.com").build()).build())
             .build();
-        when(locationRefDataService.getCourtDetailsFromEpimmsId(Mockito.anyString(), Mockito.anyString()))
-            .thenReturn(Optional.of(courtVenue));
-        when(c100IssueCaseService.getFactCourtId(courtVenue)).thenReturn("");
-        when(courtSealFinderService.getCourtSeal(Mockito.anyString())).thenReturn("");
     }
 
     @Test
-    public void testC100EmailNotification() throws Exception {
+    void testC100EmailNotification() {
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(
             callbackRequest.getCaseDetails(),
             objectMapper
         )).thenReturn(caseData);
         when(locationRefDataService.getCourtDetailsFromEpimmsId(Mockito.anyString(), Mockito.anyString()))
-            .thenReturn(Optional.of(courtVenue));
-        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+            .thenReturn(Optional.of(CourtVenue.builder().build()));
         amendCourtService.handleAmendCourtSubmission("", callbackRequest, caseDataMap);
         verifyNoInteractions(emailService);
     }
 
     @Test
-    @Ignore("Removed this test case since no emails are now triggered "
-        + "upon selecting court from the dropdown list when selecting Transfer to another court event")
-    public void testC100EmailNotificationWithEmail() throws Exception {
-        caseData = caseData.toBuilder()
-            .cantFindCourtCheck(List.of())
-            .courtEmailAddress("").build();
-        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(CaseUtils.getCaseData(
-            callbackRequest.getCaseDetails(),
-            objectMapper
-        )).thenReturn(caseData);
-        when(locationRefDataService.getCourtDetailsFromEpimmsId(Mockito.anyString(), Mockito.anyString()))
-            .thenReturn(Optional.empty());
-        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
-        amendCourtService.handleAmendCourtSubmission("", callbackRequest, caseDataMap);
-        verify(emailService, times(1)).send(Mockito.anyString(),
-                                            Mockito.any(),
-                                            Mockito.any(), Mockito.any()
-        );
-    }
-
-    @Test
-    public void testFL401EmailNotificationWithEmail() throws Exception {
+    void testFL401EmailNotificationWithEmail() {
         caseData = caseData.toBuilder()
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .cantFindCourtCheck(List.of(CantFindCourtEnum.cantFindCourt))
@@ -136,9 +98,6 @@ public class AmendCourtServiceTest {
             callbackRequest.getCaseDetails(),
             objectMapper
         )).thenReturn(caseData);
-        when(locationRefDataService.getCourtDetailsFromEpimmsId(Mockito.anyString(), Mockito.anyString()))
-            .thenReturn(Optional.empty());
-        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
         amendCourtService.handleAmendCourtSubmission("", callbackRequest, caseDataMap);
         verify(emailService, times(0)).send(Mockito.anyString(),
                                             Mockito.any(),
@@ -147,75 +106,35 @@ public class AmendCourtServiceTest {
     }
 
     @Test
-    @Ignore("Removed this test case since no emails are now triggered "
-        + "upon selecting court from the dropdown list when selecting Transfer to another court event")
-    public void testFL401CourtAdminEmailEmail() throws Exception {
-        caseData = caseData.toBuilder()
-            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
-            .cantFindCourtCheck(List.of())
-            .courtEmailAddress("").build();
-        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(CaseUtils.getCaseData(
-            callbackRequest.getCaseDetails(),
-            objectMapper
-        )).thenReturn(caseData);
-        when(locationRefDataService.getCourtDetailsFromEpimmsId(Mockito.anyString(), Mockito.anyString()))
-            .thenReturn(Optional.empty());
-        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
-        amendCourtService.handleAmendCourtSubmission("", callbackRequest, caseDataMap);
-        verify(caseWorkerEmailService, times(1)).sendEmailToFl401LocalCourt(Mockito.any(),
-                                            Mockito.any()
-        );
-    }
-
-    @Test
-    public void testValidateCourtShouldGiveErrorWhenCantFindCourtIsNotSelected() throws Exception {
-        CaseData caseData = CaseData.builder()
+    void testValidateCourtShouldGiveErrorWhenCantFindCourtIsNotSelected() {
+        caseData = CaseData.builder()
             .cantFindCourtCheck(List.of(CantFindCourtEnum.cantFindCourt))
             .courtList(DynamicList.builder().build())
             .courtEmailAddress("email@test.com")
             .anotherCourt("test court").build();
         List<String> errorList  = new ArrayList<>();
 
-        Boolean error =  amendCourtService
-            .validateCourtFields(caseData, errorList);
-        Assertions.assertTrue(error);
+        assertTrue(amendCourtService.validateCourtFields(caseData, errorList));
     }
 
     @Test
-    public void testValidateCourtShouldGiveErrorWhenBothOptionSelelcted() throws Exception {
-        CaseData caseData = CaseData.builder()
-            .courtEmailAddress("email@test.com")
-            .anotherCourt("test court").build();
-        List<String> errorList  = new ArrayList<>();
-
-        Boolean error =  amendCourtService
-            .validateCourtFields(caseData, errorList);
-        Assertions.assertNotNull(error);
-    }
-
-    @Test
-    public void testValidateCourtShouldNotGiveError() throws Exception {
-        CaseData caseData = CaseData.builder()
+    void testValidateCourtShouldNotGiveError() {
+        caseData = CaseData.builder()
             .courtEmailAddress("email@test.com")
             .cantFindCourtCheck(List.of(CantFindCourtEnum.cantFindCourt))
             .anotherCourt("test court").build();
         List<String> errorList  = new ArrayList<>();
 
-        Boolean error =  amendCourtService
-            .validateCourtFields(caseData, errorList);
-        Assertions.assertFalse(error);
+        assertFalse(amendCourtService.validateCourtFields(caseData, errorList));
     }
 
     @Test
-    public void testValidateCourtShouldGiveError() throws Exception {
-        CaseData caseData = CaseData.builder()
+    void testValidateCourtShouldGiveError() {
+        caseData = CaseData.builder()
             .cantFindCourtCheck(List.of(CantFindCourtEnum.cantFindCourt)).build();
 
         List<String> errorList  = new ArrayList<>();
 
-        Boolean error =  amendCourtService
-            .validateCourtFields(caseData, errorList);
-        Assertions.assertTrue(error);
+        assertTrue(amendCourtService.validateCourtFields(caseData, errorList));
     }
 }

@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,8 +22,12 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @ExtendWith(MockitoExtension.class)
-public class MiamPolicyUpgradeCheckerTest {
+class MiamPolicyUpgradeCheckerTest {
 
     @InjectMocks
     MiamPolicyUpgradeChecker miamPolicyUpgradeChecker;
@@ -33,92 +36,92 @@ public class MiamPolicyUpgradeCheckerTest {
     TaskErrorService taskErrorService;
 
     @Test
-    public void testHasMandatoryCompleted() {
+    void testHasMandatoryCompleted() {
         CaseData caseData = CaseData.builder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
                 .build())
             .build();
-        Assert.assertFalse(miamPolicyUpgradeChecker.hasMandatoryCompleted(caseData));
+        assertFalse(miamPolicyUpgradeChecker.hasMandatoryCompleted(caseData));
     }
 
     @Test
-    public void testGetDefaultTaskState() {
+    void testGetDefaultTaskState() {
         CaseData caseData = CaseData.builder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
                 .build())
             .build();
-        Assert.assertEquals(TaskState.NOT_STARTED, miamPolicyUpgradeChecker.getDefaultTaskState(caseData));
+        assertEquals(TaskState.NOT_STARTED, miamPolicyUpgradeChecker.getDefaultTaskState(caseData));
     }
 
     @Test
-    public void testIsStartedFalse() {
+    void testIsStartedFalse() {
         CaseData caseData = CaseData.builder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
                 .build())
             .build();
-        Assert.assertFalse(miamPolicyUpgradeChecker.isStarted(caseData));
+        assertFalse(miamPolicyUpgradeChecker.isStarted(caseData));
     }
 
     @Test
-    public void testIsStartedTrue() {
+    void testIsStartedTrue() {
         CaseData caseData = CaseData.builder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
                 .mpuChildInvolvedInMiam(YesOrNo.Yes)
                 .build())
             .build();
-        Assert.assertTrue(miamPolicyUpgradeChecker.isStarted(caseData));
+        assertTrue(miamPolicyUpgradeChecker.isStarted(caseData));
     }
 
     @Test
-    public void testIsFinished() {
+    void testIsFinished() {
         CaseData caseData = CaseData.builder()
             .consentOrder(YesOrNo.No)
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
                 .build())
             .build();
-        Assert.assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
+        assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
     }
 
     @Test
-    public void testIsFinishedHasConstantOrder() {
+    void testIsFinishedHasConstantOrder() {
         CaseData caseData = CaseData.builder()
             .consentOrder(YesOrNo.Yes)
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
                 .build())
             .build();
-        Assert.assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
+        assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
     }
 
     @Test
-    public void testIsFinishedChildInvolvedInMiam() {
+    void testIsFinishedChildInvolvedInMiam() {
         CaseData caseData = CaseData.builder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
                 .mpuChildInvolvedInMiam(YesOrNo.Yes)
                 .build())
             .build();
-        Assert.assertTrue(miamPolicyUpgradeChecker.isFinished(caseData));
+        assertTrue(miamPolicyUpgradeChecker.isFinished(caseData));
     }
 
     @Test
-    public void testIsFinishedChildNotInvolvedInMiam() {
+    void testIsFinishedChildNotInvolvedInMiam() {
         CaseData caseData = CaseData.builder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
                 .mpuChildInvolvedInMiam(YesOrNo.No)
                 .build())
             .build();
-        Assert.assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
+        assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
     }
 
     @Test
-    public void testIsFinishedChildNotInvolvedInMiamApplicantAttendedEverythingEmpty() {
+    void testIsFinishedChildNotInvolvedInMiamApplicantAttendedEverythingEmpty() {
         CaseData caseData = CaseData.builder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
@@ -126,11 +129,11 @@ public class MiamPolicyUpgradeCheckerTest {
                 .mpuApplicantAttendedMiam(YesOrNo.Yes)
                 .build())
             .build();
-        Assert.assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
+        assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
     }
 
     @Test
-    public void testIsFinishedChildNotInvolvedInMiamApplicantAttendedRegNumberEmpty() {
+    void testIsFinishedChildNotInvolvedInMiamApplicantAttendedRegNumberEmpty() {
         CaseData caseData = CaseData.builder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
@@ -139,11 +142,11 @@ public class MiamPolicyUpgradeCheckerTest {
                 .mediatorRegistrationNumber("")
                 .build())
             .build();
-        Assert.assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
+        assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
     }
 
     @Test
-    public void testIsFinishedChildNotInvolvedInMiamApplicantAttendedMediatorServiceNameEmpty() {
+    void testIsFinishedChildNotInvolvedInMiamApplicantAttendedMediatorServiceNameEmpty() {
         CaseData caseData = CaseData.builder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
@@ -153,11 +156,11 @@ public class MiamPolicyUpgradeCheckerTest {
                 .familyMediatorServiceName("")
                 .build())
             .build();
-        Assert.assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
+        assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
     }
 
     @Test
-    public void testIsFinishedChildNotInvolvedInMiamApplicantAttendedMediatorSoleNameEmpty() {
+    void testIsFinishedChildNotInvolvedInMiamApplicantAttendedMediatorSoleNameEmpty() {
         CaseData caseData = CaseData.builder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
@@ -168,11 +171,11 @@ public class MiamPolicyUpgradeCheckerTest {
                 .soleTraderName("")
                 .build())
             .build();
-        Assert.assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
+        assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
     }
 
     @Test
-    public void testIsFinishedChildNotInvolvedInMiamApplicantAttendedMediatorSoleNameEverythingThere() {
+    void testIsFinishedChildNotInvolvedInMiamApplicantAttendedMediatorSoleNameEverythingThere() {
         CaseData caseData = CaseData.builder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
@@ -184,11 +187,11 @@ public class MiamPolicyUpgradeCheckerTest {
                 .miamCertificationDocumentUpload(Document.builder().build())
                 .build())
             .build();
-        Assert.assertTrue(miamPolicyUpgradeChecker.isFinished(caseData));
+        assertTrue(miamPolicyUpgradeChecker.isFinished(caseData));
     }
 
     @Test
-    public void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionNo() {
+    void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionNo() {
         CaseData caseData = CaseData.builder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
@@ -197,11 +200,11 @@ public class MiamPolicyUpgradeCheckerTest {
                 .mpuClaimingExemptionMiam(YesOrNo.No)
                 .build())
             .build();
-        Assert.assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
+        assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
     }
 
     @Test
-    public void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionYes() {
+    void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionYes() {
         CaseData caseData = CaseData.builder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
@@ -210,11 +213,11 @@ public class MiamPolicyUpgradeCheckerTest {
                 .mpuClaimingExemptionMiam(YesOrNo.Yes)
                 .build())
             .build();
-        Assert.assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
+        assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
     }
 
     @Test
-    public void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionEmpty() {
+    void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionEmpty() {
         CaseData caseData = CaseData.builder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
@@ -224,11 +227,11 @@ public class MiamPolicyUpgradeCheckerTest {
                 .mpuExemptionReasons(new ArrayList<>())
                 .build())
             .build();
-        Assert.assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
+        assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
     }
 
     @Test
-    public void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionDomesticAbuse() {
+    void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionDomesticAbuse() {
         CaseData caseData = CaseData.builder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
@@ -238,11 +241,11 @@ public class MiamPolicyUpgradeCheckerTest {
                 .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuDomesticAbuse))
                 .build())
             .build();
-        Assert.assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
+        assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
     }
 
     @Test
-    public void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionDomesticAbuseEmpty() {
+    void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionDomesticAbuseEmpty() {
         CaseData caseData = CaseData.builder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
@@ -253,11 +256,11 @@ public class MiamPolicyUpgradeCheckerTest {
                 .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuDomesticAbuse))
                 .build())
             .build();
-        Assert.assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
+        assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
     }
 
     @Test
-    public void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionDomesticAbuseEmptyEvidence() {
+    void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionDomesticAbuseEmptyEvidence() {
         CaseData caseData = CaseData.builder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
@@ -268,11 +271,11 @@ public class MiamPolicyUpgradeCheckerTest {
                 .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuDomesticAbuse))
                 .build())
             .build();
-        Assert.assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
+        assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
     }
 
     @Test
-    public void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionDomesticAbuseSuccess() {
+    void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionDomesticAbuseSuccess() {
         CaseData caseData = CaseData.builder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
@@ -284,11 +287,11 @@ public class MiamPolicyUpgradeCheckerTest {
                 .mpuIsDomesticAbuseEvidenceProvided(YesOrNo.Yes)
                 .build())
             .build();
-        Assert.assertTrue(miamPolicyUpgradeChecker.isFinished(caseData));
+        assertTrue(miamPolicyUpgradeChecker.isFinished(caseData));
     }
 
     @Test
-    public void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionChildProtection() {
+    void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionChildProtection() {
         CaseData caseData = CaseData.builder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
@@ -298,11 +301,11 @@ public class MiamPolicyUpgradeCheckerTest {
                 .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuChildProtectionConcern))
                 .build())
             .build();
-        Assert.assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
+        assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
     }
 
     @Test
-    public void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionChildProtectionSuccess() {
+    void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionChildProtectionSuccess() {
         CaseData caseData = CaseData.builder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
@@ -313,11 +316,11 @@ public class MiamPolicyUpgradeCheckerTest {
                 .mpuChildProtectionConcernReason(MiamPolicyUpgradeChildProtectionConcernEnum.mpuChildProtectionConcern_value_1)
                 .build())
             .build();
-        Assert.assertTrue(miamPolicyUpgradeChecker.isFinished(caseData));
+        assertTrue(miamPolicyUpgradeChecker.isFinished(caseData));
     }
 
     @Test
-    public void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionUrgency() {
+    void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionUrgency() {
         CaseData caseData = CaseData.builder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
@@ -327,11 +330,11 @@ public class MiamPolicyUpgradeCheckerTest {
                 .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuUrgency))
                 .build())
             .build();
-        Assert.assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
+        assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
     }
 
     @Test
-    public void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionUrgencySuccess() {
+    void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionUrgencySuccess() {
         CaseData caseData = CaseData.builder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
@@ -342,11 +345,11 @@ public class MiamPolicyUpgradeCheckerTest {
                 .mpuUrgencyReason(MiamUrgencyReasonChecklistEnum.miamPolicyUpgradeUrgencyReason_Value_1)
                 .build())
             .build();
-        Assert.assertTrue(miamPolicyUpgradeChecker.isFinished(caseData));
+        assertTrue(miamPolicyUpgradeChecker.isFinished(caseData));
     }
 
     @Test
-    public void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionPreviousMiam() {
+    void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionPreviousMiam() {
         CaseData caseData = CaseData.builder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
@@ -356,11 +359,11 @@ public class MiamPolicyUpgradeCheckerTest {
                 .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
                 .build())
             .build();
-        Assert.assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
+        assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
     }
 
     @Test
-    public void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionPreviousMiamAttendence1() {
+    void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionPreviousMiamAttendence1() {
         CaseData caseData = CaseData.builder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
@@ -372,11 +375,11 @@ public class MiamPolicyUpgradeCheckerTest {
                 .mpuDocFromDisputeResolutionProvider(Document.builder().build())
                 .build())
             .build();
-        Assert.assertTrue(miamPolicyUpgradeChecker.isFinished(caseData));
+        assertTrue(miamPolicyUpgradeChecker.isFinished(caseData));
     }
 
     @Test
-    public void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionPreviousMiamAttendence2Certificate() {
+    void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionPreviousMiamAttendence2Certificate() {
         CaseData caseData = CaseData.builder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
@@ -389,11 +392,11 @@ public class MiamPolicyUpgradeCheckerTest {
                 .mpuCertificateByMediator(Document.builder().build())
                 .build())
             .build();
-        Assert.assertTrue(miamPolicyUpgradeChecker.isFinished(caseData));
+        assertTrue(miamPolicyUpgradeChecker.isFinished(caseData));
     }
 
     @Test
-    public void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionPreviousMiamAttendence2Details() {
+    void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionPreviousMiamAttendence2Details() {
         CaseData caseData = CaseData.builder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
@@ -406,11 +409,11 @@ public class MiamPolicyUpgradeCheckerTest {
                 .mpuMediatorDetails("test")
                 .build())
             .build();
-        Assert.assertTrue(miamPolicyUpgradeChecker.isFinished(caseData));
+        assertTrue(miamPolicyUpgradeChecker.isFinished(caseData));
     }
 
     @Test
-    public void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionOther() {
+    void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionOther() {
         CaseData caseData = CaseData.builder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
@@ -420,11 +423,11 @@ public class MiamPolicyUpgradeCheckerTest {
                 .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuOther))
                 .build())
             .build();
-        Assert.assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
+        assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
     }
 
     @Test
-    public void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionOtherReason1() {
+    void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionOtherReason1() {
         CaseData caseData = CaseData.builder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
@@ -435,11 +438,11 @@ public class MiamPolicyUpgradeCheckerTest {
                 .mpuOtherExemptionReasons(MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_1)
                 .build())
             .build();
-        Assert.assertTrue(miamPolicyUpgradeChecker.isFinished(caseData));
+        assertTrue(miamPolicyUpgradeChecker.isFinished(caseData));
     }
 
     @Test
-    public void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionOtherReason3() {
+    void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionOtherReason3() {
         CaseData caseData = CaseData.builder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
@@ -451,11 +454,11 @@ public class MiamPolicyUpgradeCheckerTest {
                 .mpuApplicantUnableToAttendMiamReason1("test")
                 .build())
             .build();
-        Assert.assertTrue(miamPolicyUpgradeChecker.isFinished(caseData));
+        assertTrue(miamPolicyUpgradeChecker.isFinished(caseData));
     }
 
     @Test
-    public void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionOtherReason4() {
+    void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionOtherReason4() {
         CaseData caseData = CaseData.builder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
@@ -467,11 +470,11 @@ public class MiamPolicyUpgradeCheckerTest {
                 .mpuApplicantUnableToAttendMiamReason1("")
                 .build())
             .build();
-        Assert.assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
+        assertFalse(miamPolicyUpgradeChecker.isFinished(caseData));
     }
 
     @Test
-    public void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionOtherReason5() {
+    void testIsFinishedChildNotInvolvedInMiamApplicantAttendedClaimingExemptionOtherReason5() {
         CaseData caseData = CaseData.builder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
@@ -483,6 +486,6 @@ public class MiamPolicyUpgradeCheckerTest {
                 .mpuApplicantUnableToAttendMiamReason2("test")
                 .build())
             .build();
-        Assert.assertTrue(miamPolicyUpgradeChecker.isFinished(caseData));
+        assertTrue(miamPolicyUpgradeChecker.isFinished(caseData));
     }
 }

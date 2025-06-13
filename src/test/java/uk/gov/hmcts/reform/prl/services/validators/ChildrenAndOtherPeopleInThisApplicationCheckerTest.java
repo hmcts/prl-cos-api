@@ -28,7 +28,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE_REVISED;
 
 @ExtendWith(MockitoExtension.class)
-public class ChildrenAndOtherPeopleInThisApplicationCheckerTest {
+class ChildrenAndOtherPeopleInThisApplicationCheckerTest {
 
     @InjectMocks
     ChildrenAndOtherPeopleInThisApplicationChecker childrenAndOtherPeopleInThisApplicationChecker;
@@ -40,12 +40,12 @@ public class ChildrenAndOtherPeopleInThisApplicationCheckerTest {
     EventsChecker eventsChecker;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    public void testIsStartedChildAndOtherPeoplesRelationsPresent() {
+    void testIsStartedChildAndOtherPeoplesRelationsPresent() {
         ChildrenAndOtherPeopleRelation child = ChildrenAndOtherPeopleRelation.builder()
                 .build();
 
@@ -62,7 +62,7 @@ public class ChildrenAndOtherPeopleInThisApplicationCheckerTest {
     }
 
     @Test
-    public void testIsStartedReturnsFalse() {
+    void testIsStartedReturnsFalse() {
 
         CaseData caseData = CaseData.builder()
                 .relations(Relations.builder().build())
@@ -72,7 +72,7 @@ public class ChildrenAndOtherPeopleInThisApplicationCheckerTest {
     }
 
     @Test
-    public void testIsFinishedReturnsTrueWhenAllDataThere() {
+    void testIsFinishedReturnsTrueWhenAllDataThere() {
         ChildrenAndOtherPeopleRelation child = ChildrenAndOtherPeopleRelation.builder()
                 .childLivesWith(YesOrNo.Yes)
                 .otherPeopleFullName("test")
@@ -94,7 +94,7 @@ public class ChildrenAndOtherPeopleInThisApplicationCheckerTest {
     }
 
     @Test
-    public void testIsFinishedNotAllInformationPresent() {
+    void testIsFinishedNotAllInformationPresent() {
         ChildrenAndOtherPeopleRelation child = ChildrenAndOtherPeopleRelation.builder()
                 .childFullName("Name").childAndOtherPeopleRelation(RelationshipsEnum.father)
                 .childLivesWith(YesOrNo.No)
@@ -111,7 +111,7 @@ public class ChildrenAndOtherPeopleInThisApplicationCheckerTest {
     }
 
     @Test
-    public void whenAllChildDataPresentThenIsFinishedReturnsFalse() {
+    void whenAllChildDataPresentThenIsFinishedReturnsFalse() {
         CaseData caseData = CaseData.builder()
                 .relations(Relations.builder().build())
                 .build();
@@ -119,7 +119,7 @@ public class ChildrenAndOtherPeopleInThisApplicationCheckerTest {
     }
 
     @Test
-    public void whenAllChildDataPresentThenIsFinishedReturnsFalseWithErrors() {
+    void whenAllChildDataPresentThenIsFinishedReturnsFalseWithErrors() {
         CaseData caseData = CaseData.builder()
                 .relations(Relations.builder().build())
                 .build();
@@ -130,7 +130,7 @@ public class ChildrenAndOtherPeopleInThisApplicationCheckerTest {
     }
 
     @Test
-    public void whenAllChildDataPresentAndIsTaskCanBeEnabledFalseThenIsFinishedReturnsFalse() {
+    void whenAllChildDataPresentAndIsTaskCanBeEnabledFalseThenIsFinishedReturnsFalse() {
         CaseData caseData = CaseData.builder()
                 .relations(Relations.builder().childAndOtherPeopleRelations(null).build())
                 .build();
@@ -139,7 +139,7 @@ public class ChildrenAndOtherPeopleInThisApplicationCheckerTest {
     }
 
     @Test
-    public void whenAllChildDataPresentAndChildAndOtherPeopleRekationsIsNullThenIsFinishedReturnsFalse() {
+    void whenAllChildDataPresentAndChildAndOtherPeopleRekationsIsNullThenIsFinishedReturnsFalse() {
         CaseData caseData = CaseData.builder()
                 .relations(Relations.builder().childAndOtherPeopleRelations(null).build())
                 .build();
@@ -148,32 +148,32 @@ public class ChildrenAndOtherPeopleInThisApplicationCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataPresentThenHasMandatoryCompletedReturnsTrue() {
+    void whenNoCaseDataPresentThenHasMandatoryCompletedReturnsTrue() {
         CaseData caseData = CaseData.builder().build();
         assertFalse(childrenAndOtherPeopleInThisApplicationChecker.hasMandatoryCompleted(caseData));
     }
 
     @Test
-    public void testDefaultTaskStateWhenCannotStart() {
+    void testDefaultTaskStateWhenCannotStart() {
         assertEquals(TaskState.CANNOT_START_YET, childrenAndOtherPeopleInThisApplicationChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 
     @Test
-    public void testDefaultTaskStateWhenChildDetailsDone() {
+    void testDefaultTaskStateWhenChildDetailsDone() {
         CaseData caseData = CaseData.builder().build();
         when(eventsChecker.hasMandatoryCompleted(CHILD_DETAILS_REVISED, caseData)).thenReturn(true);
         assertEquals(TaskState.CANNOT_START_YET, childrenAndOtherPeopleInThisApplicationChecker.getDefaultTaskState(caseData));
     }
 
     @Test
-    public void testDefaultTaskStateWhenChildDetailsDoneIsFinished() {
+    void testDefaultTaskStateWhenChildDetailsDoneIsFinished() {
         CaseData caseData = CaseData.builder().build();
         when(eventsChecker.isFinished(CHILD_DETAILS_REVISED, caseData)).thenReturn(true);
         assertEquals(TaskState.CANNOT_START_YET, childrenAndOtherPeopleInThisApplicationChecker.getDefaultTaskState(caseData));
     }
 
     @Test
-    public void testDefaultTaskStateWhenChildDetailsDoneAndOtherPeopleDetails() {
+    void testDefaultTaskStateWhenChildDetailsDoneAndOtherPeopleDetails() {
         CaseData caseData = CaseData.builder().build();
         when(eventsChecker.hasMandatoryCompleted(CHILD_DETAILS_REVISED, caseData)).thenReturn(true);
         when(eventsChecker.hasMandatoryCompleted(OTHER_PEOPLE_IN_THE_CASE_REVISED, caseData)).thenReturn(true);
@@ -181,7 +181,7 @@ public class ChildrenAndOtherPeopleInThisApplicationCheckerTest {
     }
 
     @Test
-    public void testDefaultTaskStateWhenChildDetailsDoneAndOtherDetailsDetailsIsFinished() {
+    void testDefaultTaskStateWhenChildDetailsDoneAndOtherDetailsDetailsIsFinished() {
         CaseData caseData = CaseData.builder().build();
         when(eventsChecker.hasMandatoryCompleted(CHILD_DETAILS_REVISED, caseData)).thenReturn(true);
         when(eventsChecker.isFinished(OTHER_PEOPLE_IN_THE_CASE_REVISED, caseData)).thenReturn(true);

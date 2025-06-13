@@ -77,6 +77,7 @@ public enum PartyRole {
                 .toList();
     }
 
+    @Getter
     public enum Representing {
         CAAPPLICANT(
                 CaseData::getApplicants,
@@ -135,11 +136,8 @@ public enum PartyRole {
 
         private final Function<CaseData, List<Element<PartyDetails>>> caTarget;
         private final Function<CaseData, PartyDetails> daTarget;
-        @Getter
         private final String caseDataExternalField;
-        @Getter
         private final String caseDataInternalField;
-        @Getter
         private final String groupId;
 
         Representing(Function<CaseData, List<Element<PartyDetails>>> caTarget,
@@ -152,26 +150,6 @@ public enum PartyRole {
             this.caseDataExternalField = caseDataExternalField;
             this.caseDataInternalField = caseDataInternalField;
             this.groupId = groupId;
-        }
-
-        public Function<CaseData, List<Element<PartyDetails>>> getCaTarget() {
-            return caTarget;
-        }
-
-        public Function<CaseData, PartyDetails> getDaTarget() {
-            return daTarget;
-        }
-
-        public String getCaseDataExternalField() {
-            return caseDataExternalField;
-        }
-
-        public String getCaseDataInternalField() {
-            return caseDataInternalField;
-        }
-
-        public String getGroupId() {
-            return groupId;
         }
 
         private static class Constants {

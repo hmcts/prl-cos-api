@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.controllers.managecafcassaccess;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,7 +28,7 @@ import static uk.gov.hmcts.reform.prl.controllers.managecafcassaccess.ManageCafc
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-public class ManageCafcassAccessControllerTest {
+class ManageCafcassAccessControllerTest {
 
     @InjectMocks
     ManageCafcassAccessController manageCafcassAccessController;
@@ -44,7 +43,7 @@ public class ManageCafcassAccessControllerTest {
     public static final String SERVICE_AUTH = "serviceAuth";
 
     @Test
-    public void testManageCafcassAccessAllowed() throws Exception {
+    void testManageCafcassAccessAllowed() throws Exception {
 
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes).build())
@@ -66,7 +65,7 @@ public class ManageCafcassAccessControllerTest {
     }
 
     @Test
-    public void testManageCafcassAccessNotAllowed() throws Exception {
+    void testManageCafcassAccessNotAllowed() throws Exception {
 
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.No).build())
@@ -88,7 +87,7 @@ public class ManageCafcassAccessControllerTest {
     }
 
     @Test
-    public void testExceptionForSubmitted() throws Exception {
+    void testExceptionForSubmitted() throws Exception {
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes).build())
             .caseTypeOfApplication("C100")
@@ -103,18 +102,10 @@ public class ManageCafcassAccessControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_AUTH)).thenReturn(false);
-        assertExpectedException(() -> {
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
             manageCafcassAccessController.manageCafcassAccessSubmitted(AUTH_TOKEN, SERVICE_AUTH, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
-
+        });
+        assertEquals("Invalid Client", ex.getMessage());
     }
-
-
-    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
-                                                                 String expectedMessage) {
-        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
-        assertEquals(expectedMessage, exception.getMessage());
-    }
-
 }
 

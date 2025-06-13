@@ -9,12 +9,12 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.generator.AllegationOfHarmGe
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class AllegationOfHarmGeneratorTest {
+class AllegationOfHarmGeneratorTest {
 
     private final AllegationOfHarmGenerator generator = new AllegationOfHarmGenerator();
 
     @Test
-    public void testGenerate() {
+    void testGenerate() {
         CaseSummary caseSummary = generator.generate(CaseData.builder()
                                                          .allegationOfHarm(uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm.builder()
                                                                                .allegationsOfHarmDomesticAbuseYesNo(YesOrNo.Yes)
@@ -36,7 +36,7 @@ public class AllegationOfHarmGeneratorTest {
     }
 
     @Test
-    public void testNoTypeOfHarm() {
+    void testNoTypeOfHarm() {
         CaseSummary caseSummary = generator
             .generate(CaseData.builder()
                           .allegationOfHarm(uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm

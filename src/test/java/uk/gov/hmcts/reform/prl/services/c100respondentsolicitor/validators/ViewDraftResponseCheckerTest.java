@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @ExtendWith(MockitoExtension.class)
-public class ViewDraftResponseCheckerTest {
+class ViewDraftResponseCheckerTest {
 
     @InjectMocks
     ViewDraftResponseChecker viewDraftResponseChecker;
@@ -18,12 +18,12 @@ public class ViewDraftResponseCheckerTest {
     PartyDetails respondent;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         respondent = PartyDetails.builder().build();
     }
 
     @Test
-    public void isStartedTest() {
+    void isStartedTest() {
 
         boolean bool = viewDraftResponseChecker.isStarted(respondent, true);
 
@@ -31,7 +31,7 @@ public class ViewDraftResponseCheckerTest {
     }
 
     @Test
-    public void mandatoryCompletedTest() {
+    void mandatoryCompletedTest() {
         boolean bool = viewDraftResponseChecker.isFinished(respondent, true);
 
         assertFalse(bool);

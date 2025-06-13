@@ -39,7 +39,7 @@ public class InternationalElementsCheckerTest {
     PartyDetails respondent;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
 
         respondent = PartyDetails
             .builder()
@@ -68,26 +68,26 @@ public class InternationalElementsCheckerTest {
     }
 
     @Test
-    public void isStartedTest() {
+    void isStartedTest() {
         Boolean bool = internationalElementsChecker.isStarted(respondent, true);
         assertTrue(bool);
     }
 
     @Test
-    public void isNotStartedTest() {
+    void isNotStartedTest() {
         PartyDetails blankRespondent = PartyDetails.builder().build();
         Boolean bool = internationalElementsChecker.isStarted(blankRespondent, true);
         assertFalse(bool);
     }
 
     @Test
-    public void mandatoryCompletedTest() {
+    void mandatoryCompletedTest() {
         Boolean bool = internationalElementsChecker.isFinished(respondent, true);
         assertTrue(bool);
     }
 
     @Test
-    public void isNotFinishedEmptyResponseTest() {
+    void isNotFinishedEmptyResponseTest() {
         PartyDetails blankRespondent = PartyDetails.builder().response(Response
                                                                            .builder().build()).build();
         Boolean bool = internationalElementsChecker.isFinished(blankRespondent, true);
@@ -95,7 +95,7 @@ public class InternationalElementsCheckerTest {
     }
 
     @Test
-    public void isNotFinishedEmptyStringChildrenLiveOutsideOfEnWlDetails() {
+    void isNotFinishedEmptyStringChildrenLiveOutsideOfEnWlDetails() {
         PartyDetails blankRespondent = PartyDetails
             .builder()
             .response(Response
@@ -110,7 +110,7 @@ public class InternationalElementsCheckerTest {
     }
 
     @Test
-    public void isNotFinishedEmptyCitizenInternationalElementsTest() {
+    void isNotFinishedEmptyCitizenInternationalElementsTest() {
         PartyDetails blankRespondent = PartyDetails
             .builder()
             .response(Response
@@ -127,14 +127,14 @@ public class InternationalElementsCheckerTest {
     }
 
     @Test
-    public void mandatoryCompletedWithoutRespdntTest() {
+    void mandatoryCompletedWithoutRespdntTest() {
         respondent = null;
         Boolean bool = internationalElementsChecker.isFinished(respondent, true);
         assertFalse(bool);
     }
 
     @Test
-    public void mandatoryNotCompletedWithoutDetailsTest() {
+    void mandatoryNotCompletedWithoutDetailsTest() {
         respondent = PartyDetails
             .builder()
             .response(Response
@@ -153,7 +153,7 @@ public class InternationalElementsCheckerTest {
     }
 
     @Test
-    public void mandatoryCompletedWithoutDetailsTest() {
+    void mandatoryCompletedWithoutDetailsTest() {
         respondent = PartyDetails
             .builder()
             .response(Response

@@ -17,14 +17,14 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LIST_ON_NOTICE_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SELECTED_AND_ADDITIONAL_REASONS;
 
 @ExtendWith(MockitoExtension.class)
-public class ListOnNoticeServiceTest {
+class ListOnNoticeServiceTest {
 
     @InjectMocks
     ListOnNoticeService listOnNoticeService;
 
 
     @Test
-    public void testReturnReasonsSelectedWhenReasonsSelected() {
+    void testReturnReasonsSelectedWhenReasonsSelected() {
         List<String> reasonsSelected = new ArrayList<>();
         reasonsSelected.add("childrenResideWithApplicantAndBothProtectedByNonMolestationOrder");
         reasonsSelected.add("noEvidenceOnRespondentSeekToFrustrateTheProcessIfTheyWereGivenNotice");
@@ -34,12 +34,12 @@ public class ListOnNoticeServiceTest {
     }
 
     @Test
-    public void testReturnReasonsSelectedWhenNoReasonsSelected() {
+    void testReturnReasonsSelectedWhenNoReasonsSelected() {
         assertEquals(null,listOnNoticeService.getReasonsSelected(null,Long.valueOf("11111111111111")));
     }
 
     @Test
-    public void testCleanUpListOnNoticeFields() {
+    void testCleanUpListOnNoticeFields() {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put(SELECTED_AND_ADDITIONAL_REASONS, "test");
         caseDataUpdated.put(LIST_ON_NOTICE_REASONS_SELECTED, "test");

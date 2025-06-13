@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -59,7 +58,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @PropertySource(value = "classpath:application.yaml")
 @ExtendWith(MockitoExtension.class)
-public class PrePopulateFeeAndSolicitorNameControllerTest {
+class PrePopulateFeeAndSolicitorNameControllerTest {
 
     private MockMvc mockMvc;
 
@@ -142,7 +141,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     private static final String DRAFT_C_100_APPLICATION = "Draft_c100_application.pdf";
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
 
 
         feeResponse = FeeResponse.builder()
@@ -193,7 +192,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
     //TODO Update this testcase once we have integration with Fee and Pay
     @Test
-    public void testUserDetailsForSolicitorName() throws Exception {
+    void testUserDetailsForSolicitorName() throws Exception {
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
 
@@ -216,7 +215,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     }
 
     @Test
-    public void testUserDetailsForSolicitorName_FeeException() throws Exception {
+    void testUserDetailsForSolicitorName_FeeException() throws Exception {
         when(submitAndPayChecker.hasMandatoryCompleted(Mockito.any(CaseData.class))).thenReturn(true);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
@@ -240,7 +239,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     }
 
     @Test
-    public void testWhenControllerCalledOneInvokeToDgsService() throws Exception {
+    void testWhenControllerCalledOneInvokeToDgsService() throws Exception {
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
@@ -273,7 +272,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     }
 
     @Test
-    public void testWhenControllerCalledOneMiamUpgrade() throws Exception {
+    void testWhenControllerCalledOneMiamUpgrade() throws Exception {
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
@@ -300,7 +299,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
 
     @Test
-    public void testFeeDetailsForFeeAmount() throws Exception {
+    void testFeeDetailsForFeeAmount() throws Exception {
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -320,7 +319,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     }
 
     @Test
-    public void testCourtDetailsWithCourtName() throws Exception {
+    void testCourtDetailsWithCourtName() throws Exception {
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         PartyDetails applicant = PartyDetails.builder()
@@ -414,7 +413,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     }
 
     @Test
-    public void testCaseCreationAndSubmitWithAllegationHarmRevised() throws Exception {
+    void testCaseCreationAndSubmitWithAllegationHarmRevised() throws Exception {
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
                 .thenReturn(caseData);
         PartyDetails applicant = PartyDetails.builder()
@@ -518,7 +517,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
 
     @Test
-    public void testCourtDetailsWithoutCourtName() throws Exception {
+    void testCourtDetailsWithoutCourtName() throws Exception {
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         PartyDetails applicant = PartyDetails.builder()
@@ -609,7 +608,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     }
 
     @Test
-    public void testExceptionCourtDetailsWithoutCourtName() throws Exception {
+    void testExceptionCourtDetailsWithoutCourtName() throws Exception {
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         PartyDetails applicant = PartyDetails.builder()
@@ -693,18 +692,21 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .thenReturn(generatedDocumentInfo);
 
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getCaseData(), CaseData.class))
             .thenReturn(caseData1);
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken, s2sToken, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
-    }
 
-    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
-                                                                 String expectedMessage) {
-        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
-        assertEquals(expectedMessage, exception.getMessage());
+        RuntimeException ex = assertThrows(
+            RuntimeException.class, () -> {
+                prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(
+                    authToken,
+                    s2sToken,
+                    callbackRequest
+                );
+            }
+        );
+        assertEquals("Invalid Client", ex.getMessage());
+
     }
 }

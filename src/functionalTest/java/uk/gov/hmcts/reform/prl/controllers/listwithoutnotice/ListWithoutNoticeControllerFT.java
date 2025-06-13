@@ -6,7 +6,6 @@ import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,6 +16,9 @@ import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.reform.prl.controllers.listwithoutnotice.ListWithoutNoticeController.CONFIRMATION_BODY_PREFIX_CA;
 
 @Slf4j
@@ -63,8 +65,8 @@ public class ListWithoutNoticeControllerFT {
             .post(c100ListWithoutNoticeEndpoint);
         response.then().assertThat().statusCode(200);
         AboutToStartOrSubmitCallbackResponse res = objectMapper.readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
-        Assert.assertNotNull(res.getData());
-        Assert.assertTrue(res.getData().containsKey("caseNotes"));
+        assertNotNull(res.getData());
+        assertTrue(res.getData().containsKey("caseNotes"));
     }
 
     @Test
@@ -84,6 +86,6 @@ public class ListWithoutNoticeControllerFT {
             response.getBody().asString(),
             SubmittedCallbackResponse.class
         );
-        Assert.assertEquals(res.getConfirmationBody(),CONFIRMATION_BODY_PREFIX_CA);
+        assertEquals(res.getConfirmationBody(),CONFIRMATION_BODY_PREFIX_CA);
     }
 }

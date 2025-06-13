@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services.hearings;
 import feign.FeignException;
 import feign.Request;
 import feign.Response;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,11 +45,13 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class HearingServiceTest {
+class HearingServiceTest {
 
     @Value("#{'${hearing_component.futureHearingStatus}'.split(',')}")
     private List<String> futureHearingStatusList;
@@ -92,7 +93,7 @@ public class HearingServiceTest {
     PartyDetails respondent;
 
     @BeforeEach
-    public void init() {
+    void init() {
 
         LocalDateTime hearingStartDate = LocalDateTime.now().plusDays(5);
         hearingDaySchedule =
@@ -169,18 +170,18 @@ public class HearingServiceTest {
 
     @Test
     @DisplayName("test case for HearingService getHearings success.")
-    public void getHearingsTestSuccess() {
+    void getHearingsTestSuccess() {
 
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         Hearings hearingsResp = hearingService.getHearings(auth, caseReferenceNumber);
 
-        assertNotNull(hearingsResp.getCaseHearings().get(0).getNextHearingDate());
-        assertEquals(true,hearingsResp.getCaseHearings().get(0).isUrgentFlag());
+        assertNotNull(hearingsResp.getCaseHearings().getFirst().getNextHearingDate());
+        assertEquals(true,hearingsResp.getCaseHearings().getFirst().isUrgentFlag());
     }
 
     @Test
     @DisplayName("test case for HearingService getHearings no hearings returned.")
-    public void getHearingsTestNoHearingReturned() {
+    void getHearingsTestNoHearingReturned() {
 
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         when(hearingApiClient.getHearingDetails(auth, serviceAuthToken, caseReferenceNumber)).thenReturn(null);
@@ -192,7 +193,7 @@ public class HearingServiceTest {
 
     @Test
     @DisplayName("test case for HearingService getHearings exception.")
-    public void getHearingsTestException() {
+    void getHearingsTestException() {
         when(hearingApiClient.getHearingDetails(
             Mockito.any(),
             Mockito.any(),
@@ -205,13 +206,13 @@ public class HearingServiceTest {
         Hearings response =
             hearingService.getHearings(auth, caseReferenceNumber);
 
-        Assert.assertEquals(null, response);
+        assertEquals(null, response);
 
     }
 
     @Test
     @DisplayName("test case for HearingService getHearings exception.")
-    public void getHearingsTestExceptionForRefData() {
+    void getHearingsTestExceptionForRefData() {
         when(refDataService.getRefDataCategoryValueMap(
             any(),
             any(),
@@ -221,14 +222,14 @@ public class HearingServiceTest {
         Hearings response =
             hearingService.getHearings(auth, caseReferenceNumber);
 
-        Assert.assertEquals("", response.getCaseHearings().get(0).getHearingTypeValue());
+        assertEquals("", response.getCaseHearings().getFirst().getHearingTypeValue());
 
     }
 
 
     @Test
     @DisplayName("test case for HearingService getNextHearingDate success.")
-    public void getNextHearingDateTestSuccess() {
+    void getNextHearingDateTestSuccess() {
 
         NextHearingDetails nextHearingDetails = NextHearingDetails.builder().hearingID("2030006118")
             .hearingDateTime(LocalDateTime.now().plusDays(5)).build();
@@ -241,12 +242,12 @@ public class HearingServiceTest {
         NextHearingDetails response =
             hearingService.getNextHearingDate(auth, caseReferenceNumber);
 
-        Assert.assertEquals("2030006118", response.getHearingID());
+        assertEquals("2030006118", response.getHearingID());
     }
 
     @Test
     @DisplayName("test case for HearingService getNextHearingDate exception .")
-    public void getNextHearingDateTestException() {
+    void getNextHearingDateTestException() {
         when(hearingApiClient.getNextHearingDate(
             any(),
             any(),
@@ -255,13 +256,13 @@ public class HearingServiceTest {
         NextHearingDetails response =
             hearingService.getNextHearingDate(auth, caseReferenceNumber);
 
-        Assert.assertEquals(null, response);
+        assertEquals(null, response);
     }
 
 
     @Test
     @DisplayName("test case for HearingService getNextHearingDate success.")
-    public void getCaseLinkedDataTestSuccess() {
+    void getCaseLinkedDataTestSuccess() {
         CaseLinkedRequest caseLinkedRequest = CaseLinkedRequest.caseLinkedRequestWith().build();
         List<CaseLinkedData> caseLinkedDataList = new ArrayList<>();
         caseLinkedDataList.add(CaseLinkedData.caseLinkedDataWith().caseReference("123").build());
@@ -269,12 +270,12 @@ public class HearingServiceTest {
         List<CaseLinkedData> response =
             hearingService.getCaseLinkedData(auth,caseLinkedRequest);
 
-        Assert.assertEquals(new ArrayList<>(), response);
+        assertEquals(new ArrayList<>(), response);
     }
 
     @Test
     @DisplayName("test case for HearingService getNextHearingDate success.")
-    public void getCaseLinkedDataTestException() {
+    void getCaseLinkedDataTestException() {
         CaseLinkedRequest caseLinkedRequest = CaseLinkedRequest.caseLinkedRequestWith().build();
         List<CaseLinkedData> caseLinkedDataList = new ArrayList<>();
         caseLinkedDataList.add(CaseLinkedData.caseLinkedDataWith().caseReference("123").build());
@@ -292,12 +293,12 @@ public class HearingServiceTest {
         List<CaseLinkedData> response =
             hearingService.getCaseLinkedData(auth,caseLinkedRequest);
 
-        Assert.assertEquals(null, response);
+        assertEquals(null, response);
     }
 
     @Test
     @DisplayName("test case for HearingService getFutureHearings success.")
-    public void getFutureHearingsTestSuccess() {
+    void getFutureHearingsTestSuccess() {
         when(hearingApiClient.getFutureHearings(
             any(),
             any(),
@@ -306,12 +307,12 @@ public class HearingServiceTest {
         Hearings response =
             hearingService.getFutureHearings(auth, caseReferenceNumber);
 
-        Assert.assertEquals("2030006118", response.getCaseHearings().get(0).getHearingID().toString());
+        assertEquals("2030006118", response.getCaseHearings().getFirst().getHearingID().toString());
     }
 
     @Test
     @DisplayName("test case for HearingService getFutureHearings exception .")
-    public void getFutureHearingsTestException() {
+    void getFutureHearingsTestException() {
         when(hearingApiClient.getFutureHearings(
             any(),
             any(),
@@ -321,12 +322,12 @@ public class HearingServiceTest {
         Hearings response =
             hearingService.getFutureHearings(auth, caseReferenceNumber);
 
-        Assert.assertEquals(null, response);
+        assertEquals(null, response);
     }
 
     @Test
     @DisplayName("test case for HearingService getHearings for given list of case ids success.")
-    public void getHearingsByListOfCaseIdsTestSuccess() {
+    void getHearingsByListOfCaseIdsTestSuccess() {
 
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         Map<String, String> caseIds = new HashMap<>();
@@ -339,7 +340,7 @@ public class HearingServiceTest {
 
     @Test
     @DisplayName("test case for HearingService getHearings for given list of case ids success.")
-    public void getHearingsByListOfCaseIdsTestException() {
+    void getHearingsByListOfCaseIdsTestException() {
 
         when(hearingApiClient.getHearingsByListOfCaseIds(
             any(),
@@ -352,54 +353,54 @@ public class HearingServiceTest {
         caseIds.put(caseReferenceNumber, null);
         List<Hearings> hearingsResp = hearingService.getHearingsByListOfCaseIds(auth, caseIds);
 
-        Assert.assertTrue(hearingsResp.isEmpty());
+        assertTrue(hearingsResp.isEmpty());
     }
 
     @Test
     @DisplayName("test case for Automated Hearing Management.")
-    public void createAutomatedHearingManagementTestSuccess() {
+    void createAutomatedHearingManagementTestSuccess() {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         AutomatedHearingCaseData automatedHearingCaseData = AutomatedHearingTransactionRequestMapper
             .mappingAutomatedHearingTransactionRequest(caseData, HearingData.builder().build());
         when(hearingApiClient.createAutomatedHearing(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
             .thenReturn(ResponseEntity.ok(AutomatedHearingResponse.builder().build()));
         AutomatedHearingResponse automatedHearingsResponse = hearingService.createAutomatedHearing(auth, automatedHearingCaseData);
-        Assert.assertNotNull(automatedHearingsResponse);
+        assertNotNull(automatedHearingsResponse);
     }
 
     @Test
     @DisplayName("test case for Automated Hearing Management.")
-    public void createAutomatedHearingManagementTestBadRequest() {
+    void createAutomatedHearingManagementTestBadRequest() {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         AutomatedHearingCaseData automatedHearingCaseData = AutomatedHearingTransactionRequestMapper
             .mappingAutomatedHearingTransactionRequest(caseData, HearingData.builder().build());
         when(hearingApiClient.createAutomatedHearing(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
             .thenThrow(new RuntimeException());
         AutomatedHearingResponse automatedHearingsResponse = hearingService.createAutomatedHearing(auth, automatedHearingCaseData);
-        Assert.assertNull(automatedHearingsResponse);
+        assertNull(automatedHearingsResponse);
     }
 
     @Test
     @DisplayName("test case for Automated Hearing Management.")
-    public void createAutomatedHearingManagementTestException() {
+    void createAutomatedHearingManagementTestException() {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         when(hearingApiClient.createAutomatedHearing(any(), any(), any())).thenThrow(new RuntimeException());
         AutomatedHearingCaseData automatedHearingCaseData = AutomatedHearingTransactionRequestMapper
             .mappingAutomatedHearingTransactionRequest(caseData, HearingData.builder().build());
         AutomatedHearingResponse automatedHearingsResponse = hearingService.createAutomatedHearing(auth, automatedHearingCaseData);
-        Assert.assertNull(automatedHearingsResponse);
+        assertNull(automatedHearingsResponse);
     }
 
     @Test
     @DisplayName("test case for Automated Hearing Management with failure response.")
-    public void createAutomatedHearingManagementTestFailure() {
+    void createAutomatedHearingManagementTestFailure() {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         AutomatedHearingCaseData automatedHearingCaseData = AutomatedHearingTransactionRequestMapper
             .mappingAutomatedHearingTransactionRequest(caseData, HearingData.builder().build());
         when(hearingApiClient.createAutomatedHearing(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
             .thenReturn(ResponseEntity.internalServerError().build());
         AutomatedHearingResponse automatedHearingsResponse = hearingService.createAutomatedHearing(auth, automatedHearingCaseData);
-        Assert.assertNull(automatedHearingsResponse);
+        assertNull(automatedHearingsResponse);
 
     }
 }

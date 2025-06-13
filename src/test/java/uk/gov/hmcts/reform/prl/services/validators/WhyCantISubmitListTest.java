@@ -63,7 +63,7 @@ import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.WELSH_LANGUAGE_ERROR
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.WITHOUT_NOTICE_ORDER_ERROR;
 
 @ExtendWith(MockitoExtension.class)
-public class WhyCantISubmitListTest {
+class WhyCantISubmitListTest {
 
     @Mock
     TaskErrorService taskErrorService;
@@ -132,12 +132,12 @@ public class WhyCantISubmitListTest {
     private CaseData caseData;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         caseData = CaseData.builder().build();
     }
 
     @Test
-    public void testMiamCheckerAddsError() {
+    void testMiamCheckerAddsError() {
         caseData = caseData.toBuilder().miamDetails(
             MiamDetails.builder().build()
         ).consentOrder(YesOrNo.No).build();
@@ -146,7 +146,7 @@ public class WhyCantISubmitListTest {
     }
 
     @Test
-    public void testMiamCheckerDoesNotAddError() {
+    void testMiamCheckerDoesNotAddError() {
         caseData = caseData.toBuilder()
             .miamDetails(MiamDetails.builder().build())
             .consentOrder(YesOrNo.Yes).build();
@@ -155,62 +155,62 @@ public class WhyCantISubmitListTest {
     }
 
     @Test
-    public void testChildCheckerAddsError() {
+    void testChildCheckerAddsError() {
 
         childChecker.isFinished(caseData);
         verify(taskErrorService).addEventError(CHILD_DETAILS, CHILD_DETAILS_ERROR, CHILD_DETAILS_ERROR.getError());
     }
 
     @Test
-    public void testAllegationOfHarmCheckerAddsError() {
+    void testAllegationOfHarmCheckerAddsError() {
         caseData = caseData.toBuilder().allegationOfHarm(AllegationOfHarm.builder().build()).build();
         allegationsOfHarmChecker.isFinished(caseData);
         verify(taskErrorService).addEventError(ALLEGATIONS_OF_HARM, ALLEGATIONS_OF_HARM_ERROR, ALLEGATIONS_OF_HARM_ERROR.getError());
     }
 
     @Test
-    public void testApplicantsCheckerAddsError() {
+    void testApplicantsCheckerAddsError() {
 
         applicantsChecker.hasMandatoryCompleted(caseData);
         verify(taskErrorService).addEventError(APPLICANT_DETAILS, APPLICANTS_DETAILS_ERROR, APPLICANTS_DETAILS_ERROR.getError());
     }
 
     @Test
-    public void testApplicationTypeCheckerAddsError() {
+    void testApplicationTypeCheckerAddsError() {
 
         applicationTypeChecker.isFinished(caseData);
         verify(taskErrorService).addEventError(TYPE_OF_APPLICATION, TYPE_OF_APPLICATION_ERROR, TYPE_OF_APPLICATION_ERROR.getError());
     }
 
     @Test
-    public void testRespondentsCheckerAddsError() {
+    void testRespondentsCheckerAddsError() {
 
         respondentsChecker.isFinished(caseData);
         verify(taskErrorService).addEventError(RESPONDENT_DETAILS, RESPONDENT_DETAILS_ERROR, RESPONDENT_DETAILS_ERROR.getError());
     }
 
     @Test
-    public void testLitigationCapacityCheckerAddsError() {
+    void testLitigationCapacityCheckerAddsError() {
         caseData = caseData.toBuilder().litigationCapacityOtherFactors(YesOrNo.Yes).build();
         litigationCapacityChecker.isStarted(caseData);
         verify(taskErrorService).addEventError(LITIGATION_CAPACITY, LITIGATION_CAPACITY_ERROR, LITIGATION_CAPACITY_ERROR.getError());
     }
 
     @Test
-    public void testInternationalElementCheckerAddsError() {
+    void testInternationalElementCheckerAddsError() {
         caseData = caseData.toBuilder().habitualResidentInOtherState(YesOrNo.Yes).build();
         internationalElementChecker.isStarted(caseData);
         verify(taskErrorService,times(2)).addEventError(INTERNATIONAL_ELEMENT, INTERNATIONAL_ELEMENT_ERROR, INTERNATIONAL_ELEMENT_ERROR.getError());
     }
 
     @Test
-    public void testHearingUrgencyCheckerAddsError() {
+    void testHearingUrgencyCheckerAddsError() {
         hearingUrgencyChecker.isFinished(caseData);
         verify(taskErrorService).addEventError(HEARING_URGENCY, HEARING_URGENCY_ERROR, HEARING_URGENCY_ERROR.getError());
     }
 
     @Test
-    public void testOtherPeopleCheckerAddsError() {
+    void testOtherPeopleCheckerAddsError() {
         caseData = caseData.toBuilder()
             .othersToNotify(List.of(Element.<PartyDetails>builder()
                                         .value(PartyDetails.builder().build()).build())).build();
@@ -219,7 +219,7 @@ public class WhyCantISubmitListTest {
     }
 
     @Test
-    public void testAttendingTheHearingCheckerAddsError() {
+    void testAttendingTheHearingCheckerAddsError() {
         caseData = caseData.toBuilder()
                 .attendHearing(AttendHearing.builder()
                                    .isWelshNeeded(YesOrNo.Yes)
@@ -230,28 +230,28 @@ public class WhyCantISubmitListTest {
     }
 
     @Test
-    public void testWelshLanguageReqCheckerAddsError() {
+    void testWelshLanguageReqCheckerAddsError() {
         caseData = caseData.toBuilder().welshLanguageRequirement(YesOrNo.Yes).build();
         welshLanguageRequirementsChecker.isStarted(caseData);
         verify(taskErrorService).addEventError(WELSH_LANGUAGE_REQUIREMENTS, WELSH_LANGUAGE_ERROR, WELSH_LANGUAGE_ERROR.getError());
     }
 
     @Test
-    public void testOtherProceedingsCheckerAddsError() {
+    void testOtherProceedingsCheckerAddsError() {
         caseData = caseData.toBuilder().previousOrOngoingProceedingsForChildren(YesNoDontKnow.yes).build();
         otherProceedingsChecker.isStarted(caseData);
         verify(taskErrorService).addEventError(OTHER_PROCEEDINGS, OTHER_PROCEEDINGS_ERROR, OTHER_PROCEEDINGS_ERROR.getError());
     }
 
     @Test
-    public void testWithoutNoticeOrderCheckerAddsError() {
+    void testWithoutNoticeOrderCheckerAddsError() {
 
         withoutNoticeOrderChecker.isFinished(caseData);
         verify(taskErrorService).addEventError(WITHOUT_NOTICE_ORDER, WITHOUT_NOTICE_ORDER_ERROR, WITHOUT_NOTICE_ORDER_ERROR.getError());
     }
 
     @Test
-    public void testRelationshipToRespondentCheckerAddsError() {
+    void testRelationshipToRespondentCheckerAddsError() {
 
         respondentRelationshipChecker.isFinished(caseData);
         verify(taskErrorService).addEventError(RELATIONSHIP_TO_RESPONDENT,
@@ -260,14 +260,14 @@ public class WhyCantISubmitListTest {
     }
 
     @Test
-    public void testApplicantFamilyCheckerAddsError() {
+    void testApplicantFamilyCheckerAddsError() {
 
         fl401ApplicantFamilyChecker.isFinished(caseData);
         verify(taskErrorService).addEventError(FL401_APPLICANT_FAMILY_DETAILS, FL401_APPLICANT_FAMILY_ERROR, FL401_APPLICANT_FAMILY_ERROR.getError());
     }
 
     @Test
-    public void testFL401ApplicationTypeCheckerAddsError() {
+    void testFL401ApplicationTypeCheckerAddsError() {
 
         fl401ApplicationTypeChecker.isFinished(caseData);
         verify(taskErrorService).addEventError(FL401_TYPE_OF_APPLICATION,
@@ -276,7 +276,7 @@ public class WhyCantISubmitListTest {
     }
 
     @Test
-    public void testFl401OtherProceedingsCheckerAddsError() {
+    void testFl401OtherProceedingsCheckerAddsError() {
         caseData = caseData.toBuilder()
             .fl401OtherProceedingDetails(FL401OtherProceedingDetails.builder()
                                              .hasPrevOrOngoingOtherProceeding(YesNoDontKnow.yes).build())
@@ -286,14 +286,14 @@ public class WhyCantISubmitListTest {
     }
 
     @Test
-    public void testRespondentsBehaviourCheckerAddsError() {
+    void testRespondentsBehaviourCheckerAddsError() {
 
         respondentBehaviourChecker.isFinished(caseData);
         verify(taskErrorService).addEventError(RESPONDENT_BEHAVIOUR, RESPONDENT_BEHAVIOUR_ERROR, RESPONDENT_BEHAVIOUR_ERROR.getError());
     }
 
     @Test
-    public void testHomeCheckerAddsError() {
+    void testHomeCheckerAddsError() {
 
         homeChecker.isFinished(caseData);
         verify(taskErrorService).addEventError(FL401_HOME, HOME_ERROR, HOME_ERROR.getError());

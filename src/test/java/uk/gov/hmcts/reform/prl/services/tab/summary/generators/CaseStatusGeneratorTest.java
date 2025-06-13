@@ -14,7 +14,7 @@ public class CaseStatusGeneratorTest {
     private final CaseStatusGenerator generator = new CaseStatusGenerator();
 
     @Test
-    public void testGenerate() {
+    void testGenerate() {
         CaseSummary caseSummary = generator.generate(CaseData.builder()
                                                          .state(State.AWAITING_RESUBMISSION_TO_HMCTS)
                                                              .build());

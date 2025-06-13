@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,13 +19,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @ExtendWith(MockitoExtension.class)
-public class RespondentsCheckerTest {
+class RespondentsCheckerTest {
 
     @Mock
     TaskErrorService taskErrorService;
@@ -37,7 +38,7 @@ public class RespondentsCheckerTest {
     Address address;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         address = Address.builder()
             .addressLine1("55 Test Street")
             .postTown("Town")
@@ -46,40 +47,40 @@ public class RespondentsCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataThenIsStartedReturnsFalse() {
+    void whenNoCaseDataThenIsStartedReturnsFalse() {
 
         CaseData caseData = CaseData.builder().build();
 
-        Assert.assertFalse(respondentsChecker.isStarted(caseData));
+        assertFalse(respondentsChecker.isStarted(caseData));
     }
 
     @Test
-    public void whenNoCaseDataThenIsFinishedReturnsFalse() {
+    void whenNoCaseDataThenIsFinishedReturnsFalse() {
 
         CaseData caseData = CaseData.builder().build();
 
-        Assert.assertFalse(respondentsChecker.isFinished(caseData));
+        assertFalse(respondentsChecker.isFinished(caseData));
     }
 
     @Test
-    public void whenIncompleteCaseDataThenIsFinishedReturnsFalse() {
+    void whenIncompleteCaseDataThenIsFinishedReturnsFalse() {
 
         CaseData caseData = CaseData.builder().caseTypeOfApplication(FL401_CASE_TYPE)
             .respondentsFL401(PartyDetails.builder().build()).build();
 
-        Assert.assertFalse(respondentsChecker.isFinished(caseData));
+        assertFalse(respondentsChecker.isFinished(caseData));
     }
 
     @Test
-    public void whenNoCaseDataThenHasMandatoryReturnsFalse() {
+    void whenNoCaseDataThenHasMandatoryReturnsFalse() {
 
         CaseData caseData = CaseData.builder().build();
 
-        Assert.assertFalse(respondentsChecker.hasMandatoryCompleted(caseData));
+        assertFalse(respondentsChecker.hasMandatoryCompleted(caseData));
     }
 
     @Test
-    public void whenMinimalRelevantCaseDataThenIsStartedReturnsTrue() {
+    void whenMinimalRelevantCaseDataThenIsStartedReturnsTrue() {
         PartyDetails respondent = PartyDetails.builder().firstName("TestName").build();
         Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedRespondents);
@@ -88,21 +89,21 @@ public class RespondentsCheckerTest {
             .respondents(applicantList)
             .build();
 
-        Assert.assertTrue(respondentsChecker.isStarted(caseData));
+        assertTrue(respondentsChecker.isStarted(caseData));
     }
 
     @Test
-    public void whenIncompleteCaseDataValidateMandatoryFieldsForRespondentReturnsFalse() {
+    void whenIncompleteCaseDataValidateMandatoryFieldsForRespondentReturnsFalse() {
         PartyDetails respondent = PartyDetails.builder().firstName("TestName").build();
 
         CaseData caseData = CaseData.builder().caseTypeOfApplication("Test")
             .build();
 
-        Assert.assertFalse(respondentsChecker.validateMandatoryFieldsForRespondent(respondent, caseData.getCaseTypeOfApplication()));
+        assertFalse(respondentsChecker.validateMandatoryFieldsForRespondent(respondent, caseData.getCaseTypeOfApplication()));
     }
 
     @Test
-    public void whenIncompleteC100CaseDataValidateMandatoryFieldsForRespondentReturnsFalse() {
+    void whenIncompleteC100CaseDataValidateMandatoryFieldsForRespondentReturnsFalse() {
         PartyDetails respondent = PartyDetails.builder()
             .firstName("TestName")
             .build();
@@ -111,26 +112,26 @@ public class RespondentsCheckerTest {
             .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
 
-        Assert.assertFalse(respondentsChecker.validateMandatoryFieldsForRespondent(respondent, caseData.getCaseTypeOfApplication()));
+        assertFalse(respondentsChecker.validateMandatoryFieldsForRespondent(respondent, caseData.getCaseTypeOfApplication()));
     }
 
     @Test
-    public void whenIncompleteCaseDataRespondentsDetailsStartedReturnsTrue() {
+    void whenIncompleteCaseDataRespondentsDetailsStartedReturnsTrue() {
         PartyDetails respondent = PartyDetails.builder().firstName("TestName").build();
 
-        Assert.assertTrue(respondentsChecker.respondentDetailsStarted(respondent));
+        assertTrue(respondentsChecker.respondentDetailsStarted(respondent));
     }
 
     @Test
-    public void whenNoDataIsGenderCompletedFieldShouldEmpty() {
+    void whenNoDataIsGenderCompletedFieldShouldEmpty() {
         PartyDetails respondent = PartyDetails.builder().build();
         List<Optional<?>> fields = new ArrayList<>();
         respondentsChecker.isGenderCompleted(respondent,fields);
-        Assert.assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
+        assertFalse(fields.size() > 1 && !fields.getFirst().isEmpty());
     }
 
     @Test
-    public void whenDataPresentIsGenderCompletedFieldShouldNotNull() {
+    void whenDataPresentIsGenderCompletedFieldShouldNotNull() {
         PartyDetails respondent = PartyDetails.builder()
             .firstName("TestName")
             .gender(Gender.other)
@@ -138,20 +139,20 @@ public class RespondentsCheckerTest {
             .build();
         List<Optional<?>> fields = new ArrayList<>();
         respondentsChecker.isGenderCompleted(respondent,fields);
-        Assert.assertTrue(fields.size() > 1 && !fields.get(0).isEmpty());
+        assertTrue(fields.size() > 1 && !fields.getFirst().isEmpty());
 
     }
 
     @Test
-    public void whenNoDataIsPlaceOfBirthCompletedFieldShouldEmpty() {
+    void whenNoDataIsPlaceOfBirthCompletedFieldShouldEmpty() {
         PartyDetails respondent = PartyDetails.builder().build();
         List<Optional<?>> fields = new ArrayList<>();
         respondentsChecker.isPlaceOfBirthCompleted(respondent,fields);
-        Assert.assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
+        assertFalse(fields.size() > 1 && !fields.getFirst().isEmpty());
     }
 
     @Test
-    public void whenDataPresentIsPlaceOfBirthCompletedFieldShouldNotNull() {
+    void whenDataPresentIsPlaceOfBirthCompletedFieldShouldNotNull() {
         PartyDetails respondent = PartyDetails.builder()
             .firstName("TestName")
             .isPlaceOfBirthKnown(Yes)
@@ -160,20 +161,20 @@ public class RespondentsCheckerTest {
 
         List<Optional<?>> fields = new ArrayList<>();
         respondentsChecker.isPlaceOfBirthCompleted(respondent,fields);
-        Assert.assertTrue(fields.size() > 1 && !fields.get(0).isEmpty());
+        assertTrue(fields.size() > 1 && !fields.getFirst().isEmpty());
 
     }
 
     @Test
-    public void whenNoDataIsCurrentAddressCompletedFieldShouldEmpty() {
+    void whenNoDataIsCurrentAddressCompletedFieldShouldEmpty() {
         PartyDetails respondent = PartyDetails.builder().build();
         List<Optional<?>> fields = new ArrayList<>();
         respondentsChecker.isCurrentAddressCompleted(respondent,fields);
-        Assert.assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
+        assertFalse(fields.size() > 1 && !fields.getFirst().isEmpty());
     }
 
     @Test
-    public void whenDataPresentIsCurrentAddressCompletedFieldShouldNotNull() {
+    void whenDataPresentIsCurrentAddressCompletedFieldShouldNotNull() {
         PartyDetails respondent = PartyDetails.builder()
             .isCurrentAddressKnown(Yes)
             .isPlaceOfBirthKnown(Yes)
@@ -183,20 +184,20 @@ public class RespondentsCheckerTest {
 
         List<Optional<?>> fields = new ArrayList<>();
         respondentsChecker.isCurrentAddressCompleted(respondent,fields);
-        Assert.assertTrue(fields.size() > 1 && !fields.get(0).isEmpty());
+        assertTrue(fields.size() > 1 && !fields.getFirst().isEmpty());
 
     }
 
     @Test
-    public void whenNoDataIsCanYouProvideEmailAddressCompletedFieldShouldEmpty() {
+    void whenNoDataIsCanYouProvideEmailAddressCompletedFieldShouldEmpty() {
         PartyDetails respondent = PartyDetails.builder().build();
         List<Optional<?>> fields = new ArrayList<>();
         respondentsChecker.isCanYouProvideEmailAddressCompleted(respondent,fields);
-        Assert.assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
+        assertFalse(fields.size() > 1 && !fields.getFirst().isEmpty());
     }
 
     @Test
-    public void whenDataPresentIsCanYouProvideEmailAddressCompletedFieldShouldNotNull() {
+    void whenDataPresentIsCanYouProvideEmailAddressCompletedFieldShouldNotNull() {
         PartyDetails respondent = PartyDetails.builder()
             .canYouProvideEmailAddress(Yes)
             .email("testing@gmail.com")
@@ -204,20 +205,20 @@ public class RespondentsCheckerTest {
 
         List<Optional<?>> fields = new ArrayList<>();
         respondentsChecker.isCanYouProvideEmailAddressCompleted(respondent,fields);
-        Assert.assertTrue(fields.size() > 1 && !fields.get(0).isEmpty());
+        assertTrue(fields.size() > 1 && !fields.getFirst().isEmpty());
 
     }
 
     @Test
-    public void whenNoDataIsAtAddressLessThan5YearsCompletedFieldShouldEmpty() {
+    void whenNoDataIsAtAddressLessThan5YearsCompletedFieldShouldEmpty() {
         PartyDetails respondent = PartyDetails.builder().build();
         List<Optional<?>> fields = new ArrayList<>();
         respondentsChecker.isAtAddressLessThan5YearsCompleted(respondent,fields);
-        Assert.assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
+        assertFalse(fields.size() > 1 && !fields.getFirst().isEmpty());
     }
 
     @Test
-    public void whenDataPresentIsAtAddressLessThan5YearsCompletedFieldShouldNotNull() {
+    void whenDataPresentIsAtAddressLessThan5YearsCompletedFieldShouldNotNull() {
         PartyDetails respondent = PartyDetails.builder()
             .isAtAddressLessThan5YearsWithDontKnow(YesNoDontKnow.yes)
             .addressLivedLessThan5YearsDetails("testing")
@@ -225,20 +226,20 @@ public class RespondentsCheckerTest {
 
         List<Optional<?>> fields = new ArrayList<>();
         respondentsChecker.isAtAddressLessThan5YearsCompleted(respondent,fields);
-        Assert.assertTrue(fields.size() > 1 && !fields.get(0).isEmpty());
+        assertTrue(fields.size() > 1 && !fields.getFirst().isEmpty());
 
     }
 
     @Test
-    public void whenNoDataIsDoTheyHaveLegalRepresentationCompletedFieldShouldEmpty() {
+    void whenNoDataIsDoTheyHaveLegalRepresentationCompletedFieldShouldEmpty() {
         PartyDetails respondent = PartyDetails.builder().build();
         List<Optional<?>> fields = new ArrayList<>();
         respondentsChecker.isDoTheyHaveLegalRepresentationCompleted(respondent,fields);
-        Assert.assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
+        assertFalse(fields.size() > 1 && !fields.getFirst().isEmpty());
     }
 
     @Test
-    public void whenDataPresentIsDoTheyHaveLegalRepresentationCompletedFieldShouldNotNull() {
+    void whenDataPresentIsDoTheyHaveLegalRepresentationCompletedFieldShouldNotNull() {
         PartyDetails respondent = PartyDetails.builder()
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .solicitorEmail("solicitor@gmail.com")
@@ -246,12 +247,12 @@ public class RespondentsCheckerTest {
 
         List<Optional<?>> fields = new ArrayList<>();
         respondentsChecker.isDoTheyHaveLegalRepresentationCompleted(respondent,fields);
-        Assert.assertTrue(fields.size() > 1 && !fields.get(0).isEmpty());
+        assertTrue(fields.size() > 1 && !fields.getFirst().isEmpty());
 
     }
 
     @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+    void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
         assertNotNull(respondentsChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 
-import javax.json.JsonValue;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.json.JsonValue;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
-public class RespondentsMapperTest {
+class RespondentsMapperTest {
 
     @InjectMocks
     RespondentsMapper respondentsMapper;
@@ -46,7 +46,7 @@ public class RespondentsMapperTest {
 
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         address = Address.builder()
             .addressLine1("55 Test Street")
             .postTown("Town")
@@ -77,23 +77,23 @@ public class RespondentsMapperTest {
     }
 
     @Test
-    public void testRespondentsMapperEmptyCheck() {
+    void testRespondentsMapperEmptyCheck() {
         respondents = Collections.emptyList();
         assertTrue(respondentsMapper.map(respondents, respondentSolicitorMap).isEmpty());
     }
 
     @Test
-    public void testRespondentsMapperWithAllFields() {
+    void testRespondentsMapperWithAllFields() {
         assertNotNull(respondentsMapper.map(respondents, respondentSolicitorMap));
     }
 
     @Test
-    public void testMapWhenRespondentsIsNull() {
+    void testMapWhenRespondentsIsNull() {
         assertEquals(JsonValue.EMPTY_JSON_ARRAY,respondentsMapper.map(null, respondentSolicitorMap));
     }
 
     @Test
-    public void testMap() {
+    void testMap() {
         PartyDetails partyDetails1 = PartyDetails.builder()
             .firstName("First name")
             .lastName("Last name")

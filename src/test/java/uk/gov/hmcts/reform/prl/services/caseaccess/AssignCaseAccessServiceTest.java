@@ -26,13 +26,13 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 
 @ExtendWith(MockitoExtension.class)
-public class AssignCaseAccessServiceTest {
-
-    @Mock
-    private AssignCaseAccessClient assignCaseAccessClient;
+class AssignCaseAccessServiceTest {
 
     @InjectMocks
     private AssignCaseAccessService assignCaseAccessService;
+
+    @Mock
+    private AssignCaseAccessClient assignCaseAccessClient;
 
     @Mock
     private AuthTokenGenerator authTokenGenerator;
@@ -49,10 +49,8 @@ public class AssignCaseAccessServiceTest {
     @Mock
     private RoleAssignmentApi roleAssignmentApi;
 
-
-
     @Test
-    public void testAssignCaseAccess() {
+    void testAssignCaseAccess() {
         List<String> roles = new ArrayList<>();
         roles.add("caseworker-privatelaw-solicitor");
         UserDetails userDetails
@@ -72,7 +70,7 @@ public class AssignCaseAccessServiceTest {
     }
 
     @Test
-    public void testAssignCaseAccess2() {
+    void testAssignCaseAccess2() {
 
         when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(false);
         assignCaseAccessService.assignCaseAccess("42", "ABC123");
@@ -82,7 +80,7 @@ public class AssignCaseAccessServiceTest {
     }
 
     @Test
-    public void testAssignCaseAccessForCourtAdmin() {
+    void testAssignCaseAccessForCourtAdmin() {
         List<String> roles = new ArrayList<>();
         roles.add("caseworker-privatelaw-courtadmin");
         UserDetails userDetails
@@ -96,12 +94,12 @@ public class AssignCaseAccessServiceTest {
     }
 
     @Test
-    public void testAssignCaseAccessForCourtAdminSec() {
+    void testAssignCaseAccessForCourtAdminSec() {
         List<String> roles = new ArrayList<>();
         roles.add("caseworker-privatelaw-courtadmin");
         UserDetails userDetails
             = new UserDetails("test-id","test@test.com", "test", "test", roles);
-        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("citizen");
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse();
 
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
         doNothing().when(ccdDataStoreService).removeCreatorRole(Mockito.anyString(), Mockito.anyString());
@@ -114,10 +112,10 @@ public class AssignCaseAccessServiceTest {
         verify(ccdDataStoreService, times(1)).removeCreatorRole(Mockito.anyString(), Mockito.anyString());
     }
 
-    private RoleAssignmentServiceResponse setAndGetRoleAssignmentServiceResponse(String roleName) {
+    private RoleAssignmentServiceResponse setAndGetRoleAssignmentServiceResponse() {
         List<RoleAssignmentResponse> listOfRoleAssignmentResponses = new ArrayList<>();
         RoleAssignmentResponse roleAssignmentResponse = new RoleAssignmentResponse();
-        roleAssignmentResponse.setRoleName(roleName);
+        roleAssignmentResponse.setRoleName("citizen");
         listOfRoleAssignmentResponses.add(roleAssignmentResponse);
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = new RoleAssignmentServiceResponse();
         roleAssignmentServiceResponse.setRoleAssignmentResponse(listOfRoleAssignmentResponses);

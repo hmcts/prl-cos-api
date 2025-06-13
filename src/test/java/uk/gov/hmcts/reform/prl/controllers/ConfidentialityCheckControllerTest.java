@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -42,7 +41,7 @@ import static uk.gov.hmcts.reform.prl.controllers.ConfidentialityCheckController
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
-public class ConfidentialityCheckControllerTest {
+class ConfidentialityCheckControllerTest {
 
     @InjectMocks
     private ConfidentialityCheckController confidentialityCheckController;
@@ -59,11 +58,11 @@ public class ConfidentialityCheckControllerTest {
     @Mock
     private AuthorisationService authorisationService;
 
-    public static final String authToken = "Bearer TestAuthToken";
-    public static final String s2sToken = "s2s AuthToken";
+    public static final String AUTH_TOKEN = "Bearer TestAuthToken";
+    public static final String S2S_TOKEN = "s2s AuthToken";
 
     @Test
-    public void testPackAvailable() {
+    void testPackAvailable() {
 
         ResponseDocuments responseDocument = ResponseDocuments.builder()
                 .dateTimeCreated(LocalDateTime.now()).respondentC8Document(Document.builder().build()).build();
@@ -86,12 +85,12 @@ public class ConfidentialityCheckControllerTest {
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = confidentialityCheckController
-            .confidentialCheckAboutToStart(authToken,s2sToken, callbackRequest);
+            .confidentialCheckAboutToStart(AUTH_TOKEN,S2S_TOKEN, callbackRequest);
         assertNull(aboutToStartOrSubmitCallbackResponse.getErrors());
     }
 
     @Test
-    public void respondentTestPackAvailable() {
+    void respondentTestPackAvailable() {
 
         ResponseDocuments responseDocument = ResponseDocuments.builder()
                 .dateTimeCreated(LocalDateTime.now()).respondentC8Document(Document.builder().build()).build();
@@ -113,12 +112,12 @@ public class ConfidentialityCheckControllerTest {
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(Mockito.anyString(),Mockito.anyString())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = confidentialityCheckController
-            .confidentialCheckAboutToStart(authToken,s2sToken, callbackRequest);
+            .confidentialCheckAboutToStart(AUTH_TOKEN,S2S_TOKEN, callbackRequest);
         assertNull(aboutToStartOrSubmitCallbackResponse.getErrors());
     }
 
     @Test
-    public void otherPeopleTestPackAvailable() {
+    void otherPeopleTestPackAvailable() {
         ResponseDocuments responseDocument = ResponseDocuments.builder()
                 .dateTimeCreated(LocalDateTime.now()).respondentC8Document(Document.builder().build()).build();
         Element<ResponseDocuments> responseDocumentsElement = Element.<ResponseDocuments>builder().value(responseDocument).build();
@@ -139,11 +138,10 @@ public class ConfidentialityCheckControllerTest {
         when(authorisationService.isAuthorized(Mockito.anyString(),Mockito.anyString())).thenReturn(true);
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = confidentialityCheckController
-            .confidentialCheckAboutToStart(authToken,s2sToken, callbackRequest);
+            .confidentialCheckAboutToStart(AUTH_TOKEN,S2S_TOKEN, callbackRequest);
         assertNull(aboutToStartOrSubmitCallbackResponse.getErrors());
     }
 
-    @NotNull
     private static ObjectMapper getObjectMapper() {
         ObjectMapper objectMapper1 = new ObjectMapper();
         objectMapper1.registerModule(new JavaTimeModule());
@@ -154,7 +152,7 @@ public class ConfidentialityCheckControllerTest {
     }
 
     @Test
-    public void testNoPackAvailable() {
+    void testNoPackAvailable() {
 
         CaseData caseData = CaseData.builder().id(12345L).serviceOfApplication(ServiceOfApplication.builder()
                                                                               .build()).build();
@@ -168,13 +166,13 @@ public class ConfidentialityCheckControllerTest {
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = confidentialityCheckController
-            .confidentialCheckAboutToStart(authToken,s2sToken, callbackRequest);
+            .confidentialCheckAboutToStart(AUTH_TOKEN,S2S_TOKEN, callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getErrors());
         assertTrue(aboutToStartOrSubmitCallbackResponse.getErrors().contains(NO_PACKS_AVAILABLE_FOR_CONFIDENTIAL_DETAILS_CHECK));
     }
 
     @Test
-    public void testHandleAboutToSubmitCallBack() {
+    void testHandleAboutToSubmitCallBack() {
         CaseData caseData = CaseData.builder().id(12345L)
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .unServedOthersPack(SoaPack.builder()
@@ -191,22 +189,22 @@ public class ConfidentialityCheckControllerTest {
             .caseDetails(CaseDetails.builder()
                              .id(12345L)
                              .data(caseDetails).build()).build();
-        assertNull(confidentialityCheckController.handleAboutToSubmit(authToken,s2sToken, callbackRequest).getData().get("test"));
+        assertNull(confidentialityCheckController.handleAboutToSubmit(AUTH_TOKEN,S2S_TOKEN, callbackRequest).getData().get("test"));
     }
 
     @Test
-    public void testAboutToSubmitAuthFailure() {
+    void testAboutToSubmitAuthFailure() {
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
         when(authorisationService.isAuthorized(Mockito.anyString(),Mockito.anyString())).thenReturn(false);
         assertThrows(
             RuntimeException.class,
             () -> confidentialityCheckController
-                .handleAboutToSubmit(authToken,s2sToken, callbackRequest)
+                .handleAboutToSubmit(AUTH_TOKEN,S2S_TOKEN, callbackRequest)
         );
     }
 
     @Test
-    public void testHandleSubmittedCallBack() {
+    void testHandleSubmittedCallBack() {
         Map<String, Object> caseData = new HashMap<>();
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
@@ -216,28 +214,28 @@ public class ConfidentialityCheckControllerTest {
         ResponseEntity<SubmittedCallbackResponse> submittedCallbackResponse = ResponseEntity.noContent().build();
         when(authorisationService.isAuthorized(Mockito.anyString(),Mockito.anyString())).thenReturn(true);
         when(serviceOfApplicationService.processConfidentialityCheck("", callbackRequest)).thenReturn(submittedCallbackResponse);
-        assertNull(confidentialityCheckController.handleSubmittedNew(authToken,s2sToken, callbackRequest));
+        assertNull(confidentialityCheckController.handleSubmittedNew(AUTH_TOKEN,S2S_TOKEN, callbackRequest));
     }
 
     @Test
-    public void testSubmittedCallBackAuthFailure() {
+    void testSubmittedCallBackAuthFailure() {
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
         when(authorisationService.isAuthorized(Mockito.anyString(),Mockito.anyString())).thenReturn(false);
         assertThrows(
             RuntimeException.class,
             () -> confidentialityCheckController
-                .handleSubmittedNew(authToken,s2sToken, callbackRequest)
+                .handleSubmittedNew(AUTH_TOKEN,S2S_TOKEN, callbackRequest)
         );
     }
 
     @Test
-    public void testAboutToStartCallBackAuthFailure() {
+    void testAboutToStartCallBackAuthFailure() {
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
         when(authorisationService.isAuthorized(Mockito.anyString(),Mockito.anyString())).thenReturn(false);
         assertThrows(
             RuntimeException.class,
             () -> confidentialityCheckController
-                .confidentialCheckAboutToStart(authToken,s2sToken, callbackRequest)
+                .confidentialCheckAboutToStart(AUTH_TOKEN,S2S_TOKEN, callbackRequest)
         );
     }
 }

@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(MockitoExtension.class)
-public class WelshLanguageRequirementsCheckerTest {
+class WelshLanguageRequirementsCheckerTest {
 
     @Mock
     TaskErrorService taskErrorService;
@@ -21,21 +21,21 @@ public class WelshLanguageRequirementsCheckerTest {
     WelshLanguageRequirementsChecker welshLanguageRequirementsChecker;
 
     @Test
-    public void whenNoCaseDataThenIsStartedFalse() {
+    void whenNoCaseDataThenIsStartedFalse() {
         CaseData caseData = CaseData.builder().build();
 
         assertFalse(welshLanguageRequirementsChecker.isStarted(caseData));
     }
 
     @Test
-    public void whenNoCaseDataThenIsFinishedFalse() {
+    void whenNoCaseDataThenIsFinishedFalse() {
         CaseData caseData = CaseData.builder().build();
 
         assertFalse(welshLanguageRequirementsChecker.isFinished(caseData));
     }
 
     @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+    void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
         assertNotNull(welshLanguageRequirementsChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

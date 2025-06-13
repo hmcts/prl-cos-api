@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class CaseInitiationControllerTest {
+class CaseInitiationControllerTest {
 
     @InjectMocks
     private CaseInitiationController caseInitiationController;
@@ -40,8 +39,8 @@ public class CaseInitiationControllerTest {
     @Mock
     private CaseInitiationService caseInitiationService;
 
-    public static final String authToken = "Bearer TestAuthToken";
-    public static final String s2sToken = "s2s AuthToken";
+    public static final String AUTH_TOKEN = "Bearer TestAuthToken";
+    public static final String S2S_TOKEN = "s2s AuthToken";
 
     Map<String, Object> caseDataMap;
     CaseDetails caseDetails;
@@ -50,7 +49,7 @@ public class CaseInitiationControllerTest {
     CallbackRequest callbackRequest;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         caseDataMap = new HashMap<>();
         caseData = CaseData.builder()
             .id(12345678L)
@@ -68,34 +67,29 @@ public class CaseInitiationControllerTest {
     }
 
     @Test
-    public void testHandleSubmitted() {
-        caseInitiationController.handleSubmitted(authToken, s2sToken, callbackRequest);
+    void testHandleSubmitted() {
+        caseInitiationController.handleSubmitted(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         verify(caseInitiationService, times(1)).handleCaseInitiation(
-            authToken,
+            AUTH_TOKEN,
             callbackRequest
         );
     }
 
     @Test
-    public void testExceptionForHandleSubmitted() throws Exception {
-        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            caseInitiationController.handleSubmitted(authToken, s2sToken, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
-    }
+    void testExceptionForHandleSubmitted() {
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
 
-    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
-                                                                 String expectedMessage) {
-        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
-        assertEquals(expectedMessage, exception.getMessage());
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
+            caseInitiationController.handleSubmitted(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+        });
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testHandlePopulateCourtList() {
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        caseInitiationController.populateCourtList(authToken, s2sToken, callbackRequest);
+    void testHandlePopulateCourtList() {
+        caseInitiationController.populateCourtList(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         verify(caseInitiationService, times(1)).prePopulateCourtDetails(
-            authToken,
+            AUTH_TOKEN,
             new HashMap<>()
         );
     }

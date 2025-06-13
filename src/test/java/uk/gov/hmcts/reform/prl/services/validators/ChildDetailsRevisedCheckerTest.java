@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
@@ -23,35 +24,34 @@ import static uk.gov.hmcts.reform.prl.enums.Gender.other;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 
 @ExtendWith(MockitoExtension.class)
-public class ChildDetailsRevisedCheckerTest {
+class ChildDetailsRevisedCheckerTest {
 
     @Mock
     TaskErrorService taskErrorService;
-
 
     @InjectMocks
     ChildDetailsRevisedChecker childChecker;
 
     @Test
-    public void whenNoCaseDataPresentThenIsStartedReturnsFalse() {
+    void whenNoCaseDataPresentThenIsStartedReturnsFalse() {
         CaseData caseData = CaseData.builder().build();
 
-        assertTrue(!childChecker.isStarted(caseData));
+        assertFalse(childChecker.isStarted(caseData));
     }
 
     @Test
-    public void whenEmptyChildDataPresentThenIsStartedReturnsFalse() {
+    void whenEmptyChildDataPresentThenIsStartedReturnsFalse() {
         ChildDetailsRevised child = ChildDetailsRevised.builder().build();
         Element<ChildDetailsRevised> wrappedChildren = Element.<ChildDetailsRevised>builder().value(child).build();
         List<Element<ChildDetailsRevised>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder().newChildDetails(listOfChildren).build();
 
-        assertTrue(!childChecker.isStarted(caseData));
+        assertFalse(childChecker.isStarted(caseData));
     }
 
     @Test
-    public void whenSomeChildDataPresentThenIsStartedReturnsTrue() {
+    void whenSomeChildDataPresentThenIsStartedReturnsTrue() {
         ChildDetailsRevised child = ChildDetailsRevised.builder().firstName("Test").lastName("Name").build();
         Element<ChildDetailsRevised> wrappedChildren = Element.<ChildDetailsRevised>builder().value(child).build();
         List<Element<ChildDetailsRevised>> listOfChildren = Collections.singletonList(wrappedChildren);
@@ -67,25 +67,25 @@ public class ChildDetailsRevisedCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataPresentThenIsFinishedReturnsFalse() {
+    void whenNoCaseDataPresentThenIsFinishedReturnsFalse() {
         CaseData caseData = CaseData.builder().build();
 
-        assertTrue(!childChecker.isFinished(caseData));
+        assertFalse(childChecker.isFinished(caseData));
     }
 
     @Test
-    public void whenSomeChildDataPresentThenIsFinishedReturnsFalse() {
+    void whenSomeChildDataPresentThenIsFinishedReturnsFalse() {
         ChildDetailsRevised child = ChildDetailsRevised.builder().firstName("Test").lastName("Name").build();
         Element<ChildDetailsRevised> wrappedChildren = Element.<ChildDetailsRevised>builder().value(child).build();
         List<Element<ChildDetailsRevised>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder().newChildDetails(listOfChildren).build();
 
-        assertTrue(!childChecker.isFinished(caseData));
+        assertFalse(childChecker.isFinished(caseData));
     }
 
     @Test
-    public void whenAllChildDataPresentThenIsFinishedReturnsTrue() {
+    void whenAllChildDataPresentThenIsFinishedReturnsTrue() {
         ChildDetailsRevised child = ChildDetailsRevised.builder()
             .firstName("Test")
             .lastName("Name")
@@ -112,7 +112,7 @@ public class ChildDetailsRevisedCheckerTest {
 
 
     @Test
-    public void whenAllChildDataPresentThenIsFinishedReturnsTrue1() {
+    void whenAllChildDataPresentThenIsFinishedReturnsTrue1() {
         ChildDetailsRevised child = ChildDetailsRevised.builder()
             .firstName("Test")
             .lastName("Name")
@@ -133,12 +133,12 @@ public class ChildDetailsRevisedCheckerTest {
             .build();
 
 
-        assertTrue(!childChecker.isFinished(caseData));
+        assertFalse(childChecker.isFinished(caseData));
     }
 
 
     @Test
-    public void whenAllChildDataPresentThenIsFinishedReturnsTrueWithGenderOther() {
+    void whenAllChildDataPresentThenIsFinishedReturnsTrueWithGenderOther() {
         ChildDetailsRevised child = ChildDetailsRevised.builder()
             .firstName("Test")
             .lastName("Name")
@@ -165,7 +165,7 @@ public class ChildDetailsRevisedCheckerTest {
 
 
     @Test
-    public void whenAllChildDataPresentThenIsFinishedReturnsTrueWithGNull() {
+    void whenAllChildDataPresentThenIsFinishedReturnsTrueWithGNull() {
 
         CaseData caseData = CaseData.builder()
             .newChildDetails(null)
@@ -173,18 +173,18 @@ public class ChildDetailsRevisedCheckerTest {
             .childrenKnownToLocalAuthorityTextArea("TestString")
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.dontKnow)
             .build();
-        assertTrue(!childChecker.isFinished(caseData));
+        assertFalse(childChecker.isFinished(caseData));
     }
 
 
     @Test
-    public void whenNoCaseDataPresentThenHasMandatoryCompletedReturnsTrue() {
+    void whenNoCaseDataPresentThenHasMandatoryCompletedReturnsTrue() {
         CaseData caseData = CaseData.builder().build();
-        assertTrue(!childChecker.hasMandatoryCompleted(caseData));
+        assertFalse(childChecker.hasMandatoryCompleted(caseData));
     }
 
     @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+    void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
         assertNotNull(childChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

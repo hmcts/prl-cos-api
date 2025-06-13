@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -109,7 +108,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -126,41 +124,28 @@ import static uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100Respo
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
-public class C100RespondentSolicitorServiceTest {
+class C100RespondentSolicitorServiceTest {
 
     @InjectMocks
-    C100RespondentSolicitorService respondentSolicitorService;
+    private C100RespondentSolicitorService respondentSolicitorService;
 
     @Mock
-    ReviewDocumentService reviewDocumentService;
+    private ReviewDocumentService reviewDocumentService;
 
     @Mock
-    ConfidentialityC8RefugeService confidentialityC8RefugeService;
-
-    CaseData caseData;
-
-    CaseData caseData2;
+    private ConfidentialityC8RefugeService confidentialityC8RefugeService;
 
     @Mock
-    RespondentAllegationOfHarmService respondentAllegationOfHarmService;
+    private RespondentAllegationOfHarmService respondentAllegationOfHarmService;
 
     @Mock
-    ManageOrderService manageOrderService;
-
-    PartyDetails respondent;
-
-    PartyDetails respondent2;
-
-    PartyDetails respondent3;
-
-    PartyDetails respondent4;
+    private ManageOrderService manageOrderService;
 
     @Mock
     ObjectMapper objectMapper;
 
     @Mock
     CaseSummaryTabService caseSummaryTab;
-
 
     @Mock
     CcdDataStoreService ccdDataStoreService;
@@ -188,39 +173,37 @@ public class C100RespondentSolicitorServiceTest {
 
     @Mock
     ApplicationsTabService applicationsTabService;
+
     @Mock
     ManageDocumentsService manageDocumentsService;
+
     @Mock
     UserService userService;
 
     @Mock
     OrganisationService organisationService;
+
     @Mock
     LaunchDarklyClient launchDarklyClient;
 
-    ResponseToAllegationsOfHarm responseToAllegationsOfHarm;
+    private CaseData caseData;
+    private CaseData caseData2;
+    private PartyDetails respondent;
+    private PartyDetails respondent2;
+    private PartyDetails respondent3;
+    private ResponseToAllegationsOfHarm responseToAllegationsOfHarm2;
+    private Map<String, Object> stringObjectMap;
+    private final Map<String, Object> allegationsOfHarmDataMap = new HashMap<>();
+    private CallbackRequest callbackRequest;
+    private QuarantineLegalDoc quarantineLegalDoc;
+    private Document document;
 
-    ResponseToAllegationsOfHarm responseToAllegationsOfHarm2;
+    private final boolean mandatoryFinished = false;
 
-    boolean mandatoryFinished = false;
-
-    public static final String authToken = "Bearer TestAuthToken";
-
-    Map<String, Object> stringObjectMap;
-
-    Map<String, Object> stringObjectMap2;
-    Map<String, Object> allegationsOfHarmDataMap = new HashMap<>();
-
-    CallbackRequest callbackRequest;
-
-    CallbackRequest callbackRequest2;
-
-    QuarantineLegalDoc quarantineLegalDoc;
-
-    Document document;
+    private static final String AUTH_TOKEN = "Bearer TestAuthToken";
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
 
         document = Document.builder()
             .documentFileName("test.pdf")
@@ -325,10 +308,10 @@ public class C100RespondentSolicitorServiceTest {
                 .value(proceedingDetails).build();
         List<Element<RespondentProceedingDetails>> proceedingsList = Collections.singletonList(proceedingDetailsElement);
 
-        responseToAllegationsOfHarm = ResponseToAllegationsOfHarm.builder()
-                .responseToAllegationsOfHarmYesOrNoResponse(Yes)
-                .responseToAllegationsOfHarmDocument(Document.builder().build())
-                .build();
+        ResponseToAllegationsOfHarm responseToAllegationsOfHarm = ResponseToAllegationsOfHarm.builder()
+            .responseToAllegationsOfHarmYesOrNoResponse(Yes)
+            .responseToAllegationsOfHarmDocument(Document.builder().build())
+            .build();
 
         responseToAllegationsOfHarm2 = ResponseToAllegationsOfHarm.builder()
             .responseToAllegationsOfHarmYesOrNoResponse(No)
@@ -570,7 +553,6 @@ public class C100RespondentSolicitorServiceTest {
 
         stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         callbackRequest = CallbackRequest.builder()
                 .caseDetails(CaseDetails.builder()
                         .id(123L)
@@ -584,14 +566,6 @@ public class C100RespondentSolicitorServiceTest {
                     .build())
                 .eventId("SolicitorA")
                 .build();
-        when(confidentialDetailsMapper.mapConfidentialData(
-                Mockito.any(CaseData.class),
-                Mockito.anyBoolean()
-        )).thenReturn(caseData);
-        when(applicationsTabService.getRespondentsTable(caseData)).thenReturn(List.of(Element.<Respondent>builder().build()));
-        when(organisationService.getOrganisationDetails(Mockito.anyString(), Mockito.anyString())).thenReturn(
-                Organisations.builder().contactInformation(List.of(ContactInformation.builder().build())).build());
-        when(systemUserService.getSysUserToken()).thenReturn("");
 
         List<ConfidentialityListEnum> confidentialityListEnums2 = new ArrayList<>();
 
@@ -675,67 +649,67 @@ public class C100RespondentSolicitorServiceTest {
         contactInformation2.add(ContactInformation.builder()
                 .addressLine1("AddressLine1").dxAddress(dxAddress2).build());
 
-        respondent4 = PartyDetails.builder()
-                .user(user)
-                .representativeFirstName("Abc")
-                .representativeLastName("Xyz")
-                .gender(Gender.male)
-                .email("abc@xyz.com")
-                .phoneNumber("1234567890")
-                .response(Response.builder()
-                    .currentOrPastProceedingsForChildren(YesNoDontKnow.yes)
-                        .citizenDetails(CitizenDetails.builder()
-                                .firstName(null)
-                                .lastName(null)
-                                .contact(Contact.builder()
-                                        .phoneNumber("123")
-                                        .email("test@test.com").build())
-                                .address(Address.builder().addressLine1("123").build())
-                                .build())
-                        .consent(Consent.builder()
-                                .consentToTheApplication(No)
-                            .permissionFromCourt(No)
-                                .noConsentReason("test")
-                                .build())
-                        .c7ResponseSubmitted(No)
-                        .keepDetailsPrivate(KeepDetailsPrivate
-                                .builder()
-                                .otherPeopleKnowYourContactDetails(YesNoIDontKnow.yes)
-                                .confidentiality(Yes)
-                                .confidentialityList(confidentialityListEnums2)
-                                .build())
-                        .miam(Miam.builder().attendedMiam(No)
-                                .willingToAttendMiam(No)
-                                .reasonNotAttendingMiam("test").build())
-                        .respondentExistingProceedings(proceedingsList2)
-                        .respondentAllegationsOfHarmData(allegationsOfHarmData)
-                        .citizenInternationalElements(CitizenInternationalElements
-                                .builder()
-                                .childrenLiveOutsideOfEnWl(Yes)
-                                .childrenLiveOutsideOfEnWlDetails("Test")
-                                .parentsAnyOneLiveOutsideEnWl(Yes)
-                                .parentsAnyOneLiveOutsideEnWlDetails("Test")
-                                .anotherPersonOrderOutsideEnWl(Yes)
-                                .anotherPersonOrderOutsideEnWlDetails("test")
-                                .anotherCountryAskedInformation(Yes)
-                                .anotherCountryAskedInformationDetaails("test")
-                                .build())
-                        .supportYouNeed(ReasonableAdjustmentsSupport.builder()
-                                .reasonableAdjustments(List.of(ReasonableAdjustmentsEnum.nosupport)).build())
-                        .responseToAllegationsOfHarm(responseToAllegationsOfHarm)
-                        .build())
-                .canYouProvideEmailAddress(Yes)
-                .isEmailAddressConfidential(No)
-                .isPhoneNumberConfidential(No)
-                .isAddressConfidential(No)
-                .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
-                .solicitorAddress(Address.builder().addressLine1("ABC").addressLine2("test").addressLine3("test").postCode(
-                        "AB1 2MN").build())
-                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                .solicitorReference("test")
-                .address(Address.builder().addressLine1("").build())
-                .organisations(Organisations.builder().contactInformation(contactInformation2).build())
-                .build();
+        PartyDetails respondent4 = PartyDetails.builder()
+            .user(user)
+            .representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .response(Response.builder()
+                          .currentOrPastProceedingsForChildren(YesNoDontKnow.yes)
+                          .citizenDetails(CitizenDetails.builder()
+                                              .firstName(null)
+                                              .lastName(null)
+                                              .contact(Contact.builder()
+                                                           .phoneNumber("123")
+                                                           .email("test@test.com").build())
+                                              .address(Address.builder().addressLine1("123").build())
+                                              .build())
+                          .consent(Consent.builder()
+                                       .consentToTheApplication(No)
+                                       .permissionFromCourt(No)
+                                       .noConsentReason("test")
+                                       .build())
+                          .c7ResponseSubmitted(No)
+                          .keepDetailsPrivate(KeepDetailsPrivate
+                                                  .builder()
+                                                  .otherPeopleKnowYourContactDetails(YesNoIDontKnow.yes)
+                                                  .confidentiality(Yes)
+                                                  .confidentialityList(confidentialityListEnums2)
+                                                  .build())
+                          .miam(Miam.builder().attendedMiam(No)
+                                    .willingToAttendMiam(No)
+                                    .reasonNotAttendingMiam("test").build())
+                          .respondentExistingProceedings(proceedingsList2)
+                          .respondentAllegationsOfHarmData(allegationsOfHarmData)
+                          .citizenInternationalElements(CitizenInternationalElements
+                                                            .builder()
+                                                            .childrenLiveOutsideOfEnWl(Yes)
+                                                            .childrenLiveOutsideOfEnWlDetails("Test")
+                                                            .parentsAnyOneLiveOutsideEnWl(Yes)
+                                                            .parentsAnyOneLiveOutsideEnWlDetails("Test")
+                                                            .anotherPersonOrderOutsideEnWl(Yes)
+                                                            .anotherPersonOrderOutsideEnWlDetails("test")
+                                                            .anotherCountryAskedInformation(Yes)
+                                                            .anotherCountryAskedInformationDetaails("test")
+                                                            .build())
+                          .supportYouNeed(ReasonableAdjustmentsSupport.builder()
+                                              .reasonableAdjustments(List.of(ReasonableAdjustmentsEnum.nosupport)).build())
+                          .responseToAllegationsOfHarm(responseToAllegationsOfHarm)
+                          .build())
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(No)
+            .isPhoneNumberConfidential(No)
+            .isAddressConfidential(No)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").addressLine2("test").addressLine3("test").postCode(
+                "AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .solicitorReference("test")
+            .address(Address.builder().addressLine1("").build())
+            .organisations(Organisations.builder().contactInformation(contactInformation2).build())
+            .build();
 
         List<RespondentWelshNeedsListEnum> welshNeedsListEnum2 = new ArrayList<>();
         welshNeedsListEnum2.add(RespondentWelshNeedsListEnum.speakWelsh);
@@ -835,44 +809,10 @@ public class C100RespondentSolicitorServiceTest {
                         .responseToAllegationsOfHarm(responseToAllegationsOfHarm)
                         .build())
                 .build();
-
-
-
-        stringObjectMap2 = caseData2.toMap(new ObjectMapper());
-
-
-        callbackRequest2 = uk.gov.hmcts.reform.ccd.client.model
-                .CallbackRequest.builder()
-                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                        .id(123L)
-                        .data(stringObjectMap2)
-                        .build())
-                .eventId("SolicitorA")
-                .build();
-        when(confidentialDetailsMapper.mapConfidentialData(
-                Mockito.any(CaseData.class),
-                Mockito.anyBoolean()
-        )).thenReturn(caseData);
-        when(applicationsTabService.getRespondentsTable(caseData2)).thenReturn(List.of(Element.<Respondent>builder().build()));
-        when(organisationService.getOrganisationDetails(Mockito.anyString(), Mockito.anyString())).thenReturn(
-                Organisations.builder().contactInformation(List.of(ContactInformation.builder().build())).build());
-        when(systemUserService.getSysUserToken()).thenReturn("");
-
-        Map<String, Object> allegationsOfHarmDataMap = Map.of(
-                "respAohYesOrNo", "Yes"
-        );
-
-        when(objectMapper.convertValue(eq(allegationsOfHarmData),
-                Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(allegationsOfHarmDataMap);
-
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
-        when(documentLanguageService.docGenerateLang(
-            Mockito.any(CaseData.class)
-        )).thenReturn(documentLanguage);
     }
 
     @Test
-    public void populateAboutToStartCaseDataResSolConsentingToApplicationTest() {
+    void populateAboutToStartCaseDataResSolConsentingToApplicationTest() {
 
         String[] events = {"c100ResSolConsentingToApplicationA", "c100ResSolKeepDetailsPrivateA",
             "c100ResSolConfirmOrEditContactDetailsA", "c100ResSolAttendingTheCourtA", "c100ResSolMiamA",
@@ -891,7 +831,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void populateAboutToSubmitCaseDataSolCurrentOrPreviousProceedingTest() {
+    void populateAboutToSubmitCaseDataSolCurrentOrPreviousProceedingTest() {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
@@ -915,7 +855,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void validateActiveRespondentResponse() throws Exception {
+    void validateActiveRespondentResponse() throws Exception {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -950,14 +890,14 @@ public class C100RespondentSolicitorServiceTest {
         )).thenReturn(documentLanguage);
 
         Map<String, Object> response = respondentSolicitorService.validateActiveRespondentResponse(
-            callbackRequest, errorList, authToken
+            callbackRequest, errorList, AUTH_TOKEN
         );
 
         assertTrue(response.containsKey("respondents"));
     }
 
     @Test
-    public void validateActiveRespondentResponseWelsh() throws Exception {
+    void validateActiveRespondentResponseWelsh() throws Exception {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -987,14 +927,14 @@ public class C100RespondentSolicitorServiceTest {
         List<String> errorList = new ArrayList<>();
 
         Map<String, Object> response = respondentSolicitorService.validateActiveRespondentResponse(
-            callbackRequest, errorList, authToken
+            callbackRequest, errorList, AUTH_TOKEN
         );
 
         assertTrue(response.containsKey("respondents"));
     }
 
     @Test
-    public void validateActiveRespondentResponseIfNoRespondentExists() throws Exception {
+    void validateActiveRespondentResponseIfNoRespondentExists() throws Exception {
         caseData = caseData.toBuilder()
                 .respondentSolicitorData(RespondentSolicitorData.builder().respondentAllegationsOfHarmData(allegationsOfHarmData)
                         .build())
@@ -1002,7 +942,6 @@ public class C100RespondentSolicitorServiceTest {
                 .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(responseSubmitChecker.isFinished(respondent, true)).thenReturn(mandatoryFinished);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
                 .CallbackRequest.builder()
                 .eventId("c100ResSolConsentingToApplicationA")
@@ -1020,7 +959,7 @@ public class C100RespondentSolicitorServiceTest {
         )).thenReturn(documentLanguage);
 
         Map<String, Object> response = respondentSolicitorService.validateActiveRespondentResponse(
-                callbackRequest, errorList, authToken
+                callbackRequest, errorList, AUTH_TOKEN
         );
 
         assertTrue(response.containsKey("respondents"));
@@ -1028,7 +967,7 @@ public class C100RespondentSolicitorServiceTest {
 
 
     @Test
-    public void validateActiveRespondentResponseElseCase() throws Exception {
+    void validateActiveRespondentResponseElseCase() throws Exception {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
@@ -1051,14 +990,14 @@ public class C100RespondentSolicitorServiceTest {
                 .build();
 
         Map<String, Object> response = respondentSolicitorService.validateActiveRespondentResponse(
-                callbackRequest, new ArrayList<>(), authToken
+                callbackRequest, new ArrayList<>(), AUTH_TOKEN
         );
 
         assertTrue(response.containsKey("finalC1AResponseDoc"));
     }
 
     @Test
-    public void submitC7ResponseForActiveRespondentTest() throws Exception {
+    void submitC7ResponseForActiveRespondentTest() throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
                 .url("TestUrl")
                 .binaryUrl("binaryUrl")
@@ -1111,13 +1050,13 @@ public class C100RespondentSolicitorServiceTest {
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(false);
 
         Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
-                authToken, callbackRequest
+                AUTH_TOKEN, callbackRequest
         );
         Assertions.assertTrue(response.containsKey("respondentAc8"));
     }
 
     @Test
-    public void submitC7ResponseForActiveRespondentWelshTest() throws Exception {
+    void submitC7ResponseForActiveRespondentWelshTest() throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -1165,13 +1104,13 @@ public class C100RespondentSolicitorServiceTest {
         callbackRequest.setEventId("c100ResSolConsentingToApplicationA");
 
         Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
-            authToken, callbackRequest
+            AUTH_TOKEN, callbackRequest
         );
         Assertions.assertTrue(response.containsKey("respondentAc8"));
     }
 
     @Test
-    public void submitC7ResponseForActiveRespondentTestB() throws Exception {
+    void submitC7ResponseForActiveRespondentTestB() throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
                 .url("TestUrl")
                 .binaryUrl("binaryUrl")
@@ -1249,14 +1188,14 @@ public class C100RespondentSolicitorServiceTest {
             String respondent = eventsAndResp.split(HYPHEN_SEPARATOR)[1];
             when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
             Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
-                    authToken, callbackRequest
+                    AUTH_TOKEN, callbackRequest
             );
             Assertions.assertTrue(response.containsKey(respondent));
         }
     }
 
     @Test
-    public void submitC7ResponseForActiveRespondentTestE() throws Exception {
+    void submitC7ResponseForActiveRespondentTestE() throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
                 .url("TestUrl")
                 .binaryUrl("binaryUrl")
@@ -1299,13 +1238,13 @@ public class C100RespondentSolicitorServiceTest {
         )).thenReturn(documentLanguage);
 
         Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
-                authToken, callbackRequest
+                AUTH_TOKEN, callbackRequest
         );
         Assertions.assertTrue(response.containsKey("respondentEc8"));
     }
 
     @Test
-    public void populateAboutToSubmitCaseDataForC100ResSolKeepDetailsPrivateATest() {
+    void populateAboutToSubmitCaseDataForC100ResSolKeepDetailsPrivateATest() {
 
         when(responseSubmitChecker.isFinished(respondent3, true)).thenReturn(mandatoryFinished);
         when(objectMapper.convertValue(Mockito.<RespondentAllegationsOfHarmData>any(),
@@ -1330,7 +1269,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void populateAboutToSubmitCaseDataForC100ResSolCurrentOrPreviousProceedingsAWhileExistingProceedingNoTest() {
+    void populateAboutToSubmitCaseDataForC100ResSolCurrentOrPreviousProceedingsAWhileExistingProceedingNoTest() {
 
         when(responseSubmitChecker.isFinished(respondent3, true)).thenReturn(mandatoryFinished);
         when(objectMapper.convertValue(Mockito.<RespondentAllegationsOfHarmData>any(),
@@ -1347,7 +1286,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void populateAboutToSubmitCaseDataWithFewNullsTest() {
+    void populateAboutToSubmitCaseDataWithFewNullsTest() {
         List<ConfidentialityListEnum> confidentialityListEnums = new ArrayList<>();
 
         RespondentProceedingDetails proceedingDetails = RespondentProceedingDetails.builder()
@@ -1604,11 +1543,7 @@ public class C100RespondentSolicitorServiceTest {
                 Mockito.anyBoolean()
         )).thenReturn(caseData);
         when(applicationsTabService.getRespondentsTable(caseData)).thenReturn(List.of(Element.<Respondent>builder().build()));
-        when(organisationService.getOrganisationDetails(Mockito.anyString(), Mockito.anyString())).thenReturn(
-                Organisations.builder().contactInformation(List.of(ContactInformation.builder().build())).build());
-        when(systemUserService.getSysUserToken()).thenReturn("");
 
-        when(responseSubmitChecker.isFinished(respondent, true)).thenReturn(mandatoryFinished);
         when(objectMapper.convertValue(Mockito.<RespondentAllegationsOfHarmData>any(),
                 Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(allegationsOfHarmDataMap);
 
@@ -1627,7 +1562,7 @@ public class C100RespondentSolicitorServiceTest {
 
 
     @Test
-    public void populateAboutToSubmitCaseDataForC100RMiamWithAttendMiamYesOrNoTest() {
+    void populateAboutToSubmitCaseDataForC100RMiamWithAttendMiamYesOrNoTest() {
 
         YesOrNo[] attendMiam = {Yes, No};
         for (YesOrNo yesOrNo : attendMiam) {
@@ -1665,18 +1600,9 @@ public class C100RespondentSolicitorServiceTest {
             when(objectMapper.convertValue(Mockito.<RespondentAllegationsOfHarmData>any(),
                     Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(allegationsOfHarmDataMap);
 
-            when(confidentialDetailsMapper.mapConfidentialData(
-                    Mockito.any(CaseData.class),
-                    Mockito.anyBoolean()
-            )).thenReturn(caseData);
-
             when(applicationsTabService.getRespondentsTable(caseData1)).thenReturn(List.of(Element.<Respondent>builder().build()));
-            when(organisationService.getOrganisationDetails(Mockito.anyString(), Mockito.anyString())).thenReturn(
-                    Organisations.builder().contactInformation(List.of(ContactInformation.builder().build())).build());
             when(objectMapper.convertValue(Mockito.<RespondentAllegationsOfHarmData>any(),
                     Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(allegationsOfHarmDataMap);
-
-            when(systemUserService.getSysUserToken()).thenReturn("");
 
             CallbackRequest callbackRequest1 = uk.gov.hmcts.reform.ccd.client.model
                     .CallbackRequest.builder()
@@ -1697,7 +1623,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void populateAboutToSubmitCaseDataForC100ResSolKeepDetailsPrivateAWithConfidentialityIsNoTest() {
+    void populateAboutToSubmitCaseDataForC100ResSolKeepDetailsPrivateAWithConfidentialityIsNoTest() {
 
         respondent = PartyDetails.builder()
                 .response(Response.builder()
@@ -1708,8 +1634,6 @@ public class C100RespondentSolicitorServiceTest {
                                 .build())
                         .build())
                 .build();
-
-        when(responseSubmitChecker.isFinished(respondent, true)).thenReturn(mandatoryFinished);
 
         Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder()
                 .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
@@ -1752,9 +1676,6 @@ public class C100RespondentSolicitorServiceTest {
         when(objectMapper.convertValue(Mockito.<RespondentAllegationsOfHarmData>any(),
                 Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(allegationsOfHarmDataMap);
         when(applicationsTabService.getRespondentsTable(caseData1)).thenReturn(List.of(Element.<Respondent>builder().build()));
-        when(organisationService.getOrganisationDetails(Mockito.anyString(), Mockito.anyString())).thenReturn(
-                Organisations.builder().contactInformation(List.of(ContactInformation.builder().build())).build());
-        when(systemUserService.getSysUserToken()).thenReturn("");
         when(objectMapper.convertValue(Mockito.<RespondentAllegationsOfHarmData>any(),
                 Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(allegationsOfHarmDataMap);
 
@@ -1771,7 +1692,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void populateAboutToStartCaseDataConsentToApplicationEvent() {
+    void populateAboutToStartCaseDataConsentToApplicationEvent() {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
@@ -1800,7 +1721,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void testC7DraftDocument() throws Exception {
+    void testC7DraftDocument() throws Exception {
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
                 .url("TestUrl")
@@ -1819,7 +1740,7 @@ public class C100RespondentSolicitorServiceTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(documentGenService.generateSingleDocument(
-                authToken,
+                AUTH_TOKEN,
                 caseData,
                 SOLICITOR_C7_DRAFT_DOCUMENT,
                 false
@@ -1838,7 +1759,7 @@ public class C100RespondentSolicitorServiceTest {
                 .build();
 
         Map<String, Object> response = respondentSolicitorService.generateDraftDocumentsForRespondent(
-                callbackRequest, authToken
+                callbackRequest, AUTH_TOKEN
         );
 
         assertTrue(response.containsKey("draftC7ResponseDoc"));
@@ -1859,7 +1780,7 @@ public class C100RespondentSolicitorServiceTest {
                 .documentFileName("Draft_C1A_allegation_of_harm.pdf")
                 .build();
         when(documentGenService.generateSingleDocument(
-                authToken,
+                AUTH_TOKEN,
                 caseData,
                 SOLICITOR_C1A_DRAFT_DOCUMENT,
                 false
@@ -1875,7 +1796,7 @@ public class C100RespondentSolicitorServiceTest {
                 .build();
 
         response = respondentSolicitorService.generateDraftDocumentsForRespondent(
-                callbackRequest, authToken
+                callbackRequest, AUTH_TOKEN
         );
 
         assertTrue(response.containsKey("draftC7ResponseDoc"));
@@ -1884,7 +1805,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void testC7DraftDocumentNoDxNumber() throws Exception {
+    void testC7DraftDocumentNoDxNumber() throws Exception {
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
                 .url("TestUrl")
@@ -1910,7 +1831,7 @@ public class C100RespondentSolicitorServiceTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(documentGenService.generateSingleDocument(
-                authToken,
+                AUTH_TOKEN,
                 caseData,
                 SOLICITOR_C7_DRAFT_DOCUMENT,
                 false
@@ -1928,7 +1849,7 @@ public class C100RespondentSolicitorServiceTest {
                 .documentFileName("Draft_C1A_allegation_of_harm.pdf")
                 .build();
         when(documentGenService.generateSingleDocument(
-                authToken,
+                AUTH_TOKEN,
                 caseData,
                 SOLICITOR_C1A_DRAFT_DOCUMENT,
                 false
@@ -1947,7 +1868,7 @@ public class C100RespondentSolicitorServiceTest {
                 .build();
 
         Map<String, Object> response = respondentSolicitorService.generateDraftDocumentsForRespondent(
-                callbackRequest, authToken
+                callbackRequest, AUTH_TOKEN
         );
 
         assertTrue(response.containsKey("draftC7ResponseDoc"));
@@ -1955,7 +1876,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void testPopulateDraftDocumentForElseConditions() throws Exception {
+    void testPopulateDraftDocumentForElseConditions() throws Exception {
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
                 .url("TestUrl")
@@ -1974,7 +1895,7 @@ public class C100RespondentSolicitorServiceTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(documentGenService.generateSingleDocument(
-                authToken,
+                AUTH_TOKEN,
                 caseData,
                 SOLICITOR_C7_DRAFT_DOCUMENT,
                 false
@@ -2011,7 +1932,7 @@ public class C100RespondentSolicitorServiceTest {
                 .documentFileName("Draft_C1A_allegation_of_harm.pdf")
                 .build();
         when(documentGenService.generateSingleDocument(
-                authToken,
+                AUTH_TOKEN,
                 caseData,
                 SOLICITOR_C1A_DRAFT_DOCUMENT,
                 false
@@ -2044,7 +1965,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void testGetOrganisationAddressException() {
+    void testGetOrganisationAddressException() {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
@@ -2061,7 +1982,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void testGenerateConfidentialMapWithAllConfValues() {
+    void testGenerateConfidentialMapWithAllConfValues() {
 
         Map<String, Object> response = respondentSolicitorService.generateConfidentialityDynamicSelectionDisplay(
                 callbackRequest
@@ -2072,18 +1993,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void testGenerateConfidentialMapWithoutAllConfValues() {
-
-        Map<String, Object> response = respondentSolicitorService.generateConfidentialityDynamicSelectionDisplay(
-                callbackRequest
-        );
-
-        assertTrue(response.containsKey("confidentialListDetails"));
-
-    }
-
-    @Test
-    public void testsubmittedC7Response() {
+    void testSubmittedC7Response() {
         SubmittedCallbackResponse response = respondentSolicitorService.submittedC7Response(
                 caseData
         );
@@ -2091,7 +2001,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void testsubmittedC7ResponseWithCourtName() {
+    void testSubmittedC7ResponseWithCourtName() {
         caseData = caseData.toBuilder().courtName("test").build();
         SubmittedCallbackResponse response = respondentSolicitorService.submittedC7Response(
                 caseData
@@ -2100,7 +2010,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void testGetSolicitorRoleException() {
+    void testGetSolicitorRoleException() {
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
                 .CallbackRequest.builder()
                 .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -2109,13 +2019,16 @@ public class C100RespondentSolicitorServiceTest {
                         .build())
                 .eventId("")
                 .build();
-        assertExpectedException(() -> respondentSolicitorService.getSolicitorRole(
-                callbackRequest
-        ), RespondentSolicitorException.class, TECH_ERROR);
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
+            respondentSolicitorService.getSolicitorRole(callbackRequest);
+        });
+
+        assertEquals(TECH_ERROR, ex.getMessage());
     }
 
     @Test
-    public void testFindSolicitorRepresentedRespondentsException() {
+    void testFindSolicitorRepresentedRespondentsException() {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -2131,13 +2044,14 @@ public class C100RespondentSolicitorServiceTest {
         when(responseSubmitChecker.isFinished(respondent, true)).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
-        assertExpectedException(() -> respondentSolicitorService.findSolicitorRepresentedRespondents(
-                callbackRequest,SolicitorRole.C100APPLICANTSOLICITOR1
-        ), RespondentSolicitorException.class, RESPONSE_ALREADY_SUBMITTED_ERROR);
+        RespondentSolicitorException ex = assertThrows(RespondentSolicitorException.class, () ->
+            respondentSolicitorService.findSolicitorRepresentedRespondents(callbackRequest, SolicitorRole.C100APPLICANTSOLICITOR1));
+
+        assertEquals(RESPONSE_ALREADY_SUBMITTED_ERROR, ex.getMessage());
     }
 
     @Test
-    public void populateAboutToSubmitCaseDataSolResponseToAllegationOfHarmYesTest() {
+    void populateAboutToSubmitCaseDataSolResponseToAllegationOfHarmYesTest() {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
@@ -2159,7 +2073,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void populateAboutToSubmitCaseDataSolResponseToAllegationOfHarmNoTest() {
+    void populateAboutToSubmitCaseDataSolResponseToAllegationOfHarmNoTest() {
 
         Element<PartyDetails> wrappedRespondents1 = Element.<PartyDetails>builder()
             .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
@@ -2194,16 +2108,12 @@ public class C100RespondentSolicitorServiceTest {
         assertTrue(response.containsKey("respondents"));
     }
 
-    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
-                                                                 String expectedMessage) {
-        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
-        assertEquals(expectedMessage, exception.getMessage());
-    }
+
 
 
 
     @Test
-    public void testPopulateDataMapNoSolOrg() {
+    void testPopulateDataMapNoSolOrg() {
         Map<String,Object> objectMap = new HashMap<>();
         CallbackRequest callbackRequest1 = CallbackRequest.builder()
                 .caseDetails(CaseDetails.builder().data(objectMap).build())
@@ -2274,7 +2184,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void testC1ADocumentQuarantine() throws Exception {
+    void testC1ADocumentQuarantine() throws Exception {
         quarantineLegalDoc = quarantineLegalDoc.toBuilder()
             .document(document)
             .restrictedDetails("test details")
@@ -2358,7 +2268,7 @@ public class C100RespondentSolicitorServiceTest {
                 .roles(List.of("caseworker-privatelaw-solicitor")).build();
             when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
             Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
-                authToken, callbackRequest
+                AUTH_TOKEN, callbackRequest
             );
 
             List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList
@@ -2370,7 +2280,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void testPopulateDataMapNoSolOrgForVersion() {
+    void testPopulateDataMapNoSolOrgForVersion() {
         respondent2 = PartyDetails.builder()
             .user(User.builder().build())
             .representativeFirstName("Abc")
@@ -2435,7 +2345,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void testPopulateDataMapOriginatedFromCitizen() {
+    void testPopulateDataMapOriginatedFromCitizen() {
         respondent2 = PartyDetails.builder()
             .user(User.builder().build())
             .representativeFirstName("Abc")
@@ -2499,7 +2409,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void testPopulateDataMapForRaCitizen() {
+    void testPopulateDataMapForRaCitizen() {
         CurrentOrPreviousProceedings currentOrPreviousProceedings = CurrentOrPreviousProceedings.builder()
             .courtOrderMadeForProtection(Yes)
             .haveChildrenBeenInvolvedInCourtCase(Yes)
@@ -2626,7 +2536,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void populateAboutToSubmitCaseDataWithAoHOrders() {
+    void populateAboutToSubmitCaseDataWithAoHOrders() {
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -2709,8 +2619,6 @@ public class C100RespondentSolicitorServiceTest {
 
         stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
         callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -2719,19 +2627,6 @@ public class C100RespondentSolicitorServiceTest {
                              .build())
             .eventId("SolicitorA")
             .build();
-        when(confidentialDetailsMapper.mapConfidentialData(
-            Mockito.any(CaseData.class),
-            Mockito.anyBoolean()
-        )).thenReturn(caseData);
-        when(applicationsTabService.getRespondentsTable(caseData)).thenReturn(List.of(Element.<Respondent>builder().build()));
-        when(organisationService.getOrganisationDetails(Mockito.anyString(), Mockito.anyString())).thenReturn(
-            Organisations.builder().contactInformation(List.of(ContactInformation.builder().build())).build());
-        when(systemUserService.getSysUserToken()).thenReturn("");
-
-        when(objectMapper.convertValue(
-            Mockito.<RespondentAllegationsOfHarmData>any(),
-            Mockito.<TypeReference<Map<String, Object>>>any()
-        )).thenReturn(allegationsOfHarmDataMap);
 
         respondentSolicitorService.buildAoHResponse(
             caseData,

@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.rpa.mappers;
 
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,7 +29,7 @@ import static org.mockito.ArgumentMatchers.any;
 
 
 @ExtendWith(MockitoExtension.class)
-public class AllegationsOfHarmRevisedMapperTest {
+class AllegationsOfHarmRevisedMapperTest {
 
     @InjectMocks
     AllegationsOfHarmRevisedMapper allegationsOfHarmRevisedMapper;
@@ -38,13 +37,9 @@ public class AllegationsOfHarmRevisedMapperTest {
     @Mock
     AllegationOfHarmRevisedService allegationOfHarmRevisedService;
 
-    @BeforeEach
-    public void setUp() {
-
-    }
 
     @Test
-    public void testAllegationsOfHarmMapperWithSomeFields() {
+    void testAllegationsOfHarmMapperWithSomeFields() {
 
         AllegationOfHarmRevised allegationOfHarmRevised = AllegationOfHarmRevised.builder().newAllegationsOfHarmYesNo(
                 YesOrNo.Yes)
@@ -70,7 +65,7 @@ public class AllegationsOfHarmRevisedMapperTest {
 
 
     @Test
-    public void testNoDataAllegationsOfHarmMapperMapBehaviours() {
+    void testNoDataAllegationsOfHarmMapperMapBehaviours() {
 
         CaseData caseData = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder().build()).build();
@@ -78,7 +73,7 @@ public class AllegationsOfHarmRevisedMapperTest {
     }
 
     @Test
-    public void testDataAllegationsOfHarmMapperMapCollections() {
+    void testDataAllegationsOfHarmMapperMapCollections() {
 
 
         DomesticAbuseBehaviours domesticAbuseBehaviours = DomesticAbuseBehaviours.builder().typeOfAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)

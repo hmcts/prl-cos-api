@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class OrganisationServiceTest {
+class OrganisationServiceTest {
 
     @InjectMocks
     private OrganisationService organisationService;
@@ -50,13 +50,13 @@ public class OrganisationServiceTest {
     private final String serviceAuthToken = "serviceTestAuthtoken";
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         when(systemUserService.getSysUserToken()).thenReturn(authToken);
     }
 
     @Test
-    public void testApplicantOrganisationDetails() throws NotFoundException {
+    void testApplicantOrganisationDetails() throws NotFoundException {
 
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -120,7 +120,7 @@ public class OrganisationServiceTest {
     }
 
     @Test
-    public void testRespondentOrganisationDetails() throws NotFoundException {
+    void testRespondentOrganisationDetails() throws NotFoundException {
 
         PartyDetails respondent = PartyDetails.builder()
             .firstName("TestFirst")
@@ -185,7 +185,7 @@ public class OrganisationServiceTest {
     }
 
     @Test
-    public void testRespondentOrganisationDetailsNotFound() throws NotFoundException {
+    void testRespondentOrganisationDetailsNotFound() throws NotFoundException {
 
         PartyDetails respondent = PartyDetails.builder()
             .firstName("TestFirst")
@@ -212,7 +212,7 @@ public class OrganisationServiceTest {
     }
 
     @Test
-    public void testApplicantOrganisationDetailsForFl401() throws NotFoundException {
+    void testApplicantOrganisationDetailsForFl401() throws NotFoundException {
 
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -272,7 +272,7 @@ public class OrganisationServiceTest {
     }
 
     @Test
-    public void testApplicantOrganisationDetailsForFl401NotFound() throws NotFoundException {
+    void testApplicantOrganisationDetailsForFl401NotFound() throws NotFoundException {
 
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -295,7 +295,7 @@ public class OrganisationServiceTest {
     }
 
     @Test
-    public void testRespondentOrganisationDetailsForFl401() throws NotFoundException {
+    void testRespondentOrganisationDetailsForFl401() throws NotFoundException {
 
         PartyDetails respondent = PartyDetails.builder()
             .firstName("TestFirst")
@@ -355,7 +355,7 @@ public class OrganisationServiceTest {
     }
 
     @Test
-    public void testRespondentOrganisationDetailsForFl401NotFound() throws NotFoundException {
+    void testRespondentOrganisationDetailsForFl401NotFound() throws NotFoundException {
 
         PartyDetails respondent = PartyDetails.builder()
             .firstName("TestFirst")
@@ -378,7 +378,7 @@ public class OrganisationServiceTest {
     }
 
     @Test
-    public void testRespondentOrganisationDetailsForFl401WhenRespondentNull() {
+    void testRespondentOrganisationDetailsForFl401WhenRespondentNull() {
 
         CaseData caseData = CaseData.builder().respondentsFL401(null).build();
 
@@ -388,7 +388,7 @@ public class OrganisationServiceTest {
 
 
     @Test
-    public void findUserOrganisationTest() {
+    void findUserOrganisationTest() {
         Organisations organisations = Organisations.builder()
             .organisationIdentifier("79ZRSOU")
             .name("Civil - Organisation 2")
@@ -403,7 +403,7 @@ public class OrganisationServiceTest {
     }
 
     @Test
-    public void findUserOrganisationNotFoundTest() {
+    void findUserOrganisationNotFoundTest() {
         when(organisationApi.findUserOrganisation(authToken,
                                                   serviceAuthToken))
             .thenThrow(feignException(404, "Not found"));
@@ -413,7 +413,7 @@ public class OrganisationServiceTest {
     }
 
     @Test
-    public void getOrganisationSolicitorDetailsTest() {
+    void getOrganisationSolicitorDetailsTest() {
         when(organisationApi.findOrganisationSolicitors(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
             .thenReturn(OrgSolicitors.builder().build());
@@ -429,7 +429,7 @@ public class OrganisationServiceTest {
     }
 
     @Test
-    public void testGetAllActiveOrganisations() {
+    void testGetAllActiveOrganisations() {
 
         List<ContactInformation> contactInformationList = Collections.singletonList(ContactInformation.builder()
                                                                                         .addressLine1("29, SEATON DRIVE")

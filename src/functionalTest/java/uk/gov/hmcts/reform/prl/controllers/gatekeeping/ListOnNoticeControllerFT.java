@@ -6,7 +6,6 @@ import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -21,6 +20,10 @@ import uk.gov.hmcts.reform.prl.enums.gatekeeping.ListOnNoticeReasonsEnum;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SELECTED_AND_ADDITIONAL_REASONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TIER_OF_JUDICIARY;
@@ -84,8 +87,8 @@ public class ListOnNoticeControllerFT {
             .extract()
             .as(CaseDetails.class);
 
-        Assert.assertNotNull(caseDetails);
-        Assert.assertNotNull(caseDetails.getId());
+        assertNotNull(caseDetails);
+        assertNotNull(caseDetails.getId());
     }
 
     @Test
@@ -102,10 +105,10 @@ public class ListOnNoticeControllerFT {
             .post(listOnNoticeMidEventEndpoint);
         response.then().assertThat().statusCode(200);
         AboutToStartOrSubmitCallbackResponse res = objectMapper.readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
-        Assert.assertNotNull(res);
+        assertNotNull(res);
         String reasonsSelectedString = ListOnNoticeReasonsEnum.getDisplayedValue("childrenResideWithApplicantAndBothProtectedByNonMolestationOrder")
             + "\n\n" + ListOnNoticeReasonsEnum.getDisplayedValue("noEvidenceOnRespondentSeekToFrustrateTheProcessIfTheyWereGivenNotice") + "\n\n";
-        Assert.assertEquals(reasonsSelectedString,res.getData().get(SELECTED_AND_ADDITIONAL_REASONS));
+        assertEquals(reasonsSelectedString,res.getData().get(SELECTED_AND_ADDITIONAL_REASONS));
     }
 
     @Test
@@ -122,8 +125,8 @@ public class ListOnNoticeControllerFT {
             .post(listOnNoticeMidEventEndpoint);
         response.then().assertThat().statusCode(200);
         AboutToStartOrSubmitCallbackResponse res = objectMapper.readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
-        Assert.assertNotNull(res);
-        Assert.assertEquals(null,res.getData().get(SELECTED_AND_ADDITIONAL_REASONS));
+        assertNotNull(res);
+        assertEquals(null,res.getData().get(SELECTED_AND_ADDITIONAL_REASONS));
     }
 
     @Test
@@ -140,14 +143,14 @@ public class ListOnNoticeControllerFT {
             .post(listOnNoticeSubmissionEndpoint);
         response.then().assertThat().statusCode(200);
         AboutToStartOrSubmitCallbackResponse res = objectMapper.readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
-        Assert.assertNotNull(res);
+        assertNotNull(res);
         String reasonsSelectedString = "The child[ren] reside with applicant and both are protected by a Non-Molestation Order"
             + "\nThere is no evidence to suggest that the respondent seeks to remove the child[ren] from the applicant's care and therefore "
             + "there is no genuine emergency"
             + "\ntestAdditionalReason";
-        Assert.assertNotNull(res.getData().get(SELECTED_AND_ADDITIONAL_REASONS));
-        Assert.assertNotNull(res.getData().get(CASE_NOTES));
-        Assert.assertNotNull(res.getData().get(TIER_OF_JUDICIARY));
+        assertNotNull(res.getData().get(SELECTED_AND_ADDITIONAL_REASONS));
+        assertNotNull(res.getData().get(CASE_NOTES));
+        assertNotNull(res.getData().get(TIER_OF_JUDICIARY));
     }
 
     @Test
@@ -164,8 +167,8 @@ public class ListOnNoticeControllerFT {
             .post(listOnNoticeSubmissionEndpoint);
         response.then().assertThat().statusCode(200);
         AboutToStartOrSubmitCallbackResponse res = objectMapper.readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
-        Assert.assertNotNull(res);
-        Assert.assertNull(res.getData().get(SELECTED_AND_ADDITIONAL_REASONS));
+        assertNotNull(res);
+        assertNull(res.getData().get(SELECTED_AND_ADDITIONAL_REASONS));
     }
 
     @Test
@@ -182,8 +185,8 @@ public class ListOnNoticeControllerFT {
             .post(listOnNoticePrepopulateEndpoint);
         response.then().assertThat().statusCode(200);
         AboutToStartOrSubmitCallbackResponse res = objectMapper.readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
-        Assert.assertNotNull(res);
-        Assert.assertTrue(res.getData().containsKey("legalAdviserList"));
+        assertNotNull(res);
+        assertTrue(res.getData().containsKey("legalAdviserList"));
     }
 
     @Test

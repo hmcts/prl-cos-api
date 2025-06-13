@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,7 +27,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @ExtendWith(MockitoExtension.class)
-public class RespondentMiamCheckerTest {
+class RespondentMiamCheckerTest {
 
     @InjectMocks
     private RespondentMiamChecker respondentMiamChecker;
@@ -40,7 +39,7 @@ public class RespondentMiamCheckerTest {
     PartyDetails respondents;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         User user = User.builder().email("respondent@example.net")
             .idamId("1234-5678").solicitorRepresented(Yes).build();
         Response miamResponse = Response.builder()
@@ -77,7 +76,7 @@ public class RespondentMiamCheckerTest {
     }
 
     @Test
-    public void testMiamAttendedIsStarted() {
+    void testMiamAttendedIsStarted() {
 
         boolean isStarted;
         isStarted = respondentMiamChecker.isStarted(respondents, true);
@@ -86,14 +85,14 @@ public class RespondentMiamCheckerTest {
     }
 
     @Test
-    public void hasMandatoryCompletedTest() {
+    void hasMandatoryCompletedTest() {
         boolean anyNonEmpty = respondentMiamChecker.isFinished(respondents, true);
 
-        Assert.assertTrue(anyNonEmpty);
+        assertTrue(anyNonEmpty);
     }
 
     @Test
-    public void hasMandatoryCompletedTestWithAttendedMiamYes() {
+    void hasMandatoryCompletedTestWithAttendedMiamYes() {
 
         Response miamResponse = Response
             .builder()
@@ -120,6 +119,6 @@ public class RespondentMiamCheckerTest {
 
         boolean anyNonEmpty = respondentMiamChecker.isFinished(respondents, true);
 
-        Assert.assertTrue(anyNonEmpty);
+        assertTrue(anyNonEmpty);
     }
 }

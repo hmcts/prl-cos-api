@@ -19,7 +19,7 @@ import static uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum.noNowSought;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @ExtendWith(MockitoExtension.class)
-public class ApplicationTypeCheckerTest {
+class ApplicationTypeCheckerTest {
 
     @Mock
     private TaskErrorService taskErrorService;
@@ -28,7 +28,7 @@ public class ApplicationTypeCheckerTest {
     private ApplicationTypeChecker applicationTypeChecker;
 
     @Test
-    public void whenFieldsPartiallyCompleteIsFinishedReturnsFalse() {
+    void whenFieldsPartiallyCompleteIsFinishedReturnsFalse() {
 
         CaseData caseData = CaseData.builder()
             .ordersApplyingFor(Collections.singletonList(childArrangementsOrder))
@@ -39,7 +39,7 @@ public class ApplicationTypeCheckerTest {
     }
 
     @Test
-    public void whenAllRequiredFieldsCompletedThenIsFinishedReturnsTrue() {
+    void whenAllRequiredFieldsCompletedThenIsFinishedReturnsTrue() {
         CaseData caseData = CaseData.builder()
             .ordersApplyingFor(Collections.singletonList(childArrangementsOrder))
             .natureOfOrder("Test")
@@ -52,7 +52,7 @@ public class ApplicationTypeCheckerTest {
     }
 
     @Test
-    public void whenTypeOfApplicationNoNowSoughtSelectedThenIsFinishedReturnsTrue() {
+    void whenTypeOfApplicationNoNowSoughtSelectedThenIsFinishedReturnsTrue() {
         CaseData caseData = CaseData.builder()
             .ordersApplyingFor(Collections.singletonList(childArrangementsOrder))
             .natureOfOrder("Test")
@@ -65,7 +65,7 @@ public class ApplicationTypeCheckerTest {
     }
 
     @Test
-    public void whenAnyFieldCompletedThenIsStartedReturnsTrue() {
+    void whenAnyFieldCompletedThenIsStartedReturnsTrue() {
 
         CaseData caseData = CaseData.builder()
             .natureOfOrder("Test")
@@ -75,7 +75,7 @@ public class ApplicationTypeCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataThenIsStartedReturnsFalse() {
+    void whenNoCaseDataThenIsStartedReturnsFalse() {
 
         CaseData caseData = CaseData.builder().build();
 
@@ -84,7 +84,7 @@ public class ApplicationTypeCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataThenHasMandatoryReturnsFalse() {
+    void whenNoCaseDataThenHasMandatoryReturnsFalse() {
 
         CaseData caseData = CaseData.builder().build();
 
@@ -92,7 +92,7 @@ public class ApplicationTypeCheckerTest {
     }
 
     @Test
-    public void whenCaseDataPresentThenHasMandatoryReturnsFalse() {
+    void whenCaseDataPresentThenHasMandatoryReturnsFalse() {
 
         CaseData caseData = CaseData.builder()
             .ordersApplyingFor(Collections.singletonList(childArrangementsOrder))
@@ -106,7 +106,7 @@ public class ApplicationTypeCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+    void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
         assertNotNull(applicationTypeChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

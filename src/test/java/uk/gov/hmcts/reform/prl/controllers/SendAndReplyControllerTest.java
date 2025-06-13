@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -60,10 +59,14 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.OK;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_IN_REVIEW;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
@@ -73,7 +76,7 @@ import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
-public class SendAndReplyControllerTest {
+class SendAndReplyControllerTest {
 
     @InjectMocks
     SendAndReplyController sendAndReplyController;
@@ -118,7 +121,7 @@ public class SendAndReplyControllerTest {
     Element<Message> message2Element;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         caseDataMap = new HashMap<>();
 
         sendCaseData = CaseData.builder()
@@ -172,13 +175,11 @@ public class SendAndReplyControllerTest {
         messages.add(message1Element);
 
         message2Element = element(message2);
-        listOfClosedMessages = Arrays.asList(element(message2));
-
-        when(objectMapper.convertValue(sendCaseDetails.getData(), CaseData.class)).thenReturn(sendCaseData);
+        listOfClosedMessages = List.of(element(message2));
     }
 
     @Test
-    public void testHandleAboutToStart() {
+    void testHandleAboutToStart() {
         Map<String, Object> aboutToStartMap = new HashMap<>();
         aboutToStartMap.put("messageObject", MessageMetaData.builder().build());
 
@@ -189,7 +190,7 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testHandleSendOrMessageAboutToStart() {
+    void testHandleSendOrMessageAboutToStart() {
         Map<String, Object> aboutToStartMap = new HashMap<>();
         aboutToStartMap.put("messageObject", MessageMetaData.builder().build());
 
@@ -199,9 +200,7 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testHandleMidEventSendPath() {
-        Map<String, Object> expectedMap = new HashMap<>();
-        expectedMap.put("messageReply", Message.builder().build());
+    void testHandleMidEventSendPath() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         CaseData caseData = CaseData.builder().id(12345L).chooseSendOrReply(SEND).build();
@@ -212,11 +211,11 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testHandleMidEventReplyPath() {
+    void testHandleMidEventReplyPath() {
         Map<String, Object> expectedMap = new HashMap<>();
         expectedMap.put("messageReply", Message.builder().build());
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
-        List<Element<Message>> messages = Collections.singletonList(element(Message.builder().build()));
+        messages = Collections.singletonList(element(Message.builder().build()));
         CaseData caseData = CaseData.builder().id(12345L)
             .chooseSendOrReply(REPLY)
             .sendOrReplyDto(SendOrReplyDto.builder().openMessages(messages).build())
@@ -233,9 +232,7 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testHandleMidEventReplyPathNoMessages() {
-        Map<String, Object> expectedMap = new HashMap<>();
-        expectedMap.put("messageReply", Message.builder().build());
+    void testHandleMidEventReplyPathNoMessages() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         CaseData caseData = CaseData.builder().id(12345L).chooseSendOrReply(REPLY).build();
@@ -248,7 +245,7 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testHandleAboutToSubmitSendPath() {
+    void testHandleAboutToSubmitSendPath() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         CaseData caseData = CaseData.builder().id(12345L)
             .sendOrReplyDto(SendOrReplyDto.builder().build())
@@ -266,7 +263,7 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testHandleAboutToSubmitSendPathWhenCaseTypeIsNull() {
+    void testHandleAboutToSubmitSendPathWhenCaseTypeIsNull() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L)
             .build();
         CaseData caseData = CaseData.builder().id(12345L)
@@ -288,8 +285,7 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testHandleAboutToSubmitReplyPathClose() {
-        Map<String, Object> caseDataMap = new HashMap<>();
+    void testHandleAboutToSubmitReplyPathClose() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         Message message = Message.builder().status(MessageStatus.OPEN).isReplying(YesOrNo.No).build();
         CaseData caseDataWithMessage = CaseData.builder().id(12345L)
@@ -312,7 +308,7 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testHandleAboutToSubmitReplyPathReplyWithClosedMessages() {
+    void testHandleAboutToSubmitReplyPathReplyWithClosedMessages() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         Message message = Message.builder().isReplying(YesOrNo.No).build();
         CaseData caseData = CaseData.builder().id(12345L)
@@ -333,7 +329,7 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testSendOrReplyToMessagesMidEventForSend() {
+    void testSendOrReplyToMessagesMidEventForSend() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         Message message = Message.builder().isReplying(YesOrNo.No).build();
         CaseData caseData = CaseData.builder().id(12345L)
@@ -347,7 +343,6 @@ public class SendAndReplyControllerTest {
             .replyMessageDynamicList(DynamicList.builder().build())
             .sendOrReplyDto(SendOrReplyDto.builder().closedMessages(Collections.singletonList(element(message))).build())
             .build();
-        UUID selectedValue = UUID.randomUUID();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
@@ -357,7 +352,7 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testSendOrReplyToMessagesMidEventForReply() {
+    void testSendOrReplyToMessagesMidEventForReply() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         Message message = Message.builder().isReplying(YesOrNo.No).build();
         CaseData caseData = CaseData.builder().id(12345L)
@@ -381,8 +376,7 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testHandleAboutToSubmitReplyPathReplyWithoutClosedMessages() {
-        Map<String, Object> caseDataMap = new HashMap<>();
+    void testHandleAboutToSubmitReplyPathReplyWithoutClosedMessages() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         Message message = Message.builder().isReplying(YesOrNo.Yes).build();
 
@@ -406,7 +400,7 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testHandleSubmittedClosedMessageNoClosedMessages() {
+    void testHandleSubmittedClosedMessageNoClosedMessages() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         Message message = Message.builder().isReplying(YesOrNo.No)
             .status(MessageStatus.CLOSED)
@@ -424,7 +418,7 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testHandleSubmittedClosedMessageWithClosedMessages() {
+    void testHandleSubmittedClosedMessageWithClosedMessages() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         Message message = Message.builder().isReplying(YesOrNo.No)
             .status(MessageStatus.CLOSED)
@@ -444,7 +438,7 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testHandleSubmittedNewMessage() {
+    void testHandleSubmittedNewMessage() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         Message newMessage = Message.builder()
             .updatedTime(ZonedDateTime.of(2022, 01, 01, 10, 30, 30, 0,
@@ -456,13 +450,6 @@ public class SendAndReplyControllerTest {
                 ZoneId.of("Europe/London")).toLocalDateTime())
             .status(MessageStatus.OPEN)
             .isReplying(YesOrNo.Yes).build();
-
-        Message closedMessage = Message.builder()
-            .updatedTime(ZonedDateTime.of(2022, 01, 01, 9, 30, 30, 0,
-                ZoneId.of("Europe/London")).toLocalDateTime())
-            .status(MessageStatus.CLOSED)
-            .isReplying(YesOrNo.Yes).build();
-
 
         CaseData caseData = CaseData.builder().id(12345L)
             .chooseSendOrReply(SEND)
@@ -478,7 +465,7 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testSendOrReplyToMessagesSubmitForMessageAboutOtherForSend() {
+    void testSendOrReplyToMessagesSubmitForMessageAboutOtherForSend() {
 
         DynamicList dynamicList = DynamicList.builder()
             .value(DynamicListElement.builder().code(UUID.randomUUID()).build()).build();
@@ -499,8 +486,7 @@ public class SendAndReplyControllerTest {
             .messageAbout(MessageAboutEnum.OTHER)
             .build();
 
-        List<Element<Message>> msgListWithNewMessage = new ArrayList<>();
-        msgListWithNewMessage.addAll(messages);
+        List<Element<Message>> msgListWithNewMessage = new ArrayList<>(messages);
         msgListWithNewMessage.add(element(newMessage));
 
         CaseData caseData = CaseData.builder().id(12345L)
@@ -539,7 +525,7 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testSendOrReplyToMessagesSubmitForMessageAboutOtherForApplicantsResponentsSend() {
+    void testSendOrReplyToMessagesSubmitForMessageAboutOtherForApplicantsRespondentsSend() {
 
         Message newMessage = Message.builder()
             .senderEmail("sender@email.com")
@@ -562,8 +548,7 @@ public class SendAndReplyControllerTest {
             .data(caseDataMap)
             .build();
 
-        List<Element<Message>> msgListWithNewMessage = new ArrayList<>();
-        msgListWithNewMessage.addAll(messages);
+        List<Element<Message>> msgListWithNewMessage = new ArrayList<>(messages);
         msgListWithNewMessage.add(element(newMessage));
 
         PartyDetails applicant = PartyDetails.builder()
@@ -649,7 +634,7 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testSendOrReplyToMessagesSubmitForMessageAboutReviewSubmittedDocForSend() {
+    void testSendOrReplyToMessagesSubmitForMessageAboutReviewSubmittedDocForSend() {
 
         Message newMessage = Message.builder()
             .senderEmail("sender@email.com")
@@ -672,8 +657,7 @@ public class SendAndReplyControllerTest {
             .data(caseDataMap)
             .build();
 
-        List<Element<Message>> msgListWithNewMessage = new ArrayList<>();
-        msgListWithNewMessage.addAll(messages);
+        List<Element<Message>> msgListWithNewMessage = new ArrayList<>(messages);
         msgListWithNewMessage.add(element(newMessage));
 
         CaseData caseData = CaseData.builder().id(123451L)
@@ -696,7 +680,7 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testSendOrReplyToMessagesSubmitForReplyAndClose() {
+    void testSendOrReplyToMessagesSubmitForReplyAndClose() {
 
 
 
@@ -706,22 +690,20 @@ public class SendAndReplyControllerTest {
             .state(State.SUBMITTED_PAID.getValue())
             .data(caseDataMap)
             .build();
-        UUID selectedValue = messages.get(0).getId();
+        UUID selectedValue = messages.getFirst().getId();
 
         List<Element<Message>> openMessagesBefore = messages;
 
-        List<Element<Message>> closedMessage = new ArrayList<>();
-
-        closedMessage = messages.stream()
+        List<Element<Message>> closedMessage = messages.stream()
             .filter(m -> m.getId().equals(selectedValue))
             .findFirst()
             .map(element -> {
                 openMessagesBefore.remove(element);
                 element.getValue().setStatus(MessageStatus.CLOSED);
-                element.getValue().setUpdatedTime(dateTime.now());
+                element.getValue().setUpdatedTime(LocalDateTime.now());
                 return element;
             }).stream().collect(Collectors.toList());
-        closedMessage.add(listOfClosedMessages.get(0));
+        closedMessage.add(listOfClosedMessages.getFirst());
 
         DynamicList dynamicList =  ElementUtils.asDynamicList(messages, null, Message::getLabelForDynamicList);
 
@@ -772,7 +754,7 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testSendOrReplyToMessagesSubmitForReplyAndAppendHistory() {
+    void testSendOrReplyToMessagesSubmitForReplyAndAppendHistory() {
 
         DynamicList dynamicList =  ElementUtils.asDynamicList(messages, null, Message::getLabelForDynamicList);
 
@@ -787,9 +769,7 @@ public class SendAndReplyControllerTest {
 
         msgHisElemList.add(element(messageHistory));
 
-        messagesWithHistory.get(0).getValue().setReplyHistory(msgHisElemList);
-
-        UUID selectedValue = messages.get(0).getId();
+        messagesWithHistory.getFirst().getValue().setReplyHistory(msgHisElemList);
 
         CaseData caseData = CaseData.builder().id(12345L)
             .chooseSendOrReply(REPLY)
@@ -823,7 +803,7 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testSendOrReplyToMessagesSubmitForReply() {
+    void testSendOrReplyToMessagesSubmitForReply() {
         Message message = Message.builder().isReplying(YesOrNo.Yes).build();
 
         CaseData caseData = CaseData.builder().id(123451L)
@@ -852,7 +832,7 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testHandleSubmittedSendAndReplyWhenRespToMesgNo() {
+    void testHandleSubmittedSendAndReplyWhenRespToMesgNo() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         Message message = Message.builder().isReplying(YesOrNo.Yes).build();
 
@@ -875,7 +855,7 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testHandleSubmittedSendAndReplyWhenRespToMesgSendAndNo() {
+    void testHandleSubmittedSendAndReplyWhenRespToMesgSendAndNo() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         Message message = Message.builder().isReplying(YesOrNo.Yes).build();
 
@@ -897,11 +877,11 @@ public class SendAndReplyControllerTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyController.handleSubmittedSendAndReply(auth, callbackRequest);
-        Assertions.assertThat(response.getStatusCodeValue()).isEqualTo(200);
+        assertEquals(OK, response.getStatusCode());
     }
 
     @Test
-    public void testHandSubmittedSendAndReplyWhenRespondToMessageYes() {
+    void testHandSubmittedSendAndReplyWhenRespondToMessageYes() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         Message message = Message.builder().isReplying(YesOrNo.Yes).build();
 
@@ -919,12 +899,11 @@ public class SendAndReplyControllerTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyController.handleSubmittedSendAndReply(auth, callbackRequest);
-        Assertions.assertThat(response.getStatusCodeValue()).isEqualTo(200);
-
+        assertEquals(OK, response.getStatusCode());
     }
 
     @Test
-    public void testClearDynamicLists() {
+    void testClearDynamicLists() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         Message message = Message.builder().isReplying(YesOrNo.Yes).build();
 
@@ -972,7 +951,7 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testSendOrReplyToMessagesMidEventForReplyWithNoOpenMessages() {
+    void testSendOrReplyToMessagesMidEventForReplyWithNoOpenMessages() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         Message message = Message.builder().isReplying(YesOrNo.No).build();
         CaseData caseData = CaseData.builder().id(12345L)
@@ -994,9 +973,8 @@ public class SendAndReplyControllerTest {
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         CallbackResponse response = sendAndReplyController.sendOrReplyToMessagesMidEvent(auth, callbackRequest);
-        Assert.assertNotNull(response.getErrors());
-        Assert.assertTrue(!response.getErrors().isEmpty());
-        Assert.assertEquals("There are no messages to respond to.",
-            response.getErrors().get(0));
+        assertNotNull(response.getErrors());
+        assertFalse(response.getErrors().isEmpty());
+        assertEquals("There are no messages to respond to.", response.getErrors().getFirst());
     }
 }

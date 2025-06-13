@@ -112,13 +112,13 @@ public class BundleCreateRequestMapper {
         if (null != hearingDetails && null != hearingDetails.getCaseHearings()) {
             List<CaseHearing> listedCaseHearings = hearingDetails.getCaseHearings().stream()
                 .filter(caseHearing -> LISTED.equalsIgnoreCase(caseHearing.getHmcStatus())).toList();
-            if (null != listedCaseHearings && !listedCaseHearings.isEmpty()) {
-                List<HearingDaySchedule> hearingDaySchedules = listedCaseHearings.get(0).getHearingDaySchedule();
+            if (!listedCaseHearings.isEmpty()) {
+                List<HearingDaySchedule> hearingDaySchedules = listedCaseHearings.getFirst().getHearingDaySchedule();
                 if (null != hearingDaySchedules && !hearingDaySchedules.isEmpty()) {
-                    return BundleHearingInfo.builder().hearingVenueAddress(getHearingVenueAddress(hearingDaySchedules.get(0)))
-                        .hearingDateAndTime(null != hearingDaySchedules.get(0).getHearingStartDateTime()
-                            ? getBundleDateTime(hearingDaySchedules.get(0).getHearingStartDateTime()) : BLANK_STRING)
-                        .hearingJudgeName(hearingDaySchedules.get(0).getHearingJudgeName()).build();
+                    return BundleHearingInfo.builder().hearingVenueAddress(getHearingVenueAddress(hearingDaySchedules.getFirst()))
+                        .hearingDateAndTime(null != hearingDaySchedules.getFirst().getHearingStartDateTime()
+                            ? getBundleDateTime(hearingDaySchedules.getFirst().getHearingStartDateTime()) : BLANK_STRING)
+                        .hearingJudgeName(hearingDaySchedules.getFirst().getHearingJudgeName()).build();
                 }
             }
         }
@@ -194,8 +194,8 @@ public class BundleCreateRequestMapper {
 
     private List<Element<BundlingRequestDocument>> mapFl401WitnessDocs(List<Element<Document>> fl401UploadWitnessDocuments) {
         List<Element<BundlingRequestDocument>> fl401WitnessDocs = new ArrayList<>();
-        Optional<List<Element<Document>>> existingfl401WitnessDocs = ofNullable(fl401UploadWitnessDocuments);
-        if (existingfl401WitnessDocs.isEmpty()) {
+        Optional<List<Element<Document>>> existingFl401WitnessDocs = ofNullable(fl401UploadWitnessDocuments);
+        if (existingFl401WitnessDocs.isEmpty()) {
             return fl401WitnessDocs;
         }
         ElementUtils.unwrapElements(fl401UploadWitnessDocuments).forEach(witnessDocs ->
@@ -230,8 +230,8 @@ public class BundleCreateRequestMapper {
 
     private List<Element<BundlingRequestDocument>> mapFl401SupportingDocs(List<Element<Document>> fl401UploadSupportDocuments) {
         List<Element<BundlingRequestDocument>> fl401SupportingDocs = new ArrayList<>();
-        Optional<List<Element<Document>>> existingfl401SupportingDocs = ofNullable(fl401UploadSupportDocuments);
-        if (existingfl401SupportingDocs.isEmpty()) {
+        Optional<List<Element<Document>>> existingFl401SupportingDocs = ofNullable(fl401UploadSupportDocuments);
+        if (existingFl401SupportingDocs.isEmpty()) {
             return fl401SupportingDocs;
         }
         ElementUtils.unwrapElements(fl401UploadSupportDocuments).forEach(supportDocs ->

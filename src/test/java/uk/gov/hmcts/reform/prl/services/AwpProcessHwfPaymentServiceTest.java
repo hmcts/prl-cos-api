@@ -1,12 +1,12 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestReferenceStatusR
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -39,15 +40,13 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-@Slf4j
 @ExtendWith(MockitoExtension.class)
-public class AwpProcessHwfPaymentServiceTest {
+class AwpProcessHwfPaymentServiceTest {
 
     private final String authToken = "authToken";
     private final String s2sAuthToken = "s2sAuthToken";
     private CaseDetails caseDetails;
     private CaseData caseData;
-
 
     @InjectMocks
     private AwpProcessHwfPaymentService awpProcessHwfPaymentService;
@@ -75,7 +74,7 @@ public class AwpProcessHwfPaymentServiceTest {
 
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         when(systemUserService.getSysUserToken()).thenReturn(authToken);
         when(authTokenGenerator.generate()).thenReturn(s2sAuthToken);
 
@@ -150,12 +149,14 @@ public class AwpProcessHwfPaymentServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
 
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(s2sAuthToken,
-                                                                                                        EventRequestData.builder().build(),
-                                                                                                        StartEventResponse.builder().build(),
-                                                                                                        caseData.toMap(
-                                                                                                            objectMapper),
-                                                                                                        caseData, null
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            s2sAuthToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            caseData.toMap(
+                objectMapper),
+            caseData,
+            null
         );
         when(allTabService.getStartUpdateForSpecificEvent(any(), any())).thenReturn(startAllTabsUpdateDataContent);
         when(allTabService.submitAllTabsUpdate(
@@ -174,7 +175,7 @@ public class AwpProcessHwfPaymentServiceTest {
     }
 
     @Test
-    public void testCheckHwfPaymentStatusAndUpdateApplicationStatus() {
+    void testCheckHwfPaymentStatusAndUpdateApplicationStatus() {
 
         awpProcessHwfPaymentService.checkHwfPaymentStatusAndUpdateApplicationStatus();
         verify(paymentRequestService, times(3))
@@ -183,7 +184,7 @@ public class AwpProcessHwfPaymentServiceTest {
     }
 
     @Test
-    public void testCheckHwfPaymentStatusAndUpdateCaseStateWithEmptyList() {
+    void testCheckHwfPaymentStatusAndUpdateCaseStateWithEmptyList() {
         SearchResult searchResult = SearchResult.builder()
             .total(0)
             .build();

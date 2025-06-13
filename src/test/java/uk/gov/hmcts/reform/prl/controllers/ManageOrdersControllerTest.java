@@ -1,9 +1,8 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Ignore;
-import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,7 +32,6 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrLegalAdvisorCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
-import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
@@ -103,7 +101,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @PropertySource(value = "classpath:application.yaml")
 @ExtendWith(MockitoExtension.class)
-public class ManageOrdersControllerTest {
+class ManageOrdersControllerTest {
 
     @InjectMocks
     private ManageOrdersController manageOrdersController;
@@ -164,7 +162,7 @@ public class ManageOrdersControllerTest {
     AllTabServiceImpl allTabService;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         List<String> roles = new ArrayList();
         roles.add("caseworker-privatelaw-judge");
         userDetails = UserDetails.builder()
@@ -228,7 +226,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testSubmitApplicationEventValidation() throws Exception {
+    void testSubmitApplicationEventValidation() throws Exception {
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
             .courtName("Horsham Court")
@@ -268,7 +266,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testPopulatePreviewOrderWhenOrderUploaded() throws Exception {
+    void testPopulatePreviewOrderWhenOrderUploaded() throws Exception {
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
             .manageOrders(ManageOrders.builder().build())
@@ -307,7 +305,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testPopulatePreviewOrderWithError() throws Exception {
+    void testPopulatePreviewOrderWithError() throws Exception {
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
             .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.justicesLegalAdviser).build())
@@ -346,7 +344,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testPopulatePreviewOrderWithErrorblank() throws Exception {
+    void testPopulatePreviewOrderWithErrorblank() throws Exception {
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
             .justiceLegalAdviserFullName(" ")
@@ -387,7 +385,7 @@ public class ManageOrdersControllerTest {
 
 
     @Test
-    public void testManageOrderApplicationEventValidation() throws Exception {
+    void testManageOrderApplicationEventValidation() throws Exception {
 
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
@@ -437,7 +435,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testManageOrderFL404bApplicationEventValidation() throws Exception {
+    void testManageOrderFL404bApplicationEventValidation() throws Exception {
 
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
@@ -487,7 +485,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testFetchFl401DataNoticeOfProceedings() {
+    void testFetchFl401DataNoticeOfProceedings() {
         Child child = Child.builder()
             .firstName("Test")
             .lastName("Name")
@@ -555,7 +553,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testNotPrepopulateFl401DataNoticeOfProceedingsIfC100() {
+    void testNotPrepopulateFl401DataNoticeOfProceedingsIfC100() {
         Child child = Child.builder()
             .firstName("Test")
             .lastName("Name")
@@ -626,7 +624,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testBlankOrderOrDirections() {
+    void testBlankOrderOrDirections() {
 
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder().build())
@@ -665,7 +663,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testChildArrangement() {
+    void testChildArrangement() {
 
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder().build())
@@ -704,7 +702,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testParentalResponsability() {
+    void testParentalResponsability() {
 
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder().build())
@@ -743,7 +741,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testSpecialGuardianship() {
+    void testSpecialGuardianship() {
 
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder().build())
@@ -782,7 +780,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testNoticeOfProcceedingsParties() {
+    void testNoticeOfProcceedingsParties() {
 
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder().build())
@@ -821,7 +819,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testNoticeOfProceedingsNonParties() {
+    void testNoticeOfProceedingsNonParties() {
 
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder().build())
@@ -860,7 +858,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testAppointmentOfGuardian() {
+    void testAppointmentOfGuardian() {
 
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder().build())
@@ -899,7 +897,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testStandardDirectionsOrder() {
+    void testStandardDirectionsOrder() {
 
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder().build())
@@ -938,7 +936,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testFL401DataWithHomeSituation() {
+    void testFL401DataWithHomeSituation() {
         ChildrenLiveAtAddress childrenLiveAtAddress = ChildrenLiveAtAddress.builder()
             .childFullName("TestName")
             .childsAge("23")
@@ -1005,8 +1003,8 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    @Ignore
-    public void testSubmitAmanageorderEmailValidation() throws Exception {
+    @Disabled
+    void testSubmitAmanageorderEmailValidation() throws Exception {
 
         Map<String, Object> summaryTabFields = Map.of(
             "field4", "value4",
@@ -1036,7 +1034,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void saveOrderDetailsTest() throws Exception {
+    void saveOrderDetailsTest() throws Exception {
 
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -1151,7 +1149,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void saveOrderDetailsJudgeTest() throws Exception {
+    void saveOrderDetailsJudgeTest() throws Exception {
 
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -1261,7 +1259,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void saveOrderDetailsNoOneApprovesTest() throws Exception {
+    void saveOrderDetailsNoOneApprovesTest() throws Exception {
 
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -1371,7 +1369,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void populateHeaderTest() throws Exception {
+    void populateHeaderTest() throws Exception {
 
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder().build())
@@ -1405,7 +1403,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testShowPreviewOrderWhenOrderCreated() throws Exception {
+    void testShowPreviewOrderWhenOrderCreated() throws Exception {
 
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -1484,8 +1482,8 @@ public class ManageOrdersControllerTest {
 
 
     @Test
-    @Ignore
-    public void testSubmitManageOrderCafacassEmailNotification() throws Exception {
+    @Disabled
+    void testSubmitManageOrderCafacassEmailNotification() throws Exception {
 
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -1592,7 +1590,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testPopulateOrderToAmendDownloadLink() {
+    void testPopulateOrderToAmendDownloadLink() {
 
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -1690,7 +1688,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void saveOrderDetailsTestWithResetChildOptions() throws Exception {
+    void saveOrderDetailsTestWithResetChildOptions() throws Exception {
 
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -1800,7 +1798,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testManageOrderMidEvent() throws Exception {
+    void testManageOrderMidEvent() throws Exception {
 
         caseData = CaseData.builder()
             .id(12345L)
@@ -1830,7 +1828,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testManageOrderMidEventForAmendOrderSelection() throws Exception {
+    void testManageOrderMidEventForAmendOrderSelection() throws Exception {
 
         caseData = CaseData.builder()
             .id(12345L)
@@ -1855,7 +1853,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testAddUploadOrder() throws Exception {
+    void testAddUploadOrder() throws Exception {
 
         ManageOrders manageOrders = ManageOrders.builder()
             .isCaseWithdrawn(Yes)
@@ -1906,7 +1904,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testAddUploadOrderDoesntAmmendSlipRule() throws Exception {
+    void testAddUploadOrderDoesntAmmendSlipRule() throws Exception {
 
         ManageOrders manageOrders = ManageOrders.builder()
             .isCaseWithdrawn(Yes)
@@ -1957,7 +1955,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testAddUploadOrderDoesntNeedServing() throws Exception {
+    void testAddUploadOrderDoesntNeedServing() throws Exception {
 
         ManageOrders manageOrders = ManageOrders.builder()
             .isCaseWithdrawn(Yes)
@@ -2008,7 +2006,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testupdateManageOrdersisSdoSelectedNo() throws Exception {
+    void testupdateManageOrdersisSdoSelectedNo() throws Exception {
         Child child = Child.builder()
             .firstName("Test")
             .lastName("Name")
@@ -2077,7 +2075,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testupdateManageOrdersisSdoSelectedYes() throws Exception {
+    void testupdateManageOrdersisSdoSelectedYes() throws Exception {
         Child child = Child.builder()
             .firstName("Test")
             .lastName("Name")
@@ -2146,7 +2144,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testExceptionForPopulatePreviewOrderWhenOrderUploaded() throws Exception {
+    void testExceptionForPopulatePreviewOrderWhenOrderUploaded() throws Exception {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -2172,13 +2170,16 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
             manageOrdersController.populatePreviewOrderWhenOrderUploaded(authToken, s2sToken, PrlAppsConstants.ENGLISH, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+        });
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testExceptionForPrepopulateFL401CaseDetails() throws Exception {
+    void testExceptionForPrepopulateFL401CaseDetails() throws Exception {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -2204,13 +2205,16 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
             manageOrdersController.prepopulateFL401CaseDetails(authToken, s2sToken, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+        });
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testExceptionForPopulateHeader() throws Exception {
+    void testExceptionForPopulateHeader() throws Exception {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -2236,14 +2240,17 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
             manageOrdersController.populateHeader(callbackRequest, authToken, s2sToken);
-        }, RuntimeException.class, "Invalid Client");
+        });
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
 
     @Test
-    public void testExceptionForPopulateHeaderFL401() throws Exception {
+    void testExceptionForPopulateHeaderFL401() throws Exception {
 
         CaseData caseDataFL401 = CaseData.builder()
             .id(12345L)
@@ -2281,7 +2288,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testExceptionForPopulateHeaderC100() throws Exception {
+    void testExceptionForPopulateHeaderC100() throws Exception {
 
         CaseData caseDataC100 = CaseData.builder()
             .id(12345L)
@@ -2320,7 +2327,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testExceptionForSendEmailNotificationOnClosingOrder() throws Exception {
+    void testExceptionForSendEmailNotificationOnClosingOrder() throws Exception {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -2346,13 +2353,15 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
             manageOrdersController.sendEmailNotificationOnClosingOrder(authToken, s2sToken, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+        });
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testExceptionForshowPreviewOrderWhenOrderCreated() throws Exception {
+    void testExceptionForshowPreviewOrderWhenOrderCreated() throws Exception {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -2378,13 +2387,16 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
             manageOrdersController.showPreviewOrderWhenOrderCreated(authToken, s2sToken, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+        });
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testExceptionForshowPreviewOrderWhenOrderCreatedWithHearingData() throws Exception {
+    void testExceptionForshowPreviewOrderWhenOrderCreatedWithHearingData() throws Exception {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -2423,7 +2435,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testExceptionForpopulateOrderToAmendDownloadLink() throws Exception {
+    void testExceptionForpopulateOrderToAmendDownloadLink() throws Exception {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -2449,13 +2461,16 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
             manageOrdersController.populateOrderToAmendDownloadLink(authToken, s2sToken, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+        });
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testExceptionForAddUploadOrder() throws Exception {
+    void testExceptionForAddUploadOrder() throws Exception {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -2481,13 +2496,16 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
             manageOrdersController.whenToServeOrder(authToken, s2sToken, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+        });
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testExceptionForManageOrderMidEvent() throws Exception {
+    void testExceptionForManageOrderMidEvent() throws Exception {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -2513,13 +2531,15 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
             manageOrdersController.manageOrderMidEvent(authToken, s2sToken, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+        });
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testExceptionForServeOrderMidEvent() throws Exception {
+    void testExceptionForServeOrderMidEvent() throws Exception {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -2545,13 +2565,15 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
             manageOrdersController.serveOrderMidEvent(authToken, s2sToken, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+        });
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testExceptionForprePopulateJudgeOrLegalAdviser() throws Exception {
+    void testExceptionForprePopulateJudgeOrLegalAdviser() throws Exception {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -2577,19 +2599,16 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            manageOrdersController.prePopulateJudgeOrLegalAdviser(authToken, s2sToken, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
-    }
 
-    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
-                                                                 String expectedMessage) {
-        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
-        assertEquals(expectedMessage, exception.getMessage());
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
+            manageOrdersController.prePopulateJudgeOrLegalAdviser(authToken, s2sToken, callbackRequest);
+        });
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testNoHearingDataValidation() throws Exception {
+    void testNoHearingDataValidation() throws Exception {
         CaseData caseData = CaseData.builder()
             .createSelectOrderOptions(noticeOfProceedingsParties)
             .manageOrders(ManageOrders.builder().build())
@@ -2614,11 +2633,11 @@ public class ManageOrdersControllerTest {
 
         assertNotNull(callbackResponse);
         assertNotNull(callbackResponse.getErrors());
-        assertEquals("Please provide at least one hearing details", callbackResponse.getErrors().get(0));
+        assertEquals("Please provide at least one hearing details", callbackResponse.getErrors().getFirst());
     }
 
     @Test
-    public void testNoHearingDataSelectedValidation() throws Exception {
+    void testNoHearingDataSelectedValidation() throws Exception {
         CaseData caseData = CaseData.builder()
             .createSelectOrderOptions(noticeOfProceedingsParties)
             .manageOrders(ManageOrders.builder()
@@ -2644,11 +2663,11 @@ public class ManageOrdersControllerTest {
 
         assertNotNull(callbackResponse);
         assertNotNull(callbackResponse.getErrors());
-        assertEquals("Please provide at least one hearing details", callbackResponse.getErrors().get(0));
+        assertEquals("Please provide at least one hearing details", callbackResponse.getErrors().getFirst());
     }
 
     @Test
-    public void testMoreThanOneHearingsSelectedValidation() throws Exception {
+    void testMoreThanOneHearingsSelectedValidation() throws Exception {
         HearingData hearingData1 = HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
             .build();
@@ -2680,11 +2699,11 @@ public class ManageOrdersControllerTest {
 
         assertNotNull(callbackResponse);
         assertNotNull(callbackResponse.getErrors());
-        assertEquals("Only one hearing can be created", callbackResponse.getErrors().get(0));
+        assertEquals("Only one hearing can be created", callbackResponse.getErrors().getFirst());
     }
 
     @Test
-    public void testHearingTypeAndEstimatedTimingsValidations() throws Exception {
+    void testHearingTypeAndEstimatedTimingsValidations() throws Exception {
         HearingData hearingData = HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
             .hearingEstimatedDays("ABC")
@@ -2716,14 +2735,14 @@ public class ManageOrdersControllerTest {
 
         assertNotNull(callbackResponse);
         assertNotNull(callbackResponse.getErrors());
-        assertEquals("You must select a hearing type", callbackResponse.getErrors().get(0));
+        assertEquals("You must select a hearing type", callbackResponse.getErrors().getFirst());
         assertEquals("Please enter numeric value for Hearing estimated days", callbackResponse.getErrors().get(1));
         assertEquals("Please enter numeric value for Hearing estimated hours", callbackResponse.getErrors().get(2));
         assertEquals("Please enter numeric value for Hearing estimated minutes", callbackResponse.getErrors().get(3));
     }
 
     @Test
-    public void testValidateAndPopulateHearingData() throws Exception {
+    void testValidateAndPopulateHearingData() throws Exception {
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
             .courtName("Horsham Court")
@@ -2765,7 +2784,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void saveOrderDetailsTestForServedSavedOrder() throws Exception {
+    void saveOrderDetailsTestForServedSavedOrder() throws Exception {
 
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -2884,7 +2903,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void saveOrderDetailsTestForUploadOrder() throws Exception {
+    void saveOrderDetailsTestForUploadOrder() throws Exception {
 
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -3001,7 +3020,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testHearingTypeAndEstimatedTimingsValidationsForSdo() throws Exception {
+    void testHearingTypeAndEstimatedTimingsValidationsForSdo() throws Exception {
         HearingData hearingData = HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
             .hearingEstimatedDays("ABC")
@@ -3039,11 +3058,11 @@ public class ManageOrdersControllerTest {
 
         assertNotNull(callbackResponse);
         assertNotNull(callbackResponse.getErrors());
-        assertEquals("Please enter numeric value for Hearing estimated hours", callbackResponse.getErrors().get(0));
+        assertEquals("Please enter numeric value for Hearing estimated hours", callbackResponse.getErrors().getFirst());
     }
 
     @Test
-    public void testManageOrderApplication() throws Exception {
+    void testManageOrderApplication() throws Exception {
 
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
@@ -3094,7 +3113,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testServeOrderMidEvent() {
+    void testServeOrderMidEvent() {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -3124,7 +3143,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testPrePopulateJudgeOrLegalAdviser() {
+    void testPrePopulateJudgeOrLegalAdviser() {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -3154,7 +3173,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testExceptionForPrePopulateJudgeOrLegalAdviser() throws Exception {
+    void testExceptionForPrePopulateJudgeOrLegalAdviser() throws Exception {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -3180,13 +3199,16 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
             manageOrdersController.prePopulateJudgeOrLegalAdviser(authToken, s2sToken, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+        });
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testPopulatePreviewOrderWhenOccupationOrderCreated() throws Exception {
+    void testPopulatePreviewOrderWhenOccupationOrderCreated() throws Exception {
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
             .manageOrders(ManageOrders.builder()
@@ -3228,7 +3250,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testPopulatePreviewOrderWhenOccupationOrderAndAppOrRespPresent() throws Exception {
+    void testPopulatePreviewOrderWhenOccupationOrderAndAppOrRespPresent() throws Exception {
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
             .manageOrders(ManageOrders.builder()
@@ -3271,7 +3293,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void saveOrderDetailsTestWithHearing() throws Exception {
+    void saveOrderDetailsTestWithHearing() throws Exception {
 
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -3382,7 +3404,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void saveOrderDetailsTestWithSdo() throws Exception {
+    void saveOrderDetailsTestWithSdo() throws Exception {
 
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -3496,7 +3518,7 @@ public class ManageOrdersControllerTest {
 
 
     @Test
-    public void saveOrderDetailsTestFailedToAutherisation() throws Exception {
+    void saveOrderDetailsTestFailedToAutherisation() throws Exception {
 
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -3596,14 +3618,15 @@ public class ManageOrdersControllerTest {
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
         when(manageOrderService.setHearingDataForSdo(any(),any(),any())).thenReturn(caseData);
-        assertExpectedException(() -> {
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
             manageOrdersController.saveOrderDetails(authToken, s2sToken, callbackRequest);
-        }, InvalidClientException.class, "Invalid Client");
+        });
 
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testNoHearingDataValidationFailedToAutherisation() throws Exception {
+    void testNoHearingDataValidationFailedToAutherisation() throws Exception {
         CaseData caseData = CaseData.builder()
             .createSelectOrderOptions(noticeOfProceedingsParties)
             .manageOrders(ManageOrders.builder().build())
@@ -3620,13 +3643,15 @@ public class ManageOrdersControllerTest {
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
 
-        assertExpectedException(() -> {
-            manageOrdersController.validateAndPopulateHearingData(authToken, s2sToken, callbackRequest); }, RuntimeException.class, "Invalid Client");
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
+            manageOrdersController.validateAndPopulateHearingData(authToken, s2sToken, callbackRequest);
+        });
 
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testAddressValidationError() throws Exception {
+    void testAddressValidationError() throws Exception {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .build();
@@ -3653,11 +3678,11 @@ public class ManageOrdersControllerTest {
 
         assertNotNull(callbackResponse);
         assertNotNull(callbackResponse.getErrors());
-        assertEquals(errors.get(0), callbackResponse.getErrors().get(0));
+        assertEquals(errors.getFirst(), callbackResponse.getErrors().getFirst());
     }
 
     @Test
-    public void testCaseDataWhenNoValidationErrorReturned() throws Exception {
+    void testCaseDataWhenNoValidationErrorReturned() throws Exception {
         CaseData caseData = CaseData.builder()
             .id(123L)
             .build();
@@ -3689,7 +3714,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testValidateAddressFailedToAuthorisation() throws Exception {
+    void testValidateAddressFailedToAuthorisation() throws Exception {
         CaseData caseData1 = CaseData.builder()
             .build();
 
@@ -3704,15 +3729,15 @@ public class ManageOrdersControllerTest {
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
 
-        assertExpectedException(() -> {
-            manageOrdersController
-                .validateRespondentAndOtherPersonAddress(authToken, s2sToken, callbackRequest); },
-                                RuntimeException.class, "Invalid Client");
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
+            manageOrdersController.validateRespondentAndOtherPersonAddress(authToken, s2sToken, callbackRequest);
+        });
 
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testAutomatedHearingManagementRequest() {
+    void testAutomatedHearingManagementRequest() {
 
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
@@ -3742,13 +3767,14 @@ public class ManageOrdersControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
-                                                                                                        EventRequestData.builder().build(),
-                                                                                                        StartEventResponse.builder().build(),
-                                                                                                        stringObjectMap,
-                                                                                                        caseData1,
-                                                                                                        null
-        );
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
+            new StartAllTabsUpdateDataContent(authToken,
+                                              EventRequestData.builder().build(),
+                                              StartEventResponse.builder().build(),
+                                              stringObjectMap,
+                                              caseData1,
+                                              null
+            );
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData1);

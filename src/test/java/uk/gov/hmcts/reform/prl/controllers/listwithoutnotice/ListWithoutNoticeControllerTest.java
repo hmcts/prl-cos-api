@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.controllers.listwithoutnotice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -37,7 +36,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-public class ListWithoutNoticeControllerTest {
+class ListWithoutNoticeControllerTest {
 
     @InjectMocks
     ListWithoutNoticeController listWithoutNoticeController;
@@ -60,7 +59,7 @@ public class ListWithoutNoticeControllerTest {
 
 
     @Test
-    public void testListWithoutNoticeSubmission_CA() throws Exception {
+    void testListWithoutNoticeSubmission_CA() throws Exception {
 
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
@@ -83,16 +82,17 @@ public class ListWithoutNoticeControllerTest {
         when(userService.getUserDetails(anyString())).thenReturn(
             UserDetails.builder().email("abc@test.com").build());
 
-        when(addCaseNoteService.addCaseNoteDetails(any(CaseData.class), any(UserDetails.class))).thenReturn(List.of(element(
-            CaseNoteDetails.builder().build())));
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(addCaseNoteService.addCaseNoteDetails(any(CaseData.class), any(UserDetails.class))).thenReturn(List.of(
+            element(
+                CaseNoteDetails.builder().build())));
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = listWithoutNoticeController
-            .c100ListWithoutNoticeSubmission(authToken,serviceAuth,callbackRequest);
+            .c100ListWithoutNoticeSubmission(authToken, serviceAuth, callbackRequest);
         assertTrue(response.getData().containsKey("caseNotes"));
     }
 
     @Test
-    public void testExceptionForListWithoutNoticeSubmission_CA() throws Exception {
+    void testExceptionForListWithoutNoticeSubmission_CA() throws Exception {
 
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
@@ -111,14 +111,18 @@ public class ListWithoutNoticeControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken, serviceAuth)).thenReturn(false);
-        assertExpectedException(() -> {
-            listWithoutNoticeController.c100ListWithoutNoticeSubmission(authToken,serviceAuth,callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
 
+        RuntimeException ex = assertThrows(
+            RuntimeException.class, () -> {
+                listWithoutNoticeController.c100ListWithoutNoticeSubmission(authToken, serviceAuth, callbackRequest);
+            }
+        );
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testExceptionForCcdSubmitted_CA() throws Exception {
+    void testExceptionForCcdSubmitted_CA() throws Exception {
 
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
@@ -137,14 +141,18 @@ public class ListWithoutNoticeControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken, serviceAuth)).thenReturn(false);
-        assertExpectedException(() -> {
-            listWithoutNoticeController.c100CcdSubmitted(authToken,serviceAuth,callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
 
+        RuntimeException ex = assertThrows(
+            RuntimeException.class, () -> {
+                listWithoutNoticeController.c100CcdSubmitted(authToken, serviceAuth, callbackRequest);
+            }
+        );
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testForCcdSubmitted_CA() throws Exception {
+    void testForCcdSubmitted_CA() throws Exception {
 
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
@@ -164,15 +172,8 @@ public class ListWithoutNoticeControllerTest {
 
         Mockito.when(authorisationService.isAuthorized(authToken, serviceAuth)).thenReturn(true);
         ResponseEntity<SubmittedCallbackResponse> submittedCallbackResponse =
-            listWithoutNoticeController.c100CcdSubmitted(authToken,serviceAuth,callbackRequest);
+            listWithoutNoticeController.c100CcdSubmitted(authToken, serviceAuth, callbackRequest);
         assertEquals(CONFIRMATION_BODY_PREFIX_CA, submittedCallbackResponse.getBody().getConfirmationBody());
     }
-
-    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
-                                                                 String expectedMessage) {
-        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
-        assertEquals(expectedMessage, exception.getMessage());
-    }
-
 }
 

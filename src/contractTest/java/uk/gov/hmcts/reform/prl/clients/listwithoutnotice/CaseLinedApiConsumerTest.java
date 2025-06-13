@@ -91,7 +91,7 @@ public class CaseLinedApiConsumerTest {
         List<CaseLinkedData>
             caseLinkedData = hearingApiClient.getCaseLinkedData(BEARER_TOKEN,SERVICE_AUTHORIZATION_HEADER,caseLinkedRequest);
         assertNotNull(caseLinkedData);
-        assertEquals(caseLinkedData.get(0).getCaseReference(),"1670601355422736");
-        assertEquals(caseLinkedData.get(0).getCaseName(),"Case_Flag_9_Dec_6");
+        assertEquals(caseLinkedData.getFirst().getCaseReference(),"1670601355422736");
+        assertEquals(caseLinkedData.getFirst().getCaseName(),"Case_Flag_9_Dec_6");
     }
 }

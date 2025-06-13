@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-public class OtherProceedingsCheckerTest {
+class OtherProceedingsCheckerTest {
 
     @Mock
     TaskErrorService taskErrorService;
@@ -28,7 +28,7 @@ public class OtherProceedingsCheckerTest {
     OtherProceedingsChecker otherProceedingsChecker;
 
     @Test
-    public void startedWithPreviousOrOngoingProceedings() {
+    void startedWithPreviousOrOngoingProceedings() {
         CaseData caseData = CaseData.builder()
             .previousOrOngoingProceedingsForChildren(YesNoDontKnow.yes)
             .build();
@@ -37,7 +37,7 @@ public class OtherProceedingsCheckerTest {
     }
 
     @Test
-    public void notStartedWithoutPreviousOrOngoingProceedings() {
+    void notStartedWithoutPreviousOrOngoingProceedings() {
         CaseData caseData = CaseData.builder()
             .previousOrOngoingProceedingsForChildren(YesNoDontKnow.no)
             .build();
@@ -46,7 +46,7 @@ public class OtherProceedingsCheckerTest {
     }
 
     @Test
-    public void finishedIfNoPreviousOrOngoingProceedings() {
+    void finishedIfNoPreviousOrOngoingProceedings() {
         CaseData caseData = CaseData.builder()
             .previousOrOngoingProceedingsForChildren(YesNoDontKnow.no)
             .build();
@@ -55,7 +55,7 @@ public class OtherProceedingsCheckerTest {
     }
 
     @Test
-    public void notFinishedWithPreviousOrOngoingProceedings() {
+    void notFinishedWithPreviousOrOngoingProceedings() {
         CaseData caseData = CaseData.builder()
             .previousOrOngoingProceedingsForChildren(YesNoDontKnow.yes)
             .build();
@@ -64,7 +64,7 @@ public class OtherProceedingsCheckerTest {
     }
 
     @Test
-    public void finishedWithPreviousOrOngoingProceedingList() {
+    void finishedWithPreviousOrOngoingProceedingList() {
 
         ProceedingDetails proceedingDetails = ProceedingDetails.builder().build();
         Element<ProceedingDetails> wrappedProceedings = Element.<ProceedingDetails>builder().value(proceedingDetails).build();
@@ -80,7 +80,7 @@ public class OtherProceedingsCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+    void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
         assertNotNull(otherProceedingsChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

@@ -2,7 +2,6 @@
 package uk.gov.hmcts.reform.prl.controllers.serviceofdocuments;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,7 +35,7 @@ import static org.mockito.Mockito.when;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-public class ServiceOfDocumentsControllerTest {
+class ServiceOfDocumentsControllerTest {
 
     public static final String NO_DOCUMENTS_SELECTED_ERROR = "Please select a document or upload a document to serve";
     public static final String UN_SERVED_DOCUMENTS_PRESENT_ERROR =
@@ -55,7 +54,7 @@ public class ServiceOfDocumentsControllerTest {
     private Map<String, Object> caseDataMap;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         caseDataMap = new HashMap<>();
         callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
@@ -63,121 +62,150 @@ public class ServiceOfDocumentsControllerTest {
                              .data(caseDataMap).build())
             .build();
 
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
     }
 
     @Test
-    public void testHandleAboutToStart() {
-        when(serviceOfDocumentsService.handleAboutToStart(Mockito.anyString(), Mockito.any(CallbackRequest.class))).thenReturn(caseDataMap);
+    void testHandleAboutToStart() {
+        when(serviceOfDocumentsService.handleAboutToStart(
+            Mockito.anyString(),
+            Mockito.any(CallbackRequest.class)
+        )).thenReturn(caseDataMap);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfDocumentsController
-            .handleAboutToStart(any(),any(),callbackRequest);
+            .handleAboutToStart(any(), any(), callbackRequest);
 
         assertNotNull(aboutToStartOrSubmitCallbackResponse);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
     }
 
     @Test
-    public void testHandleAboutToStartUnServedDocsPresent() {
-        caseDataMap.put("sodUnServedPack", SodPack.builder().documents(List.of(Element.<Document>builder().build())).build());
+    void testHandleAboutToStartUnServedDocsPresent() {
+        caseDataMap.put(
+            "sodUnServedPack",
+            SodPack.builder().documents(List.of(Element.<Document>builder().build())).build()
+        );
         callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
                              .id(1L)
                              .data(caseDataMap).build())
             .build();
         caseDataMap.put("errors", List.of(UN_SERVED_DOCUMENTS_PRESENT_ERROR));
-        when(serviceOfDocumentsService.handleAboutToStart(anyString(), any(CallbackRequest.class))).thenReturn(caseDataMap);
+        when(serviceOfDocumentsService.handleAboutToStart(anyString(), any(CallbackRequest.class))).thenReturn(
+            caseDataMap);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfDocumentsController
             .handleAboutToStart(anyString(), anyString(), callbackRequest);
 
         assertNotNull(aboutToStartOrSubmitCallbackResponse);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getErrors());
-        assertEquals(UN_SERVED_DOCUMENTS_PRESENT_ERROR, aboutToStartOrSubmitCallbackResponse.getErrors().get(0));
+        assertEquals(UN_SERVED_DOCUMENTS_PRESENT_ERROR, aboutToStartOrSubmitCallbackResponse.getErrors().getFirst());
     }
 
     @Test
-    public void testHandleAboutToSubmit() {
+    void testHandleAboutToSubmit() {
         caseDataMap.put("sodUnServedPack", SodPack.builder().build());
-        when(serviceOfDocumentsService.handleAboutToSubmit(Mockito.anyString(), Mockito.any(CallbackRequest.class))).thenReturn(caseDataMap);
+        when(serviceOfDocumentsService.handleAboutToSubmit(
+            Mockito.anyString(),
+            Mockito.any(CallbackRequest.class)
+        )).thenReturn(caseDataMap);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfDocumentsController
-            .handleAboutToSubmit(any(),any(),callbackRequest);
+            .handleAboutToSubmit(any(), any(), callbackRequest);
 
         assertNotNull(aboutToStartOrSubmitCallbackResponse);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
     }
 
     @Test
-    public void testValidateDocumentsWhenEitherPresent() {
+    void testValidateDocumentsWhenEitherPresent() {
         when(serviceOfDocumentsService.validateDocuments(Mockito.any(CallbackRequest.class))).thenReturn(Collections.emptyList());
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfDocumentsController
-            .validateDocuments(any(),any(),callbackRequest);
+            .validateDocuments(any(), any(), callbackRequest);
 
         assertNotNull(aboutToStartOrSubmitCallbackResponse);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
     }
 
     @Test
-    public void testValidateDocumentsWhenBothDocsAreEmpty() {
+    void testValidateDocumentsWhenBothDocsAreEmpty() {
         List<String> errors = List.of(NO_DOCUMENTS_SELECTED_ERROR);
         when(serviceOfDocumentsService.validateDocuments(Mockito.any(CallbackRequest.class))).thenReturn(errors);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfDocumentsController
-            .validateDocuments(any(),any(),callbackRequest);
+            .validateDocuments(any(), any(), callbackRequest);
 
         assertNotNull(aboutToStartOrSubmitCallbackResponse);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getErrors());
-        assertEquals(NO_DOCUMENTS_SELECTED_ERROR, aboutToStartOrSubmitCallbackResponse.getErrors().get(0));
+        assertEquals(NO_DOCUMENTS_SELECTED_ERROR, aboutToStartOrSubmitCallbackResponse.getErrors().getFirst());
     }
 
     @Test
-    public void testHandleSubmitted() {
+    void testHandleSubmitted() {
         ResponseEntity<SubmittedCallbackResponse> submittedCallbackResponse = ResponseEntity.ok().build();
-        when(serviceOfDocumentsService.handleSubmitted(anyString(), Mockito.any(CallbackRequest.class))).thenReturn(submittedCallbackResponse);
+        when(serviceOfDocumentsService.handleSubmitted(anyString(), Mockito.any(CallbackRequest.class))).thenReturn(
+            submittedCallbackResponse);
 
-        ResponseEntity<SubmittedCallbackResponse> response = serviceOfDocumentsController.handleSubmitted(anyString(), anyString(), callbackRequest);
+        ResponseEntity<SubmittedCallbackResponse> response = serviceOfDocumentsController.handleSubmitted(
+            anyString(),
+            anyString(),
+            callbackRequest
+        );
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
     @Test
-    public void testExceptionHandleAboutToStart() {
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
-        assertExpectedException(() -> {
-            serviceOfDocumentsController.handleAboutToStart(any(), any(), callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+    void testExceptionHandleAboutToStart() {
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(false);
+
+        RuntimeException ex = assertThrows(
+            RuntimeException.class, () -> {
+                serviceOfDocumentsController.handleAboutToStart(any(), any(), callbackRequest);
+
+            }
+        );
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testExceptionHandleAboutToSubmit() {
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
-        assertExpectedException(() -> {
-            serviceOfDocumentsController.handleAboutToSubmit(any(), any(), callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+    void testExceptionHandleAboutToSubmit() {
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(false);
+
+        RuntimeException ex = assertThrows(
+            RuntimeException.class, () -> {
+                serviceOfDocumentsController.handleAboutToSubmit(any(), any(), callbackRequest);
+            }
+        );
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testExceptionHandleSubmitted() {
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
-        assertExpectedException(() -> {
-            serviceOfDocumentsController.handleSubmitted(any(), any(), callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+    void testExceptionHandleSubmitted() {
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(false);
+
+        RuntimeException ex = assertThrows(
+            RuntimeException.class, () -> {
+                serviceOfDocumentsController.handleSubmitted(any(), any(), callbackRequest);
+            }
+        );
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testExceptionValidateDocuments() {
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
-        assertExpectedException(() -> {
-            serviceOfDocumentsController.validateDocuments(any(), any(), callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
-    }
+    void testExceptionValidateDocuments() {
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(false);
+        RuntimeException ex = assertThrows(
+            RuntimeException.class, () -> {
+                serviceOfDocumentsController.validateDocuments(any(), any(), callbackRequest);
+            }
+        );
 
-    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
-                                                                 String expectedMessage) {
-        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
-        assertEquals(expectedMessage, exception.getMessage());
+        assertEquals("Invalid Client", ex.getMessage());
     }
 }

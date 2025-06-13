@@ -15,15 +15,15 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 public class HearingDataPrePopulatedDynamicLists {
     private DynamicList retrievedHearingTypes;
 
-    private DynamicList retrievedHearingDates = null;
+    private DynamicList retrievedHearingDates;
 
-    private DynamicList retrievedHearingChannels = null;
+    private DynamicList retrievedHearingChannels;
 
-    private DynamicList retrievedVideoSubChannels = null;
+    private DynamicList retrievedVideoSubChannels;
 
-    private DynamicList retrievedTelephoneSubChannels = null;
+    private DynamicList retrievedTelephoneSubChannels;
 
-    private DynamicList retrievedCourtLocations = null;
+    private DynamicList retrievedCourtLocations;
 
-    private DynamicList hearingListedLinkedCases = null;
+    private DynamicList hearingListedLinkedCases;
 }

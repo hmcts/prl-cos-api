@@ -25,7 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class FL401CaseInviteServiceTest {
+class FL401CaseInviteServiceTest {
 
     @InjectMocks
     FL401CaseInviteService fl401CaseInviteService;
@@ -47,7 +47,7 @@ public class FL401CaseInviteServiceTest {
     private CaseData caseDataNoRespondents;
 
     @BeforeEach
-    public void init() {
+    void init() {
 
         PartyDetails respondentOneWithEmail = PartyDetails.builder()
             .firstName("Respondent")
@@ -104,7 +104,7 @@ public class FL401CaseInviteServiceTest {
     }
 
     @Test
-    public void givenRespondentsWithNoRepresentation_whenCaseInvitesGenerated_thenSentToAllRespondentsAndStoredInCaseData() {
+    void givenRespondentsWithNoRepresentation_whenCaseInvitesGenerated_thenSentToAllRespondentsAndStoredInCaseData() {
         CaseData actualCaseData = fl401CaseInviteService
             .sendCaseInviteEmail(caseDataWithRespondentsAndEmailsNoRepresentation);
         assertTrue(actualCaseData.getCaseInvites().isEmpty());
@@ -112,7 +112,7 @@ public class FL401CaseInviteServiceTest {
     }
 
     @Test
-    public void givenRespondentWithRepresentation_whenCaseInvitesGenerated_thenSentToOnlyThoseWithoutRepresentation() {
+    void givenRespondentWithRepresentation_whenCaseInvitesGenerated_thenSentToOnlyThoseWithoutRepresentation() {
         //two respondents but only one should have a case invite generated
         CaseData actualCaseData = fl401CaseInviteService
             .sendCaseInviteEmail(caseDataWithRespondentsAndEmailsOnePartyNoRepresentation);
@@ -121,28 +121,28 @@ public class FL401CaseInviteServiceTest {
     }
 
     @Test
-    public void givenMultipleRespondentsWithNoEmail_whenCaseInvitesGenerated_thenNoRespondentsReceiveInvite() {
+    void givenMultipleRespondentsWithNoEmail_whenCaseInvitesGenerated_thenNoRespondentsReceiveInvite() {
         CaseData actualCaseData = fl401CaseInviteService
             .sendCaseInviteEmail(getCaseDataWithRespondentsNoEmails);
         assertTrue(actualCaseData.getCaseInvites().isEmpty());
     }
 
     @Test
-    public void givenMultipleRespondentsWithEmailAndRepresentation_whenCaseInvitesGenerated_thenNoRespondentsReceiveInvite() {
+    void givenMultipleRespondentsWithEmailAndRepresentation_whenCaseInvitesGenerated_thenNoRespondentsReceiveInvite() {
         CaseData actualCaseData = fl401CaseInviteService
             .sendCaseInviteEmail(caseDataWithRespondentsAllWithRepresentation);
         assertTrue(actualCaseData.getCaseInvites().isEmpty());
     }
 
     @Test
-    public void givenNoRespondents_whenCaseInvitesGenerated_thenNoInvitesGenerated() {
+    void givenNoRespondents_whenCaseInvitesGenerated_thenNoInvitesGenerated() {
         CaseData actualCaseData = fl401CaseInviteService
             .sendCaseInviteEmail(caseDataWithRespondentsAllWithRepresentation);
         assertTrue(actualCaseData.getCaseInvites().isEmpty());
     }
 
     @Test
-    public void givenApplicants_whenCaseInvitesGenerated_thenSendInvite() {
+    void givenApplicants_whenCaseInvitesGenerated_thenSendInvite() {
         PartyDetails applicant = PartyDetails.builder()
             .firstName("test")
             .email("testfl401@applicant.com")
@@ -155,7 +155,7 @@ public class FL401CaseInviteServiceTest {
     }
 
     @Test
-    public void givenApplicants_whenCaseInvitesGenerated_thenSendInvite_Fl401() {
+    void givenApplicants_whenCaseInvitesGenerated_thenSendInvite_Fl401() {
         when(launchDarklyClient.isFeatureEnabled("generate-da-citizen-applicant-pin")).thenReturn(true);
         PartyDetails applicant = PartyDetails.builder()
             .firstName("test")
@@ -171,7 +171,7 @@ public class FL401CaseInviteServiceTest {
     }
 
     @Test
-    public void givenApplicants_whenCaseInvitesGenerated_thenSendInvite_Fl401noEmail() {
+    void givenApplicants_whenCaseInvitesGenerated_thenSendInvite_Fl401noEmail() {
         when(launchDarklyClient.isFeatureEnabled("generate-da-citizen-applicant-pin")).thenReturn(true);
         PartyDetails applicant = PartyDetails.builder()
             .firstName("test")
@@ -187,7 +187,7 @@ public class FL401CaseInviteServiceTest {
     }
 
     @Test
-    public void testToGenerateCaseInviteAndSendToFl401Applicant() {
+    void testToGenerateCaseInviteAndSendToFl401Applicant() {
 
         PartyDetails respondent = PartyDetails.builder()
             .firstName("Respondent")
@@ -216,12 +216,12 @@ public class FL401CaseInviteServiceTest {
         List<Element<CaseInvite>> partyCaseInvites = fl401CaseInviteService
             .generateAndSendCaseInviteForDaApplicant(caseData, applicant);
         assertEquals(2, partyCaseInvites.size());
-        assertEquals(YesOrNo.Yes, partyCaseInvites.get(0).getValue().getIsApplicant());
+        assertEquals(YesOrNo.Yes, partyCaseInvites.getFirst().getValue().getIsApplicant());
 
     }
 
     @Test
-    public void testToGenerateCaseInviteAndSendToFl401Respondent() {
+    void testToGenerateCaseInviteAndSendToFl401Respondent() {
 
         PartyDetails respondent = PartyDetails.builder()
             .firstName("Respondent")
@@ -249,7 +249,7 @@ public class FL401CaseInviteServiceTest {
         List<Element<CaseInvite>> partyCaseInvites = fl401CaseInviteService
             .generateAndSendCaseInviteForDaRespondent(caseData, respondent);
         assertEquals(1, partyCaseInvites.size());
-        assertEquals(YesOrNo.No, partyCaseInvites.get(0).getValue().getIsApplicant());
+        assertEquals(YesOrNo.No, partyCaseInvites.getFirst().getValue().getIsApplicant());
 
     }
 }

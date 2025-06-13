@@ -49,7 +49,7 @@ import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_PETITIONER_NAME;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_RESPONDENT_NAME;
 
 @ExtendWith(MockitoExtension.class)
-public class EmailServiceTest {
+class EmailServiceTest {
 
     public static final String EMAIL_TEMPLATE_ID_1 = "111";
     public static final String EMAIL_TEMPLATE_ID_2 = "222";
@@ -79,7 +79,7 @@ public class EmailServiceTest {
     private String citizenUrl;
 
     @BeforeEach
-    public void setup() throws NotificationClientException {
+    void setup() throws NotificationClientException {
         when(emailTemplatesConfig.getTemplates())
             .thenReturn(
                 ImmutableMap.of(
@@ -92,7 +92,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void sendShouldCallNotifyApi() throws NotificationClientException {
+    void sendShouldCallNotifyApi() throws NotificationClientException {
         emailService.send(
             TEST_EMAIL,
             EmailTemplateNames.EXAMPLE,
@@ -109,7 +109,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void sendShouldHandleNotificationClientExceptionAndRethrow() throws NotificationClientException {
+    void sendShouldHandleNotificationClientExceptionAndRethrow() throws NotificationClientException {
         when(notificationClient.sendEmail(eq(EMAIL_TEMPLATE_ID_2), any(), any(), any()))
             .thenThrow(GovUkNotificationException.class);
 
@@ -129,7 +129,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void shouldGetCaseData() {
+    void shouldGetCaseData() {
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345L)
             .state(State.CASE_ISSUED.getValue())
@@ -145,7 +145,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void testToSendSoaEmail() throws NotificationClientException {
+    void testToSendSoaEmail() throws NotificationClientException {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -195,7 +195,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void sendShouldHandleNotificationClientExceptionAndRethrowGovUkNotificationException() throws NotificationClientException {
+    void sendShouldHandleNotificationClientExceptionAndRethrowGovUkNotificationException() throws NotificationClientException {
         when(notificationClient.sendEmail(eq(EMAIL_TEMPLATE_ID_1), any(), any(), any()))
             .thenThrow(new NotificationClientException("Test exception"));
 
@@ -215,7 +215,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void sendSoaShouldHandleNotificationClientExceptionAndRethrowGovUkNotificationException() throws NotificationClientException {
+    void sendSoaShouldHandleNotificationClientExceptionAndRethrowGovUkNotificationException() throws NotificationClientException {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")

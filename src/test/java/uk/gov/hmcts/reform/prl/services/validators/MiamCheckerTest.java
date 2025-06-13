@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.Collections;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.reform.prl.enums.MiamChildProtectionConcernChecklistEnum.MIAMChildProtectionConcernChecklistEnum_value_1;
@@ -24,7 +25,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 
 @ExtendWith(MockitoExtension.class)
-public class MiamCheckerTest {
+class MiamCheckerTest {
 
     @Mock
     TaskErrorService taskErrorService;
@@ -33,15 +34,15 @@ public class MiamCheckerTest {
     MiamChecker miamChecker;
 
     @Test
-    public void whenNoCaseDataThenIsStartedReturnsFalse() {
+    void whenNoCaseDataThenIsStartedReturnsFalse() {
         CaseData caseData = CaseData.builder()
             .miamDetails(MiamDetails.builder().build()).build();
 
-        assertTrue(!miamChecker.isStarted(caseData));
+        assertFalse(miamChecker.isStarted(caseData));
     }
 
     @Test
-    public void whenBasicMiamCaseDataPresentThenIsStartedReturnsTrue() {
+    void whenBasicMiamCaseDataPresentThenIsStartedReturnsTrue() {
         CaseData caseData = CaseData.builder()
             .miamDetails(MiamDetails.builder()
                              .applicantAttendedMiam(Yes)
@@ -55,23 +56,23 @@ public class MiamCheckerTest {
     }
 
     @Test
-    public void whenNoDataHasMandatoryCompletedReturnsFalse() {
+    void whenNoDataHasMandatoryCompletedReturnsFalse() {
         CaseData caseData = CaseData.builder().build();
 
-        assertTrue(!miamChecker.hasMandatoryCompleted(caseData));
+        assertFalse(miamChecker.hasMandatoryCompleted(caseData));
     }
 
     @Test
-    public void whenNoDataIsFinishedReturnsFalse() {
+    void whenNoDataIsFinishedReturnsFalse() {
         CaseData caseData = CaseData.builder().miamDetails(
             MiamDetails.builder().build()
         ).build();
 
-        assertTrue(!miamChecker.isFinished(caseData));
+        assertFalse(miamChecker.isFinished(caseData));
     }
 
     @Test
-    public void whenApplicantHasAttendedMiamAndDetailsProvidedIsFinishedReturnsTrue() {
+    void whenApplicantHasAttendedMiamAndDetailsProvidedIsFinishedReturnsTrue() {
         CaseData caseData = CaseData.builder()
             .miamDetails(MiamDetails.builder()
                              .applicantAttendedMiam(Yes)
@@ -86,7 +87,7 @@ public class MiamCheckerTest {
     }
 
     @Test
-    public void whenApplicantHasNotAttendedMiamButHasApprovedExemptionIsFinishedReturnsTrue() {
+    void whenApplicantHasNotAttendedMiamButHasApprovedExemptionIsFinishedReturnsTrue() {
         CaseData caseData = CaseData.builder()
             .miamDetails(MiamDetails.builder()
                              .applicantAttendedMiam(No)
@@ -103,7 +104,7 @@ public class MiamCheckerTest {
     }
 
     @Test
-    public void whenApplicantHasNotAttendedMiamButHasCompletedExemptionsSectionIsFinishedReturnsTrue() {
+    void whenApplicantHasNotAttendedMiamButHasCompletedExemptionsSectionIsFinishedReturnsTrue() {
         CaseData caseData = CaseData.builder()
             .miamDetails(MiamDetails.builder()
                              .applicantAttendedMiam(No)
@@ -119,7 +120,7 @@ public class MiamCheckerTest {
     }
 
     @Test
-    public void whenApplicantHasNotAttendedMiamButHasCompletedExemptionsSectionSubmittedChildProtectionConcernIsFinishedReturnsTrue() {
+    void whenApplicantHasNotAttendedMiamButHasCompletedExemptionsSectionSubmittedChildProtectionConcernIsFinishedReturnsTrue() {
         CaseData caseData = CaseData.builder()
             .miamDetails(MiamDetails.builder()
                              .applicantAttendedMiam(No)
@@ -135,7 +136,7 @@ public class MiamCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+    void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
         assertNotNull(miamChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

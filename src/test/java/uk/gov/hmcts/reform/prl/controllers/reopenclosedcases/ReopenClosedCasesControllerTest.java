@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers.reopenclosedcases;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -11,6 +10,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.reopenclosedcases.ReopenClosedCasesService;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -18,7 +18,7 @@ import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
-public class ReopenClosedCasesControllerTest {
+class ReopenClosedCasesControllerTest {
 
     @InjectMocks
     ReopenClosedCasesController reopenClosedCasesController;
@@ -34,7 +34,7 @@ public class ReopenClosedCasesControllerTest {
 
 
     @Test
-    public void testClosingCaseAboutToSubmit() {
+    void testClosingCaseAboutToSubmit() {
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         reopenClosedCasesController.reopenClosedCases(AUTH_TOKEN, S_2_S_TOKEN, CallbackRequest.builder().build());
         verify(reopenClosedCasesService, times(1)).reopenClosedCases(Mockito.any(CallbackRequest.class));
@@ -42,10 +42,10 @@ public class ReopenClosedCasesControllerTest {
 
 
     @Test
-    public void testClosingCaseAboutToSubmitException() {
+    void testClosingCaseAboutToSubmitException() {
         when(authorisationService.isAuthorized(any(), any())).thenReturn(false);
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
-        Assert.assertThrows(RuntimeException.class,
+        assertThrows(RuntimeException.class,
                             () -> reopenClosedCasesController.reopenClosedCases(
                                 AUTH_TOKEN,
                                 S_2_S_TOKEN,

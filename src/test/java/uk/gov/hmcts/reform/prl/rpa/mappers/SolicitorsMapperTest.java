@@ -23,13 +23,13 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
-import javax.json.JsonObject;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import javax.json.JsonObject;
 
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class SolicitorsMapperTest {
+class SolicitorsMapperTest {
 
     @InjectMocks
     SolicitorsMapper solicitorsMapper;
@@ -69,7 +69,7 @@ public class SolicitorsMapperTest {
     private UUID uuid;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         uuid = randomUUID();
         authToken = "auth-token";
         s2sToken = "s2sToken";
@@ -105,7 +105,7 @@ public class SolicitorsMapperTest {
     }
 
     @Test
-    public void testSolicitorAddresswithFields() {
+    void testSolicitorAddresswithFields() {
 
         ContactInformation contactInformation = ContactInformation.builder().county("County")
             .country("UK").postCode("PostCode").townCity("towncity").addressLine1("Addressline1")
@@ -114,12 +114,12 @@ public class SolicitorsMapperTest {
     }
 
     @Test
-    public void testCallOrgSearchFormSolicitorMapWithNullParty() {
+    void testCallOrgSearchFormSolicitorMapWithNullParty() {
         assertNotNull(solicitorsMapper.callOrgSearchFormSolicitorMap("123", PartyDetails.builder().build()));
     }
 
     @Test
-    public void testCallOrgSearchFormSolicitorMapWithPartyDetails() {
+    void testCallOrgSearchFormSolicitorMapWithPartyDetails() {
         PartyDetails partyDetails = PartyDetails
             .builder()
             .solicitorOrg(Organisation.builder().organisationID("1234").build())
@@ -130,14 +130,14 @@ public class SolicitorsMapperTest {
     }
 
     @Test
-    public void testSolicitorAddresswithoutFields() {
+    void testSolicitorAddresswithoutFields() {
 
         ContactInformation contactInformation = null;
         assertTrue(solicitorsMapper.mapSolicitorAddress(contactInformation).isEmpty());
     }
 
     @Test
-    public void testOrgSearchFormSolicitorMap() {
+    void testOrgSearchFormSolicitorMap() {
         partyDetails = PartyDetails.builder()
             .firstName("First name")
             .lastName("Last name")
@@ -154,7 +154,7 @@ public class SolicitorsMapperTest {
     }
 
     @Test
-    public void testOrgSearchFormSolicitorMapWithAuthToken() {
+    void testOrgSearchFormSolicitorMapWithAuthToken() {
 
         organisation = Organisation.builder().organisationID("Org ID").build();
         partyDetails = PartyDetails.builder()
@@ -174,37 +174,37 @@ public class SolicitorsMapperTest {
     }
 
     @Test
-    public void testSolicitorFullName() {
+    void testSolicitorFullName() {
         String fullName = solicitorsMapper.getSolicitorFullName("FirstName",
                                                                 "LastName");
         assertEquals("FirstNameLastName", fullName);
     }
 
     @Test
-    public void testSolicitorNullName() {
+    void testSolicitorNullName() {
         String fullName = solicitorsMapper.getSolicitorFullName(null, null);
         assertNull(fullName);
     }
 
     @Test
-    public void testSolicitorAddress() {
+    void testSolicitorAddress() {
         JsonObject solicitorAddress = solicitorsMapper.getSolicitorAddress(partyDetails, null);
         assertNull(solicitorAddress);
     }
 
     @Test
-    public void testDxNumber() {
+    void testDxNumber() {
         partyDetails = PartyDetails.builder().dxNumber("DxNumber").build();
         assertEquals("DxNumber", solicitorsMapper.getDxNumber(partyDetails, null));
     }
 
     @Test
-    public void testWithPartyDetailsAndOrgIsNull() {
+    void testWithPartyDetailsAndOrgIsNull() {
         assertNull(solicitorsMapper.getDxNumber(partyDetails, null));
     }
 
     @Test
-    public void testOrgIsNotEmpty() {
+    void testOrgIsNotEmpty() {
         List<ContactInformation> contactInformation = new ArrayList<>();
         List<DxAddress> dxAddress = new ArrayList<>();
         dxAddress.add(DxAddress.builder().dxNumber("dxNumber").build());
@@ -215,7 +215,7 @@ public class SolicitorsMapperTest {
     }
 
     @Test
-    public void testMapSolicitorList() {
+    void testMapSolicitorList() {
         solicitorMap = new HashMap<>();
         solicitorMap.put("134", partyDetails);
         assertNotNull(solicitorsMapper.mapSolicitorList(solicitorMap));

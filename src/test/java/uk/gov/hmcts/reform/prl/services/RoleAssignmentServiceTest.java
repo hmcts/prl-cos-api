@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,11 +26,12 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_ROLE;
 
 @ExtendWith(MockitoExtension.class)
-public class RoleAssignmentServiceTest {
+class RoleAssignmentServiceTest {
 
     @InjectMocks
     RoleAssignmentService roleAssignmentService;
@@ -59,7 +59,7 @@ public class RoleAssignmentServiceTest {
     CallbackRequest callbackRequest;
 
     @BeforeEach
-    public void init() {
+    void init() {
 
         Map<String, Object> dataMap = new HashMap<>();
         caseDetails = CaseDetails.builder().data(dataMap).id(123L).build();
@@ -67,7 +67,7 @@ public class RoleAssignmentServiceTest {
     }
 
     @Test
-    public void testCreateRoleAssignmentActorIdIsNull() {
+    void testCreateRoleAssignmentActorIdIsNull() {
         Map<String, Object> caseDetailsMap = new HashMap<>();
         List<String> roles = new ArrayList();
         roles.add("caseworker-privatelaw-judge");
@@ -95,7 +95,7 @@ public class RoleAssignmentServiceTest {
     }
 
     @Test
-    public void testCreateRoleAssignmentJudgeWithName() {
+    void testCreateRoleAssignmentJudgeWithName() {
         Map<String, Object> caseDetailsMap = new HashMap<>();
         caseDetailsMap.put("isJudgeOrLegalAdviser", "judge");
         caseDetailsMap.put("judgeName", "test");
@@ -122,7 +122,7 @@ public class RoleAssignmentServiceTest {
     }
 
     @Test
-    public void testCreateRoleAssignmentJudgeWithEmail() {
+    void testCreateRoleAssignmentJudgeWithEmail() {
         Map<String, Object> caseDetailsMap = new HashMap<>();
         caseDetailsMap.put("isJudgeOrLegalAdviser", "judge");
         caseDetailsMap.put("judgeNameAndEmail", "test");
@@ -141,7 +141,7 @@ public class RoleAssignmentServiceTest {
     }
 
     @Test
-    public void testCreateRoleAssignmentJudgeGatekeeping() {
+    void testCreateRoleAssignmentJudgeGatekeeping() {
         Map<String, Object> caseDetailsMap = new HashMap<>();
         caseDetailsMap.put("isJudgeOrLegalAdviserGatekeeping", "test");
         List<String> roles = new ArrayList();
@@ -164,7 +164,7 @@ public class RoleAssignmentServiceTest {
     }
 
     @Test
-    public void testCreateRoleAssignmentJudgeGatekeepingWithName() {
+    void testCreateRoleAssignmentJudgeGatekeepingWithName() {
         Map<String, Object> caseDetailsMap = new HashMap<>();
         caseDetailsMap.put("isJudgeOrLegalAdviserGatekeeping", "judge");
         caseDetailsMap.put("judgeNameAndEmail", "test");
@@ -182,7 +182,7 @@ public class RoleAssignmentServiceTest {
     }
 
     @Test
-    public void testCreateRoleAssignmentJudgeGatekeepingWithEmail() {
+    void testCreateRoleAssignmentJudgeGatekeepingWithEmail() {
         Map<String, Object> caseDetailsMap = new HashMap<>();
         caseDetailsMap.put("isJudgeOrLegalAdviserGatekeeping", "judge");
         caseDetailsMap.put("judgeName", "test");
@@ -200,7 +200,7 @@ public class RoleAssignmentServiceTest {
     }
 
     @Test
-    public void testCreateRoleAssignmentIsJudgeNotNull() {
+    void testCreateRoleAssignmentIsJudgeNotNull() {
         Map<String, Object> caseDetailsMap = new HashMap<>();
         caseDetailsMap.put("isJudgeOrLegalAdviser", "");
         caseDetailsMap.put("legalAdviserList", "");
@@ -223,7 +223,7 @@ public class RoleAssignmentServiceTest {
     }
 
     @Test
-    public void testCreateRoleAssignmentNameOfJudgeToReviewOrderNotNull() {
+    void testCreateRoleAssignmentNameOfJudgeToReviewOrderNotNull() {
         Map<String, Object> caseDetailsMap = new HashMap<>();
         caseDetailsMap.put("nameOfJudgeToReviewOrder", "Test");
         List<String> roles = new ArrayList();
@@ -245,7 +245,7 @@ public class RoleAssignmentServiceTest {
     }
 
     @Test
-    public void testCreateRoleAssignmentNameOfLaToReviewOrderNotNull() {
+    void testCreateRoleAssignmentNameOfLaToReviewOrderNotNull() {
         Map<String, Object> caseDetailsMap = new HashMap<>();
         caseDetailsMap.put("isJudgeOrLegalAdviserGatekeeping", "Yes");
         caseDetailsMap.put("legalAdviserList", "");
@@ -268,7 +268,7 @@ public class RoleAssignmentServiceTest {
     }
 
     @Test
-    public void testValidateIfUserHasRightRole() {
+    void testValidateIfUserHasRightRole() {
         List<RoleAssignmentResponse> listOfRoleAssignmentResponses = new ArrayList<>();
         RoleAssignmentResponse roleAssignmentResponse = new RoleAssignmentResponse();
         roleAssignmentResponse.setRoleName(HEARING_JUDGE_ROLE);
@@ -286,7 +286,7 @@ public class RoleAssignmentServiceTest {
     }
 
     @Test
-    public void testValidateIfUserDoesNotHaveRightRole() {
+    void testValidateIfUserDoesNotHaveRightRole() {
         List<RoleAssignmentResponse> listOfRoleAssignmentResponses = new ArrayList<>();
         RoleAssignmentResponse roleAssignmentResponse = new RoleAssignmentResponse();
         roleAssignmentResponse.setRoleName("test");
@@ -304,7 +304,7 @@ public class RoleAssignmentServiceTest {
     }
 
     @Test
-    public void testFetchIdamAmRoles() {
+    void testFetchIdamAmRoles() {
         Map<String, String> amRoles = new HashMap<>();
         amRoles.put("amRoles","case-worker");
         List<String> roles = new ArrayList();
@@ -327,6 +327,6 @@ public class RoleAssignmentServiceTest {
         stringObjectMap.put("judgeName", JudicialUser.builder().idamId("123").personalCode("123456").build());
         callbackRequest = CallbackRequest.builder().caseDetails(caseDetails.toBuilder().data(stringObjectMap).build()).build();
         Map<String, String> rolesResponse = roleAssignmentService.fetchIdamAmRoles(auth, emailId);
-        Assert.assertFalse(rolesResponse.isEmpty());
+        assertFalse(rolesResponse.isEmpty());
     }
 }

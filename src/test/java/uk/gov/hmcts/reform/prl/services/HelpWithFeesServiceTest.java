@@ -44,7 +44,7 @@ import static uk.gov.hmcts.reform.prl.services.HelpWithFeesService.HWF_APPLICATI
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
-public class HelpWithFeesServiceTest {
+class HelpWithFeesServiceTest {
 
     @InjectMocks
     private HelpWithFeesService helpWithFeesService;
@@ -61,7 +61,7 @@ public class HelpWithFeesServiceTest {
     CaseDetails caseDetails;
 
     @BeforeEach
-    public void init() {
+    void init() {
 
         casedata = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -83,18 +83,18 @@ public class HelpWithFeesServiceTest {
     }
 
     @Test
-    public void testAboutToStart() {
+    void testAboutToStart() {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata);
         Map<String, Object> response = helpWithFeesService.handleAboutToStart(caseDetails);
         assertNotNull(response);
         DynamicList dynamicList = (DynamicList) response.get("hwfAppList");
-        assertEquals("Child arrangements application C100 - 24/06/2024 10:46:55", dynamicList.getListItems().get(0).getLabel());
+        assertEquals("Child arrangements application C100 - 24/06/2024 10:46:55", dynamicList.getListItems().getFirst().getLabel());
         assertEquals("C100",response.get("caseTypeOfApplication"));
     }
 
     @Test
-    public void testAboutToSubmit() {
+    void testAboutToSubmit() {
         casedata = casedata.toBuilder()
                 .state(State.SUBMITTED_PAID)
                     .build();
@@ -113,7 +113,7 @@ public class HelpWithFeesServiceTest {
     }
 
     @Test
-    public void testAboutToSubmitApplicationsWithinProceedingsProcessUrgentFeesIsNull() {
+    void testAboutToSubmitApplicationsWithinProceedingsProcessUrgentFeesIsNull() {
         casedata = casedata.toBuilder()
             .state(State.SUBMITTED_PAID)
             .build();
@@ -130,7 +130,7 @@ public class HelpWithFeesServiceTest {
     }
 
     @Test
-    public void testAboutToSubmitApplicationsWithinProceedingsDynamicListIsNull() {
+    void testAboutToSubmitApplicationsWithinProceedingsDynamicListIsNull() {
         casedata = casedata.toBuilder()
             .state(State.SUBMITTED_PAID)
             .processUrgentHelpWithFees(ProcessUrgentHelpWithFees.builder().build())
@@ -148,7 +148,7 @@ public class HelpWithFeesServiceTest {
     }
 
     @Test
-    public void testAboutToSubmitApplicationsWithinProceedingsDynamicListIsEmptyWithAdditionalApplications() {
+    void testAboutToSubmitApplicationsWithinProceedingsDynamicListIsEmptyWithAdditionalApplications() {
         UUID applicationId = UUID.randomUUID();
         List<Element<AdditionalApplicationsBundle>> additionalApplications = new ArrayList<>();
         AdditionalApplicationsBundle additionalApplicationsBundle = AdditionalApplicationsBundle.builder()
@@ -180,14 +180,14 @@ public class HelpWithFeesServiceTest {
     }
 
     @Test
-    public void testSubmitted() {
+    void testSubmitted() {
         ResponseEntity<SubmittedCallbackResponse> submittedResponse = helpWithFeesService.handleSubmitted();
         assertEquals(APPLICATION_UPDATED, submittedResponse.getBody().getConfirmationHeader());
         assertEquals(CONFIRMATION_BODY, submittedResponse.getBody().getConfirmationBody());
     }
 
     @Test
-    public void testAboutToStart_c2Awp() {
+    void testAboutToStart_c2Awp() {
         caseDetails = caseDetails.toBuilder()
             .state(State.SUBMITTED_PAID.getValue())
             .build();
@@ -208,7 +208,7 @@ public class HelpWithFeesServiceTest {
     }
 
     @Test
-    public void testAboutToStart_otherAwp() {
+    void testAboutToStart_otherAwp() {
         caseDetails = caseDetails.toBuilder()
             .state(State.SUBMITTED_PAID.getValue())
             .build();
@@ -231,7 +231,7 @@ public class HelpWithFeesServiceTest {
     }
 
     @Test
-    public void testCheckForManagerApproval() {
+    void testCheckForManagerApproval() {
         casedata = casedata.toBuilder()
             .processUrgentHelpWithFees(ProcessUrgentHelpWithFees.builder()
                                            .outstandingBalance(YesOrNo.Yes)
@@ -243,7 +243,7 @@ public class HelpWithFeesServiceTest {
     }
 
     @Test
-    public void testPopulateHwfDynamicData() {
+    void testPopulateHwfDynamicData() {
         caseDetails = caseDetails.toBuilder()
             .data(casedata.toMap(new ObjectMapper()))
             .build();
@@ -255,7 +255,7 @@ public class HelpWithFeesServiceTest {
     }
 
     @Test
-    public void testPopulateHwfDynamicData_c2Awp() {
+    void testPopulateHwfDynamicData_c2Awp() {
         UUID applicationId = UUID.randomUUID();
         caseDetails = caseDetails.toBuilder()
             .state(State.SUBMITTED_PAID.getValue())
@@ -283,7 +283,7 @@ public class HelpWithFeesServiceTest {
     }
 
     @Test
-    public void testPopulateHwfDynamicData_otherAwp() {
+    void testPopulateHwfDynamicData_otherAwp() {
         UUID applicationId = UUID.randomUUID();
         caseDetails = caseDetails.toBuilder()
             .state(State.SUBMITTED_PAID.getValue())

@@ -96,8 +96,8 @@ public class AutomatedHearingTransactionRequestMapper {
                 automatedHearingCaseData.setApplicants(applicantsAutomatedHearingpartyDetails);
                 automatedHearingCaseData.setRespondents(respondentsAutomatedHearingpartyDetails);
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                automatedHearingCaseData.setApplicantsFL401(applicantsAutomatedHearingpartyDetails.get(0).getValue());
-                automatedHearingCaseData.setRespondentsFL401(respondentsAutomatedHearingpartyDetails.get(0).getValue());
+                automatedHearingCaseData.setApplicantsFL401(applicantsAutomatedHearingpartyDetails.getFirst().getValue());
+                automatedHearingCaseData.setRespondentsFL401(respondentsAutomatedHearingpartyDetails.getFirst().getValue());
             }
             return automatedHearingCaseData;
         } catch (Exception e) {

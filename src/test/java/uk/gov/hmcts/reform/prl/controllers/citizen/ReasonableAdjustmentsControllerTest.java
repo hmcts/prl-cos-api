@@ -28,10 +28,11 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
-public class ReasonableAdjustmentsControllerTest {
+class ReasonableAdjustmentsControllerTest {
 
     @InjectMocks
     private ReasonableAdjustmentsController reasonableAdjustmentsController;
@@ -55,12 +56,12 @@ public class ReasonableAdjustmentsControllerTest {
     public static final String servAuthToken = "Bearer TestServToken";
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         objectMapper.registerModule(new JavaTimeModule());
     }
 
     @Test
-    public void testRetrieveRaFlags() {
+    void testRetrieveRaFlags() {
         String caseId = "1234567891234567L";
         String partyId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
 
@@ -74,22 +75,23 @@ public class ReasonableAdjustmentsControllerTest {
         assertNotNull(flag);
     }
 
-    @Test(expected = RuntimeException.class)
-    public void testRetrieveRaFlagsWhenAuthFails() {
+    @Test
+    void testRetrieveRaFlagsWhenAuthFails() {
+        assertThrows(RuntimeException.class, () -> {
+            String caseId = "1234567891234567L";
+            String partyId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
 
-        String caseId = "1234567891234567L";
-        String partyId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
+            Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
+            Mockito.when(authorisationService.authoriseService(servAuthToken)).thenReturn(Boolean.TRUE);
 
-        Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
-        Mockito.when(authorisationService.authoriseService(servAuthToken)).thenReturn(Boolean.TRUE);
+            reasonableAdjustmentsController.getCaseFlags(caseId, partyId, authToken, servAuthToken);
 
-        reasonableAdjustmentsController.getCaseFlags(caseId, partyId, authToken, servAuthToken);
-
-        throw new RuntimeException("Invalid Client");
+            throw new RuntimeException("Invalid Client");
+        });
     }
 
     @Test
-    public void testUpdateCitizenRAflags() {
+    void testUpdateCitizenRAflags() {
         String caseId = "1234567891234567L";
         String eventId = "c100RequestSupport";
         String partyId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
@@ -127,7 +129,7 @@ public class ReasonableAdjustmentsControllerTest {
     }
 
     @Test
-    public void testUpdateCitizenRAflagsWhenAuthFails() {
+    void testUpdateCitizenRAflagsWhenAuthFails() {
         String caseId = "1234567891234567L";
         String eventId = "fl401RequestSupport";
         String partyId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
@@ -160,7 +162,7 @@ public class ReasonableAdjustmentsControllerTest {
     }
 
     @Test
-    public void testlanguageSupportCaseNotes() {
+    void testlanguageSupportCaseNotes() {
         String caseId = "1234567891234567L";
         LanguageSupportCaseNotesRequest languageSupportCaseNotesRequest = LanguageSupportCaseNotesRequest.builder()
             .languageSupportNotes("test").build();
@@ -183,7 +185,7 @@ public class ReasonableAdjustmentsControllerTest {
     }
 
     @Test
-    public void testlanguageSupportCaseNotesWhenAuthFails() {
+    void testlanguageSupportCaseNotesWhenAuthFails() {
         String caseId = "1234567891234567L";
         LanguageSupportCaseNotesRequest languageSupportCaseNotesRequest = LanguageSupportCaseNotesRequest.builder()
             .languageSupportNotes("test").build();

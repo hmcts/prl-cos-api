@@ -146,7 +146,7 @@ public class ManageOrderEmailServiceTest {
     Document coverLetterDoc;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
 
 
         applicant = PartyDetails.builder()
@@ -227,7 +227,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void buildCafcassEmailNotificationForC100() throws NotFoundException {
+    void buildCafcassEmailNotificationForC100() throws NotFoundException {
 
 
         applicant = PartyDetails.builder()
@@ -318,7 +318,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void buildCafcassEmailNotificationForFL401() throws NotFoundException {
+    void buildCafcassEmailNotificationForFL401() throws NotFoundException {
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -407,7 +407,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void sendCafcassEmailNotification() throws NotFoundException {
+    void sendCafcassEmailNotification() throws NotFoundException {
 
 
         applicant = PartyDetails.builder()
@@ -506,7 +506,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void sendEmailWhenOrderIsServed() {
+    void sendEmailWhenOrderIsServed() {
 
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -589,7 +589,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void sendEmailDaWhenOrderIsServed() {
+    void sendEmailDaWhenOrderIsServed() {
 
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -686,7 +686,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testServeOrdersToOtherOrganisation() {
+    void testServeOrdersToOtherOrganisation() {
         PostalInformation address = PostalInformation.builder()
             .postalAddress(Address.builder()
                 .addressLine1("Made Up Street").build())
@@ -736,7 +736,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testServeOrdersToOtherOrganisationThrowsException() throws Exception {
+    void testServeOrdersToOtherOrganisationThrowsException() throws Exception {
         PostalInformation address = PostalInformation.builder()
             .postalAddress(Address.builder()
                 .addressLine1("Made Up Street").build())
@@ -785,7 +785,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testServeOrdersToOtherOrganisationServeOrderDetailsNull() {
+    void testServeOrdersToOtherOrganisationServeOrderDetailsNull() {
         OrderDetails orderDetails = OrderDetails.builder()
             .orderTypeId("abc")
             .dateCreated(LocalDateTime.now())
@@ -815,7 +815,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testServeOrdersToOtherOrganisationAddressIsEmpty() {
+    void testServeOrdersToOtherOrganisationAddressIsEmpty() {
         PostalInformation address = PostalInformation.builder()
             .postalName("Test")
             .build();
@@ -858,7 +858,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testServeOrdersToOtherOrganisationPostalInformationIsEmpty() {
+    void testServeOrdersToOtherOrganisationPostalInformationIsEmpty() {
         PostalInformation address = PostalInformation.builder()
             .postalName("Test")
             .postalAddress(Address.builder().build())
@@ -901,7 +901,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testServeOrdersDetailsNull() {
+    void testServeOrdersDetailsNull() {
         OrderDetails orderDetails = OrderDetails.builder()
             .orderTypeId("abc")
             .dateCreated(LocalDateTime.now())
@@ -936,7 +936,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailWhenOrderServed_General_Order() throws IOException {
+    void testSendEmailWhenOrderServed_General_Order() throws IOException {
         CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
@@ -997,7 +997,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailWhenOrderServed_two_Orders() throws IOException {
+    void testSendEmailWhenOrderServed_two_Orders() throws IOException {
         CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
@@ -1066,7 +1066,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailWhenOrderServed_Interim_Order() throws IOException {
+    void testSendEmailWhenOrderServed_Interim_Order() throws IOException {
         CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
@@ -1128,7 +1128,7 @@ public class ManageOrderEmailServiceTest {
 
 
     @Test
-    public void testSendEmailWhenOrderServedShouldInvoke() throws Exception {
+    void testSendEmailWhenOrderServedShouldInvoke() throws Exception {
         CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
@@ -1169,7 +1169,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailForCitizenWhenTheyHaveDashboardAccess() {
+    void testSendEmailForCitizenWhenTheyHaveDashboardAccess() {
         CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
@@ -1215,7 +1215,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailWhenOrderServedShouldInvokeForRespondentContactPrefDigital() throws Exception {
+    void testSendEmailWhenOrderServedShouldInvokeForRespondentContactPrefDigital() throws Exception {
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
             .code("00000000-0000-0000-0000-000000000000")
@@ -1262,7 +1262,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailWhenOrderServedShouldInvokeForRespondentContactPrefPost() throws Exception {
+    void testSendEmailWhenOrderServedShouldInvokeForRespondentContactPrefPost() throws Exception {
         CaseDetails caseDetails = CaseDetails.builder().build();
         LocalDateTime now = LocalDateTime.of(2023,8, 23, 0, 0, 0);
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
@@ -1326,7 +1326,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailWhenOrderServedFl401() throws IOException {
+    void testSendEmailWhenOrderServedFl401() throws IOException {
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
             .code("00000000-0000-0000-0000-000000000000")
@@ -1380,7 +1380,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailWhenOrderServedFl401Welsh() throws IOException {
+    void testSendEmailWhenOrderServedFl401Welsh() throws IOException {
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
             .code("00000000-0000-0000-0000-000000000000")
@@ -1435,7 +1435,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailWhenOrderServedFl401ServeOtherPartiesDaNull() throws IOException {
+    void testSendEmailWhenOrderServedFl401ServeOtherPartiesDaNull() throws IOException {
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
             .code("00000000-0000-0000-0000-000000000000")
@@ -1486,7 +1486,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailWhenOrderServedFl401ServeOtherPartiesDaNullWelsh() throws IOException {
+    void testSendEmailWhenOrderServedFl401ServeOtherPartiesDaNullWelsh() throws IOException {
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
             .code("00000000-0000-0000-0000-000000000000")
@@ -1538,7 +1538,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailWhenOrderServedFl40ServeOtherPartiesNotSetToOther() throws IOException {
+    void testSendEmailWhenOrderServedFl40ServeOtherPartiesNotSetToOther() throws IOException {
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
             .code("00000000-0000-0000-0000-000000000000")
@@ -1588,7 +1588,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailWhenOrderServedFl40ServeOtherPartiesNotSetToOtherWelsh() throws IOException {
+    void testSendEmailWhenOrderServedFl40ServeOtherPartiesNotSetToOtherWelsh() throws IOException {
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
             .code("00000000-0000-0000-0000-000000000000")
@@ -1640,7 +1640,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailWhenOrderServed() {
+    void testSendEmailWhenOrderServed() {
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
             .code("00000000-0000-0000-0000-000000000000")
@@ -1689,7 +1689,7 @@ public class ManageOrderEmailServiceTest {
 
 
     @Test
-    public void testSendOrderAndAdditionalDocsToOtherPersonViaPost() throws Exception {
+    void testSendOrderAndAdditionalDocsToOtherPersonViaPost() throws Exception {
         //Given
         caseData = caseData.toBuilder()
             .othersToNotify(List.of(element(uuid, otherPerson)))
@@ -1718,13 +1718,13 @@ public class ManageOrderEmailServiceTest {
         assertNotNull(caseDataMap.get("orderCollection"));
         //noinspection unchecked
         List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) caseDataMap.get("orderCollection");
-        assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails());
-        assertEquals(1, orderCollection.get(0).getValue().getBulkPrintOrderDetails().size());
-        assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails().get(0).getValue().getBulkPrintId());
+        assertNotNull(orderCollection.getFirst().getValue().getBulkPrintOrderDetails());
+        assertEquals(1, orderCollection.getFirst().getValue().getBulkPrintOrderDetails().size());
+        assertNotNull(orderCollection.getFirst().getValue().getBulkPrintOrderDetails().getFirst().getValue().getBulkPrintId());
     }
 
     @Test
-    public void testSendOrderAndAdditionalDocsToRespondentViaPost() throws Exception {
+    void testSendOrderAndAdditionalDocsToRespondentViaPost() throws Exception {
 
         //Given
         PartyDetails respondent = PartyDetails.builder()
@@ -1761,13 +1761,13 @@ public class ManageOrderEmailServiceTest {
         assertNotNull(caseDataMap.get("orderCollection"));
         //noinspection unchecked
         List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) caseDataMap.get("orderCollection");
-        assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails());
-        assertEquals(1, orderCollection.get(0).getValue().getBulkPrintOrderDetails().size());
-        assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails().get(0).getValue().getBulkPrintId());
+        assertNotNull(orderCollection.getFirst().getValue().getBulkPrintOrderDetails());
+        assertEquals(1, orderCollection.getFirst().getValue().getBulkPrintOrderDetails().size());
+        assertNotNull(orderCollection.getFirst().getValue().getBulkPrintOrderDetails().getFirst().getValue().getBulkPrintId());
     }
 
     @Test
-    public void testServeOrderDocsToRespondentsEmailOtherPersonPost() throws Exception {
+    void testServeOrderDocsToRespondentsEmailOtherPersonPost() throws Exception {
         //Given
         PartyDetails respondent1 = PartyDetails.builder()
             .firstName("RespFN")
@@ -1823,13 +1823,13 @@ public class ManageOrderEmailServiceTest {
         assertNotNull(caseDataMap.get("orderCollection"));
         //noinspection unchecked
         List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) caseDataMap.get("orderCollection");
-        assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails());
-        assertEquals(2, orderCollection.get(0).getValue().getBulkPrintOrderDetails().size());
+        assertNotNull(orderCollection.getFirst().getValue().getBulkPrintOrderDetails());
+        assertEquals(2, orderCollection.getFirst().getValue().getBulkPrintOrderDetails().size());
 
     }
 
     @Test
-    public void sendEmailWhenOrderIsServedOnly47aNoOptionsSelected() {
+    void sendEmailWhenOrderIsServedOnly47aNoOptionsSelected() {
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -1917,7 +1917,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testsendEmailToLegalRepresentativeOnRejection() {
+    void testsendEmailToLegalRepresentativeOnRejection() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("TestCaseName")
@@ -1942,7 +1942,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void sendEmailWhenOrderIsServedOnly47a() {
+    void sendEmailWhenOrderIsServedOnly47a() {
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -2028,7 +2028,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void sendEmailWhenOrderIsServedEmailOptionIsEmpty() throws IOException {
+    void sendEmailWhenOrderIsServedEmailOptionIsEmpty() throws IOException {
         applicant = PartyDetails.builder()
             .partyId(UUID.fromString(TEST_UUID))
             .firstName("TestFirst")
@@ -2123,7 +2123,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void sendEmailWhenOrderIsServedEmailOptionIsEmptyWelsh() throws IOException {
+    void sendEmailWhenOrderIsServedEmailOptionIsEmptyWelsh() throws IOException {
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -2217,7 +2217,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void sendServeOrderEmailWhenCourtBailiffOptionSelected() throws IOException {
+    void sendServeOrderEmailWhenCourtBailiffOptionSelected() throws IOException {
         applicant = PartyDetails.builder()
             .partyId(UUID.fromString(TEST_UUID))
             .firstName("TestFirst")
@@ -2312,7 +2312,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void sendServeOrderEmailWhenCourtBailiffOptionSelectedWelsh() throws IOException {
+    void sendServeOrderEmailWhenCourtBailiffOptionSelectedWelsh() throws IOException {
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -2406,7 +2406,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void sendServeOrderEmailWhenCourtAdminOptionSelected() throws IOException {
+    void sendServeOrderEmailWhenCourtAdminOptionSelected() throws IOException {
         applicant = PartyDetails.builder()
             .partyId(UUID.fromString(TEST_UUID))
             .firstName("TestFirst")
@@ -2501,7 +2501,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void sendServeOrderEmailWhenCourtAdminOptionSelectedWelsh() throws IOException {
+    void sendServeOrderEmailWhenCourtAdminOptionSelectedWelsh() throws IOException {
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -2595,7 +2595,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void sendEmailWhenOrderIsServedToCafcassCymruWelsh() throws IOException {
+    void sendEmailWhenOrderIsServedToCafcassCymruWelsh() throws IOException {
 
         DynamicMultiselectListElement serveOrderDynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
@@ -2647,7 +2647,7 @@ public class ManageOrderEmailServiceTest {
 
 
     @Test
-    public void sendServeOrderEmailWhenCourtBailiffOptionSelectedForC100Case() throws IOException {
+    void sendServeOrderEmailWhenCourtBailiffOptionSelectedForC100Case() throws IOException {
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -2742,7 +2742,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void sendServeOrderEmailWhenCourtBailiffOptionSelectedForC100CaseWelsh() throws IOException {
+    void sendServeOrderEmailWhenCourtBailiffOptionSelectedForC100CaseWelsh() throws IOException {
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -2837,7 +2837,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void sendServeOrderEmailWhenCourtAdminOptionSelectedForC100Case() throws IOException {
+    void sendServeOrderEmailWhenCourtAdminOptionSelectedForC100Case() throws IOException {
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -2936,7 +2936,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void sendServeOrderEmailWhenCourtAdminOptionSelectedForC100CaseWelsh() throws IOException {
+    void sendServeOrderEmailWhenCourtAdminOptionSelectedForC100CaseWelsh() throws IOException {
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -3035,7 +3035,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailWhenOrderServedShouldInvokeServeOrderToApplicantAddress() throws Exception {
+    void testSendEmailWhenOrderServedShouldInvokeServeOrderToApplicantAddress() throws Exception {
 
         CaseDetails caseDetails = CaseDetails.builder().build();
         LocalDateTime now = LocalDateTime.of(2023, 8, 23, 0, 0, 0);
@@ -3097,12 +3097,12 @@ public class ManageOrderEmailServiceTest {
 
         assertNotNull(dataMap.get("orderCollection"));
         List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) dataMap.get("orderCollection");
-        assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails());
-        assertEquals(1, orderCollection.get(0).getValue().getBulkPrintOrderDetails().size());
-        assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails().get(0).getValue().getBulkPrintId());
+        assertNotNull(orderCollection.getFirst().getValue().getBulkPrintOrderDetails());
+        assertEquals(1, orderCollection.getFirst().getValue().getBulkPrintOrderDetails().size());
+        assertNotNull(orderCollection.getFirst().getValue().getBulkPrintOrderDetails().getFirst().getValue().getBulkPrintId());
         assertEquals(
             bulkPrintId.toString(),
-            orderCollection.get(0).getValue().getBulkPrintOrderDetails().get(0).getValue().getBulkPrintId()
+            orderCollection.getFirst().getValue().getBulkPrintOrderDetails().getFirst().getValue().getBulkPrintId()
         );
 
         Mockito.verify(sendgridService, Mockito.times(1)).sendEmailUsingTemplateWithAttachments(
@@ -3113,7 +3113,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailWhenOrderServedShouldInvokeServeOrderToApplicantAddressWithNoAddress() throws Exception {
+    void testSendEmailWhenOrderServedShouldInvokeServeOrderToApplicantAddressWithNoAddress() throws Exception {
 
         CaseDetails caseDetails = CaseDetails.builder().build();
         LocalDateTime now = LocalDateTime.of(2023, 8, 23, 0, 0, 0);
@@ -3171,12 +3171,12 @@ public class ManageOrderEmailServiceTest {
 
         assertNotNull(dataMap.get("orderCollection"));
         List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) dataMap.get("orderCollection");
-        assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails());
-        assertEquals(0, orderCollection.get(0).getValue().getBulkPrintOrderDetails().size());
+        assertNotNull(orderCollection.getFirst().getValue().getBulkPrintOrderDetails());
+        assertEquals(0, orderCollection.getFirst().getValue().getBulkPrintOrderDetails().size());
     }
 
     @Test
-    public void testSendEmailWhenOrderServedShouldInvokeServeOrderToApplicantAddressException() throws Exception {
+    void testSendEmailWhenOrderServedShouldInvokeServeOrderToApplicantAddressException() throws Exception {
         CaseDetails caseDetails = CaseDetails.builder().build();
         LocalDateTime now = LocalDateTime.of(2023, 8, 23, 0, 0, 0);
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
@@ -3232,13 +3232,13 @@ public class ManageOrderEmailServiceTest {
 
         assertNotNull(dataMap.get("orderCollection"));
         List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) dataMap.get("orderCollection");
-        assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails());
-        assertEquals(0, orderCollection.get(0).getValue().getBulkPrintOrderDetails().size());
-        assertEquals(new ArrayList<>(), orderCollection.get(0).getValue().getBulkPrintOrderDetails());
+        assertNotNull(orderCollection.getFirst().getValue().getBulkPrintOrderDetails());
+        assertEquals(0, orderCollection.getFirst().getValue().getBulkPrintOrderDetails().size());
+        assertEquals(new ArrayList<>(), orderCollection.getFirst().getValue().getBulkPrintOrderDetails());
     }
 
     @Test
-    public void testServeOrderDocsToUnrepresentedApplicantViaPostC100() throws Exception {
+    void testServeOrderDocsToUnrepresentedApplicantViaPostC100() throws Exception {
         //Given
         PartyDetails applicantPost = PartyDetails.builder()
             .partyId(uuid)
@@ -3272,12 +3272,12 @@ public class ManageOrderEmailServiceTest {
         assertNotNull(caseDataMap.get("orderCollection"));
         //noinspection unchecked
         List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) caseDataMap.get("orderCollection");
-        assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails());
-        assertEquals(1, orderCollection.get(0).getValue().getBulkPrintOrderDetails().size());
+        assertNotNull(orderCollection.getFirst().getValue().getBulkPrintOrderDetails());
+        assertEquals(1, orderCollection.getFirst().getValue().getBulkPrintOrderDetails().size());
     }
 
     @Test
-    public void testServeOrderDocsToUnrepresentedApplicantWithNoAddressC100() {
+    void testServeOrderDocsToUnrepresentedApplicantWithNoAddressC100() {
         //Given
         PartyDetails applicantNoAddress = PartyDetails.builder()
             .partyId(uuid)
@@ -3306,11 +3306,11 @@ public class ManageOrderEmailServiceTest {
         assertNotNull(caseDataMap.get("orderCollection"));
         //noinspection unchecked
         List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) caseDataMap.get("orderCollection");
-        assertTrue(orderCollection.get(0).getValue().getBulkPrintOrderDetails().isEmpty());
+        assertTrue(orderCollection.getFirst().getValue().getBulkPrintOrderDetails().isEmpty());
     }
 
     @Test
-    public void testServeOrderDocsToUnrepresentedApplicantViaEmailC100() {
+    void testServeOrderDocsToUnrepresentedApplicantViaEmailC100() {
         //Given
         PartyDetails applicantEmail = PartyDetails.builder()
             .partyId(uuid)
@@ -3344,7 +3344,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testServeOrderDocsToUnrepresentedApplicantViaPostFL401() throws Exception {
+    void testServeOrderDocsToUnrepresentedApplicantViaPostFL401() throws Exception {
         //Given
         PartyDetails applicantPostFl401 = PartyDetails.builder()
             .partyId(uuid)
@@ -3378,12 +3378,12 @@ public class ManageOrderEmailServiceTest {
         assertNotNull(caseDataMap.get("orderCollection"));
         //noinspection unchecked
         List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) caseDataMap.get("orderCollection");
-        assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails());
-        assertEquals(1, orderCollection.get(0).getValue().getBulkPrintOrderDetails().size());
+        assertNotNull(orderCollection.getFirst().getValue().getBulkPrintOrderDetails());
+        assertEquals(1, orderCollection.getFirst().getValue().getBulkPrintOrderDetails().size());
     }
 
     @Test
-    public void testServeOrderDocsToUnrepresentedApplicantWithNoAddressFL401() {
+    void testServeOrderDocsToUnrepresentedApplicantWithNoAddressFL401() {
         //Given
         PartyDetails applicantNoAddressFl401 = PartyDetails.builder()
             .partyId(uuid)
@@ -3411,11 +3411,11 @@ public class ManageOrderEmailServiceTest {
         assertNotNull(caseDataMap.get("orderCollection"));
         //noinspection unchecked
         List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) caseDataMap.get("orderCollection");
-        assertTrue(orderCollection.get(0).getValue().getBulkPrintOrderDetails().isEmpty());
+        assertTrue(orderCollection.getFirst().getValue().getBulkPrintOrderDetails().isEmpty());
     }
 
     @Test
-    public void testServeOrderDocsToUnrepresentedApplicantViaEmailFL401() throws Exception {
+    void testServeOrderDocsToUnrepresentedApplicantViaEmailFL401() throws Exception {
         //Given
         PartyDetails applicantEmailFl401 = PartyDetails.builder()
             .partyId(uuid)
@@ -3451,7 +3451,7 @@ public class ManageOrderEmailServiceTest {
 
 
     @Test
-    public void testServeOrderDocsToUnrepresentedApplicantViaEmailFL401ThrowException() throws Exception {
+    void testServeOrderDocsToUnrepresentedApplicantViaEmailFL401ThrowException() throws Exception {
         //Given
         PartyDetails applicantFl401Exception = PartyDetails.builder()
             .partyId(uuid)
@@ -3486,7 +3486,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testServeOrderDocsToUnrepresentedApplicantViaEmailDa() {
+    void testServeOrderDocsToUnrepresentedApplicantViaEmailDa() {
         //Given
         PartyDetails applicantDa = PartyDetails.builder()
             .partyId(uuid)
@@ -3520,7 +3520,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailForCitizenWhenTheyHaveDashboardAccessAndMultipleOrdersWelshSentence() {
+    void testSendEmailForCitizenWhenTheyHaveDashboardAccessAndMultipleOrdersWelshSentence() {
         UUID uuidOne = UUID.fromString("00000000-0000-0000-0000-000000000001");
         UUID uuidTwo = UUID.fromString("00000000-0000-0000-0000-000000000002");
         DynamicMultiselectListElement dynamicMultiselectListElementOne = DynamicMultiselectListElement
@@ -3590,7 +3590,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailForCitizenWhenTheyHaveDashboardAccessAndNonMultipleOrdersWelshSentence() {
+    void testSendEmailForCitizenWhenTheyHaveDashboardAccessAndNonMultipleOrdersWelshSentence() {
         UUID uuidOne = UUID.fromString("00000000-0000-0000-0000-000000000001");
         DynamicMultiselectListElement dynamicMultiselectListElementOne = DynamicMultiselectListElement
             .builder()
@@ -3650,7 +3650,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailForCitizenWhenTheyHaveDashboardAccessAndMultipleFinalOrdersWelshSentence() {
+    void testSendEmailForCitizenWhenTheyHaveDashboardAccessAndMultipleFinalOrdersWelshSentence() {
         UUID uuidOne = UUID.fromString("00000000-0000-0000-0000-000000000001");
         UUID uuidTwo = UUID.fromString("00000000-0000-0000-0000-000000000002");
         DynamicMultiselectListElement dynamicMultiselectListElementOne = DynamicMultiselectListElement
@@ -3720,7 +3720,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailForCitizenWhenTheyHaveDashboardAccessAndMultipleNewOrdersWelshSentence() {
+    void testSendEmailForCitizenWhenTheyHaveDashboardAccessAndMultipleNewOrdersWelshSentence() {
         UUID uuidOne = UUID.fromString("00000000-0000-0000-0000-000000000001");
         UUID uuidTwo = UUID.fromString("00000000-0000-0000-0000-000000000002");
         DynamicMultiselectListElement dynamicMultiselectListElementOne = DynamicMultiselectListElement
@@ -3790,7 +3790,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailForCitizenWhenTheyHaveDashboardAccessAndNewOrdersWelshSentence() {
+    void testSendEmailForCitizenWhenTheyHaveDashboardAccessAndNewOrdersWelshSentence() {
         UUID uuidOne = UUID.fromString("00000000-0000-0000-0000-000000000001");
         DynamicMultiselectListElement dynamicMultiselectListElementOne = DynamicMultiselectListElement
             .builder()
@@ -3850,7 +3850,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testsendEmailToCafcassCymruForC100CaseThrowsSendGridNotificationException() {
+    void testsendEmailToCafcassCymruForC100CaseThrowsSendGridNotificationException() {
         // Given
         PartyDetails applicant1 = PartyDetails.builder()
             .partyId(uuid)
@@ -3888,7 +3888,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailViaSendGridForC100CaseThrowsSendGridNotificationException() {
+    void testSendEmailViaSendGridForC100CaseThrowsSendGridNotificationException() {
         // Given
         PartyDetails applicant1 = PartyDetails.builder()
             .partyId(uuid)

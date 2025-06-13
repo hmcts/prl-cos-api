@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.respondentsolicitor.RespondentWelshNeedsListEnum;
@@ -14,7 +13,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentInterpreterNeeds;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskErrorService;
 
 import java.util.ArrayList;
@@ -22,24 +20,21 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doNothing;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @ExtendWith(MockitoExtension.class)
-public class AttendToCourtCheckerTest {
+class AttendToCourtCheckerTest {
 
     @InjectMocks
-    AttendToCourtChecker attendToCourtChecker;
+    private AttendToCourtChecker attendToCourtChecker;
 
     @Mock
-    RespondentTaskErrorService respondentTaskErrorService;
+    private RespondentTaskErrorService respondentTaskErrorService;
 
-    CaseData caseData;
-
-    PartyDetails respondent;
+    private PartyDetails respondent;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
 
         List<RespondentWelshNeedsListEnum> welshNeedsListEnum = new ArrayList<>();
         welshNeedsListEnum.add(RespondentWelshNeedsListEnum.speakWelsh);
@@ -48,12 +43,13 @@ public class AttendToCourtCheckerTest {
         party.add(PartyEnum.respondent);
 
         RespondentInterpreterNeeds interpreterNeeds = RespondentInterpreterNeeds.builder()
-                                 .party(party)
-                                 .relationName("Test")
-                                 .requiredLanguage("Cornish")
-                .build();
+            .party(party)
+            .relationName("Test")
+            .requiredLanguage("Cornish")
+            .build();
 
-        Element<RespondentInterpreterNeeds> wrappedInterpreter = Element.<RespondentInterpreterNeeds>builder().value(interpreterNeeds).build();
+        Element<RespondentInterpreterNeeds> wrappedInterpreter = Element.<RespondentInterpreterNeeds>builder().value(
+            interpreterNeeds).build();
         List<Element<RespondentInterpreterNeeds>> interpreterList = Collections.singletonList(wrappedInterpreter);
 
         respondent = PartyDetails.builder()
@@ -72,26 +68,15 @@ public class AttendToCourtCheckerTest {
                                              .build())
                           .build())
             .build();
-
-        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
-        List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
-        doNothing().when(respondentTaskErrorService).addEventError(Mockito.any(), Mockito.any(), Mockito.any());
-
-        caseData = CaseData.builder().respondents(respondentList).build();
     }
 
     @Test
-    public void isStartedTest() {
-
-        Boolean bool = attendToCourtChecker.isStarted(respondent, true);
-
-        assertTrue(bool);
+    void isStartedTest() {
+        assertTrue(attendToCourtChecker.isStarted(respondent, true));
     }
 
     @Test
-    public void mandatoryCompletedTest() {
-        Boolean bool = attendToCourtChecker.isFinished(respondent, true);
-
-        assertTrue(bool);
+    void mandatoryCompletedTest() {
+        assertTrue(attendToCourtChecker.isFinished(respondent, true));
     }
 }

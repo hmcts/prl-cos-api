@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -73,7 +72,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 
 @PropertySource(value = "classpath:application.yaml")
 @ExtendWith(MockitoExtension.class)
-public class FL401SubmitApplicationControllerTest {
+class FL401SubmitApplicationControllerTest {
 
     private MockMvc mockMvc;
 
@@ -145,7 +144,7 @@ public class FL401SubmitApplicationControllerTest {
     private DynamicList dynamicList;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
 
 
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
@@ -193,11 +192,11 @@ public class FL401SubmitApplicationControllerTest {
                                         .siteName("test")
                                         .region("test")
                                         .build()));
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
     }
 
     @Test
-    public void testSubmitApplicationEventValidation() throws Exception {
+    void testSubmitApplicationEventValidation() throws Exception {
 
         PartyDetails fl401Applicant = PartyDetails.builder()
             .canYouProvideEmailAddress(YesOrNo.No)
@@ -246,7 +245,7 @@ public class FL401SubmitApplicationControllerTest {
     }
 
     @Test
-    public void testSubmitApplicationEventValidationMandatoryNotDone() throws Exception {
+    void testSubmitApplicationEventValidationMandatoryNotDone() throws Exception {
 
         PartyDetails fl401Applicant = PartyDetails.builder()
             .canYouProvideEmailAddress(YesOrNo.No)
@@ -290,13 +289,15 @@ public class FL401SubmitApplicationControllerTest {
         );
         verify(fl401StatementOfTruthAndSubmitChecker, times(1)).hasMandatoryCompleted(caseData);
         Assertions.assertEquals(1, callbackResponseTest.getErrors().size());
-        Assertions.assertEquals("Statement of truth and submit is not allowed for this case unless "
-                                    + "you finish all the mandatory events", callbackResponseTest.getErrors().get(0));
+        Assertions.assertEquals(
+            "Statement of truth and submit is not allowed for this case unless "
+                + "you finish all the mandatory events", callbackResponseTest.getErrors().getFirst()
+        );
 
     }
 
     @Test
-    public void testCourtNameAndEmailAddressReturnedWhileFamilyEmailAddressReturned_WithBothOrders() throws Exception {
+    void testCourtNameAndEmailAddressReturnedWhileFamilyEmailAddressReturned_WithBothOrders() throws Exception {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -399,7 +400,7 @@ public class FL401SubmitApplicationControllerTest {
     }
 
     @Test
-    public void testFl401SendApplicationNotification() throws Exception {
+    void testFl401SendApplicationNotification() throws Exception {
 
         PartyDetails fl401Applicant = PartyDetails.builder()
             .canYouProvideEmailAddress(YesOrNo.No)
@@ -436,7 +437,7 @@ public class FL401SubmitApplicationControllerTest {
     }
 
     @Test
-    public void testExceptionForFl401SubmitApplicationValidation() throws Exception {
+    void testExceptionForFl401SubmitApplicationValidation() throws Exception {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
@@ -448,18 +449,23 @@ public class FL401SubmitApplicationControllerTest {
                              .build())
             .build();
 
-        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            fl401SubmitApplicationController.fl401SubmitApplicationValidation(
-                authToken,
-                s2sToken,
-                callbackRequest
-            );
-        }, RuntimeException.class, "Invalid Client");
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+
+        RuntimeException ex = assertThrows(
+            RuntimeException.class, () -> {
+                fl401SubmitApplicationController.fl401SubmitApplicationValidation(
+                    authToken,
+                    s2sToken,
+                    callbackRequest
+                );
+            }
+        );
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testExceptionForFl401GenerateDocumentSubmitApplication() throws Exception {
+    void testExceptionForFl401GenerateDocumentSubmitApplication() throws Exception {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
@@ -471,18 +477,23 @@ public class FL401SubmitApplicationControllerTest {
                              .build())
             .build();
 
-        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            fl401SubmitApplicationController.fl401GenerateDocumentSubmitApplication(
-                authToken,
-                s2sToken,
-                callbackRequest
-            );
-        }, RuntimeException.class, "Invalid Client");
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+
+        RuntimeException ex = assertThrows(
+            RuntimeException.class, () -> {
+                fl401SubmitApplicationController.fl401GenerateDocumentSubmitApplication(
+                    authToken,
+                    s2sToken,
+                    callbackRequest
+                );
+            }
+        );
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testExceptionForFl401SendApplicationNotification() throws Exception {
+    void testExceptionForFl401SendApplicationNotification() throws Exception {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
@@ -494,19 +505,18 @@ public class FL401SubmitApplicationControllerTest {
                              .build())
             .build();
 
-        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            fl401SubmitApplicationController.fl401SendApplicationNotification(
-                authToken,
-                s2sToken,
-                callbackRequest
-            );
-        }, RuntimeException.class, "Invalid Client");
-    }
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
 
-    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
-                                                                 String expectedMessage) {
-        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
-        assertEquals(expectedMessage, exception.getMessage());
+        RuntimeException ex = assertThrows(
+            RuntimeException.class, () -> {
+                fl401SubmitApplicationController.fl401SendApplicationNotification(
+                    authToken,
+                    s2sToken,
+                    callbackRequest
+                );
+            }
+        );
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 }

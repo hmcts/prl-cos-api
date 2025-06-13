@@ -35,7 +35,7 @@ import static uk.gov.hmcts.reform.prl.services.LocationRefDataService.MIDLANDS;
 import static uk.gov.hmcts.reform.prl.services.LocationRefDataService.SCOTLAND;
 
 @ExtendWith(MockitoExtension.class)
-public class LocationRefDataServiceTest {
+class LocationRefDataServiceTest {
 
 
     @InjectMocks
@@ -51,7 +51,7 @@ public class LocationRefDataServiceTest {
     private AuthTokenGenerator authTokenGenerator;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         when(authTokenGenerator.generate()).thenReturn("");
         ReflectionTestUtils.setField(locationRefDataService,"courtsToFilter", "1:email,2:email,3:email,4:email");
         ReflectionTestUtils.setField(locationRefDataService,"daCourtsToFilter", "1:email,2:email,3:email,4:email");
@@ -59,7 +59,7 @@ public class LocationRefDataServiceTest {
     }
 
     @Test
-    public void testgetCourtDetailsWithNullCourtDetails() {
+    void testgetCourtDetailsWithNullCourtDetails() {
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
             .thenReturn(null);
         List<DynamicListElement> courtLocations = locationRefDataService.getCourtLocations("test");
@@ -67,7 +67,7 @@ public class LocationRefDataServiceTest {
     }
 
     @Test
-    public void testDaGetCourtDetailsWithNullCourtDetails() {
+    void testDaGetCourtDetailsWithNullCourtDetails() {
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
             .thenReturn(null);
         List<DynamicListElement> courtLocations = locationRefDataService.getDaCourtLocations("test");
@@ -75,23 +75,23 @@ public class LocationRefDataServiceTest {
     }
 
     @Test
-    public void testgetCourtDetailsWithException() {
+    void testgetCourtDetailsWithException() {
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
             .thenThrow(FeignException.class);
         List<DynamicListElement> courtLocations = locationRefDataService.getCourtLocations("test");
-        assertNull(courtLocations.get(0).getCode());
+        assertNull(courtLocations.getFirst().getCode());
     }
 
     @Test
-    public void testDaGetCourtDetailsWithException() {
+    void testDaGetCourtDetailsWithException() {
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
             .thenThrow(NullPointerException.class);
         List<DynamicListElement> courtLocations = locationRefDataService.getDaCourtLocations("test");
-        assertNull(courtLocations.get(0).getCode());
+        assertNull(courtLocations.getFirst().getCode());
     }
 
     @Test
-    public void testgetCourtDetailsWithData() {
+    void testgetCourtDetailsWithData() {
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
             .thenReturn(CourtDetails.builder()
                             .courtVenues(List.of(CourtVenue.builder().region("r").regionId("id").courtName("1")
@@ -104,7 +104,7 @@ public class LocationRefDataServiceTest {
     }
 
     @Test
-    public void testgetCourtDetailsWithDataNotMatched() {
+    void testgetCourtDetailsWithDataNotMatched() {
         ReflectionTestUtils.setField(locationRefDataService,"courtsToFilter", "email");
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
             .thenReturn(CourtDetails.builder()
@@ -119,7 +119,7 @@ public class LocationRefDataServiceTest {
 
 
     @Test
-    public void testDaGetCourtDetailsWithData() {
+    void testDaGetCourtDetailsWithData() {
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
             .thenReturn(CourtDetails.builder()
                             .courtVenues(List.of(CourtVenue.builder().region("r").regionId("id").courtName("1")
@@ -132,7 +132,7 @@ public class LocationRefDataServiceTest {
     }
 
     @Test
-    public void testDaGetCourtDetailsWithDataNotMatched() {
+    void testDaGetCourtDetailsWithDataNotMatched() {
         ReflectionTestUtils.setField(locationRefDataService,"daCourtsToFilter", "email");
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
             .thenReturn(CourtDetails.builder()
@@ -146,7 +146,7 @@ public class LocationRefDataServiceTest {
     }
 
     @Test
-    public void testgetCourtDetailsWithNoData() {
+    void testgetCourtDetailsWithNoData() {
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
             .thenReturn(CourtDetails.builder()
                             .courtVenues(List.of(CourtVenue.builder().region("r").regionId("id").courtName("1")
@@ -160,7 +160,7 @@ public class LocationRefDataServiceTest {
     }
 
     @Test
-    public void testDaGetCourtDetailsWithNoData() {
+    void testDaGetCourtDetailsWithNoData() {
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
             .thenReturn(CourtDetails.builder()
                             .courtVenues(List.of(CourtVenue.builder().region("r").regionId("id").courtName("1")
@@ -174,7 +174,7 @@ public class LocationRefDataServiceTest {
     }
 
     @Test
-    public void testGetCourtDetailsFromEpimmsId() {
+    void testGetCourtDetailsFromEpimmsId() {
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
             .thenReturn(CourtDetails.builder()
                             .courtVenues(List.of(CourtVenue.builder().region("r").regionId("id").courtName("1")
@@ -187,7 +187,7 @@ public class LocationRefDataServiceTest {
     }
 
     @Test
-    public void testCourtListWithoutEmail() {
+    void testCourtListWithoutEmail() {
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
             .thenReturn(CourtDetails.builder()
                             .courtVenues(List.of(CourtVenue.builder().region("r").regionId("id").courtName("1")
@@ -201,7 +201,7 @@ public class LocationRefDataServiceTest {
     }
 
     @Test
-    public void testFilteredCourtEmail() {
+    void testFilteredCourtEmail() {
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
             .thenReturn(CourtDetails.builder()
                             .courtVenues(List.of(CourtVenue.builder().region("r").regionId("id").courtName("1")
@@ -215,7 +215,7 @@ public class LocationRefDataServiceTest {
     }
 
     @Test
-    public void testFilteredDaCourtEmail() {
+    void testFilteredDaCourtEmail() {
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
             .thenReturn(CourtDetails.builder()
                             .courtVenues(List.of(CourtVenue.builder().region("r").regionId("id").courtName("1")
@@ -229,7 +229,7 @@ public class LocationRefDataServiceTest {
     }
 
     @Test
-    public void testFilteredCourtEmailWithEmptyList() {
+    void testFilteredCourtEmailWithEmptyList() {
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
             .thenThrow(NullPointerException.class);
         ReflectionTestUtils.setField(locationRefDataService,"courtsToFilter", "1:email,2,3:email,4:email");
@@ -238,7 +238,7 @@ public class LocationRefDataServiceTest {
     }
 
     @Test
-    public void testFilteredDaCourtEmailWithEmptyList() {
+    void testFilteredDaCourtEmailWithEmptyList() {
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
             .thenThrow(NullPointerException.class);
         ReflectionTestUtils.setField(locationRefDataService,"courtsToFilter", "1:email,2,3:email,4:email");
@@ -247,7 +247,7 @@ public class LocationRefDataServiceTest {
     }
 
     @Test
-    public void testFilteredDaCourtEmailWithEmptyListWhenCourtListIsNull() {
+    void testFilteredDaCourtEmailWithEmptyListWhenCourtListIsNull() {
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
             .thenReturn(null);
         ReflectionTestUtils.setField(locationRefDataService,"courtsToFilter", "1:email,2,3:email,4:email");
@@ -256,7 +256,7 @@ public class LocationRefDataServiceTest {
     }
 
     @Test
-    public void testGetCourtDetailsFromEpimmsIdEmptyCourtVenue() {
+    void testGetCourtDetailsFromEpimmsIdEmptyCourtVenue() {
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
             .thenReturn(CourtDetails.builder()
                             .build());
@@ -265,7 +265,7 @@ public class LocationRefDataServiceTest {
     }
 
     @Test
-    public void testGetCourtDetailsFromEpimmsIdForScotland() {
+    void testGetCourtDetailsFromEpimmsIdForScotland() {
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
             .thenReturn(CourtDetails.builder()
                             .courtVenues(List.of(CourtVenue.builder().region(SCOTLAND).regionId("id").courtName("1")
@@ -278,7 +278,7 @@ public class LocationRefDataServiceTest {
     }
 
     @Test
-    public void testDefaultCourtForCA() {
+    void testDefaultCourtForCA() {
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
             .thenReturn(CourtDetails.builder()
                             .courtVenues(List.of(CourtVenue.builder().region(MIDLANDS).regionId("id").courtName("Stoke")
@@ -294,7 +294,7 @@ public class LocationRefDataServiceTest {
     }
 
     @Test
-    public void returnNullWhenDefaultCourtForCaIsNotConfigured() {
+    void returnNullWhenDefaultCourtForCaIsNotConfigured() {
         CaseManagementLocation defaultCaseManagementLocation = CaseManagementLocation.builder()
             .region(C100_DEFAULT_REGION_ID)
             .baseLocation(C100_DEFAULT_BASE_LOCATION_ID).regionName(C100_DEFAULT_REGION_NAME)
@@ -305,7 +305,7 @@ public class LocationRefDataServiceTest {
     }
 
     @Test
-    public void returnNullWhenCourtVenueForCaIsNotConfigured() {
+    void returnNullWhenCourtVenueForCaIsNotConfigured() {
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
             .thenReturn(CourtDetails.builder()
                             .courtVenues(List.of())

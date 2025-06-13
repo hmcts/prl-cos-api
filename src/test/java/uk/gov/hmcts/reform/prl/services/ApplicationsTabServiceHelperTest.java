@@ -35,16 +35,16 @@ import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 
 @ExtendWith(MockitoExtension.class)
-public class ApplicationsTabServiceHelperTest {
+class ApplicationsTabServiceHelperTest {
 
     @InjectMocks
-    ApplicationsTabServiceHelper applicationsTabService;
+    private ApplicationsTabServiceHelper applicationsTabService;
 
     @Mock
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
     @Test
-    public void testGetChildRevisedDetails() {
+    void testGetChildRevisedDetails() {
 
         ChildDetailsRevised child = ChildDetailsRevised.builder()
             .firstName("Test")
@@ -68,7 +68,7 @@ public class ApplicationsTabServiceHelperTest {
     }
 
     @Test
-    public void testGetChildRevisedDetailsWithoutChildDetails() {
+    void testGetChildRevisedDetailsWithoutChildDetails() {
 
         CaseData caseData = CaseData.builder()
             .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
@@ -79,7 +79,7 @@ public class ApplicationsTabServiceHelperTest {
     }
 
     @Test
-    public void testGetChildDetailsRevised() {
+    void testGetChildDetailsRevised() {
 
         ChildDetailsRevised child = ChildDetailsRevised.builder()
             .firstName("Test")
@@ -94,11 +94,11 @@ public class ApplicationsTabServiceHelperTest {
     }
 
     @Test
-    public void testGetChildAndApplicantsRelationTable() {
+    void testGetChildAndApplicantsRelationTable() {
         ChildrenAndApplicantRelation child = ChildrenAndApplicantRelation.builder()
             .applicantFullName("Test")
             .childFullName("Name").childAndApplicantRelation(RelationshipsEnum.other)
-            .childAndApplicantRelationOtherDetails("dfdsf")
+            .childAndApplicantRelationOtherDetails("family")
             .childLivesWith(YesOrNo.Yes)
             .build();
 
@@ -114,7 +114,7 @@ public class ApplicationsTabServiceHelperTest {
     }
 
     @Test
-    public void testGetChildAndApplicantsRelationTableWithoutChildRelation() {
+    void testGetChildAndApplicantsRelationTableWithoutChildRelation() {
         CaseData caseData = CaseData.builder()
             .childrenNotPartInTheCaseYesNo(YesOrNo.Yes)
                 .relations(Relations.builder().build())
@@ -125,7 +125,7 @@ public class ApplicationsTabServiceHelperTest {
 
 
     @Test
-    public void testGetChildAndRespondentRelationsTable() {
+    void testGetChildAndRespondentRelationsTable() {
         ChildrenAndRespondentRelation child = ChildrenAndRespondentRelation.builder()
             .respondentFullName("Test")
             .childFullName("Name").childAndRespondentRelation(RelationshipsEnum.other)
@@ -145,7 +145,7 @@ public class ApplicationsTabServiceHelperTest {
 
 
     @Test
-    public void testGetChildAndRespondentRelationsTableWithoutList() {
+    void testGetChildAndRespondentRelationsTableWithoutList() {
 
         CaseData caseData = CaseData.builder()
             .childrenNotPartInTheCaseYesNo(YesOrNo.Yes)
@@ -156,7 +156,7 @@ public class ApplicationsTabServiceHelperTest {
 
 
     @Test
-    public void testGetChildAndOtherPeopleRelationsTable() {
+    void testGetChildAndOtherPeopleRelationsTable() {
         ChildrenAndOtherPeopleRelation child = ChildrenAndOtherPeopleRelation.builder()
             .otherPeopleFullName("Test")
             .childFullName("Name").childAndOtherPeopleRelation(RelationshipsEnum.other)
@@ -188,7 +188,7 @@ public class ApplicationsTabServiceHelperTest {
     }
 
     @Test
-    public void testGetChildAndOtherPeopleRelationsTable1() {
+    void testGetChildAndOtherPeopleRelationsTable1() {
         ChildrenAndOtherPeopleRelation child = ChildrenAndOtherPeopleRelation.builder()
             .otherPeopleFullName("Test")
             .childFullName("Name").childAndOtherPeopleRelation(RelationshipsEnum.other)
@@ -222,7 +222,7 @@ public class ApplicationsTabServiceHelperTest {
 
 
     @Test
-    public void testGetChildAndOtherPeopleRelationsTableWithoutList() {
+    void testGetChildAndOtherPeopleRelationsTableWithoutList() {
 
         CaseData caseData = CaseData.builder()
                 .relations(Relations.builder().build())
@@ -232,7 +232,7 @@ public class ApplicationsTabServiceHelperTest {
 
 
     @Test
-    public void testGetOtherChildNotInTheCaseTable() {
+    void testGetOtherChildNotInTheCaseTable() {
         OtherChildrenNotInTheCase child = OtherChildrenNotInTheCase.builder()
             .firstName("Test")
             .lastName("Name")
@@ -253,7 +253,7 @@ public class ApplicationsTabServiceHelperTest {
     }
 
     @Test
-    public void testGetOtherChildNotInTheCaseTableNo() {
+    void testGetOtherChildNotInTheCaseTableNo() {
         CaseData caseData = CaseData.builder()
             .childrenNotPartInTheCaseYesNo(YesOrNo.No)
             .build();
@@ -262,7 +262,7 @@ public class ApplicationsTabServiceHelperTest {
 
 
     @Test
-    public void testGetOtherChildNotInTheCaseTableWithoutList() {
+    void testGetOtherChildNotInTheCaseTableWithoutList() {
         CaseData caseData = CaseData.builder()
             .childrenNotPartInTheCaseYesNo(YesOrNo.Yes)
             .build();
@@ -270,7 +270,7 @@ public class ApplicationsTabServiceHelperTest {
     }
 
     @Test
-    public void testGetOtherPeopleInTheCaseRevisedTable() {
+    void testGetOtherPeopleInTheCaseRevisedTable() {
 
         PartyDetails partyDetails = PartyDetails.builder()
             .firstName("Test")
@@ -289,7 +289,7 @@ public class ApplicationsTabServiceHelperTest {
             .dxNumber("123456")
             .gender(Gender.female)
             .lastName("lastName")
-            .previousName("testPreviousname")
+            .previousName("testPreviousName")
             .isDateOfBirthKnown(YesOrNo.Yes)
             .isCurrentAddressKnown(YesOrNo.No)
             .build();
@@ -304,7 +304,7 @@ public class ApplicationsTabServiceHelperTest {
     }
 
     @Test
-    public void testGetOtherPeopleWhenOtherPartyInTheCaseRevisedIsNotEmpty() {
+    void testGetOtherPeopleWhenOtherPartyInTheCaseRevisedIsNotEmpty() {
 
         PartyDetails partyDetails = PartyDetails.builder()
             .firstName("Test")
@@ -323,7 +323,7 @@ public class ApplicationsTabServiceHelperTest {
             .dxNumber("123456")
             .gender(Gender.female)
             .lastName("lastName")
-            .previousName("testPreviousname")
+            .previousName("testPreviousName")
             .isDateOfBirthKnown(YesOrNo.Yes)
             .isCurrentAddressKnown(YesOrNo.No)
             .build();
@@ -347,7 +347,7 @@ public class ApplicationsTabServiceHelperTest {
             .addressLivedLessThan5YearsDetails("Test")
             .gender("Female")
             .lastName("lastName")
-            .previousName("testPreviousname")
+            .previousName("testPreviousName")
             .isDateOfBirthKnown(YesOrNo.Yes)
             .isCurrentAddressKnown(YesOrNo.No)
             .build();
@@ -366,7 +366,7 @@ public class ApplicationsTabServiceHelperTest {
     }
 
     @Test
-    public void testGetOtherPeopleWhenOtherPartyInTheCaseRevisedIsNotEmptyAndGenderIsNotAdded() {
+    void testGetOtherPeopleWhenOtherPartyInTheCaseRevisedIsNotEmptyAndGenderIsNotAdded() {
 
         PartyDetails partyDetails = PartyDetails.builder().firstName("Test").build();
         Element<PartyDetails> partyWrapped = Element.<PartyDetails>builder().value(partyDetails).build();
@@ -387,7 +387,7 @@ public class ApplicationsTabServiceHelperTest {
     }
 
     @Test
-    public void testGetOtherPeopleInTheCaseRevisedTableWithoutList() {
+    void testGetOtherPeopleInTheCaseRevisedTableWithoutList() {
 
         CaseData caseData = CaseData.builder()
             .build();
@@ -397,7 +397,7 @@ public class ApplicationsTabServiceHelperTest {
 
 
     @Test
-    public void testMaskingPartyDetails() {
+    void testMaskingPartyDetails() {
 
         Address address = Address.builder()
             .addressLine1("55 Test Street")

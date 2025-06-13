@@ -23,7 +23,7 @@ import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.Gender.other;
 
 @ExtendWith(MockitoExtension.class)
-public class OtherChildrenNotPartOfTheApplicationCheckerTest {
+class OtherChildrenNotPartOfTheApplicationCheckerTest {
 
     @Mock
     TaskErrorService taskErrorService;
@@ -33,14 +33,14 @@ public class OtherChildrenNotPartOfTheApplicationCheckerTest {
     OtherChildrenNotPartOfTheApplicationChecker childChecker;
 
     @Test
-    public void whenNoCaseDataPresentThenIsStartedReturnsFalse() {
+    void whenNoCaseDataPresentThenIsStartedReturnsFalse() {
         CaseData caseData = CaseData.builder().build();
 
-        assertTrue(!childChecker.isStarted(caseData));
+        assertFalse(childChecker.isStarted(caseData));
     }
 
     @Test
-    public void whenEmptyChildDataPresentThenIsStartedReturnsFalse() {
+    void whenEmptyChildDataPresentThenIsStartedReturnsFalse() {
         OtherChildrenNotInTheCase child = OtherChildrenNotInTheCase.builder().build();
         Element<OtherChildrenNotInTheCase> wrappedChildren =
             Element.<OtherChildrenNotInTheCase>builder().value(child).build();
@@ -48,11 +48,11 @@ public class OtherChildrenNotPartOfTheApplicationCheckerTest {
 
         CaseData caseData = CaseData.builder().childrenNotInTheCase(listOfChildren).build();
 
-        assertTrue(!childChecker.isStarted(caseData));
+        assertFalse(childChecker.isStarted(caseData));
     }
 
     @Test
-    public void whenSomeChildDataPresentThenIsStartedReturnsTrue() {
+    void whenSomeChildDataPresentThenIsStartedReturnsTrue() {
 
         CaseData caseData = CaseData.builder()
             .childrenNotPartInTheCaseYesNo(YesOrNo.Yes)
@@ -62,7 +62,7 @@ public class OtherChildrenNotPartOfTheApplicationCheckerTest {
     }
 
     @Test
-    public void whenSomeChildDataPresentThenIsStartedReturnsFalse() {
+    void whenSomeChildDataPresentThenIsStartedReturnsFalse() {
 
         CaseData caseData = CaseData.builder()
             .childrenNotPartInTheCaseYesNo(YesOrNo.No)
@@ -72,25 +72,25 @@ public class OtherChildrenNotPartOfTheApplicationCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataPresentThenIsFinishedReturnsFalse() {
+    void whenNoCaseDataPresentThenIsFinishedReturnsFalse() {
         CaseData caseData = CaseData.builder().build();
 
-        assertTrue(!childChecker.isFinished(caseData));
+        assertFalse(childChecker.isFinished(caseData));
     }
 
     @Test
-    public void whenSomeChildDataPresentThenIsFinishedReturnsFalse() {
+    void whenSomeChildDataPresentThenIsFinishedReturnsFalse() {
         ChildDetailsRevised child = ChildDetailsRevised.builder().firstName("Test").lastName("Name").build();
         Element<ChildDetailsRevised> wrappedChildren = Element.<ChildDetailsRevised>builder().value(child).build();
         List<Element<ChildDetailsRevised>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder().newChildDetails(listOfChildren).build();
 
-        assertTrue(!childChecker.isFinished(caseData));
+        assertFalse(childChecker.isFinished(caseData));
     }
 
     @Test
-    public void whenAllChildDataPresentThenIsFinishedReturnsTrue() {
+    void whenAllChildDataPresentThenIsFinishedReturnsTrue() {
         OtherChildrenNotInTheCase child = OtherChildrenNotInTheCase.builder()
             .firstName("Test")
             .lastName("Name")
@@ -114,7 +114,7 @@ public class OtherChildrenNotPartOfTheApplicationCheckerTest {
 
 
     @Test
-    public void whenAllChildDataPresentThenIsFinishedReturnsTrueWithisDateOfBirthKnown() {
+    void whenAllChildDataPresentThenIsFinishedReturnsTrueWithisDateOfBirthKnown() {
         OtherChildrenNotInTheCase child = OtherChildrenNotInTheCase.builder()
             .firstName("Test")
             .lastName("Name")
@@ -138,7 +138,7 @@ public class OtherChildrenNotPartOfTheApplicationCheckerTest {
 
 
     @Test
-    public void whenAllChildDataPresentThenIsFinishedReturnsFalse() {
+    void whenAllChildDataPresentThenIsFinishedReturnsFalse() {
         OtherChildrenNotInTheCase child = OtherChildrenNotInTheCase.builder()
             .firstName("Test")
             .isDateOfBirthKnown(YesOrNo.No)
@@ -156,12 +156,12 @@ public class OtherChildrenNotPartOfTheApplicationCheckerTest {
             .build();
 
 
-        assertTrue(!childChecker.isFinished(caseData));
+        assertFalse(childChecker.isFinished(caseData));
     }
 
 
     @Test
-    public void whenAllChildDataPresentThenIsFinishedReturnsFalseWithNull() {
+    void whenAllChildDataPresentThenIsFinishedReturnsFalseWithNull() {
 
         CaseData caseData = CaseData.builder()
             .childrenNotInTheCase(null)
@@ -171,17 +171,17 @@ public class OtherChildrenNotPartOfTheApplicationCheckerTest {
     }
 
     @Test
-    public void whenAllChildDataPresentThenIsFinishedReturnsFalseWithNullYes() {
+    void whenAllChildDataPresentThenIsFinishedReturnsFalseWithNullYes() {
 
         CaseData caseData = CaseData.builder()
             .childrenNotInTheCase(null)
             .childrenNotPartInTheCaseYesNo(null)
             .build();
-        assertTrue(!childChecker.isFinished(caseData));
+        assertFalse(childChecker.isFinished(caseData));
     }
 
     @Test
-    public void whenvalidateOtherChildrenNotInTheCaseReturnsTrue() {
+    void whenvalidateOtherChildrenNotInTheCaseReturnsTrue() {
         OtherChildrenNotInTheCase child = OtherChildrenNotInTheCase.builder()
             .firstName("Test")
             .lastName("Name")
@@ -201,7 +201,7 @@ public class OtherChildrenNotPartOfTheApplicationCheckerTest {
 
 
     @Test
-    public void whenAllChildDataPresentThenIsFinishedReturnsTrueWithGenderOther() {
+    void whenAllChildDataPresentThenIsFinishedReturnsTrueWithGenderOther() {
         OtherChildrenNotInTheCase child = OtherChildrenNotInTheCase.builder()
             .firstName("Test")
             .lastName("Name")
@@ -222,14 +222,14 @@ public class OtherChildrenNotPartOfTheApplicationCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataPresentThenHasMandatoryCompletedReturnsTrue() {
+    void whenNoCaseDataPresentThenHasMandatoryCompletedReturnsTrue() {
         CaseData caseData = CaseData.builder().build();
-        assertTrue(!childChecker.hasMandatoryCompleted(caseData));
+        assertFalse(childChecker.hasMandatoryCompleted(caseData));
     }
 
 
     @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+    void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
         assertNotNull(childChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

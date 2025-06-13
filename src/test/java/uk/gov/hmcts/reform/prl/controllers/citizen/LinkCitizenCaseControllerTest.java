@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,11 +20,14 @@ import uk.gov.hmcts.reform.prl.services.citizen.LinkCitizenCaseService;
 
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class LinkCitizenCaseControllerTest {
+class LinkCitizenCaseControllerTest {
 
     @InjectMocks
     private LinkCitizenCaseController linkCitizenCaseController;
@@ -58,7 +60,7 @@ public class LinkCitizenCaseControllerTest {
     Hearings hearings;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         accessCodeRequest = accessCodeRequest.toBuilder()
             .caseId("123")
             .accessCode("123")
@@ -76,7 +78,7 @@ public class LinkCitizenCaseControllerTest {
     }
 
     @Test
-    public void testLinkCitizenToCase() {
+    void testLinkCitizenToCase() {
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(linkCitizenCaseService.linkCitizenToCase(authToken,
             accessCodeRequest.getCaseId(),
@@ -84,25 +86,29 @@ public class LinkCitizenCaseControllerTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
 
         CaseData caseData = linkCitizenCaseController.linkCitizenToCase(authToken, s2sToken, accessCodeRequest);
-        Assert.assertEquals(1223, caseData.getId());
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void testLinkCitizenToCaseCantLink() {
-        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
-
-        linkCitizenCaseController.linkCitizenToCase(authToken, s2sToken, accessCodeRequest);
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void testLinkCitizenToCaseInvalidClient() {
-        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-
-        linkCitizenCaseController.linkCitizenToCase(authToken, s2sToken, accessCodeRequest);
+        assertEquals(1223, caseData.getId());
     }
 
     @Test
-    public void testLinkCitizenToCaseWithHearing() {
+    void testLinkCitizenToCaseCantLink() {
+        assertThrows(RuntimeException.class, () -> {
+            when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+
+            linkCitizenCaseController.linkCitizenToCase(authToken, s2sToken, accessCodeRequest);
+        });
+    }
+
+    @Test
+    void testLinkCitizenToCaseInvalidClient() {
+        assertThrows(RuntimeException.class, () -> {
+            when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+
+            linkCitizenCaseController.linkCitizenToCase(authToken, s2sToken, accessCodeRequest);
+        });
+    }
+
+    @Test
+    void testLinkCitizenToCaseWithHearing() {
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(linkCitizenCaseService.linkCitizenToCase(authToken,
             accessCodeRequest.getCaseId(),
@@ -114,11 +120,11 @@ public class LinkCitizenCaseControllerTest {
 
         CaseDataWithHearingResponse caseData = linkCitizenCaseController
             .linkCitizenToCaseWithHearing(authToken, s2sToken, accessCodeRequestWithHearing);
-        Assert.assertEquals(hearings, caseData.getHearings());
+        assertEquals(hearings, caseData.getHearings());
     }
 
     @Test
-    public void testLinkCitizenToCaseWithHearingButNoHearingNeeded() {
+    void testLinkCitizenToCaseWithHearingButNoHearingNeeded() {
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(linkCitizenCaseService.linkCitizenToCase(authToken,
             accessCodeRequest.getCaseId(),
@@ -130,37 +136,43 @@ public class LinkCitizenCaseControllerTest {
 
         CaseDataWithHearingResponse caseData = linkCitizenCaseController
             .linkCitizenToCaseWithHearing(authToken, s2sToken, accessCodeRequest);
-        Assert.assertNull(caseData.getHearings());
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void testLinkCitizenToCaseWithhearingsCantLink() {
-        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
-
-        linkCitizenCaseController.linkCitizenToCaseWithHearing(authToken, s2sToken, accessCodeRequestWithHearing);
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void testLinkCitizenToCaseWithhearingsInvalidClient() {
-        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-
-        linkCitizenCaseController.linkCitizenToCaseWithHearing(authToken, s2sToken, accessCodeRequestWithHearing);
+        assertNull(caseData.getHearings());
     }
 
     @Test
-    public void testValidateAccessCode() {
+    void testLinkCitizenToCaseWithhearingsCantLink() {
+        assertThrows(RuntimeException.class, () -> {
+            when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+
+            linkCitizenCaseController.linkCitizenToCaseWithHearing(authToken, s2sToken, accessCodeRequestWithHearing);
+        });
+    }
+
+    @Test
+    void testLinkCitizenToCaseWithhearingsInvalidClient() {
+        assertThrows(RuntimeException.class, () -> {
+            when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+
+            linkCitizenCaseController.linkCitizenToCaseWithHearing(authToken, s2sToken, accessCodeRequestWithHearing);
+        });
+    }
+
+    @Test
+    void testValidateAccessCode() {
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
 
         when(linkCitizenCaseService.validateAccessCode(accessCodeRequest.getCaseId(), accessCodeRequest.getAccessCode()))
             .thenReturn("test");
         String accessCode = linkCitizenCaseController.validateAccessCode(authToken, s2sToken, accessCodeRequest);
-        Assert.assertEquals("test", accessCode);
+        assertEquals("test", accessCode);
     }
 
-    @Test(expected = RuntimeException.class)
-    public void testValidateAccessCodeInvalidClient() {
-        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+    @Test
+    void testValidateAccessCodeInvalidClient() {
+        assertThrows(RuntimeException.class, () -> {
+            when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
 
-        linkCitizenCaseController.validateAccessCode(authToken, s2sToken, accessCodeRequest);
+            linkCitizenCaseController.validateAccessCode(authToken, s2sToken, accessCodeRequest);
+        });
     }
 }

@@ -11,61 +11,77 @@ import uk.gov.hmcts.reform.prl.models.complextypes.OtherChildrenNotInTheCase;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
 
-import javax.json.JsonValue;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import javax.json.JsonValue;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 
 @ExtendWith(MockitoExtension.class)
-public class C100JsonMapperTest {
+class C100JsonMapperTest {
 
     @InjectMocks
-    C100JsonMapper c100JsonMapper;
-    @Mock
-    CombinedMapper combinedMapper;
-    @Mock
-    ChildrenMapper childrenMapper;
+    private C100JsonMapper c100JsonMapper;
 
     @Mock
-    ChildDetailsRevisedMapper childDetailsRevisedMapper;
-    @Mock
-    MiamMapper miamMapper;
-    @Mock
-    TypeOfApplicationMapper typeOfApplicationMapper;
-    @Mock
-    HearingUrgencyMapper hearingUrgencyMapper;
-    @Mock
-    AllegationsOfHarmMapper allegationOfHarmMapper;
-    @Mock
-    OtherPeopleInTheCaseMapper otherPeopleInTheCaseMapper;
-    @Mock
-    OtherProceedingsMapper otherproceedingsMapper;
-    @Mock
-    OtherChildrenNotInTheCaseMapper otherChildrenNotInTheCaseMapper;
-    @Mock
-    OtherPeopleInTheCaseRevisedMapper otherPeopleInTheCaseRevisedMapper;
-    @Mock
-    AttendingTheHearingMapper attendingTheHearingMapper;
-    @Mock
-    InternationalElementMapper internationalElementMapper;
-    @Mock
-    LitigationCapacityMapper litigationCapacityMapper;
-    @Mock
-    ChildrenAndApplicantsMapper childrenAndApplicantsMapper;
-    @Mock
-    ChildrenAndRespondentsMapper childrenAndRespondentsMapper;
-    @Mock
-    ChildrenAndOtherPeopleMapper childrenAndOtherPeopleMapper;
+    private CombinedMapper combinedMapper;
 
     @Mock
-    AllegationsOfHarmRevisedMapper allegationsOfHarmRevisedMapper;
+    private ChildrenMapper childrenMapper;
+
+    @Mock
+    private ChildDetailsRevisedMapper childDetailsRevisedMapper;
+
+    @Mock
+    private MiamMapper miamMapper;
+
+    @Mock
+    private TypeOfApplicationMapper typeOfApplicationMapper;
+
+    @Mock
+    private HearingUrgencyMapper hearingUrgencyMapper;
+
+    @Mock
+    private AllegationsOfHarmMapper allegationOfHarmMapper;
+
+    @Mock
+    private OtherPeopleInTheCaseMapper otherPeopleInTheCaseMapper;
+
+    @Mock
+    private  OtherProceedingsMapper otherproceedingsMapper;
+
+    @Mock
+    private  OtherChildrenNotInTheCaseMapper otherChildrenNotInTheCaseMapper;
+
+    @Mock
+    private OtherPeopleInTheCaseRevisedMapper otherPeopleInTheCaseRevisedMapper;
+
+    @Mock
+    private AttendingTheHearingMapper attendingTheHearingMapper;
+
+    @Mock
+    private InternationalElementMapper internationalElementMapper;
+
+    @Mock
+    private LitigationCapacityMapper litigationCapacityMapper;
+
+    @Mock
+    private ChildrenAndApplicantsMapper childrenAndApplicantsMapper;
+
+    @Mock
+    private ChildrenAndRespondentsMapper childrenAndRespondentsMapper;
+
+    @Mock
+    private ChildrenAndOtherPeopleMapper childrenAndOtherPeopleMapper;
+
+    @Mock
+    private AllegationsOfHarmRevisedMapper allegationsOfHarmRevisedMapper;
 
     @Test
-    public void testC100JsonMapperWithSomeFields() {
+    void testC100JsonMapperWithSomeFields() {
         OtherChildrenNotInTheCase child = OtherChildrenNotInTheCase.builder().firstName("Lewis").lastName("Christine")
             .dateOfBirth(LocalDate.of(1990, 8, 1))
             .gender(Gender.male).otherGender("").build();
@@ -81,16 +97,14 @@ public class C100JsonMapperTest {
     }
 
     @Test
-    public void testC100JsonMapperWithNullValuesInAllFields() {
+    void testC100JsonMapperWithNullValuesInAllFields() {
         CaseData caseData = CaseData.builder().build();
 
-        //when();
-        //when(objectMapper.convertValue(partyDetails, Applicant.class)).thenReturn(applicant);
         assertNotNull(c100JsonMapper.map(caseData));
     }
 
     @Test
-    public void testC100JsonMapperWithOtherChildrenNotInTheCase() {
+    void testC100JsonMapperWithOtherChildrenNotInTheCase() {
 
         OtherChildrenNotInTheCase childrenNotInTheCase = OtherChildrenNotInTheCase.builder()
             .firstName("Test")
@@ -111,7 +125,7 @@ public class C100JsonMapperTest {
 
 
     @Test
-    public void testC100JsonMapperForV2() {
+    void testC100JsonMapperForV2() {
 
         OtherChildrenNotInTheCase childrenNotInTheCase = OtherChildrenNotInTheCase.builder()
             .firstName("Test")

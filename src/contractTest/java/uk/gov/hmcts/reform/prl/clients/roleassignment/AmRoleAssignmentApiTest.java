@@ -15,13 +15,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.util.Assert;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.clients.idam.IdamApiConsumerApplication;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(PactConsumerTestExt.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -104,7 +105,7 @@ public class AmRoleAssignmentApiTest {
                                  "3"
             );
 
-        Assert.notNull(roleAssignmentResponse, "Api is returning role assignment response when actor id is given");
+        assertNotNull(roleAssignmentResponse, "Api is returning role assignment response when actor id is given");
     }
 
     @Test
@@ -115,6 +116,6 @@ public class AmRoleAssignmentApiTest {
                 RoleAssignmentRequest.roleAssignmentRequest().build()
             );
 
-        Assert.notNull(roleAssignmentResponse, "Api is returning role assignment response");
+        assertNotNull(roleAssignmentResponse, "Api is returning role assignment response");
     }
 }

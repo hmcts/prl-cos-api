@@ -56,7 +56,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-public class Fm5ReminderServiceTest {
+class Fm5ReminderServiceTest {
 
     private final String authToken = "authToken";
     private final String s2sAuthToken = "s2sAuthToken";
@@ -93,7 +93,7 @@ public class Fm5ReminderServiceTest {
     Fm5NotificationService fm5NotificationService;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         when(systemUserService.getSysUserToken()).thenReturn(authToken);
         when(authTokenGenerator.generate()).thenReturn(s2sAuthToken);
 
@@ -179,7 +179,7 @@ public class Fm5ReminderServiceTest {
     }
 
     @Test
-    public void testSendFm5ReminderNotificationsToBothParties() {
+    void testSendFm5ReminderNotificationsToBothParties() {
         fm5ReminderService.sendFm5ReminderNotifications(null);
 
         //verify
@@ -188,7 +188,7 @@ public class Fm5ReminderServiceTest {
     }
 
     @Test
-    public void testSendFm5ReminderNotificationsToApplicant() {
+    void testSendFm5ReminderNotificationsToApplicant() {
 
         caseData = caseData.toBuilder()
             .respondents(new ArrayList<>())
@@ -214,7 +214,7 @@ public class Fm5ReminderServiceTest {
     }
 
     @Test
-    public void testSendFm5ReminderNotificationsToRespondent() {
+    void testSendFm5ReminderNotificationsToRespondent() {
 
         caseData = caseData.toBuilder()
             .applicants(new ArrayList<>())
@@ -242,7 +242,7 @@ public class Fm5ReminderServiceTest {
 
 
     @Test
-    public void testSendFm5ReminderNotificationsToNonePartiesWhenC1AAvailable() {
+    void testSendFm5ReminderNotificationsToNonePartiesWhenC1AAvailable() {
 
         caseData = caseData.toBuilder()
             .c1ADocument(Document.builder().build())
@@ -272,7 +272,7 @@ public class Fm5ReminderServiceTest {
     }
 
     @Test
-    public void testSendFm5ReminderNotificationsToNonePartiesWhenDraftConsentOrderFileAvailable() {
+    void testSendFm5ReminderNotificationsToNonePartiesWhenDraftConsentOrderFileAvailable() {
 
         caseData = caseData.toBuilder()
             .draftConsentOrderFile(Document.builder().build())
@@ -302,7 +302,7 @@ public class Fm5ReminderServiceTest {
     }
 
     @Test
-    public void testSendFm5ReminderNotificationsToNonePartiesWhenMiamPolicyUpgradeDetailsAvailable() {
+    void testSendFm5ReminderNotificationsToNonePartiesWhenMiamPolicyUpgradeDetailsAvailable() {
 
         caseData = caseData.toBuilder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
@@ -335,7 +335,7 @@ public class Fm5ReminderServiceTest {
     }
 
     @Test
-    public void testSendFm5ReminderNotificationsToNonePartiesWhenReviewDocumentsDetailsAvailable() {
+    void testSendFm5ReminderNotificationsToNonePartiesWhenReviewDocumentsDetailsAvailable() {
 
         List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTabInitial = new ArrayList<>();
         List<Element<QuarantineLegalDoc>> courtStaffUploadDocListDocTabInitial = new ArrayList<>();
@@ -384,7 +384,7 @@ public class Fm5ReminderServiceTest {
     }
 
     @Test
-    public void testSendFm5ReminderNotificationsWithEmptyList() {
+    void testSendFm5ReminderNotificationsWithEmptyList() {
         SearchResult searchResult = SearchResult.builder()
             .total(0)
             .build();
@@ -399,7 +399,7 @@ public class Fm5ReminderServiceTest {
     }
 
     @Test
-    public void testSendFm5ReminderNotificationsToNoneParties() {
+    void testSendFm5ReminderNotificationsToNoneParties() {
 
         List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTabInitial = new ArrayList<>();
         List<Element<QuarantineLegalDoc>> courtStaffUploadDocListDocTabInitial = new ArrayList<>();
@@ -454,7 +454,7 @@ public class Fm5ReminderServiceTest {
     }
 
     @Test
-    public void testSendFm5ReminderNotificationsWithException() throws JsonProcessingException {
+    void testSendFm5ReminderNotificationsWithException() throws JsonProcessingException {
 
         when(objectMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("") {});
 
@@ -465,7 +465,7 @@ public class Fm5ReminderServiceTest {
     }
 
     @Test
-    public void testSendFm5ReminderNotificationsToNonePartiesWhenlegalProfQuarantineDocsListAvailable() {
+    void testSendFm5ReminderNotificationsToNonePartiesWhenlegalProfQuarantineDocsListAvailable() {
 
         List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTabInitial = new ArrayList<>();
         quarantineLegalDoc = quarantineLegalDoc.toBuilder()
@@ -505,7 +505,7 @@ public class Fm5ReminderServiceTest {
     }
 
     @Test
-    public void testSendFm5ReminderNotificationsToNonePartiesWhenRestrictedDocumentsListAvailable() {
+    void testSendFm5ReminderNotificationsToNonePartiesWhenRestrictedDocumentsListAvailable() {
 
         List<Element<QuarantineLegalDoc>> quarantineList = new ArrayList<>();
         quarantineLegalDoc = quarantineLegalDoc.toBuilder()
@@ -544,7 +544,7 @@ public class Fm5ReminderServiceTest {
     }
 
     @Test
-    public void testSendFm5ReminderNotificationsToNonePartiesWhenCitizenQuarantineDocsListAvailable() {
+    void testSendFm5ReminderNotificationsToNonePartiesWhenCitizenQuarantineDocsListAvailable() {
 
         List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList = new ArrayList<>();
         quarantineLegalDoc = quarantineLegalDoc.toBuilder()
@@ -584,7 +584,7 @@ public class Fm5ReminderServiceTest {
     }
 
     @Test
-    public void testSendFm5ReminderNotificationsToNonePartiesWhenCitizenUploadedCaseDocsListAvailable() {
+    void testSendFm5ReminderNotificationsToNonePartiesWhenCitizenUploadedCaseDocsListAvailable() {
 
         List<Element<QuarantineLegalDoc>> quarantineList = new ArrayList<>();
         quarantineLegalDoc = quarantineLegalDoc.toBuilder()

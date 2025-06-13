@@ -11,7 +11,7 @@ import static org.mockito.Mockito.verify;
 
 
 @ExtendWith(MockitoExtension.class)
-public class EventServiceTest {
+class EventServiceTest {
 
     @Mock
     ApplicationEventPublisher applicationEventPublisher;
@@ -20,7 +20,7 @@ public class EventServiceTest {
     EventService eventService;
 
     @Test
-    public void testPublishEvent() {
+    void testPublishEvent() {
         Object event = new Object();
 
         eventService.publishEvent(event);

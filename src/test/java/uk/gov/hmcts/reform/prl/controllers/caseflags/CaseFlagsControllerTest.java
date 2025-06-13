@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsWaService;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
-public class CaseFlagsControllerTest {
+class CaseFlagsControllerTest {
 
     public static final String AUTH_TOKEN = "auth-token";
     public static final String SERVICE_TOKEN = "service-token";
@@ -25,7 +25,7 @@ public class CaseFlagsControllerTest {
     private CaseFlagsController caseFlagsController;
 
     @Test
-    public void tesSetUpWaTaskForCaseFlags2() {
+    void tesSetUpWaTaskForCaseFlags2() {
 
         Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
         caseFlagsController

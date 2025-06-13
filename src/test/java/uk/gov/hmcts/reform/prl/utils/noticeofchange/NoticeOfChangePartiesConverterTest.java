@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeParties;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
-public class NoticeOfChangePartiesConverterTest {
+class NoticeOfChangePartiesConverterTest {
 
     @InjectMocks
     NoticeOfChangePartiesConverter noticeOfChangePartiesConverter;
@@ -20,7 +20,7 @@ public class NoticeOfChangePartiesConverterTest {
     PartyDetails partyDetails;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
 
         partyDetails =
             PartyDetails.builder().firstName("Test").lastName("Test").build();
@@ -28,7 +28,7 @@ public class NoticeOfChangePartiesConverterTest {
     }
 
     @Test
-    public void generateForSubmissionTest() {
+    void generateForSubmissionTest() {
 
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(partyDetails).build();
 
@@ -38,7 +38,7 @@ public class NoticeOfChangePartiesConverterTest {
     }
 
     @Test
-    public void generateDaForSubmissionTest() {
+    void generateDaForSubmissionTest() {
         NoticeOfChangeParties submission = noticeOfChangePartiesConverter.generateDaForSubmission(partyDetails);
 
         assertEquals("Test", submission.getFirstName());

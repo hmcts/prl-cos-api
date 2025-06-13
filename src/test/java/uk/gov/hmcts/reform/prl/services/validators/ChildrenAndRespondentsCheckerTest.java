@@ -21,14 +21,14 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
 
 @ExtendWith(MockitoExtension.class)
-public class ChildrenAndRespondentsCheckerTest {
-
+class ChildrenAndRespondentsCheckerTest {
 
     @Mock
     TaskErrorService taskErrorService;
@@ -40,20 +40,20 @@ public class ChildrenAndRespondentsCheckerTest {
     ChildrenAndRespondentsChecker childrenAndRespondentsChecker;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    public void whenNoCaseDataPresentThenIsStartedReturnsFalse() {
+    void whenNoCaseDataPresentThenIsStartedReturnsFalse() {
         CaseData caseData = CaseData.builder()
                 .relations(Relations.builder().build()).build();
 
-        assertTrue(!childrenAndRespondentsChecker.isStarted(caseData));
+        assertFalse(childrenAndRespondentsChecker.isStarted(caseData));
     }
 
     @Test
-    public void whenEmptyChildDataPresentThenIsStartedReturnsFalse() {
+    void whenEmptyChildDataPresentThenIsStartedReturnsFalse() {
         ChildrenAndRespondentRelation child = ChildrenAndRespondentRelation.builder()
             .respondentFullName("Test")
             .childFullName("Name").childAndRespondentRelation(RelationshipsEnum.other)
@@ -74,7 +74,7 @@ public class ChildrenAndRespondentsCheckerTest {
 
 
     @Test
-    public void whenEmptyChildDataPresentThenIsStartedReturnsFalseWitherOther() {
+    void whenEmptyChildDataPresentThenIsStartedReturnsFalseWitherOther() {
         ChildrenAndRespondentRelation child = ChildrenAndRespondentRelation.builder()
             .respondentFullName("Test")
             .childFullName("Name").childAndRespondentRelation(RelationshipsEnum.other)
@@ -90,11 +90,11 @@ public class ChildrenAndRespondentsCheckerTest {
             .childrenNotPartInTheCaseYesNo(YesOrNo.Yes)
             .build();
 
-        assertTrue(!childrenAndRespondentsChecker.isFinished(caseData));
+        assertFalse(childrenAndRespondentsChecker.isFinished(caseData));
     }
 
     @Test
-    public void whenEmptyChildDataPresentThenIsStartedReturnsFalse1() {
+    void whenEmptyChildDataPresentThenIsStartedReturnsFalse1() {
         ChildrenAndRespondentRelation child = ChildrenAndRespondentRelation.builder()
             .respondentFullName("Test")
             .childFullName("Name").childAndRespondentRelation(RelationshipsEnum.father)
@@ -115,30 +115,30 @@ public class ChildrenAndRespondentsCheckerTest {
 
 
     @Test
-    public void whenEmptyisFinishedThenReturnsFalse() {
+    void whenEmptyisFinishedThenReturnsFalse() {
 
         CaseData caseData = CaseData.builder()
                 .relations(Relations.builder().build())
             .build();
 
-        assertTrue(!childrenAndRespondentsChecker.isFinished(caseData));
+        assertFalse(childrenAndRespondentsChecker.isFinished(caseData));
     }
 
 
     @Test
-    public void whenSomeChildDataPresentThenIsStartedReturnsTrue() {
+    void whenSomeChildDataPresentThenIsStartedReturnsTrue() {
 
         CaseData caseData = CaseData.builder()
                 .relations(Relations.builder().build())
             .build();
 
-        assertTrue(!childrenAndRespondentsChecker.isStarted(caseData));
+        assertFalse(childrenAndRespondentsChecker.isStarted(caseData));
     }
 
 
 
     @Test
-    public void whenAllChildDataPresentThenIsFinishedReturnsTrueWithGenderOther() {
+    void whenAllChildDataPresentThenIsFinishedReturnsTrueWithGenderOther() {
         ChildrenAndRespondentRelation child = ChildrenAndRespondentRelation.builder()
             .respondentFullName("Test")
             .childFullName("Name").childAndRespondentRelation(RelationshipsEnum.other)
@@ -159,33 +159,33 @@ public class ChildrenAndRespondentsCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataPresentThenHasMandatoryCompletedReturnsTrue() {
+    void whenNoCaseDataPresentThenHasMandatoryCompletedReturnsTrue() {
         CaseData caseData = CaseData.builder().build();
-        assertTrue(!childrenAndRespondentsChecker.hasMandatoryCompleted(caseData));
+        assertFalse(childrenAndRespondentsChecker.hasMandatoryCompleted(caseData));
     }
 
 
     @Test
-    public void testDefaultTaskStateWhenCannotStart() {
+    void testDefaultTaskStateWhenCannotStart() {
         assertEquals(TaskState.CANNOT_START_YET, childrenAndRespondentsChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 
     @Test
-    public void testDefaultTaskStateWhenChildDetailsDone() {
+    void testDefaultTaskStateWhenChildDetailsDone() {
         CaseData caseData = CaseData.builder().build();
         when(eventsChecker.hasMandatoryCompleted(CHILD_DETAILS_REVISED, caseData)).thenReturn(true);
         assertEquals(TaskState.CANNOT_START_YET, childrenAndRespondentsChecker.getDefaultTaskState(caseData));
     }
 
     @Test
-    public void testDefaultTaskStateWhenChildDetailsDoneIsFinished() {
+    void testDefaultTaskStateWhenChildDetailsDoneIsFinished() {
         CaseData caseData = CaseData.builder().build();
         when(eventsChecker.isFinished(CHILD_DETAILS_REVISED, caseData)).thenReturn(true);
         assertEquals(TaskState.CANNOT_START_YET, childrenAndRespondentsChecker.getDefaultTaskState(caseData));
     }
 
     @Test
-    public void testDefaultTaskStateWhenChildDetailsDoneAndApplicantDetails() {
+    void testDefaultTaskStateWhenChildDetailsDoneAndApplicantDetails() {
         CaseData caseData = CaseData.builder().build();
         when(eventsChecker.hasMandatoryCompleted(CHILD_DETAILS_REVISED, caseData)).thenReturn(true);
         when(eventsChecker.hasMandatoryCompleted(RESPONDENT_DETAILS, caseData)).thenReturn(true);

@@ -31,7 +31,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
 @ExtendWith(MockitoExtension.class)
-public class GatekeepingDetailsServiceTest {
+class GatekeepingDetailsServiceTest {
 
     @InjectMocks
     GatekeepingDetailsService gatekeepingDetailsService;
@@ -47,7 +47,7 @@ public class GatekeepingDetailsServiceTest {
     Object idamId;
 
     @Test
-    public void testGatekeepingWhenLegalAdvisorDetailsProvided() {
+    void testGatekeepingWhenLegalAdvisorDetailsProvided() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).build();
 
@@ -62,7 +62,7 @@ public class GatekeepingDetailsServiceTest {
     }
 
     @Test
-    public void testGatekeepingWhenJudgeDetailsProvided() {
+    void testGatekeepingWhenJudgeDetailsProvided() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).build();
         String[] personalCodes = new String[3];
@@ -85,7 +85,7 @@ public class GatekeepingDetailsServiceTest {
     }
 
     @Test
-    public void testGatekeepingWhenJudgeDetailsNotProvided() {
+    void testGatekeepingWhenJudgeDetailsNotProvided() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).build();
         String[] personalCodes = new String[3];
@@ -108,7 +108,7 @@ public class GatekeepingDetailsServiceTest {
     }
 
     @Test
-    public void testGatekeepingWhenJudgeDetailsEmpty() {
+    void testGatekeepingWhenJudgeDetailsEmpty() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).build();
         String[] personalCodes = new String[3];

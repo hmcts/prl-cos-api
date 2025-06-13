@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,7 +39,7 @@ import static org.mockito.Mockito.when;
 
 @PropertySource(value = "classpath:application.yaml")
 @ExtendWith(MockitoExtension.class)
-public class SolicitorEmailServiceTest {
+class SolicitorEmailServiceTest {
 
 
     private static final String manageCaseUrl = null;
@@ -79,7 +78,7 @@ public class SolicitorEmailServiceTest {
     UserDetails userDetails;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -113,7 +112,7 @@ public class SolicitorEmailServiceTest {
     }
 
     @Test
-    public void whenApplicantPresentThenApplicantStringCreated() throws NotFoundException {
+    void whenApplicantPresentThenApplicantStringCreated() throws NotFoundException {
 
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -169,12 +168,12 @@ public class SolicitorEmailServiceTest {
 
         when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
 
-        Assert.assertEquals(solicitorEmailService.buildEmail(caseDetails, false), email);
+        assertEquals(solicitorEmailService.buildEmail(caseDetails, false), email);
 
     }
 
     @Test
-    public void testIsApplicantPayingC100() throws NotFoundException {
+    void testIsApplicantPayingC100() throws NotFoundException {
 
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -230,12 +229,12 @@ public class SolicitorEmailServiceTest {
 
         when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
 
-        Assert.assertEquals(solicitorEmailService.buildEmail(caseDetails, true), email);
+        assertEquals(solicitorEmailService.buildEmail(caseDetails, true), email);
 
     }
 
     @Test
-    public void sendEmailSuccessfully() throws NotFoundException {
+    void sendEmailSuccessfully() throws NotFoundException {
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -298,7 +297,7 @@ public class SolicitorEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailForWithdraw() throws NotFoundException {
+    void testSendEmailForWithdraw() throws NotFoundException {
 
         List<PartyDetails> applicantList = new ArrayList<>();
         PartyDetails applicant = PartyDetails.builder()
@@ -326,8 +325,8 @@ public class SolicitorEmailServiceTest {
             .email("test@demo.com")
             .build();
 
-        String email = (!applicantList.isEmpty() && applicantList.get(0).getEmail() != null) ? String.valueOf(
-            applicantList.get(0).getEmail())
+        String email = (!applicantList.isEmpty() && applicantList.getFirst().getEmail() != null) ? String.valueOf(
+            applicantList.getFirst().getEmail())
             : userDetails.getEmail();
 
         Map<String, Object> data = new HashMap<>();
@@ -344,7 +343,7 @@ public class SolicitorEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailForWithdrawWhenApplicantSolicitorEmailNotPresent() throws NotFoundException {
+    void testSendEmailForWithdrawWhenApplicantSolicitorEmailNotPresent() throws NotFoundException {
 
         List<PartyDetails> applicantList = new ArrayList<>();
         PartyDetails applicant = PartyDetails.builder()
@@ -371,8 +370,8 @@ public class SolicitorEmailServiceTest {
             .email("test@demo.com")
             .build();
 
-        String email = (!applicantList.isEmpty() && applicantList.get(0).getEmail() != null) ? String.valueOf(
-            applicantList.get(0).getEmail())
+        String email = (!applicantList.isEmpty() && applicantList.getFirst().getEmail() != null) ? String.valueOf(
+            applicantList.getFirst().getEmail())
             : userDetails.getEmail();
 
         Map<String, Object> data = new HashMap<>();
@@ -389,7 +388,7 @@ public class SolicitorEmailServiceTest {
     }
 
     @Test
-    public void testFL401SolicitorEmail() {
+    void testFL401SolicitorEmail() {
 
         PartyDetails fl401Applicant = PartyDetails.builder()
             .firstName("testUser")
@@ -424,7 +423,7 @@ public class SolicitorEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailToFl401LocalCourt() {
+    void testSendEmailToFl401LocalCourt() {
 
         PartyDetails fl401Applicant = PartyDetails.builder()
             .firstName("testUser")
@@ -464,7 +463,7 @@ public class SolicitorEmailServiceTest {
     }
 
     @Test
-    public void testSendApplicationSubmittedEmailToFl401SolicitorFromUserDetails() {
+    void testSendApplicationSubmittedEmailToFl401SolicitorFromUserDetails() {
 
         PartyDetails fl401Applicant = PartyDetails.builder()
             .firstName("testUser")
@@ -502,7 +501,7 @@ public class SolicitorEmailServiceTest {
     }
 
     @Test
-    public void testSendWithdrawEmailToFl401Solicitor() {
+    void testSendWithdrawEmailToFl401Solicitor() {
 
         PartyDetails fl401Applicant = PartyDetails.builder()
             .firstName("testUser")
@@ -542,7 +541,7 @@ public class SolicitorEmailServiceTest {
     }
 
     @Test
-    public void testSendWithdrawEmailToFl401SolicitorFromUserDetails() {
+    void testSendWithdrawEmailToFl401SolicitorFromUserDetails() {
 
         PartyDetails fl401Applicant = PartyDetails.builder()
             .firstName("testUser")
@@ -580,7 +579,7 @@ public class SolicitorEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailForWithdrawAfterIssued() throws NotFoundException {
+    void testSendEmailForWithdrawAfterIssued() throws NotFoundException {
 
         List<PartyDetails> applicantList = new ArrayList<>();
         PartyDetails applicant = PartyDetails.builder()
@@ -608,8 +607,8 @@ public class SolicitorEmailServiceTest {
             .email("test@demo.com")
             .build();
 
-        String email = (!applicantList.isEmpty() && applicantList.get(0).getEmail() != null) ? String.valueOf(
-            applicantList.get(0).getEmail())
+        String email = (!applicantList.isEmpty() && applicantList.getFirst().getEmail() != null) ? String.valueOf(
+            applicantList.getFirst().getEmail())
             : userDetails.getEmail();
 
         Map<String, Object> data = new HashMap<>();
@@ -627,7 +626,7 @@ public class SolicitorEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailForWithdrawAfterIssuedWithEmptySolicitorEmail() throws NotFoundException {
+    void testSendEmailForWithdrawAfterIssuedWithEmptySolicitorEmail() throws NotFoundException {
 
         List<PartyDetails> applicantList = new ArrayList<>();
         PartyDetails applicant = PartyDetails.builder()
@@ -655,8 +654,8 @@ public class SolicitorEmailServiceTest {
             .email("test@demo.com")
             .build();
 
-        String email = (!applicantList.isEmpty() && applicantList.get(0).getEmail() != null) ? String.valueOf(
-            applicantList.get(0).getEmail())
+        String email = (!applicantList.isEmpty() && applicantList.getFirst().getEmail() != null) ? String.valueOf(
+            applicantList.getFirst().getEmail())
             : userDetails.getEmail();
 
         Map<String, Object> data = new HashMap<>();
@@ -674,7 +673,7 @@ public class SolicitorEmailServiceTest {
     }
 
     @Test
-    public void testSendWithdrawEmailToFl401SolicitorAfterIssued() {
+    void testSendWithdrawEmailToFl401SolicitorAfterIssued() {
         PartyDetails fl401Applicant = PartyDetails.builder()
             .firstName("testUser")
             .lastName("last test")
@@ -711,7 +710,7 @@ public class SolicitorEmailServiceTest {
     }
 
     @Test
-    public void testSendWithdrawEmailToFl401SolicitorAfterIssuedWithoutEmail() {
+    void testSendWithdrawEmailToFl401SolicitorAfterIssuedWithoutEmail() {
 
         PartyDetails fl401Applicant = PartyDetails.builder()
             .firstName("testUser")
@@ -751,7 +750,7 @@ public class SolicitorEmailServiceTest {
     }
 
     @Test
-    public void sendReSubmitEmailSuccessfully() throws NotFoundException {
+    void sendReSubmitEmailSuccessfully() throws NotFoundException {
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -814,7 +813,7 @@ public class SolicitorEmailServiceTest {
     }
 
     @Test
-    public void sendAwaitingPaymentEmailSuccessfully() throws NotFoundException {
+    void sendAwaitingPaymentEmailSuccessfully() throws NotFoundException {
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -858,7 +857,7 @@ public class SolicitorEmailServiceTest {
     }
 
     @Test
-    public void testHelpWithFeesEmail() throws NotFoundException {
+    void testHelpWithFeesEmail() throws NotFoundException {
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -902,7 +901,7 @@ public class SolicitorEmailServiceTest {
     }
 
     @Test
-    public void shouldNotSendEmail_WhenEmailIsNull() {
+    void shouldNotSendEmail_WhenEmailIsNull() {
         Map<String, Object> data = new HashMap<>();
 
         CaseDetails caseDetails = CaseDetails.builder()
@@ -914,7 +913,7 @@ public class SolicitorEmailServiceTest {
     }
 
     @Test
-    public void shouldNotSendEmail_WhenEmailIsBlank() {
+    void shouldNotSendEmail_WhenEmailIsBlank() {
         Map<String, Object> data = new HashMap<>();
 
         CaseDetails caseDetails = CaseDetails.builder()
@@ -927,7 +926,7 @@ public class SolicitorEmailServiceTest {
     }
 
     @Test
-    public void shouldCatchException_WhenEmailSendingFails() {
+    void shouldCatchException_WhenEmailSendingFails() {
         Map<String, Object> data = new HashMap<>();
 
         CaseDetails caseDetails = CaseDetails.builder()

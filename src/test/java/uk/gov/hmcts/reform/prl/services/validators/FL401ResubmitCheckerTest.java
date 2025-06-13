@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class FL401ResubmitCheckerTest {
+class FL401ResubmitCheckerTest {
 
     @Mock
     FL401StatementOfTruthAndSubmitChecker fl401StatementOfTruthAndSubmitChecker;
@@ -22,7 +22,7 @@ public class FL401ResubmitCheckerTest {
     FL401ResubmitChecker fl401ResubmitChecker;
 
     @Test
-    public void whenSubmitAndPayCheckerFinished_thenSubmitCheckerAlsoFinished() {
+    void whenSubmitAndPayCheckerFinished_thenSubmitCheckerAlsoFinished() {
         CaseData caseData = CaseData.builder().build();
         when(fl401StatementOfTruthAndSubmitChecker.isFinished(caseData)).thenReturn(true);
         assertTrue(fl401ResubmitChecker.isFinished(caseData));
@@ -30,19 +30,19 @@ public class FL401ResubmitCheckerTest {
     }
 
     @Test
-    public void whenNoCaseData_thenSubmitCheckerNotStarted() {
+    void whenNoCaseData_thenSubmitCheckerNotStarted() {
         CaseData caseData = CaseData.builder().build();
         assertFalse(fl401ResubmitChecker.isStarted(caseData));
     }
 
     @Test
-    public void whenNoCaseData_thenSubmitCheckerHasMandatoryCompletedFalse() {
+    void whenNoCaseData_thenSubmitCheckerHasMandatoryCompletedFalse() {
         CaseData caseData = CaseData.builder().build();
         assertFalse(fl401ResubmitChecker.hasMandatoryCompleted(caseData));
     }
 
     @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+    void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
         assertNotNull(fl401ResubmitChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 

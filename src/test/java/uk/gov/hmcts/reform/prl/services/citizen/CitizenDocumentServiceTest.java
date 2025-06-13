@@ -46,7 +46,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @ExtendWith(MockitoExtension.class)
-public class CitizenDocumentServiceTest {
+class CitizenDocumentServiceTest {
 
     public static final String AUTH_TOKEN = "Bearer TestAuthToken";
 
@@ -73,7 +73,7 @@ public class CitizenDocumentServiceTest {
     private QuarantineLegalDoc quarantineCaseDoc;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
 
         ReflectionTestUtils.setField(manageDocumentsService, "objectMapper", objectMapper);
         ReflectionTestUtils.setField(manageDocumentsService, "notificationService", notificationService);
@@ -116,7 +116,7 @@ public class CitizenDocumentServiceTest {
     }
 
     @Test
-    public void testCitizenUploadDocumentsAndMoveToQuarantine() throws Exception {
+    void testCitizenUploadDocumentsAndMoveToQuarantine() throws Exception {
         //Given
         documentRequest = documentRequest.toBuilder()
             .isConfidential(Yes)
@@ -166,7 +166,7 @@ public class CitizenDocumentServiceTest {
     }
 
     @Test
-    public void testCitizenUploadDocumentsAndMoveRespectiveCategory() throws Exception {
+    void testCitizenUploadDocumentsAndMoveRespectiveCategory() throws Exception {
         //Given
         documentRequest = documentRequest.toBuilder()
             .categoryId("FM5_STATEMENTS")

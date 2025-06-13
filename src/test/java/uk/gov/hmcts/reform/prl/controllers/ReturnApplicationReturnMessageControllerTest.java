@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,7 +46,7 @@ import static uk.gov.hmcts.reform.prl.enums.RejectReasonEnum.consentOrderNotProv
 
 
 @ExtendWith(MockitoExtension.class)
-public class ReturnApplicationReturnMessageControllerTest {
+class ReturnApplicationReturnMessageControllerTest {
 
     private MockMvc mockMvc;
 
@@ -92,7 +91,7 @@ public class ReturnApplicationReturnMessageControllerTest {
     public static final String s2sToken = "s2s AuthToken";
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
 
         PartyDetails applicant = PartyDetails.builder().representativeFirstName("John").representativeLastName("Smith").build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
@@ -110,11 +109,11 @@ public class ReturnApplicationReturnMessageControllerTest {
             .rejectReason(Collections.singletonList(consentOrderNotProvided))
             .build();
 
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
     }
 
     @Test
-    public void shouldStartReturnApplicationReturnMessageWithCaseDetails() throws Exception {
+    void shouldStartReturnApplicationReturnMessageWithCaseDetails() throws Exception {
         Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap.put("returnMessage", "Test");
 
@@ -126,18 +125,22 @@ public class ReturnApplicationReturnMessageControllerTest {
             .build();
 
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
-        when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class)).thenReturn(casedata);
+        when(objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        )).thenReturn(casedata);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = returnApplicationReturnMessageController
             .returnApplicationReturnMessage(
-            authToken,
-            s2sToken,
-            callbackRequest);
+                authToken,
+                s2sToken,
+                callbackRequest
+            );
         verify(userService).getUserDetails(authToken);
         verifyNoMoreInteractions(userService);
     }
 
     @Test
-    public void testReturnApplicationEmailNotification() throws Exception {
+    void testReturnApplicationEmailNotification() throws Exception {
 
         PartyDetails applicant = PartyDetails.builder().representativeFirstName("John").representativeLastName("Smith").build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
@@ -149,7 +152,10 @@ public class ReturnApplicationReturnMessageControllerTest {
             .build();
 
         Map<String, Object> stringObjectMap = new HashMap<>();
-        when(returnApplicationService.updateMiamPolicyUpgradeDataForConfidentialDocument(any(CaseData.class), anyMap())).thenReturn(caseData);
+        when(returnApplicationService.updateMiamPolicyUpgradeDataForConfidentialDocument(
+            any(CaseData.class),
+            anyMap()
+        )).thenReturn(caseData);
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(caseEventHandler.getUpdatedTaskList(any(CaseData.class))).thenReturn("taskList");
@@ -159,13 +165,17 @@ public class ReturnApplicationReturnMessageControllerTest {
 
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
-            returnApplicationReturnMessageController.returnApplicationEmailNotification(authToken, s2sToken, callbackRequest);
+            returnApplicationReturnMessageController.returnApplicationEmailNotification(
+                authToken,
+                s2sToken,
+                callbackRequest
+            );
 
         verify(allTabsService, times(1)).getAllTabsFields(any(CaseData.class));
     }
 
     @Test
-    public void testExceptionForReturnApplicationReturnMessage() {
+    void testExceptionForReturnApplicationReturnMessage() {
         Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap.put("returnMessage", "Test");
 
@@ -177,17 +187,23 @@ public class ReturnApplicationReturnMessageControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            returnApplicationReturnMessageController
-                .returnApplicationReturnMessage(
-                    authToken,
-                    s2sToken,
-                    callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+
+        RuntimeException ex = assertThrows(
+            RuntimeException.class, () -> {
+                returnApplicationReturnMessageController
+                    .returnApplicationReturnMessage(
+                        authToken,
+                        s2sToken,
+                        callbackRequest
+                );
+            }
+        );
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testExceptionForReturnApplicationEmailNotification() {
+    void testExceptionForReturnApplicationEmailNotification() {
         PartyDetails applicant = PartyDetails.builder().representativeFirstName("John").representativeLastName("Smith").build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
@@ -203,19 +219,23 @@ public class ReturnApplicationReturnMessageControllerTest {
                                                        .data(stringObjectMap).build()).build();
 
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            returnApplicationReturnMessageController.returnApplicationEmailNotification(authToken, s2sToken, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+
+        RuntimeException ex = assertThrows(
+            RuntimeException.class, () -> {
+                returnApplicationReturnMessageController.returnApplicationEmailNotification(
+                    authToken,
+                    s2sToken,
+                    callbackRequest
+                );
+            }
+        );
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
-    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
-                                                                 String expectedMessage) {
-        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
-        assertEquals(expectedMessage, exception.getMessage());
-    }
 
     @Test
-    public void testReturnApplicationEmailNotificationMiam() throws Exception {
+    void testReturnApplicationEmailNotificationMiam() throws Exception {
 
         PartyDetails applicant = PartyDetails.builder().representativeFirstName("John").representativeLastName("Smith").build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
@@ -243,7 +263,10 @@ public class ReturnApplicationReturnMessageControllerTest {
             .build();
 
         Map<String, Object> stringObjectMap = new HashMap<>();
-        when(returnApplicationService.updateMiamPolicyUpgradeDataForConfidentialDocument(any(CaseData.class), anyMap())).thenReturn(caseData);
+        when(returnApplicationService.updateMiamPolicyUpgradeDataForConfidentialDocument(
+            any(CaseData.class),
+            anyMap()
+        )).thenReturn(caseData);
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(caseEventHandler.getUpdatedTaskList(any(CaseData.class))).thenReturn("taskList");
@@ -253,7 +276,11 @@ public class ReturnApplicationReturnMessageControllerTest {
 
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
-            returnApplicationReturnMessageController.returnApplicationEmailNotification(authToken, s2sToken, callbackRequest);
+            returnApplicationReturnMessageController.returnApplicationEmailNotification(
+                authToken,
+                s2sToken,
+                callbackRequest
+            );
 
         verify(allTabsService, times(1)).getAllTabsFields(any(CaseData.class));
     }

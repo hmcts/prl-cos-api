@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -66,6 +65,9 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
@@ -80,7 +82,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @ExtendWith(MockitoExtension.class)
-public class TestingSupportServiceTest {
+class TestingSupportServiceTest {
 
     @InjectMocks
     TestingSupportService testingSupportService;
@@ -147,7 +149,7 @@ public class TestingSupportServiceTest {
     String s2sAuth = "s2sAuth";
 
     @BeforeEach
-    public void setUp() throws Exception {
+    void setUp() throws Exception {
         List<ContactInformation> contactInformation = new ArrayList<>();
         List<DxAddress> dxAddress = new ArrayList<>();
         dxAddress.add(DxAddress.builder().dxNumber("dxNumber").build());
@@ -307,7 +309,7 @@ public class TestingSupportServiceTest {
     }
 
     @Test
-    public void testAboutToSubmitCaseCreationWithoutDummyData() throws Exception {
+    void testAboutToSubmitCaseCreationWithoutDummyData() throws Exception {
         caseData = CaseData.builder()
                 .id(12345678L)
                 .state(State.SUBMITTED_PAID)
@@ -324,11 +326,11 @@ public class TestingSupportServiceTest {
                 .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreation(auth, callbackRequest);
-        Assert.assertTrue(stringObjectMap.isEmpty());
+        assertTrue(stringObjectMap.isEmpty());
     }
 
     @Test
-    public void testAboutToSubmitSolicitorCaseCreationWithDummyC100Data() throws Exception {
+    void testAboutToSubmitSolicitorCaseCreationWithDummyC100Data() throws Exception {
         caseData = CaseData.builder()
                 .id(12345678L)
                 .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -348,11 +350,11 @@ public class TestingSupportServiceTest {
         when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(caseDetails);
 
         Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreation(auth, callbackRequest);
-        Assert.assertTrue(!stringObjectMap.isEmpty());
+        assertFalse(stringObjectMap.isEmpty());
     }
 
     @Test
-    public void testRespondentTaskListRequestSubmittedWithDummyC100Data() throws Exception {
+    void testRespondentTaskListRequestSubmittedWithDummyC100Data() throws Exception {
         caseData = CaseData.builder()
                 .id(12345678L)
                 .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -380,7 +382,7 @@ public class TestingSupportServiceTest {
     }
 
     @Test
-    public void testAboutToSubmitSolicitorCaseCreationWithDummyFl401Data() throws Exception {
+    void testAboutToSubmitSolicitorCaseCreationWithDummyFl401Data() throws Exception {
         caseData = CaseData.builder()
                 .id(12345678L)
                 .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
@@ -403,12 +405,12 @@ public class TestingSupportServiceTest {
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(caseDetails);
         Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreation(auth, callbackRequest);
-        Assert.assertTrue(!stringObjectMap.isEmpty());
+        assertFalse(stringObjectMap.isEmpty());
     }
 
 
     @Test
-    public void testAboutToSubmitAdminCaseCreationWithDummyC100Data() throws Exception {
+    void testAboutToSubmitAdminCaseCreationWithDummyC100Data() throws Exception {
         caseData = CaseData.builder()
                 .id(12345678L)
                 .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -427,11 +429,11 @@ public class TestingSupportServiceTest {
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(caseDetails);
         Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreation(auth, callbackRequest);
-        Assert.assertTrue(!stringObjectMap.isEmpty());
+        assertFalse(stringObjectMap.isEmpty());
     }
 
     @Test
-    public void testAboutToSubmitAdminCaseCreationWithDummyFl401Data() throws Exception {
+    void testAboutToSubmitAdminCaseCreationWithDummyFl401Data() throws Exception {
         caseData = CaseData.builder()
                 .id(12345678L)
                 .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
@@ -450,11 +452,11 @@ public class TestingSupportServiceTest {
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(caseDetails);
         Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreation(auth, callbackRequest);
-        Assert.assertTrue(!stringObjectMap.isEmpty());
+        assertFalse(stringObjectMap.isEmpty());
     }
 
     @Test
-    public void testAboutToSubmitAdminCaseCreationWithDummyFl401DataDocumentCreationError() throws Exception {
+    void testAboutToSubmitAdminCaseCreationWithDummyFl401DataDocumentCreationError() throws Exception {
         caseData = CaseData.builder()
                 .id(12345678L)
                 .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
@@ -477,33 +479,35 @@ public class TestingSupportServiceTest {
                 any(CaseData.class)
         )).thenThrow(RuntimeException.class);
         Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreation(auth, callbackRequest);
-        Assert.assertTrue(!stringObjectMap.isEmpty());
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void testAboutToSubmitAdminCaseCreationInvalidClient() throws Exception {
-        caseData = CaseData.builder()
-                .id(12345678L)
-                .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
-                .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-                .build();
-        caseDataMap = caseData.toMap(new ObjectMapper());
-        caseDetails = CaseDetails.builder()
-                .id(12345678L)
-                .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-                .data(caseDataMap)
-                .build();
-        callbackRequest = CallbackRequest.builder()
-                .caseDetails(caseDetails)
-                .eventId(TS_ADMIN_APPLICATION_NOC.getId())
-                .build();
-        when(launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)).thenReturn(true);
-        when(authorisationService.authoriseUser(anyString())).thenReturn(Boolean.FALSE);
-        testingSupportService.initiateCaseCreation(auth, callbackRequest);
+        assertFalse(stringObjectMap.isEmpty());
     }
 
     @Test
-    public void testSubmittedCaseCreation() {
+    void testAboutToSubmitAdminCaseCreationInvalidClient() throws Exception {
+        assertThrows(RuntimeException.class, () -> {
+            caseData = CaseData.builder()
+            .id(12345678L)
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .build();
+            caseDataMap = caseData.toMap(new ObjectMapper());
+            caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseDataMap)
+            .build();
+            callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .eventId(TS_ADMIN_APPLICATION_NOC.getId())
+            .build();
+            when(launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)).thenReturn(true);
+            when(authorisationService.authoriseUser(anyString())).thenReturn(Boolean.FALSE);
+            testingSupportService.initiateCaseCreation(auth, callbackRequest);
+        });
+    }
+
+    @Test
+    void testSubmittedCaseCreation() {
         caseData = CaseData.builder()
                 .id(12345678L)
                 .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
@@ -530,33 +534,35 @@ public class TestingSupportServiceTest {
 
         when(tabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         Map<String, Object> stringObjectMap = testingSupportService.submittedCaseCreation(callbackRequest, auth);
-        Assert.assertTrue(!stringObjectMap.isEmpty());
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void testSubmittedCaseCreationWithInvalidClient() {
-        caseData = CaseData.builder()
-                .id(12345678L)
-                .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
-                .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-                .build();
-        caseDataMap = caseData.toMap(new ObjectMapper());
-        caseDetails = CaseDetails.builder()
-                .id(12345678L)
-                .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-                .data(caseDataMap)
-                .build();
-        callbackRequest = CallbackRequest.builder()
-                .caseDetails(caseDetails)
-                .eventId(TS_ADMIN_APPLICATION_NOC.getId())
-                .build();
-        when(launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)).thenReturn(true);
-        when(authorisationService.authoriseUser(anyString())).thenReturn(Boolean.FALSE);
-        testingSupportService.submittedCaseCreation(callbackRequest, auth);
+        assertFalse(stringObjectMap.isEmpty());
     }
 
     @Test
-    public void testConfirmDummyPayment() {
+    void testSubmittedCaseCreationWithInvalidClient() {
+        assertThrows(RuntimeException.class, () -> {
+            caseData = CaseData.builder()
+            .id(12345678L)
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .build();
+            caseDataMap = caseData.toMap(new ObjectMapper());
+            caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseDataMap)
+            .build();
+            callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .eventId(TS_ADMIN_APPLICATION_NOC.getId())
+            .build();
+            when(launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)).thenReturn(true);
+            when(authorisationService.authoriseUser(anyString())).thenReturn(Boolean.FALSE);
+            testingSupportService.submittedCaseCreation(callbackRequest, auth);
+        });
+    }
+
+    @Test
+    void testConfirmDummyPayment() {
         caseData = CaseData.builder()
                 .id(12345678L)
                 .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
@@ -579,32 +585,34 @@ public class TestingSupportServiceTest {
                 any()
         )).thenReturn(caseDetails);
         Map<String, Object> stringObjectMap = testingSupportService.confirmDummyPayment(callbackRequest, auth);
-        Assert.assertTrue(!stringObjectMap.isEmpty());
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void testConfirmDummyPaymentWithInvalidClient() {
-        caseData = CaseData.builder()
-                .id(12345678L)
-                .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
-                .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-                .build();
-        caseDataMap = caseData.toMap(new ObjectMapper());
-        caseDetails = CaseDetails.builder()
-                .id(12345678L)
-                .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-                .data(caseDataMap)
-                .build();
-        callbackRequest = CallbackRequest.builder()
-                .caseDetails(caseDetails)
-                .eventId(TS_ADMIN_APPLICATION_NOC.getId())
-                .build();
-        when(launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)).thenReturn(false);
-        testingSupportService.confirmDummyPayment(callbackRequest, auth);
+        assertFalse(stringObjectMap.isEmpty());
     }
 
     @Test
-    public void testCreateDummyLiPC100Case() throws Exception {
+    void testConfirmDummyPaymentWithInvalidClient() {
+        assertThrows(RuntimeException.class, () -> {
+            caseData = CaseData.builder()
+            .id(12345678L)
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .build();
+            caseDataMap = caseData.toMap(new ObjectMapper());
+            caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseDataMap)
+            .build();
+            callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .eventId(TS_ADMIN_APPLICATION_NOC.getId())
+            .build();
+            when(launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)).thenReturn(false);
+            testingSupportService.confirmDummyPayment(callbackRequest, auth);
+        });
+    }
+
+    @Test
+    void testCreateDummyLiPC100Case() throws Exception {
         caseData = CaseData.builder()
                 .id(12345678L)
                 .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -629,7 +637,7 @@ public class TestingSupportServiceTest {
     }
 
     @Test
-    public void testCreateDummyLiPC100CaseWithBody() throws Exception {
+    void testCreateDummyLiPC100CaseWithBody() throws Exception {
         caseData = CaseData.builder()
             .id(12345678L)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -654,7 +662,7 @@ public class TestingSupportServiceTest {
     }
 
     @Test
-    public void testAboutToSubmitSolicitorCaseCreationForAdminWithDummyC100Data() throws Exception {
+    void testAboutToSubmitSolicitorCaseCreationForAdminWithDummyC100Data() throws Exception {
         caseData = CaseData.builder()
             .id(12345678L)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -677,11 +685,11 @@ public class TestingSupportServiceTest {
                                                                      .build());
 
         Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreation(auth, callbackRequest);
-        Assert.assertTrue(!stringObjectMap.isEmpty());
+        assertFalse(stringObjectMap.isEmpty());
     }
 
     @Test
-    public void testAboutToSubmitCourtAdminCaseCreationWithDummyFl401Data() throws Exception {
+    void testAboutToSubmitCourtAdminCaseCreationWithDummyFl401Data() throws Exception {
         caseData = CaseData.builder()
             .id(12345678L)
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
@@ -707,11 +715,11 @@ public class TestingSupportServiceTest {
                                                                      .roles(List.of(COURT_ADMIN_ROLE))
                                                                      .build());
         Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreation(auth, callbackRequest);
-        Assert.assertTrue(!stringObjectMap.isEmpty());
+        assertFalse(stringObjectMap.isEmpty());
     }
 
     @Test
-    public void testCourtNavCreatedCase() throws Exception {
+    void testCourtNavCreatedCase() throws Exception {
         caseData = CaseData.builder()
             .id(12345678L)
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
@@ -740,14 +748,16 @@ public class TestingSupportServiceTest {
         assertEquals(12345678L,caseDataMapResponse.get(CASE_DATA_ID));
     }
 
-    @Test(expected = RuntimeException.class)
-    public void testCreateDummyCourtNavCase_InvalidClientLD_disabled() throws Exception {
-        when(launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)).thenReturn(false);
-        testingSupportService.initiateCaseCreationForCourtNav(auth, CallbackRequest.builder().build());
+    @Test
+    void testCreateDummyCourtNavCase_InvalidClientLD_disabled() throws Exception {
+        assertThrows(RuntimeException.class, () -> {
+            when(launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)).thenReturn(false);
+            testingSupportService.initiateCaseCreationForCourtNav(auth, CallbackRequest.builder().build());
+        });
     }
 
     @Test
-    public void testInitiateCaseCreationForCourtNav() throws Exception {
+    void testInitiateCaseCreationForCourtNav() throws Exception {
         caseData = CaseData.builder()
             .id(12345678L)
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
@@ -778,48 +788,62 @@ public class TestingSupportServiceTest {
         when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(caseDetails);
 
         Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreationForCourtNav(auth, callbackRequest);
-        Assert.assertFalse(stringObjectMap.isEmpty());
+        assertFalse(stringObjectMap.isEmpty());
     }
 
-    @Test(expected = RuntimeException.class)
-    public void testCreateDummyLiPC100Case_InvalidClient_LdDisabled() throws Exception {
-        when(launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)).thenReturn(false);
-        testingSupportService.createDummyLiPC100Case(auth, s2sAuth);
+    @Test
+    void testCreateDummyLiPC100Case_InvalidClient_LdDisabled() throws Exception {
+        assertThrows(RuntimeException.class, () -> {
+            when(launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)).thenReturn(false);
+            testingSupportService.createDummyLiPC100Case(auth, s2sAuth);
+        });
     }
 
-    @Test(expected = RuntimeException.class)
-    public void testCreateDummyLiPC100Case_InvalidS2S() throws Exception {
-        when(authorisationService.authoriseService(anyString())).thenReturn(false);
-        testingSupportService.createDummyLiPC100Case(auth, s2sAuth);
+    @Test
+    void testCreateDummyLiPC100Case_InvalidS2S() throws Exception {
+        assertThrows(RuntimeException.class, () -> {
+            when(authorisationService.authoriseService(anyString())).thenReturn(false);
+            testingSupportService.createDummyLiPC100Case(auth, s2sAuth);
+        });
     }
 
-    @Test(expected = RuntimeException.class)
-    public void testCreateDummyLiPC100Case_InvalidAuthorisation() throws Exception {
-        when(authorisationService.authoriseUser(anyString())).thenReturn(false);
-        testingSupportService.createDummyLiPC100Case(auth, s2sAuth);
+    @Test
+    void testCreateDummyLiPC100Case_InvalidAuthorisation() throws Exception {
+        assertThrows(RuntimeException.class, () -> {
+            when(authorisationService.authoriseUser(anyString())).thenReturn(false);
+            testingSupportService.createDummyLiPC100Case(auth, s2sAuth);
+        });
     }
 
-    @Test(expected = RuntimeException.class)
-    public void testCreateDummyLiPC100CaseWithBody_InvalidClient_LdDisabled() throws Exception {
-        when(launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)).thenReturn(false);
-        testingSupportService.createDummyLiPC100CaseWithBody(auth, s2sAuth, "test body");
+    @Test
+    void testCreateDummyLiPC100CaseWithBody_InvalidClient_LdDisabled() throws Exception {
+        assertThrows(RuntimeException.class, () -> {
+            when(launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)).thenReturn(false);
+            testingSupportService.createDummyLiPC100CaseWithBody(auth, s2sAuth, "test body");
+        });
     }
 
-    @Test(expected = RuntimeException.class)
-    public void testCreateDummyLiPC100CaseWithBody_InvalidS2S() throws Exception {
-        when(authorisationService.authoriseService(anyString())).thenReturn(false);
-        testingSupportService.createDummyLiPC100CaseWithBody(auth, s2sAuth, "test body");
+    @Test
+    void testCreateDummyLiPC100CaseWithBody_InvalidS2S() throws Exception {
+        assertThrows(RuntimeException.class, () -> {
+            when(authorisationService.authoriseService(anyString())).thenReturn(false);
+            testingSupportService.createDummyLiPC100CaseWithBody(auth, s2sAuth, "test body");
+        });
     }
 
-    @Test(expected = RuntimeException.class)
-    public void testCreateDummyLiPC100CaseWithBody_InvalidAuthorisation() throws Exception {
-        when(authorisationService.authoriseUser(anyString())).thenReturn(false);
-        testingSupportService.createDummyLiPC100CaseWithBody(auth, s2sAuth, "test body");
+    @Test
+    void testCreateDummyLiPC100CaseWithBody_InvalidAuthorisation() throws Exception {
+        assertThrows(RuntimeException.class, () -> {
+            when(authorisationService.authoriseUser(anyString())).thenReturn(false);
+            testingSupportService.createDummyLiPC100CaseWithBody(auth, s2sAuth, "test body");
+        });
     }
 
-    @Test(expected = RuntimeException.class)
-    public void invalidInitiateCaseCreationForCourtNav() throws Exception {
-        when(authorisationService.authoriseUser(anyString())).thenReturn(false);
-        testingSupportService.initiateCaseCreationForCourtNav(auth, callbackRequest);
+    @Test
+    void invalidInitiateCaseCreationForCourtNav() throws Exception {
+        assertThrows(RuntimeException.class, () -> {
+            when(authorisationService.authoriseUser(anyString())).thenReturn(false);
+            testingSupportService.initiateCaseCreationForCourtNav(auth, callbackRequest);
+        });
     }
 }

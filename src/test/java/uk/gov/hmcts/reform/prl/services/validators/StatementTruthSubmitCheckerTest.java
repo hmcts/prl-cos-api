@@ -8,11 +8,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-public class StatementTruthSubmitCheckerTest {
+class StatementTruthSubmitCheckerTest {
 
     @Mock
     TaskErrorService taskErrorService;
@@ -22,32 +22,32 @@ public class StatementTruthSubmitCheckerTest {
     StatementTruthSubmitChecker statementTruthSubmitChecker;
 
     @Test
-    public void whenNoCaseDataPresentThenIsStartedReturnsFalse() {
+    void whenNoCaseDataPresentThenIsStartedReturnsFalse() {
         CaseData caseData = CaseData.builder().build();
 
-        assertTrue(!statementTruthSubmitChecker.isStarted(caseData));
+        assertFalse(statementTruthSubmitChecker.isStarted(caseData));
     }
 
     @Test
-    public void whenAllChildDataPresentThenIsFinishedReturnsFalseWithNullYes() {
+    void whenAllChildDataPresentThenIsFinishedReturnsFalseWithNullYes() {
 
         CaseData caseData = CaseData.builder()
             .childrenNotInTheCase(null)
             .childrenNotPartInTheCaseYesNo(null)
             .build();
-        assertTrue(!statementTruthSubmitChecker.isFinished(caseData));
+        assertFalse(statementTruthSubmitChecker.isFinished(caseData));
     }
 
 
     @Test
-    public void whenNoCaseDataPresentThenHasMandatoryCompletedReturnsTrue() {
+    void whenNoCaseDataPresentThenHasMandatoryCompletedReturnsTrue() {
         CaseData caseData = CaseData.builder().build();
-        assertTrue(!statementTruthSubmitChecker.hasMandatoryCompleted(caseData));
+        assertFalse(statementTruthSubmitChecker.hasMandatoryCompleted(caseData));
     }
 
 
     @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+    void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
         assertNotNull(statementTruthSubmitChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

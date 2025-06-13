@@ -6,7 +6,6 @@ import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -22,6 +21,8 @@ import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_WITHOUT_NOTICE;
@@ -82,8 +83,8 @@ public class Fl401ListOnNoticeControllerFT {
             .extract()
             .as(CaseDetails.class);
 
-        Assert.assertNotNull(caseDetails);
-        Assert.assertNotNull(caseDetails.getId());
+        assertNotNull(caseDetails);
+        assertNotNull(caseDetails.getId());
     }
 
 
@@ -125,8 +126,8 @@ public class Fl401ListOnNoticeControllerFT {
             .post(aboutToSubmitEndpoint);
         response.then().assertThat().statusCode(200);
         AboutToStartOrSubmitCallbackResponse res = objectMapper.readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
-        Assert.assertNotNull(res);
-        Assert.assertNotNull(res.getData().get(CASE_NOTES));
+        assertNotNull(res);
+        assertNotNull(res.getData().get(CASE_NOTES));
     }
 
     @Test
@@ -143,8 +144,8 @@ public class Fl401ListOnNoticeControllerFT {
             .post(aboutToStartEndpoint);
         response.then().assertThat().statusCode(200);
         AboutToStartOrSubmitCallbackResponse res = objectMapper.readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
-        Assert.assertNotNull(res);
-        Assert.assertNotNull(res.getData().get(FL401_CASE_WITHOUT_NOTICE));
-        Assert.assertEquals("No", res.getData().get(FL401_CASE_WITHOUT_NOTICE));
+        assertNotNull(res);
+        assertNotNull(res.getData().get(FL401_CASE_WITHOUT_NOTICE));
+        assertEquals("No", res.getData().get(FL401_CASE_WITHOUT_NOTICE));
     }
 }

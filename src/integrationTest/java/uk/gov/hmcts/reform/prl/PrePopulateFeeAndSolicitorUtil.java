@@ -2,7 +2,8 @@ package uk.gov.hmcts.reform.prl;
 
 import io.restassured.response.Response;
 
-import static net.serenitybdd.rest.SerenityRest.given;
+import static io.restassured.RestAssured.given;
+
 
 public class PrePopulateFeeAndSolicitorUtil {
     static Response prePopulateFeeAndSolicitorName(final String requestBody, final String prePopulateUri, final String userToken) {

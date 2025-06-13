@@ -20,7 +20,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class HelpWithFeesControllerTest {
+class HelpWithFeesControllerTest {
 
     public static final String AUTH_TOKEN = "Bearer TestAuthToken";
     public static final String S2S_TOKEN = "s2s AuthToken";
@@ -39,7 +39,7 @@ public class HelpWithFeesControllerTest {
     private CallbackRequest callbackRequest;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         caseDetails = CaseDetails.builder()
             .id(123L)
             .build();
@@ -49,7 +49,7 @@ public class HelpWithFeesControllerTest {
     }
 
     @Test
-    public void test_HelpWithFeesAboutToStart() {
+    void test_HelpWithFeesAboutToStart() {
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
         helpWithFeesController.handleAboutToStart(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         verify(helpWithFeesService, times(1)).handleAboutToStart(caseDetails);
@@ -67,7 +67,7 @@ public class HelpWithFeesControllerTest {
     }
 
     @Test
-    public void test_HelpWithFeesAboutToSubmit() {
+    void test_HelpWithFeesAboutToSubmit() {
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
         helpWithFeesController.handleAboutToSubmit(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         verify(helpWithFeesService, times(1)).setCaseStatus(callbackRequest, AUTH_TOKEN);
@@ -85,7 +85,7 @@ public class HelpWithFeesControllerTest {
     }
 
     @Test
-    public void test_HelpWithFeesHandleSubmitted() throws Exception {
+    void test_HelpWithFeesHandleSubmitted() throws Exception {
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
         helpWithFeesController.handleSubmitted(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         verify(helpWithFeesService, times(1)).handleSubmitted();
@@ -103,7 +103,7 @@ public class HelpWithFeesControllerTest {
     }
 
     @Test
-    public void test_populateHwfDynamicData() {
+    void test_populateHwfDynamicData() {
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
         helpWithFeesController.populateHwfDynamicData(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         verify(helpWithFeesService, times(1)).populateHwfDynamicData(callbackRequest.getCaseDetails());
@@ -121,14 +121,14 @@ public class HelpWithFeesControllerTest {
     }
 
     @Test
-    public void test_checkForManagerApproval_1() {
+    void test_checkForManagerApproval_1() {
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
         helpWithFeesController.checkForManagerApproval(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         verify(helpWithFeesService, times(1)).checkForManagerApproval(callbackRequest.getCaseDetails());
     }
 
     @Test
-    public void test_checkForManagerApproval_2() {
+    void test_checkForManagerApproval_2() {
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
         when(helpWithFeesService.checkForManagerApproval(callbackRequest.getCaseDetails())).thenReturn(Arrays.asList("test"));
         helpWithFeesController.checkForManagerApproval(AUTH_TOKEN, S2S_TOKEN, callbackRequest);

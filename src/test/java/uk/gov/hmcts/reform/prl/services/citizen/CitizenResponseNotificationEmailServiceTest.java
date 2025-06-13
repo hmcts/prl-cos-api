@@ -22,7 +22,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
-public class CitizenResponseNotificationEmailServiceTest {
+class CitizenResponseNotificationEmailServiceTest {
 
     @Mock
     private EmailService emailService;
@@ -34,7 +34,7 @@ public class CitizenResponseNotificationEmailServiceTest {
     private ObjectMapper objectMapper;
 
     @Test
-    public void verifyEmailNotificationTriggeredForApplicantSolicitor() throws Exception {
+    void verifyEmailNotificationTriggeredForApplicantSolicitor() throws Exception {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -62,7 +62,7 @@ public class CitizenResponseNotificationEmailServiceTest {
     }
 
     @Test
-    public void verifyNoEmailNotificationTriggeredForApplicantSolicitor() throws Exception {
+    void verifyNoEmailNotificationTriggeredForApplicantSolicitor() throws Exception {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)

@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,18 +23,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 
 
 @ExtendWith(MockitoExtension.class)
-public class RespondentAllegationOfHarmServiceTest {
+class RespondentAllegationOfHarmServiceTest {
 
     @InjectMocks
     RespondentAllegationOfHarmService respondentAllegationOfHarmService;
 
 
     @Test
-    public void testUpdateChildAbuses() {
+    void testUpdateChildAbuses() {
         RespChildAbuse childAbuse = RespChildAbuse.builder().respAbuseNatureDescription("test")
                 .build();
         RespondentAllegationsOfHarmData data = RespondentAllegationsOfHarmData.builder()
@@ -80,13 +81,13 @@ public class RespondentAllegationOfHarmServiceTest {
                 .respChildSexualAbuse(childAbuse).build();
 
         List<Element<RespChildAbuseBehaviour>> response = respondentAllegationOfHarmService.updateChildAbusesForDocmosis(data);
-        Assert.assertFalse(response.isEmpty());
+        assertFalse(response.isEmpty());
 
     }
 
 
     @Test
-    public void testPrePopulateChildData() {
+    void testPrePopulateChildData() {
         List<DynamicMultiselectListElement> valueElements = new ArrayList<>();
         valueElements.add(DynamicMultiselectListElement.builder().code("test").label("test name").build());
 
@@ -114,12 +115,12 @@ public class RespondentAllegationOfHarmServiceTest {
                         .respondentSolicitorData(RespondentSolicitorData.builder()
                                 .respondentAllegationsOfHarmData(allegationOfHarmRevised).build())
                         .newChildDetails(List.of(childDetailsRevisedElement)).build(),data,allegationOfHarmRevised);
-        Assert.assertFalse(data.isEmpty());
+        assertFalse(data.isEmpty());
 
     }
 
     @Test
-    public void testPrePopulateChildDataWithoutAnyAbuses() {
+    void testPrePopulateChildDataWithoutAnyAbuses() {
         List<DynamicMultiselectListElement> valueElements = new ArrayList<>();
         valueElements.add(DynamicMultiselectListElement.builder().code("test").label("test name").build());
 
@@ -144,12 +145,12 @@ public class RespondentAllegationOfHarmServiceTest {
                                 .respondentAllegationsOfHarmData(allegationOfHarmRevised).build())
                         .newChildDetails(List.of(childDetailsRevisedElement)).children(List.of(childElement))
                         .build(),data,allegationOfHarmRevised);
-        Assert.assertFalse(data.isEmpty());
+        assertFalse(data.isEmpty());
 
     }
 
     @Test
-    public void testGetWhichChildrenAreInRiskPhysicalAbuse() {
+    void testGetWhichChildrenAreInRiskPhysicalAbuse() {
         RespondentAllegationsOfHarmData allegationOfHarmRevised = RespondentAllegationsOfHarmData.builder()
                 .respAllChildrenAreRiskPhysicalAbuse(YesOrNo.No)
                 .respWhichChildrenAreRiskPhysicalAbuse(DynamicMultiSelectList.builder()
@@ -160,12 +161,12 @@ public class RespondentAllegationOfHarmServiceTest {
                 .build();
         DynamicMultiSelectList childrenInRisk = respondentAllegationOfHarmService
                 .getWhichChildrenAreInRisk(ChildAbuseEnum.physicalAbuse,allegationOfHarmRevised);
-        Assert.assertNotNull(childrenInRisk);
+        assertNotNull(childrenInRisk);
 
     }
 
     @Test
-    public void testGetWhichChildrenAreInRiskPsychologicalAbuse() {
+    void testGetWhichChildrenAreInRiskPsychologicalAbuse() {
         RespondentAllegationsOfHarmData allegationOfHarmRevised = RespondentAllegationsOfHarmData.builder()
                 .respAllChildrenAreRiskPsychologicalAbuse(YesOrNo.No)
                 .respWhichChildrenAreRiskPsychologicalAbuse(DynamicMultiSelectList.builder()
@@ -176,12 +177,12 @@ public class RespondentAllegationOfHarmServiceTest {
                 .build();
         DynamicMultiSelectList childrenInRisk = respondentAllegationOfHarmService
                 .getWhichChildrenAreInRisk(ChildAbuseEnum.psychologicalAbuse,allegationOfHarmRevised);
-        Assert.assertNotNull(childrenInRisk);
+        assertNotNull(childrenInRisk);
 
     }
 
     @Test
-    public void testGetWhichChildrenAreInRiskSexualAbuse() {
+    void testGetWhichChildrenAreInRiskSexualAbuse() {
         RespondentAllegationsOfHarmData allegationOfHarmRevised = RespondentAllegationsOfHarmData.builder()
                 .respAllChildrenAreRiskSexualAbuse(YesOrNo.No)
                 .respWhichChildrenAreRiskSexualAbuse(DynamicMultiSelectList.builder()
@@ -192,12 +193,12 @@ public class RespondentAllegationOfHarmServiceTest {
                 .build();
         DynamicMultiSelectList childrenInRisk = respondentAllegationOfHarmService
                 .getWhichChildrenAreInRisk(ChildAbuseEnum.sexualAbuse,allegationOfHarmRevised);
-        Assert.assertNotNull(childrenInRisk);
+        assertNotNull(childrenInRisk);
 
     }
 
     @Test
-    public void testGetWhichChildrenAreInRiskEmotionalAbuse() {
+    void testGetWhichChildrenAreInRiskEmotionalAbuse() {
         RespondentAllegationsOfHarmData allegationOfHarmRevised = RespondentAllegationsOfHarmData.builder()
                 .respAllChildrenAreRiskEmotionalAbuse(YesOrNo.No)
                 .respWhichChildrenAreRiskEmotionalAbuse(DynamicMultiSelectList.builder()
@@ -208,12 +209,12 @@ public class RespondentAllegationOfHarmServiceTest {
                 .build();
         DynamicMultiSelectList childrenInRisk = respondentAllegationOfHarmService
                 .getWhichChildrenAreInRisk(ChildAbuseEnum.emotionalAbuse,allegationOfHarmRevised);
-        Assert.assertNotNull(childrenInRisk);
+        assertNotNull(childrenInRisk);
 
     }
 
     @Test
-    public void testGetWhichChildrenAreInRiskFinancialAbuse() {
+    void testGetWhichChildrenAreInRiskFinancialAbuse() {
         RespondentAllegationsOfHarmData allegationOfHarmRevised = RespondentAllegationsOfHarmData.builder()
                 .respAllChildrenAreRiskFinancialAbuse(YesOrNo.No)
                 .respWhichChildrenAreRiskFinancialAbuse(DynamicMultiSelectList.builder()
@@ -224,7 +225,7 @@ public class RespondentAllegationOfHarmServiceTest {
                 .build();
         DynamicMultiSelectList childrenInRisk = respondentAllegationOfHarmService
                 .getWhichChildrenAreInRisk(ChildAbuseEnum.financialAbuse,allegationOfHarmRevised);
-        Assert.assertNotNull(childrenInRisk);
+        assertNotNull(childrenInRisk);
 
     }
 

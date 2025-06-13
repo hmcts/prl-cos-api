@@ -1,24 +1,24 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import net.serenitybdd.junit.spring.integration.SpringIntegrationSerenityRunner;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@Ignore
-@ExtendWith(SpringIntegrationSerenityRunner.class)
+@Disabled
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = {Application.class, SendGridIntegrationTest.class})
 public class SendGridIntegrationTest {
 

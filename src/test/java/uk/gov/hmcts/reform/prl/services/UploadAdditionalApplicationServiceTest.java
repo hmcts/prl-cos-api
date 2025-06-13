@@ -105,7 +105,7 @@ class UploadAdditionalApplicationServiceTest {
     PartyDetails party;
 
     @BeforeEach
-    public void setUp() throws Exception {
+    void setUp() throws Exception {
         List<DynamicMultiselectListElement> dynamicMultiselectListElements = new ArrayList<>();
         DynamicMultiselectListElement partyDynamicMultiselectListElement = DynamicMultiselectListElement.builder()
             .code("f2847b15-dbb8-4df0-868a-420d9de11d29")

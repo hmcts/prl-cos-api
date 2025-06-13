@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,13 +23,14 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
-public class ServiceOfApplicationEmailServiceTest {
+class ServiceOfApplicationEmailServiceTest {
 
     @Mock
     private EmailService emailService;
@@ -42,7 +42,7 @@ public class ServiceOfApplicationEmailServiceTest {
     SendgridService sendgridService;
 
     @Test
-    public void testCafcassEmail() {
+    void testCafcassEmail() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
@@ -58,7 +58,7 @@ public class ServiceOfApplicationEmailServiceTest {
     }
 
     @Test
-    public void testLocalAuthorityEmail() {
+    void testLocalAuthorityEmail() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
@@ -75,7 +75,7 @@ public class ServiceOfApplicationEmailServiceTest {
     }
 
     @Test
-    public void testLocalAuthorityEmailNotification() {
+    void testLocalAuthorityEmailNotification() {
         when(sendgridService.sendEmailUsingTemplateWithAttachments(Mockito.any(),Mockito.anyString(),Mockito.any()))
             .thenReturn(true);
         CaseData caseData = CaseData.builder()
@@ -105,7 +105,7 @@ public class ServiceOfApplicationEmailServiceTest {
     }
 
     @Test
-    public void testsendEmailUsingTemplateWithAttachments() {
+    void testsendEmailUsingTemplateWithAttachments() {
         when(sendgridService.sendEmailUsingTemplateWithAttachments(Mockito.any(),Mockito.anyString(),Mockito.any()))
             .thenReturn(true);
         serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments("test",
@@ -120,7 +120,7 @@ public class ServiceOfApplicationEmailServiceTest {
     }
 
     @Test
-    public void testCitizenEmailVars() {
+    void testCitizenEmailVars() {
         EmailTemplateVars emailTemplateVars = serviceOfApplicationEmailService.buildCitizenEmailVars(CaseData.builder()
                                                                                                          .id(123L)
                                                                                                          .build(),
@@ -129,7 +129,7 @@ public class ServiceOfApplicationEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailWithAttachmentsWhenExceptionOccurs() {
+    void testSendEmailWithAttachmentsWhenExceptionOccurs() {
         when(sendgridService.sendEmailUsingTemplateWithAttachments(
             Mockito.any(),
             Mockito.anyString(),
@@ -143,11 +143,11 @@ public class ServiceOfApplicationEmailServiceTest {
             new HashMap<>(),
             PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR
         );
-        Assert.assertNull(emailNotificationDetails);
+        assertNull(emailNotificationDetails);
     }
 
     @Test
-    public void testSendEmailToLocalAuthorityWhenExceptionOccurs() {
+    void testSendEmailToLocalAuthorityWhenExceptionOccurs() {
 
         CaseData caseData = CaseData.builder().id(12345L).caseTypeOfApplication("C100").applicantCaseName(
             "Test Case 45678").build();
@@ -164,11 +164,11 @@ public class ServiceOfApplicationEmailServiceTest {
                 Document.builder().build()),
             "Local authority"
         );
-        Assert.assertNull(emailNotificationDetails);
+        assertNull(emailNotificationDetails);
     }
 
     @Test
-    public void testsendEmailUsingTemplateWithAttachments1() {
+    void testsendEmailUsingTemplateWithAttachments1() {
         when(sendgridService.sendEmailUsingTemplateWithAttachments(
             Mockito.any(),
             Mockito.anyString(),
@@ -192,7 +192,7 @@ public class ServiceOfApplicationEmailServiceTest {
     }
 
     @Test
-    public void testLocalAuthorityEmailNotification1() {
+    void testLocalAuthorityEmailNotification1() {
         CaseData caseData = CaseData.builder().id(12345L).caseTypeOfApplication("C100").applicantCaseName(
             "Test Case 45678").build();
         when(sendgridService.sendEmailUsingTemplateWithAttachments(

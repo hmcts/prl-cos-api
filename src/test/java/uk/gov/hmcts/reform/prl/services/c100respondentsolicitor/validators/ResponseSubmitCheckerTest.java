@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class ResponseSubmitCheckerTest {
+class ResponseSubmitCheckerTest {
 
     @InjectMocks
     ResponseSubmitChecker responseSubmitChecker;
@@ -71,7 +71,7 @@ public class ResponseSubmitCheckerTest {
     PartyDetails emptyRespondent;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         emptyRespondent = PartyDetails.builder().build();
 
         PartyDetails respondent = PartyDetails.builder()
@@ -108,14 +108,14 @@ public class ResponseSubmitCheckerTest {
     }
 
     @Test
-    public void isStarted() {
+    void isStarted() {
 
         Boolean bool = responseSubmitChecker.isStarted(emptyRespondent, true);
         assertFalse(bool);
     }
 
     @Test
-    public void hasMandatoryCompletedFalse() {
+    void hasMandatoryCompletedFalse() {
 
         when(respondentEventsChecker.getConsentToApplicationChecker()).thenReturn(consentToApplicationChecker);
         when(respondentEventsChecker.getKeepDetailsPrivateChecker()).thenReturn(keepDetailsPrivateChecker);
@@ -133,7 +133,7 @@ public class ResponseSubmitCheckerTest {
     }
 
     @Test
-    public void hasMandatoryCompletedTrue() {
+    void hasMandatoryCompletedTrue() {
 
         when(respondentEventsChecker.getConsentToApplicationChecker()).thenReturn(consentToApplicationChecker);
         when(consentToApplicationChecker.isFinished(respondent, true)).thenReturn(true);

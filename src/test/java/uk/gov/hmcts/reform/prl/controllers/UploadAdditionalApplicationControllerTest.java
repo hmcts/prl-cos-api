@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
-import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -88,7 +87,7 @@ public class UploadAdditionalApplicationControllerTest {
     public static final String s2sToken = "s2s AuthToken";
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         Map<String, List<DynamicMultiselectListElement>> listItems = new HashMap<>();
         listItems.put("applicants", List.of(DynamicMultiselectListElement.EMPTY));
         listItems.put("respondents", List.of(DynamicMultiselectListElement.EMPTY));
@@ -103,7 +102,7 @@ public class UploadAdditionalApplicationControllerTest {
     }
 
     @Test
-    public void testPrePopulateApplicants() throws NotFoundException {
+    void testPrePopulateApplicants() throws NotFoundException {
 
         PartyDetails applicant1 = PartyDetails.builder()
             .firstName("test1")
@@ -156,7 +155,7 @@ public class UploadAdditionalApplicationControllerTest {
     }
 
     @Test
-    public void testExceptionForPrePopulateApplicants() {
+    void testExceptionForPrePopulateApplicants() {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("temporaryOtherApplicationsBundle", "test");
         caseDataUpdated.put("temporaryC2Document", "test");
@@ -169,13 +168,16 @@ public class UploadAdditionalApplicationControllerTest {
                              .id(1L)
                              .data(caseDataUpdated).build()).build();
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
             uploadAdditionalApplicationController.prePopulateApplicants(authToken,callbackRequest, s2sToken);
-        }, RuntimeException.class, "Invalid Client");
+        });
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testPrePopulateApplicantsNotFound() throws NotFoundException {
+    void testPrePopulateApplicantsNotFound() throws NotFoundException {
         CaseData caseData = CaseData.builder().build();
         Map<String, Object> caseDataUpdated = new HashMap<>();
 
@@ -197,7 +199,7 @@ public class UploadAdditionalApplicationControllerTest {
     }
 
     @Test
-    public void testcreateUploadAdditionalApplicationBundle() throws Exception {
+    void testcreateUploadAdditionalApplicationBundle() throws Exception {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicationsApplyingFor(AdditionalApplicationTypeEnum.otherOrder)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
@@ -236,7 +238,7 @@ public class UploadAdditionalApplicationControllerTest {
     }
 
     @Test
-    public void testExceptionForUploadAdditionalApplicationBundle() {
+    void testExceptionForUploadAdditionalApplicationBundle() {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("temporaryOtherApplicationsBundle", "test");
         caseDataUpdated.put("temporaryC2Document", "test");
@@ -249,14 +251,17 @@ public class UploadAdditionalApplicationControllerTest {
                              .id(1L)
                              .data(caseDataUpdated).build()).build();
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
             uploadAdditionalApplicationController.createUploadAdditionalApplicationBundle(authToken,callbackRequest, s2sToken);
-        }, RuntimeException.class, "Invalid Client");
+        });
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
 
     @Test
-    public void testcreateUploadAdditionalApplicationBundleWithCaseDataMap() throws Exception {
+    void testcreateUploadAdditionalApplicationBundleWithCaseDataMap() throws Exception {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("temporaryOtherApplicationsBundle", "test");
         caseDataUpdated.put("temporaryC2Document", "test");
@@ -290,7 +295,7 @@ public class UploadAdditionalApplicationControllerTest {
     }
 
     @Test
-    public void testExceptionForUploadAdditionalApplicationBundleWithCaseDataMap() {
+    void testExceptionForUploadAdditionalApplicationBundleWithCaseDataMap() {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("temporaryOtherApplicationsBundle", "test");
         caseDataUpdated.put("temporaryC2Document", "test");
@@ -303,13 +308,18 @@ public class UploadAdditionalApplicationControllerTest {
                              .id(1L)
                              .data(caseDataUpdated).build()).build();
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
             uploadAdditionalApplicationController.createUploadAdditionalApplicationBundle(authToken,callbackRequest, s2sToken);
-        }, RuntimeException.class, "Invalid Client");
+        });
+
+        assertEquals("Invalid Client", ex.getMessage());
+
+
     }
 
     @Test
-    public void testcalculateAdditionalApplicationsFee() throws Exception {
+    void testcalculateAdditionalApplicationsFee() throws Exception {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("temporaryOtherApplicationsBundle", "test");
         caseDataUpdated.put("temporaryC2Document", "test");
@@ -343,7 +353,7 @@ public class UploadAdditionalApplicationControllerTest {
     }
 
     @Test
-    public void testExceptionForCalculateAdditionalApplicationsFee() {
+    void testExceptionForCalculateAdditionalApplicationsFee() {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("temporaryOtherApplicationsBundle", "test");
         caseDataUpdated.put("temporaryC2Document", "test");
@@ -356,13 +366,16 @@ public class UploadAdditionalApplicationControllerTest {
                              .id(1L)
                              .data(caseDataUpdated).build()).build();
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
             uploadAdditionalApplicationController.calculateAdditionalApplicationsFee(authToken,callbackRequest, s2sToken);
-        }, RuntimeException.class, "Invalid Client");
+        });
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testUploadAdditionalApplicationSubmitted() throws Exception {
+    void testUploadAdditionalApplicationSubmitted() throws Exception {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("temporaryOtherApplicationsBundle", "test");
         caseDataUpdated.put("temporaryC2Document", "test");
@@ -395,7 +408,7 @@ public class UploadAdditionalApplicationControllerTest {
     }
 
     @Test
-    public void testExceptionForUploadAdditionalApplicationSubmitted() {
+    void testExceptionForUploadAdditionalApplicationSubmitted() {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("temporaryOtherApplicationsBundle", "test");
         caseDataUpdated.put("temporaryC2Document", "test");
@@ -408,13 +421,16 @@ public class UploadAdditionalApplicationControllerTest {
                              .id(1L)
                              .data(caseDataUpdated).build()).build();
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
             uploadAdditionalApplicationController.uploadAdditionalApplicationSubmittedEvent(authToken,callbackRequest, s2sToken);
-        }, RuntimeException.class, "Invalid Client");
+        });
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testUploadAdditionalApplicationMidEvent() throws Exception {
+    void testUploadAdditionalApplicationMidEvent() throws Exception {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("temporaryOtherApplicationsBundle", "test");
         caseDataUpdated.put("temporaryC2Document", "test");
@@ -447,7 +463,7 @@ public class UploadAdditionalApplicationControllerTest {
     }
 
     @Test
-    public void testExceptionForUploadAdditionalApplicationMidEvent() {
+    void testExceptionForUploadAdditionalApplicationMidEvent() {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("temporaryOtherApplicationsBundle", "test");
         caseDataUpdated.put("temporaryC2Document", "test");
@@ -460,15 +476,10 @@ public class UploadAdditionalApplicationControllerTest {
                              .id(1L)
                              .data(caseDataUpdated).build()).build();
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
             uploadAdditionalApplicationController.populateHearingList(authToken,callbackRequest, s2sToken);
-        }, RuntimeException.class, "Invalid Client");
+        });
+        assertEquals("Invalid Client", ex.getMessage());
     }
-
-    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
-                                                                 String expectedMessage) {
-        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
-        assertEquals(expectedMessage, exception.getMessage());
-    }
-
 }

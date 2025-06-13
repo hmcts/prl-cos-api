@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class SubmitCheckerTest {
+class SubmitCheckerTest {
 
     @Mock
     SubmitAndPayChecker submitAndPayChecker;
@@ -22,7 +22,7 @@ public class SubmitCheckerTest {
     SubmitChecker submitChecker;
 
     @Test
-    public void whenSubmitAndPayCheckerFinished_thenSubmitCheckerAlsoFinished() {
+    void whenSubmitAndPayCheckerFinished_thenSubmitCheckerAlsoFinished() {
         CaseData caseData = CaseData.builder().build();
         when(submitAndPayChecker.isFinished(caseData)).thenReturn(true);
         assertTrue(submitChecker.isFinished(caseData));
@@ -30,19 +30,19 @@ public class SubmitCheckerTest {
     }
 
     @Test
-    public void whenNoCaseData_thenSubmitCheckerNotStarted() {
+    void whenNoCaseData_thenSubmitCheckerNotStarted() {
         CaseData caseData = CaseData.builder().build();
         assertFalse(submitChecker.isStarted(caseData));
     }
 
     @Test
-    public void whenNoCaseData_thenSubmitCheckerHasMandatoryCompletedFalse() {
+    void whenNoCaseData_thenSubmitCheckerHasMandatoryCompletedFalse() {
         CaseData caseData = CaseData.builder().build();
         assertFalse(submitChecker.hasMandatoryCompleted(caseData));
     }
 
     @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+    void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
         assertNotNull(submitChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

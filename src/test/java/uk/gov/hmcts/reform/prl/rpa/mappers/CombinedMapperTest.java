@@ -16,18 +16,18 @@ import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
-import javax.json.JsonArray;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.json.JsonArray;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 @ExtendWith(MockitoExtension.class)
-public class CombinedMapperTest {
+class CombinedMapperTest {
 
     @InjectMocks
     CombinedMapper combinedMapper;
@@ -53,7 +53,7 @@ public class CombinedMapperTest {
 
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         address = Address.builder()
             .addressLine1("55 Test Street")
             .postTown("Town")
@@ -84,7 +84,7 @@ public class CombinedMapperTest {
 
 
     @Test
-    public void testWithNullValues() {
+    void testWithNullValues() {
         CaseData caseData = CaseData.builder().build();
         assertNull(combinedMapper.map(caseData));
     }

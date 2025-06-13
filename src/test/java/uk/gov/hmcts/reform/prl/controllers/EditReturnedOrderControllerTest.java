@@ -1,8 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
-import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,8 +33,10 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -67,14 +67,14 @@ public class EditReturnedOrderControllerTest {
     public static final String s2sToken = "s2s AuthToken";
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(),
                                                               Mockito.any(), Mockito.anyString(),
                                                               Mockito.anyString())).thenReturn(DraftOrder.builder().build());
     }
 
     @Test
-    public void testGenerateReturnedOrdersDropdown() {
+    void testGenerateReturnedOrdersDropdown() {
         Map<String, Object> caseDataMap = new HashMap<>();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         caseDataMap.put("rejectedOrdersDynamicList", DynamicList.builder().build());
@@ -88,11 +88,11 @@ public class EditReturnedOrderControllerTest {
             .build();
         AboutToStartOrSubmitCallbackResponse response = editReturnedOrderController
             .handleAboutToStart(authToken,s2sToken,callbackRequest);
-        Assert.assertTrue(response.getData().containsKey("rejectedOrdersDynamicList"));
+        assertTrue(response.getData().containsKey("rejectedOrdersDynamicList"));
     }
 
     @Test
-    public void testInvaliddClientOnHandleAboutToStart() {
+    void testInvaliddClientOnHandleAboutToStart() {
         CaseData caseData = CaseData.builder()
             .id(123L)
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -108,13 +108,15 @@ public class EditReturnedOrderControllerTest {
                              .data(caseDataMap)
                              .build())
             .build();
-        assertExpectedException(() -> {
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
             editReturnedOrderController.handleAboutToStart(authToken, s2sToken, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+        });
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testPopulateInstructions() {
+    void testPopulateInstructions() {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(editReturnedOrderService.populateInstructionsAndFieldsForLegalRep(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any()))
             .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("error1")).build());
@@ -125,11 +127,11 @@ public class EditReturnedOrderControllerTest {
             .build();
         AboutToStartOrSubmitCallbackResponse response = editReturnedOrderController
             .populateInstructionsToSolicitor(authToken,s2sToken,PrlAppsConstants.ENGLISH,callbackRequest);
-        Assert.assertFalse(response.getErrors().isEmpty());
+        assertFalse(response.getErrors().isEmpty());
     }
 
     @Test
-    public void testInvaliddClientOnPopulateInstructionsCallBack() {
+    void testInvaliddClientOnPopulateInstructionsCallBack() {
         CaseData caseData = CaseData.builder()
             .id(123L)
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -145,13 +147,15 @@ public class EditReturnedOrderControllerTest {
                              .data(caseDataMap)
                              .build())
             .build();
-        assertExpectedException(() -> {
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
             editReturnedOrderController.populateInstructionsToSolicitor(authToken, s2sToken, PrlAppsConstants.ENGLISH, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+        });
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testInvaliddClientOnSubmittedCallBack() {
+    void testInvaliddClientOnSubmittedCallBack() {
         CaseData caseData = CaseData.builder()
             .id(123L)
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -167,13 +171,15 @@ public class EditReturnedOrderControllerTest {
                              .data(caseDataMap)
                              .build())
             .build();
-        assertExpectedException(() -> {
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
             editReturnedOrderController.handleEditAndReturnedSubmitted(authToken, s2sToken, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+        });
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testSubmittedCallBack() {
+    void testSubmittedCallBack() {
         CaseData caseData = CaseData.builder()
             .id(123L)
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -197,11 +203,5 @@ public class EditReturnedOrderControllerTest {
         ResponseEntity<SubmittedCallbackResponse> responseEntity = editReturnedOrderController
             .handleEditAndReturnedSubmitted(authToken, s2sToken, callbackRequest);
         assertNotNull(responseEntity.getBody());
-    }
-
-    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
-                                                                 String expectedMessage) {
-        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
-        assertEquals(expectedMessage, exception.getMessage());
     }
 }

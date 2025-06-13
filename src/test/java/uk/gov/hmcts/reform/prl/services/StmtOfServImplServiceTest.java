@@ -63,7 +63,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILEN
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
-public class StmtOfServImplServiceTest {
+class StmtOfServImplServiceTest {
 
     @InjectMocks
     private StmtOfServImplService stmtOfServImplService;
@@ -101,7 +101,7 @@ public class StmtOfServImplServiceTest {
     private static final String ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER = "enable-citizen-access-code-in-cover-letter";
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         respondent = PartyDetails.builder()
             .lastName("TestLast")
             .firstName("TestFirst")
@@ -130,7 +130,7 @@ public class StmtOfServImplServiceTest {
     }
 
     @Test
-    public void testToAddRespondentsAsDynamicListForC100() {
+    void testToAddRespondentsAsDynamicListForC100() {
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -178,7 +178,7 @@ public class StmtOfServImplServiceTest {
 
 
     @Test
-    public void testToAddRespondentsAsDynamicListForFL401() {
+    void testToAddRespondentsAsDynamicListForFL401() {
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -229,7 +229,7 @@ public class StmtOfServImplServiceTest {
     }
 
     @Test
-    public void testToHandleSosAboutToSubmitForC100WhileServingApplicationPack() {
+    void testToHandleSosAboutToSubmitForC100WhileServingApplicationPack() {
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -299,7 +299,7 @@ public class StmtOfServImplServiceTest {
     }
 
     @Test
-    public void testToHandleSosAboutToSubmitForC100WhileServingOrder() {
+    void testToHandleSosAboutToSubmitForC100WhileServingOrder() {
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -366,7 +366,7 @@ public class StmtOfServImplServiceTest {
     }
 
     @Test
-    public void testToHandleSosAboutToSubmitForFL401WhileServingApplicationPack() {
+    void testToHandleSosAboutToSubmitForFL401WhileServingApplicationPack() {
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -437,7 +437,7 @@ public class StmtOfServImplServiceTest {
     }
 
     @Test
-    public void testToHandleSosAboutToSubmitForFL401ServedByCourtAdmin() {
+    void testToHandleSosAboutToSubmitForFL401ServedByCourtAdmin() {
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -508,7 +508,7 @@ public class StmtOfServImplServiceTest {
     }
 
     @Test
-    public void testToHandleSosAboutToSubmitForFL401WhileServingOrder() {
+    void testToHandleSosAboutToSubmitForFL401WhileServingOrder() {
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -573,7 +573,7 @@ public class StmtOfServImplServiceTest {
     }
 
     @Test
-    public void testToHandleSosAboutToSubmitForC100Scenario2WhileServingApplicationPack() {
+    void testToHandleSosAboutToSubmitForC100Scenario2WhileServingApplicationPack() {
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -646,11 +646,11 @@ public class StmtOfServImplServiceTest {
         assertNotNull(updatedCaseData);
         assertEquals(TEST_UUID,
                      ((List<Element<StmtOfServiceAddRecipient>>)updatedCaseData.get("stmtOfServiceForApplication"))
-                         .get(0).getValue().getSelectedPartyId());
+                         .getFirst().getValue().getSelectedPartyId());
     }
 
     @Test
-    public void testToHandleSosAboutToSubmitForC100Scenario2WhileServingOrder() {
+    void testToHandleSosAboutToSubmitForC100Scenario2WhileServingOrder() {
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -712,7 +712,7 @@ public class StmtOfServImplServiceTest {
     }
 
     @Test
-    public void testcitizenSosSubmissionC100() {
+    void testcitizenSosSubmissionC100() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .serviceOfApplication(ServiceOfApplication.builder()
@@ -753,7 +753,7 @@ public class StmtOfServImplServiceTest {
     }
 
     @Test
-    public void testcitizenSosSubmissionFl401() {
+    void testcitizenSosSubmissionFl401() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .serviceOfApplication(ServiceOfApplication.builder()
@@ -793,7 +793,7 @@ public class StmtOfServImplServiceTest {
     }
 
     @Test
-    public void testcitizenSosSubmissionFl401Order() {
+    void testcitizenSosSubmissionFl401Order() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .serviceOfApplication(ServiceOfApplication.builder()
@@ -833,7 +833,7 @@ public class StmtOfServImplServiceTest {
     }
 
     @Test
-    public void testcitizenSosSubmissionC100Order() {
+    void testcitizenSosSubmissionC100Order() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .serviceOfApplication(ServiceOfApplication.builder()

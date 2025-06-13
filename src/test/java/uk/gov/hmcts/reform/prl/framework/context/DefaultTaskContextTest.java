@@ -10,28 +10,28 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-public class DefaultTaskContextTest {
+class DefaultTaskContextTest {
 
     private DefaultTaskContext defaultTaskContext;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         defaultTaskContext = new DefaultTaskContext();
     }
 
     @Test
-    public void defaultContextTasFailedIsFalseByDefault() {
+    void defaultContextTasFailedIsFalseByDefault() {
         assertThat(defaultTaskContext.hasTaskFailed(), is(false));
     }
 
     @Test
-    public void defaultContextStatusIsTrueWhenSetFailedIsCalled() {
+    void defaultContextStatusIsTrueWhenSetFailedIsCalled() {
         defaultTaskContext.setTaskFailed(true);
         assertTrue(defaultTaskContext.hasTaskFailed());
     }
 
     @Test
-    public void computesTransientObjectIfAbsent() {
+    void computesTransientObjectIfAbsent() {
         defaultTaskContext.setTransientObject("foo", null);
         defaultTaskContext.computeTransientObjectIfAbsent("foo", "bar");
 
@@ -39,7 +39,7 @@ public class DefaultTaskContextTest {
     }
 
     @Test
-    public void doesNotComputeTransientObjectIfAbsent() {
+    void doesNotComputeTransientObjectIfAbsent() {
         defaultTaskContext.setTransientObject("foo", "bar");
         defaultTaskContext.computeTransientObjectIfAbsent("foo", "baz");
 
@@ -49,7 +49,7 @@ public class DefaultTaskContextTest {
     }
 
     @Test
-    public void useOverloadedConstructor() {
+    void useOverloadedConstructor() {
         defaultTaskContext.setTransientObject("foo", "bar");
         DefaultTaskContext context = new DefaultTaskContext(defaultTaskContext);
 

@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,7 +34,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
-public class ResetAccessCodeControllerTest {
+class ResetAccessCodeControllerTest {
 
 
     @InjectMocks
@@ -60,23 +59,27 @@ public class ResetAccessCodeControllerTest {
     public static final String S2S_TOKEN = "s2s AuthToken";
 
     @BeforeEach
-    public void init() {
+    void init() {
 
         caseData = new HashMap<>();
         caseData.put("id", 12345L);
         caseData.put("caseTypeOfApplication", "C100");
-        caseData.put("applicants", List.of(element(PartyDetails.builder()
-                                                       .email("abc1@de.com")
-                                                       .representativeLastName("LastName")
-                                                       .representativeFirstName("FirstName")
-                                                       .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
-                                                       .build())));
-        caseData.put("respondents", List.of(element(PartyDetails.builder()
-                                                        .email("abc2@de.com")
-                                                        .representativeLastName("LastName")
-                                                        .representativeFirstName("FirstName")
-                                                        .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
-                                                        .build())));
+        caseData.put(
+            "applicants", List.of(element(PartyDetails.builder()
+                                              .email("abc1@de.com")
+                                              .representativeLastName("LastName")
+                                              .representativeFirstName("FirstName")
+                                              .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                                              .build()))
+        );
+        caseData.put(
+            "respondents", List.of(element(PartyDetails.builder()
+                                               .email("abc2@de.com")
+                                               .representativeLastName("LastName")
+                                               .representativeFirstName("FirstName")
+                                               .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                                               .build()))
+        );
 
 
         caseData1 = CaseData.builder()
@@ -106,7 +109,7 @@ public class ResetAccessCodeControllerTest {
     }
 
     @Test
-    public void testResetAccessCodeFlow() {
+    void testResetAccessCodeFlow() {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
                              .id(1L)
@@ -114,14 +117,14 @@ public class ResetAccessCodeControllerTest {
         CaseInvite caseInvite1 = new CaseInvite("abc1@de.com", "ABCD1234", "abc1", UUID.randomUUID(), YesOrNo.Yes);
         CaseInvite caseInvite2 = new CaseInvite("abc2@de.com", "WXYZ5678", "abc2", UUID.randomUUID(), YesOrNo.No);
         List<Element<CaseInvite>> caseInvites = List.of(element(caseInvite1), element(caseInvite2));
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = resetAccessCodeController
             .resetAccessCode(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         assertTrue(response.getData().containsKey("caseInvites"));
     }
 
     @Test
-    public void testExceptionForResetAccessCodeFlow() {
+    void testExceptionForResetAccessCodeFlow() {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
                              .id(1L)
@@ -129,17 +132,14 @@ public class ResetAccessCodeControllerTest {
         CaseInvite caseInvite1 = new CaseInvite("abc1@de.com", "ABCD1234", "abc1", UUID.randomUUID(), YesOrNo.Yes);
         CaseInvite caseInvite2 = new CaseInvite("abc2@de.com", "WXYZ5678", "abc2", UUID.randomUUID(), YesOrNo.No);
         List<Element<CaseInvite>> caseInvites = List.of(element(caseInvite1), element(caseInvite2));
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
-        assertExpectedException(() -> {
-            resetAccessCodeController
-                .resetAccessCode(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
-    }
 
-    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
-                                                                 String expectedMessage) {
-        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
-        assertEquals(expectedMessage, exception.getMessage());
+        RuntimeException ex = assertThrows(
+            RuntimeException.class, () -> {
+                resetAccessCodeController.resetAccessCode(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+            }
+        );
+        assertEquals("Invalid Client", ex.getMessage());
     }
 }

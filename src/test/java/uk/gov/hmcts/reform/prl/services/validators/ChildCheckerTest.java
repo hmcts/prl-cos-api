@@ -30,7 +30,7 @@ import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
 
 @ExtendWith(MockitoExtension.class)
-public class ChildCheckerTest {
+class ChildCheckerTest {
 
     @Mock
     TaskErrorService taskErrorService;
@@ -39,25 +39,25 @@ public class ChildCheckerTest {
     ChildChecker childChecker;
 
     @Test
-    public void whenNoCaseDataPresentThenIsStartedReturnsFalse() {
+    void whenNoCaseDataPresentThenIsStartedReturnsFalse() {
         CaseData caseData = CaseData.builder().build();
 
-        assertTrue(!childChecker.isStarted(caseData));
+        assertFalse(childChecker.isStarted(caseData));
     }
 
     @Test
-    public void whenEmptyChildDataPresentThenIsStartedReturnsFalse() {
+    void whenEmptyChildDataPresentThenIsStartedReturnsFalse() {
         Child child = Child.builder().build();
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder().children(listOfChildren).build();
 
-        assertTrue(!childChecker.isStarted(caseData));
+        assertFalse(childChecker.isStarted(caseData));
     }
 
     @Test
-    public void whenSomeChildDataPresentThenIsStartedReturnsTrue() {
+    void whenSomeChildDataPresentThenIsStartedReturnsTrue() {
         Child child = Child.builder().firstName("Test").lastName("Name").build();
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
@@ -68,36 +68,36 @@ public class ChildCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataPresentThenIsFinishedReturnsFalse() {
+    void whenNoCaseDataPresentThenIsFinishedReturnsFalse() {
         CaseData caseData = CaseData.builder().build();
 
-        assertTrue(!childChecker.isFinished(caseData));
+        assertFalse(childChecker.isFinished(caseData));
     }
 
     @Test
-    public void whenEmptyChildDataPresentThenIsFinishedReturnsFalse() {
+    void whenEmptyChildDataPresentThenIsFinishedReturnsFalse() {
         Child child = Child.builder().build();
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder().children(listOfChildren).build();
 
-        assertTrue(!childChecker.isFinished(caseData));
+        assertFalse(childChecker.isFinished(caseData));
     }
 
     @Test
-    public void whenSomeChildDataPresentThenIsFinishedReturnsFalse() {
+    void whenSomeChildDataPresentThenIsFinishedReturnsFalse() {
         Child child = Child.builder().firstName("Test").lastName("Name").build();
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder().children(listOfChildren).build();
 
-        assertTrue(!childChecker.isFinished(caseData));
+        assertFalse(childChecker.isFinished(caseData));
     }
 
     @Test
-    public void whenAllChildDataPresentThenIsFinishedReturnsTrue() {
+    void whenAllChildDataPresentThenIsFinishedReturnsTrue() {
         Child child = Child.builder()
             .firstName("Test")
             .lastName("Name")
@@ -125,7 +125,7 @@ public class ChildCheckerTest {
     }
 
     @Test
-    public void whenAllChildDataPresentAndChoosenAnotherPersonNotListedWithNoPersonDetails() {
+    void whenAllChildDataPresentAndChoosenAnotherPersonNotListedWithNoPersonDetails() {
         Child child = Child.builder()
             .firstName("Test")
             .lastName("Name")
@@ -150,7 +150,7 @@ public class ChildCheckerTest {
     }
 
     @Test
-    public void whenAllChildDataPresentAndChoosenAnotherPersonNotListedWithPersonDetails() {
+    void whenAllChildDataPresentAndChoosenAnotherPersonNotListedWithPersonDetails() {
 
         Address address = Address.builder()
             .addressLine1("address")
@@ -191,7 +191,7 @@ public class ChildCheckerTest {
     }
 
     @Test
-    public void whenParentalResChildDataNotPresentAndChoosenAnotherPersonNotListedWithPersonDetails() {
+    void whenParentalResChildDataNotPresentAndChoosenAnotherPersonNotListedWithPersonDetails() {
 
         Address address = Address.builder()
             .postTown("London")
@@ -231,7 +231,7 @@ public class ChildCheckerTest {
     }
 
     @Test
-    public void whenAllChildDataPresentAndChoosenAnotherPersonNotListedWithPersonDetailsNotAvailableInSecondRow() {
+    void whenAllChildDataPresentAndChoosenAnotherPersonNotListedWithPersonDetailsNotAvailableInSecondRow() {
 
         Address address = Address.builder()
             .postTown("London")
@@ -280,7 +280,7 @@ public class ChildCheckerTest {
 
 
     @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+    void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
         assertNotNull(childChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

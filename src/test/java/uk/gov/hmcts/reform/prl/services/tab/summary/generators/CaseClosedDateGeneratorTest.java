@@ -13,7 +13,7 @@ public class CaseClosedDateGeneratorTest {
     private final CaseClosedDateGenerator generator = new CaseClosedDateGenerator();
 
     @Test
-    public void testGenerate() {
+    void testGenerate() {
         CaseSummary caseSummary = generator.generate(CaseData.builder()
                 .finalCaseClosedDate("24 Sep 2024")
                 .build());

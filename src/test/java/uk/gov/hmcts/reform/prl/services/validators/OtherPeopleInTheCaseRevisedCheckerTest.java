@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
-public class OtherPeopleInTheCaseRevisedCheckerTest {
+class OtherPeopleInTheCaseRevisedCheckerTest {
 
     @Mock
     TaskErrorService taskErrorService;
@@ -34,7 +34,7 @@ public class OtherPeopleInTheCaseRevisedCheckerTest {
     OtherPeopleInTheCaseRevisedChecker otherPeopleInTheCaseChecker;
 
     @Test
-    public void whenNoCaseDataThenIsStartedReturnsFalse() {
+    void whenNoCaseDataThenIsStartedReturnsFalse() {
 
         CaseData caseData = CaseData.builder().build();
 
@@ -43,7 +43,7 @@ public class OtherPeopleInTheCaseRevisedCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataThenIsFinishedReturnsFalse() {
+    void whenNoCaseDataThenIsFinishedReturnsFalse() {
 
         CaseData caseData = CaseData.builder().build();
 
@@ -52,7 +52,7 @@ public class OtherPeopleInTheCaseRevisedCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataThenHasMandatoryReturnsFalse() {
+    void whenNoCaseDataThenHasMandatoryReturnsFalse() {
 
         CaseData caseData = CaseData.builder().build();
 
@@ -61,7 +61,7 @@ public class OtherPeopleInTheCaseRevisedCheckerTest {
     }
 
     @Test
-    public void whenMinimalRelevantCaseDataThenIsStartedReturnsTrue() {
+    void whenMinimalRelevantCaseDataThenIsStartedReturnsTrue() {
         PartyDetails other = PartyDetails.builder().firstName("TestName").build();
         Element<PartyDetails> wrappedOther = Element.<PartyDetails>builder().value(other).build();
         List<Element<PartyDetails>> otherList = Collections.singletonList(wrappedOther);
@@ -74,7 +74,7 @@ public class OtherPeopleInTheCaseRevisedCheckerTest {
     }
 
     @Test
-    public void whenNoRelevantCaseDataThenIsStartedReturnsFalse() {
+    void whenNoRelevantCaseDataThenIsStartedReturnsFalse() {
         PartyDetails other = null;
         Element<PartyDetails> wrappedOther = Element.<PartyDetails>builder().value(other).build();
         List<Element<PartyDetails>> otherList = Collections.singletonList(wrappedOther);
@@ -87,7 +87,7 @@ public class OtherPeopleInTheCaseRevisedCheckerTest {
     }
 
     @Test
-    public void whenCompletePartyDetailsThenValidationReturnsTrue() {
+    void whenCompletePartyDetailsThenValidationReturnsTrue() {
 
         PartyDetails partyDetails = PartyDetails.builder()
             .firstName("firstName")
@@ -119,7 +119,7 @@ public class OtherPeopleInTheCaseRevisedCheckerTest {
     }
 
     @Test
-    public void whenCompletePartyDetailsButMissingOtherPersonRelationshipThenValidationReturnsFalse() {
+    void whenCompletePartyDetailsButMissingOtherPersonRelationshipThenValidationReturnsFalse() {
 
         PartyDetails partyDetails = PartyDetails.builder()
             .firstName("firstName")
@@ -147,7 +147,7 @@ public class OtherPeopleInTheCaseRevisedCheckerTest {
     }
 
     @Test
-    public void whenCompletePartyDetailsButMissingOtherPersonRelationshipThenValidationReturnsFalseNoDetailsKnown() {
+    void whenCompletePartyDetailsButMissingOtherPersonRelationshipThenValidationReturnsFalseNoDetailsKnown() {
 
         PartyDetails partyDetails = PartyDetails.builder()
             .firstName("firstName")
@@ -173,7 +173,7 @@ public class OtherPeopleInTheCaseRevisedCheckerTest {
 
 
     @Test
-    public void whenIncompleteAddressDataThenVerificationReturnsFalse() {
+    void whenIncompleteAddressDataThenVerificationReturnsFalse() {
         Address address = Address.builder()
             .addressLine2("Test")
             .country("UK")
@@ -184,7 +184,7 @@ public class OtherPeopleInTheCaseRevisedCheckerTest {
 
 
     @Test
-    public void whenOtherPeopleInTheCasePresentExceptPlaceOfBirth() {
+    void whenOtherPeopleInTheCasePresentExceptPlaceOfBirth() {
 
         OtherPersonRelationshipToChild personRelationshipToChild = OtherPersonRelationshipToChild.builder()
             .personRelationshipToChild("Test relationship")
@@ -224,7 +224,7 @@ public class OtherPeopleInTheCaseRevisedCheckerTest {
 
 
     @Test
-    public void ifEmptyListOfPartyDetailsThenFinishedReturnsFalse() {
+    void ifEmptyListOfPartyDetailsThenFinishedReturnsFalse() {
 
         CaseData caseData = CaseData.builder()
             .otherPartyInTheCaseRevised(Collections.emptyList())
@@ -234,7 +234,7 @@ public class OtherPeopleInTheCaseRevisedCheckerTest {
     }
 
     @Test
-    public void whenCompletePartyDetailsThenFinishedReturnsTrue() {
+    void whenCompletePartyDetailsThenFinishedReturnsTrue() {
 
         OtherPersonRelationshipToChild personRelationshipToChild = OtherPersonRelationshipToChild.builder()
             .personRelationshipToChild("Test relationship")
@@ -274,7 +274,7 @@ public class OtherPeopleInTheCaseRevisedCheckerTest {
     }
 
     @Test
-    public void whenCompletePartyDetailsThenFinishedReturnsTrueLiveInRefugeNotPresent() {
+    void whenCompletePartyDetailsThenFinishedReturnsTrueLiveInRefugeNotPresent() {
 
         OtherPersonRelationshipToChild personRelationshipToChild = OtherPersonRelationshipToChild.builder()
             .personRelationshipToChild("Test relationship")
@@ -313,7 +313,7 @@ public class OtherPeopleInTheCaseRevisedCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+    void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
         assertNotNull(otherPeopleInTheCaseChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 

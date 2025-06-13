@@ -51,7 +51,7 @@ import static uk.gov.hmcts.reform.prl.services.fl401listonnotice.Fl401ListOnNoti
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-public class Fl401ListOnNoticeServiceTest {
+class Fl401ListOnNoticeServiceTest {
 
     @InjectMocks
     Fl401ListOnNoticeService fl401ListOnNoticeService;
@@ -80,7 +80,7 @@ public class Fl401ListOnNoticeServiceTest {
 
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         caseData = CaseData.builder()
             .courtName("testcourt")
             .caseTypeOfApplication(FL401_CASE_TYPE)
@@ -104,7 +104,7 @@ public class Fl401ListOnNoticeServiceTest {
     }
 
     @Test
-    public void testListOnNoticeSubmission() throws Exception {
+    void testListOnNoticeSubmission() throws Exception {
 
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
@@ -138,7 +138,7 @@ public class Fl401ListOnNoticeServiceTest {
     }
 
     @Test
-    public void testPrePopulateHearingPageDataForFl401ListOnNotice() throws Exception {
+    void testPrePopulateHearingPageDataForFl401ListOnNotice() throws Exception {
         CaseData caseData = CaseData.builder()
             .orderWithoutGivingNoticeToRespondent(WithoutNoticeOrderDetails.builder()
                                                       .orderWithoutGivingNotice(Yes).build())
@@ -148,7 +148,7 @@ public class Fl401ListOnNoticeServiceTest {
     }
 
     @Test
-    public void testPrePopulateHearingPageDataForFl401ListWithoutNotice() throws Exception {
+    void testPrePopulateHearingPageDataForFl401ListWithoutNotice() throws Exception {
         CaseData caseData = CaseData.builder()
             .orderWithoutGivingNoticeToRespondent(WithoutNoticeOrderDetails.builder()
                                                       .orderWithoutGivingNotice(No).build())
@@ -158,7 +158,7 @@ public class Fl401ListOnNoticeServiceTest {
     }
 
     @Test
-    public void testSendNotificationScenario1() throws Exception {
+    void testSendNotificationScenario1() throws Exception {
 
         CaseData caseData = CaseData.builder()
             .applicantsFL401(PartyDetails.builder().solicitorEmail("test@test.com").build())
@@ -185,7 +185,7 @@ public class Fl401ListOnNoticeServiceTest {
     }
 
     @Test
-    public void testSendNotificationScenario2() throws Exception {
+    void testSendNotificationScenario2() throws Exception {
         UUID uuid = UUID.randomUUID();
         CaseData caseData = CaseData.builder()
             .applicantsFL401(PartyDetails.builder().partyId(uuid).user(
@@ -212,7 +212,7 @@ public class Fl401ListOnNoticeServiceTest {
     }
 
     @Test
-    public void testSendNotificationScenario3() throws Exception {
+    void testSendNotificationScenario3() throws Exception {
         UUID uuid = UUID.randomUUID();
         CaseData caseData = CaseData.builder()
             .applicantsFL401(PartyDetails.builder()
@@ -241,7 +241,7 @@ public class Fl401ListOnNoticeServiceTest {
     }
 
     @Test
-    public void testSendNotificationScenario4() throws Exception {
+    void testSendNotificationScenario4() throws Exception {
         UUID uuid = UUID.randomUUID();
         CaseData caseData = CaseData.builder()
             .applicantsFL401(PartyDetails.builder()

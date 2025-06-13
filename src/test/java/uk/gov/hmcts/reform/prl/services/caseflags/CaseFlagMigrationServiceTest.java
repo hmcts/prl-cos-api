@@ -33,7 +33,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 @ExtendWith(MockitoExtension.class)
-public class CaseFlagMigrationServiceTest {
+class CaseFlagMigrationServiceTest {
 
     @InjectMocks
     CaseFlagMigrationService caseFlagMigrationService;
@@ -59,7 +59,7 @@ public class CaseFlagMigrationServiceTest {
 
 
     @BeforeEach
-    public void setup() {
+    void setup() {
 
         FlagDetail flagDetail1 = FlagDetail.builder().flagCode("ABCD")
             .externallyAvailable(true).flagComment(true).cateGoryId(0).build();
@@ -235,22 +235,22 @@ public class CaseFlagMigrationServiceTest {
 
 
     @Test
-    public void migrateCaseForCaseFlagsTestC100() {
+    void migrateCaseForCaseFlagsTestC100() {
         when(refDataUserService.retrieveCaseFlags(systemUserService.getSysUserToken(),FLAG_TYPE)).thenReturn(caseFlagResponse);
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
         caseFlagMigrationService.migrateCaseForCaseFlags(caseDataMap);
         assertNotNull(caseData.getAllPartyFlags());
-        assertEquals("ABCD",caseData.getAllPartyFlags().getCaApplicant1ExternalFlags().getDetails().get(0).getValue().getFlagCode());
+        assertEquals("ABCD",caseData.getAllPartyFlags().getCaApplicant1ExternalFlags().getDetails().getFirst().getValue().getFlagCode());
     }
 
 
     @Test
-    public void migrateCaseForCaseFlagsTestFL401() {
+    void migrateCaseForCaseFlagsTestFL401() {
         when(refDataUserService.retrieveCaseFlags(systemUserService.getSysUserToken(),FLAG_TYPE)).thenReturn(caseFlagResponse);
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseDataFl401);
         caseFlagMigrationService.migrateCaseForCaseFlags(caseDataMap);
         assertNotNull(caseDataFl401.getAllPartyFlags());
-        assertEquals("ABCD",caseDataFl401.getAllPartyFlags().getDaApplicantExternalFlags().getDetails().get(0).getValue().getFlagCode());
+        assertEquals("ABCD",caseDataFl401.getAllPartyFlags().getDaApplicantExternalFlags().getDetails().getFirst().getValue().getFlagCode());
     }
 
 

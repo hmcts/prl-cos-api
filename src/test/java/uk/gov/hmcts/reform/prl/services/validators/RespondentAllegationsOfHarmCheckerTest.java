@@ -36,7 +36,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @ExtendWith(MockitoExtension.class)
-public class RespondentAllegationsOfHarmCheckerTest {
+class RespondentAllegationsOfHarmCheckerTest {
     @Mock
     RespondentTaskErrorService respondentTaskErrorService;
 
@@ -47,12 +47,12 @@ public class RespondentAllegationsOfHarmCheckerTest {
     RespondentAllegationsOfHarmChecker respondentAllegationsOfHarmChecker;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    public void whenNoCaseDataThenIsStartedIsFalse() {
+    void whenNoCaseDataThenIsStartedIsFalse() {
         PartyDetails partyDetails = PartyDetails.builder()
                 .response(Response.builder()
                         .respondentAllegationsOfHarmData(RespondentAllegationsOfHarmData.builder()
@@ -63,7 +63,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
     }
 
     @Test
-    public void whenPartialCaseDataThenIsStartedTrue() {
+    void whenPartialCaseDataThenIsStartedTrue() {
         PartyDetails partyDetails = PartyDetails.builder()
                 .response(Response.builder()
                         .respondentAllegationsOfHarmData(RespondentAllegationsOfHarmData.builder().respAohYesOrNo(Yes)
@@ -75,7 +75,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
 
 
     @Test
-    public void whenNoCaseDataThenNotFinished() {
+    void whenNoCaseDataThenNotFinished() {
 
         PartyDetails partyDetails = PartyDetails.builder()
                 .response(Response.builder()
@@ -89,7 +89,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
     }
 
     @Test
-    public void finishedFieldsValidatedToTrue() {
+    void finishedFieldsValidatedToTrue() {
 
         PartyDetails partyDetails = PartyDetails.builder()
                 .response(Response.builder()
@@ -103,7 +103,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
     }
 
     @Test
-    public void validateAbusePresentFalse() {
+    void validateAbusePresentFalse() {
         PartyDetails partyDetails = PartyDetails.builder()
                 .response(Response.builder()
                         .respondentAllegationsOfHarmData(RespondentAllegationsOfHarmData.builder()
@@ -117,20 +117,20 @@ public class RespondentAllegationsOfHarmCheckerTest {
 
 
     @Test
-    public void whenNoCaseDataValidateFieldsReturnsFalse() {
+    void whenNoCaseDataValidateFieldsReturnsFalse() {
 
         assertFalse(respondentAllegationsOfHarmChecker.validateFields(RespondentAllegationsOfHarmData.builder()
                 .build()));
     }
 
     @Test
-    public void whenNoCaseDataThenValidateOtherConcernsIsFalse() {
+    void whenNoCaseDataThenValidateOtherConcernsIsFalse() {
         assertFalse(respondentAllegationsOfHarmChecker.validateOtherConcerns(RespondentAllegationsOfHarmData.builder()
                 .build()));
     }
 
     @Test
-    public void whenOtherConcernsPresentThenValidateOtherConcernsTrue() {
+    void whenOtherConcernsPresentThenValidateOtherConcernsTrue() {
         assertTrue(respondentAllegationsOfHarmChecker.validateOtherConcerns(RespondentAllegationsOfHarmData.builder()
                 .respAohOtherConcerns(Yes)
                 .respAohOtherConcernsDetails("Details")
@@ -139,13 +139,13 @@ public class RespondentAllegationsOfHarmCheckerTest {
 
 
     @Test
-    public void whenNoCaseDataThenValidateSubstanceAbuseIsFalse() {
+    void whenNoCaseDataThenValidateSubstanceAbuseIsFalse() {
         assertFalse(respondentAllegationsOfHarmChecker.validateSubstanceAbuse(RespondentAllegationsOfHarmData
                 .builder().build()));
     }
 
     @Test
-    public void whenOtherConcernsPresentThenValidateSubstanceAbuseTrue() {
+    void whenOtherConcernsPresentThenValidateSubstanceAbuseTrue() {
 
         assertTrue(respondentAllegationsOfHarmChecker.validateSubstanceAbuse(RespondentAllegationsOfHarmData.builder()
                 .respAohSubstanceAbuseYesNo(Yes)
@@ -153,7 +153,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataThenValidateChildContactIsFalse() {
+    void whenNoCaseDataThenValidateChildContactIsFalse() {
 
         assertFalse(respondentAllegationsOfHarmChecker.validateChildContact(RespondentAllegationsOfHarmData
                 .builder().build()));
@@ -161,7 +161,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
     }
 
     @Test
-    public void whenChildContactPresentThenValidateChildContactTrue() {
+    void whenChildContactPresentThenValidateChildContactTrue() {
         RespondentAllegationsOfHarmData respondentAllegationsOfHarmData = RespondentAllegationsOfHarmData.builder()
                 .respAgreeChildUnsupervisedTime(Yes)
                 .respAgreeChildSupervisedTime(Yes)
@@ -171,7 +171,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
     }
 
     @Test
-    public void whenNonMolestationOrderCurrentReturnTrue() {
+    void whenNonMolestationOrderCurrentReturnTrue() {
 
         RespondentAllegationsOfHarmData respondentAllegationsOfHarmData = RespondentAllegationsOfHarmData.builder()
                 .respOrdersNonMolestation(Yes)
@@ -182,7 +182,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
     }
 
     @Test
-    public void whenOccupationOrderCurrentReturnTrue() {
+    void whenOccupationOrderCurrentReturnTrue() {
         RespondentAllegationsOfHarmData respondentAllegationsOfHarmData = RespondentAllegationsOfHarmData.builder()
                 .respOrdersOccupation(Yes)
                 .respOrdersOccupationCurrent(Yes)
@@ -192,7 +192,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
     }
 
     @Test
-    public void whenForcedMarriageOrderCurrentReturnTrue() {
+    void whenForcedMarriageOrderCurrentReturnTrue() {
 
         RespondentAllegationsOfHarmData respondentAllegationsOfHarmData = RespondentAllegationsOfHarmData.builder()
                 .respOrdersForcedMarriageProtection(Yes)
@@ -203,7 +203,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
     }
 
     @Test
-    public void whenRestrainingOrderOrderCurrentReturnTrue() {
+    void whenRestrainingOrderOrderCurrentReturnTrue() {
 
         RespondentAllegationsOfHarmData respondentAllegationsOfHarmData = RespondentAllegationsOfHarmData.builder()
                 .respOrdersRestraining(Yes)
@@ -214,7 +214,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
     }
 
     @Test
-    public void whenOtherInjunctiveOrderCurrentReturnTrue() {
+    void whenOtherInjunctiveOrderCurrentReturnTrue() {
 
         RespondentAllegationsOfHarmData respondentAllegationsOfHarmData = RespondentAllegationsOfHarmData.builder()
                 .respOrdersOtherInjunctive(Yes)
@@ -225,7 +225,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
     }
 
     @Test
-    public void whenUndertakingOrderCurrentReturnTrue() {
+    void whenUndertakingOrderCurrentReturnTrue() {
 
         RespondentAllegationsOfHarmData respondentAllegationsOfHarmData = RespondentAllegationsOfHarmData.builder()
                 .respOrdersUndertakingInPlace(Yes)
@@ -236,14 +236,14 @@ public class RespondentAllegationsOfHarmCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataThenAbductionSectionNotComplete() {
+    void whenNoCaseDataThenAbductionSectionNotComplete() {
 
         assertFalse(respondentAllegationsOfHarmChecker.validateAbductionSection(RespondentAllegationsOfHarmData.builder()
                 .build()));
     }
 
     @Test
-    public void whenCaseDataPresentThenAbductionSectionReturnTrue() {
+    void whenCaseDataPresentThenAbductionSectionReturnTrue() {
 
         List<RespPassportPossessionEnum> abductionChildPassportPosessionList =
                 new ArrayList<>();
@@ -271,7 +271,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
 
 
     @Test
-    public void whenCaseDataPresentThenAbductionSectionReturnFalse() {
+    void whenCaseDataPresentThenAbductionSectionReturnFalse() {
 
         List<RespPassportPossessionEnum> abductionChildPassportPosessionList =
                 new ArrayList<>();
@@ -298,7 +298,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
 
 
     @Test
-    public void whenCaseDataPresentThenAbductionSectionReturnTrueWithNoPassport() {
+    void whenCaseDataPresentThenAbductionSectionReturnTrueWithNoPassport() {
         RespondentAllegationsOfHarmData respondentAllegationsOfHarmData = RespondentAllegationsOfHarmData.builder()
                 .respAohChildAbductionYesNo(Yes)
                 .respChildAbductionReasons("testing")
@@ -316,7 +316,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
 
 
     @Test
-    public void whenDomesticBehaviourPresentButIncompleteReturnTure() {
+    void whenDomesticBehaviourPresentButIncompleteReturnTure() {
 
         RespDomesticAbuseBehaviours behaviour = RespDomesticAbuseBehaviours.builder()
                 .respTypeOfAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
@@ -331,7 +331,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
 
 
     @Test
-    public void whenDomesticBehaviourPresentButIncompleteReturnFalse() {
+    void whenDomesticBehaviourPresentButIncompleteReturnFalse() {
 
         RespDomesticAbuseBehaviours behaviour = RespDomesticAbuseBehaviours.builder()
                 .respTypeOfAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
@@ -345,7 +345,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
 
 
     @Test
-    public void whenChildBehaviourPresentButIncompleteReturnTure() {
+    void whenChildBehaviourPresentButIncompleteReturnTure() {
 
         RespDomesticAbuseBehaviours behaviour = RespDomesticAbuseBehaviours.builder()
                 .respTypeOfAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
@@ -360,7 +360,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
 
 
     @Test
-    public void whenChildBehaviourPresentButIncompleteReturnFalse() {
+    void whenChildBehaviourPresentButIncompleteReturnFalse() {
 
         RespDomesticAbuseBehaviours behaviour = RespDomesticAbuseBehaviours.builder()
                 .respTypeOfAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
@@ -374,7 +374,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
 
 
     @Test
-    public void whenAbuseInCompleteReturnFalse() {
+    void whenAbuseInCompleteReturnFalse() {
 
         RespondentAllegationsOfHarmData respondentAllegationsOfHarmData = RespondentAllegationsOfHarmData.builder()
                 .respAohDomesticAbuseYesNo(Yes)
@@ -388,7 +388,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
     }
 
     @Test
-    public void whenOrderPresentButIncompleteReturnsFalse() {
+    void whenOrderPresentButIncompleteReturnsFalse() {
         RespondentAllegationsOfHarmData respondentAllegationsOfHarmData = RespondentAllegationsOfHarmData.builder()
                 .respOrdersRestraining(Yes)
                 .respOrdersRestrainingCourtName("Test Court Name").build();
@@ -397,7 +397,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
     }
 
     @Test
-    public void whenOrderPresentAndCompleteMandatoryDataReturnTrue() {
+    void whenOrderPresentAndCompleteMandatoryDataReturnTrue() {
         RespondentAllegationsOfHarmData respondentAllegationsOfHarmData = RespondentAllegationsOfHarmData.builder()
                 .respOrdersOtherInjunctiveCurrent(Yes)
                 .respOrdersOtherInjunctiveCurrent(No).build();
@@ -405,20 +405,20 @@ public class RespondentAllegationsOfHarmCheckerTest {
     }
 
     @Test
-    public void whenNoDataIsSectionsFinishedReturnFalse() {
+    void whenNoDataIsSectionsFinishedReturnFalse() {
         RespondentAllegationsOfHarmData respondentAllegationsOfHarmData = RespondentAllegationsOfHarmData.builder().build();
         assertFalse(respondentAllegationsOfHarmChecker.isSectionsFinished(respondentAllegationsOfHarmData, false));
     }
 
     @Test
-    public void whenIsSectionsFinishedTrue() {
+    void whenIsSectionsFinishedTrue() {
         RespondentAllegationsOfHarmData respondentAllegationsOfHarmData = RespondentAllegationsOfHarmData.builder().build();
 
         assertFalse(respondentAllegationsOfHarmChecker.isSectionsFinished(respondentAllegationsOfHarmData, true));
     }
 
     @Test
-    public void whenNoDataIsPreviousOrdersFinishedReturnFalse() {
+    void whenNoDataIsPreviousOrdersFinishedReturnFalse() {
         RespondentAllegationsOfHarmData allegationOfHarm = RespondentAllegationsOfHarmData.builder().build();
         Optional<YesOrNo> ordersNonMolestation = ofNullable(allegationOfHarm.getRespOrdersNonMolestation());
         Optional<YesOrNo> ordersOccupation = ofNullable(allegationOfHarm.getRespOrdersOccupation());
@@ -438,7 +438,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
     }
 
     @Test
-    public void whenDataPresentIsPreviousOrdersFinishedReturnFalse() {
+    void whenDataPresentIsPreviousOrdersFinishedReturnFalse() {
         RespondentAllegationsOfHarmData allegationOfHarm = RespondentAllegationsOfHarmData.builder().respOrdersNonMolestation(No)
                 .respOrdersOccupation(No)
                 .respOrdersForcedMarriageProtection(No)
@@ -464,7 +464,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
     }
 
     @Test
-    public void whenAllDataPresentIsPreviousOrdersFinishedReturnTrue() {
+    void whenAllDataPresentIsPreviousOrdersFinishedReturnTrue() {
         RespondentAllegationsOfHarmData allegationOfHarm = RespondentAllegationsOfHarmData.builder()
                 .respOrdersNonMolestation(No)
                 .respOrdersOccupation(No)
@@ -490,7 +490,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
     }
 
     @Test
-    public void whenPartialDataPresentAsYesIsPreviousOrdersFinishedReturnTrue() {
+    void whenPartialDataPresentAsYesIsPreviousOrdersFinishedReturnTrue() {
         RespondentAllegationsOfHarmData allegationOfHarm = RespondentAllegationsOfHarmData.builder()
                 .respOrdersNonMolestation(Yes)
                 .respOrdersRestraining(Yes)
@@ -515,7 +515,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
 
 
     @Test
-    public void whenAllCaseDataPresentValidateFieldsReturnTrue() {
+    void whenAllCaseDataPresentValidateFieldsReturnTrue() {
 
         RespDomesticAbuseBehaviours domesticAbuseBehaviours = RespDomesticAbuseBehaviours.builder()
                 .respTypeOfAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
@@ -597,7 +597,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
     }
 
     @Test
-    public void testValidateFieldsReturnFalseForPhysicalAbuse() {
+    void testValidateFieldsReturnFalseForPhysicalAbuse() {
         RespChildAbuse childAbuse = RespChildAbuse.builder()
                 .respAbuseNatureDescription(null)
                 .respBehavioursStartDateAndLength("start")
@@ -614,7 +614,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
     }
 
     @Test
-    public void testValidateFieldsReturnFalseForPhsychologicalAbuse() {
+    void testValidateFieldsReturnFalseForPhsychologicalAbuse() {
 
         RespChildAbuse childAbuse = RespChildAbuse.builder()
                 .respAbuseNatureDescription(null)
@@ -632,7 +632,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
     }
 
     @Test
-    public void testValidateFieldsReturnFalseForSexualAbuse() {
+    void testValidateFieldsReturnFalseForSexualAbuse() {
 
         RespChildAbuse childAbuse = RespChildAbuse.builder()
                 .respAbuseNatureDescription(null)
@@ -650,7 +650,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
     }
 
     @Test
-    public void testValidateFieldsReturnFalseForEmotionalAbuse() {
+    void testValidateFieldsReturnFalseForEmotionalAbuse() {
 
         RespChildAbuse childAbuse = RespChildAbuse.builder()
                 .respAbuseNatureDescription(null)
@@ -669,7 +669,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
 
 
     @Test
-    public void testValidateFieldsReturnFalseForFinancialAbuse() {
+    void testValidateFieldsReturnFalseForFinancialAbuse() {
 
         RespChildAbuse childAbuse = RespChildAbuse.builder()
                 .respAbuseNatureDescription(null)
@@ -687,7 +687,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
     }
 
     @Test
-    public void testValidateChildAbuseBehaviours() {
+    void testValidateChildAbuseBehaviours() {
         RespondentAllegationsOfHarmData respondentAllegationsOfHarmData = RespondentAllegationsOfHarmData.builder()
                 .respAllChildrenAreRiskPhysicalAbuse(No)
                 .respAllChildrenAreRiskPsychologicalAbuse(No)

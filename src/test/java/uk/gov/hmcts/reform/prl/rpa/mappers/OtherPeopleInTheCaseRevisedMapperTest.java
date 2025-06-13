@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-public class OtherPeopleInTheCaseRevisedMapperTest {
+class OtherPeopleInTheCaseRevisedMapperTest {
 
     @InjectMocks
     OtherPeopleInTheCaseRevisedMapper otherPeopleInTheCaseMapper;
@@ -32,7 +32,7 @@ public class OtherPeopleInTheCaseRevisedMapperTest {
     Address address;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         address = Address.builder()
             .addressLine1("55 Test Street")
             .postTown("Town")
@@ -43,14 +43,14 @@ public class OtherPeopleInTheCaseRevisedMapperTest {
 
 
     @Test
-    public void testOtherPeopleMapperEmptyCheck() {
+    void testOtherPeopleMapperEmptyCheck() {
         otherPeopleInTheCase = Collections.emptyList();
         assertTrue(otherPeopleInTheCaseMapper.map(otherPeopleInTheCase).isEmpty());
 
     }
 
     @Test
-    public void testOtherPeopleMapperWithAllFields() {
+    void testOtherPeopleMapperWithAllFields() {
         partyDetails = PartyDetails.builder().firstName("FirstName").lastName("LastName")
             .previousName("PreviousName").isDateOfBirthKnown(YesOrNo.Yes)
             .dateOfBirth(LocalDate.of(1990, 8, 1)).gender(Gender.female)
@@ -67,7 +67,7 @@ public class OtherPeopleInTheCaseRevisedMapperTest {
     }
 
     @Test
-    public void testOtherPeopleMapperWithSomeFields() {
+    void testOtherPeopleMapperWithSomeFields() {
         partyDetails = PartyDetails.builder().firstName("FirstName").lastName("LastName")
             .isDateOfBirthKnown(YesOrNo.Yes)
             .dateOfBirth(LocalDate.of(1990, 8, 1)).gender(Gender.female)
@@ -81,7 +81,7 @@ public class OtherPeopleInTheCaseRevisedMapperTest {
     }
 
     @Test
-    public void testChildrenMapperWithEmptyValues() {
+    void testChildrenMapperWithEmptyValues() {
         assertTrue(otherPeopleInTheCaseMapper.map(null).isEmpty());
 
     }

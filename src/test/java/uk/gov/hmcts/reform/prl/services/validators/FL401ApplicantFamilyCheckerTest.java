@@ -23,7 +23,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @ExtendWith(MockitoExtension.class)
-public class FL401ApplicantFamilyCheckerTest {
+class FL401ApplicantFamilyCheckerTest {
 
     @Mock
     TaskErrorService taskErrorService;
@@ -36,7 +36,7 @@ public class FL401ApplicantFamilyCheckerTest {
     private ApplicantChild applicantChild;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
 
         caseData = CaseData.builder().build();
         applicantFamilyDetails = ApplicantFamilyDetails.builder().build();
@@ -44,32 +44,32 @@ public class FL401ApplicantFamilyCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataThenIsStartedIsFalse() {
+    void whenNoCaseDataThenIsStartedIsFalse() {
         assertFalse(fl401ApplicantFamilyChecker.isStarted(caseData));
     }
 
     @Test
-    public void whenNoCaseDataThenNotFinished() {
+    void whenNoCaseDataThenNotFinished() {
         assertFalse(fl401ApplicantFamilyChecker.isFinished(caseData));
     }
 
     @Test
-    public void whenNoCaseDataThenHasMandatoryFalse() {
+    void whenNoCaseDataThenHasMandatoryFalse() {
         assertFalse(fl401ApplicantFamilyChecker.hasMandatoryCompleted(caseData));
     }
 
     @Test
-    public void whenNoCaseDateValidateObjectFieldsReturnFalse() {
+    void whenNoCaseDateValidateObjectFieldsReturnFalse() {
         assertFalse(fl401ApplicantFamilyChecker.validateObjectFields(caseData));
     }
 
     @Test
-    public void applicantChildrenEmptyValidMandatoryFieldsCompleteReturnFalse() {
+    void applicantChildrenEmptyValidMandatoryFieldsCompleteReturnFalse() {
         assertFalse(fl401ApplicantFamilyChecker.validateMandatoryFieldsCompleted(applicantChild));
     }
 
     @Test
-    public void whenPartialCaseDataWhenApplicantHasFamilyDetailsThenIsStartedTrue() {
+    void whenPartialCaseDataWhenApplicantHasFamilyDetailsThenIsStartedTrue() {
         applicantFamilyDetails = applicantFamilyDetails.toBuilder()
             .doesApplicantHaveChildren(Yes)
             .build();
@@ -82,7 +82,7 @@ public class FL401ApplicantFamilyCheckerTest {
     }
 
     @Test
-    public void finishedFieldsValidatedToTrue() {
+    void finishedFieldsValidatedToTrue() {
         applicantFamilyDetails = applicantFamilyDetails.toBuilder()
             .doesApplicantHaveChildren(No)
             .build();
@@ -95,7 +95,7 @@ public class FL401ApplicantFamilyCheckerTest {
     }
 
     @Test
-    public void whenFinishedCaseDataThenHasMandatoryFalse() {
+    void whenFinishedCaseDataThenHasMandatoryFalse() {
         applicantFamilyDetails = applicantFamilyDetails.toBuilder()
             .doesApplicantHaveChildren(No)
             .build();
@@ -108,7 +108,7 @@ public class FL401ApplicantFamilyCheckerTest {
     }
 
     @Test
-    public void whenNullApplicantFamilyDetailsPresentValidateObjectFieldsReturnFalse() {
+    void whenNullApplicantFamilyDetailsPresentValidateObjectFieldsReturnFalse() {
         caseData = caseData.toBuilder()
             .applicantFamilyDetails(applicantFamilyDetails)
             .build();
@@ -117,7 +117,7 @@ public class FL401ApplicantFamilyCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataValidateFieldsReturnsFalse() {
+    void whenNoCaseDataValidateFieldsReturnsFalse() {
         caseData = caseData.toBuilder()
             .applicantFamilyDetails(applicantFamilyDetails)
             .build();
@@ -126,7 +126,7 @@ public class FL401ApplicantFamilyCheckerTest {
     }
 
     @Test
-    public void whenApplicationHasChildWithEmptyApplicantChildValidateFieldsReturnsFalse() {
+    void whenApplicationHasChildWithEmptyApplicantChildValidateFieldsReturnsFalse() {
         Element<ApplicantChild> wrappedApplicantChild = Element.<ApplicantChild>builder().value(applicantChild).build();
         List<Element<ApplicantChild>> listOfApplicantChild = Collections.singletonList(wrappedApplicantChild);
 
@@ -143,7 +143,7 @@ public class FL401ApplicantFamilyCheckerTest {
     }
 
     @Test
-    public void whenApplicationHasChildWithSomeApplicantChildValidateFieldsReturnsFalse() {
+    void whenApplicationHasChildWithSomeApplicantChildValidateFieldsReturnsFalse() {
         applicantChild = applicantChild.toBuilder()
             .fullName("Testing Child")
             .applicantChildRelationship("Testing")
@@ -165,7 +165,7 @@ public class FL401ApplicantFamilyCheckerTest {
     }
 
     @Test
-    public void whenApplicationHasChildWithAllApplicantChildValidateFieldsReturnsTrue() {
+    void whenApplicationHasChildWithAllApplicantChildValidateFieldsReturnsTrue() {
         applicantChild = applicantChild.toBuilder()
             .fullName("Testing Child")
             .dateOfBirth(LocalDate.of(2000, 12, 22))
@@ -190,7 +190,7 @@ public class FL401ApplicantFamilyCheckerTest {
     }
 
     @Test
-    public void applicantChildrenHasPartialDataValidMandatoryFieldsCompleteReturnFalse() {
+    void applicantChildrenHasPartialDataValidMandatoryFieldsCompleteReturnFalse() {
         applicantChild = applicantChild.toBuilder()
             .fullName("Testing")
             .applicantChildRelationship("Mother")
@@ -200,7 +200,7 @@ public class FL401ApplicantFamilyCheckerTest {
     }
 
     @Test
-    public void applicantChildrenHasCompleteDataValidMandatoryFieldsCompleteReturnFalse() {
+    void applicantChildrenHasCompleteDataValidMandatoryFieldsCompleteReturnFalse() {
         applicantChild = applicantChild.toBuilder()
             .fullName("Testing Child")
             .dateOfBirth(LocalDate.of(2010, 12, 22))
@@ -213,7 +213,7 @@ public class FL401ApplicantFamilyCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+    void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
         assertNotNull(fl401ApplicantFamilyChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

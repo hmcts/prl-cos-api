@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers.closingcase;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,13 +11,14 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.closingcase.ClosingCaseService;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class ClosingCaseControllerTest {
+class ClosingCaseControllerTest {
 
     @InjectMocks
     ClosingCaseController closingCaseController;
@@ -33,14 +33,14 @@ public class ClosingCaseControllerTest {
     public static final String S_2_S_TOKEN = "s2s AuthToken";
 
     @Test
-    public void testPrePopulateChildData() {
+    void testPrePopulateChildData() {
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         closingCaseController.prePopulateChildData(AUTH_TOKEN, S_2_S_TOKEN, CallbackRequest.builder().build());
         verify(closingCaseService, times(1)).prePopulateChildData(Mockito.any(CallbackRequest.class));
     }
 
     @Test
-    public void testPopulateSelectedChildWithFinalOutcome() {
+    void testPopulateSelectedChildWithFinalOutcome() {
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         closingCaseController.populateSelectedChildWithFinalOutcome(
             AUTH_TOKEN,
@@ -51,7 +51,7 @@ public class ClosingCaseControllerTest {
     }
 
     @Test
-    public void testValidateChildDetails() {
+    void testValidateChildDetails() {
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         closingCaseController.validateChildDetails(AUTH_TOKEN, S_2_S_TOKEN, CallbackRequest.builder().caseDetails(
             CaseDetails.builder().build()).build());
@@ -59,25 +59,25 @@ public class ClosingCaseControllerTest {
     }
 
     @Test
-    public void testClosingCaseAboutToSubmit() {
+    void testClosingCaseAboutToSubmit() {
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         closingCaseController.closingCaseAboutToSubmit(AUTH_TOKEN, S_2_S_TOKEN, CallbackRequest.builder().build());
         verify(closingCaseService, times(1)).closingCaseForChildren(Mockito.any(CallbackRequest.class));
     }
 
     @Test
-    public void testPrePopulateChildDataException() {
+    void testPrePopulateChildDataException() {
         when(authorisationService.isAuthorized(any(), any())).thenReturn(false);
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
-        Assert.assertThrows(RuntimeException.class, () ->
+        assertThrows(RuntimeException.class, () ->
             closingCaseController.prePopulateChildData(AUTH_TOKEN, S_2_S_TOKEN, callbackRequest));
     }
 
     @Test
-    public void testPopulateSelectedChildWithFinalOutcomeException() {
+    void testPopulateSelectedChildWithFinalOutcomeException() {
         when(authorisationService.isAuthorized(any(), any())).thenReturn(false);
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
-        Assert.assertThrows(RuntimeException.class, () -> closingCaseController.populateSelectedChildWithFinalOutcome(
+        assertThrows(RuntimeException.class, () -> closingCaseController.populateSelectedChildWithFinalOutcome(
             AUTH_TOKEN,
             S_2_S_TOKEN,
             callbackRequest
@@ -85,11 +85,11 @@ public class ClosingCaseControllerTest {
     }
 
     @Test
-    public void testValidateChildDetailsException() {
+    void testValidateChildDetailsException() {
         when(authorisationService.isAuthorized(any(), any())).thenReturn(false);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(
             CaseDetails.builder().build()).build();
-        Assert.assertThrows(RuntimeException.class,
+        assertThrows(RuntimeException.class,
                             () -> closingCaseController.validateChildDetails(
                                 AUTH_TOKEN,
                                 S_2_S_TOKEN,
@@ -98,10 +98,10 @@ public class ClosingCaseControllerTest {
     }
 
     @Test
-    public void testClosingCaseAboutToSubmitException() {
+    void testClosingCaseAboutToSubmitException() {
         when(authorisationService.isAuthorized(any(), any())).thenReturn(false);
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
-        Assert.assertThrows(RuntimeException.class,
+        assertThrows(RuntimeException.class,
                             () -> closingCaseController.closingCaseAboutToSubmit(
                                 AUTH_TOKEN,
                                 S_2_S_TOKEN,

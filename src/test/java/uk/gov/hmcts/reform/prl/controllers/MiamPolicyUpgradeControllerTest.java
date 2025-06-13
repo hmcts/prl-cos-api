@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import org.junit.Assert;
-import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,11 +12,12 @@ import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class MiamPolicyUpgradeControllerTest {
+class MiamPolicyUpgradeControllerTest {
 
     @InjectMocks
     MiamPolicyUpgradeController miamPolicyUpgradeController;
@@ -30,28 +29,23 @@ public class MiamPolicyUpgradeControllerTest {
     MiamPolicyUpgradeService miamPolicyUpgradeService;
 
     @Test
-    public void testSubmitMiamPolicyUpgrade() {
+    void testSubmitMiamPolicyUpgrade() {
         when(authorisationService.isAuthorized("test", "test")).thenReturn(true);
         when(miamPolicyUpgradeService
             .populateAmendedMiamPolicyUpgradeDetails(CallbackRequest.builder().build())).thenReturn(new HashMap<>());
-        Assert.assertNotNull(miamPolicyUpgradeController
+        assertNotNull(miamPolicyUpgradeController
             .submitMiamPolicyUpgrade("test", "test", CallbackRequest.builder().build()));
     }
 
     @Test
-    public void testSubmitMiamPolicyUpgradeInvalidAuthorisation() {
+    void testSubmitMiamPolicyUpgradeInvalidAuthorisation() {
         when(authorisationService.isAuthorized("test", "test")).thenReturn(false);
-        assertExpectedException(() -> {
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
             miamPolicyUpgradeController
                 .submitMiamPolicyUpgrade("test", "test", CallbackRequest.builder().build());
-            },
-                                RuntimeException.class, "Invalid Client"
-        );
-    }
+        });
 
-    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
-                                                                 String expectedMessage) {
-        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
-        assertEquals(expectedMessage, exception.getMessage());
+        assertEquals("Invalid Client", ex.getMessage());
     }
 }

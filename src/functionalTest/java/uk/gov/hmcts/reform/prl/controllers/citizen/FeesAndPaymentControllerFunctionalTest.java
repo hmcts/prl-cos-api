@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import io.restassured.RestAssured;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +12,7 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.FeeResponseForCitizen;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Slf4j
@@ -51,7 +51,7 @@ public class FeesAndPaymentControllerFunctionalTest {
             .extract()
             .as(FeeResponseForCitizen.class);
 
-        Assert.assertNotNull(response1.getAmount());
+        assertNotNull(response1.getAmount());
 
     }
 
@@ -70,8 +70,8 @@ public class FeesAndPaymentControllerFunctionalTest {
             .extract()
             .as(FeeResponseForCitizen.class);
 
-        Assertions.assertNotNull(response);
-        Assertions.assertNotNull(response.getAmount());
+        assertNotNull(response);
+        assertNotNull(response.getAmount());
         Assertions.assertEquals("263.00", response.getAmount());
     }
 }

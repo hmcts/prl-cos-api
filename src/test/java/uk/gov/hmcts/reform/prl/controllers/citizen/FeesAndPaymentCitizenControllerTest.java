@@ -57,7 +57,7 @@ public class FeesAndPaymentCitizenControllerTest {
 
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
 
         MockitoAnnotations.openMocks(this);
 
@@ -67,7 +67,7 @@ public class FeesAndPaymentCitizenControllerTest {
     }
 
     @Test
-    public void fetchFeeDetailsSuccessfully() throws Exception {
+    void fetchFeeDetailsSuccessfully() throws Exception {
         feeResponseForCitizen = FeeResponseForCitizen.builder()
             .amount(feeResponse.getAmount().toString()).build();
 
@@ -79,7 +79,7 @@ public class FeesAndPaymentCitizenControllerTest {
     }
 
     @Test
-    public void fetchFeeDetailsWithInvalidClient() throws Exception {
+    void fetchFeeDetailsWithInvalidClient() throws Exception {
         feeResponseForCitizen = FeeResponseForCitizen.builder()
             .amount(feeResponse.getAmount().toString()).build();
         when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
@@ -93,7 +93,7 @@ public class FeesAndPaymentCitizenControllerTest {
     }
 
     @Test
-    public void createPaymentRequestSuccessfully() throws Exception {
+    void createPaymentRequestSuccessfully() throws Exception {
         //Given
         CreatePaymentRequest createPaymentRequest = CreatePaymentRequest
                 .builder().caseId(TEST_CASE_ID).returnUrl(REDIRECT_URL)
@@ -127,7 +127,7 @@ public class FeesAndPaymentCitizenControllerTest {
 
 
     @Test
-    public void createPaymentRequestWithInvalidClient() throws Exception {
+    void createPaymentRequestWithInvalidClient() throws Exception {
         //Given
         CreatePaymentRequest createPaymentRequest = CreatePaymentRequest
                 .builder().caseId(TEST_CASE_ID).returnUrl(REDIRECT_URL)
@@ -143,7 +143,7 @@ public class FeesAndPaymentCitizenControllerTest {
 
 
     @Test
-    public void retrievePaymentStatusSuccessfully() throws Exception {
+    void retrievePaymentStatusSuccessfully() throws Exception {
 
         PaymentStatusResponse paymentStatusResponse = PaymentStatusResponse.builder()
             .amount(feeResponse.getAmount().toString())
@@ -167,7 +167,7 @@ public class FeesAndPaymentCitizenControllerTest {
     }
 
     @Test
-    public void retrievePaymentStatusWithInvalidClient() throws Exception {
+    void retrievePaymentStatusWithInvalidClient() throws Exception {
 
         when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
         when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
@@ -178,7 +178,7 @@ public class FeesAndPaymentCitizenControllerTest {
     }
 
     @Test
-    public void fetchFeeCodeSuccessfully() throws Exception {
+    void fetchFeeCodeSuccessfully() throws Exception {
         //Given
         feeResponseForCitizen = FeeResponseForCitizen.builder()
             .amount(feeResponse.getAmount().toString()).build();
@@ -196,7 +196,7 @@ public class FeesAndPaymentCitizenControllerTest {
     }
 
     @Test
-    public void fetchFeeCodeException() throws Exception {
+    void fetchFeeCodeException() throws Exception {
         //Given
         feeResponseForCitizen = FeeResponseForCitizen.builder()
             .amount(feeResponse.getAmount().toString()).build();
@@ -215,7 +215,7 @@ public class FeesAndPaymentCitizenControllerTest {
     }
 
     @Test
-    public void fetchFeeCodeWithInvalidClient() throws Exception {
+    void fetchFeeCodeWithInvalidClient() throws Exception {
         //Given
         feeResponseForCitizen = FeeResponseForCitizen.builder().errorRetrievingResponse("Invalid Client").build();
 
@@ -231,7 +231,7 @@ public class FeesAndPaymentCitizenControllerTest {
     }
 
     @Test
-    public void testFetchFeeSuccess() {
+    void testFetchFeeSuccess() {
         //Given
         feeResponseForCitizen = FeeResponseForCitizen.builder()
             .amount(feeResponse.getAmount().toString()).build();
@@ -246,7 +246,7 @@ public class FeesAndPaymentCitizenControllerTest {
     }
 
     @Test
-    public void testFetchFeeNullApplicationType() {
+    void testFetchFeeNullApplicationType() {
         //Given
         feeResponseForCitizen = FeeResponseForCitizen.builder()
             .errorRetrievingResponse(FETCH_FEE_INVALID_APPLICATION_TYPE)
@@ -261,7 +261,7 @@ public class FeesAndPaymentCitizenControllerTest {
     }
 
     @Test
-    public void testFetchFeeEmptyApplicationType() {
+    void testFetchFeeEmptyApplicationType() {
         //Given
         feeResponseForCitizen = FeeResponseForCitizen.builder()
             .errorRetrievingResponse(FETCH_FEE_INVALID_APPLICATION_TYPE)

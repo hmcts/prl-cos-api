@@ -35,7 +35,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @PropertySource(value = "classpath:application.yaml")
 @ExtendWith(MockitoExtension.class)
-public class RemoveDraftOrderServiceTest {
+class RemoveDraftOrderServiceTest {
 
     public static final String authToken = "Bearer TestAuthToken";
 
@@ -54,7 +54,7 @@ public class RemoveDraftOrderServiceTest {
     private static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         Mockito.when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder()
                                                                                      .email("test@gmail.com")
                                                                                      .build());
@@ -63,7 +63,7 @@ public class RemoveDraftOrderServiceTest {
     }
 
     @Test
-    public void testReturnedOrderDynamicList() {
+    void testReturnedOrderDynamicList() {
         List<Element<DraftOrder>> draftOrderCollection = List.of(Element.<DraftOrder>builder().value(DraftOrder.builder().otherDetails(
             OtherDraftOrderDetails.builder()
                 .status(OrderStatusEnum.rejectedByJudge.getDisplayedValue())
@@ -92,7 +92,7 @@ public class RemoveDraftOrderServiceTest {
     }
 
     @Test
-    public void testReturnedOrderDynamicListWithWorngEventId() {
+    void testReturnedOrderDynamicListWithWorngEventId() {
         List<Element<DraftOrder>> draftOrderCollection = List.of(Element.<DraftOrder>builder().value(DraftOrder.builder().otherDetails(
             OtherDraftOrderDetails.builder()
                 .status(OrderStatusEnum.rejectedByJudge.getDisplayedValue())
@@ -124,7 +124,7 @@ public class RemoveDraftOrderServiceTest {
     }
 
     @Test
-    public void testRemoveSelectedDraftOrder() {
+    void testRemoveSelectedDraftOrder() {
 
         UUID id = UUID.randomUUID();
         List<Element<DraftOrder>> draftOrderCollection = List.of(Element.<DraftOrder>builder()
@@ -164,13 +164,13 @@ public class RemoveDraftOrderServiceTest {
 
         List<Element<DraftOrder>> returnDraftOrder = removeDraftOrderService.removeSelectedDraftOrder(caseData);
         assertNotNull(returnDraftOrder);
-        Element<DraftOrder> element = (Element<DraftOrder>) returnDraftOrder.get(0);
+        Element<DraftOrder> element = (Element<DraftOrder>) returnDraftOrder.getFirst();
         assertEquals(id, element.getId());
         assertNotNull(element.getValue());
     }
 
     @Test
-    public void testRemoveSelectedDraftOrderRemoveDraftOrderDynamicListNull() {
+    void testRemoveSelectedDraftOrderRemoveDraftOrderDynamicListNull() {
 
         UUID id = UUID.randomUUID();
         List<Element<DraftOrder>> draftOrderCollection = List.of(Element.<DraftOrder>builder()
@@ -201,13 +201,13 @@ public class RemoveDraftOrderServiceTest {
         List<Element<DraftOrder>> returnDraftOrder = removeDraftOrderService.removeSelectedDraftOrder(caseData);
         assertNotNull(returnDraftOrder);
         assertEquals(2, returnDraftOrder.size());
-        Element<DraftOrder> element = (Element<DraftOrder>) returnDraftOrder.get(0);
-        assertEquals(UUID.fromString(PrlAppsConstants.TEST_UUID), ((Element<DraftOrder>) returnDraftOrder.get(0)).getId());
+        Element<DraftOrder> element = (Element<DraftOrder>) returnDraftOrder.getFirst();
+        assertEquals(UUID.fromString(PrlAppsConstants.TEST_UUID), ((Element<DraftOrder>) returnDraftOrder.getFirst()).getId());
         assertEquals(id, ((Element<DraftOrder>) returnDraftOrder.get(1)).getId());
     }
 
     @Test
-    public void testRemoveSelectedDraftOrderDraftOrderCollectionIsNull() {
+    void testRemoveSelectedDraftOrderDraftOrderCollectionIsNull() {
 
         DynamicListElement dynamicListElement = DynamicListElement.builder()
             .code(UUID.fromString(PrlAppsConstants.TEST_UUID))

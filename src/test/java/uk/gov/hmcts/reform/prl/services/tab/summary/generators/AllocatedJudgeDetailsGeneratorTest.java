@@ -17,12 +17,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 
 @ExtendWith(MockitoExtension.class)
-public class AllocatedJudgeDetailsGeneratorTest {
+class AllocatedJudgeDetailsGeneratorTest {
 
     private final AllocatedJudgeDetailsGenerator generator = new AllocatedJudgeDetailsGenerator();
 
     @Test
-    public void testSummaryDetailsWhenJudgeDetailsProvided() {
+    void testSummaryDetailsWhenJudgeDetailsProvided() {
         CaseSummary caseSummary = generator.generate(CaseData.builder().courtName("Test Court").allocatedJudge(
             uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge.builder().isJudgeOrLegalAdviser(
                     AllocatedJudgeTypeEnum.judge)
@@ -38,7 +38,7 @@ public class AllocatedJudgeDetailsGeneratorTest {
     }
 
     @Test
-    public void testSummaryDetailsWhenLegalAdvisorDetailsProvided() {
+    void testSummaryDetailsWhenLegalAdvisorDetailsProvided() {
         CaseSummary caseSummary = generator.generate(CaseData.builder().courtName("Test Court").allocatedJudge(
             uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge.builder().isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.legalAdviser)
                 .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes)
@@ -53,7 +53,7 @@ public class AllocatedJudgeDetailsGeneratorTest {
     }
 
     @Test
-    public void testGenerateWhenTierOfJudiciaryDetailsProvided() {
+    void testGenerateWhenTierOfJudiciaryDetailsProvided() {
         CaseSummary caseSummary = generator.generate(CaseData.builder().courtName("Test Court").allocatedJudge(
             uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge.builder().isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
                 .tierOfJudiciary(TierOfJudiciaryEnum.circuitJudge).build()).build());
@@ -67,7 +67,7 @@ public class AllocatedJudgeDetailsGeneratorTest {
     }
 
     @Test
-    public void testGenerateWhenAllocatedJudgeIsNotProvided() {
+    void testGenerateWhenAllocatedJudgeIsNotProvided() {
         CaseSummary caseSummary = generator.generate(CaseData.builder().courtName("Test Court").build());
 
         assertThat(caseSummary).isEqualTo(CaseSummary.builder().allocatedJudgeDetails(

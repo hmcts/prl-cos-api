@@ -72,7 +72,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class FL401ApplicationMapperTest {
+class FL401ApplicationMapperTest {
 
     @InjectMocks
     FL401ApplicationMapper fl401ApplicationMapper;
@@ -107,7 +107,7 @@ public class FL401ApplicationMapperTest {
     private CourtSealFinderService courtSealFinderService;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
 
         court = Court.builder()
             .courtName("testcourt")
@@ -361,7 +361,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavMetaDataIsNull() {
+    void testCourtnavMetaDataIsNull() {
 
         courtNavFl401 = CourtNavFl401.builder()
             .metaData(CourtNavMetaData.builder()
@@ -378,7 +378,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavCaseDataIsNull() {
+    void testCourtnavCaseDataIsNull() {
 
         courtNavFl401 = CourtNavFl401.builder()
             .fl401(null)
@@ -389,7 +389,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavCaseDataWithBeforeStart() {
+    void testCourtnavCaseDataWithBeforeStart() {
 
 
         CaseData caseData = CaseData.builder()
@@ -410,7 +410,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavCaseDataWithCourtNavFL401Details() throws NotFoundException {
+    void testCourtnavCaseDataWithCourtNavFL401Details() throws NotFoundException {
 
         courtNavFl401 = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
@@ -447,7 +447,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavCaseDataWithCourtNavFL401DetailsWithOccupationalOrder() throws NotFoundException {
+    void testCourtnavCaseDataWithCourtNavFL401DetailsWithOccupationalOrder() throws NotFoundException {
 
         courtNavFl401 = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
@@ -484,7 +484,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavMetaDataCourtnavApprovedAsFalse() throws NotFoundException {
+    void testCourtnavMetaDataCourtnavApprovedAsFalse() throws NotFoundException {
 
         courtNavMetaData = CourtNavMetaData.builder()
             .courtNavApproved(false)
@@ -530,7 +530,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavOrdersAppliedWithoutNoticeAsFalse() throws NotFoundException {
+    void testCourtnavOrdersAppliedWithoutNoticeAsFalse() throws NotFoundException {
 
         situation = situation.toBuilder()
             .ordersAppliedWithoutNotice(false)
@@ -572,7 +572,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavFamilyAsApplicant() throws NotFoundException {
+    void testCourtnavFamilyAsApplicant() throws NotFoundException {
 
         family = Family.builder()
             .whoApplicationIsFor(ApplicationCoverEnum.applicantOnly)
@@ -615,7 +615,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavRelationShipDescriptionAsNoneOfTheAbove() throws NotFoundException {
+    void testCourtnavRelationShipDescriptionAsNoneOfTheAbove() throws NotFoundException {
 
         relationShipToRespondent = CourtNavRelationShipToRespondent.builder()
             .relationshipDescription(ApplicantRelationshipDescriptionEnum.noneOfAbove)
@@ -664,7 +664,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavGoingToCourtInterpreterNeeds() throws NotFoundException {
+    void testCourtnavGoingToCourtInterpreterNeeds() throws NotFoundException {
 
         List<SpecialMeasuresEnum> specialMeasuresEnum = new ArrayList<>();
         specialMeasuresEnum.add(SpecialMeasuresEnum.separateWaitingRoom);
@@ -712,7 +712,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavGoingToCourtWithNoSpecialMeasures() throws NotFoundException {
+    void testCourtnavGoingToCourtWithNoSpecialMeasures() throws NotFoundException {
 
         List<SpecialMeasuresEnum> specialMeasuresEnum = new ArrayList<>();
         specialMeasuresEnum.add(SpecialMeasuresEnum.separateWaitingRoom);
@@ -762,7 +762,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavOngoingCourtProceedings() throws NotFoundException {
+    void testCourtnavOngoingCourtProceedings() throws NotFoundException {
 
         List<CourtProceedings> courtProceedings = new ArrayList<>();
         courtProceedings.add(CourtProceedings.builder()
@@ -832,7 +832,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavHomeChildrenIsNull() throws NotFoundException {
+    void testCourtnavHomeChildrenIsNull() throws NotFoundException {
 
         home1 = home1.toBuilder()
             .childrenApplicantResponsibility(null)
@@ -873,7 +873,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavHomePreviouslyLivedAtThisAddressAsNeither() throws NotFoundException {
+    void testCourtnavHomePreviouslyLivedAtThisAddressAsNeither() throws NotFoundException {
 
         home1 = home1.toBuilder()
             .previouslyLivedAtAddress(null)
@@ -915,7 +915,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavHomeLivingStituationAsNull() throws NotFoundException {
+    void testCourtnavHomeLivingStituationAsNull() throws NotFoundException {
 
         home1 = home1.toBuilder()
             .wantToHappenWithLivingSituation(null)
@@ -957,7 +957,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavHomeNameOnRentalAgreementAsNull() throws NotFoundException {
+    void testCourtnavHomeNameOnRentalAgreementAsNull() throws NotFoundException {
 
         home1 = home1.toBuilder()
             .propertyIsRented(false)
@@ -1001,7 +1001,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavHomeMortagageAndRentDetailsAsFalse() throws NotFoundException {
+    void testCourtnavHomeMortagageAndRentDetailsAsFalse() throws NotFoundException {
 
         home1 = home1.toBuilder()
             .propertyIsRented(false)
@@ -1050,7 +1050,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavFamilyHomeEmptyListDoesNotCauseNullPE() throws NotFoundException {
+    void testCourtnavFamilyHomeEmptyListDoesNotCauseNullPE() throws NotFoundException {
 
         home1 = home1.toBuilder()
             .wantToHappenWithFamilyHome(Collections.emptyList())
@@ -1090,7 +1090,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavApplicantDetailsHasNoConfidentialInfo() throws NotFoundException {
+    void testCourtnavApplicantDetailsHasNoConfidentialInfo() throws NotFoundException {
 
         applicantsDetails = applicantsDetails.toBuilder()
             .applicantGender(ApplicantGenderEnum.female)
@@ -1138,7 +1138,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavRespondentDetailsHasNullInfo() throws NotFoundException {
+    void testCourtnavRespondentDetailsHasNullInfo() throws NotFoundException {
 
         respondentDetails = RespondentDetails.builder()
             .respondentFirstName("resp test")
@@ -1186,7 +1186,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavRelationShiptoRespondentHasRelationEndDate() throws NotFoundException {
+    void testCourtnavRelationShiptoRespondentHasRelationEndDate() throws NotFoundException {
 
         relationShipToRespondent = CourtNavRelationShipToRespondent.builder()
             .relationshipDescription(ApplicantRelationshipDescriptionEnum.formerlyMarriedOrCivil)
@@ -1246,7 +1246,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavFamilyParentalResponsibilityAsFalse() throws NotFoundException {
+    void testCourtnavFamilyParentalResponsibilityAsFalse() throws NotFoundException {
 
         List<ProtectedChild> protectedChildren = new ArrayList<>();
 
@@ -1304,7 +1304,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavRespondentBehaviourTowardsApplicantAsNull() throws NotFoundException {
+    void testCourtnavRespondentBehaviourTowardsApplicantAsNull() throws NotFoundException {
 
         List<BehaviourTowardsChildrenEnum> behaviourTowardsChildrenEnum = new ArrayList<>();
         behaviourTowardsChildrenEnum.add(BehaviourTowardsChildrenEnum.beingViolentOrThreatening);
@@ -1350,7 +1350,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavRespondentBehaviourTowardsChildrenAsNull() throws NotFoundException {
+    void testCourtnavRespondentBehaviourTowardsChildrenAsNull() throws NotFoundException {
 
         List<BehaviourTowardsApplicantEnum> behaviourTowardsApplicantEnum = new ArrayList<>();
         behaviourTowardsApplicantEnum.add(BehaviourTowardsApplicantEnum.comingNearHome);
@@ -1398,7 +1398,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtNavCaseDataWhenPopulateDefaultCaseFlagIsOn() throws NotFoundException {
+    void testCourtNavCaseDataWhenPopulateDefaultCaseFlagIsOn() throws NotFoundException {
 
         courtNavFl401 = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
@@ -1433,7 +1433,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtNavCaseDataWhenCourtDetailFoundForEpmsId() throws NotFoundException {
+    void testCourtNavCaseDataWhenCourtDetailFoundForEpmsId() throws NotFoundException {
 
         courtNavFl401 = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
@@ -1466,7 +1466,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtNavCaseDataWhenCourtDetailFoundForEpmsIdAndFlagIsOn() throws NotFoundException {
+    void testCourtNavCaseDataWhenCourtDetailFoundForEpmsIdAndFlagIsOn() throws NotFoundException {
 
         courtNavFl401 = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
@@ -1499,7 +1499,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtNavCaseDataWhenPopulateDefaultCaseFlagIsOff() throws NotFoundException {
+    void testCourtNavCaseDataWhenPopulateDefaultCaseFlagIsOff() throws NotFoundException {
 
         courtNavFl401 = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
@@ -1535,7 +1535,7 @@ public class FL401ApplicationMapperTest {
 
 
     @Test
-    public void testCourtNavContactInfirmation() throws NotFoundException {
+    void testCourtNavContactInfirmation() throws NotFoundException {
 
         applicantsDetails = applicantsDetails.toBuilder().applicantContactInstructions("Test").build();
         courtNavFl401 = CourtNavFl401.builder()

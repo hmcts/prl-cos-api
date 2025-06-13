@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.bundle;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,27 +7,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.BundleApiClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum;
-import uk.gov.hmcts.reform.prl.enums.FamilyHomeEnum;
 import uk.gov.hmcts.reform.prl.enums.FurtherEvidenceDocumentType;
-import uk.gov.hmcts.reform.prl.enums.LivingSituationEnum;
-import uk.gov.hmcts.reform.prl.enums.PeopleLivingAtThisAddressEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.enums.YesNoBothEnum;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.bundle.BundleCreateRequestMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.ContactInformation;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
-import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
-import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
@@ -43,13 +33,11 @@ import uk.gov.hmcts.reform.prl.models.dto.bundle.DocumentLink;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -58,20 +46,16 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @ExtendWith(MockitoExtension.class)
-public class BundlingServiceTest {
+class BundlingServiceTest {
+
+    @InjectMocks
+    private BundlingService bundlingService;
+
     @Mock
     private BundleApiClient bundleApiClient;
 
     @Mock
-    private CoreCaseDataApi coreCaseDataApi;
-
-    @Mock
     private AuthTokenGenerator authTokenGenerator;
-
-    @Mock
-    private CaseUtils caseUtils;
-    @Mock
-    private ObjectMapper objectMapper;
 
     @Mock
     private BundleCreateRequestMapper bundleCreateRequestMapper;
@@ -79,21 +63,14 @@ public class BundlingServiceTest {
     @Mock
     private HearingService hearingService;
 
-    @InjectMocks
-    private BundlingService bundlingService;
-    private BundleCreateResponse bundleCreateResponse;
-    private CaseDetails caseDetails;
-    private CaseData caseData;
+    private CaseData c100CaseData;
+    private CaseData c100CaseDataOther;
 
-    CaseData c100CaseData;
-    CaseData c100CaseDataOther;
-
-    CaseData c100CaseData2;
-    AllegationOfHarm allegationOfHarmYes;
-    Map<String, Object> caseDataMap;
+    private CaseData c100CaseData2;
+    private AllegationOfHarm allegationOfHarmYes;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         allegationOfHarmYes = AllegationOfHarm.builder()
             .allegationsOfHarmYesNo(Yes).build();
 
@@ -106,27 +83,6 @@ public class BundlingServiceTest {
         otherDocuments.add(OtherDocuments.builder().documentName("Application docu")
             .documentOther(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("Sample2.pdf").build()).documentTypeOther(
                 DocTypeOtherDocumentsEnum.applicantStatement).restrictCheckboxOtherDocuments(new ArrayList<>()).build());
-
-        ChildrenLiveAtAddress childrenLiveAtAddress = ChildrenLiveAtAddress.builder()
-            .keepChildrenInfoConfidential(Yes)
-            .childFullName("child")
-            .childsAge("12")
-            .isRespondentResponsibleForChild(YesOrNo.Yes)
-            .build();
-
-        Home homefull = Home.builder()
-            .address(Address.builder().addressLine1("123").build())
-            .everLivedAtTheAddress(YesNoBothEnum.yesApplicant)
-            .doesApplicantHaveHomeRights(YesOrNo.No)
-            .doAnyChildrenLiveAtAddress(YesOrNo.Yes)
-            .children(List.of(Element.<ChildrenLiveAtAddress>builder().value(childrenLiveAtAddress).build()))
-            .isPropertyRented(YesOrNo.No)
-            .isThereMortgageOnProperty(YesOrNo.No)
-            .isPropertyAdapted(YesOrNo.No)
-            .peopleLivingAtThisAddress(List.of(PeopleLivingAtThisAddressEnum.applicant))
-            .familyHome(List.of(FamilyHomeEnum.payForRepairs))
-            .livingSituation(List.of(LivingSituationEnum.awayFromHome))
-            .build();
 
         List<ContactInformation> contactInformationList = Collections.singletonList(ContactInformation.builder()
             .addressLine1("29, SEATON DRIVE")
@@ -205,13 +161,11 @@ public class BundlingServiceTest {
             .allegationOfHarm(allegationOfHarmYes)
             .applicants(listOfApplicants)
             .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
-            //.allegationsOfHarmYesNo(No)
             .applicantsConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
             .otherDocuments(ElementUtils.wrapElements(otherDocuments))
             .furtherEvidences(ElementUtils.wrapElements(furtherEvidences))
             .bundleInformation(BundlingInformation.builder().build())
-            //.home(homefull)
             .build();
         bundleCreateRequestMapper = new BundleCreateRequestMapper();
 
@@ -225,7 +179,6 @@ public class BundlingServiceTest {
             .allegationOfHarm(allegationOfHarmYes)
             .applicants(listOfApplicants)
             .state(State.DECISION_OUTCOME)
-            //.allegationsOfHarmYesNo(No)
             .applicantsConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
             .otherDocuments(ElementUtils.wrapElements(otherDocuments))
@@ -233,7 +186,6 @@ public class BundlingServiceTest {
             .finalWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("finalWelshDoc.pdf").build())
             .c1AWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("C1AWelshDoc.pdf").build())
             .bundleInformation(BundlingInformation.builder().caseBundles(bundleList).build())
-            //.home(homefull)
             .build();
 
         c100CaseData2 = CaseData.builder()
@@ -245,7 +197,6 @@ public class BundlingServiceTest {
             .allegationOfHarm(allegationOfHarmYes)
             .applicants(listOfApplicants)
             .state(State.DECISION_OUTCOME)
-            //.allegationsOfHarmYesNo(No)
             .applicantsConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
             .otherDocuments(ElementUtils.wrapElements(otherDocuments))
@@ -253,12 +204,11 @@ public class BundlingServiceTest {
             .finalWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("finalWelshDoc.pdf").build())
             .c1AWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("C1AWelshDoc.pdf").build())
             .bundleInformation(BundlingInformation.builder().caseBundles(bundleList).build())
-            //.home(homefull)
             .build();
     }
 
     @Test
-    public void testCreateBundleService() throws Exception {
+    void testCreateBundleService() {
         when(authTokenGenerator.generate()).thenReturn("authToken");
         BundleCreateResponse bundleCreateResponse = BundleCreateResponse.builder().documentTaskId(123).build();
         when(bundlingService.createBundleServiceRequest(c100CaseData,"eventId","authorization"))
@@ -268,7 +218,7 @@ public class BundlingServiceTest {
     }
 
     @Test
-    public void testCreateBundleServiceWhenLanguagePreferenceWelshAsYes() throws Exception {
+    void testCreateBundleServiceWhenLanguagePreferenceWelshAsYes() {
         when(authTokenGenerator.generate()).thenReturn("authToken");
         BundleCreateResponse bundleCreateResponse = BundleCreateResponse.builder().documentTaskId(123).build();
         when(bundlingService.createBundleServiceRequest(c100CaseData,"eventId","authorization"))
@@ -278,7 +228,7 @@ public class BundlingServiceTest {
     }
 
     @Test
-    public void testCreateBundleServiceWhenLanguagePreferenceWelshNotSet() throws Exception {
+    void testCreateBundleServiceWhenLanguagePreferenceWelshNotSet() {
         when(authTokenGenerator.generate()).thenReturn("authToken");
         BundleCreateResponse bundleCreateResponse = BundleCreateResponse.builder().documentTaskId(123).build();
         when(bundlingService.createBundleServiceRequest(c100CaseData2,"eventId","authorization"))

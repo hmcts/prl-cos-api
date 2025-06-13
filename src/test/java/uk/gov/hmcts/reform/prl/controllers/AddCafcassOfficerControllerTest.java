@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,7 +28,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
-public class AddCafcassOfficerControllerTest {
+class AddCafcassOfficerControllerTest {
 
     @Mock
     AddCafcassOfficerService addCafcassOfficerService;
@@ -40,11 +39,11 @@ public class AddCafcassOfficerControllerTest {
     @Mock
     private AuthorisationService authorisationService;
 
-    public static final String authToken = "Bearer TestAuthToken";
-    public static final String s2sToken = "s2s AuthToken";
+    public static final String AUTH_TOKEN = "Bearer TestAuthToken";
+    public static final String S2S_TOKEN = "s2s AuthToken";
 
     @Test
-    public void testUpdateChildDetailsWithCafcassOfficer() {
+    void testUpdateChildDetailsWithCafcassOfficer() {
         List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers = new ArrayList<>();
         Element<ChildAndCafcassOfficer> cafcassOfficerElement = element(ChildAndCafcassOfficer.builder().build());
         childAndCafcassOfficers.add(cafcassOfficerElement);
@@ -60,14 +59,14 @@ public class AddCafcassOfficerControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        addCafcassOfficerController.updateChildDetailsWithCafcassOfficer(s2sToken, authToken, callbackRequest);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        addCafcassOfficerController.updateChildDetailsWithCafcassOfficer(S2S_TOKEN, AUTH_TOKEN, callbackRequest);
         verify(addCafcassOfficerService, times(1))
             .populateCafcassOfficerDetails(callbackRequest);
     }
 
     @Test
-    public void testExceptionForUpdateChildDetailsWithCafcassOfficer() throws Exception {
+    void testExceptionForUpdateChildDetailsWithCafcassOfficer() {
         List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers = new ArrayList<>();
         Element<ChildAndCafcassOfficer> cafcassOfficerElement = element(ChildAndCafcassOfficer.builder().build());
         childAndCafcassOfficers.add(cafcassOfficerElement);
@@ -83,15 +82,18 @@ public class AddCafcassOfficerControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            addCafcassOfficerController.updateChildDetailsWithCafcassOfficer(s2sToken, authToken, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
-    }
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
 
-    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
-                                                                 String expectedMessage) {
-        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
-        assertEquals(expectedMessage, exception.getMessage());
+        RuntimeException ex = assertThrows(
+            RuntimeException.class, () -> {
+                addCafcassOfficerController.updateChildDetailsWithCafcassOfficer(
+                    S2S_TOKEN,
+                    AUTH_TOKEN,
+                    callbackRequest
+                );
+            }
+        );
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 }

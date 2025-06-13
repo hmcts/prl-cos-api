@@ -21,14 +21,14 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS_REVISED;
 
 @ExtendWith(MockitoExtension.class)
-public class ChildrenAndApplicantsCheckerTest {
-
+class ChildrenAndApplicantsCheckerTest {
 
     @Mock
     TaskErrorService taskErrorService;
@@ -40,20 +40,20 @@ public class ChildrenAndApplicantsCheckerTest {
     ChildrenAndApplicantsChecker childrenAndApplicantsChecker;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    public void whenNoCaseDataPresentThenIsStartedReturnsFalse() {
+    void whenNoCaseDataPresentThenIsStartedReturnsFalse() {
         CaseData caseData = CaseData.builder()
                 .relations(Relations.builder().build()).build();
 
-        assertTrue(!childrenAndApplicantsChecker.isStarted(caseData));
+        assertFalse(childrenAndApplicantsChecker.isStarted(caseData));
     }
 
     @Test
-    public void whenEmptyChildDataPresentThenIsStartedReturnsTrue() {
+    void whenEmptyChildDataPresentThenIsStartedReturnsTrue() {
         ChildrenAndApplicantRelation child = ChildrenAndApplicantRelation.builder()
             .applicantFullName("Test")
             .childFullName("Name").childAndApplicantRelation(RelationshipsEnum.other)
@@ -74,19 +74,19 @@ public class ChildrenAndApplicantsCheckerTest {
     }
 
     @Test
-    public void whenSomeChildDataPresentThenIsStartedReturnsTrue() {
+    void whenSomeChildDataPresentThenIsStartedReturnsTrue() {
 
         CaseData caseData = CaseData.builder()
                 .relations(Relations.builder().build())
             .build();
 
-        assertTrue(!childrenAndApplicantsChecker.isStarted(caseData));
+        assertFalse(childrenAndApplicantsChecker.isStarted(caseData));
     }
 
 
 
     @Test
-    public void whenAllChildDataPresentThenIsFinishedReturnsTrueWithGenderOther() {
+    void whenAllChildDataPresentThenIsFinishedReturnsTrueWithGenderOther() {
         ChildrenAndApplicantRelation child = ChildrenAndApplicantRelation.builder()
             .applicantFullName("Test")
             .childFullName("Name").childAndApplicantRelation(RelationshipsEnum.other)
@@ -106,7 +106,7 @@ public class ChildrenAndApplicantsCheckerTest {
     }
 
     @Test
-    public void whenAllChildDataPresentThenIsFinishedReturnsFalseWithGenderOther() {
+    void whenAllChildDataPresentThenIsFinishedReturnsFalseWithGenderOther() {
         ChildrenAndApplicantRelation child = ChildrenAndApplicantRelation.builder()
             .applicantFullName("Test")
             .childFullName("Name").childAndApplicantRelation(RelationshipsEnum.other)
@@ -120,12 +120,12 @@ public class ChildrenAndApplicantsCheckerTest {
                 .relations(Relations.builder()
                         .childAndApplicantRelations(listOfChildren).build()).childrenNotPartInTheCaseYesNo(YesOrNo.Yes)
             .build();
-        assertTrue(!childrenAndApplicantsChecker.isFinished(caseData));
+        assertFalse(childrenAndApplicantsChecker.isFinished(caseData));
     }
 
 
     @Test
-    public void whenAllChildDataPresentThenIsFinishedReturnsFalse1() {
+    void whenAllChildDataPresentThenIsFinishedReturnsFalse1() {
         ChildrenAndApplicantRelation child = ChildrenAndApplicantRelation.builder()
             .applicantFullName("Test")
             .childFullName("Name").childAndApplicantRelation(RelationshipsEnum.father)
@@ -145,41 +145,41 @@ public class ChildrenAndApplicantsCheckerTest {
 
 
     @Test
-    public void whenAllChildDataPresentThenIsFinishedReturnsFalse() {
+    void whenAllChildDataPresentThenIsFinishedReturnsFalse() {
         CaseData caseData = CaseData.builder()
                 .relations(Relations.builder().build())
             .build();
-        assertTrue(!childrenAndApplicantsChecker.isFinished(caseData));
+        assertFalse(childrenAndApplicantsChecker.isFinished(caseData));
     }
 
     @Test
-    public void whenNoCaseDataPresentThenHasMandatoryCompletedReturnsTrue() {
+    void whenNoCaseDataPresentThenHasMandatoryCompletedReturnsTrue() {
         CaseData caseData = CaseData.builder().build();
-        assertTrue(!childrenAndApplicantsChecker.hasMandatoryCompleted(caseData));
+        assertFalse(childrenAndApplicantsChecker.hasMandatoryCompleted(caseData));
     }
 
 
     @Test
-    public void testDefaultTaskStateWhenCannotStart() {
+    void testDefaultTaskStateWhenCannotStart() {
         assertEquals(TaskState.CANNOT_START_YET, childrenAndApplicantsChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 
     @Test
-    public void testDefaultTaskStateWhenChildDetailsDone() {
+    void testDefaultTaskStateWhenChildDetailsDone() {
         CaseData caseData = CaseData.builder().build();
         when(eventsChecker.hasMandatoryCompleted(CHILD_DETAILS_REVISED, caseData)).thenReturn(true);
         assertEquals(TaskState.CANNOT_START_YET, childrenAndApplicantsChecker.getDefaultTaskState(caseData));
     }
 
     @Test
-    public void testDefaultTaskStateWhenChildDetailsDoneIsFinished() {
+    void testDefaultTaskStateWhenChildDetailsDoneIsFinished() {
         CaseData caseData = CaseData.builder().build();
         when(eventsChecker.isFinished(CHILD_DETAILS_REVISED, caseData)).thenReturn(true);
         assertEquals(TaskState.CANNOT_START_YET, childrenAndApplicantsChecker.getDefaultTaskState(caseData));
     }
 
     @Test
-    public void testDefaultTaskStateWhenChildDetailsDoneAndApplicantDetails() {
+    void testDefaultTaskStateWhenChildDetailsDoneAndApplicantDetails() {
         CaseData caseData = CaseData.builder().build();
         when(eventsChecker.hasMandatoryCompleted(CHILD_DETAILS_REVISED, caseData)).thenReturn(true);
         when(eventsChecker.hasMandatoryCompleted(APPLICANT_DETAILS, caseData)).thenReturn(true);

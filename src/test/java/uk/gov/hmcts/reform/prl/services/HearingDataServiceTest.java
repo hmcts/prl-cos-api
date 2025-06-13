@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -79,7 +78,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-public class HearingDataServiceTest {
+class HearingDataServiceTest {
 
     @InjectMocks
     HearingDataService hearingDataService;
@@ -130,7 +129,7 @@ public class HearingDataServiceTest {
     private PartyDetails respondent;
 
     @BeforeEach
-    public void init() {
+    void init() {
         applicant = PartyDetails.builder()
             .firstName("AppFN")
             .lastName("AppLN")
@@ -150,7 +149,7 @@ public class HearingDataServiceTest {
     }
 
     @Test()
-    public void testPopulateHearingDynamicLists() {
+    void testPopulateHearingDynamicLists() {
         List<CategoryValues> categoryValues = new ArrayList<>();
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Review").build());
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Allocation").build());
@@ -218,14 +217,14 @@ public class HearingDataServiceTest {
     }
 
     @Test()
-    public void testPrePopulateHearingChannelException() {
+    void testPrePopulateHearingChannelException() {
         when(refDataUserService.filterCategoryValuesByCategoryId(any(), any())).thenThrow(new RuntimeException());
         Map<String, List<DynamicListElement>> expectedResponse = hearingDataService.prePopulateHearingChannel(authToken);
-        Assert.assertEquals(0, expectedResponse.size());
+        assertEquals(0, expectedResponse.size());
     }
 
     @Test()
-    public void testPrePopulateHearingType() {
+    void testPrePopulateHearingType() {
         List<CategoryValues> categoryValues = new ArrayList<>();
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Review").build());
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Allocation").build());
@@ -238,12 +237,12 @@ public class HearingDataServiceTest {
         when(refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse, HEARINGTYPE)).thenReturn(
             listHearingTypes);
         List<DynamicListElement> expectedResponse = hearingDataService.prePopulateHearingType(authToken);
-        assertEquals("ABA5-REV", expectedResponse.get(0).getCode());
-        assertEquals("Review", expectedResponse.get(0).getLabel());
+        assertEquals("ABA5-REV", expectedResponse.getFirst().getCode());
+        assertEquals("Review", expectedResponse.getFirst().getLabel());
     }
 
     @Test()
-    public void testPrePopulateHearingDates() {
+    void testPrePopulateHearingDates() {
 
         List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>();
         hearingDaySchedules.add(HearingDaySchedule.hearingDayScheduleWith().hearingJudgeId("123").hearingJudgeName(
@@ -267,7 +266,7 @@ public class HearingDataServiceTest {
     }
 
     @Test()
-    public void testGetHearingData() {
+    void testGetHearingData() {
 
         List<CategoryValues> categoryValues = new ArrayList<>();
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Review").build());
@@ -363,7 +362,7 @@ public class HearingDataServiceTest {
     }
 
     @Test()
-    public void testGetHearingDataForSdo() {
+    void testGetHearingDataForSdo() {
 
         List<CategoryValues> categoryValues = new ArrayList<>();
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Review").build());
@@ -454,7 +453,7 @@ public class HearingDataServiceTest {
     }
 
     @Test()
-    public void testGetHearingDataSetJ() {
+    void testGetHearingDataSetJ() {
 
         List<CategoryValues> categoryValues = new ArrayList<>();
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Review").build());
@@ -547,12 +546,12 @@ public class HearingDataServiceTest {
             hearingDataService.getHearingDataForOtherOrders(listWithoutNoticeHearingDetails,
                                                             hearingDataPrePopulatedDynamicLists,
                                                             caseData);
-        assertEquals("Test", expectedResponse.get(0).getValue().getHearingJudgePersonalCode());
+        assertEquals("Test", expectedResponse.getFirst().getValue().getHearingJudgePersonalCode());
     }
 
 
     @Test()
-    public void testGenerateHearingData() {
+    void testGenerateHearingData() {
         List<CategoryValues> categoryValues = new ArrayList<>();
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Review").build());
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Allocation").build());
@@ -624,7 +623,7 @@ public class HearingDataServiceTest {
 
 
     @Test()
-    public void testGetLinkedCasesWithBaseLocationAndRegion() {
+    void testGetLinkedCasesWithBaseLocationAndRegion() {
         List<CaseLinkedData> caseLinkedDataList = new ArrayList<>();
         CaseLinkedData caseLinkedData = CaseLinkedData.caseLinkedDataWith()
             .caseName("CaseName-Test10")
@@ -663,12 +662,12 @@ public class HearingDataServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         List<DynamicListElement> expectedResponse = hearingDataService.getLinkedCases(authToken, caseData);
-        assertEquals("1677767515750127_123",expectedResponse.get(0).getCode());
-        assertEquals("1677767515750127_test - 08 Nov 2023",expectedResponse.get(0).getLabel());
+        assertEquals("1677767515750127_123",expectedResponse.getFirst().getCode());
+        assertEquals("1677767515750127_test - 08 Nov 2023",expectedResponse.getFirst().getLabel());
     }
 
     @Test()
-    public void testGetLinkedCasesWithBaseLocationIdAndRegionId() {
+    void testGetLinkedCasesWithBaseLocationIdAndRegionId() {
         List<CaseLinkedData> caseLinkedDataList = new ArrayList<>();
         CaseLinkedData caseLinkedData = CaseLinkedData.caseLinkedDataWith()
             .caseName("CaseName-Test10")
@@ -708,12 +707,12 @@ public class HearingDataServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         List<DynamicListElement> expectedResponse = hearingDataService.getLinkedCases(authToken, caseData);
-        assertEquals("1677767515750127_123", expectedResponse.get(0).getCode());
-        assertEquals("1677767515750127_test - 08 Nov 2023", expectedResponse.get(0).getLabel());
+        assertEquals("1677767515750127_123", expectedResponse.getFirst().getCode());
+        assertEquals("1677767515750127_test - 08 Nov 2023", expectedResponse.getFirst().getLabel());
     }
 
     @Test()
-    public void testNullifyUnncessaryFieldsPopulated() {
+    void testNullifyUnncessaryFieldsPopulated() {
         Map<String, Object> hearingDateConfirmOptionEnumMap = new LinkedHashMap<>();
         Map<String, Object> objectMap = new LinkedHashMap<>();
         hearingDateConfirmOptionEnumMap.put(HEARING_DATE_CONFIRM_OPTION_ENUM, DATE_CONFIRMED_IN_HEARINGS_TAB);
@@ -726,13 +725,13 @@ public class HearingDataServiceTest {
 
         assertEquals(
             null,
-            ((LinkedHashMap) ((LinkedHashMap) listWithoutNoticeHeardetailsObj.get(0)).get("value")).get(CUSTOM_DETAILS)
+            ((LinkedHashMap) ((LinkedHashMap) listWithoutNoticeHeardetailsObj.getFirst()).get("value")).get(CUSTOM_DETAILS)
         );
 
     }
 
     @Test()
-    public void testNullifyUnncessaryFieldsPopulatedWithoutHearingDateConfirmOption() {
+    void testNullifyUnncessaryFieldsPopulatedWithoutHearingDateConfirmOption() {
         Map<String, Object> hearingDateConfirmOptionEnumMap = new LinkedHashMap<>();
         Map<String, Object> objectMap = new LinkedHashMap<>();
         hearingDateConfirmOptionEnumMap.put(HEARING_DATE_CONFIRM_OPTION_ENUM, CONFIRMED_HEARING_DATES);
@@ -745,13 +744,13 @@ public class HearingDataServiceTest {
 
         assertEquals(
             null,
-            ((LinkedHashMap) ((LinkedHashMap) listWithoutNoticeHeardetailsObj.get(0)).get("value")).get(CUSTOM_DETAILS)
+            ((LinkedHashMap) ((LinkedHashMap) listWithoutNoticeHeardetailsObj.getFirst()).get("value")).get(CUSTOM_DETAILS)
         );
 
     }
 
     @Test()
-    public void testGetLinkedCasesDynamicList() {
+    void testGetLinkedCasesDynamicList() {
         String caseId = "testCaseRefNo";
         List<CaseLinkedData> caseLinkedDataList = new ArrayList<>();
         CaseLinkedData caseLinkedData = CaseLinkedData.caseLinkedDataWith()
@@ -763,12 +762,12 @@ public class HearingDataServiceTest {
         List<DynamicListElement> dynamicListElementList = hearingDataService.getLinkedCasesDynamicList(authToken,
                                                                                                        caseId);
 
-        assertEquals("testCaseRefNo", (dynamicListElementList.get(0).getCode()));
+        assertEquals("testCaseRefNo", (dynamicListElementList.getFirst().getCode()));
 
     }
 
     @Test()
-    public void testGetLinkedCasesDynamicListException() {
+    void testGetLinkedCasesDynamicListException() {
         String caseId = "testCaseRefNo";
         List<CaseLinkedData> caseLinkedDataList = new ArrayList<>();
         CaseLinkedData caseLinkedData = CaseLinkedData.caseLinkedDataWith()
@@ -780,11 +779,11 @@ public class HearingDataServiceTest {
 
         List<DynamicListElement> dynamicListElementList = hearingDataService.getLinkedCasesDynamicList(authToken,
                                                                                                        caseId);
-        Assert.assertEquals(0, dynamicListElementList.size());
+        assertEquals(0, dynamicListElementList.size());
     }
 
     @Test()
-    public void testPrePopulateHearingTypeExceptionRetrieveCategoryValues() {
+    void testPrePopulateHearingTypeExceptionRetrieveCategoryValues() {
         List<CategoryValues> categoryValues = new ArrayList<>();
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Review").build());
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Allocation").build());
@@ -798,11 +797,11 @@ public class HearingDataServiceTest {
         when(refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse, HEARINGTYPE)).thenReturn(
             listHearingTypes);
         List<DynamicListElement> expectedResponse = hearingDataService.prePopulateHearingType(authToken);
-        assertNull(expectedResponse.get(0).getCode());
+        assertNull(expectedResponse.getFirst().getCode());
     }
 
     @Test()
-    public void testPrePopulateHearingTypeExceptionWhileFilterCategoryValuesByCategoryId() {
+    void testPrePopulateHearingTypeExceptionWhileFilterCategoryValuesByCategoryId() {
         List<CategoryValues> categoryValues = new ArrayList<>();
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Review").build());
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Allocation").build());
@@ -815,11 +814,11 @@ public class HearingDataServiceTest {
         when(refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse,
                                                                  HEARINGTYPE)).thenThrow(new RuntimeException());
         List<DynamicListElement> expectedResponse = hearingDataService.prePopulateHearingType(authToken);
-        assertNull(expectedResponse.get(0).getCode());
+        assertNull(expectedResponse.getFirst().getCode());
     }
 
     @Test
-    public void testHearingDataForSelectedHearing() {
+    void testHearingDataForSelectedHearing() {
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder()
                               .ordersHearingDetails(List.of(Element.<HearingData>builder()
@@ -856,7 +855,7 @@ public class HearingDataServiceTest {
     }
 
     @Test
-    public void testHearingDataForSelectedHearingWithoutDayLightSavingHearingTime() {
+    void testHearingDataForSelectedHearingWithoutDayLightSavingHearingTime() {
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder()
                               .ordersHearingDetails(List.of(Element.<HearingData>builder()
@@ -909,12 +908,12 @@ public class HearingDataServiceTest {
             "testAuth"
         );
         assertNotNull(hearingDataForSelectedHearing);
-        assert (hearingDataForSelectedHearing.get(0).getValue().getHearingdataFromHearingTab().get(0).getValue().getHearingTime().equals(
+        assert (hearingDataForSelectedHearing.getFirst().getValue().getHearingdataFromHearingTab().getFirst().getValue().getHearingTime().equals(
             "10:00 AM"));
     }
 
     @Test
-    public void testHearingDataForSelectedHearingDaylightSavingsHearingTime() {
+    void testHearingDataForSelectedHearingDaylightSavingsHearingTime() {
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder()
                               .ordersHearingDetails(List.of(Element.<HearingData>builder()
@@ -967,12 +966,12 @@ public class HearingDataServiceTest {
             "testAuth"
         );
         assertNotNull(hearingDataForSelectedHearing);
-        assert (hearingDataForSelectedHearing.get(0).getValue().getHearingdataFromHearingTab().get(0).getValue().getHearingTime().equals(
+        assert (hearingDataForSelectedHearing.getFirst().getValue().getHearingdataFromHearingTab().getFirst().getValue().getHearingTime().equals(
             "10:00 AM"));
     }
 
     @Test
-    public void testgetHearingStartDate() {
+    void testgetHearingStartDate() {
         Hearings hearings = Hearings.hearingsWith()
             .caseHearings(List.of(CaseHearing.caseHearingWith()
                                       .hearingID(123L)
@@ -992,7 +991,7 @@ public class HearingDataServiceTest {
     }
 
     @Test
-    public void testgetgetHearingDaySchedule() {
+    void testgetgetHearingDaySchedule() {
         Hearings hearings = Hearings.hearingsWith()
             .caseHearings(List.of(CaseHearing.caseHearingWith()
                                       .hearingID(123L)
@@ -1011,7 +1010,7 @@ public class HearingDataServiceTest {
     }
 
     @Test
-    public void testgetgetHearingBlank() {
+    void testgetgetHearingBlank() {
         Hearings hearings = Hearings.hearingsWith()
             .caseHearings(List.of(CaseHearing.caseHearingWith()
                                       .hearingID(123L)
@@ -1030,7 +1029,7 @@ public class HearingDataServiceTest {
     }
 
     @Test()
-    public void testGenerateHearingDataForCafcassCymru() {
+    void testGenerateHearingDataForCafcassCymru() {
         List<CategoryValues> categoryValues = new ArrayList<>();
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Review").build());
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Allocation").build());
@@ -1106,7 +1105,7 @@ public class HearingDataServiceTest {
     }
 
     @Test
-    public void testHearingDataForSelectedHearingForSdo() {
+    void testHearingDataForSelectedHearingForSdo() {
         CaseData caseData = CaseData.builder()
             .id(123456789000000L)
             .applicantsFL401(PartyDetails.builder().partyId(UUID.fromString(TEST_UUID)).build())
@@ -1137,7 +1136,7 @@ public class HearingDataServiceTest {
     }
 
     @Test
-    public void testHearingDataForSelectedHearingForSolicitorOrdersHearingDetails() {
+    void testHearingDataForSelectedHearingForSolicitorOrdersHearingDetails() {
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder()
                               .solicitorOrdersHearingDetails(List.of(Element.<HearingData>builder()
@@ -1174,7 +1173,7 @@ public class HearingDataServiceTest {
     }
 
     @Test
-    public void testSetHearingDataForSelectedHearing() {
+    void testSetHearingDataForSelectedHearing() {
         CaseData caseData = CaseData.builder()
             .id(123)
             .manageOrders(ManageOrders.builder()
@@ -1215,7 +1214,7 @@ public class HearingDataServiceTest {
     }
 
     @Test
-    public void testSetHearingDataForSelectedHearing_scenario2() {
+    void testSetHearingDataForSelectedHearing_scenario2() {
 
         PartyDetails applicant1 = PartyDetails.builder()
             .firstName("TestName")
@@ -1286,7 +1285,7 @@ public class HearingDataServiceTest {
     }
 
     @Test
-    public void testSetHearingDataForSelectedHearingForSolicitorOrder() {
+    void testSetHearingDataForSelectedHearingForSolicitorOrder() {
         CaseData caseData = CaseData.builder()
             .id(123)
             .manageOrders(ManageOrders.builder()
@@ -1326,7 +1325,7 @@ public class HearingDataServiceTest {
     }
 
     @Test
-    public void testFetchingAwaitingAndCompletedHearings() {
+    void testFetchingAwaitingAndCompletedHearings() {
         Hearings hearings = Hearings.hearingsWith()
             .caseHearings(List.of(CaseHearing.caseHearingWith()
                                       .hearingID(123L)
@@ -1345,7 +1344,7 @@ public class HearingDataServiceTest {
     }
 
     @Test
-    public void testFetchingAwaitingAndCompletedHearingsForException() {
+    void testFetchingAwaitingAndCompletedHearingsForException() {
         Hearings hearings = Hearings.hearingsWith()
             .caseHearings(List.of(CaseHearing.caseHearingWith()
                                       .hearingID(123L)
@@ -1363,7 +1362,7 @@ public class HearingDataServiceTest {
     }
 
     @Test
-    public void testPopulatePartiesNamesForC100() {
+    void testPopulatePartiesNamesForC100() {
         Map<String, Object> tempCaseDetails = new HashMap<>();
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
@@ -1402,7 +1401,7 @@ public class HearingDataServiceTest {
     }
 
     @Test
-    public void testPopulatePartiesNamesForC100WithEmptyData() {
+    void testPopulatePartiesNamesForC100WithEmptyData() {
         Map<String, Object> tempCaseDetails = new HashMap<>();
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
@@ -1421,7 +1420,7 @@ public class HearingDataServiceTest {
     }
 
     @Test
-    public void testPopulatePartiesNamesForFl401() {
+    void testPopulatePartiesNamesForFl401() {
         Map<String, Object> tempCaseDetails = new HashMap<>();
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
@@ -1446,7 +1445,7 @@ public class HearingDataServiceTest {
     }
 
     @Test
-    public void testPopulatePartiesNamesForFl401WithEmptyData() {
+    void testPopulatePartiesNamesForFl401WithEmptyData() {
         Map<String, Object> tempCaseDetails = new HashMap<>();
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
@@ -1465,7 +1464,7 @@ public class HearingDataServiceTest {
     }
 
     @Test
-    public void testSetHearingDataForSelectedHearingForDaOrderCaCase() {
+    void testSetHearingDataForSelectedHearingForDaOrderCaCase() {
         PartyDetails applicantParty = PartyDetails.builder()
             .firstName("TestName")
             .representativeFirstName("Ram")
@@ -1525,7 +1524,7 @@ public class HearingDataServiceTest {
     }
 
     @Test
-    public void testSetHearingDataForSelectedHearingForCaOrderCaCase() {
+    void testSetHearingDataForSelectedHearingForCaOrderCaCase() {
         PartyDetails applicantParty = PartyDetails.builder()
             .firstName("TestName")
             .representativeFirstName("Ram")
@@ -1585,7 +1584,7 @@ public class HearingDataServiceTest {
     }
 
     @Test()
-    public void testGetHearingDataFeignException() {
+    void testGetHearingDataFeignException() {
 
         List<CategoryValues> categoryValues = new ArrayList<>();
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Review").build());

@@ -23,7 +23,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class UserRoleServiceTest {
+class UserRoleServiceTest {
 
     @InjectMocks
     private UserRoleService userRoleService;
@@ -42,21 +42,21 @@ public class UserRoleServiceTest {
 
 
     @Test
-    public void testGetLoggedInUserTypeSolicitor() {
+    void testGetLoggedInUserTypeSolicitor() {
         when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder()
             .roles(List.of(Roles.SOLICITOR.getValue())).build());
         assertEquals(UserRoles.SOLICITOR.name(), userRoleService.getLoggedInUserType("test"));
     }
 
     @Test
-    public void testGetLoggedInUserTypeCitizen() {
+    void testGetLoggedInUserTypeCitizen() {
         when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder()
             .roles(List.of(Roles.CITIZEN.getValue())).build());
         assertEquals(UserRoles.CITIZEN.name(), userRoleService.getLoggedInUserType("test"));
     }
 
     @Test
-    public void testGetLoggedInUserTypeSystemUpdate() {
+    void testGetLoggedInUserTypeSystemUpdate() {
         when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder()
             .roles(List.of(Roles.SYSTEM_UPDATE.getValue())).build());
         assertEquals(UserRoles.SYSTEM_UPDATE.name(), userRoleService.getLoggedInUserType("test"));
@@ -64,7 +64,7 @@ public class UserRoleServiceTest {
 
 
     @Test
-    public void testGetLoggedInUserTypeCourtAdminFromAmRoleAssignment() {
+    void testGetLoggedInUserTypeCourtAdminFromAmRoleAssignment() {
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
             "hearing-centre-admin");
         when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder()
@@ -79,7 +79,7 @@ public class UserRoleServiceTest {
     }
 
     @Test
-    public void testGetLoggedInUserTypeSolicitorFromIdam() {
+    void testGetLoggedInUserTypeSolicitorFromIdam() {
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
             "caseworker-privatelaw-solicitor");
         when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder()
@@ -94,7 +94,7 @@ public class UserRoleServiceTest {
     }
 
     @Test
-    public void testGetLoggedInUserTypeJudgeFromAmRoleAssignment() {
+    void testGetLoggedInUserTypeJudgeFromAmRoleAssignment() {
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("allocated-magistrate");
         when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder()
             .id("123")
@@ -107,7 +107,7 @@ public class UserRoleServiceTest {
     }
 
     @Test
-    public void testGetLoggedInUserTypeForSystemUpdateFromIdam() {
+    void testGetLoggedInUserTypeForSystemUpdateFromIdam() {
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
             "caseworker-privatelaw-systemupdate");
         when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder()
@@ -122,7 +122,7 @@ public class UserRoleServiceTest {
     }
 
     @Test
-    public void testGetLoggedInUserTypeForCitizenFromIdam() {
+    void testGetLoggedInUserTypeForCitizenFromIdam() {
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("citizen");
         when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder()
             .id("123")

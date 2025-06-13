@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.utils.caseflags;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,7 +33,7 @@ public class PartyLevelCaseFlagsGeneratorTest {
     private Map<String, Object> caseDataMap;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         caseDataMap = new HashMap<>();
         caseDetails = CaseDetails.builder()
             .data(caseDataMap)
@@ -62,7 +62,7 @@ public class PartyLevelCaseFlagsGeneratorTest {
     }
 
     @Test
-    public void generatePartyFlagsForApplicantWithExternalFlag() {
+    void generatePartyFlagsForApplicantWithExternalFlag() {
         String partyName = STRING_CONSTANT;
         String caseDataField;
         String roleOnCase = STRING_CONSTANT;
@@ -75,11 +75,11 @@ public class PartyLevelCaseFlagsGeneratorTest {
                 .generatePartyFlags(caseData, partyName, caseDataField, roleOnCase, internalFlag, groupId);
             resultList.add(updatedCaseData);
         }
-        Assert.assertEquals(5, resultList.size());
+        assertEquals(5, resultList.size());
     }
 
     @Test
-    public void generatePartyFlagsForApplicantSolicitorWithExternalFlag() {
+    void generatePartyFlagsForApplicantSolicitorWithExternalFlag() {
         String partyName = STRING_CONSTANT;
         String caseDataField;
         String roleOnCase = STRING_CONSTANT;
@@ -93,11 +93,11 @@ public class PartyLevelCaseFlagsGeneratorTest {
             resultList.add(updatedCaseData);
         }
 
-        Assert.assertEquals(5, resultList.size());
+        assertEquals(5, resultList.size());
     }
 
     @Test
-    public void generatePartyFlagsForRespondentWithExternalFlag() {
+    void generatePartyFlagsForRespondentWithExternalFlag() {
         String partyName = STRING_CONSTANT;
         String caseDataField;
         String roleOnCase = STRING_CONSTANT;
@@ -111,11 +111,11 @@ public class PartyLevelCaseFlagsGeneratorTest {
             resultList.add(updatedCaseData);
         }
 
-        Assert.assertEquals(5, resultList.size());
+        assertEquals(5, resultList.size());
     }
 
     @Test
-    public void generatePartyFlagsForRespondentSolicitorWithExternalFlag() {
+    void generatePartyFlagsForRespondentSolicitorWithExternalFlag() {
         String partyName = STRING_CONSTANT;
         String caseDataField;
         String roleOnCase = STRING_CONSTANT;
@@ -129,11 +129,11 @@ public class PartyLevelCaseFlagsGeneratorTest {
             resultList.add(updatedCaseData);
         }
 
-        Assert.assertEquals(5, resultList.size());
+        assertEquals(5, resultList.size());
     }
 
     @Test
-    public void generatePartyFlagsForOtherPartyWithExternalFlag() {
+    void generatePartyFlagsForOtherPartyWithExternalFlag() {
         String partyName = STRING_CONSTANT;
         String caseDataField;
         String roleOnCase = STRING_CONSTANT;
@@ -147,11 +147,11 @@ public class PartyLevelCaseFlagsGeneratorTest {
             resultList.add(updatedCaseData);
         }
 
-        Assert.assertEquals(5, resultList.size());
+        assertEquals(5, resultList.size());
     }
 
     @Test
-    public void generatePartyFlagsForApplicantWithInternalFlag() {
+    void generatePartyFlagsForApplicantWithInternalFlag() {
         String partyName = STRING_CONSTANT;
         String caseDataField;
         String roleOnCase = STRING_CONSTANT;
@@ -165,11 +165,11 @@ public class PartyLevelCaseFlagsGeneratorTest {
             resultList.add(updatedCaseData);
         }
 
-        Assert.assertEquals(5, resultList.size());
+        assertEquals(5, resultList.size());
     }
 
     @Test
-    public void generatePartyFlagsForApplicantSolicitorWithInternalFlag() {
+    void generatePartyFlagsForApplicantSolicitorWithInternalFlag() {
         String partyName = STRING_CONSTANT;
         String caseDataField;
         String roleOnCase = STRING_CONSTANT;
@@ -183,11 +183,11 @@ public class PartyLevelCaseFlagsGeneratorTest {
             resultList.add(updatedCaseData);
         }
 
-        Assert.assertEquals(5, resultList.size());
+        assertEquals(5, resultList.size());
     }
 
     @Test
-    public void generatePartyFlagsForRespondentWithInternalFlag() {
+    void generatePartyFlagsForRespondentWithInternalFlag() {
         String partyName = STRING_CONSTANT;
         String caseDataField;
         String roleOnCase = STRING_CONSTANT;
@@ -201,11 +201,11 @@ public class PartyLevelCaseFlagsGeneratorTest {
             resultList.add(updatedCaseData);
         }
 
-        Assert.assertEquals(5, resultList.size());
+        assertEquals(5, resultList.size());
     }
 
     @Test
-    public void generatePartyFlagsForRespondentSolicitorWithInternalFlag() {
+    void generatePartyFlagsForRespondentSolicitorWithInternalFlag() {
         String partyName = STRING_CONSTANT;
         String caseDataField;
         String roleOnCase = STRING_CONSTANT;
@@ -219,11 +219,11 @@ public class PartyLevelCaseFlagsGeneratorTest {
             resultList.add(updatedCaseData);
         }
 
-        Assert.assertEquals(5, resultList.size());
+        assertEquals(5, resultList.size());
     }
 
     @Test
-    public void generatePartyFlagsForOtherPartyWithInternalFlag() {
+    void generatePartyFlagsForOtherPartyWithInternalFlag() {
         String partyName = STRING_CONSTANT;
         String caseDataField;
         String roleOnCase = STRING_CONSTANT;
@@ -237,6 +237,6 @@ public class PartyLevelCaseFlagsGeneratorTest {
             resultList.add(updatedCaseData);
         }
 
-        Assert.assertEquals(5, resultList.size());
+        assertEquals(5, resultList.size());
     }
 }

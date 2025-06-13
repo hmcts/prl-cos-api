@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -49,6 +48,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -163,7 +164,7 @@ public class TaskListServiceTest {
     }
 
     @Test
-    public void getTasksShouldReturnListOfTasks() {
+    void getTasksShouldReturnListOfTasks() {
 
         CaseData caseData = CaseData.builder().caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).build();
 
@@ -194,7 +195,7 @@ public class TaskListServiceTest {
 
 
     @Test
-    public void getTasksShouldReturnListOfRespondentSolicitorTasks() {
+    void getTasksShouldReturnListOfRespondentSolicitorTasks() {
         Document document = Document.builder()
                 .documentUrl("https:google.com")
                 .build();
@@ -234,7 +235,7 @@ public class TaskListServiceTest {
     }
 
     @Test
-    public void getTasksShouldReturnListOfRespondentSolicitorFinishedTasks() {
+    void getTasksShouldReturnListOfRespondentSolicitorFinishedTasks() {
         Document document = Document.builder()
             .documentUrl("https:google.com")
             .build();
@@ -274,7 +275,7 @@ public class TaskListServiceTest {
     }
 
     @Test
-    public void getTasksShouldReturnListOfRespondentSolicitorInProgressTasks() {
+    void getTasksShouldReturnListOfRespondentSolicitorInProgressTasks() {
         Document document = Document.builder()
             .documentUrl("https:google.com")
             .build();
@@ -316,7 +317,7 @@ public class TaskListServiceTest {
     }
 
     @Test
-    public void getTasksShouldReturnListOfTasks_WithNewAllegationOfHarm() {
+    void getTasksShouldReturnListOfTasks_WithNewAllegationOfHarm() {
 
         CaseData caseData = CaseData.builder()
                 .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -354,7 +355,7 @@ public class TaskListServiceTest {
 
 
     @Test
-    public void getTasksShouldReturnFl401ListOfTasks() {
+    void getTasksShouldReturnFl401ListOfTasks() {
 
         List<FL401OrderTypeEnum> orderList = new ArrayList<>();
 
@@ -398,7 +399,7 @@ public class TaskListServiceTest {
     }
 
     @Test
-    public void getTasksShouldReturnOccupationOrderFl401ListOfTasks() {
+    void getTasksShouldReturnOccupationOrderFl401ListOfTasks() {
 
         List<FL401OrderTypeEnum> orderList = new ArrayList<>();
 
@@ -442,7 +443,7 @@ public class TaskListServiceTest {
     }
 
     @Test
-    public void getTasksShouldReturnOccupationAndNonMolestationOrderFl401ListOfTasks() {
+    void getTasksShouldReturnOccupationAndNonMolestationOrderFl401ListOfTasks() {
 
         List<FL401OrderTypeEnum> orderList = new ArrayList<>();
 
@@ -487,7 +488,7 @@ public class TaskListServiceTest {
     }
 
     @Test
-    public void getTasksShouldReturnListOfTasksForCaseNameEventFinished() {
+    void getTasksShouldReturnListOfTasksForCaseNameEventFinished() {
 
         CaseData caseData = CaseData.builder()
                 .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -522,7 +523,7 @@ public class TaskListServiceTest {
     }
 
     @Test
-    public void getTasksShouldReturnListOfTasksForTypeOfAppEventInProgress() {
+    void getTasksShouldReturnListOfTasksForTypeOfAppEventInProgress() {
 
         CaseData caseData = CaseData.builder()
                 .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -558,7 +559,7 @@ public class TaskListServiceTest {
     }
 
     @Test
-    public void getTasksShouldReturnListOfTasksForTypeOfAppEventMandatoryCompleted() {
+    void getTasksShouldReturnListOfTasksForTypeOfAppEventMandatoryCompleted() {
 
         CaseData caseData = CaseData.builder()
                 .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -594,7 +595,7 @@ public class TaskListServiceTest {
     }
 
     @Test
-    public void testGetRespondentsEvents() {
+    void testGetRespondentsEvents() {
         CaseData caseData = CaseData.builder()
                 .c1ADocument(null)
                 .build();
@@ -618,7 +619,7 @@ public class TaskListServiceTest {
 
 
     @Test
-    public void testGetRespondentsEventsWhenAllegationofHarmisPresent() {
+    void testGetRespondentsEventsWhenAllegationofHarmisPresent() {
         Document document = Document.builder()
                 .documentUrl("https:google.com")
                 .build();
@@ -645,7 +646,7 @@ public class TaskListServiceTest {
     }
 
     @Test
-    public void getTasksShouldReturnListOfTasksVersion2Relations() {
+    void getTasksShouldReturnListOfTasksVersion2Relations() {
 
         CaseData caseData = CaseData.builder()
                 .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -684,7 +685,7 @@ public class TaskListServiceTest {
     }
 
     @Test
-    public void updateTaskListAsCourtAdminWhenCaseIsInSubmittedState() throws Exception {
+    void updateTaskListAsCourtAdminWhenCaseIsInSubmittedState() throws Exception {
         CaseData caseData = CaseData.builder()
                 .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
                 .typeOfApplicationOrders(orders)
@@ -721,13 +722,13 @@ public class TaskListServiceTest {
                 .build();
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = taskListService
                 .updateTaskList(callbackRequest, authToken);
-        Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse);
-        Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
-        Assert.assertEquals("SUBMITTED_PAID", aboutToStartOrSubmitCallbackResponse.getData().get("state"));
+        assertNotNull(aboutToStartOrSubmitCallbackResponse);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
+        assertEquals("SUBMITTED_PAID", aboutToStartOrSubmitCallbackResponse.getData().get("state"));
     }
 
     @Test
-    public void updateTaskListAsCourtAdminWhenCaseIsInIssuedState() throws Exception {
+    void updateTaskListAsCourtAdminWhenCaseIsInIssuedState() throws Exception {
         CaseData caseData = CaseData.builder()
                 .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
                 .typeOfApplicationOrders(orders)
@@ -764,13 +765,13 @@ public class TaskListServiceTest {
         when(tabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = taskListService
                 .updateTaskList(callbackRequest, authToken);
-        Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse);
-        Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
-        Assert.assertEquals("CASE_ISSUED", aboutToStartOrSubmitCallbackResponse.getData().get("state"));
+        assertNotNull(aboutToStartOrSubmitCallbackResponse);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
+        assertEquals("CASE_ISSUED", aboutToStartOrSubmitCallbackResponse.getData().get("state"));
     }
 
     @Test
-    public void testNoEventPublishedAsSolicitorWhenCaseIsInSubmittedState() throws Exception {
+    void testNoEventPublishedAsSolicitorWhenCaseIsInSubmittedState() throws Exception {
         CaseData caseData = CaseData.builder()
                 .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
                 .typeOfApplicationOrders(orders)
@@ -805,13 +806,13 @@ public class TaskListServiceTest {
         when(tabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = taskListService
                 .updateTaskList(callbackRequest, authToken);
-        Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse);
-        Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
-        Assert.assertEquals("SUBMITTED_PAID", aboutToStartOrSubmitCallbackResponse.getData().get("state"));
+        assertNotNull(aboutToStartOrSubmitCallbackResponse);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
+        assertEquals("SUBMITTED_PAID", aboutToStartOrSubmitCallbackResponse.getData().get("state"));
     }
 
     @Test
-    public void testErrorWhenFailedIDocumentGeneration() throws Exception {
+    void testErrorWhenFailedIDocumentGeneration() throws Exception {
         CaseData caseData = CaseData.builder()
                 .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
                 .typeOfApplicationOrders(orders)
@@ -848,13 +849,13 @@ public class TaskListServiceTest {
         when(tabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = taskListService
                 .updateTaskList(callbackRequest, authToken);
-        Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse);
-        Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
-        Assert.assertEquals("SUBMITTED_PAID", aboutToStartOrSubmitCallbackResponse.getData().get("state"));
+        assertNotNull(aboutToStartOrSubmitCallbackResponse);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
+        assertEquals("SUBMITTED_PAID", aboutToStartOrSubmitCallbackResponse.getData().get("state"));
     }
 
     @Test
-    public void updateTaskListForAmendMiamWhenCaseIsInIssuedState() throws Exception {
+    void updateTaskListForAmendMiamWhenCaseIsInIssuedState() throws Exception {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .typeOfApplicationOrders(orders)
@@ -890,13 +891,13 @@ public class TaskListServiceTest {
         when(tabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = taskListService
             .updateTaskList(callbackRequest, authToken);
-        Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse);
-        Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
-        Assert.assertEquals("CASE_ISSUED", aboutToStartOrSubmitCallbackResponse.getData().get("state"));
+        assertNotNull(aboutToStartOrSubmitCallbackResponse);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
+        assertEquals("CASE_ISSUED", aboutToStartOrSubmitCallbackResponse.getData().get("state"));
     }
 
     @Test
-    public void getTasksShouldReturnListOfTasksVersion3Relations() {
+    void getTasksShouldReturnListOfTasksVersion3Relations() {
 
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)

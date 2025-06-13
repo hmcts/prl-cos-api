@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -33,7 +32,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ResourceReader.readBytes;
 
 @ExtendWith(MockitoExtension.class)
-public class DocumentSealingServiceTest {
+class DocumentSealingServiceTest {
 
 
     @Mock
@@ -52,14 +51,10 @@ public class DocumentSealingServiceTest {
     private final String newFileName = "test.pdf";
 
 
-    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
-                                                                 String expectedMessage) {
-        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
-        assertEquals(expectedMessage, exception.getMessage());
-    }
+
 
     @Test
-    public void sealDocumentShouldReturnSealedDocumentWhenPdf() {
+    void sealDocumentShouldReturnSealedDocumentWhenPdf() {
         final byte[] inputDocumentBinaries = readBytes("documents/document.pdf");
         final byte[] sealBinaries = readBytes("familycourtseal.png");
         final Document sealedDocument = Document.builder().documentFileName(newFileName).documentBinaryUrl(
@@ -102,7 +97,7 @@ public class DocumentSealingServiceTest {
     }
 
     @Test
-    public void sealDocumentShouldReturnSealedDocumentWhenNotPdf() {
+    void sealDocumentShouldReturnSealedDocumentWhenNotPdf() {
         final byte[] inputDocumentBinaries = readBytes("documents/document.pdf");
         final byte[] sealBinaries = readBytes("familycourtseal-bilingual.png");
         final Document sealedDocument = Document.builder().documentFileName(newFileName).documentBinaryUrl(
@@ -151,7 +146,7 @@ public class DocumentSealingServiceTest {
     }
 
     @Test
-    public void sealDocumentShouldCatchIoException() {
+    void sealDocumentShouldCatchIoException() {
         final byte[] inputDocumentBinaries = readBytes("documents/Document.docx");
         final byte[] sealBinaries = readBytes("familycourtseal-bilingual.png");
 
@@ -183,10 +178,11 @@ public class DocumentSealingServiceTest {
         Document inputDocument = Document.builder()
             .documentUrl("/test").documentBinaryUrl("/test/binary").documentFileName("test.pdf").build();
 
-        assertExpectedException(() -> {
-            documentSealingService
-                .sealDocument(inputDocument, caseData, "testAuth");
-        }, UncheckedIOException.class, "java.io.IOException: Missing root object specification in trailer.");
+        UncheckedIOException ex = assertThrows(UncheckedIOException.class, () -> {
+            documentSealingService.sealDocument(inputDocument, caseData, "testAuth");
+        });
+        assertEquals("java.io.IOException: Missing root object specification in trailer.", ex.getMessage());
+
         mockResourceReader.close();
     }
 }

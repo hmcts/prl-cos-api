@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.controllers.fl401listonnotice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,7 +52,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-public class Fl401ListOnNoticeControllerTest {
+class Fl401ListOnNoticeControllerTest {
 
     @InjectMocks
     Fl401ListOnNoticeController fl401ListOnNoticeController;
@@ -81,7 +80,7 @@ public class Fl401ListOnNoticeControllerTest {
     CaseSummaryTabService caseSummaryTabService;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         caseData = CaseData.builder()
             .courtName("testcourt")
             .caseTypeOfApplication(FL401_CASE_TYPE)
@@ -103,11 +102,11 @@ public class Fl401ListOnNoticeControllerTest {
             "field5", "value5"
         );
 
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
     }
 
     @Test
-    public void prepopulateHearingDetailsForFl401ListOnNotice() throws Exception {
+    void prepopulateHearingDetailsForFl401ListOnNotice() throws Exception {
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -145,13 +144,13 @@ public class Fl401ListOnNoticeControllerTest {
         when(fl401ListOnNoticeService.prePopulateHearingPageDataForFl401ListOnNotice(caseData))
             .thenReturn(stringObjectMap);
         AboutToStartOrSubmitCallbackResponse response = fl401ListOnNoticeController
-            .prePopulateHearingPageDataForFl401ListOnNotice(authToken,s2sToken, callbackRequest);
+            .prePopulateHearingPageDataForFl401ListOnNotice(authToken, s2sToken, callbackRequest);
         assertNotNull(response);
 
     }
 
     @Test
-    public void shouldPrepopulateHearingDetailsListOnNotice() throws Exception {
+    void shouldPrepopulateHearingDetailsListOnNotice() throws Exception {
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -201,7 +200,7 @@ public class Fl401ListOnNoticeControllerTest {
         Element<HearingData> childElement = Element.<HearingData>builder().value(hearingData).build();
         List<Element<HearingData>> listOnNoticeHearingDetails = Collections.singletonList(childElement);
         Map<String, Object> caseDataUpdated = new HashMap<>();
-        caseDataUpdated.put("fl401ListOnNoticeHearingDetails",listOnNoticeHearingDetails);
+        caseDataUpdated.put("fl401ListOnNoticeHearingDetails", listOnNoticeHearingDetails);
 
 
         CaseData caseData = CaseData.builder()
@@ -210,14 +209,14 @@ public class Fl401ListOnNoticeControllerTest {
                                                       .orderWithoutGivingNotice(YesOrNo.Yes)
                                                       .build())
             .fl401ListOnNotice(Fl401ListOnNotice.builder()
-                                    .fl401ListOnNoticeDocument(Document.builder()
-                                                                   .documentUrl(generatedDocumentInfo.getUrl())
-                                                                   .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                                                   .documentHash(generatedDocumentInfo.getHashToken())
-                                                                   .documentFileName("fl404BFilename.pdf")
-                                                                   .build())
+                                   .fl401ListOnNoticeDocument(Document.builder()
+                                                                  .documentUrl(generatedDocumentInfo.getUrl())
+                                                                  .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                                                  .documentHash(generatedDocumentInfo.getHashToken())
+                                                                  .documentFileName("fl404BFilename.pdf")
+                                                                  .build())
                                    .fl401ListOnNoticeHearingDetails(listOnNoticeHearingDetails)
-                                    .build())
+                                   .build())
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -238,7 +237,7 @@ public class Fl401ListOnNoticeControllerTest {
     }
 
     @Test
-    public void testListOnNoticeSubmission() throws Exception {
+    void testListOnNoticeSubmission() throws Exception {
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -326,12 +325,12 @@ public class Fl401ListOnNoticeControllerTest {
         when(fl401ListOnNoticeService.fl401ListOnNoticeSubmission(caseDetails, authToken))
             .thenReturn(stringObjectMap);
         AboutToStartOrSubmitCallbackResponse response = fl401ListOnNoticeController
-            .fl401ListOnNoticeSubmission(authToken,s2sToken,callbackRequest);
+            .fl401ListOnNoticeSubmission(authToken, s2sToken, callbackRequest);
         assertNotNull(response);
     }
 
     @Test
-    public void testExceptionForFl401ListOnNoticeSubmission() throws Exception {
+    void testExceptionForFl401ListOnNoticeSubmission() throws Exception {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
@@ -344,14 +343,18 @@ public class Fl401ListOnNoticeControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            fl401ListOnNoticeController.fl401ListOnNoticeSubmission(authToken,s2sToken,callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
 
+        RuntimeException ex = assertThrows(
+            RuntimeException.class, () -> {
+                fl401ListOnNoticeController.fl401ListOnNoticeSubmission(authToken, s2sToken, callbackRequest);
+            }
+        );
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testExceptionForPrePopulateHearingPageDataForFl401ListOnNotice() throws Exception {
+    void testExceptionForPrePopulateHearingPageDataForFl401ListOnNotice() throws Exception {
 
         DynamicListElement dynamicListElement2 = DynamicListElement.builder()
             .code("INTER")
@@ -395,7 +398,7 @@ public class Fl401ListOnNoticeControllerTest {
         Element<HearingData> childElement = Element.<HearingData>builder().value(hearingData).build();
         List<Element<HearingData>> listWithoutNoticeHearingDetails = Collections.singletonList(childElement);
         Map<String, Object> caseDataUpdated = new HashMap<>();
-        caseDataUpdated.put("listWithoutNoticeHearingDetails",listWithoutNoticeHearingDetails);
+        caseDataUpdated.put("listWithoutNoticeHearingDetails", listWithoutNoticeHearingDetails);
 
 
         CaseData caseData = CaseData.builder()
@@ -415,36 +418,42 @@ public class Fl401ListOnNoticeControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            fl401ListOnNoticeController.prePopulateHearingPageDataForFl401ListOnNotice(authToken,s2sToken,callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
 
-    }
+        RuntimeException ex = assertThrows(
+            RuntimeException.class, () -> {
+                fl401ListOnNoticeController.prePopulateHearingPageDataForFl401ListOnNotice(
+                    authToken,
+                    s2sToken,
+                    callbackRequest
+                );
+            }
+        );
 
-    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
-                                                                 String expectedMessage) {
-        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
-        assertEquals(expectedMessage, exception.getMessage());
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testSendListOnNoticeNotification() throws Exception {
+    void testSendListOnNoticeNotification() throws Exception {
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(fl401ListOnNoticeService.sendNotification(any(CallbackRequest.class), anyString()))
             .thenReturn(ok(SubmittedCallbackResponse.builder()
                                .confirmationHeader("test")
                                .confirmationBody("test").build()));
         ResponseEntity<SubmittedCallbackResponse> response = fl401ListOnNoticeController
-            .sendListOnNoticeNotification(authToken,s2sToken,callbackRequest);
+            .sendListOnNoticeNotification(authToken, s2sToken, callbackRequest);
         assertNotNull(response);
     }
 
     @Test
-    public void testExceptionSendListOnNoticeNotification() throws Exception {
+    void testExceptionSendListOnNoticeNotification() throws Exception {
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            fl401ListOnNoticeController.sendListOnNoticeNotification(authToken,s2sToken,callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
 
+        RuntimeException ex = assertThrows(
+            RuntimeException.class, () -> {
+                fl401ListOnNoticeController.sendListOnNoticeNotification(authToken, s2sToken, callbackRequest);
+            }
+        );
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 }

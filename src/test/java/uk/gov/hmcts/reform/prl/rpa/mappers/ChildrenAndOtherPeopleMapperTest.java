@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-public class ChildrenAndOtherPeopleMapperTest {
+class ChildrenAndOtherPeopleMapperTest {
 
 
     @InjectMocks
@@ -24,7 +24,7 @@ public class ChildrenAndOtherPeopleMapperTest {
 
 
     @Test
-    public void testNotNull() {
+    void testNotNull() {
         ChildrenAndOtherPeopleRelation relation = ChildrenAndOtherPeopleRelation.builder().otherPeopleFullName("test")
                 .childFullName("test").childAndOtherPeopleRelation(RelationshipsEnum.father)
                 .childAndOtherPeopleRelationOtherDetails("").childLivesWith(YesOrNo.Yes)
@@ -34,7 +34,7 @@ public class ChildrenAndOtherPeopleMapperTest {
     }
 
     @Test
-    public void testEmpty() {
+    void testEmpty() {
         assertTrue(childrenAndOtherPeopleMapper.map(Collections.EMPTY_LIST).isEmpty());
     }
 

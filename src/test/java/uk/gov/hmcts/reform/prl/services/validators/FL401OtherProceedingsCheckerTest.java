@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-public class FL401OtherProceedingsCheckerTest {
+class FL401OtherProceedingsCheckerTest {
 
     @Mock
     TaskErrorService taskErrorService;
@@ -29,7 +29,7 @@ public class FL401OtherProceedingsCheckerTest {
     FL401OtherProceedingsChecker otherProceedingsChecker;
 
     @Test
-    public void startedWithPreviousOrOngoingProceedings() {
+    void startedWithPreviousOrOngoingProceedings() {
         CaseData caseData = CaseData.builder()
             .fl401OtherProceedingDetails(FL401OtherProceedingDetails.builder()
                                              .hasPrevOrOngoingOtherProceeding(YesNoDontKnow.yes).build()).build();
@@ -38,7 +38,7 @@ public class FL401OtherProceedingsCheckerTest {
     }
 
     @Test
-    public void notStartedWithoutPreviousOrOngoingProceedings() {
+    void notStartedWithoutPreviousOrOngoingProceedings() {
         CaseData caseData = CaseData.builder()
             .fl401OtherProceedingDetails(FL401OtherProceedingDetails.builder()
                                              .hasPrevOrOngoingOtherProceeding(YesNoDontKnow.no).build()).build();
@@ -47,7 +47,7 @@ public class FL401OtherProceedingsCheckerTest {
     }
 
     @Test
-    public void finishedIfNoPreviousOrOngoingProceedings() {
+    void finishedIfNoPreviousOrOngoingProceedings() {
         CaseData caseData = CaseData.builder()
             .fl401OtherProceedingDetails(FL401OtherProceedingDetails.builder()
                                              .hasPrevOrOngoingOtherProceeding(YesNoDontKnow.no).build()).build();
@@ -56,7 +56,7 @@ public class FL401OtherProceedingsCheckerTest {
     }
 
     @Test
-    public void notFinishedWithPreviousOrOngoingProceedings() {
+    void notFinishedWithPreviousOrOngoingProceedings() {
         CaseData caseData = CaseData.builder()
             .fl401OtherProceedingDetails(FL401OtherProceedingDetails.builder()
                                              .hasPrevOrOngoingOtherProceeding(YesNoDontKnow.yes).build()).build();
@@ -65,14 +65,14 @@ public class FL401OtherProceedingsCheckerTest {
     }
 
     @Test
-    public void notFinishedWithWithoutProceedings() {
+    void notFinishedWithWithoutProceedings() {
         CaseData caseData = CaseData.builder().build();
         boolean isFinished = otherProceedingsChecker.isFinished(caseData);
         assertFalse(isFinished);
     }
 
     @Test
-    public void finishedWithPreviousOrOngoingProceedingList() {
+    void finishedWithPreviousOrOngoingProceedingList() {
 
         FL401Proceedings proceedingDetails = FL401Proceedings.builder().build();
         Element<FL401Proceedings> wrappedProceedings = Element.<FL401Proceedings>builder()
@@ -91,7 +91,7 @@ public class FL401OtherProceedingsCheckerTest {
     }
 
     @Test
-    public void finishedWithOngoingProceedingList() {
+    void finishedWithOngoingProceedingList() {
 
         FL401Proceedings proceedingDetails = FL401Proceedings.builder()
             .anyOtherDetails("test")
@@ -114,7 +114,7 @@ public class FL401OtherProceedingsCheckerTest {
     }
 
     @Test
-    public void notFinishedIfTypeOfCaseEmpty() {
+    void notFinishedIfTypeOfCaseEmpty() {
 
         FL401Proceedings proceedingDetails = FL401Proceedings.builder()
             .anyOtherDetails("test")
@@ -137,7 +137,7 @@ public class FL401OtherProceedingsCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+    void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
         assertNotNull(otherProceedingsChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

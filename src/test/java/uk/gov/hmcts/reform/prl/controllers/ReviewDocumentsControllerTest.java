@@ -27,7 +27,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 
 @ExtendWith(MockitoExtension.class)
-public class ReviewDocumentsControllerTest {
+class ReviewDocumentsControllerTest {
 
     @InjectMocks
     private ReviewDocumentsController reviewDocumentsController;
@@ -55,7 +55,7 @@ public class ReviewDocumentsControllerTest {
     UUID uuid;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         uuid = UUID.randomUUID();
 
         dynamicListElement = DynamicListElement.builder().code(uuid).build();
@@ -90,7 +90,7 @@ public class ReviewDocumentsControllerTest {
     }
 
     @Test
-    public void testHandleAboutToStart() throws Exception {
+    void testHandleAboutToStart() throws Exception {
 
         when(reviewDocumentService.fetchDocumentDynamicListElements(caseData, caseDetails.getData())).thenReturn(dynamicListElements);
         reviewDocumentsController.handleAboutToStart(auth, callbackRequest);
@@ -99,7 +99,7 @@ public class ReviewDocumentsControllerTest {
     }
 
     @Test
-    public void testHandleMidEvent() {
+    void testHandleMidEvent() {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         reviewDocumentsController.handleMidEvent(auth, callbackRequest);
         verify(reviewDocumentService).getReviewedDocumentDetailsNew(caseData,stringObjectMap);
@@ -107,7 +107,7 @@ public class ReviewDocumentsControllerTest {
     }
 
     @Test
-    public void testHandleAboutToSubmit() throws Exception {
+    void testHandleAboutToSubmit() throws Exception {
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         reviewDocumentsController.handleAboutToSubmit(auth, callbackRequest);
         verify(reviewDocumentService).processReviewDocument(stringObjectMap,caseData,uuid);
@@ -115,7 +115,7 @@ public class ReviewDocumentsControllerTest {
     }
 
     @Test
-    public void testHandleSubmitted() {
+    void testHandleSubmitted() {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         reviewDocumentsController.handleSubmitted(auth, callbackRequest);

@@ -11,12 +11,12 @@ public class LaunchDarkClientFactoryTest {
     private LaunchDarkClientFactory factory;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         factory = new LaunchDarkClientFactory();
     }
 
     @Test
-    public void testCreate() {
+    void testCreate() {
         LDClientInterface client = factory.create("test key", true);
         assertNotNull(client);
     }

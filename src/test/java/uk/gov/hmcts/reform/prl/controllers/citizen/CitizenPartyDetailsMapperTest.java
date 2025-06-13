@@ -56,7 +56,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
 @ExtendWith(MockitoExtension.class)
-public class CitizenPartyDetailsMapperTest {
+class CitizenPartyDetailsMapperTest {
     @InjectMocks
     private CitizenPartyDetailsMapper citizenPartyDetailsMapper;
     public static final String authToken = "Bearer TestAuthToken";
@@ -82,7 +82,7 @@ public class CitizenPartyDetailsMapperTest {
     ObjectMapper objectMapper;
 
     @BeforeEach
-    public void setUpCA() throws IOException {
+    void setUpCA() throws IOException {
         c100RebuildData = C100RebuildData.builder()
             .c100RebuildInternationalElements(TestUtil.readFileFrom("classpath:c100-rebuild/ie.json"))
             .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn.json"))
@@ -135,7 +135,7 @@ public class CitizenPartyDetailsMapperTest {
             .build();
     }
 
-    public void setUpDa() throws IOException {
+    void setUpDa() throws IOException {
         c100RebuildData = C100RebuildData.builder()
             .c100RebuildInternationalElements(TestUtil.readFileFrom("classpath:c100-rebuild/ie.json"))
             .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn.json"))
@@ -178,7 +178,7 @@ public class CitizenPartyDetailsMapperTest {
     }
 
     @Test
-    public void testMapUpdatedPartyDetailsEventConfirmDetails() throws IOException {
+    void testMapUpdatedPartyDetailsEventConfirmDetails() throws IOException {
         setUpDa();
         CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, updateCaseData,
                                                                                                                        CaseEvent.CONFIRM_YOUR_DETAILS,
@@ -187,7 +187,7 @@ public class CitizenPartyDetailsMapperTest {
     }
 
     @Test
-    public void testMapUpdatedPartyDetailsDaRespondent() throws Exception {
+    void testMapUpdatedPartyDetailsDaRespondent() throws Exception {
         setUpDa();
         updateCaseData = CitizenUpdatedCaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -237,7 +237,7 @@ public class CitizenPartyDetailsMapperTest {
     }
 
     @Test
-    public void testMapUpdatedPartyDetailsDa13() throws Exception {
+    void testMapUpdatedPartyDetailsDa13() throws Exception {
         setUpDa();
         updateCaseData = CitizenUpdatedCaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
@@ -283,7 +283,7 @@ public class CitizenPartyDetailsMapperTest {
     }
 
     @Test
-    public void testMapUpdatedPartyDetailsEventDetailPrivate() throws IOException {
+    void testMapUpdatedPartyDetailsEventDetailPrivate() throws IOException {
         setUpDa();
         CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, updateCaseData,
                                                                                                                        CaseEvent.KEEP_DETAILS_PRIVATE,
@@ -292,7 +292,7 @@ public class CitizenPartyDetailsMapperTest {
     }
 
     @Test
-    public void testMapUpdatedPartyDetailsEventConsentApplication() throws IOException {
+    void testMapUpdatedPartyDetailsEventConsentApplication() throws IOException {
         setUpDa();
         CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, updateCaseData,
                                                                                                                  CaseEvent.CONSENT_TO_APPLICATION,
@@ -301,7 +301,7 @@ public class CitizenPartyDetailsMapperTest {
     }
 
     @Test
-    public void testMapUpdatedPartyDetailsEventRespMiam() throws IOException {
+    void testMapUpdatedPartyDetailsEventRespMiam() throws IOException {
         setUpDa();
         CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, updateCaseData,
                                                                                                                 CaseEvent.EVENT_RESPONDENT_MIAM,
@@ -310,7 +310,7 @@ public class CitizenPartyDetailsMapperTest {
     }
 
     @Test
-    public void testMapUpdatedPartyDetailsEventLegalRep() throws IOException {
+    void testMapUpdatedPartyDetailsEventLegalRep() throws IOException {
         setUpDa();
         CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, updateCaseData,
                                                                                                                        CaseEvent.LEGAL_REPRESENTATION,
@@ -319,7 +319,7 @@ public class CitizenPartyDetailsMapperTest {
     }
 
     @Test
-    public void testMapUpdatedPartyDetailsEventInternational() throws IOException {
+    void testMapUpdatedPartyDetailsEventInternational() throws IOException {
         setUpDa();
         CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, updateCaseData,
                                                                                                       CaseEvent.EVENT_INTERNATIONAL_ELEMENT,
@@ -329,7 +329,7 @@ public class CitizenPartyDetailsMapperTest {
 
 
     @Test
-    public void testMapUpdatedPartyDetailsCaseEventRespSafetyConcern() throws IOException {
+    void testMapUpdatedPartyDetailsCaseEventRespSafetyConcern() throws IOException {
         setUpDa();
         CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData,updateCaseData,
                                                                                                      CaseEvent.EVENT_RESPONDENT_AOH,
@@ -338,7 +338,7 @@ public class CitizenPartyDetailsMapperTest {
     }
 
     @Test
-    public void testMapUpdatedPartyDetailsCaseEventRemoveLegalRep() throws IOException {
+    void testMapUpdatedPartyDetailsCaseEventRemoveLegalRep() throws IOException {
         setUpDa();
         CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData,updateCaseData,
                                                                                                      CaseEvent.CITIZEN_REMOVE_LEGAL_REPRESENTATIVE,
@@ -347,7 +347,7 @@ public class CitizenPartyDetailsMapperTest {
     }
 
     @Test
-    public void testMapUpdatedPartyDetailsCaseEventSupportCase() throws IOException {
+    void testMapUpdatedPartyDetailsCaseEventSupportCase() throws IOException {
         setUpDa();
         CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData,updateCaseData,
                                                                                                     CaseEvent.SUPPORT_YOU_DURING_CASE,
@@ -356,7 +356,7 @@ public class CitizenPartyDetailsMapperTest {
     }
 
     @Test
-    public void testMapUpdatedPartyDetailsCaseEventContactPref() throws IOException {
+    void testMapUpdatedPartyDetailsCaseEventContactPref() throws IOException {
         setUpDa();
         CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData,updateCaseData,
                                                                                                          CaseEvent.CITIZEN_CONTACT_PREFERENCE,
@@ -365,7 +365,7 @@ public class CitizenPartyDetailsMapperTest {
     }
 
     @Test
-    public void testMapUpdatedPartyDetailsCaseEventCitizenInternalFlag() throws IOException {
+    void testMapUpdatedPartyDetailsCaseEventCitizenInternalFlag() throws IOException {
         setUpDa();
         CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, updateCaseData,
                                                                                              CaseEvent.CITIZEN_INTERNAL_FLAG_UPDATES,
@@ -374,7 +374,7 @@ public class CitizenPartyDetailsMapperTest {
     }
 
     @Test
-    public void testMapUpdatedPartyDetailsCaseEventConfirmDetails() throws IOException {
+    void testMapUpdatedPartyDetailsCaseEventConfirmDetails() throws IOException {
         setUpCA();
         CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData,updateCaseData,
                                                                                                                        CaseEvent.CONFIRM_YOUR_DETAILS,
@@ -383,7 +383,7 @@ public class CitizenPartyDetailsMapperTest {
     }
 
     @Test
-    public void testMapUpdatedPartyDetailsCaseEventConfirmDetailsAddressIsYes() throws IOException {
+    void testMapUpdatedPartyDetailsCaseEventConfirmDetailsAddressIsYes() throws IOException {
         setUpCA();
         updateCaseData = CitizenUpdatedCaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -411,7 +411,7 @@ public class CitizenPartyDetailsMapperTest {
     }
 
     @Test
-    public void testMapUpdatedPartyDetailsCaseEventConfirmDetailsAddressIsNo() throws IOException {
+    void testMapUpdatedPartyDetailsCaseEventConfirmDetailsAddressIsNo() throws IOException {
         setUpCA();
         updateCaseData = CitizenUpdatedCaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -439,7 +439,7 @@ public class CitizenPartyDetailsMapperTest {
     }
 
     @Test
-    public void testMapUpdatedPartyDetailsCaseEventLinkCitizen() throws IOException {
+    void testMapUpdatedPartyDetailsCaseEventLinkCitizen() throws IOException {
         setUpDa();
         CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, updateCaseData,
                                                                                                                        CaseEvent.LINK_CITIZEN,
@@ -448,7 +448,7 @@ public class CitizenPartyDetailsMapperTest {
     }
 
     @Test
-    public void testMapUpdatedPartyDetailsEventCurrentProceedings() throws IOException {
+    void testMapUpdatedPartyDetailsEventCurrentProceedings() throws IOException {
         setUpDa();
         CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper
             .mapUpdatedPartyDetails(caseData, updateCaseData, CaseEvent.CITIZEN_CURRENT_OR_PREVIOUS_PROCCEDINGS, authToken);
@@ -456,7 +456,7 @@ public class CitizenPartyDetailsMapperTest {
     }
 
     @Test
-    public void testBuildUpdatedCaseData() throws IOException {
+    void testBuildUpdatedCaseData() throws IOException {
         c100RebuildData = C100RebuildData.builder()
             .c100RebuildInternationalElements(TestUtil.readFileFrom("classpath:c100-rebuild/ie.json"))
             .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn.json"))
@@ -484,7 +484,7 @@ public class CitizenPartyDetailsMapperTest {
     }
 
     @Test
-    public void testBuildUpdatedCaseDataWhereAddressIsDontKnow() throws IOException {
+    void testBuildUpdatedCaseDataWhereAddressIsDontKnow() throws IOException {
         c100RebuildData = C100RebuildData.builder()
             .c100RebuildInternationalElements(TestUtil.readFileFrom("classpath:c100-rebuild/ie.json"))
             .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn.json"))
@@ -511,13 +511,13 @@ public class CitizenPartyDetailsMapperTest {
     }
 
     @Test
-    public void testGetC100RebuildCaseDataMap() throws IOException {
+    void testGetC100RebuildCaseDataMap() throws IOException {
         Map<String, Object> caseDataResult = citizenPartyDetailsMapper.getC100RebuildCaseDataMap(caseData);
         assertNotNull(caseDataResult);
     }
 
     @Test
-    public void testBuildUpdatedCaseDataForMiam() throws IOException {
+    void testBuildUpdatedCaseDataForMiam() throws IOException {
         c100RebuildData = C100RebuildData.builder()
             .c100RebuildInternationalElements(TestUtil.readFileFrom("classpath:c100-rebuild/ie.json"))
             .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn.json"))
@@ -543,7 +543,7 @@ public class CitizenPartyDetailsMapperTest {
     }
 
     @Test
-    public void testMapUpdatedPartyDetailsDaRespondentForV3() throws Exception {
+    void testMapUpdatedPartyDetailsDaRespondentForV3() throws Exception {
         setUpDa();
         updateCaseData = CitizenUpdatedCaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -595,7 +595,7 @@ public class CitizenPartyDetailsMapperTest {
     }
 
     @Test
-    public void testBuildUpdatedCaseDataOtherPersonLivesInRefuge() throws IOException {
+    void testBuildUpdatedCaseDataOtherPersonLivesInRefuge() throws IOException {
         c100RebuildData = C100RebuildData.builder()
             .c100RebuildInternationalElements(TestUtil.readFileFrom("classpath:c100-rebuild/ie.json"))
             .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn.json"))
@@ -643,12 +643,12 @@ public class CitizenPartyDetailsMapperTest {
         when(confidentialityTabService.updateOtherPeopleConfidentiality(any(), any())).thenReturn(Collections.singletonList(otherPartyElement));
         CaseData caseDataResult = citizenPartyDetailsMapper.buildUpdatedCaseData(caseData,c100RebuildData);
         assertNotNull(caseDataResult);
-        assertEquals(YesOrNo.Yes, caseDataResult.getOtherPartyInTheCaseRevised().get(0).getValue().getIsAddressConfidential());
-        assertEquals(YesOrNo.Yes, caseDataResult.getOtherPartyInTheCaseRevised().get(0).getValue().getLiveInRefuge());
+        assertEquals(YesOrNo.Yes, caseDataResult.getOtherPartyInTheCaseRevised().getFirst().getValue().getIsAddressConfidential());
+        assertEquals(YesOrNo.Yes, caseDataResult.getOtherPartyInTheCaseRevised().getFirst().getValue().getLiveInRefuge());
     }
 
     @Test
-    public void testBuildUpdatedCaseDataOtherPersonAddressUnknown() throws IOException {
+    void testBuildUpdatedCaseDataOtherPersonAddressUnknown() throws IOException {
         c100RebuildData = C100RebuildData.builder()
             .c100RebuildInternationalElements(TestUtil.readFileFrom("classpath:c100-rebuild/ie.json"))
             .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn.json"))
@@ -696,12 +696,12 @@ public class CitizenPartyDetailsMapperTest {
         when(confidentialityTabService.updateOtherPeopleConfidentiality(any(), any())).thenReturn(Collections.singletonList(otherPartyElement));
         CaseData caseDataResult = citizenPartyDetailsMapper.buildUpdatedCaseData(caseData,c100RebuildData);
         assertNotNull(caseDataResult);
-        assertEquals(YesOrNo.No, caseDataResult.getOtherPartyInTheCaseRevised().get(0).getValue().getIsAddressConfidential());
-        assertEquals(YesOrNo.No, caseDataResult.getOtherPartyInTheCaseRevised().get(0).getValue().getLiveInRefuge());
+        assertEquals(YesOrNo.No, caseDataResult.getOtherPartyInTheCaseRevised().getFirst().getValue().getIsAddressConfidential());
+        assertEquals(YesOrNo.No, caseDataResult.getOtherPartyInTheCaseRevised().getFirst().getValue().getLiveInRefuge());
     }
 
     @Test
-    public void testUpdatedPartyDetailsBasedOnEvent() {
+    void testUpdatedPartyDetailsBasedOnEvent() {
         PartyDetails partyDetails1 = partyDetails.toBuilder().response(null).build();
         PartyDetails partyDetails2 = partyDetails.toBuilder()
             .response(Response.builder().responseToAllegationsOfHarm(ResponseToAllegationsOfHarm.builder().build()).build())

@@ -2,8 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
-import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -143,7 +141,7 @@ import static uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum.afterSecondGate
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
-public class DraftAnOrderServiceTest {
+class DraftAnOrderServiceTest {
 
     @InjectMocks
     private DraftAnOrderService draftAnOrderService;
@@ -215,7 +213,7 @@ public class DraftAnOrderServiceTest {
     WelshCourtEmail welshCourtEmail;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -375,13 +373,13 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testToGetDraftOrderDynamicListForAdmin() {
+    void testToGetDraftOrderDynamicListForAdmin() {
 
         Map<String, Object> stringObjectMap = new HashMap<>();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(ElementUtils.element(
-            caseData.getDraftOrderCollection().get(0).getId(),
-            caseData.getDraftOrderCollection().get(0).getValue().toBuilder().otherDetails(OtherDraftOrderDetails.builder()
+            caseData.getDraftOrderCollection().getFirst().getId(),
+            caseData.getDraftOrderCollection().getFirst().getValue().toBuilder().otherDetails(OtherDraftOrderDetails.builder()
                                                                                               .dateCreated(LocalDateTime.now())
                                                                                               .createdBy("test title")
                                                                                               .reviewRequiredBy(
@@ -406,13 +404,13 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testToGetDraftOrderDynamicListForAdmin_OldCases() {
+    void testToGetDraftOrderDynamicListForAdmin_OldCases() {
 
         Map<String, Object> stringObjectMap = new HashMap<>();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(ElementUtils.element(
-            caseData.getDraftOrderCollection().get(0).getId(),
-            caseData.getDraftOrderCollection().get(0).getValue().toBuilder().otherDetails(OtherDraftOrderDetails.builder()
+            caseData.getDraftOrderCollection().getFirst().getId(),
+            caseData.getDraftOrderCollection().getFirst().getValue().toBuilder().otherDetails(OtherDraftOrderDetails.builder()
                                                                                               .dateCreated(LocalDateTime.now())
                                                                                               .createdBy("test title")
                                                                                               .reviewRequiredBy(
@@ -436,7 +434,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testGenerateDraftOrderCollection() {
+    void testGenerateDraftOrderCollection() {
 
 
         MagistrateLastName magistrateLastName = MagistrateLastName.builder()
@@ -556,11 +554,11 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testGetDraftOrderDynamicListForJudge() {
+    void testGetDraftOrderDynamicListForJudge() {
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(ElementUtils.element(
-            caseData.getDraftOrderCollection().get(0).getId(),
-            caseData.getDraftOrderCollection().get(0).getValue().toBuilder().otherDetails(OtherDraftOrderDetails.builder()
+            caseData.getDraftOrderCollection().getFirst().getId(),
+            caseData.getDraftOrderCollection().getFirst().getValue().toBuilder().otherDetails(OtherDraftOrderDetails.builder()
                                                                                               .dateCreated(LocalDateTime.now())
                                                                                               .createdBy("test title")
                                                                                               .isJudgeApprovalNeeded(No)
@@ -589,11 +587,11 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testGetDraftOrderDynamicListForJudge_OldCases() {
+    void testGetDraftOrderDynamicListForJudge_OldCases() {
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(ElementUtils.element(
-            caseData.getDraftOrderCollection().get(0).getId(),
-            caseData.getDraftOrderCollection().get(0).getValue().toBuilder().otherDetails(OtherDraftOrderDetails.builder()
+            caseData.getDraftOrderCollection().getFirst().getId(),
+            caseData.getDraftOrderCollection().getFirst().getValue().toBuilder().otherDetails(OtherDraftOrderDetails.builder()
                                                                                               .dateCreated(LocalDateTime.now())
                                                                                               .createdBy("test title")
                                                                                               .reviewRequiredBy(
@@ -620,7 +618,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testRemoveDraftOrderAndAddToFinalOrderForApplicantSolicitor() {
+    void testRemoveDraftOrderAndAddToFinalOrderForApplicantSolicitor() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
             .otherDetails(OtherDraftOrderDetails.builder()
@@ -687,7 +685,7 @@ public class DraftAnOrderServiceTest {
 
 
     @Test
-    public void testRemoveDraftUploadedOrderAndAddToFinalOrderForApplicantSolicitor() {
+    void testRemoveDraftUploadedOrderAndAddToFinalOrderForApplicantSolicitor() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
             .otherDetails(OtherDraftOrderDetails.builder()
@@ -740,7 +738,7 @@ public class DraftAnOrderServiceTest {
 
 
     @Test
-    public void testRemoveDraftOrderAndAddToFinalOrderWithEditYes() {
+    void testRemoveDraftOrderAndAddToFinalOrderWithEditYes() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
             .otherDetails(OtherDraftOrderDetails.builder()
@@ -801,7 +799,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testPopulateCommonDraftOrderFieldsWithHearingDetails() {
+    void testPopulateCommonDraftOrderFieldsWithHearingDetails() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderType(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .otherDetails(OtherDraftOrderDetails.builder()
@@ -856,7 +854,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testRemoveDraftOrderAndAddToFinalOrderForRespondentSolicitor() throws Exception {
+    void testRemoveDraftOrderAndAddToFinalOrderForRespondentSolicitor() throws Exception {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
             .orderType(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
@@ -906,7 +904,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testRemoveDraftOrderAndAddToFinalOrderException() {
+    void testRemoveDraftOrderAndAddToFinalOrderException() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
             .otherDetails(OtherDraftOrderDetails.builder()
@@ -953,7 +951,7 @@ public class DraftAnOrderServiceTest {
 
 
     @Test
-    public void testPopulateDraftOrderDocument() {
+    void testPopulateDraftOrderDocument() {
         DraftOrder draftOrder = DraftOrder.builder()
             .judgeNotes("test")
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
@@ -987,7 +985,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testPopulateDraftOrderDocumentWithHearingPage() {
+    void testPopulateDraftOrderDocumentWithHearingPage() {
         DraftOrder draftOrder = DraftOrder.builder()
             .judgeNotes("test")
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
@@ -1027,7 +1025,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testPopulateDraftOrderDocumentWithHearingPageEmptyJudgeNotes() {
+    void testPopulateDraftOrderDocumentWithHearingPageEmptyJudgeNotes() {
         DraftOrder draftOrder = DraftOrder.builder()
                 .orderDocument(Document.builder().documentFileName("abc.pdf").build())
                 .otherDetails(OtherDraftOrderDetails.builder()
@@ -1067,7 +1065,7 @@ public class DraftAnOrderServiceTest {
 
 
     @Test
-    public void testPopulateDraftOrderCustomFields() {
+    void testPopulateDraftOrderCustomFields() {
         DraftOrder draftOrder = DraftOrder.builder()
             .parentName("test")
             .otherDetails(OtherDraftOrderDetails.builder()
@@ -1103,7 +1101,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testPopulateDraftOrderCustomFieldsWithSdo() {
+    void testPopulateDraftOrderCustomFieldsWithSdo() {
         DraftOrder draftOrder = DraftOrder.builder().sdoDetails(SdoDetails.builder()
                                                                     .sdoAfterSecondGatekeeping("yes").build())
             .parentName("test")
@@ -1145,7 +1143,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testPopulateDraftOrderCustomFieldsWithHearingPage() {
+    void testPopulateDraftOrderCustomFieldsWithHearingPage() {
         DraftOrder draftOrder = DraftOrder.builder()
             .parentName("test")
             .otherDetails(OtherDraftOrderDetails.builder()
@@ -1181,7 +1179,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testPopulateCommonDraftOrderFields() {
+    void testPopulateCommonDraftOrderFields() {
         final String authorisation = "Bearer someAuthorisationToken";
         DraftOrder draftOrder = DraftOrder.builder()
             .orderType(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
@@ -1229,7 +1227,7 @@ public class DraftAnOrderServiceTest {
 
 
     @Test
-    public void testPopulateCommonDraftOrderFieldsWithHearingPage() {
+    void testPopulateCommonDraftOrderFieldsWithHearingPage() {
         final String authorisation = "Bearer someAuthorisationToken";
         DraftOrder draftOrder = DraftOrder.builder()
             .orderType(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
@@ -1278,7 +1276,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testUpdateDraftOrderCollection() {
+    void testUpdateDraftOrderCollection() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
             .orderType(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
@@ -1328,12 +1326,12 @@ public class DraftAnOrderServiceTest {
 
         assertEquals(
             JudgeOrMagistrateTitleEnum.districtJudge,
-            ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).get(0).getValue().getJudgeOrMagistrateTitle()
+            ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).getFirst().getValue().getJudgeOrMagistrateTitle()
         );
     }
 
     @Test
-    public void testUpdateDraftOrderCollection1() {
+    void testUpdateDraftOrderCollection1() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
             .orderType(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
@@ -1388,7 +1386,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testUpdateDraftOrderCollection2() {
+    void testUpdateDraftOrderCollection2() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
             .orderType(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
@@ -1439,7 +1437,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testUpdateDraftOrderCollectionForAutoHearing() {
+    void testUpdateDraftOrderCollectionForAutoHearing() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderTypeId("1234")
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
@@ -1495,12 +1493,12 @@ public class DraftAnOrderServiceTest {
 
         assertEquals(
             Yes,
-            ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).get(0).getValue().getIsAutoHearingReqPending()
+            ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).getFirst().getValue().getIsAutoHearingReqPending()
         );
     }
 
     @Test
-    public void testUpdateDraftOrderCollectionForAutoHearing1() {
+    void testUpdateDraftOrderCollectionForAutoHearing1() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderTypeId("123")
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
@@ -1554,12 +1552,12 @@ public class DraftAnOrderServiceTest {
 
         assertEquals(
             Yes,
-            ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).get(0).getValue().getIsAutoHearingReqPending()
+            ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).getFirst().getValue().getIsAutoHearingReqPending()
         );
     }
 
     @Test
-    public void testUpdateDraftOrderCollectionWithUpdatedStatus() {
+    void testUpdateDraftOrderCollectionWithUpdatedStatus() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
             .orderType(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
@@ -1618,7 +1616,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testUpdateDraftOrderCollectionForDocmosis() {
+    void testUpdateDraftOrderCollectionForDocmosis() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
             .orderType(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
@@ -1683,7 +1681,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testGenerateDocumentForC100() {
+    void testGenerateDocumentForC100() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
             .otherDetails(OtherDraftOrderDetails.builder()
@@ -1741,7 +1739,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testGenerateDocumentForFL401() {
+    void testGenerateDocumentForFL401() {
 
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
@@ -1798,7 +1796,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testCheckStandingOrderOptionsSelected_No() {
+    void testCheckStandingOrderOptionsSelected_No() {
         StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
             .sdoCourtList(new ArrayList<>())
             .sdoCafcassOrCymruList(new ArrayList<>())
@@ -1818,7 +1816,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testCheckStandingOrderOptionsSelected_Yes() {
+    void testCheckStandingOrderOptionsSelected_Yes() {
         StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
             .sdoCourtList(List.of(
                 SdoCourtEnum.crossExaminationEx740,
@@ -1849,7 +1847,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testCheckStandingOrderOptionsSelected_No7() {
+    void testCheckStandingOrderOptionsSelected_No7() {
         StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
             .sdoCourtList(List.of(
                 SdoCourtEnum.crossExaminationEx740,
@@ -1880,7 +1878,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testCheckStandingOrderOptionsSelected_No6() {
+    void testCheckStandingOrderOptionsSelected_No6() {
         StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
             .sdoCourtList(List.of(
                 SdoCourtEnum.crossExaminationEx740,
@@ -1911,7 +1909,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testCheckStandingOrderOptionsSelected_No5() {
+    void testCheckStandingOrderOptionsSelected_No5() {
         StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
             .sdoCourtList(List.of(
                 SdoCourtEnum.crossExaminationEx740,
@@ -1939,7 +1937,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testCheckStandingOrderOptionsSelected_No4() {
+    void testCheckStandingOrderOptionsSelected_No4() {
         StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
             .sdoCourtList(new ArrayList<>())
             .sdoCafcassOrCymruList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru))
@@ -1964,7 +1962,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testCheckStandingOrderOptionsSelected_No3() {
+    void testCheckStandingOrderOptionsSelected_No3() {
         StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
             .sdoCourtList(new ArrayList<>())
             .sdoCafcassOrCymruList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru))
@@ -1989,7 +1987,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testCheckStandingOrderOptionsSelected_No2() {
+    void testCheckStandingOrderOptionsSelected_No2() {
         StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
             .sdoCourtList(new ArrayList<>())
             .sdoCafcassOrCymruList(new ArrayList<>())
@@ -2015,7 +2013,7 @@ public class DraftAnOrderServiceTest {
 
 
     @Test
-    public void testCheckStandingOrderOptionsSelected_No1() {
+    void testCheckStandingOrderOptionsSelected_No1() {
         StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
             .sdoCourtList(new ArrayList<>())
             .sdoCafcassOrCymruList(new ArrayList<>())
@@ -2035,7 +2033,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testPopulateStandardDirectionOrderFields() {
+    void testPopulateStandardDirectionOrderFields() {
         StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
             .sdoCourtList(List.of(
                 SdoCourtEnum.crossExaminationEx740,
@@ -2079,7 +2077,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testPopulateStandardDirectionOrderFields1() {
+    void testPopulateStandardDirectionOrderFields1() {
         StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
             .sdoCourtList(List.of(
                 SdoCourtEnum.crossExaminationEx740,
@@ -2151,7 +2149,7 @@ public class DraftAnOrderServiceTest {
 
 
     @Test
-    public void testPopulateStandardDirectionOrderFields2() {
+    void testPopulateStandardDirectionOrderFields2() {
         StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
             .sdoCourtList(List.of(
                 SdoCourtEnum.crossExaminationEx740,
@@ -2243,7 +2241,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testPopulateStandardDirectionOrderFieldsNoMatch() {
+    void testPopulateStandardDirectionOrderFieldsNoMatch() {
         StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
             .sdoCourtList(List.of(SdoCourtEnum.transferApplication))
             .sdoCafcassOrCymruList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru))
@@ -2273,7 +2271,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testPopulateStandardDirectionOrderFieldsWithSdoInstructionsFilingParties() {
+    void testPopulateStandardDirectionOrderFieldsWithSdoInstructionsFilingParties() {
         StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
             .sdoCourtList(List.of(SdoCourtEnum.transferApplication))
             .sdoCafcassOrCymruList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru))
@@ -2305,7 +2303,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testPopulateStandardDirectionOrderTest() throws JsonProcessingException {
+    void testPopulateStandardDirectionOrderTest() throws JsonProcessingException {
         DraftOrder draftOrder = DraftOrder.builder().sdoDetails(SdoDetails.builder().build())
             .orderDocument(Document.builder().documentFileName("abc-welsh.pdf").build())
             .orderDocumentWelsh(Document.builder().documentFileName("abc-welsh.pdf").build())
@@ -2410,7 +2408,7 @@ public class DraftAnOrderServiceTest {
 
 
     @Test
-    public void testPopulateStandardDirectionOrderTestScenario2() throws JsonProcessingException {
+    void testPopulateStandardDirectionOrderTestScenario2() throws JsonProcessingException {
         DraftOrder draftOrder = DraftOrder.builder().sdoDetails(SdoDetails.builder().build())
             .orderDocument(Document.builder().documentFileName("abc-welsh.pdf").build())
             .orderDocumentWelsh(Document.builder().documentFileName("abc-welsh.pdf").build())
@@ -2516,7 +2514,7 @@ public class DraftAnOrderServiceTest {
 
 
     @Test
-    public void testPopulateStandardDirectionOrderTestScenario3() throws JsonProcessingException {
+    void testPopulateStandardDirectionOrderTestScenario3() throws JsonProcessingException {
         DraftOrder draftOrder = DraftOrder.builder().sdoDetails(SdoDetails.builder().build())
             .orderDocument(Document.builder().documentFileName("abc-welsh.pdf").build())
             .orderDocumentWelsh(Document.builder().documentFileName("abc-welsh.pdf").build())
@@ -2621,7 +2619,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testPopulateStandardDirectionOrderTestWithExp() throws JsonProcessingException {
+    void testPopulateStandardDirectionOrderTestWithExp() throws JsonProcessingException {
         DraftOrder draftOrder = DraftOrder.builder().sdoDetails(SdoDetails.builder().build())
             .orderDocument(Document.builder().documentFileName("abc-welsh.pdf").build())
             .orderDocumentWelsh(Document.builder().documentFileName("abc-welsh.pdf").build())
@@ -2692,15 +2690,24 @@ public class DraftAnOrderServiceTest {
             new ArrayList<>()
         )).thenReturn(DynamicList.builder().build());
 
-        assertExpectedException(() -> {
-            draftAnOrderService.populateStandardDirectionOrder("test-token", caseData, false, null, ADMIN_EDIT_AND_APPROVE_ORDER.getId());
-        }, ManageOrderRuntimeException.class, "Failed to parse SDO order details");
+        ManageOrderRuntimeException ex = assertThrows(ManageOrderRuntimeException.class, () -> {
+            draftAnOrderService.populateStandardDirectionOrder(
+                "test-token",
+                caseData,
+                false,
+                null,
+                ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+            );
+        });
+
+        assertEquals("Failed to parse SDO order details", ex.getMessage());
+
         //assertNotNull(caseDataUpdated.get("sdoRightToAskCourt"));
     }
 
 
     @Test
-    public void testCheckDirectionOnIssueOptionsSelected_No() {
+    void testCheckDirectionOnIssueOptionsSelected_No() {
         DirectionOnIssue directionOnIssue = DirectionOnIssue.builder()
             .dioCourtList(new ArrayList<>())
             .dioCafcassOrCymruList(new ArrayList<>())
@@ -2718,7 +2725,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testCheckDirectionOnIssueOptionsSelected_Yes() {
+    void testCheckDirectionOnIssueOptionsSelected_Yes() {
         DirectionOnIssue directionOnIssue = DirectionOnIssue.builder()
             .dioCourtList(List.of(
                 DioCourtEnum.transferApplication))
@@ -2743,7 +2750,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testPopulateDirectionOnIssueFields() {
+    void testPopulateDirectionOnIssueFields() {
         DioOtherEnum application = DioOtherEnum.applicationToApplyPermission;
         DioOtherEnum parent = DioOtherEnum.parentWithCare;
         List otherList = new ArrayList<>();
@@ -2788,7 +2795,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testPopulateDirectionOnIssueFieldsNoMatch() {
+    void testPopulateDirectionOnIssueFieldsNoMatch() {
         DirectionOnIssue directionOnIssue = DirectionOnIssue.builder()
             .dioCourtList(List.of(
                 DioCourtEnum.transferApplication))
@@ -2819,7 +2826,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testPopulateCustomFieldsBlankOrderOrDirections() {
+    void testPopulateCustomFieldsBlankOrderOrDirections() {
         caseData = CaseData.builder()
             .id(12345L)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
@@ -2830,7 +2837,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testPopulateCustomFieldsNonMolestation() {
+    void testPopulateCustomFieldsNonMolestation() {
         caseData = CaseData.builder()
             .id(12345L)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.nonMolestation)
@@ -2840,7 +2847,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testPopulateCustomFieldsAppointmentOfGuardian() {
+    void testPopulateCustomFieldsAppointmentOfGuardian() {
         caseData = CaseData.builder()
             .id(12345L)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.appointmentOfGuardian)
@@ -2851,7 +2858,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testRemoveDraftOrderAndAddToFinalOrderDaForApplicantSolicitor() {
+    void testRemoveDraftOrderAndAddToFinalOrderDaForApplicantSolicitor() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc-welsh.pdf").build())
             .orderDocumentWelsh(Document.builder().documentFileName("abc-welsh.pdf").build())
@@ -2928,7 +2935,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testGenerateDraftOrderCollectionForFirstOrder() {
+    void testGenerateDraftOrderCollectionForFirstOrder() {
         Child child = Child.builder()
             .firstName("Test")
             .lastName("Name")
@@ -3002,7 +3009,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testGetDraftOrderInfo() throws Exception {
+    void testGetDraftOrderInfo() throws Exception {
 
         DraftOrder draftOrder = DraftOrder.builder()
             .orderType(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
@@ -3036,7 +3043,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testGetDraftOrderInfoWithHearingData() throws Exception {
+    void testGetDraftOrderInfoWithHearingData() throws Exception {
 
         DraftOrder draftOrder = DraftOrder.builder()
             .orderType(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
@@ -3071,7 +3078,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testJudgeOrAdminEditApproveDraftOrderMidEvent() {
+    void testJudgeOrAdminEditApproveDraftOrderMidEvent() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
             .orderType(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
@@ -3122,7 +3129,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testJudgeOrAdminEditApproveDraftOrderAboutToSubmit() {
+    void testJudgeOrAdminEditApproveDraftOrderAboutToSubmit() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
             .orderType(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
@@ -3179,7 +3186,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testJudgeOrAdminEditApproveDraftOrderAboutToSubmitCaseId() {
+    void testJudgeOrAdminEditApproveDraftOrderAboutToSubmitCaseId() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
             .otherDetails(OtherDraftOrderDetails.builder()
@@ -3231,7 +3238,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testResetFields() {
+    void testResetFields() {
 
         caseData = CaseData.builder()
             .id(12345L)
@@ -3261,7 +3268,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testExceptionForPopulateSdoFields() throws Exception {
+    void testExceptionForPopulateSdoFields() throws Exception {
         DraftOrder draftOrder = DraftOrder.builder()
             .build();
 
@@ -3293,13 +3300,15 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> standardDirectionOrderMap = new HashMap<>();
         when(draftAnOrderService.copyPropertiesToStandardDirectionOrder(sdoDetails)).thenThrow(JsonProcessingException.class);
 
-        assertExpectedException(() -> {
+        UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, () -> {
             draftAnOrderService.populateStandardDirectionOrder("test-token", caseData, true, null, ADMIN_EDIT_AND_APPROVE_ORDER.getId());
-        }, UnsupportedOperationException.class, "Could not find order");
+        });
+
+        assertEquals("Could not find order", ex.getMessage());
     }
 
     @Test
-    public void testPopulateDraftOrderFieldsWhenDraftAnOrderForC100() throws Exception {
+    void testPopulateDraftOrderFieldsWhenDraftAnOrderForC100() throws Exception {
         caseData = CaseData.builder()
             .id(123L)
             .applicantCaseName("Jo Davis & Jon Smith")
@@ -3338,14 +3347,14 @@ public class DraftAnOrderServiceTest {
             CaseData.class
         )).thenReturn(caseData);
         when(manageOrderService.populateCustomOrderFields(any(), Mockito.any(), Mockito.any())).thenReturn(caseData);
-        Assert.assertEquals(
+        assertEquals(
             stringObjectMap,
             draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken, null, PrlAppsConstants.ENGLISH)
         );
     }
 
     @Test
-    public void testPopulateDraftOrderFieldsWhenDraftAnOrderForFL401() throws Exception {
+    void testPopulateDraftOrderFieldsWhenDraftAnOrderForFL401() throws Exception {
         caseData = CaseData.builder()
             .id(123L)
             .caseTypeOfApplication(FL401_CASE_TYPE)
@@ -3384,14 +3393,14 @@ public class DraftAnOrderServiceTest {
             CaseData.class
         )).thenReturn(caseData);
         when(manageOrderService.populateCustomOrderFields(any(), Mockito.any(), Mockito.any())).thenReturn(caseData);
-        Assert.assertEquals(
+        assertEquals(
             stringObjectMap,
             draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken, null, PrlAppsConstants.ENGLISH)
         );
     }
 
     @Test
-    public void testPopulateDraftOrderFieldsWhenUploadAnOrder() throws Exception {
+    void testPopulateDraftOrderFieldsWhenUploadAnOrder() throws Exception {
         caseData = CaseData.builder()
             .id(123L)
             .applicantCaseName("Jo Davis & Jon Smith")
@@ -3426,14 +3435,14 @@ public class DraftAnOrderServiceTest {
             caseData,
             CreateSelectOrderOptionsEnum.blankOrderOrDirections
         ));
-        Assert.assertEquals(
+        assertEquals(
             stringObjectMap,
             draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken, null, PrlAppsConstants.ENGLISH)
         );
     }
 
     @Test
-    public void testPopulateDraftOrderFieldsWhenCreateAnOrderFOrFl401Case() throws Exception {
+    void testPopulateDraftOrderFieldsWhenCreateAnOrderFOrFl401Case() throws Exception {
         caseData = CaseData.builder()
             .id(123L)
             .applicantCaseName("Jo Davis & Jon Smith")
@@ -3488,7 +3497,7 @@ public class DraftAnOrderServiceTest {
             caseData,
             CreateSelectOrderOptionsEnum.blankOrderOrDirections
         ));
-        Assert.assertEquals(
+        assertEquals(
             stringObjectMap,
             draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken, null, PrlAppsConstants.ENGLISH)
         );
@@ -3496,7 +3505,7 @@ public class DraftAnOrderServiceTest {
 
 
     @Test
-    public void testPrepareDraftOrderCollection() throws Exception {
+    void testPrepareDraftOrderCollection() throws Exception {
         caseData = CaseData.builder()
             .id(123L)
             .applicantCaseName("Jo Davis & Jon Smith")
@@ -3522,18 +3531,18 @@ public class DraftAnOrderServiceTest {
                                                                   Mockito.any(UserDetails.class)))
             .thenReturn(DraftOrder.builder().orderTypeId("abc").build());
         Map<String, Object> response = draftAnOrderService.prepareDraftOrderCollection(authToken,callbackRequest);
-        Assert.assertEquals(
+        assertEquals(
             stringObjectMap.get("applicantCaseName"),
             response.get("applicantCaseName")
         );
-        Assert.assertNotNull(response.get("draftOrderCollection"));
-        Assert.assertEquals(1, ((List<Element<DraftOrder>>) response.get("draftOrderCollection")).size());
+        assertNotNull(response.get("draftOrderCollection"));
+        assertEquals(1, ((List<Element<DraftOrder>>) response.get("draftOrderCollection")).size());
 
 
     }
 
     @Test
-    public void testPrepareDraftOrderCollectionWithHearingPage() throws Exception {
+    void testPrepareDraftOrderCollectionWithHearingPage() throws Exception {
         caseData = CaseData.builder()
             .id(123L)
             .applicantCaseName("Jo Davis & Jon Smith")
@@ -3561,16 +3570,16 @@ public class DraftAnOrderServiceTest {
             Mockito.any(UserDetails.class)))
             .thenReturn(DraftOrder.builder().orderTypeId("abc").build());
         Map<String, Object> response = draftAnOrderService.prepareDraftOrderCollection(authToken,callbackRequest);
-        Assert.assertEquals(
+        assertEquals(
             stringObjectMap.get("applicantCaseName"),
             response.get("applicantCaseName")
         );
-        Assert.assertNotNull(response.get("draftOrderCollection"));
-        Assert.assertEquals(1, ((List<Element<DraftOrder>>) response.get("draftOrderCollection")).size());
+        assertNotNull(response.get("draftOrderCollection"));
+        assertEquals(1, ((List<Element<DraftOrder>>) response.get("draftOrderCollection")).size());
     }
 
     @Test
-    public void testSelectedOrderForUploadScenario() throws Exception {
+    void testSelectedOrderForUploadScenario() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
                                                     .value(Child.builder().build()).build());
         caseData = CaseData.builder()
@@ -3605,7 +3614,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testSelectedOrdersForUploadScenario() throws Exception {
+    void testSelectedOrdersForUploadScenario() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
             .value(Child.builder().build()).build());
         caseData = CaseData.builder()
@@ -3644,7 +3653,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testSelectedOrderForUploadScenarioStandardDirection() throws Exception {
+    void testSelectedOrderForUploadScenarioStandardDirection() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
             .value(Child.builder().build()).build());
         caseData = CaseData.builder()
@@ -3675,13 +3684,13 @@ public class DraftAnOrderServiceTest {
             authToken,
             PrlAppsConstants.ENGLISH
         );
-        assertEquals("This order is not available to be drafted", response.getErrors().get(0));
+        assertEquals("This order is not available to be drafted", response.getErrors().getFirst());
         //assertEquals(1, response.getData().get("children").size());
 
     }
 
     @Test
-    public void testSelectedOrderForUploadScenarioStandardDirectionWelsh() throws Exception {
+    void testSelectedOrderForUploadScenarioStandardDirectionWelsh() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
             .value(Child.builder().build()).build());
         CaseData caseData2 = CaseData.builder()
@@ -3712,13 +3721,13 @@ public class DraftAnOrderServiceTest {
             authToken,
             PrlAppsConstants.WELSH
         );
-        assertEquals("Nid yw’r gorchymyn hwn ar gael i’w drafftio", response.getErrors().get(0));
+        assertEquals("Nid yw’r gorchymyn hwn ar gael i’w drafftio", response.getErrors().getFirst());
         //assertEquals(1, response.getData().get("children").size());
 
     }
 
     @Test
-    public void testSelectedOrderForDraftAnOrderScenario() throws Exception {
+    void testSelectedOrderForDraftAnOrderScenario() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
                                                     .value(Child.builder().build()).build());
         caseData = CaseData.builder()
@@ -3754,7 +3763,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testSelectedOrderForDraftAnOrderScenarioWelsh() throws Exception {
+    void testSelectedOrderForDraftAnOrderScenarioWelsh() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
             .value(Child.builder().build()).build());
         CaseData caseData2 = CaseData.builder()
@@ -3791,7 +3800,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testSelectedOrderForDraftAnOrderC21Scenario() throws Exception {
+    void testSelectedOrderForDraftAnOrderC21Scenario() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
                                                     .value(Child.builder().build()).build());
         caseData = CaseData.builder()
@@ -3831,7 +3840,7 @@ public class DraftAnOrderServiceTest {
 
 
     @Test
-    public void testSelectedOrderForDraftAnOrderScenarioBlankOrderAndDirections() throws Exception {
+    void testSelectedOrderForDraftAnOrderScenarioBlankOrderAndDirections() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
                                                     .value(Child.builder().build()).build());
         caseData = CaseData.builder()
@@ -3859,7 +3868,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testSelectedOrderForDraftAnOrderScenarioParentalResponsability() throws Exception {
+    void testSelectedOrderForDraftAnOrderScenarioParentalResponsability() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
                                                     .value(Child.builder().build()).build());
         caseData = CaseData.builder()
@@ -3887,7 +3896,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testSelectedOrderForDraftAnOrderScenarioSpecialGuardianship() throws Exception {
+    void testSelectedOrderForDraftAnOrderScenarioSpecialGuardianship() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
                                                     .value(Child.builder().build()).build());
         caseData = CaseData.builder()
@@ -3915,7 +3924,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testSelectedOrderForDraftAnOrderScenarioParties() throws Exception {
+    void testSelectedOrderForDraftAnOrderScenarioParties() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
                                                     .value(Child.builder().build()).build());
         caseData = CaseData.builder()
@@ -3943,7 +3952,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testSelectedOrderForDraftAnOrderScenarioNonParties() throws Exception {
+    void testSelectedOrderForDraftAnOrderScenarioNonParties() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
                                                     .value(Child.builder().build()).build());
         caseData = CaseData.builder()
@@ -3971,7 +3980,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testSelectedOrderForDraftAnOrderScenarioAppointGuardian() throws Exception {
+    void testSelectedOrderForDraftAnOrderScenarioAppointGuardian() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
                                                     .value(Child.builder().build()).build());
         caseData = CaseData.builder()
@@ -3998,14 +4007,10 @@ public class DraftAnOrderServiceTest {
         assertNotNull(draftAnOrderService.handleSelectedOrder(callbackRequest, authToken, PrlAppsConstants.ENGLISH));
     }
 
-    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
-                                                                 String expectedMessage) {
-        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
-        assertEquals(expectedMessage, exception.getMessage());
-    }
+
 
     @Test
-    public void testSelectedOrderForDraftAnOrderScenarioNoCaseType() throws Exception {
+    void testSelectedOrderForDraftAnOrderScenarioNoCaseType() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
                                                     .value(Child.builder().build()).build());
         caseData = CaseData.builder()
@@ -4032,7 +4037,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testSelectedOrderForDraftAnOrderScenarioNonMolestation() throws Exception {
+    void testSelectedOrderForDraftAnOrderScenarioNonMolestation() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
                                                     .value(Child.builder().build()).build());
         caseData = CaseData.builder()
@@ -4060,7 +4065,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testSelectedOrderForDraftAnOrderScenarioOccupation() throws Exception {
+    void testSelectedOrderForDraftAnOrderScenarioOccupation() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
                                                     .value(Child.builder().build()).build());
         caseData = CaseData.builder()
@@ -4088,7 +4093,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testSelectedOrderForDraftAnOrderScenarioAmendDischargedVaried() throws Exception {
+    void testSelectedOrderForDraftAnOrderScenarioAmendDischargedVaried() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
                                                     .value(Child.builder().build()).build());
         caseData = CaseData.builder()
@@ -4116,7 +4121,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testSelectedOrderForDraftAnOrderScenarioBlank() throws Exception {
+    void testSelectedOrderForDraftAnOrderScenarioBlank() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
                                                     .value(Child.builder().build()).build());
         caseData = CaseData.builder()
@@ -4144,7 +4149,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testSelectedOrderForDraftAnOrderScenarioPowerOfArrest() throws Exception {
+    void testSelectedOrderForDraftAnOrderScenarioPowerOfArrest() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
                                                     .value(Child.builder().build()).build());
         caseData = CaseData.builder()
@@ -4172,7 +4177,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testSelectedOrderForDraftAnOrderScenarioGeneralForm() throws Exception {
+    void testSelectedOrderForDraftAnOrderScenarioGeneralForm() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
                                                     .value(Child.builder().build()).build());
         caseData = CaseData.builder()
@@ -4200,7 +4205,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testSelectedOrderForDraftAnOrderScenarioFL401ThrowsError() throws Exception {
+    void testSelectedOrderForDraftAnOrderScenarioFL401ThrowsError() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
                                                     .value(Child.builder().build()).build());
         caseData = CaseData.builder()
@@ -4230,11 +4235,11 @@ public class DraftAnOrderServiceTest {
             PrlAppsConstants.ENGLISH
         );
         assertEquals(1, response.getErrors().size());
-        assertEquals(ORDER_NOT_AVAILABLE_FL401, response.getErrors().get(0));
+        assertEquals(ORDER_NOT_AVAILABLE_FL401, response.getErrors().getFirst());
     }
 
     @Test
-    public void testSelectedOrderForDraftAnOrderScenarioFL401ThrowsErrorWelsh() throws Exception {
+    void testSelectedOrderForDraftAnOrderScenarioFL401ThrowsErrorWelsh() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
             .value(Child.builder().build()).build());
         CaseData caseData2 = CaseData.builder()
@@ -4264,11 +4269,11 @@ public class DraftAnOrderServiceTest {
             PrlAppsConstants.WELSH
         );
         assertEquals(1, response.getErrors().size());
-        assertEquals(ORDER_NOT_AVAILABLE_FL401_WELSH, response.getErrors().get(0));
+        assertEquals(ORDER_NOT_AVAILABLE_FL401_WELSH, response.getErrors().getFirst());
     }
 
     @Test
-    public void testSelectedOrderForSdoDraftAnOrderScenario() throws Exception {
+    void testSelectedOrderForSdoDraftAnOrderScenario() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
                                                     .value(Child.builder().build()).build());
         caseData = CaseData.builder()
@@ -4298,12 +4303,12 @@ public class DraftAnOrderServiceTest {
             PrlAppsConstants.ENGLISH
         );
         assertEquals(1, response.getErrors().size());
-        assertEquals("This order is not available to be drafted", response.getErrors().get(0));
+        assertEquals("This order is not available to be drafted", response.getErrors().getFirst());
 
     }
 
     @Test
-    public void testSelectedOrderForDioDraftAnOrderScenario() throws Exception {
+    void testSelectedOrderForDioDraftAnOrderScenario() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
                                                     .value(Child.builder().build()).build());
         caseData = CaseData.builder()
@@ -4333,11 +4338,11 @@ public class DraftAnOrderServiceTest {
             PrlAppsConstants.ENGLISH
         );
         assertEquals(1, response.getErrors().size());
-        assertEquals("This order is not available to be drafted", response.getErrors().get(0));
+        assertEquals("This order is not available to be drafted", response.getErrors().getFirst());
 
     }
 
-    public void testRemoveDraftOrderAndAddToFinalOrderDaForApplicantSolicitorWithExp() {
+    void testRemoveDraftOrderAndAddToFinalOrderDaForApplicantSolicitorWithExp() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc-welsh.pdf").build())
             .orderDocumentWelsh(Document.builder().documentFileName("abc-welsh.pdf").build())
@@ -4415,7 +4420,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testRemoveDraftOrderAndAddToFinalOrderWithEditYesForSdo() {
+    void testRemoveDraftOrderAndAddToFinalOrderWithEditYesForSdo() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
             .otherDetails(OtherDraftOrderDetails.builder()
@@ -4480,7 +4485,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testUpdateDraftOrderCollectionForSdo() {
+    void testUpdateDraftOrderCollectionForSdo() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
             .orderType(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
@@ -4536,12 +4541,12 @@ public class DraftAnOrderServiceTest {
 
         assertEquals(
             JudgeOrMagistrateTitleEnum.districtJudge,
-            ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).get(0).getValue().getJudgeOrMagistrateTitle()
+            ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).getFirst().getValue().getJudgeOrMagistrateTitle()
         );
     }
 
     @Test
-    public void testGenerateOrderDocumentPostValidations() throws Exception {
+    void testGenerateOrderDocumentPostValidations() throws Exception {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
             .otherDetails(OtherDraftOrderDetails.builder()
@@ -4606,7 +4611,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testGenerateOrderDocumentPostValidationsTrue() throws Exception {
+    void testGenerateOrderDocumentPostValidationsTrue() throws Exception {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
             .otherDetails(OtherDraftOrderDetails.builder()
@@ -4671,7 +4676,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testPopulateDraftOrderHearingFieldsWhenDraftAnOrder() throws Exception {
+    void testPopulateDraftOrderHearingFieldsWhenDraftAnOrder() throws Exception {
         caseData = CaseData.builder()
             .id(123L)
             .caseTypeOfApplication(FL401_CASE_TYPE)
@@ -4718,12 +4723,12 @@ public class DraftAnOrderServiceTest {
             PrlAppsConstants.ENGLISH
         );
 
-        Assert.assertEquals(stringObjectMap, caseDataMap);
+        assertEquals(stringObjectMap, caseDataMap);
     }
 
 
     @Test
-    public void testOrderNameForWaFieldInDraftOrderJourney() {
+    void testOrderNameForWaFieldInDraftOrderJourney() {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
         LocalDateTime nowTime = LocalDateTime.parse(dtf.format(LocalDateTime.now()));
         DraftOrder draftOrder = DraftOrder.builder()
@@ -4764,7 +4769,7 @@ public class DraftAnOrderServiceTest {
 
 
     @Test
-    public void testOrderNameForWaFieldInDraftUploadOrderJourney() {
+    void testOrderNameForWaFieldInDraftUploadOrderJourney() {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
         LocalDateTime nowTime = LocalDateTime.parse(dtf.format(LocalDateTime.now()));
         DraftOrder draftOrder = DraftOrder.builder()
@@ -4807,7 +4812,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testOrderNameForWaFieldInReturnOrderJourney() {
+    void testOrderNameForWaFieldInReturnOrderJourney() {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
         LocalDateTime nowTime = LocalDateTime.parse(dtf.format(LocalDateTime.now()));
         DraftOrder draftOrder = DraftOrder.builder()
@@ -4846,7 +4851,7 @@ public class DraftAnOrderServiceTest {
 
 
     @Test
-    public void testHandleDocumentGenerationDraftOrder() throws Exception {
+    void testHandleDocumentGenerationDraftOrder() throws Exception {
         caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
@@ -4873,7 +4878,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testHandleDocumentGenerationDraftOrderWithError() throws Exception {
+    void testHandleDocumentGenerationDraftOrderWithError() throws Exception {
         caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
@@ -4902,7 +4907,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testHandleDocumentGenerationDraftOrderWithOccupation() throws Exception {
+    void testHandleDocumentGenerationDraftOrderWithOccupation() throws Exception {
         caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
@@ -4930,7 +4935,7 @@ public class DraftAnOrderServiceTest {
 
 
     @Test
-    public void testHandleDocumentGenerationEditOrder() throws Exception {
+    void testHandleDocumentGenerationEditOrder() throws Exception {
         DraftOrder draftOrder = DraftOrder.builder()
             .parentName("test")
             .otherDetails(OtherDraftOrderDetails.builder()
@@ -4970,11 +4975,11 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testGetDraftOrderDynamicListForManager() {
+    void testGetDraftOrderDynamicListForManager() {
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(ElementUtils.element(
-            caseData.getDraftOrderCollection().get(0).getId(),
-            caseData.getDraftOrderCollection().get(0).getValue().toBuilder().otherDetails(OtherDraftOrderDetails.builder()
+            caseData.getDraftOrderCollection().getFirst().getId(),
+            caseData.getDraftOrderCollection().getFirst().getValue().toBuilder().otherDetails(OtherDraftOrderDetails.builder()
                                                                                               .dateCreated(LocalDateTime.now())
                                                                                               .createdBy("test title")
                                                                                               .isJudgeApprovalNeeded(No)
@@ -5004,7 +5009,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testHandleDocumentGenerationYesToEditOrder() throws Exception {
+    void testHandleDocumentGenerationYesToEditOrder() throws Exception {
         DraftOrder draftOrder = DraftOrder.builder()
             .parentName("test")
             .otherDetails(OtherDraftOrderDetails.builder()
@@ -5046,7 +5051,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testHandleDocumentGenerationEditOrderWithoutError() throws Exception {
+    void testHandleDocumentGenerationEditOrderWithoutError() throws Exception {
         DraftOrder draftOrder = DraftOrder.builder()
             .parentName("test")
             .otherDetails(OtherDraftOrderDetails.builder()
@@ -5094,7 +5099,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testHandleDocumentGenerationEditOrderWithHearing() throws Exception {
+    void testHandleDocumentGenerationEditOrderWithHearing() throws Exception {
         DraftOrder draftOrder = DraftOrder.builder()
             .parentName("test")
             .otherDetails(OtherDraftOrderDetails.builder()
@@ -5144,7 +5149,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testSelectedOrderForC100ProhibitedOrdersScenario() throws Exception {
+    void testSelectedOrderForC100ProhibitedOrdersScenario() throws Exception {
 
         CreateSelectOrderOptionsEnum[] prohibitedC100OrderIdsForSolicitors = {CreateSelectOrderOptionsEnum.noticeOfProceedingsParties,
             CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties};
@@ -5180,14 +5185,14 @@ public class DraftAnOrderServiceTest {
                 PrlAppsConstants.ENGLISH
             );
             assertEquals(1, response.getErrors().size());
-            assertEquals("This order is not available to be drafted", response.getErrors().get(0));
+            assertEquals("This order is not available to be drafted", response.getErrors().getFirst());
 
         }
 
     }
 
     @Test
-    public void testSelectedOrderForFl402OrdersForBothCAandDAcasesScenario() {
+    void testSelectedOrderForFl402OrdersForBothCAandDAcasesScenario() {
 
         String[] caseTypes = {"C100","FL401"};
 
@@ -5221,12 +5226,12 @@ public class DraftAnOrderServiceTest {
                 PrlAppsConstants.ENGLISH
             );
             assertEquals(1, response.getErrors().size());
-            assertEquals("This order is not available to be drafted", response.getErrors().get(0));
+            assertEquals("This order is not available to be drafted", response.getErrors().getFirst());
         }
     }
 
     @Test
-    public void testValidationIfDirectionForFactFindingSelectedScenario1Welsh() {
+    void testValidationIfDirectionForFactFindingSelectedScenario1Welsh() {
         List<Element<PartyDetails>> partyDetails = new ArrayList<>();
         PartyDetails details = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test Org").build())
@@ -5254,7 +5259,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testValidationIfDirectionForFactFindingSelectedScenario1() throws Exception {
+    void testValidationIfDirectionForFactFindingSelectedScenario1() throws Exception {
         List<Element<PartyDetails>> partyDetails = new ArrayList<>();
         PartyDetails details = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test Org").build())
@@ -5282,7 +5287,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testValidationIfDirectionForFactFindingSelectedScenario2() throws Exception {
+    void testValidationIfDirectionForFactFindingSelectedScenario2() throws Exception {
         List<Element<PartyDetails>> partyDetails = new ArrayList<>();
         PartyDetails details = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test Org").build())
@@ -5305,7 +5310,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testRemoveDraftOrderAndAddToFinalOrderAndUpdateCaseDataForDocmosisC100() {
+    void testRemoveDraftOrderAndAddToFinalOrderAndUpdateCaseDataForDocmosisC100() {
 
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
@@ -5378,7 +5383,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testRemoveDraftOrderAndAddToFinalOrderAndUpdateCaseDataForDocmosisFl401() {
+    void testRemoveDraftOrderAndAddToFinalOrderAndUpdateCaseDataForDocmosisFl401() {
 
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
@@ -5450,7 +5455,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testRemoveDraftOrderAndAddToFinalOrderAndUpdateCaseDataForDocmosisForSdoOrder() {
+    void testRemoveDraftOrderAndAddToFinalOrderAndUpdateCaseDataForDocmosisForSdoOrder() {
 
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
@@ -5542,7 +5547,7 @@ public class DraftAnOrderServiceTest {
 
 
     @Test
-    public void testAdminUpdateUploadDraftOrderCollection() {
+    void testAdminUpdateUploadDraftOrderCollection() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
             .orderTypeId("Blank order or directions")
@@ -5591,14 +5596,14 @@ public class DraftAnOrderServiceTest {
         assertNotNull(caseDataMap);
         assertNotNull(caseDataMap.get("draftOrderCollection"));
         List<Element<DraftOrder>> updatedDraftOrderCollection =  (List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection");
-        DraftOrder updatedDraftOrder = updatedDraftOrderCollection.get(0).getValue();
+        DraftOrder updatedDraftOrder = updatedDraftOrderCollection.getFirst().getValue();
         assertNotNull(updatedDraftOrder.getHearingsType());
         assertEquals("Yes", String.valueOf(updatedDraftOrder.getWasTheOrderApprovedAtHearing()));
         assertEquals("Yes", String.valueOf(updatedDraftOrder.getOtherDetails().getIsJudgeApprovalNeeded()));
     }
 
     @Test
-    public void testJudgeUpdateUploadDraftOrderCollectionAndApprove() {
+    void testJudgeUpdateUploadDraftOrderCollectionAndApprove() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
             .orderTypeId("Blank order or directions")
@@ -5648,14 +5653,14 @@ public class DraftAnOrderServiceTest {
         assertNotNull(caseDataMap);
         assertNotNull(caseDataMap.get("draftOrderCollection"));
         List<Element<DraftOrder>> updatedDraftOrderCollection =  (List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection");
-        DraftOrder updatedDraftOrder = updatedDraftOrderCollection.get(0).getValue();
+        DraftOrder updatedDraftOrder = updatedDraftOrderCollection.getFirst().getValue();
         assertNotNull(updatedDraftOrder.getHearingsType());
         assertEquals("Yes", String.valueOf(updatedDraftOrder.getWasTheOrderApprovedAtHearing()));
         assertEquals("No", String.valueOf(updatedDraftOrder.getOtherDetails().getIsJudgeApprovalNeeded()));
     }
 
     @Test
-    public void testSolicitorEditReturnedOrderUpdateDraftOrderCollection() {
+    void testSolicitorEditReturnedOrderUpdateDraftOrderCollection() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
             .orderType(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
@@ -5696,14 +5701,14 @@ public class DraftAnOrderServiceTest {
         assertNotNull(caseDataMap);
         assertNotNull(caseDataMap.get("draftOrderCollection"));
         List<Element<DraftOrder>> updatedDraftOrderCollection =  (List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection");
-        DraftOrder updatedDraftOrder = updatedDraftOrderCollection.get(0).getValue();
+        DraftOrder updatedDraftOrder = updatedDraftOrderCollection.getFirst().getValue();
         assertNotNull(updatedDraftOrder.getManageOrderHearingDetails());
         assertEquals(dateReservedWithListAssit.getDisplayedValue(),
-                     updatedDraftOrder.getManageOrderHearingDetails().get(0).getValue().getHearingDateConfirmOptionEnum().getDisplayedValue());
+                     updatedDraftOrder.getManageOrderHearingDetails().getFirst().getValue().getHearingDateConfirmOptionEnum().getDisplayedValue());
     }
 
     @Test
-    public void testRemoveDraftOrderAndAddToFinalOrderAndUpdateCaseDataForDocmosisC100ForGeneralFormOrder() {
+    void testRemoveDraftOrderAndAddToFinalOrderAndUpdateCaseDataForDocmosisC100ForGeneralFormOrder() {
 
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
@@ -5790,7 +5795,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testHandleDocumentGenerationWhenOrderEdited() throws Exception {
+    void testHandleDocumentGenerationWhenOrderEdited() throws Exception {
         DraftOrder draftOrder = DraftOrder.builder()
             .parentName("test")
             .otherDetails(OtherDraftOrderDetails.builder()
@@ -5841,7 +5846,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testHandleDocumentGenerationWhenBlankOrderEdited() throws Exception {
+    void testHandleDocumentGenerationWhenBlankOrderEdited() throws Exception {
         DraftOrder draftOrder = DraftOrder.builder()
             .parentName("test")
             .otherDetails(OtherDraftOrderDetails.builder()
@@ -5892,7 +5897,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testGetSelectedDraftOrderDetails() throws Exception {
+    void testGetSelectedDraftOrderDetails() throws Exception {
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().id(UUID.fromString("048a6b7e-e2c5-4e6f-8f81-f4926c59bb74"))
             .value(DraftOrder.builder().otherDetails(OtherDraftOrderDetails.builder().dateCreated(LocalDateTime.now()).build()).build())
             .build();
@@ -5918,11 +5923,11 @@ public class DraftAnOrderServiceTest {
             + "wMCwibWFqb3JfcHJpb3JpdHkiOjUwMDAsInByaW9yaXR5X2RhdGUiOiIyMDI0LTA4LTE2VDE3OjAwOjAwKzAwMDAifSwiY29tcGxldGVfdGFzayI6dHJ1ZX19fQ==";
         DraftOrder draftOrder = draftAnOrderService
             .getSelectedDraftOrderDetails(draftOrderCollection, null, encodedString, Event.EDIT_AND_APPROVE_ORDER.getId());
-        Assert.assertNotNull(draftOrder);
+        assertNotNull(draftOrder);
     }
 
     @Test
-    public void testSolicitorEditReturnedSdoOrderUpdateDraftOrderCollection() {
+    void testSolicitorEditReturnedSdoOrderUpdateDraftOrderCollection() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
             .orderType(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
@@ -5964,14 +5969,14 @@ public class DraftAnOrderServiceTest {
         assertNotNull(caseDataMap);
         assertNotNull(caseDataMap.get("draftOrderCollection"));
         List<Element<DraftOrder>> updatedDraftOrderCollection =  (List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection");
-        DraftOrder updatedDraftOrder = updatedDraftOrderCollection.get(0).getValue();
+        DraftOrder updatedDraftOrder = updatedDraftOrderCollection.getFirst().getValue();
         assertNotNull(updatedDraftOrder.getManageOrderHearingDetails());
         assertEquals(dateReservedWithListAssit.getDisplayedValue(),
-                     updatedDraftOrder.getManageOrderHearingDetails().get(0).getValue().getHearingDateConfirmOptionEnum().getDisplayedValue());
+                     updatedDraftOrder.getManageOrderHearingDetails().getFirst().getValue().getHearingDateConfirmOptionEnum().getDisplayedValue());
     }
 
     @Test
-    public void testSolicitorEditReturnedC6OrderUpdateDraftOrderCollection() {
+    void testSolicitorEditReturnedC6OrderUpdateDraftOrderCollection() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
             .orderType(CreateSelectOrderOptionsEnum.noticeOfProceedings)
@@ -6020,9 +6025,9 @@ public class DraftAnOrderServiceTest {
         assertNotNull(caseDataMap);
         assertNotNull(caseDataMap.get("draftOrderCollection"));
         List<Element<DraftOrder>> updatedDraftOrderCollection =  (List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection");
-        DraftOrder updatedDraftOrder = updatedDraftOrderCollection.get(0).getValue();
+        DraftOrder updatedDraftOrder = updatedDraftOrderCollection.getFirst().getValue();
         assertNotNull(updatedDraftOrder.getManageOrderHearingDetails());
         assertEquals(dateReservedWithListAssit.getDisplayedValue(),
-                     updatedDraftOrder.getManageOrderHearingDetails().get(0).getValue().getHearingDateConfirmOptionEnum().getDisplayedValue());
+                     updatedDraftOrder.getManageOrderHearingDetails().getFirst().getValue().getHearingDateConfirmOptionEnum().getDisplayedValue());
     }
 }

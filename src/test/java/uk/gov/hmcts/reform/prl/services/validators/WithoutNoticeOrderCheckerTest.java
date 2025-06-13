@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-public class WithoutNoticeOrderCheckerTest {
+class WithoutNoticeOrderCheckerTest {
 
     @Mock
     TaskErrorService taskErrorService;
@@ -38,7 +38,7 @@ public class WithoutNoticeOrderCheckerTest {
     private OtherDetailsOfWithoutNoticeOrder otherDetailsOfWithoutNoticeOrder;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         caseData = CaseData.builder().build();
         withoutNoticeOrderDetails = WithoutNoticeOrderDetails.builder().build();
         reasonForWithoutNoticeOrder = ReasonForWithoutNoticeOrder.builder().build();
@@ -47,7 +47,7 @@ public class WithoutNoticeOrderCheckerTest {
     }
 
     @Test
-    public void whenNoWithoutOrderDetailsProvidedShouldReturnsFalse() {
+    void whenNoWithoutOrderDetailsProvidedShouldReturnsFalse() {
         caseData = caseData.toBuilder().orderWithoutGivingNoticeToRespondent(withoutNoticeOrderDetails).build();
         assertFalse(withoutNoticeOrderChecker
                         .isStarted(caseData));
@@ -55,7 +55,7 @@ public class WithoutNoticeOrderCheckerTest {
     }
 
     @Test
-    public void whenWithoutOrderDetailsProvidedShouldReturnsTrue() {
+    void whenWithoutOrderDetailsProvidedShouldReturnsTrue() {
         withoutNoticeOrderDetails = withoutNoticeOrderDetails.toBuilder().orderWithoutGivingNotice(YesOrNo.Yes).build();
         caseData = caseData.toBuilder().orderWithoutGivingNoticeToRespondent(
             withoutNoticeOrderDetails).build();
@@ -64,13 +64,13 @@ public class WithoutNoticeOrderCheckerTest {
     }
 
     @Test
-    public void whenNoDataHasMandatoryCompletedReturnsFalse() {
+    void whenNoDataHasMandatoryCompletedReturnsFalse() {
         CaseData caseData = CaseData.builder().build();
-        assertTrue(!withoutNoticeOrderChecker.hasMandatoryCompleted(caseData));
+        assertFalse(withoutNoticeOrderChecker.hasMandatoryCompleted(caseData));
     }
 
     @Test
-    public void whenWithoutOrderDetailsProvidedShouldReturnsAsFinished() {
+    void whenWithoutOrderDetailsProvidedShouldReturnsAsFinished() {
         withoutNoticeOrderDetails = withoutNoticeOrderDetails.toBuilder().orderWithoutGivingNotice(YesOrNo.Yes).build();
         reasonForWithoutNoticeOrder = reasonForWithoutNoticeOrder.toBuilder().reasonForOrderWithoutGivingNotice(
             Arrays.asList(ReasonForOrderWithoutGivingNoticeEnum.harmToApplicantOrChild)).build();
@@ -85,7 +85,7 @@ public class WithoutNoticeOrderCheckerTest {
     }
 
     @Test
-    public void whenWithoutNoticeOrderReasonNotProvidedThenShouldNotReturnsAsFinished() {
+    void whenWithoutNoticeOrderReasonNotProvidedThenShouldNotReturnsAsFinished() {
         withoutNoticeOrderDetails = withoutNoticeOrderDetails.toBuilder().orderWithoutGivingNotice(YesOrNo.Yes).build();
         respondentBailConditionDetails = respondentBailConditionDetails.toBuilder().isRespondentAlreadyInBailCondition(
             YesNoDontKnow.dontKnow).build();
@@ -97,7 +97,7 @@ public class WithoutNoticeOrderCheckerTest {
     }
 
     @Test
-    public void whenBailConditionNotProvidedShouldReturnsAsFinished() {
+    void whenBailConditionNotProvidedShouldReturnsAsFinished() {
         withoutNoticeOrderDetails = withoutNoticeOrderDetails.toBuilder().orderWithoutGivingNotice(YesOrNo.Yes).build();
         reasonForWithoutNoticeOrder = reasonForWithoutNoticeOrder.toBuilder().reasonForOrderWithoutGivingNotice(
             Arrays.asList(ReasonForOrderWithoutGivingNoticeEnum.harmToApplicantOrChild)).build();
@@ -109,7 +109,7 @@ public class WithoutNoticeOrderCheckerTest {
     }
 
     @Test
-    public void whenWithoutOrderDetailsProvidedAsNoShouldReturnsAsFinished() {
+    void whenWithoutOrderDetailsProvidedAsNoShouldReturnsAsFinished() {
         withoutNoticeOrderDetails = withoutNoticeOrderDetails.toBuilder().orderWithoutGivingNotice(YesOrNo.No).build();
         caseData = caseData.toBuilder().orderWithoutGivingNoticeToRespondent(
                 withoutNoticeOrderDetails).reasonForOrderWithoutGivingNotice(reasonForWithoutNoticeOrder)
@@ -119,17 +119,17 @@ public class WithoutNoticeOrderCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+    void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
         assertNotNull(withoutNoticeOrderChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 
 
     @Test
-    public void whenWithoutOrderDetailsProvidedShouldReturnsFalse() {
+    void whenWithoutOrderDetailsProvidedShouldReturnsFalse() {
         withoutNoticeOrderDetails = withoutNoticeOrderDetails.toBuilder().orderWithoutGivingNotice(null).build();
         caseData = caseData.toBuilder().orderWithoutGivingNoticeToRespondent(
             withoutNoticeOrderDetails).build();
-        assertTrue(!withoutNoticeOrderChecker
+        assertFalse(withoutNoticeOrderChecker
                        .isStarted(caseData));
     }
 

@@ -30,7 +30,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @ExtendWith(MockitoExtension.class)
-public class RespondentContactDetailsCheckerTest {
+class RespondentContactDetailsCheckerTest {
 
     @InjectMocks
     RespondentContactDetailsChecker respondentContactDetailsChecker;
@@ -49,7 +49,7 @@ public class RespondentContactDetailsCheckerTest {
     PartyDetails noAddressRespondent;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
 
         Address address = Address.builder()
             .addressLine1("test")
@@ -135,27 +135,27 @@ public class RespondentContactDetailsCheckerTest {
     }
 
     @Test
-    public void isStartedTest() {
+    void isStartedTest() {
         Boolean bool = respondentContactDetailsChecker.isStarted(respondent, true);
         assertTrue(bool);
     }
 
     @Test
-    public void mandatoryInformationTest() {
+    void mandatoryInformationTest() {
         doNothing().when(respondentTaskErrorService).addEventError(Mockito.any(), Mockito.any(), Mockito.any());
         Boolean bool = respondentContactDetailsChecker.isFinished(respondent, true);
         assertTrue(bool);
     }
 
     @Test
-    public void mandatoryInformationTestWithRefuge() {
+    void mandatoryInformationTestWithRefuge() {
         doNothing().when(respondentTaskErrorService).addEventError(Mockito.any(), Mockito.any(), Mockito.any());
         Boolean bool = respondentContactDetailsChecker.isFinished(respondentLivesInRefuge, true);
         assertTrue(bool);
     }
 
     @Test
-    public void noAddressTest() {
+    void noAddressTest() {
         doNothing().when(respondentTaskErrorService).addEventError(Mockito.any(), Mockito.any(), Mockito.any());
         Boolean bool = respondentContactDetailsChecker.isFinished(noAddressRespondent, true);
         assertFalse(bool);

@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,7 +26,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @ExtendWith(MockitoExtension.class)
-public class ConsentToApplicationCheckerTest {
+class ConsentToApplicationCheckerTest {
 
     @InjectMocks
     ConsentToApplicationChecker consentToApplicationChecker;
@@ -39,7 +38,7 @@ public class ConsentToApplicationCheckerTest {
     PartyDetails respondent;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         User user = User.builder().email("respondent@example.net")
             .idamId("1234-5678").solicitorRepresented(Yes).build();
         respondent = PartyDetails.builder()
@@ -64,14 +63,14 @@ public class ConsentToApplicationCheckerTest {
     }
 
     @Test
-    public void isStartedTest() {
+    void isStartedTest() {
         boolean anyNonEmpty = consentToApplicationChecker.isStarted(respondent, true);
 
         assertTrue(anyNonEmpty);
     }
 
     @Test
-    public void isStartedTest_whenNot() {
+    void isStartedTest_whenNot() {
         PartyDetails respondent = PartyDetails.builder()
             .response(Response
                           .builder()
@@ -97,30 +96,30 @@ public class ConsentToApplicationCheckerTest {
     }
 
     @Test
-    public void hasMandatoryCompletedTest() {
+    void hasMandatoryCompletedTest() {
         boolean anyNonEmpty = consentToApplicationChecker.isFinished(respondent, true);
 
-        Assert.assertTrue(anyNonEmpty);
+        assertTrue(anyNonEmpty);
     }
 
     @Test
-    public void hasStartedNoResponse() {
+    void hasStartedNoResponse() {
         PartyDetails blankRespondent = PartyDetails.builder().build();
         boolean anyNonEmpty = consentToApplicationChecker.isStarted(blankRespondent, true);
 
-        Assert.assertFalse(anyNonEmpty);
+        assertFalse(anyNonEmpty);
     }
 
     @Test
-    public void hasFinishedNoResponse() {
+    void hasFinishedNoResponse() {
         PartyDetails blankRespondent = PartyDetails.builder().build();
         boolean anyNonEmpty = consentToApplicationChecker.isFinished(blankRespondent, true);
 
-        Assert.assertFalse(anyNonEmpty);
+        assertFalse(anyNonEmpty);
     }
 
     @Test
-    public void hasFinishedEmptyResponse() {
+    void hasFinishedEmptyResponse() {
         PartyDetails blankRespondent = PartyDetails
             .builder()
             .response(Response
@@ -129,6 +128,6 @@ public class ConsentToApplicationCheckerTest {
             .build();
         boolean anyNonEmpty = consentToApplicationChecker.isFinished(blankRespondent, true);
 
-        Assert.assertFalse(anyNonEmpty);
+        assertFalse(anyNonEmpty);
     }
 }

@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,11 +25,14 @@ import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenCaseUpdateService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class CitizenCaseUpdateControllerTest {
+class CitizenCaseUpdateControllerTest {
 
     @InjectMocks
     private CitizenCaseUpdateController citizenCaseUpdateController;
@@ -67,7 +69,7 @@ public class CitizenCaseUpdateControllerTest {
     public static final String eventId = "confirmYourDetails";
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         accessCodeRequest = accessCodeRequest.toBuilder()
             .caseId("123")
             .accessCode("123")
@@ -83,7 +85,7 @@ public class CitizenCaseUpdateControllerTest {
     }
 
     @Test
-    public void testUpdatePartyDetailsFromCitizen() {
+    void testUpdatePartyDetailsFromCitizen() {
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(citizenCaseUpdateService.updateCitizenPartyDetails(any(),
                                                                 any(),
@@ -100,77 +102,89 @@ public class CitizenCaseUpdateControllerTest {
         CaseDataWithHearingResponse caseDataWithHearing = citizenCaseUpdateController
             .updatePartyDetailsFromCitizen(CitizenUpdatedCaseData.builder().build(), any(), any(),
                                            authToken, s2sToken);
-        Assert.assertEquals(1223, caseDataWithHearing.getCaseData().getCaseData().getId());
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void testUpdatePartyDetailsFromCitizenException() {
-        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
-        when(citizenCaseUpdateService.updateCitizenPartyDetails(any(),
-                                                                any(),
-                                                                any(), any())).thenReturn(null);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
-        citizenCaseUpdateController.updatePartyDetailsFromCitizen(CitizenUpdatedCaseData.builder().build(), any(), any(), authToken, s2sToken);
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void testUpdatePartyDetailsFromCitizenAuthorizationException() {
-        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        when(citizenCaseUpdateService.updateCitizenPartyDetails(any(),
-                                                                any(),
-                                                                any(), any())).thenReturn(null);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
-        citizenCaseUpdateController.updatePartyDetailsFromCitizen(CitizenUpdatedCaseData.builder().build(), any(), any(), authToken, s2sToken);
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void testUpdatePartyDetailsFromCitizenJsonException() throws JsonProcessingException {
-        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
-        when(objectMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("") {});
-        citizenCaseUpdateController.updatePartyDetailsFromCitizen(CitizenUpdatedCaseData.builder().build(), any(), any(), authToken, s2sToken);
+        assertEquals(1223, caseDataWithHearing.getCaseData().getCaseData().getId());
     }
 
     @Test
-    public void testSaveDraftCitizenApplication() throws JsonProcessingException {
+    void testUpdatePartyDetailsFromCitizenException() {
+        assertThrows(RuntimeException.class, () -> {
+            when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+            when(citizenCaseUpdateService.updateCitizenPartyDetails(any(),
+            any(),
+            any(), any())).thenReturn(null);
+            when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
+            citizenCaseUpdateController.updatePartyDetailsFromCitizen(CitizenUpdatedCaseData.builder().build(), any(), any(), authToken, s2sToken);
+        });
+    }
+
+    @Test
+    void testUpdatePartyDetailsFromCitizenAuthorizationException() {
+        assertThrows(RuntimeException.class, () -> {
+            when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+            when(citizenCaseUpdateService.updateCitizenPartyDetails(any(),
+            any(),
+            any(), any())).thenReturn(null);
+            when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
+            citizenCaseUpdateController.updatePartyDetailsFromCitizen(CitizenUpdatedCaseData.builder().build(), any(), any(), authToken, s2sToken);
+        });
+    }
+
+    @Test
+    void testUpdatePartyDetailsFromCitizenJsonException() throws JsonProcessingException {
+        assertThrows(RuntimeException.class, () -> {
+            when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+            when(objectMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("") {});
+            citizenCaseUpdateController.updatePartyDetailsFromCitizen(CitizenUpdatedCaseData.builder().build(), any(), any(), authToken, s2sToken);
+        });
+    }
+
+    @Test
+    void testSaveDraftCitizenApplication() throws JsonProcessingException {
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(citizenCaseUpdateService.saveDraftCitizenApplication(any(),
                                                                   any(),
                                                                   any())).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
         CaseData caseData = citizenCaseUpdateController.saveDraftCitizenApplication(any(), authToken, s2sToken, any());
-        Assert.assertEquals(1223, caseData.getId());
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void testSaveDraftCitizenApplicationException() throws JsonProcessingException {
-        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
-        when(citizenCaseUpdateService.saveDraftCitizenApplication(any(),
-                                                                  any(),
-                                                                  any())).thenReturn(null);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
-        citizenCaseUpdateController.saveDraftCitizenApplication(any(), authToken, s2sToken, any());
-    }
-
-
-    @Test(expected = RuntimeException.class)
-    public void testSaveDraftCitizenApplicationAuthorizationException() throws JsonProcessingException {
-        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        when(citizenCaseUpdateService.saveDraftCitizenApplication(any(),
-                                                                  any(),
-                                                                  any())).thenReturn(caseDetails);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
-        citizenCaseUpdateController.saveDraftCitizenApplication(any(), authToken, s2sToken, any());
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void testSaveDraftCitizenApplicationJsonException() throws JsonProcessingException {
-        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
-        when(objectMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("") {});
-        citizenCaseUpdateController.saveDraftCitizenApplication(any(), authToken, s2sToken, any());
+        assertEquals(1223, caseData.getId());
     }
 
     @Test
-    public void testSubmitC100Application() throws JsonProcessingException, NotFoundException {
+    void testSaveDraftCitizenApplicationException() throws JsonProcessingException {
+        assertThrows(RuntimeException.class, () -> {
+            when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+            when(citizenCaseUpdateService.saveDraftCitizenApplication(any(),
+            any(),
+            any())).thenReturn(null);
+            when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
+            citizenCaseUpdateController.saveDraftCitizenApplication(any(), authToken, s2sToken, any());
+        });
+    }
+
+
+    @Test
+    void testSaveDraftCitizenApplicationAuthorizationException() throws JsonProcessingException {
+        assertThrows(RuntimeException.class, () -> {
+            when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+            when(citizenCaseUpdateService.saveDraftCitizenApplication(any(),
+            any(),
+            any())).thenReturn(caseDetails);
+            when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
+            citizenCaseUpdateController.saveDraftCitizenApplication(any(), authToken, s2sToken, any());
+        });
+    }
+
+    @Test
+    void testSaveDraftCitizenApplicationJsonException() throws JsonProcessingException {
+        assertThrows(RuntimeException.class, () -> {
+            when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+            when(objectMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("") {});
+            citizenCaseUpdateController.saveDraftCitizenApplication(any(), authToken, s2sToken, any());
+        });
+    }
+
+    @Test
+    void testSubmitC100Application() throws JsonProcessingException, NotFoundException {
         CaseData caseData = CaseData.builder().id(12345L)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .build();
@@ -181,109 +195,125 @@ public class CitizenCaseUpdateControllerTest {
                                                                   any())).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
         CaseData caseDataResult = citizenCaseUpdateController.submitC100Application(caseId, eventId, authToken, s2sToken, caseData);
-        Assert.assertEquals(1223, caseDataResult.getId());
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void testSubmitC100ApplicationException() throws JsonProcessingException, NotFoundException {
-        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
-        when(citizenCaseUpdateService.saveDraftCitizenApplication(any(),
-                                                                  any(),
-                                                                  any())).thenReturn(null);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
-        citizenCaseUpdateController.submitC100Application(caseId, eventId, authToken, s2sToken, any());
-    }
-
-
-    @Test(expected = RuntimeException.class)
-    public void testSubmitC100ApplicationAuthoirizationException() throws JsonProcessingException, NotFoundException {
-        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        when(citizenCaseUpdateService.saveDraftCitizenApplication(any(),
-                                                                  any(),
-                                                                  any())).thenReturn(caseDetails);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
-        citizenCaseUpdateController.submitC100Application(any(), any(), authToken, s2sToken, any());
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void testSubmitC100ApplicationJsonException() throws JsonProcessingException, NotFoundException {
-        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
-        when(objectMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("") {});
-        citizenCaseUpdateController.submitC100Application(any(), any(), authToken, s2sToken, any());
+        assertEquals(1223, caseDataResult.getId());
     }
 
     @Test
-    public void testDeleteApplicationCitizen() throws JsonProcessingException {
+    void testSubmitC100ApplicationException() throws JsonProcessingException, NotFoundException {
+        assertThrows(RuntimeException.class, () -> {
+            when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+            when(citizenCaseUpdateService.saveDraftCitizenApplication(any(),
+            any(),
+            any())).thenReturn(null);
+            when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
+            citizenCaseUpdateController.submitC100Application(caseId, eventId, authToken, s2sToken, any());
+        });
+    }
+
+
+    @Test
+    void testSubmitC100ApplicationAuthoirizationException() throws JsonProcessingException, NotFoundException {
+        assertThrows(RuntimeException.class, () -> {
+            when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+            when(citizenCaseUpdateService.saveDraftCitizenApplication(any(),
+            any(),
+            any())).thenReturn(caseDetails);
+            when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
+            citizenCaseUpdateController.submitC100Application(any(), any(), authToken, s2sToken, any());
+        });
+    }
+
+    @Test
+    void testSubmitC100ApplicationJsonException() throws JsonProcessingException, NotFoundException {
+        assertThrows(RuntimeException.class, () -> {
+            when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+            when(objectMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("") {});
+            citizenCaseUpdateController.submitC100Application(any(), any(), authToken, s2sToken, any());
+        });
+    }
+
+    @Test
+    void testDeleteApplicationCitizen() throws JsonProcessingException {
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(citizenCaseUpdateService.deleteApplication(any(),
                                                         any(),
                                                         any())).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
         CaseData caseData = citizenCaseUpdateController.deleteApplicationCitizen(any(), authToken, s2sToken, any());
-        Assert.assertEquals(1223, caseData.getId());
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void testDeleteApplicationCitizenException() throws JsonProcessingException {
-        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
-        when(citizenCaseUpdateService.deleteApplication(any(),
-                                                        any(),
-                                                        any())).thenReturn(null);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
-        citizenCaseUpdateController.deleteApplicationCitizen(any(), authToken, s2sToken, any());
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void testDeleteApplicationCitizenJsonException() throws JsonProcessingException {
-        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
-        when(objectMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("") {});
-        citizenCaseUpdateController.deleteApplicationCitizen(any(), authToken, s2sToken, any());
-    }
-
-
-    @Test(expected = RuntimeException.class)
-    public void testDeleteApplicationCitizenAuthorizationException() throws JsonProcessingException {
-        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        when(citizenCaseUpdateService.deleteApplication(any(),
-                                                        any(),
-                                                        any())).thenReturn(caseDetails);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
-        citizenCaseUpdateController.deleteApplicationCitizen(any(), authToken, s2sToken, any());
+        assertEquals(1223, caseData.getId());
     }
 
     @Test
-    public void testWithdrawApplicationCitizen() {
+    void testDeleteApplicationCitizenException() throws JsonProcessingException {
+        assertThrows(RuntimeException.class, () -> {
+            when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+            when(citizenCaseUpdateService.deleteApplication(any(),
+            any(),
+            any())).thenReturn(null);
+            when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
+            citizenCaseUpdateController.deleteApplicationCitizen(any(), authToken, s2sToken, any());
+        });
+    }
+
+    @Test
+    void testDeleteApplicationCitizenJsonException() throws JsonProcessingException {
+        assertThrows(RuntimeException.class, () -> {
+            when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+            when(objectMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("") {});
+            citizenCaseUpdateController.deleteApplicationCitizen(any(), authToken, s2sToken, any());
+        });
+    }
+
+
+    @Test
+    void testDeleteApplicationCitizenAuthorizationException() throws JsonProcessingException {
+        assertThrows(RuntimeException.class, () -> {
+            when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+            when(citizenCaseUpdateService.deleteApplication(any(),
+            any(),
+            any())).thenReturn(caseDetails);
+            when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
+            citizenCaseUpdateController.deleteApplicationCitizen(any(), authToken, s2sToken, any());
+        });
+    }
+
+    @Test
+    void testWithdrawApplicationCitizen() {
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(citizenCaseUpdateService.withdrawCase(any(),
                                                    any(),
                                                    any())).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
         CaseData caseData = citizenCaseUpdateController.withdrawCase(any(), any(), authToken, s2sToken);
-        Assert.assertEquals(1223, caseData.getId());
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void testWithdrawApplicationCitizenException() {
-        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
-        when(citizenCaseUpdateService.withdrawCase(any(),
-                                                   any(),
-                                                   any())).thenReturn(null);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
-        citizenCaseUpdateController.withdrawCase(any(), any(), authToken, s2sToken);
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void testWithdrawApplicationCitizenAuthorizationException() {
-        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        when(citizenCaseUpdateService.withdrawCase(any(),
-                                                   any(),
-                                                   any())).thenReturn(caseDetails);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
-        citizenCaseUpdateController.withdrawCase(any(), any(), authToken, s2sToken);
+        assertEquals(1223, caseData.getId());
     }
 
     @Test
-    public void testCitizenAwpApplication() {
+    void testWithdrawApplicationCitizenException() {
+        assertThrows(RuntimeException.class, () -> {
+            when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+            when(citizenCaseUpdateService.withdrawCase(any(),
+            any(),
+            any())).thenReturn(null);
+            when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
+            citizenCaseUpdateController.withdrawCase(any(), any(), authToken, s2sToken);
+        });
+    }
+
+    @Test
+    void testWithdrawApplicationCitizenAuthorizationException() {
+        assertThrows(RuntimeException.class, () -> {
+            when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+            when(citizenCaseUpdateService.withdrawCase(any(),
+            any(),
+            any())).thenReturn(caseDetails);
+            when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
+            citizenCaseUpdateController.withdrawCase(any(), any(), authToken, s2sToken);
+        });
+    }
+
+    @Test
+    void testCitizenAwpApplication() {
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(citizenCaseUpdateService.saveCitizenAwpApplication(any(),
                                                                 any(),
@@ -291,11 +321,11 @@ public class CitizenCaseUpdateControllerTest {
 
         ResponseEntity<Object> response = citizenCaseUpdateController.saveCitizenAwpApplication(authToken, s2sToken, any(), any(
             CitizenAwpRequest.class));
-        Assert.assertTrue(response.getStatusCode().is2xxSuccessful());
+        assertTrue(response.getStatusCode().is2xxSuccessful());
     }
 
     @Test
-    public void testCitizenAwpApplicationThrowError() {
+    void testCitizenAwpApplicationThrowError() {
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(citizenCaseUpdateService.saveCitizenAwpApplication(any(),
                                                                 any(),
@@ -303,17 +333,19 @@ public class CitizenCaseUpdateControllerTest {
 
         ResponseEntity<Object> response = citizenCaseUpdateController.saveCitizenAwpApplication(authToken, s2sToken, any(), any(
             CitizenAwpRequest.class));
-        Assert.assertTrue(response.getStatusCode().is5xxServerError());
+        assertTrue(response.getStatusCode().is5xxServerError());
     }
 
-    @Test(expected = RuntimeException.class)
-    public void testCitizenAwpApplicationThrowsAuthException() {
-        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        when(citizenCaseUpdateService.saveCitizenAwpApplication(any(),
-                                                                any(),
-                                                                any())).thenReturn(caseDetails);
+    @Test
+    void testCitizenAwpApplicationThrowsAuthException() {
+        assertThrows(RuntimeException.class, () -> {
+            when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+            when(citizenCaseUpdateService.saveCitizenAwpApplication(any(),
+            any(),
+            any())).thenReturn(caseDetails);
 
-        citizenCaseUpdateController.saveCitizenAwpApplication(authToken, s2sToken, any(), any(CitizenAwpRequest.class));
+            citizenCaseUpdateController.saveCitizenAwpApplication(authToken, s2sToken, any(), any(CitizenAwpRequest.class));
+        });
     }
 
 }

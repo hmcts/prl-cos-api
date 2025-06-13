@@ -25,7 +25,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class TestingSupportCreateCaseDataControllerTest {
+class TestingSupportCreateCaseDataControllerTest {
 
     @InjectMocks
     private TestingSupportCreateCaseDataController testingSupportCreateCaseDataController;
@@ -44,7 +44,7 @@ public class TestingSupportCreateCaseDataControllerTest {
 
 
     @Test
-    public void shouldCreateCaseWhenCalled() throws Exception {
+    void shouldCreateCaseWhenCalled() throws Exception {
         CaseData caseData = CaseData.builder()
             .applicantCaseName("test")
             .build();

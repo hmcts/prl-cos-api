@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.document;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,22 +8,22 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 
 
 @ExtendWith(MockitoExtension.class)
-public class C100DocumentTemplateFinderServiceTest {
-
+class C100DocumentTemplateFinderServiceTest {
 
     @InjectMocks
-    C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
+    private C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
 
-    CaseData caseData;
+    private CaseData caseData;
 
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         ReflectionTestUtils.setField(c100DocumentTemplateFinderService, "c100FinalTemplate", "c100FinalTemplate");
         ReflectionTestUtils.setField(c100DocumentTemplateFinderService, "c100FinalWelshTemplate", "c100FinalWelshTemplate");
         ReflectionTestUtils.setField(c100DocumentTemplateFinderService, "c100FinalTemplateV2", "c100FinalTemplateV2");
@@ -63,171 +62,164 @@ public class C100DocumentTemplateFinderServiceTest {
 
 
     @Test
-    public void findFinalDocumentTemplateV2True() {
+    void findFinalDocumentTemplateV2True() {
         caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V2).build();
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDocumentTemplate(caseData,Boolean.TRUE));
+        assertNotNull(c100DocumentTemplateFinderService.findFinalDocumentTemplate(caseData,Boolean.TRUE));
     }
 
     @Test
-    public void findFinalDocumentTemplateV3True() {
+    void findFinalDocumentTemplateV3True() {
         caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V3).build();
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDocumentTemplate(caseData,Boolean.TRUE));
+        assertNotNull(c100DocumentTemplateFinderService.findFinalDocumentTemplate(caseData,Boolean.TRUE));
     }
 
     @Test
-    public void findFinalDocumentTemplateV2False() {
+    void findFinalDocumentTemplateV2False() {
         caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V2).build();
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDocumentTemplate(caseData,Boolean.FALSE));
+        assertNotNull(c100DocumentTemplateFinderService.findFinalDocumentTemplate(caseData,Boolean.FALSE));
     }
 
     @Test
-    public void findFinalDocumentTemplateV3False() {
+    void findFinalDocumentTemplateV3False() {
         caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V3).build();
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDocumentTemplate(caseData,Boolean.FALSE));
+        assertNotNull(c100DocumentTemplateFinderService.findFinalDocumentTemplate(caseData,Boolean.FALSE));
     }
 
     @Test
-    public void findFinalDocumentTemplateTrue() {
+    void findFinalDocumentTemplateTrue() {
         caseData = CaseData.builder().build();
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDocumentTemplate(caseData,Boolean.TRUE));
+        assertNotNull(c100DocumentTemplateFinderService.findFinalDocumentTemplate(caseData,Boolean.TRUE));
     }
 
     @Test
-    public void findFinalDocumentTemplateFalse() {
-        caseData = CaseData.builder().build();
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDocumentTemplate(caseData,Boolean.TRUE));
-    }
-
-    @Test
-    public void findFinalDraftDocumentTemplateV2True() {
+    void findFinalDraftDocumentTemplateV2True() {
         caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V2).build();
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseData,Boolean.TRUE));
+        assertNotNull(c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseData,Boolean.TRUE));
     }
 
     @Test
-    public void findFinalDraftDocumentTemplateV3True() {
+    void findFinalDraftDocumentTemplateV3True() {
         caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V3).build();
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseData,Boolean.TRUE));
+        assertNotNull(c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseData,Boolean.TRUE));
     }
 
     @Test
-    public void findFinalDraftDocumentTemplateV2False() {
+    void findFinalDraftDocumentTemplateV2False() {
         caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V2).build();
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseData,Boolean.FALSE));
+        assertNotNull(c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseData,Boolean.FALSE));
     }
 
     @Test
-    public void findFinalDraftDocumentTemplateV3False() {
+    void findFinalDraftDocumentTemplateV3False() {
         caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V3).build();
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseData,Boolean.FALSE));
+        assertNotNull(c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseData,Boolean.FALSE));
     }
 
     @Test
-    public void findFinalDraftDocumentTemplateTrue() {
+    void findFinalDraftDocumentTemplateTrue() {
         caseData = CaseData.builder().build();
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseData,Boolean.TRUE));
+        assertNotNull(c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseData,Boolean.TRUE));
     }
 
     @Test
-    public void findFinalDraftDocumentTemplateFalse() {
+    void findFinalDraftDocumentTemplateFalse() {
         caseData = CaseData.builder().build();
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseData,Boolean.FALSE));
+        assertNotNull(c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseData,Boolean.FALSE));
     }
 
     @Test
-    public void findC8DocumentTemplateV2True() {
+    void findC8DocumentTemplateV2True() {
         caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V2).build();
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findC8DocumentTemplate(caseData,Boolean.TRUE));
+        assertNotNull(c100DocumentTemplateFinderService.findC8DocumentTemplate(caseData,Boolean.TRUE));
     }
 
     @Test
-    public void findC8DocumentTemplateV2False() {
+    void findC8DocumentTemplateV2False() {
         caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V2).build();
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findC8DocumentTemplate(caseData,Boolean.FALSE));
+        assertNotNull(c100DocumentTemplateFinderService.findC8DocumentTemplate(caseData,Boolean.FALSE));
     }
 
     @Test
-    public void findC8DocumentTemplateTrue() {
+    void findC8DocumentTemplateTrue() {
         caseData = CaseData.builder().build();
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findC8DocumentTemplate(caseData,Boolean.TRUE));
+        assertNotNull(c100DocumentTemplateFinderService.findC8DocumentTemplate(caseData,Boolean.TRUE));
     }
 
     @Test
-    public void findC8DocumentTemplateFalse() {
+    void findC8DocumentTemplateFalse() {
         caseData = CaseData.builder().build();
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findC8DocumentTemplate(caseData,Boolean.FALSE));
+        assertNotNull(c100DocumentTemplateFinderService.findC8DocumentTemplate(caseData,Boolean.FALSE));
     }
 
     @Test
-    public void findC8DraftDocumentTemplateV2True() {
+    void findC8DraftDocumentTemplateV2True() {
         caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V2).build();
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findC8DraftDocumentTemplate(caseData,Boolean.TRUE));
+        assertNotNull(c100DocumentTemplateFinderService.findC8DraftDocumentTemplate(caseData,Boolean.TRUE));
     }
 
     @Test
-    public void findC8DraftDocumentTemplateV2False() {
+    void findC8DraftDocumentTemplateV2False() {
         caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V2).build();
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findC8DraftDocumentTemplate(caseData,Boolean.FALSE));
+        assertNotNull(c100DocumentTemplateFinderService.findC8DraftDocumentTemplate(caseData,Boolean.FALSE));
     }
 
     @Test
-    public void findC8DraftDocumentTemplateTrue() {
+    void findC8DraftDocumentTemplateTrue() {
         caseData = CaseData.builder().build();
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findC8DraftDocumentTemplate(caseData,Boolean.TRUE));
+        assertNotNull(c100DocumentTemplateFinderService.findC8DraftDocumentTemplate(caseData,Boolean.TRUE));
     }
 
     @Test
-    public void findC8DraftDocumentTemplateFalse() {
+    void findC8DraftDocumentTemplateFalse() {
         caseData = CaseData.builder().build();
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findC8DraftDocumentTemplate(caseData,Boolean.FALSE));
+        assertNotNull(c100DocumentTemplateFinderService.findC8DraftDocumentTemplate(caseData,Boolean.FALSE));
     }
 
     @Test
-    public void findC1ADraftDocumentTemplateV2True() {
+    void findC1ADraftDocumentTemplateV2True() {
         caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V2).build();
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findDraftC1ATemplate(caseData,Boolean.TRUE));
+        assertNotNull(c100DocumentTemplateFinderService.findDraftC1ATemplate(caseData,Boolean.TRUE));
     }
 
     @Test
-    public void findC1ADraftDocumentTemplateV2False() {
+    void findC1ADraftDocumentTemplateV2False() {
         caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V2).build();
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findDraftC1ATemplate(caseData,Boolean.FALSE));
+        assertNotNull(c100DocumentTemplateFinderService.findDraftC1ATemplate(caseData,Boolean.FALSE));
     }
 
     @Test
-    public void findC1ADraftDocumentTemplateTrue() {
+    void findC1ADraftDocumentTemplateTrue() {
         caseData = CaseData.builder().build();
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findDraftC1ATemplate(caseData,Boolean.TRUE));
+        assertNotNull(c100DocumentTemplateFinderService.findDraftC1ATemplate(caseData,Boolean.TRUE));
     }
 
     @Test
-    public void findC1ADraftDocumentTemplateFalse() {
+    void findC1ADraftDocumentTemplateFalse() {
         caseData = CaseData.builder().build();
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findDraftC1ATemplate(caseData,Boolean.FALSE));
+        assertNotNull(c100DocumentTemplateFinderService.findDraftC1ATemplate(caseData,Boolean.FALSE));
     }
 
     @Test
-    public void findC1ADocumentTemplateV2True() {
+    void findC1ADocumentTemplateV2True() {
         caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V2).build();
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findC1ATemplate(caseData,Boolean.TRUE));
+        assertNotNull(c100DocumentTemplateFinderService.findC1ATemplate(caseData,Boolean.TRUE));
     }
 
     @Test
-    public void findC1ADocumentTemplateV2False() {
+    void findC1ADocumentTemplateV2False() {
         caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V2).build();
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findC1ATemplate(caseData,Boolean.FALSE));
+        assertNotNull(c100DocumentTemplateFinderService.findC1ATemplate(caseData,Boolean.FALSE));
     }
 
     @Test
-    public void findC1ADocumentTemplateTrue() {
-        caseData = CaseData.builder().build();;
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findC1ATemplate(caseData,Boolean.TRUE));
-    }
-
-    @Test
-    public void findC1ADocumentTemplateFalse() {
+    void findC1ADocumentTemplateTrue() {
         caseData = CaseData.builder().build();
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findC1ATemplate(caseData,Boolean.FALSE));
+        assertNotNull(c100DocumentTemplateFinderService.findC1ATemplate(caseData,Boolean.TRUE));
     }
 
+    @Test
+    void findC1ADocumentTemplateFalse() {
+        caseData = CaseData.builder().build();
+        assertNotNull(c100DocumentTemplateFinderService.findC1ATemplate(caseData,Boolean.FALSE));
+    }
 }

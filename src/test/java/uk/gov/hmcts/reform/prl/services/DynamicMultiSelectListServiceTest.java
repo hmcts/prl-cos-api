@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @ExtendWith(MockitoExtension.class)
-public class DynamicMultiSelectListServiceTest {
+class DynamicMultiSelectListServiceTest {
 
     @InjectMocks
     private DynamicMultiSelectListService dynamicMultiSelectListService;
@@ -50,7 +50,7 @@ public class DynamicMultiSelectListServiceTest {
     private List<Element<PartyDetails>> partyDetails;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
                                                     .value(Child.builder().build()).build());
         partyDetails = List.of(Element.<PartyDetails>builder().id(UUID.fromString(TEST_UUID))
@@ -131,14 +131,14 @@ public class DynamicMultiSelectListServiceTest {
     }
 
     @Test
-    public void testChildDetails() {
+    void testChildDetails() {
         List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
             .getChildrenMultiSelectList(caseData);
         assertNotNull(listItems);
     }
 
     @Test
-    public void testChildDetailsScenario2() {
+    void testChildDetailsScenario2() {
         List<Element<ChildDetailsRevised>> children = List.of(Element.<ChildDetailsRevised>builder().id(UUID.fromString(TEST_UUID))
                                                     .value(ChildDetailsRevised.builder().isFinalOrderIssued(YesOrNo.No).build()).build());
         caseDataC100 = caseDataC100.toBuilder().taskListVersion("v2").newChildDetails(children).build();
@@ -148,14 +148,14 @@ public class DynamicMultiSelectListServiceTest {
     }
 
     @Test
-    public void testOrderDetails() throws Exception {
+    void testOrderDetails() throws Exception {
         DynamicMultiSelectList dynamicMultiSelectList = dynamicMultiSelectListService
             .getOrdersAsDynamicMultiSelectList(caseData);
         assertNotNull(dynamicMultiSelectList);
     }
 
     @Test
-    public void testOrderDetailsAsNull() throws Exception {
+    void testOrderDetailsAsNull() throws Exception {
         caseData = caseData.toBuilder().orderCollection(List.of(Element.<OrderDetails>builder().value(OrderDetails.builder()
                                                             .otherDetails(OtherOrderDetails.builder().build())
                                                             .build()).build())).build();
@@ -165,7 +165,7 @@ public class DynamicMultiSelectListServiceTest {
     }
 
     @Test
-    public void testOrderDetailsOtherDetailsAsNull() throws Exception {
+    void testOrderDetailsOtherDetailsAsNull() throws Exception {
         caseData = caseData.toBuilder().orderCollection(List.of(Element.<OrderDetails>builder()
                                                                     .value(OrderDetails.builder()
                                                                                .otherDetails(OtherOrderDetails.builder()
@@ -178,7 +178,7 @@ public class DynamicMultiSelectListServiceTest {
     }
 
     @Test
-    public void testApplicantDetails() throws Exception {
+    void testApplicantDetails() throws Exception {
         List<DynamicMultiselectListElement> applicants = dynamicMultiSelectListService
             .getApplicantsMultiSelectList(caseData).get("applicants");
         List<DynamicMultiselectListElement> solicitors = dynamicMultiSelectListService
@@ -188,7 +188,7 @@ public class DynamicMultiSelectListServiceTest {
     }
 
     @Test
-    public void testRespondantDetails() throws Exception {
+    void testRespondantDetails() throws Exception {
         List<DynamicMultiselectListElement> respondents = dynamicMultiSelectListService
             .getRespondentsMultiSelectList(caseData).get("respondents");
         List<DynamicMultiselectListElement> solicitors = dynamicMultiSelectListService
@@ -199,17 +199,17 @@ public class DynamicMultiSelectListServiceTest {
     }
 
     @Test
-    public void testOtherPeopleDetails() {
+    void testOtherPeopleDetails() {
         List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
             .getOtherPeopleMultiSelectList(caseData);
         assertNotNull(listItems);
     }
 
     @Test
-    public void testApplicantDetailsFl401() throws Exception {
+    void testApplicantDetailsFl401() throws Exception {
         caseData = caseData.toBuilder()
-            .applicantsFL401(partyDetails.get(0).getValue())
-            .respondentsFL401(partyDetails.get(0).getValue())
+            .applicantsFL401(partyDetails.getFirst().getValue())
+            .respondentsFL401(partyDetails.getFirst().getValue())
             .applicants(null)
             .respondents(null)
             .caseTypeOfApplication("FL401")
@@ -229,7 +229,7 @@ public class DynamicMultiSelectListServiceTest {
     }
 
     @Test
-    public void testChildDetailsFl401() throws Exception {
+    void testChildDetailsFl401() throws Exception {
         caseData = caseData.toBuilder().children(null)
             .applicantChildDetails(List.of(Element.<ApplicantChild>builder().id(UUID.fromString(TEST_UUID))
                                                .value(ApplicantChild.builder().fullName("test").build())
@@ -239,7 +239,7 @@ public class DynamicMultiSelectListServiceTest {
     }
 
     @Test
-    public void testGetStringFromDynMulSelectList() {
+    void testGetStringFromDynMulSelectList() {
         DynamicMultiselectListElement listElement = DynamicMultiselectListElement.builder()
             .label("Child (Child 1)")
             .build();
@@ -252,7 +252,7 @@ public class DynamicMultiSelectListServiceTest {
     }
 
     @Test
-    public void testGetServedPartiesFromDynMulSelectList() {
+    void testGetServedPartiesFromDynMulSelectList() {
         DynamicMultiselectListElement listElement = DynamicMultiselectListElement.builder()
             .code("2323WDWDw2322")
             .label("Child (Child 1)")
@@ -262,12 +262,12 @@ public class DynamicMultiSelectListServiceTest {
                                                      .builder()
                                                      .value(List.of(listElement, listElement))
                                                      .build());
-        assertEquals(listElement.getCode(), servedParties.get(0).getValue().getPartyId());
-        assertEquals(listElement.getLabel(), servedParties.get(0).getValue().getPartyName());
+        assertEquals(listElement.getCode(), servedParties.getFirst().getValue().getPartyId());
+        assertEquals(listElement.getLabel(), servedParties.getFirst().getValue().getPartyName());
     }
 
     @Test
-    public void testGetStringFromDynMultiSelectListFromListItems() {
+    void testGetStringFromDynMultiSelectListFromListItems() {
         DynamicMultiselectListElement listElement = DynamicMultiselectListElement.builder()
             .label("Child (Child 1)")
             .build();
@@ -280,7 +280,7 @@ public class DynamicMultiSelectListServiceTest {
     }
 
     @Test
-    public void testGetStringFromDynMultiSelectListFromListItemsForEmptyList() {
+    void testGetStringFromDynMultiSelectListFromListItemsForEmptyList() {
         String str = dynamicMultiSelectListService
             .getStringFromDynamicMultiSelectListFromListItems(DynamicMultiSelectList
                                                                   .builder()
@@ -290,7 +290,7 @@ public class DynamicMultiSelectListServiceTest {
     }
 
     @Test
-    public void testDynamicMultiSelectForDocmosis() {
+    void testDynamicMultiSelectForDocmosis() {
 
         caseData = caseData.toBuilder()
             .manageOrders(ManageOrders.builder()
@@ -307,7 +307,7 @@ public class DynamicMultiSelectListServiceTest {
     }
 
     @Test
-    public void testGetChildrenForDocmosisC100() {
+    void testGetChildrenForDocmosisC100() {
         List<Element<Child>> str = dynamicMultiSelectListService
             .getChildrenForDocmosis(caseDataC100);
         assertNotNull(str);
@@ -315,21 +315,21 @@ public class DynamicMultiSelectListServiceTest {
 
 
     @Test
-    public void testGetApplicantChildDetailsForDocmosis() {
+    void testGetApplicantChildDetailsForDocmosis() {
         List<Element<ApplicantChild>> str = dynamicMultiSelectListService
             .getApplicantChildDetailsForDocmosis(caseData);
         assertNotNull(str);
     }
 
     @Test
-    public void testGetRemoveLegalRepAndPartiesListFL401() {
+    void testGetRemoveLegalRepAndPartiesListFL401() {
         DynamicMultiSelectList listItems = dynamicMultiSelectListService
             .getRemoveLegalRepAndPartiesList(caseData);
         assertNotNull(listItems);
     }
 
     @Test
-    public void testGetRemoveLegalRepAndPartiesListFL401SolicitorOrg() {
+    void testGetRemoveLegalRepAndPartiesListFL401SolicitorOrg() {
         PartyDetails partyDetails1 = PartyDetails.builder()
             .isRemoveLegalRepresentativeRequested(Yes)
             .solicitorOrg(Organisation.builder().organisationID("test").build())
@@ -367,7 +367,7 @@ public class DynamicMultiSelectListServiceTest {
     }
 
     @Test
-    public void testGetRemoveLegalRepAndPartiesListFL401LegalRep() {
+    void testGetRemoveLegalRepAndPartiesListFL401LegalRep() {
         PartyDetails partyDetails1 = PartyDetails.builder()
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .isRemoveLegalRepresentativeRequested(Yes)
@@ -406,14 +406,14 @@ public class DynamicMultiSelectListServiceTest {
     }
 
     @Test
-    public void testGetRemoveLegalRepAndPartiesListC100() {
+    void testGetRemoveLegalRepAndPartiesListC100() {
         DynamicMultiSelectList listItems = dynamicMultiSelectListService
             .getRemoveLegalRepAndPartiesList(caseDataC100);
         assertNotNull(listItems);
     }
 
     @Test
-    public void testGetRemoveLegalRepAndPartiesListC100LegalRep() {
+    void testGetRemoveLegalRepAndPartiesListC100LegalRep() {
         partyDetails = List.of(Element.<PartyDetails>builder().id(UUID.fromString(TEST_UUID))
                                    .value(PartyDetails.builder()
                                               .user(User.builder().build())
@@ -449,7 +449,7 @@ public class DynamicMultiSelectListServiceTest {
     }
 
     @Test
-    public void testGetRemoveLegalRepAndPartiesListC100SolOrg() {
+    void testGetRemoveLegalRepAndPartiesListC100SolOrg() {
         partyDetails = List.of(Element.<PartyDetails>builder().id(UUID.fromString(TEST_UUID))
                                    .value(PartyDetails.builder()
                                               .user(User.builder().build())
@@ -484,7 +484,7 @@ public class DynamicMultiSelectListServiceTest {
     }
 
     @Test
-    public void testGetSolicitorRepresentedParties() {
+    void testGetSolicitorRepresentedParties() {
         PartyDetails applicant1 = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -510,7 +510,7 @@ public class DynamicMultiSelectListServiceTest {
     }
 
     @Test
-    public void testGetDynamicMultiSellectEMptyList() {
+    void testGetDynamicMultiSellectEMptyList() {
         assertEquals(1, dynamicMultiSelectListService.getEmptyDynMultiSelectList().getListItems().size());
     }
 }

@@ -55,7 +55,7 @@ import static uk.gov.hmcts.reform.prl.services.PaymentRequestService.ENG_LANGUAG
 import static uk.gov.hmcts.reform.prl.services.PaymentRequestService.GBP_CURRENCY;
 
 @ExtendWith(MockitoExtension.class)
-public class PaymentRequestServiceTest {
+class PaymentRequestServiceTest {
 
     private final String serviceAuthToken = "Bearer testServiceAuth";
 
@@ -102,7 +102,7 @@ public class PaymentRequestServiceTest {
 
 
     @BeforeEach
-    public void setUp() throws Exception {
+    void setUp() throws Exception {
         feeResponse = FeeResponse.builder()
             .amount(BigDecimal.valueOf(100))
             .version(1)
@@ -171,7 +171,7 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
-    public void shouldReturnPaymentServiceResponseWithReferenceResponse() throws Exception {
+    void shouldReturnPaymentServiceResponseWithReferenceResponse() throws Exception {
         when(objectMapper.convertValue(
             CaseData.builder().applicantCaseName(callbackRequest.getCaseDetails().getCaseData().getApplicantCaseName())
                 .id(Long.valueOf(callbackRequest.getCaseDetails().getCaseId())).build(),
@@ -198,7 +198,7 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
-    public void shouldReturnPaymentServiceResponseWithNullReference() throws Exception {
+    void shouldReturnPaymentServiceResponseWithNullReference() throws Exception {
         when(objectMapper.convertValue(
             CaseData.builder().applicantCaseName(callbackRequest.getCaseDetails().getCaseData().getApplicantCaseName())
                 .id(Long.valueOf(callbackRequest.getCaseDetails().getCaseId())).build(),
@@ -232,14 +232,14 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
-    public void shouldThrowNullPointerException() {
+    void shouldThrowNullPointerException() {
         callbackRequest = CallbackRequest.builder().build();
         assertThrows(NullPointerException.class, () ->
             paymentRequestService.createServiceRequest(callbackRequest, "", feeResponse));
     }
 
     @Test
-    public void shouldReturnPaymentCreateResponse() throws Exception {
+    void shouldReturnPaymentCreateResponse() throws Exception {
         //Given
         when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
         OnlineCardPaymentRequest onlineCardPaymentRequest = OnlineCardPaymentRequest
@@ -266,7 +266,7 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
-    public void shouldReturnPaymentStatus() {
+    void shouldReturnPaymentStatus() {
 
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
 
@@ -290,7 +290,7 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
-    public void shouldCreateServiceRequestAndPaymentRequests() throws Exception {
+    void shouldCreateServiceRequestAndPaymentRequests() throws Exception {
 
         caseData = caseData.toBuilder()
             .paymentServiceRequestReferenceNumber(PAYMENT_REFERENCE)
@@ -336,7 +336,7 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
-    public void shouldCreatePaymentRequestIfServiceRequestExists() throws Exception {
+    void shouldCreatePaymentRequestIfServiceRequestExists() throws Exception {
 
         caseData = caseData.toBuilder().build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -383,7 +383,7 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
-    public void testCreateFeesWithHelpWithFeesNewRefGenerated() throws Exception {
+    void testCreateFeesWithHelpWithFeesNewRefGenerated() throws Exception {
         createPaymentRequest = CreatePaymentRequest.builder()
             .caseId("12345")
             .returnUrl(null)
@@ -417,7 +417,7 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
-    public void testCreateFeesWithHelpWithFees() throws Exception {
+    void testCreateFeesWithHelpWithFees() throws Exception {
         createPaymentRequest = CreatePaymentRequest.builder()
             .hwfRefNumber("test")
             .caseId("12345")
@@ -439,7 +439,7 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
-    public void shouldCreatePaymentRequestWithPaymentNull() throws Exception {
+    void shouldCreatePaymentRequestWithPaymentNull() throws Exception {
         paymentServiceRequest = PaymentServiceRequest.builder()
             .callBackUrl(null)
             .casePaymentRequest(CasePaymentRequestDto.builder()
@@ -534,7 +534,7 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
-    public void shouldCreatePaymentRequestWithHwfPaymentReference() throws Exception {
+    void shouldCreatePaymentRequestWithHwfPaymentReference() throws Exception {
         paymentServiceRequest = PaymentServiceRequest.builder()
             .callBackUrl(null)
             .casePaymentRequest(CasePaymentRequestDto.builder()
@@ -632,7 +632,7 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
-    public void shouldCreatePaymentRequestWithPaymentReferenceNumberNull() throws Exception {
+    void shouldCreatePaymentRequestWithPaymentReferenceNumberNull() throws Exception {
         paymentServiceRequest = PaymentServiceRequest.builder()
             .callBackUrl(null)
             .casePaymentRequest(CasePaymentRequestDto.builder()
@@ -729,7 +729,7 @@ public class PaymentRequestServiceTest {
 
 
     @Test
-    public void shouldPaymentRequestAgainIfPreviousPaymentFailed() throws Exception {
+    void shouldPaymentRequestAgainIfPreviousPaymentFailed() throws Exception {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(
@@ -782,7 +782,7 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
-    public void shouldTestCreatePaymentRequestWhenHelpWithFeesApplied() throws Exception {
+    void shouldTestCreatePaymentRequestWhenHelpWithFeesApplied() throws Exception {
 
         caseData = caseData.toBuilder()
                 .paymentServiceRequestReferenceNumber(null)
@@ -820,7 +820,7 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
-    public void shouldTestCreatePaymentRequestWhenServiceAndPaymentReferenceAlreadyExist() throws Exception {
+    void shouldTestCreatePaymentRequestWhenServiceAndPaymentReferenceAlreadyExist() throws Exception {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
@@ -859,7 +859,7 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
-    public void testCreateServiceRequestFromCcdCallack() throws Exception {
+    void testCreateServiceRequestFromCcdCallack() throws Exception {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
@@ -877,7 +877,7 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
-    public void shouldReturnPaymentGroupReferenceStatus() {
+    void shouldReturnPaymentGroupReferenceStatus() {
 
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
 
@@ -898,7 +898,7 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
-    public void testCreatePaymentWithNullHwfReferenceNumber() {
+    void testCreatePaymentWithNullHwfReferenceNumber() {
         when(paymentApi.createPaymentServiceRequest(Mockito.any(), Mockito.any(), Mockito.any()))
             .thenReturn(PaymentServiceResponse.builder().serviceRequestReference("response").build());
         when(paymentApi.createPaymentRequest(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
@@ -909,7 +909,7 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
-    public void testCreatePaymentWithNonNullHwfReferenceNumber() {
+    void testCreatePaymentWithNonNullHwfReferenceNumber() {
         when(paymentApi.createPaymentServiceRequest(Mockito.any(), Mockito.any(), Mockito.any()))
             .thenReturn(PaymentServiceResponse.builder().serviceRequestReference("response").build());
         createPaymentRequest.setHwfRefNumber("test");
@@ -919,7 +919,7 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
-    public void testCreatePaymentWithNonNullPaymentServiceAndNullHwfReferenceNumber() {
+    void testCreatePaymentWithNonNullPaymentServiceAndNullHwfReferenceNumber() {
         when(paymentApi.createPaymentRequest(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
             .thenReturn(PaymentResponse.builder().build());
         PaymentResponse paymentResponse1 = paymentRequestService.createPayment(authToken, createPaymentRequest, "test",
@@ -928,7 +928,7 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
-    public void testCreatePaymentWithNonNullPaymentServiceAndNonNullHwfReferenceNumber() {
+    void testCreatePaymentWithNonNullPaymentServiceAndNonNullHwfReferenceNumber() {
         when(paymentApi.createPaymentServiceRequest(Mockito.any(), Mockito.any(), Mockito.any()))
             .thenReturn(PaymentServiceResponse.builder().serviceRequestReference("response").build());
         createPaymentRequest.setHwfRefNumber("test");
@@ -938,7 +938,7 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
-    public void testCreatePaymentWithNullCaseData() throws Exception {
+    void testCreatePaymentWithNullCaseData() throws Exception {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
                                                                                                         EventRequestData.builder().build(),
                                                                                                         StartEventResponse.builder().build(),
@@ -949,7 +949,7 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
-    public void testCreatePaymentWithNullFeeResponse() throws Exception {
+    void testCreatePaymentWithNullFeeResponse() throws Exception {
         when(feeService.fetchFeeDetails(Mockito.any())).thenReturn(null);
 
         PaymentResponse paymentResponse1 = paymentRequestService.createPayment(authToken, createPaymentRequest);
@@ -957,7 +957,7 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
-    public void testCreatePaymentWithNonAwpFeeResponse() throws Exception {
+    void testCreatePaymentWithNonAwpFeeResponse() throws Exception {
         when(feeService.fetchFeeDetails(Mockito.any())).thenReturn(feeResponse);
         when(paymentApi.createPaymentRequest(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
             .thenReturn(PaymentResponse.builder().build());
@@ -969,7 +969,7 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
-    public void testCreatePaymentWithAwpPayments() throws Exception {
+    void testCreatePaymentWithAwpPayments() throws Exception {
         List<Element<CitizenAwpPayment>> awpPayments = new ArrayList<>();
         awpPayments.add(Element.<CitizenAwpPayment>builder().value(CitizenAwpPayment.builder()
                                                                        .feeType(FeeType.C2_WITH_NOTICE.toString())

@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.services.EventService;
 
 @ExtendWith(MockitoExtension.class)
-public class CaseFlagsWaServiceTest {
+class CaseFlagsWaServiceTest {
 
     @Mock
     private EventService eventPublisher;
@@ -20,7 +20,7 @@ public class CaseFlagsWaServiceTest {
 
 
     @Test
-    public void testSetUpWaTaskForCaseFlagsEventHandler() {
+    void testSetUpWaTaskForCaseFlagsEventHandler() {
         caseFlagsWaService.setUpWaTaskForCaseFlagsEventHandler("auth-token", CallbackRequest.builder().build());
         Mockito.verify(eventPublisher,Mockito.times(1)).publishEvent(Mockito.any());
     }

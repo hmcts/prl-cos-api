@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.managedocuments;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,6 +37,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -49,7 +50,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @ExtendWith(MockitoExtension.class)
-public class ManageDocumentsControllerTest {
+class ManageDocumentsControllerTest {
 
     @InjectMocks
     ManageDocumentsController manageDocumentsController;
@@ -90,7 +91,7 @@ public class ManageDocumentsControllerTest {
     List<String> categoriesToExclude;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         caseDataMap = new HashMap<>();
         caseDataMap.put("id", 12345678L);
         caseData = CaseData.builder()
@@ -131,7 +132,7 @@ public class ManageDocumentsControllerTest {
     }
 
     @Test
-    public void testHandleAboutToStart() {
+    void testHandleAboutToStart() {
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentCategories(dynamicList)
             .build();
@@ -146,14 +147,14 @@ public class ManageDocumentsControllerTest {
 
         when(manageDocumentsService.populateDocumentCategories(auth, caseData)).thenReturn(caseDataUpdated);
         CallbackResponse response = manageDocumentsController.handleAboutToStart(auth, callbackRequest);
-        Assert.assertNotNull(response.getData().getDocumentManagementDetails().getManageDocuments());
+        assertNotNull(response.getData().getDocumentManagementDetails().getManageDocuments());
 
         verify(manageDocumentsService).populateDocumentCategories(auth, caseData);
         verifyNoMoreInteractions(manageDocumentsService);
     }
 
     @Test
-    public void testCopyManageDocs() {
+    void testCopyManageDocs() {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
 
@@ -164,17 +165,17 @@ public class ManageDocumentsControllerTest {
     }
 
     @Test
-    public void testHandleSubmitted() {
+    void testHandleSubmitted() {
 
         ResponseEntity<SubmittedCallbackResponse> abc = manageDocumentsController.handleSubmitted(callbackRequest, auth);
         abc.getBody().getConfirmationHeader();
-        Assert.assertEquals("# Cyflwynwyd y ddogfen<br/>Documents submitted",abc.getBody().getConfirmationHeader());
+        assertEquals("# Cyflwynwyd y ddogfen<br/>Documents submitted",abc.getBody().getConfirmationHeader());
         verifyNoMoreInteractions(tabService);
 
     }
 
     @Test
-    public void testCopyManageDocsMid() {
+    void testCopyManageDocsMid() {
 
         UserDetails userDetailsSolicitorRole = UserDetails.builder()
             .forename("test")
@@ -189,7 +190,7 @@ public class ManageDocumentsControllerTest {
     }
 
     @Test
-    public void testCopyManageDocsMidIfErrorsExist() {
+    void testCopyManageDocsMidIfErrorsExist() {
 
         UserDetails userDetailsSolicitorRole = UserDetails.builder()
             .forename("test")
@@ -205,7 +206,7 @@ public class ManageDocumentsControllerTest {
     }
 
     @Test
-    public void testCopyManageDocsMid_notSolicitor() {
+    void testCopyManageDocsMid_notSolicitor() {
 
         UserDetails userDetailsCafcassRole = UserDetails.builder()
             .forename("test")

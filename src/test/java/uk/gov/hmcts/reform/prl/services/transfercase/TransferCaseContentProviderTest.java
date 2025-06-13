@@ -17,14 +17,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @ExtendWith(MockitoExtension.class)
-public class TransferCaseContentProviderTest {
+class TransferCaseContentProviderTest {
     @InjectMocks
     TransferCaseContentProvider transferCaseContentProvider;
 
     CaseData caseData;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         caseData = CaseData.builder()
             .id(123455)
             .caseTypeOfApplication("fl401")
@@ -45,7 +45,7 @@ public class TransferCaseContentProviderTest {
     }
 
     @Test
-    public void testBuildTransferOfCaseEmailSolicitor() {
+    void testBuildTransferOfCaseEmailSolicitor() {
         EmailTemplateVars emailTemplateVars = transferCaseContentProvider.buildCourtTransferEmail(caseData,"test");
         assertEquals("123455",emailTemplateVars.getCaseReference());
     }

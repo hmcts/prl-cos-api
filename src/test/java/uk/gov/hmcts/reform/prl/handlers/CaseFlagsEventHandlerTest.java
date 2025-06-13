@@ -31,7 +31,7 @@ import java.util.Map;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 
 @ExtendWith(MockitoExtension.class)
-public class CaseFlagsEventHandlerTest {
+class CaseFlagsEventHandlerTest {
 
     public static final String TEST_AUTH = "test-auth";
     public static final String SERVICE_TOKEN = "service-token";
@@ -50,7 +50,7 @@ public class CaseFlagsEventHandlerTest {
     private CaseFlagsEventHandler caseFlagsEventHandler;
 
     @Test
-    public void testTriggerDummyEventForCaseFlags() {
+    void testTriggerDummyEventForCaseFlags() {
         List<RoleAssignmentResponse> roleAssignmentResponses =  new ArrayList<>();
         RoleAssignmentResponse roleAssignmentResponse =  new RoleAssignmentResponse();
         roleAssignmentResponse.setRoleName("ctsc");
@@ -87,7 +87,7 @@ public class CaseFlagsEventHandlerTest {
     }
 
     @Test
-    public void testTriggerDummyEventForWhenNotCTscUser() {
+    void testTriggerDummyEventForWhenNotCTscUser() {
         List<RoleAssignmentResponse> roleAssignmentResponses =  new ArrayList<>();
         RoleAssignmentResponse roleAssignmentResponse =  new RoleAssignmentResponse();
         roleAssignmentResponse.setRoleName("admin");

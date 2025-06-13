@@ -60,7 +60,7 @@ import static uk.gov.hmcts.reform.prl.services.caseaccess.RestrictedCaseAccessSe
 import static uk.gov.hmcts.reform.prl.services.caseaccess.RestrictedCaseAccessService.RESTRICTED_CONFIRMATION_SUBTEXT;
 
 @ExtendWith(MockitoExtension.class)
-public class RestrictedCaseAccessServiceTest {
+class RestrictedCaseAccessServiceTest {
 
     @Mock
     private AllTabServiceImpl allTabService;
@@ -94,7 +94,7 @@ public class RestrictedCaseAccessServiceTest {
 
 
     @Test
-    public void testInitiateUpdateCaseAccessForRestricted() {
+    void testInitiateUpdateCaseAccessForRestricted() {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put(APPLICANT_CASE_NAME, "John Smith" + RESTRICTED_CASE);
         CallbackRequest callbackRequest = CallbackRequest.builder()
@@ -108,7 +108,7 @@ public class RestrictedCaseAccessServiceTest {
     }
 
     @Test
-    public void testInitiateUpdateCaseAccessForPrivate() {
+    void testInitiateUpdateCaseAccessForPrivate() {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put(APPLICANT_CASE_NAME, "John Smith" + PRIVATE_CASE);
         CallbackRequest callbackRequest = CallbackRequest.builder()
@@ -122,7 +122,7 @@ public class RestrictedCaseAccessServiceTest {
     }
 
     @Test
-    public void testInitiateUpdateCaseAccessForPublic() {
+    void testInitiateUpdateCaseAccessForPublic() {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put(APPLICANT_CASE_NAME, "John Smith");
         caseDataUpdated.put(APPLICANT_OR_RESPONDENT_CASE_NAME, "John Smith");
@@ -137,7 +137,7 @@ public class RestrictedCaseAccessServiceTest {
     }
 
     @Test
-    public void testChangeCaseAccess() {
+    void testChangeCaseAccess() {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put(APPLICANT_CASE_NAME, "John Smith" + RESTRICTED_CASE);
         caseDataUpdated.put(CASE_SECURITY_CLASSIFICATION, PRIVATE.getValue());
@@ -154,7 +154,7 @@ public class RestrictedCaseAccessServiceTest {
     }
 
     @Test
-    public void testChangeCaseAccessRequestSubmittedForRestricted() {
+    void testChangeCaseAccessRequestSubmittedForRestricted() {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put(CASE_SECURITY_CLASSIFICATION, RESTRICTED.getValue());
         CallbackRequest callbackRequest = CallbackRequest.builder()
@@ -199,7 +199,7 @@ public class RestrictedCaseAccessServiceTest {
     }
 
     @Test
-    public void testChangeCaseAccessRequestSubmittedForPrivate() {
+    void testChangeCaseAccessRequestSubmittedForPrivate() {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put(CASE_SECURITY_CLASSIFICATION, PRIVATE.getValue());
         CallbackRequest callbackRequest = CallbackRequest.builder()
@@ -245,7 +245,7 @@ public class RestrictedCaseAccessServiceTest {
     }
 
     @Test
-    public void testChangeCaseAccessRequestSubmittedForPublic() {
+    void testChangeCaseAccessRequestSubmittedForPublic() {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put(CASE_SECURITY_CLASSIFICATION, PUBLIC.getValue());
         CallbackRequest callbackRequest = CallbackRequest.builder()
@@ -291,7 +291,7 @@ public class RestrictedCaseAccessServiceTest {
     }
 
     @Test
-    public void testRetrieveAssignedUserRolesWithUsers() {
+    void testRetrieveAssignedUserRolesWithUsers() {
 
         when(systemUserService.getSysUserToken()).thenReturn("test");
         when(authTokenGenerator.generate()).thenReturn("test");
@@ -327,7 +327,7 @@ public class RestrictedCaseAccessServiceTest {
     }
 
     @Test
-    public void testRetrieveAssignedUserRolesWithoutUsers() {
+    void testRetrieveAssignedUserRolesWithoutUsers() {
         when(systemUserService.getSysUserToken()).thenReturn("test");
         when(authTokenGenerator.generate()).thenReturn("test");
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = RoleAssignmentServiceResponse.builder()

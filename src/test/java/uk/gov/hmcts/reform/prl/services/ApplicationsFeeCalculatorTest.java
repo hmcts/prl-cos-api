@@ -38,6 +38,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
@@ -53,22 +54,23 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
 @ExtendWith(MockitoExtension.class)
-public class ApplicationsFeeCalculatorTest {
+class ApplicationsFeeCalculatorTest {
 
     @InjectMocks
     private ApplicationsFeeCalculator applicationsFeeCalculator;
+
     @Mock
     private FeeService feeService;
 
     @Captor
     private ArgumentCaptor<List<FeeType>> actualFeeTypes;
 
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private C2DocumentBundle c2DocumentBundle;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         List<DynamicListElement> hearingDropdowns = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime hearingDate = now.plusDays(15L);
@@ -85,7 +87,7 @@ public class ApplicationsFeeCalculatorTest {
     }
 
     @Test
-    public void testCalculateAdditionalApplicationsFeeForCa() {
+    void testCalculateAdditionalApplicationsFeeForCa() {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(DynamicMultiSelectList.builder().build())
             .additionalApplicationsApplyingFor(
@@ -117,7 +119,7 @@ public class ApplicationsFeeCalculatorTest {
     }
 
     @Test
-    public void testCalculateAdditionalApplicationsFeeForCaC2WithoutNotice() {
+    void testCalculateAdditionalApplicationsFeeForCaC2WithoutNotice() {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(DynamicMultiSelectList.builder().build())
             .additionalApplicationsApplyingFor(
@@ -149,9 +151,8 @@ public class ApplicationsFeeCalculatorTest {
     }
 
 
-
     @Test
-    public void testCalculateAdditionalApplicationsFeeForDaApplicant() {
+    void testCalculateAdditionalApplicationsFeeForDaApplicant() {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(DynamicMultiSelectList.builder().build())
             .additionalApplicationsApplyingFor(
@@ -177,7 +178,7 @@ public class ApplicationsFeeCalculatorTest {
     }
 
     @Test
-    public void testCalculateAdditionalApplicationsFeeForDaRespondnet() {
+    void testCalculateAdditionalApplicationsFeeForDaRespondent() {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(DynamicMultiSelectList.builder().build())
             .additionalApplicationsApplyingFor(
@@ -202,27 +203,30 @@ public class ApplicationsFeeCalculatorTest {
         assertEquals(CURRENCY_SIGN_POUND + BigDecimal.TEN, stringObjectMap.get(ADDITIONAL_APPLICATION_FEES_TO_PAY));
     }
 
-    @Test(expected = Exception.class)
-    public void testCalculateAdditionalApplicationsFeeForError() {
-        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
-            .additionalApplicantsList(DynamicMultiSelectList.builder().build())
-            .additionalApplicationsApplyingFor(
-                AdditionalApplicationTypeEnum.otherOrder
-            )
-            .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
-            .temporaryC2Document(c2DocumentBundle)
-            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
-            .build();
-        when(feeService.getFeesDataForAdditionalApplications(anyList())).thenThrow(new Exception());
-        CaseData caseData = CaseData.builder()
-            .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
-            .build();
-        applicationsFeeCalculator.calculateAdditionalApplicationsFee(caseData);
-
+    @Test
+    void testCalculateAdditionalApplicationsFeeForError() {
+        assertThrows(
+            Exception.class, () -> {
+                UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
+                    .additionalApplicantsList(DynamicMultiSelectList.builder().build())
+                    .additionalApplicationsApplyingFor(
+                        AdditionalApplicationTypeEnum.otherOrder
+                    )
+                    .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
+                    .temporaryC2Document(c2DocumentBundle)
+                    .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
+                    .build();
+                when(feeService.getFeesDataForAdditionalApplications(anyList())).thenThrow(new Exception());
+                CaseData caseData = CaseData.builder()
+                    .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
+                    .build();
+                applicationsFeeCalculator.calculateAdditionalApplicationsFee(caseData);
+            }
+        );
     }
 
     @Test
-    public void testCalculateAdditionalApplicationsFeeForHearingLessThan14DaysForFC600_Committal_Application() {
+    void testCalculateAdditionalApplicationsFeeForHearingLessThan14DaysForFC600_Committal_Application() {
         List<DynamicListElement> hearingDropdowns = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime hearingDate = now.plusDays(10L);
@@ -270,7 +274,7 @@ public class ApplicationsFeeCalculatorTest {
     }
 
     @Test
-    public void testOtherApplicationTypeEmpty() {
+    void testOtherApplicationTypeEmpty() {
         List<DynamicListElement> hearingDropdowns = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime hearingDate = now.plusDays(10L);
@@ -317,7 +321,7 @@ public class ApplicationsFeeCalculatorTest {
     }
 
     @Test
-    public void testCalculateAdditionalApplicationsFeeForHearingLessThan14DaysForD89_Court_Bailiff() {
+    void testCalculateAdditionalApplicationsFeeForHearingLessThan14DaysForD89_Court_Bailiff() {
         List<DynamicListElement> hearingDropdowns = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime hearingDate = now.plusDays(10L);
@@ -365,7 +369,7 @@ public class ApplicationsFeeCalculatorTest {
     }
 
     @Test
-    public void testCalculateAdditionalApplicationsFeeForHearingLessThan14DaysForC79_Child_Order() {
+    void testCalculateAdditionalApplicationsFeeForHearingLessThan14DaysForC79_Child_Order() {
         List<DynamicListElement> hearingDropdowns = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime hearingDate = now.plusDays(10L);
@@ -413,7 +417,7 @@ public class ApplicationsFeeCalculatorTest {
     }
 
     @Test
-    public void testGetFeeTypes() {
+    void testGetFeeTypes() {
         List<DynamicListElement> hearingDropdowns = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime hearingDate = now.plusDays(10L);
@@ -458,7 +462,7 @@ public class ApplicationsFeeCalculatorTest {
     }
 
     @Test
-    public void testCalculateAdditionalApplicationsFeeForDaApplicantWithD89_Court_Bailiff() {
+    void testCalculateAdditionalApplicationsFeeForDaApplicantWithD89_Court_Bailiff() {
         List<DynamicListElement> hearingDropdowns = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime hearingDate = now.plusDays(15L);
@@ -467,10 +471,12 @@ public class ApplicationsFeeCalculatorTest {
             .code("testId123456 - First Hearing")
             .build();
         C2DocumentBundle c2DocumentBundle1 = C2DocumentBundle.builder().hearingList(DynamicList.builder()
-                                                                        .value(hearingElement)
-                                                                        .listItems(hearingDropdowns).build())
-            .caReasonsForC2Application(List.of(C2AdditionalOrdersRequestedCa.REQUESTING_ADJOURNMENT,
-                                               C2AdditionalOrdersRequestedCa.APPOINTMENT_OF_GUARDIAN))
+                                                                                        .value(hearingElement)
+                                                                                        .listItems(hearingDropdowns).build())
+            .caReasonsForC2Application(List.of(
+                C2AdditionalOrdersRequestedCa.REQUESTING_ADJOURNMENT,
+                C2AdditionalOrdersRequestedCa.APPOINTMENT_OF_GUARDIAN
+            ))
             .daReasonsForC2Application(List.of(C2AdditionalOrdersRequestedCa.REQUESTING_ADJOURNMENT)).build();
 
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
@@ -498,7 +504,7 @@ public class ApplicationsFeeCalculatorTest {
     }
 
     @Test
-    public void testCalculateAdditionalApplicationsFeeForDaApplicantFP25() {
+    void testCalculateAdditionalApplicationsFeeForDaApplicantFP25() {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(DynamicMultiSelectList.builder().build())
             .additionalApplicationsApplyingFor(
@@ -524,7 +530,7 @@ public class ApplicationsFeeCalculatorTest {
     }
 
     @Test
-    public void testCalculateAdditionalApplicationsFeeForDaRespondentFP25() {
+    void testCalculateAdditionalApplicationsFeeForDaRespondentFP25() {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(DynamicMultiSelectList.builder().build())
             .additionalApplicationsApplyingFor(
@@ -555,7 +561,7 @@ public class ApplicationsFeeCalculatorTest {
     }
 
     @Test
-    public void testExceptionCalculateAdditionalApplicationsFee() {
+    void testExceptionCalculateAdditionalApplicationsFee() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .build();

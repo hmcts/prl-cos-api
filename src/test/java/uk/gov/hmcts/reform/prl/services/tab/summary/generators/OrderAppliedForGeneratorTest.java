@@ -17,7 +17,7 @@ public class OrderAppliedForGeneratorTest {
     private final OrderAppliedForGenerator generator = new OrderAppliedForGenerator();
 
     @Test
-    public void testGenerate() {
+    void testGenerate() {
         CaseSummary caseSummary = generator.generate(CaseData.builder()
                                                          .ordersApplyingFor(
                                                              Arrays.asList(OrderTypeEnum.childArrangementsOrder,
@@ -39,7 +39,7 @@ public class OrderAppliedForGeneratorTest {
     }
 
     @Test
-    public void testIfOrderAppliedForNotSelected() {
+    void testIfOrderAppliedForNotSelected() {
         CaseSummary caseSummary = generator.generate(CaseData.builder()
                                                          .typeOfChildArrangementsOrder(
                 ChildArrangementOrderTypeEnum.spendTimeWithOrder)

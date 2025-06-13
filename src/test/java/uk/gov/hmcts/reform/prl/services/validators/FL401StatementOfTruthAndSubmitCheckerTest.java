@@ -49,7 +49,7 @@ import static uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToCh
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 
 @ExtendWith(MockitoExtension.class)
-public class FL401StatementOfTruthAndSubmitCheckerTest {
+class FL401StatementOfTruthAndSubmitCheckerTest {
 
     @InjectMocks
     FL401StatementOfTruthAndSubmitChecker fl401StatementOfTruthAndSubmitChecker;
@@ -107,7 +107,7 @@ public class FL401StatementOfTruthAndSubmitCheckerTest {
     private RespondentBehaviour respondentBehaviour;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
 
         List<FL401OrderTypeEnum> orderList = new ArrayList<>();
         orderList.add(FL401OrderTypeEnum.nonMolestationOrder);
@@ -204,13 +204,13 @@ public class FL401StatementOfTruthAndSubmitCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataThenIsStartedReturnsFalse() {
+    void whenNoCaseDataThenIsStartedReturnsFalse() {
         caseData = CaseData.builder().build();
         assertFalse(fl401StatementOfTruthAndSubmitChecker.isStarted(caseData));
     }
 
     @Test
-    public void whenPartialCaseDataPresentIsFinishedReturnsFalse() {
+    void whenPartialCaseDataPresentIsFinishedReturnsFalse() {
         caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .typeOfApplicationOrders(orders)
@@ -247,7 +247,7 @@ public class FL401StatementOfTruthAndSubmitCheckerTest {
     }
 
     @Test
-    public void whenAllDetailsProvidedIsFinishedReturnsTrue() {
+    void whenAllDetailsProvidedIsFinishedReturnsTrue() {
 
         caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
@@ -304,7 +304,7 @@ public class FL401StatementOfTruthAndSubmitCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataPresentHasMandatoryCompletedReturnsFalse() {
+    void whenNoCaseDataPresentHasMandatoryCompletedReturnsFalse() {
         caseData = CaseData.builder().build();
 
         when(caseNameChecker.hasMandatoryCompleted(caseData)).thenReturn(false);
@@ -337,7 +337,7 @@ public class FL401StatementOfTruthAndSubmitCheckerTest {
     }
 
     @Test
-    public void whenMandatoryCaseDataPresentHasMandatoryCompletedReturnsTrue() {
+    void whenMandatoryCaseDataPresentHasMandatoryCompletedReturnsTrue() {
         caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .typeOfApplicationOrders(orders)
@@ -402,7 +402,7 @@ public class FL401StatementOfTruthAndSubmitCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+    void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
         assertNotNull(fl401StatementOfTruthAndSubmitChecker.getDefaultTaskState(caseData));
     }
 

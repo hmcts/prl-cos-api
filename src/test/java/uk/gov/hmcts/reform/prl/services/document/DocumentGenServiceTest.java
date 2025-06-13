@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.document;
 
 import feign.FeignException;
-import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -71,6 +70,7 @@ import java.util.Map;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -200,7 +200,7 @@ public class DocumentGenServiceTest {
     private DocumentRequest documentRequest;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -437,7 +437,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void generateDocsForC100Test() throws Exception {
+    void generateDocsForC100Test() throws Exception {
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
@@ -479,7 +479,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void generateDocsForC100TestFinalDoc() throws Exception {
+    void generateDocsForC100TestFinalDoc() throws Exception {
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
@@ -522,7 +522,7 @@ public class DocumentGenServiceTest {
 
 
     @Test
-    public void generateDocsForFL401TestWithOrganisation() throws Exception {
+    void generateDocsForFL401TestWithOrganisation() throws Exception {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
@@ -562,7 +562,7 @@ public class DocumentGenServiceTest {
 
 
     @Test
-    public void testGenerateDraftDocumentEng() throws Exception {
+    void testGenerateDraftDocumentEng() throws Exception {
         CaseData caseData = CaseData.builder().allegationOfHarmRevised(AllegationOfHarmRevised.builder()
                 .newAllegationsOfHarmYesNo(Yes).build()).build();
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
@@ -574,7 +574,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateDraftDocumentWelsh() throws Exception {
+    void testGenerateDraftDocumentWelsh() throws Exception {
         CaseData caseData = CaseData.builder().allegationOfHarmRevised(AllegationOfHarmRevised.builder()
                 .newAllegationsOfHarmYesNo(Yes).build()).build();
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(false).isGenWelsh(true).build();
@@ -586,7 +586,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void generateDraftDocsForC100Test() throws Exception {
+    void generateDraftDocsForC100Test() throws Exception {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
@@ -622,7 +622,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void generateDocsForC100TestWithC1A() throws Exception {
+    void generateDocsForC100TestWithC1A() throws Exception {
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
@@ -665,7 +665,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void generateDocsForFL401Test() throws Exception {
+    void generateDocsForFL401Test() throws Exception {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
@@ -702,7 +702,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void generateDocsForFL401TestWithChildConfidentialInfo() throws Exception {
+    void generateDocsForFL401TestWithChildConfidentialInfo() throws Exception {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
@@ -744,7 +744,7 @@ public class DocumentGenServiceTest {
 
 
     @Test
-    public void testC8Formgenerationbasedconconfidentiality2() throws Exception {
+    void testC8Formgenerationbasedconconfidentiality2() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -844,7 +844,7 @@ public class DocumentGenServiceTest {
 
 
     @Test
-    public void testC8Formgenerationbasedconconfidentiality_withoutTypeofOrders() throws Exception {
+    void testC8Formgenerationbasedconconfidentiality_withoutTypeofOrders() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -939,7 +939,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testC8FormGenerationBasedcOnConfidentiality_() throws Exception {
+    void testC8FormGenerationBasedcOnConfidentiality_() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -1017,7 +1017,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testDocsNullValueWhenAbsent() throws Exception {
+    void testDocsNullValueWhenAbsent() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -1081,7 +1081,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testDocsNullValueWhenEnglishNotWesh() throws Exception {
+    void testDocsNullValueWhenEnglishNotWesh() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -1140,7 +1140,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testDocsNullValueWhenWelshNotenglish() throws Exception {
+    void testDocsNullValueWhenWelshNotenglish() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -1196,7 +1196,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testSingleDocGenerationWithMap() throws Exception {
+    void testSingleDocGenerationWithMap() throws Exception {
         Map<String, Object> respondentDetails = new HashMap<>();
         documentGenService.generateSingleDocument(
             "auth",
@@ -1214,7 +1214,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testDocGenerationWithNoName() {
+    void testDocGenerationWithNoName() {
         documentGenService.convertToPdf("auth", Document.builder().build());
         verify(caseDocumentClient, times(0)).getDocumentBinary(
             authToken, "s2s token", generatedDocumentInfo.getUrl()
@@ -1222,7 +1222,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testDocGenerationWithNoPeriods() {
+    void testDocGenerationWithNoPeriods() {
         documentGenService.convertToPdf("auth", Document.builder().documentFileName("i").build());
         verify(caseDocumentClient, times(0)).getDocumentBinary(
             authToken, "s2s token", generatedDocumentInfo.getUrl()
@@ -1230,13 +1230,13 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testSingleDocGeneration() throws Exception {
+    void testSingleDocGeneration() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, DOCUMENT_COVER_SHEET_HINT, false);
         verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
     @Test
-    public void testSingleDocGenerationC1A() throws Exception {
+    void testSingleDocGenerationC1A() throws Exception {
         c100CaseData = c100CaseData.toBuilder().taskListVersion(TASK_LIST_VERSION_V2).build();
         documentGenService.generateSingleDocument("auth", c100CaseData, C1A_HINT, false);
         verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
@@ -1244,7 +1244,7 @@ public class DocumentGenServiceTest {
 
 
     @Test
-    public void testBlankDocsGeneration() throws Exception {
+    void testBlankDocsGeneration() throws Exception {
         CaseData emptyCaseData = CaseData.builder().build();
         documentGenService.generateSingleDocument("auth", emptyCaseData, DOCUMENT_C7_DRAFT_HINT, false);
         documentGenService.generateSingleDocument("auth", emptyCaseData, DOCUMENT_C8_BLANK_HINT, false);
@@ -1256,7 +1256,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testDeleteDocument() {
+    void testDeleteDocument() {
         //Given
         DocumentResponse documentResponse = DocumentResponse
             .builder()
@@ -1270,7 +1270,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testDeleteDocumentException() {
+    void testDeleteDocumentException() {
         //Given
         DocumentResponse documentResponse = DocumentResponse
             .builder()
@@ -1279,15 +1279,15 @@ public class DocumentGenServiceTest {
         doThrow(new RuntimeException("Exception while delete document")).when(uploadService).deleteDocument(any(),
                                                                                                             any());
 
-        assertExpectedException(() -> {
-            documentGenService
-                .deleteDocument(authToken, "TEST_DOCUMENT_ID");
-        }, RuntimeException.class, "Exception while delete document");
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
+            documentGenService.deleteDocument(authToken, "TEST_DOCUMENT_ID");
+        });
 
+        assertEquals("Exception while delete document", ex.getMessage());
     }
 
     @Test
-    public void testDownloadDocument() {
+    void testDownloadDocument() {
         //Given
         Resource expectedResource = new ClassPathResource("documents/document.pdf");
         HttpHeaders headers = new HttpHeaders();
@@ -1302,15 +1302,17 @@ public class DocumentGenServiceTest {
         assertEquals(OK, response.getStatusCode());
     }
 
-    @Test(expected = RuntimeException.class)
-    public void testDownloadDocumentThrowException() {
-        when(uploadService.downloadDocument(authToken, "TEST_DOCUMENT_ID"
-        )).thenThrow(RuntimeException.class);
-        documentGenService.downloadDocument(authToken, "TEST_DOCUMENT_ID");
+    @Test
+    void testDownloadDocumentThrowException() {
+        assertThrows(RuntimeException.class, () -> {
+            when(uploadService.downloadDocument(authToken, "TEST_DOCUMENT_ID"
+            )).thenThrow(RuntimeException.class);
+            documentGenService.downloadDocument(authToken, "TEST_DOCUMENT_ID");
+        });
     }
 
     @Test
-    public void testGenerateDocumentsForCitizenSubmissionForEnglish() throws Exception {
+    void testGenerateDocumentsForCitizenSubmissionForEnglish() throws Exception {
 
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
@@ -1332,7 +1334,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateDocumentsForCitizenSubmissionForWelsh() throws Exception {
+    void testGenerateDocumentsForCitizenSubmissionForWelsh() throws Exception {
 
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
@@ -1350,11 +1352,11 @@ public class DocumentGenServiceTest {
             c100CaseData
         );
         assertEquals(updatedCaseData.get(IS_ENG_DOC_GEN), Yes.toString());
-        assertTrue(!updatedCaseData.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
+        assertFalse(updatedCaseData.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
     }
 
     @Test
-    public void testGenerateDocumentsForCitizen() throws Exception {
+    void testGenerateDocumentsForCitizen() throws Exception {
         //Given
         when(documentLanguageService.docGenerateLang(c100CaseData)).thenReturn(DocumentLanguage
                                                                                    .builder().isGenEng(true).build());
@@ -1370,37 +1372,37 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testSingleDocGenerationForEnglish() throws Exception {
+    void testSingleDocGenerationForEnglish() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, C7_FINAL_RESPONDENT, false);
         verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
     @Test
-    public void testSingleDocGenerationForWelsh() throws Exception {
+    void testSingleDocGenerationForWelsh() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, C7_FINAL_WELSH, false);
         verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
     @Test
-    public void testSingleDocGenerationDefault() throws Exception {
+    void testSingleDocGenerationDefault() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, "", false);
         verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
     @Test
-    public void testSingleDocGenerationC8DraftHint() throws Exception {
+    void testSingleDocGenerationC8DraftHint() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, C8_DRAFT_HINT, false);
         verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
     @Test
-    public void testSingleDocGenerationC1ADraftHint() throws Exception {
+    void testSingleDocGenerationC1ADraftHint() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, C1A_DRAFT_HINT, false);
         verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
     @Test
-    public void testGenerateC8DocumentForRespondent() throws Exception {
+    void testGenerateC8DocumentForRespondent() throws Exception {
         Map<String, Object> respondentDetails = new HashMap<>();
         respondentDetails.put("dynamic_fileName", "test.pdf");
         documentGenService.generateSingleDocument(
@@ -1419,7 +1421,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void generateDocsForC100CaseNotIssued() throws Exception {
+    void generateDocsForC100CaseNotIssued() throws Exception {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
@@ -1460,7 +1462,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateCitizenDocument() throws Exception {
+    void testGenerateCitizenDocument() throws Exception {
         Map<String, String> documentValues = new HashMap<>();
         documentValues.put("caseId", "1664294549087405");
         documentValues.put("freeTextUploadStatements", "testing document gen");
@@ -1498,7 +1500,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateCitizenDocumentWithYourWitnessStatement() throws Exception {
+    void testGenerateCitizenDocumentWithYourWitnessStatement() throws Exception {
         Map<String, String> documentValues = new HashMap<>();
         documentValues.put("caseId", "1664294549087405");
         documentValues.put("freeTextUploadStatements", "testing document gen");
@@ -1536,7 +1538,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateCitizenDocumentWithOtherWitnessStatement() throws Exception {
+    void testGenerateCitizenDocumentWithOtherWitnessStatement() throws Exception {
         Map<String, String> documentValues = new HashMap<>();
         documentValues.put("caseId", "1664294549087405");
         documentValues.put("freeTextUploadStatements", "testing document gen");
@@ -1574,7 +1576,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateCitizenDocumentWithMedicalRecords() throws Exception {
+    void testGenerateCitizenDocumentWithMedicalRecords() throws Exception {
         Map<String, String> documentValues = new HashMap<>();
         documentValues.put("caseId", "1664294549087405");
         documentValues.put("freeTextUploadStatements", "testing document gen");
@@ -1612,7 +1614,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateCitizenDocumentWithMail_screenshots() throws Exception {
+    void testGenerateCitizenDocumentWithMail_screenshots() throws Exception {
         Map<String, String> documentValues = new HashMap<>();
         documentValues.put("caseId", "1664294549087405");
         documentValues.put("freeTextUploadStatements", "testing document gen");
@@ -1650,7 +1652,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateCitizenDocumentWithLettersFromSchools() throws Exception {
+    void testGenerateCitizenDocumentWithLettersFromSchools() throws Exception {
         Map<String, String> documentValues = new HashMap<>();
         documentValues.put("caseId", "1664294549087405");
         documentValues.put("freeTextUploadStatements", "testing document gen");
@@ -1688,7 +1690,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateCitizenDocumentWithTenancyMortgageAgreement() throws Exception {
+    void testGenerateCitizenDocumentWithTenancyMortgageAgreement() throws Exception {
         Map<String, String> documentValues = new HashMap<>();
         documentValues.put("caseId", "1664294549087405");
         documentValues.put("freeTextUploadStatements", "testing document gen");
@@ -1726,7 +1728,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateCitizenDocumentWithPreviousOrderSubmitted() throws Exception {
+    void testGenerateCitizenDocumentWithPreviousOrderSubmitted() throws Exception {
         Map<String, String> documentValues = new HashMap<>();
         documentValues.put("caseId", "1664294549087405");
         documentValues.put("freeTextUploadStatements", "testing document gen");
@@ -1764,7 +1766,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateCitizenDocumentWithMedicalReports() throws Exception {
+    void testGenerateCitizenDocumentWithMedicalReports() throws Exception {
         Map<String, String> documentValues = new HashMap<>();
         documentValues.put("caseId", "1664294549087405");
         documentValues.put("freeTextUploadStatements", "testing document gen");
@@ -1802,7 +1804,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateCitizenDocumentWithPaternityTestReports() throws Exception {
+    void testGenerateCitizenDocumentWithPaternityTestReports() throws Exception {
         Map<String, String> documentValues = new HashMap<>();
         documentValues.put("caseId", "1664294549087405");
         documentValues.put("freeTextUploadStatements", "testing document gen");
@@ -1840,7 +1842,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateCitizenDocumentWithDrugAndAlcoholReports() throws Exception {
+    void testGenerateCitizenDocumentWithDrugAndAlcoholReports() throws Exception {
         Map<String, String> documentValues = new HashMap<>();
         documentValues.put("caseId", "1664294549087405");
         documentValues.put("freeTextUploadStatements", "testing document gen");
@@ -1878,7 +1880,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateCitizenDocumentWithPoliceReports() throws Exception {
+    void testGenerateCitizenDocumentWithPoliceReports() throws Exception {
         Map<String, String> documentValues = new HashMap<>();
         documentValues.put("caseId", "1664294549087405");
         documentValues.put("freeTextUploadStatements", "testing document gen");
@@ -1916,7 +1918,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateCitizenDocumentWithOtherDocument() throws Exception {
+    void testGenerateCitizenDocumentWithOtherDocument() throws Exception {
         Map<String, String> documentValues = new HashMap<>();
         documentValues.put("caseId", "1664294549087405");
         documentValues.put("freeTextUploadStatements", "testing document gen");
@@ -1954,7 +1956,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateC7Document() throws Exception {
+    void testGenerateC7Document() throws Exception {
         CaseData caseData = CaseData.builder()
             .id(123456789123L)
             .welshLanguageRequirement(Yes)
@@ -1972,7 +1974,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testSingleDocGenerationForSolicitorC7() throws Exception {
+    void testSingleDocGenerationForSolicitorC7() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, SOLICITOR_C7_DRAFT_DOCUMENT, false);
         documentGenService.generateSingleDocument("auth", c100CaseData, SOLICITOR_C7_FINAL_DOCUMENT, false);
         documentGenService.generateSingleDocument("auth", c100CaseData, SOLICITOR_C1A_DRAFT_DOCUMENT, false);
@@ -1985,7 +1987,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void generateDocumentsForTestingSupportForC100Test() throws Exception {
+    void generateDocumentsForTestingSupportForC100Test() throws Exception {
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
@@ -2026,7 +2028,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void generateDocumentsForTestingSupportForC100TestFinalDoc() throws Exception {
+    void generateDocumentsForTestingSupportForC100TestFinalDoc() throws Exception {
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
@@ -2069,7 +2071,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void generateDocumentsForTestingSupportForFL401TestWithOrganisation() throws Exception {
+    void generateDocumentsForTestingSupportForFL401TestWithOrganisation() throws Exception {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
@@ -2111,7 +2113,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void generateDocumentsForTestingSupportForC100TestWithC1A() throws Exception {
+    void generateDocumentsForTestingSupportForC100TestWithC1A() throws Exception {
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
@@ -2156,7 +2158,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void generateDocumentsForTestingSupportForFL401Test() throws Exception {
+    void generateDocumentsForTestingSupportForFL401Test() throws Exception {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
@@ -2196,7 +2198,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void generateDocumentsForTestingSupportForFL401TestWithChildConfidentialInfo() throws Exception {
+    void generateDocumentsForTestingSupportForFL401TestWithChildConfidentialInfo() throws Exception {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
@@ -2240,7 +2242,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateDocumentsForTestingSupportC8Formgenerationbasedconconfidentiality2() throws Exception {
+    void testGenerateDocumentsForTestingSupportC8Formgenerationbasedconconfidentiality2() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -2339,7 +2341,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateDocumentsForTestingSupportC8Formgenerationbasedconconfidentiality_withoutTypeofOrders() throws Exception {
+    void testGenerateDocumentsForTestingSupportC8Formgenerationbasedconconfidentiality_withoutTypeofOrders() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -2434,7 +2436,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateDocumentsForTestingSupportC8FormGenerationBasedcOnConfidentiality_() throws Exception {
+    void testGenerateDocumentsForTestingSupportC8FormGenerationBasedcOnConfidentiality_() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -2512,7 +2514,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateDocumentsForTestingSupportDocsNullValueWhenAbsent() throws Exception {
+    void testGenerateDocumentsForTestingSupportDocsNullValueWhenAbsent() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -2576,7 +2578,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateDocumentsForTestingSupportDocsNullValueWhenEnglishNotWesh() throws Exception {
+    void testGenerateDocumentsForTestingSupportDocsNullValueWhenEnglishNotWesh() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -2636,7 +2638,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateDocumentsForTestingSupportDocsNullValueWhenWelshNotenglish() throws Exception {
+    void testGenerateDocumentsForTestingSupportDocsNullValueWhenWelshNotenglish() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -2692,13 +2694,13 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testSingleDocGenerationForFl404b() throws Exception {
+    void testSingleDocGenerationForFl404b() throws Exception {
         documentGenService.generateSingleDocument("auth", fl401CaseData, DA_LIST_ON_NOTICE_FL404B_DOCUMENT, false);
         verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
     @Test
-    public void testForGetDocumentBytes() {
+    void testForGetDocumentBytes() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -2719,22 +2721,23 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testForGetDocumentBytesException() {
+    void testForGetDocumentBytesException() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
 
-        assertExpectedException(() -> {
-            documentGenService
-                .getDocumentBytes(generatedDocumentInfo.getUrl(), authToken, "s2s token");
-        }, InvalidResourceException.class, "Resource is invalid TestUrl");
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
+            documentGenService.getDocumentBytes(generatedDocumentInfo.getUrl(), authToken, "s2s token");
+        });
+
+        assertEquals("Resource is invalid TestUrl", ex.getMessage());
 
     }
 
     @Test
-    public void testForGetDocumentBytesFileNotFoundException() {
+    void testForGetDocumentBytesFileNotFoundException() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -2747,15 +2750,15 @@ public class DocumentGenServiceTest {
         when(caseDocumentClient.getDocumentBinary(authToken, "s2s token", generatedDocumentInfo.getUrl()))
             .thenReturn(expectedResponse);
 
-        assertExpectedException(() -> {
-            documentGenService
-                .getDocumentBytes(generatedDocumentInfo.getUrl(), authToken, "s2s token");
-        }, InvalidResourceException.class, "Doc name TestUrl");
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
+            documentGenService.getDocumentBytes(generatedDocumentInfo.getUrl(), authToken, "s2s token");
+        });
 
+        assertEquals("Doc name TestUrl", ex.getMessage());
     }
 
     @Test
-    public void testForConvertToPdf() {
+    void testForConvertToPdf() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("TestUrl")
@@ -2787,7 +2790,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testForConvertToPdfException() {
+    void testForConvertToPdfException() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("TestUrl")
@@ -2811,15 +2814,16 @@ public class DocumentGenServiceTest {
         when(dgsApiClient.convertDocToPdf(anyString(), anyString(), any()))
             .thenReturn(generatedDocumentInfo);
 
-        assertExpectedException(() -> {
-            documentGenService
-                .convertToPdf(authToken, document);
-        }, InvalidResourceException.class, "Doc name FL401-Final.docx");
+        InvalidResourceException ex = assertThrows(InvalidResourceException.class, () -> {
+            documentGenService.convertToPdf(authToken, document);
+        });
+
+        assertEquals("Doc name FL401-Final.docx", ex.getMessage());
     }
 
     // write test similar to testForConvertToPdfException covering convertToPdf method validating the FeignException
     @Test
-    public void testForConvertToPdfFeignException() {
+    void testForConvertToPdfFeignException() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("TestUrl")
@@ -2843,14 +2847,16 @@ public class DocumentGenServiceTest {
         when(dgsApiClient.convertDocToPdf(anyString(), anyString(), any()))
             .thenThrow(FeignException.class);
 
-        assertExpectedException(() -> {
+        NullPointerException ex = assertThrows(NullPointerException.class, () -> {
             documentGenService.convertToPdf(authToken, document);
-        }, NullPointerException.class, "Cannot invoke \"uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo.getUrl()\" "
-            + "because \"generatedDocumentInfo\" is null");
+        });
+
+        assertEquals("Cannot invoke \"uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo.getUrl()\" "
+            + "because \"generatedDocumentInfo\" is null", ex.getMessage());
     }
 
     @Test
-    public void testForConvertToPdfRuntimeException() {
+    void testForConvertToPdfRuntimeException() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("TestUrl")
@@ -2874,14 +2880,16 @@ public class DocumentGenServiceTest {
         when(dgsApiClient.convertDocToPdf(anyString(), anyString(), any()))
             .thenThrow(RuntimeException.class);
 
-        assertExpectedException(() -> {
+        NullPointerException ex = assertThrows(NullPointerException.class, () -> {
             documentGenService.convertToPdf(authToken, document);
-        }, NullPointerException.class, "Cannot invoke \"uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo.getUrl()\" "
-                                    + "because \"generatedDocumentInfo\" is null");
+        });
+
+        assertEquals("Cannot invoke \"uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo.getUrl()\" "
+                                    + "because \"generatedDocumentInfo\" is null", ex.getMessage());
     }
 
     @Test
-    public void testUploadDocument() throws Exception {
+    void testUploadDocument() throws Exception {
 
         uk.gov.hmcts.reform.ccd.document.am.model.Document.Link binaryLink = new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
         binaryLink.href = randomAlphanumeric(10);
@@ -2912,14 +2920,10 @@ public class DocumentGenServiceTest {
     }
 
 
-    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
-                                                                 String expectedMessage) {
-        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
-        assertEquals(expectedMessage, exception.getMessage());
-    }
+
 
     @Test
-    public void testGenerateAndUploadDocument() throws Exception {
+    void testGenerateAndUploadDocument() throws Exception {
         //Given
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -2945,7 +2949,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testCitizenCoverLetterTemplateEnglish() {
+    void testCitizenCoverLetterTemplateEnglish() {
         ReflectionTestUtils.setField(documentGenService, "docCoverSheetServeOrderTemplate", "citizen_cover_letter_en");
         String template = documentGenService.getTemplate(c100CaseData, DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT, false);
 
@@ -2954,7 +2958,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testCitizenCoverLetterTemplateWelsh() {
+    void testCitizenCoverLetterTemplateWelsh() {
         ReflectionTestUtils.setField(
             documentGenService,
             "docCoverSheetWelshServeOrderTemplate",
@@ -2967,7 +2971,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateDraftDocumentsForCaseResubmissionTest1() throws Exception {
+    void testGenerateDraftDocumentsForCaseResubmissionTest1() throws Exception {
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
@@ -3001,7 +3005,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateDraftDocumentsForCaseResubmissionTest2() throws Exception {
+    void testGenerateDraftDocumentsForCaseResubmissionTest2() throws Exception {
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
@@ -3037,7 +3041,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testSendReplyMessageTemplateEnglish() {
+    void testSendReplyMessageTemplateEnglish() {
         ReflectionTestUtils.setField(documentGenService, "docSendReplyMessageTemplate", "send_reply_message_letter_en");
         String template = documentGenService.getTemplate(c100CaseData, DOCUMENT_SEND_REPLY_MESSAGE, false);
 
@@ -3046,7 +3050,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testCitizenDocumentC1aDraftHintWelsh() {
+    void testCitizenDocumentC1aDraftHintWelsh() {
         ReflectionTestUtils.setField(
             documentGenService,
             "solicitorC1ADraftWelshTemplate",
@@ -3059,7 +3063,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testCitizenDocumentC1aDraftHintEnglish() {
+    void testCitizenDocumentC1aDraftHintEnglish() {
         ReflectionTestUtils.setField(
             documentGenService,
             "solicitorC1ADraftTemplate",
@@ -3072,20 +3076,20 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testSingleDocGenerationForCitizenDocumentC1aDraftEnglish() throws Exception {
+    void testSingleDocGenerationForCitizenDocumentC1aDraftEnglish() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, DOCUMENT_C1A_DRAFT_HINT, false);
         verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
     @Test
-    public void testSingleDocGenerationForCitizenDocumentC1aDraftWelsh() throws Exception {
+    void testSingleDocGenerationForCitizenDocumentC1aDraftWelsh() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, DOCUMENT_C1A_DRAFT_HINT, true);
         verify(dgsService, times(1)).generateWelshDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
 
     @Test
-    public void testSendReplyMessageTemplateWelsh() {
+    void testSendReplyMessageTemplateWelsh() {
         ReflectionTestUtils.setField(documentGenService, "docSendReplyMessageWelshTemplate", "send_reply_message_letter_wel");
         String template = documentGenService.getTemplate(c100CaseData, DOCUMENT_SEND_REPLY_MESSAGE, true);
 
@@ -3094,7 +3098,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testC8RespFL401FinalHintEnglish() {
+    void testC8RespFL401FinalHintEnglish() {
         ReflectionTestUtils.setField(documentGenService, "fl401RespC8Template", "fl401_resp_c8_letter_en");
         String template = documentGenService.getTemplate(c100CaseData, C8_RESP_FL401_FINAL_HINT, false);
 
@@ -3103,7 +3107,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testC8RespFL401FinalHintWelsh() {
+    void testC8RespFL401FinalHintWelsh() {
         ReflectionTestUtils.setField(documentGenService, "fl401RespC8TemplateWelsh", "fl401_resp_c8_letter_wel");
         String template = documentGenService.getTemplate(c100CaseData, C8_RESP_FL401_FINAL_HINT, true);
 

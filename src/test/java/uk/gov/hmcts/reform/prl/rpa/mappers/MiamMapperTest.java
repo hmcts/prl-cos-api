@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(MockitoExtension.class)
-public class MiamMapperTest {
+class MiamMapperTest {
 
     @InjectMocks
     MiamMapper miamMapper;
@@ -29,7 +29,7 @@ public class MiamMapperTest {
     ArrayList<MiamUrgencyReasonChecklistEnum> miamUrgencyReasonChecklistEnum;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         miamExemptionsChecklistEnum = new ArrayList<>();
         miamExemptionsChecklistEnum.add(MiamExemptionsChecklistEnum.previousMIAMattendance);
         miamExemptionsChecklistEnum.add(MiamExemptionsChecklistEnum.domesticViolence);
@@ -43,7 +43,7 @@ public class MiamMapperTest {
     }
 
     @Test
-    public void testMiamMapperWithAllFields() {
+    void testMiamMapperWithAllFields() {
 
 
         CaseData caseData = CaseData.builder()
@@ -64,7 +64,7 @@ public class MiamMapperTest {
     }
 
     @Test
-    public void testMiamMapperWithSomeFields() {
+    void testMiamMapperWithSomeFields() {
         CaseData caseData = CaseData.builder()
             .miamDetails(MiamDetails.builder()
                              .applicantAttendedMiam(YesOrNo.Yes)

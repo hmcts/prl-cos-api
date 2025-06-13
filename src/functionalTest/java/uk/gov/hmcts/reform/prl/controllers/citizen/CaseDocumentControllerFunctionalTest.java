@@ -7,7 +7,6 @@ import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,7 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.ResourceUtils;
 import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
@@ -26,10 +25,13 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 
 @Slf4j
 @SpringBootTest
-@ExtendWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @TestPropertySource(
     properties = {
         "idam.client.secret=${CITIZEN_IDAM_CLIENT_SECRET}",
@@ -78,9 +80,9 @@ public class CaseDocumentControllerFunctionalTest {
         response.then().assertThat().statusCode(200);
         DocumentResponse res = objectMapper.readValue(response.getBody().asString(), DocumentResponse.class);
 
-        Assert.assertEquals("Success", res.getStatus());
-        Assert.assertNotNull(res.getDocument());
-        Assert.assertEquals("Test.pdf", res.getDocument().getDocumentFileName());
+        assertEquals("Success", res.getStatus());
+        assertNotNull(res.getDocument());
+        assertEquals("Test.pdf", res.getDocument().getDocumentFileName());
     }
 
     @Test
@@ -110,7 +112,7 @@ public class CaseDocumentControllerFunctionalTest {
         deleteResponse.then().assertThat().statusCode(200);
         DocumentResponse delRes = objectMapper.readValue(deleteResponse.getBody().asString(), DocumentResponse.class);
 
-        Assert.assertEquals("Success", delRes.getStatus());
+        assertEquals("Success", delRes.getStatus());
     }
 
 

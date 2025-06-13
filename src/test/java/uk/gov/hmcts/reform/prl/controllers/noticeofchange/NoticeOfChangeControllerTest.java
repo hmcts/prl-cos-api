@@ -23,7 +23,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class NoticeOfChangeControllerTest {
+class NoticeOfChangeControllerTest {
 
     @InjectMocks
     NoticeOfChangeController noticeOfChangeController;
@@ -43,7 +43,7 @@ public class NoticeOfChangeControllerTest {
     CallbackRequest callbackRequest;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         caseDataMap = new HashMap<>();
         caseData = CaseData.builder()
             .id(12345678L)
@@ -62,7 +62,7 @@ public class NoticeOfChangeControllerTest {
     }
 
     @Test
-    public void testAboutToSubmitNoCRequest() throws Exception {
+    void testAboutToSubmitNoCRequest() throws Exception {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         noticeOfChangeController.aboutToSubmitNoCRequest(authToken, s2sToken, callbackRequest);
         verify(noticeOfChangePartiesService, times(1)).applyDecision(
@@ -72,7 +72,7 @@ public class NoticeOfChangeControllerTest {
     }
 
     @Test
-    public void testSubmittedNoCRequest() throws Exception {
+    void testSubmittedNoCRequest() throws Exception {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         noticeOfChangeController.submittedNoCRequest(authToken, s2sToken, callbackRequest);
         verify(noticeOfChangePartiesService, times(1)).nocRequestSubmitted(
@@ -80,7 +80,7 @@ public class NoticeOfChangeControllerTest {
     }
 
     @Test
-    public void testStartStopRepresentation() throws Exception {
+    void testStartStopRepresentation() throws Exception {
         noticeOfChangeController.aboutToStartStopRepresentation(authToken, callbackRequest);
         verify(noticeOfChangePartiesService, times(1)).populateAboutToStartStopRepresentation(
             Mockito.anyString(),
@@ -90,7 +90,7 @@ public class NoticeOfChangeControllerTest {
     }
 
     @Test
-    public void testAboutToSubmitStopRepresentation() throws Exception {
+    void testAboutToSubmitStopRepresentation() throws Exception {
         noticeOfChangeController.aboutToSubmitStopRepresentation(authToken, callbackRequest);
         verify(noticeOfChangePartiesService, times(1)).aboutToSubmitStopRepresenting(
             Mockito.anyString(),
@@ -98,7 +98,7 @@ public class NoticeOfChangeControllerTest {
     }
 
     @Test
-    public void testSubmittedStopRepresentation() throws Exception {
+    void testSubmittedStopRepresentation() throws Exception {
         noticeOfChangeController.submittedStopRepresentation(authToken, callbackRequest);
         verify(noticeOfChangePartiesService, times(1)).submittedStopRepresenting(
             Mockito.any(CallbackRequest.class)
@@ -106,7 +106,7 @@ public class NoticeOfChangeControllerTest {
     }
 
     @Test
-    public void testAboutToStartAdminRemoveLegalRepresentative() throws Exception {
+    void testAboutToStartAdminRemoveLegalRepresentative() throws Exception {
         noticeOfChangeController.aboutToStartAdminRemoveLegalRepresentative(authToken, callbackRequest);
         verify(noticeOfChangePartiesService, times(1))
             .populateAboutToStartAdminRemoveLegalRepresentative(
@@ -116,7 +116,7 @@ public class NoticeOfChangeControllerTest {
     }
 
     @Test
-    public void testAboutToSubmitAdminRemoveLegalRepresentative() throws Exception {
+    void testAboutToSubmitAdminRemoveLegalRepresentative() throws Exception {
         noticeOfChangeController.aboutToSubmitAdminRemoveLegalRepresentative(authToken, callbackRequest);
         verify(noticeOfChangePartiesService, times(1))
             .aboutToSubmitAdminRemoveLegalRepresentative(
@@ -126,7 +126,7 @@ public class NoticeOfChangeControllerTest {
     }
 
     @Test
-    public void testSubmittedAdminRemoveLegalRepresentative() throws Exception {
+    void testSubmittedAdminRemoveLegalRepresentative() throws Exception {
         noticeOfChangeController.submittedAdminRemoveLegalRepresentative(authToken, callbackRequest);
         verify(noticeOfChangePartiesService, times(1))
             .submittedAdminRemoveLegalRepresentative(

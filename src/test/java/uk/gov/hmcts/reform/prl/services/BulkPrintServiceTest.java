@@ -24,10 +24,8 @@ import uk.gov.hmcts.reform.sendletter.api.LetterWithPdfsRequest;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterApi;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterResponse;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,7 +36,10 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
 @ExtendWith(MockitoExtension.class)
-public class BulkPrintServiceTest {
+class BulkPrintServiceTest {
+
+    @InjectMocks
+    private BulkPrintService bulkPrintService;
 
     @Mock
     private SendLetterApi sendLetterApi;
@@ -46,24 +47,18 @@ public class BulkPrintServiceTest {
     @Mock
     private CaseDocumentClient caseDocumentClient;
 
-    @InjectMocks
-    private BulkPrintService bulkPrintService;
-
     @Mock
     private AuthTokenGenerator authTokenGenerator;
 
     @Mock
     private DocumentGenService documentGenService;
 
-    private UUID uuid;
-
     private Document docInfo;
     private String authToken;
     private String s2sToken;
 
     @BeforeEach
-    public void setUp() {
-        uuid = randomUUID();
+    void setUp() {
         authToken = "auth-token";
         s2sToken = "s2sToken";
         docInfo = Document.builder()
@@ -74,11 +69,11 @@ public class BulkPrintServiceTest {
     }
 
     @Test
-    public void sendLetterServiceWithValidInput() throws IOException {
+    void sendLetterServiceWithValidInput() {
         Resource expectedResource = new ClassPathResource("task-list-markdown.md");
         HttpHeaders headers = new HttpHeaders();
         ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, HttpStatus.OK);
-        SendLetterResponse sendLetterResponse = new SendLetterResponse(uuid);
+        SendLetterResponse sendLetterResponse = new SendLetterResponse(randomUUID());
         PartyDetails applicant = PartyDetails.builder()
             .solicitorEmail("test@gmail.com")
             .representativeLastName("LastName")
@@ -87,19 +82,6 @@ public class BulkPrintServiceTest {
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("test@applicant.com")
             .build();
-
-        Document finalDoc = Document.builder()
-            .documentUrl("finalDoc")
-            .documentBinaryUrl("finalDoc")
-            .documentHash("finalDoc")
-            .build();
-
-        Document coverSheet = Document.builder()
-            .documentUrl("coverSheet")
-            .documentBinaryUrl("coverSheet")
-            .documentHash("coverSheet")
-            .build();
-        final List<Document> documentList = List.of(coverSheet, finalDoc);
 
         final CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -117,35 +99,41 @@ public class BulkPrintServiceTest {
         when(sendLetterApi.sendLetter(any(), any(LetterWithPdfsRequest.class))).thenReturn(sendLetterResponse);
 
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
-        when(documentGenService.convertToPdf(authToken,docInfo)).thenReturn(docInfo);
+        when(documentGenService.convertToPdf(authToken, docInfo)).thenReturn(docInfo);
 
         when(caseDocumentClient.getDocumentBinary(authToken, s2sToken, "binaryUrl"))
             .thenReturn(expectedResponse);
-        assertEquals(bulkPrintService.send(
-            String.valueOf(caseData.getId()),
-            authToken,
-            "abc",
-            List.of(docInfo),
-            "test"
-        ), uuid);
+        assertEquals(
+            bulkPrintService.send(
+                String.valueOf(caseData.getId()),
+                authToken,
+                "abc",
+                List.of(docInfo),
+                "test"
+            ), randomUUID()
+        );
 
     }
 
     @Test
-    public void sendLetterServiceWithInvalidBinaryUrl() {
-        Resource expectedResource = new ClassPathResource("task-list-markdown.md");
-        HttpHeaders headers = new HttpHeaders();
-        ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, HttpStatus.OK);
-        SendLetterResponse sendLetterResponse = new SendLetterResponse(uuid);
-        PartyDetails applicant = PartyDetails.builder()
-            .solicitorEmail("test@gmail.com")
-            .representativeLastName("LastName")
-            .representativeFirstName("FirstName")
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .email("test@applicant.com")
-            .build();
+    void sendLetterServiceWithInvalidBinaryUrl() {
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
 
+        assertThrows(
+            BulkPrintException.class,
+            () -> bulkPrintService.send(
+                "123",
+                authToken,
+                "abc",
+                null,
+                "test"
+            )
+        );
+
+    }
+
+    @Test
+    void sendLetterServiceBulkPrintFails() {
         Document finalDoc = Document.builder()
             .documentUrl("finalDoc")
             .documentBinaryUrl("finalDoc")
@@ -159,73 +147,32 @@ public class BulkPrintServiceTest {
             .build();
         final List<Document> documentList = List.of(coverSheet, finalDoc);
 
-        final CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .applicantCaseName("test")
-            .caseTypeOfApplication("C100")
-            .applicants(List.of(element(applicant)))
-            .respondents(List.of(element(PartyDetails.builder()
-                                             .solicitorEmail("test@gmail.com")
-                                             .representativeLastName("LastName")
-                                             .representativeFirstName("FirstName")
-                                             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                             .build())))
-            .build();
-
-        //when(sendLetterApi.sendLetter(any(), any(LetterWithPdfsRequest.class))).thenReturn(sendLetterResponse);
-
-
+        when(documentGenService.convertToPdf(authToken, finalDoc)).thenThrow(new RuntimeException());
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
 
         assertThrows(
-            BulkPrintException.class,
-            () -> bulkPrintService.send("123",
-                                        authToken,
-                                        "abc",
-                                        null,
-                                        "test"
-            ));
+            Exception.class,
+            () -> bulkPrintService.send(
+                "123",
+                authToken,
+                "abc",
+                documentList,
+                "test"
+            )
+        );
 
     }
 
     @Test
-    public void sendLetterServiceBulkPrintFails() {
-        Document finalDoc = Document.builder()
-                .documentUrl("finalDoc")
-                .documentBinaryUrl("finalDoc")
-                .documentHash("finalDoc")
-                .build();
-
-        Document coverSheet = Document.builder()
-                .documentUrl("coverSheet")
-                .documentBinaryUrl("coverSheet")
-                .documentHash("coverSheet")
-                .build();
-        final List<Document> documentList = List.of(coverSheet, finalDoc);
-
-        when(documentGenService.convertToPdf(authToken,finalDoc)).thenThrow(new RuntimeException());
-        when(authTokenGenerator.generate()).thenReturn(s2sToken);
-
-        assertThrows(
-                Exception.class,
-                () -> bulkPrintService.send("123",
-                        authToken,
-                        "abc",
-                        documentList,
-                        "test"
-                ));
-
-    }
-
-    @Test
-    public void sendLetterServiceWithInValidInput() {
+    void sendLetterServiceWithInValidInput() {
         assertThrows(
             BulkPrintException.class,
-            () -> bulkPrintService.send("123",
-                                        authToken,
-                                        "abc",
-                                        null,
-                                        "test"
+            () -> bulkPrintService.send(
+                "123",
+                authToken,
+                "abc",
+                null,
+                "test"
             )
         );
     }

@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.hearingmanagement;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -45,7 +45,7 @@ import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
 
 @ExtendWith(MockitoExtension.class)
-public class HearingManagementServiceTest {
+class HearingManagementServiceTest {
 
     @InjectMocks
     private HearingManagementService hearingManagementService;
@@ -102,7 +102,7 @@ public class HearingManagementServiceTest {
     private LocalDateTime testNextHearingDate = LocalDateTime.of(2024, 04, 28, 1, 0);
 
     @BeforeEach
-    public void setup() {
+    void setup() {
 
         nextHearingDateRequest = NextHearingDateRequest.builder()
             .caseRef("1669565933090179")
@@ -235,7 +235,7 @@ public class HearingManagementServiceTest {
     }
 
     @Test
-    public void testHmcStateAsListedAndStateChangeAndNotificationForC100() throws Exception {
+    void testHmcStateAsListedAndStateChangeAndNotificationForC100() throws Exception {
         caseDetails = caseDetails.toBuilder().data(stringObjectMap).build();
         when(objectMapper.convertValue(stringObjectMap,CaseData.class)).thenReturn(c100CaseData);
 
@@ -251,7 +251,7 @@ public class HearingManagementServiceTest {
     }
 
     @Test
-    public void testHmcStatusAsChangedStateChangeAndNotificationForC100() throws Exception {
+    void testHmcStatusAsChangedStateChangeAndNotificationForC100() throws Exception {
         c100CaseData = c100CaseData.toBuilder().state(PREPARE_FOR_HEARING_CONDUCT_HEARING).build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(c100CaseData);
@@ -283,7 +283,7 @@ public class HearingManagementServiceTest {
     }
 
     @Test
-    public void testHmcStatusAsCancelledStateChangeAndNotificationForC100() throws Exception {
+    void testHmcStatusAsCancelledStateChangeAndNotificationForC100() throws Exception {
         c100CaseData = c100CaseData.toBuilder().state(PREPARE_FOR_HEARING_CONDUCT_HEARING).build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(c100CaseData);
@@ -315,7 +315,7 @@ public class HearingManagementServiceTest {
     }
 
     @Test
-    public void testHmcStateAsListedAndStateChangeAndNotificationForFl401() throws Exception {
+    void testHmcStateAsListedAndStateChangeAndNotificationForFl401() throws Exception {
         PartyDetails applicantFl401 = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -401,7 +401,7 @@ public class HearingManagementServiceTest {
 
 
     @Test
-    public void testHmcStatusAsChangedStateChangeAndNotificationForFl401() throws Exception {
+    void testHmcStatusAsChangedStateChangeAndNotificationForFl401() throws Exception {
 
         PartyDetails applicantFl401 = PartyDetails.builder()
             .firstName("TestFirst")
@@ -473,7 +473,7 @@ public class HearingManagementServiceTest {
     }
 
     @Test
-    public void testHmcStatusAsCancelledStateChangeAndNotificationForFL401() throws Exception {
+    void testHmcStatusAsCancelledStateChangeAndNotificationForFL401() throws Exception {
 
         PartyDetails applicantFl401 = PartyDetails.builder()
             .firstName("TestFirst")
@@ -542,7 +542,7 @@ public class HearingManagementServiceTest {
     }
 
     @Test
-    public void testHmcNextHearingDateChangeAndNotificationForC100() throws Exception {
+    void testHmcNextHearingDateChangeAndNotificationForC100() throws Exception {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(c100CaseData);
 
         hearingManagementService.caseNextHearingDateChangeForHearingManagement(nextHearingDateRequest);
@@ -560,22 +560,22 @@ public class HearingManagementServiceTest {
     }
 
     @Test
-    public void testValidateHearingState() {
+    void testValidateHearingState() {
         CaseData caseData = CaseData.builder().hearingTaskData(HearingTaskData.builder().currentHearingId("id")
                 .currentHearingStatus("LISTED").build()).build();
         Map<String, Object> caseDataUpdated = new HashMap<>();
         hearingManagementService.validateHearingState(caseDataUpdated, caseData);
-        Assert.assertTrue(caseDataUpdated.containsKey("hearingListed"));
+        assertTrue(caseDataUpdated.containsKey("hearingListed"));
 
     }
 
     @Test
-    public void testValidateHearingState_2() {
+    void testValidateHearingState_2() {
         CaseData caseData = CaseData.builder().hearingTaskData(HearingTaskData.builder().currentHearingId("id")
                 .currentHearingStatus("Listed1").build()).build();
         Map<String, Object> caseDataUpdated = new HashMap<>();
         hearingManagementService.validateHearingState(caseDataUpdated, caseData);
-        Assert.assertEquals("false",caseDataUpdated.get("hearingListed"));
+        assertEquals("false",caseDataUpdated.get("hearingListed"));
 
     }
 

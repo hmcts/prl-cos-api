@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentSolici
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.apache.commons.lang3.RandomUtils.nextLong;
+import static java.util.concurrent.ThreadLocalRandom.current;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ABILITY_TO_PARTICIPATE;
@@ -56,14 +56,14 @@ public class RespondentSolicitorTaskListRendererTest {
     );
 
     @Test
-    public void renderTaskListTest() {
+    void renderTaskListTest() {
         List<RespondentEventValidationErrors> resErrors = new ArrayList<>();
         resErrors.add(RespondentEventValidationErrors.builder().event(KEEP_DETAILS_PRIVATE)
                 .errors(List.of("Error in Keep Details Private event"))
                 .build());
         final CaseData caseData = CaseData.builder()
-                .id(nextLong())
-                .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .id(current().nextLong(1_000_000_000L, 9_999_999_999L))
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
                 .caseTypeOfApplication(C100_CASE_TYPE)
                 .build();
         String taskList = taskListRenderer.render(tasks, resErrors, "A", "test test", false, caseData);
@@ -72,11 +72,11 @@ public class RespondentSolicitorTaskListRendererTest {
     }
 
     @Test
-    public void renderTaskListTestAlreadySubmitted() {
+    void renderTaskListTestAlreadySubmitted() {
         List<RespondentEventValidationErrors> resErrors = new ArrayList<>();
         final CaseData caseData = CaseData.builder()
-                .id(nextLong())
-                .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .id(current().nextLong(1_000_000_000L, 9_999_999_999L))
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
                 .caseTypeOfApplication(C100_CASE_TYPE)
                 .build();
         String taskList = taskListRenderer.render(tasks, resErrors, "A", "test test", true, caseData);

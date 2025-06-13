@@ -24,7 +24,7 @@ public class CaseWorkerEmailNotificationEventHandlerTest {
     private CaseWorkerNotificationEmailEvent caseWorkerNotificationEmailEvent;
 
     @BeforeEach
-    public void init() {
+    void init() {
         caseWorkerNotificationEmailEvent
             = CaseWorkerNotificationEmailEvent.builder()
             .caseDetailsModel(CaseDetails.builder().build())
@@ -33,7 +33,7 @@ public class CaseWorkerEmailNotificationEventHandlerTest {
     }
 
     @Test
-    public void shouldNotifyLocalCourt() {
+    void shouldNotifyLocalCourt() {
         caseWorkerEmailNotificationEventHandler.notifyLocalCourt(caseWorkerNotificationEmailEvent);
         Mockito.verify(caseWorkerEmailService, Mockito.times(1))
             .sendEmailToFl401LocalCourt(caseWorkerNotificationEmailEvent.getCaseDetailsModel(),
@@ -41,28 +41,28 @@ public class CaseWorkerEmailNotificationEventHandlerTest {
     }
 
     @Test
-    public void shouldNotifyCaseWorkerForCaseReSubmission() {
+    void shouldNotifyCaseWorkerForCaseReSubmission() {
         caseWorkerEmailNotificationEventHandler.notifyCaseWorkerForCaseResubmission(caseWorkerNotificationEmailEvent);
         Mockito.verify(caseWorkerEmailService, Mockito.times(1))
             .sendEmail(caseWorkerNotificationEmailEvent.getCaseDetailsModel());
     }
 
     @Test
-    public void shouldNotifyCourtAdmin() {
+    void shouldNotifyCourtAdmin() {
         caseWorkerEmailNotificationEventHandler.notifyCourtAdmin(caseWorkerNotificationEmailEvent);
         Mockito.verify(caseWorkerEmailService, Mockito.times(1))
             .sendEmailToCourtAdmin(caseWorkerNotificationEmailEvent.getCaseDetailsModel());
     }
 
     @Test
-    public void shouldNotifySolicitorForReturnApplication() {
+    void shouldNotifySolicitorForReturnApplication() {
         caseWorkerEmailNotificationEventHandler.notifySolicitorForReturnApplication(caseWorkerNotificationEmailEvent);
         Mockito.verify(caseWorkerEmailService, Mockito.times(1))
             .sendReturnApplicationEmailToSolicitor(caseWorkerNotificationEmailEvent.getCaseDetailsModel());
     }
 
     @Test
-    public void notifyLocalCourtForCaseWithdrawal() {
+    void notifyLocalCourtForCaseWithdrawal() {
         caseWorkerEmailNotificationEventHandler.notifyLocalCourtForCaseWithdrawal(caseWorkerNotificationEmailEvent);
         Mockito.verify(caseWorkerEmailService, Mockito.times(1))
             .sendWithdrawApplicationEmailToLocalCourt(caseWorkerNotificationEmailEvent.getCaseDetailsModel(),

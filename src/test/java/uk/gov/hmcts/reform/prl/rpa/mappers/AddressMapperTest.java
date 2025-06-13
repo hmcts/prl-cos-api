@@ -10,14 +10,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
 @ExtendWith(MockitoExtension.class)
-public class AddressMapperTest {
+class AddressMapperTest {
 
     @InjectMocks
     AddressMapper addressMapper;
 
 
     @Test
-    public void testAddressMapperWithoutNullValues() {
+    void testAddressMapperWithoutNullValues() {
         Address address = Address.builder().addressLine1("157").addressLine2("London")
             .postCode("SE1 234").country("UK").build();
         assertNotNull(addressMapper.mapAddress(address).toString());
@@ -25,7 +25,7 @@ public class AddressMapperTest {
     }
 
     @Test
-    public void testAddressMapperWithNullValues() {
+    void testAddressMapperWithNullValues() {
         Address address = Address.builder().build();
         assertNotNull(addressMapper.mapAddress(address).toString());
 

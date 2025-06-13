@@ -76,7 +76,7 @@ public class RelationshipsControllerTest {
 
 
     @Test
-    public void testPrePopulateApplicantsToChildRelation() throws NotFoundException {
+    void testPrePopulateApplicantsToChildRelation() throws NotFoundException {
 
         PartyDetails applicant1 = PartyDetails.builder()
             .firstName("test1")
@@ -124,7 +124,7 @@ public class RelationshipsControllerTest {
     }
 
     @Test
-    public void testPrePopulateAmendApplicantsToChildRelation() throws NotFoundException {
+    void testPrePopulateAmendApplicantsToChildRelation() throws NotFoundException {
 
         PartyDetails applicant1 = PartyDetails.builder()
             .firstName("test1")
@@ -177,7 +177,7 @@ public class RelationshipsControllerTest {
 
 
     @Test
-    public void testPrePopulateAmendApplicantsToChildRelation_scenario2() throws NotFoundException {
+    void testPrePopulateAmendApplicantsToChildRelation_scenario2() throws NotFoundException {
 
         PartyDetails applicant1 = PartyDetails.builder()
             .firstName("test1")
@@ -230,7 +230,7 @@ public class RelationshipsControllerTest {
     }
 
     @Test
-    public void testPopulateApplicantsToChildRelation() throws NotFoundException {
+    void testPopulateApplicantsToChildRelation() throws NotFoundException {
 
         PartyDetails applicant1 = PartyDetails.builder()
             .firstName("test1")
@@ -288,7 +288,7 @@ public class RelationshipsControllerTest {
     }
 
     @Test
-    public void testPrePopulateRespondentsToChildRelation() throws NotFoundException {
+    void testPrePopulateRespondentsToChildRelation() throws NotFoundException {
 
         PartyDetails applicant1 = PartyDetails.builder()
             .firstName("test1")
@@ -336,7 +336,7 @@ public class RelationshipsControllerTest {
     }
 
     @Test
-    public void testPrePopulateAmendRespondentsToChildRelation() throws NotFoundException {
+    void testPrePopulateAmendRespondentsToChildRelation() throws NotFoundException {
 
         PartyDetails respondent = PartyDetails.builder()
             .firstName("test1")
@@ -405,7 +405,7 @@ public class RelationshipsControllerTest {
     }
 
     @Test
-    public void testPrePopulateAmendRespondentsToChildRelationWhenNoExistingRelations() throws NotFoundException {
+    void testPrePopulateAmendRespondentsToChildRelationWhenNoExistingRelations() throws NotFoundException {
 
         PartyDetails respondent = PartyDetails.builder()
             .firstName("test1")
@@ -463,7 +463,7 @@ public class RelationshipsControllerTest {
     }
 
     @Test
-    public void testPrePopulateAmendRespondentsToChildRelationWhenIdsDoNotMatch() throws NotFoundException {
+    void testPrePopulateAmendRespondentsToChildRelationWhenIdsDoNotMatch() throws NotFoundException {
 
         PartyDetails respondent = PartyDetails.builder()
             .firstName("test1")
@@ -532,7 +532,7 @@ public class RelationshipsControllerTest {
     }
 
     @Test
-    public void testPrePopulateAmendRespondentsToChildRelationWhenChildIdDoesNotMatch() throws NotFoundException {
+    void testPrePopulateAmendRespondentsToChildRelationWhenChildIdDoesNotMatch() throws NotFoundException {
 
         PartyDetails respondent = PartyDetails.builder()
             .firstName("test1")
@@ -602,7 +602,7 @@ public class RelationshipsControllerTest {
     }
 
     @Test
-    public void testPopulateRespondentToChildRelation() throws NotFoundException {
+    void testPopulateRespondentToChildRelation() throws NotFoundException {
 
         PartyDetails applicant1 = PartyDetails.builder()
             .firstName("test1")
@@ -672,7 +672,7 @@ public class RelationshipsControllerTest {
 
 
     @Test
-    public void testPopulateRespondentToChildRelationWhenRelationIsOther() throws NotFoundException {
+    void testPopulateRespondentToChildRelationWhenRelationIsOther() throws NotFoundException {
 
         PartyDetails applicant1 = PartyDetails.builder()
             .firstName("test1")
@@ -733,7 +733,7 @@ public class RelationshipsControllerTest {
 
 
     @Test
-    public void testPrePopulateOtherPeopleToChildRelation() throws NotFoundException {
+    void testPrePopulateOtherPeopleToChildRelation() throws NotFoundException {
 
         ChildDetailsRevised child = ChildDetailsRevised.builder()
             .firstName("Test")
@@ -802,7 +802,7 @@ public class RelationshipsControllerTest {
     }
 
     @Test
-    public void testPrePopulateAmendOtherPeopleToChildRelation() throws NotFoundException {
+    void testPrePopulateAmendOtherPeopleToChildRelation() throws NotFoundException {
 
         PartyDetails otherPeople = PartyDetails.builder()
             .firstName("test1")
@@ -873,7 +873,7 @@ public class RelationshipsControllerTest {
     }
 
     @Test
-    public void testPrePopulateAmendOtherPeopleToChildRelationWhenNoExistingRelations() throws NotFoundException {
+    void testPrePopulateAmendOtherPeopleToChildRelationWhenNoExistingRelations() throws NotFoundException {
 
         PartyDetails otherPeople = PartyDetails.builder()
             .firstName("test1")
@@ -932,7 +932,7 @@ public class RelationshipsControllerTest {
     }
 
     @Test
-    public void testPrePopulateAmendOtherPeopleToChildRelationWhenIdsDoNotMatch() throws NotFoundException {
+    void testPrePopulateAmendOtherPeopleToChildRelationWhenIdsDoNotMatch() throws NotFoundException {
 
         PartyDetails otherPeople = PartyDetails.builder()
             .firstName("test1")
@@ -1002,7 +1002,7 @@ public class RelationshipsControllerTest {
     }
 
     @Test
-    public void testPrePopulateAmendOtherPeopleToChildRelationWhenChildIdDoesNotMatch() throws NotFoundException {
+    void testPrePopulateAmendOtherPeopleToChildRelationWhenChildIdDoesNotMatch() throws NotFoundException {
 
         PartyDetails otherPeople = PartyDetails.builder()
             .firstName("test1")
@@ -1073,7 +1073,7 @@ public class RelationshipsControllerTest {
     }
 
     @Test
-    public void testPopulateOtherPeopleToChildRelation() throws NotFoundException {
+    void testPopulateOtherPeopleToChildRelation() throws NotFoundException {
 
         PartyDetails applicant1 = PartyDetails.builder()
             .firstName("test1")
@@ -1178,7 +1178,7 @@ public class RelationshipsControllerTest {
     }
 
     @Test
-    public void testPopulateOtherPeopleToChildRelationWhenRelationIsOtherAndChildLivesWithIsYes() throws NotFoundException {
+    void testPopulateOtherPeopleToChildRelationWhenRelationIsOtherAndChildLivesWithIsYes() throws NotFoundException {
 
         PartyDetails otherPerson = PartyDetails.builder()
             .firstName("test1")

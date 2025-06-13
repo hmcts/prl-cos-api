@@ -40,7 +40,7 @@ public class ResponseToAllegationsOfHarmCheckerTest {
     PartyDetails respondent2;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         User user = User.builder().email("respondent@example.net")
                 .idamId("1234-5678").solicitorRepresented(Yes).build();
         respondent1 = PartyDetails.builder()
@@ -71,28 +71,28 @@ public class ResponseToAllegationsOfHarmCheckerTest {
     }
 
     @Test
-    public void isStartedTest() {
+    void isStartedTest() {
         boolean anyNonEmpty = responseToAllegationsOfHarmChecker.isStarted(respondent1, true);
 
         assertTrue(anyNonEmpty);
     }
 
     @Test
-    public void isStartedTest_scenario2() {
+    void isStartedTest_scenario2() {
         boolean anyNonEmpty = responseToAllegationsOfHarmChecker.isStarted(respondent2, true);
 
         assertTrue(anyNonEmpty);
     }
 
     @Test
-    public void isStartedTest_scenario3() {
+    void isStartedTest_scenario3() {
         boolean anyNonEmpty = responseToAllegationsOfHarmChecker.isStarted(respondent1, false);
 
         assertTrue(anyNonEmpty);
     }
 
     @Test
-    public void isStartedNotTest() {
+    void isStartedNotTest() {
         respondent1 = null;
         boolean anyNonEmpty = responseToAllegationsOfHarmChecker.isStarted(respondent1, true);
 
@@ -100,21 +100,21 @@ public class ResponseToAllegationsOfHarmCheckerTest {
     }
 
     @Test
-    public void hasMandatoryCompletedTest() {
+    void hasMandatoryCompletedTest() {
         boolean anyNonEmpty = responseToAllegationsOfHarmChecker.isFinished(respondent1, true);
 
         assertTrue(anyNonEmpty);
     }
 
     @Test
-    public void hasMandatoryCompletedWithoutRespondentTest() {
+    void hasMandatoryCompletedWithoutRespondentTest() {
         respondent1 = null;
         boolean anyNonEmpty = responseToAllegationsOfHarmChecker.isFinished(respondent1, true);
         assertFalse(anyNonEmpty);
     }
 
     @Test
-    public void hasMandatoryCompletedTestWithoutC1A() {
+    void hasMandatoryCompletedTestWithoutC1A() {
         boolean anyNonEmpty = responseToAllegationsOfHarmChecker.isFinished(respondent1, false);
 
         assertTrue(anyNonEmpty);

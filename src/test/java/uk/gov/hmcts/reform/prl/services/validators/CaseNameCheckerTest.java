@@ -11,7 +11,7 @@ public class CaseNameCheckerTest {
 
 
     @Test
-    public void whenNoDataEnteredThenIsNotFinshed() {
+    void whenNoDataEnteredThenIsNotFinshed() {
 
         CaseData caseData = CaseData.builder().build();
 
@@ -23,7 +23,7 @@ public class CaseNameCheckerTest {
     }
 
     @Test
-    public void whenCaseNameEnteredThenFinished() {
+    void whenCaseNameEnteredThenFinished() {
         CaseData caseData = CaseData.builder().applicantCaseName("Test Name").build();
 
         CaseNameChecker caseNameChecker = new CaseNameChecker();
@@ -34,7 +34,7 @@ public class CaseNameCheckerTest {
     }
 
     @Test
-    public void whenCaseNameEnteredThenIsStartedReturnsFalse() {
+    void whenCaseNameEnteredThenIsStartedReturnsFalse() {
         CaseData caseData = CaseData.builder().applicantCaseName("Test Name").build();
 
         CaseNameChecker caseNameChecker = new CaseNameChecker();
@@ -43,7 +43,7 @@ public class CaseNameCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataThenIsStartedReturnsFalse() {
+    void whenNoCaseDataThenIsStartedReturnsFalse() {
         CaseData caseData = CaseData.builder().build();
 
         CaseNameChecker caseNameChecker = new CaseNameChecker();
@@ -52,7 +52,7 @@ public class CaseNameCheckerTest {
     }
 
     @Test
-    public void whenCaseNameEnteredThenHasMandatoryReturnsFalse() {
+    void whenCaseNameEnteredThenHasMandatoryReturnsFalse() {
         CaseData caseData = CaseData.builder().applicantCaseName("Test Name").build();
 
         CaseNameChecker caseNameChecker = new CaseNameChecker();
@@ -61,7 +61,7 @@ public class CaseNameCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataThenHasMandatoryReturnsFalse() {
+    void whenNoCaseDataThenHasMandatoryReturnsFalse() {
         CaseData caseData = CaseData.builder().build();
 
         CaseNameChecker caseNameChecker = new CaseNameChecker();
@@ -70,7 +70,7 @@ public class CaseNameCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+    void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
         CaseNameChecker caseNameChecker = new CaseNameChecker();
         assertNotNull(caseNameChecker.getDefaultTaskState(CaseData.builder().build()));
     }

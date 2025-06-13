@@ -28,7 +28,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
-public class CaseInviteManagerTest {
+class CaseInviteManagerTest {
 
     @Mock
     private LaunchDarklyClient launchDarklyClient;
@@ -49,7 +49,7 @@ public class CaseInviteManagerTest {
     private PartyDetails respondentPartyDetails;
 
     @BeforeEach
-    public void init() {
+    void init() {
         applicantPartyDetails = PartyDetails.builder()
             .email("abc1@de.com")
             .representativeLastName("LastName")
@@ -93,12 +93,12 @@ public class CaseInviteManagerTest {
     }
 
     @Test
-    public void testGeneratePinAndNotificationEmailForC100() throws Exception {
+    void testGeneratePinAndNotificationEmailForC100() throws Exception {
 
         CaseData actualCaseData = caseInviteManager.sendAccessCodeNotificationEmail(caseData);
 
         assertEquals(2, actualCaseData.getCaseInvites().size());
-        assertEquals("abc1@de.com", actualCaseData.getCaseInvites().get(0).getValue()
+        assertEquals("abc1@de.com", actualCaseData.getCaseInvites().getFirst().getValue()
             .getCaseInviteEmail());
         assertEquals("abc2@de.com", actualCaseData.getCaseInvites().get(1).getValue()
             .getCaseInviteEmail());
@@ -106,13 +106,13 @@ public class CaseInviteManagerTest {
     }
 
     @Test
-    public void testGeneratePinAndNotificationEmailForFL401() throws Exception {
+    void testGeneratePinAndNotificationEmailForFL401() throws Exception {
 
         CaseData actualCaseData = caseInviteManager.sendAccessCodeNotificationEmail(caseData.toBuilder().caseTypeOfApplication(
             "FL401").build());
 
         assertEquals(2, actualCaseData.getCaseInvites().size());
-        assertEquals("abc1@de.com", actualCaseData.getCaseInvites().get(0).getValue()
+        assertEquals("abc1@de.com", actualCaseData.getCaseInvites().getFirst().getValue()
             .getCaseInviteEmail());
         assertEquals("abc2@de.com", actualCaseData.getCaseInvites().get(1).getValue()
             .getCaseInviteEmail());
@@ -120,12 +120,12 @@ public class CaseInviteManagerTest {
     }
 
     @Test
-    public void testReGeneratePinAndNotificationEmailForC100() throws Exception {
+    void testReGeneratePinAndNotificationEmailForC100() throws Exception {
 
         CaseData actualCaseData = caseInviteManager.reGeneratePinAndSendNotificationEmail(caseData);
 
         assertEquals(2, actualCaseData.getCaseInvites().size());
-        assertEquals("abc1@de.com", actualCaseData.getCaseInvites().get(0).getValue()
+        assertEquals("abc1@de.com", actualCaseData.getCaseInvites().getFirst().getValue()
             .getCaseInviteEmail());
         assertEquals("abc2@de.com", actualCaseData.getCaseInvites().get(1).getValue()
             .getCaseInviteEmail());
@@ -133,12 +133,12 @@ public class CaseInviteManagerTest {
     }
 
     @Test
-    public void testReGeneratePinAndNotificationEmailForFL401() throws Exception {
+    void testReGeneratePinAndNotificationEmailForFL401() throws Exception {
         CaseData actualCaseData = caseInviteManager.reGeneratePinAndSendNotificationEmail(caseData.toBuilder().caseTypeOfApplication(
             "FL401").build());
 
         assertEquals(2, actualCaseData.getCaseInvites().size());
-        assertEquals("abc1@de.com", actualCaseData.getCaseInvites().get(0).getValue()
+        assertEquals("abc1@de.com", actualCaseData.getCaseInvites().getFirst().getValue()
             .getCaseInviteEmail());
         assertEquals("abc2@de.com", actualCaseData.getCaseInvites().get(1).getValue()
             .getCaseInviteEmail());
@@ -146,7 +146,7 @@ public class CaseInviteManagerTest {
     }
 
     @Test
-    public void testGeneratePinAfterLegalRepresentationRemovedForC100Applicant() {
+    void testGeneratePinAfterLegalRepresentationRemovedForC100Applicant() {
         when(launchDarklyClient.isFeatureEnabled("generate-ca-citizen-applicant-pin")).thenReturn(true);
         caseData = caseData.toBuilder().caseCreatedBy(CaseCreatedBy.CITIZEN).build();
         CaseInvite caseInvite = caseInviteManager.generatePinAfterLegalRepresentationRemoved(element(applicantPartyDetails),
@@ -156,7 +156,7 @@ public class CaseInviteManagerTest {
     }
 
     @Test
-    public void testGeneratePinAfterLegalRepresentationRemovedForC100Respondent() {
+    void testGeneratePinAfterLegalRepresentationRemovedForC100Respondent() {
         caseData = caseData.toBuilder().caseCreatedBy(CaseCreatedBy.CITIZEN).build();
         CaseInvite caseInvite = caseInviteManager.generatePinAfterLegalRepresentationRemoved(element(respondentPartyDetails),
                                                                                              SolicitorRole.C100RESPONDENTSOLICITOR1);
@@ -165,7 +165,7 @@ public class CaseInviteManagerTest {
     }
 
     @Test
-    public void testGeneratePinAfterLegalRepresentationRemovedForFL401Respondent() {
+    void testGeneratePinAfterLegalRepresentationRemovedForFL401Respondent() {
         caseData = caseData.toBuilder().caseCreatedBy(CaseCreatedBy.CITIZEN).build();
         CaseInvite caseInvite = caseInviteManager.generatePinAfterLegalRepresentationRemoved(element(respondentPartyDetails),
                                                                                              SolicitorRole.FL401RESPONDENTSOLICITOR);
@@ -174,7 +174,7 @@ public class CaseInviteManagerTest {
     }
 
     @Test
-    public void testGeneratePinAfterLegalRepresentationRemovedForFL401Applicant() {
+    void testGeneratePinAfterLegalRepresentationRemovedForFL401Applicant() {
         when(launchDarklyClient.isFeatureEnabled("generate-da-citizen-applicant-pin")).thenReturn(true);
         caseData = caseData.toBuilder().caseCreatedBy(CaseCreatedBy.CITIZEN).build();
         CaseInvite caseInvite = caseInviteManager.generatePinAfterLegalRepresentationRemoved(element(applicantPartyDetails),

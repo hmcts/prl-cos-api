@@ -17,8 +17,8 @@ import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 
-import javax.json.JsonValue;
 import java.util.Map;
+import javax.json.JsonValue;
 
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -41,7 +41,7 @@ public class SolicitorEmailNotificationEventHandlerTest {
     private SolicitorNotificationEmailEvent solicitorNotificationEmailEvent;
 
     @BeforeEach
-    public void init() {
+    void init() {
         solicitorNotificationEmailEvent
             = SolicitorNotificationEmailEvent.builder()
             .caseDetailsModel(CaseDetails.builder().build())
@@ -51,7 +51,7 @@ public class SolicitorEmailNotificationEventHandlerTest {
     }
 
     @Test
-    public void shouldNotifySolicitorForAwaitingPayment() {
+    void shouldNotifySolicitorForAwaitingPayment() {
         solicitorEmailNotificationEventHandler
             .notifySolicitorForAwaitingPayment(solicitorNotificationEmailEvent);
         Mockito.verify(solicitorEmailService,Mockito.times(1))
@@ -59,7 +59,7 @@ public class SolicitorEmailNotificationEventHandlerTest {
     }
 
     @Test
-    public void shouldNotifyFl401Solicitor() {
+    void shouldNotifyFl401Solicitor() {
         solicitorEmailNotificationEventHandler
             .notifyFl401Solicitor(solicitorNotificationEmailEvent);
         Mockito.verify(solicitorEmailService,Mockito.times(1))
@@ -68,7 +68,7 @@ public class SolicitorEmailNotificationEventHandlerTest {
     }
 
     @Test
-    public void shouldNotifySolicitorForCaseResubmission() {
+    void shouldNotifySolicitorForCaseResubmission() {
         solicitorEmailNotificationEventHandler
             .notifySolicitorForCaseResubmission(solicitorNotificationEmailEvent);
         Mockito.verify(solicitorEmailService,Mockito.times(1))
@@ -76,7 +76,7 @@ public class SolicitorEmailNotificationEventHandlerTest {
     }
 
     @Test
-    public void shouldNotifyC100SolicitorOfCaseWithdrawal() {
+    void shouldNotifyC100SolicitorOfCaseWithdrawal() {
         solicitorEmailNotificationEventHandler
             .notifyC100SolicitorOfCaseWithdrawal(solicitorNotificationEmailEvent);
         Mockito.verify(solicitorEmailService,Mockito.times(1))
@@ -85,7 +85,7 @@ public class SolicitorEmailNotificationEventHandlerTest {
     }
 
     @Test
-    public void shouldNotifyFL401SolicitorOfCaseWithdrawal() {
+    void shouldNotifyFL401SolicitorOfCaseWithdrawal() {
         solicitorEmailNotificationEventHandler
             .notifyFL401SolicitorOfCaseWithdrawal(solicitorNotificationEmailEvent);
         Mockito.verify(solicitorEmailService,Mockito.times(1))
@@ -94,7 +94,7 @@ public class SolicitorEmailNotificationEventHandlerTest {
     }
 
     @Test
-    public void shouldNotifyC100SolicitorOfCaseWithdrawalBeforeIssue() {
+    void shouldNotifyC100SolicitorOfCaseWithdrawalBeforeIssue() {
         solicitorEmailNotificationEventHandler
             .notifyC100SolicitorOfCaseWithdrawalBeforeIssue(solicitorNotificationEmailEvent);
         Mockito.verify(solicitorEmailService,Mockito.times(1))
@@ -103,7 +103,7 @@ public class SolicitorEmailNotificationEventHandlerTest {
     }
 
     @Test
-    public void shouldNotifyFL401SolicitorOfCaseWithdrawalBeforeIssue() {
+    void shouldNotifyFL401SolicitorOfCaseWithdrawalBeforeIssue() {
         solicitorEmailNotificationEventHandler
             .notifyFL401SolicitorOfCaseWithdrawalBeforeIssue(solicitorNotificationEmailEvent);
         Mockito.verify(solicitorEmailService,Mockito.times(1))
@@ -112,7 +112,7 @@ public class SolicitorEmailNotificationEventHandlerTest {
     }
 
     @Test
-    public void shouldNotifyRpaForCaseIssuance() throws Exception {
+    void shouldNotifyRpaForCaseIssuance() throws Exception {
         CaseData caseData = CaseData.builder()
             .consentOrder(Yes)
             .id(123L)

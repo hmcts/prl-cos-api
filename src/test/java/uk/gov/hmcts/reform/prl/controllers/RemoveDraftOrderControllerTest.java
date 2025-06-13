@@ -2,20 +2,16 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.annotation.PropertySource;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
@@ -38,6 +34,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -47,22 +44,19 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @ExtendWith(MockitoExtension.class)
 @PropertySource(value = "classpath:application.yaml")
-@Slf4j
-public class RemoveDraftOrderControllerTest {
-
-    @Mock
-    private  ObjectMapper objectMapper;
-    @Mock
-    private  RemoveDraftOrderService removeDraftOrderService;
+class RemoveDraftOrderControllerTest {
 
     @InjectMocks
     private RemoveDraftOrderController removeDraftOrderController;
 
     @Mock
-    private AuthorisationService authorisationService;
+    private  ObjectMapper objectMapper;
 
-    public static final String authToken = "Bearer TestAuthToken";
-    public static final String s2sToken = "s2s AuthToken";
+    @Mock
+    private  RemoveDraftOrderService removeDraftOrderService;
+
+    @Mock
+    private AuthorisationService authorisationService;
 
     @Mock
     private UserService userService;
@@ -71,17 +65,17 @@ public class RemoveDraftOrderControllerTest {
     ElementUtils elementUtils;
 
     private CaseData caseData;
-
     private List<Element<DraftOrder>> draftOrderCollection;
 
-    private static final String testAuth = "auth";
-
+    private static final String AUTH_TOKEN = "Bearer TestAuthToken";
+    private static final String S2S_TOKEN = "s2s AuthToken";
     private static final String REMOVE_DRAFT_ORDERS_DYNAMIC_LIST = "removeDraftOrdersDynamicList";
 
-    private static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
+
+
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
 
         draftOrderCollection = List.of(Element.<DraftOrder>builder()
              .id(UUID.randomUUID())
@@ -111,16 +105,10 @@ public class RemoveDraftOrderControllerTest {
             .removeDraftOrderFields(RemoveDraftOrderFields.builder()
                                         .removeDraftOrderText("Draft removed").build())
             .build();
-
-        when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder()
-                                                                                     .email("test@gmail.com")
-                                                                                     .build());
-        when(elementUtils.getDynamicListSelectedValue(Mockito.any(),Mockito.any()))
-            .thenReturn(UUID.fromString(PrlAppsConstants.TEST_UUID));
     }
 
     @Test
-    public void testRemoveDraftOrderDropDown() {
+    void testRemoveDraftOrderDropDown() {
 
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put(REMOVE_DRAFT_ORDERS_DYNAMIC_LIST, ElementUtils.asDynamicList(
@@ -140,17 +128,17 @@ public class RemoveDraftOrderControllerTest {
 
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(removeDraftOrderService.getDraftOrderDynamicList(caseData, callbackRequest.getEventId(), authToken)).thenReturn(caseDataMap);
+        when(removeDraftOrderService.getDraftOrderDynamicList(caseData, callbackRequest.getEventId(), AUTH_TOKEN)).thenReturn(caseDataMap);
         AboutToStartOrSubmitCallbackResponse response = removeDraftOrderController
-            .generateRemoveDraftOrderDropDown(authToken,s2sToken, callbackRequest);
-        Assert.assertNotNull(response);
-        Assert.assertNotNull(response.getData());
+            .generateRemoveDraftOrderDropDown(AUTH_TOKEN,S2S_TOKEN, callbackRequest);
+        assertNotNull(response);
+        assertNotNull(response.getData());
         DynamicList supportedDraftOrderList = (DynamicList) response.getData().get(REMOVE_DRAFT_ORDERS_DYNAMIC_LIST);
         assertEquals(2, supportedDraftOrderList.getListItems().size());
     }
 
     @Test
-    public void testRemoveDraftOrderDropDownWithDraftOrderCollectionIsNull() {
+    void testRemoveDraftOrderDropDownWithDraftOrderCollectionIsNull() {
 
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put(REMOVE_DRAFT_ORDERS_DYNAMIC_LIST, ElementUtils.asDynamicList(
@@ -179,23 +167,15 @@ public class RemoveDraftOrderControllerTest {
 
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData1);
-        when(removeDraftOrderService.getDraftOrderDynamicList(caseData1, callbackRequest.getEventId(), authToken)).thenReturn(caseDataMap);
         AboutToStartOrSubmitCallbackResponse response = removeDraftOrderController
-            .generateRemoveDraftOrderDropDown(authToken,s2sToken, callbackRequest);
-        Assert.assertNotNull(response);
-        Assert.assertNotNull(response.getErrors());
-        assertEquals("There are no draft orders", response.getErrors().get(0));
+            .generateRemoveDraftOrderDropDown(AUTH_TOKEN,S2S_TOKEN, callbackRequest);
+        assertNotNull(response);
+        assertNotNull(response.getErrors());
+        assertEquals("There are no draft orders", response.getErrors().getFirst());
     }
 
     @Test
-    public void testRemoveDraftOrderDropDownAndAuthorizationFalse() {
-
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put(REMOVE_DRAFT_ORDERS_DYNAMIC_LIST, ElementUtils.asDynamicList(
-            draftOrderCollection,
-            null,
-            DraftOrder::getLabelForOrdersDynamicList
-        ));
+    void testRemoveDraftOrderDropDownAndAuthorizationFalse() {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule()));
         CallbackRequest callbackRequest = CallbackRequest.builder()
@@ -209,20 +189,13 @@ public class RemoveDraftOrderControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
 
         RuntimeException exception =  assertThrows(RuntimeException.class, () ->
-            removeDraftOrderController.generateRemoveDraftOrderDropDown(authToken,s2sToken, callbackRequest));
+            removeDraftOrderController.generateRemoveDraftOrderDropDown(AUTH_TOKEN,S2S_TOKEN, callbackRequest));
 
         assertEquals("Invalid Client", exception.getMessage());
     }
 
     @Test
-    public void testHandleRemoveDraftOrderAboutToSubmitted() {
-
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put(REMOVE_DRAFT_ORDERS_DYNAMIC_LIST, ElementUtils.asDynamicList(
-            draftOrderCollection,
-            null,
-            DraftOrder::getLabelForOrdersDynamicList
-        ));
+    void testHandleRemoveDraftOrderAboutToSubmitted() {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule()));
         CallbackRequest callbackRequest = CallbackRequest.builder()
@@ -247,18 +220,18 @@ public class RemoveDraftOrderControllerTest {
 
         when(removeDraftOrderService.removeSelectedDraftOrder(caseData)).thenReturn(returnDraftOrderCollection);
         AboutToStartOrSubmitCallbackResponse response = removeDraftOrderController
-            .handleRemoveDraftOrderAboutToSubmitted(authToken,s2sToken, callbackRequest);
-        Assert.assertNotNull(response);
-        Assert.assertNotNull(response.getData());
+            .handleRemoveDraftOrderAboutToSubmitted(AUTH_TOKEN,S2S_TOKEN, callbackRequest);
+        assertNotNull(response);
+        assertNotNull(response.getData());
         List<Element<DraftOrder>> returnDraftOrderList = (List<Element<DraftOrder>>) response.getData()
             .get(RemoveDraftOrderController.DRAFT_ORDER_COLLECTION);
         assertEquals(1, returnDraftOrderList.size());
-        assertEquals(UUID.fromString(PrlAppsConstants.TEST_UUID), returnDraftOrderList.get(0).getId());
+        assertEquals(UUID.fromString(PrlAppsConstants.TEST_UUID), returnDraftOrderList.getFirst().getId());
         assertEquals("Draft removed",  response.getData().get(RemoveDraftOrderController.REMOVED_DRAFT_ORDER_TEXT));
     }
 
     @Test
-    public void testHandleRemoveDraftOrderAboutToSubmittedAndAuthorizationFalse() {
+    void testHandleRemoveDraftOrderAboutToSubmittedAndAuthorizationFalse() {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule()));
         CallbackRequest callbackRequest = CallbackRequest.builder()
@@ -272,7 +245,7 @@ public class RemoveDraftOrderControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
 
         RuntimeException exception =  assertThrows(RuntimeException.class, () ->
-            removeDraftOrderController.handleRemoveDraftOrderAboutToSubmitted(authToken,s2sToken, callbackRequest));
+            removeDraftOrderController.handleRemoveDraftOrderAboutToSubmitted(AUTH_TOKEN,S2S_TOKEN, callbackRequest));
 
         assertEquals("Invalid Client", exception.getMessage());
     }

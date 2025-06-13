@@ -10,22 +10,21 @@ import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.core.model.annotations.PactFolder;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.restassured.http.ContentType;
-import net.serenitybdd.rest.SerenityRest;
 import org.apache.http.client.fluent.Executor;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 
@@ -33,6 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonBody;
+import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static uk.gov.hmcts.reform.prl.clients.util.TestConstants.CAFCASS_AUTHORISATION_HEADER;
 import static uk.gov.hmcts.reform.prl.clients.util.TestConstants.CAFCASS_CCD_CASE_TYPE_ID_QUERY_PARAM;
@@ -77,10 +77,10 @@ public class CafcassApiConsumerCcdSearchCaseApiTest {
         System.setProperty("pact.verifier.publishResults", "true");
     }
 
-    @MockBean
+    @MockitoBean
     private IdamClient idamClient;
 
-    @After
+    @AfterEach
     void tearDown() {
         Executor.closeIdleConnections();
     }
@@ -118,8 +118,7 @@ public class CafcassApiConsumerCcdSearchCaseApiTest {
     @PactTestFor(pactMethod = CAFCASS_GET_PACT_METHOD)
     public void verifySearchCasesByDateRange(MockServer mockServer) {
         String actualResponseBody =
-                SerenityRest
-                        .given()
+                given()
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .header(CAFCASS_AUTHORISATION_HEADER, CAFCASS_TEST_AUTH_TOKEN)
                         .header(CAFCASS_SERVICE_AUTHORISATION_HEADER, CAFCASS_TEST_SERVICE_AUTH_TOKEN)

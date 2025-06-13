@@ -25,37 +25,26 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
-public class C100CaseInviteServiceTest {
-
+class C100CaseInviteServiceTest {
 
     @InjectMocks
-    C100CaseInviteService c100CaseInviteService;
+    private C100CaseInviteService c100CaseInviteService;
 
     @Mock
-    CaseInviteEmailService caseInviteEmailService;
+    private CaseInviteEmailService caseInviteEmailService;
 
     @Mock
-    LaunchDarklyClient launchDarklyClient;
+    private LaunchDarklyClient launchDarklyClient;
 
-    private CaseData caseDataWithRespondentsAndEmailsNoRepresentation;
-
-    private CaseData caseDataWithRespondentsAndEmailsOnePartyNoRepresentation;
-
-
-    private CaseData caseDataWithRespondentsAllWithRepresentation;
-    private CaseData caseDataWithApplicants;
-
-    private CaseData caseDataNoRespondents;
-
-    private CaseData citizenCaseDataWithApplicantEmail;
-
-    PartyDetails respondentOneWithEmail;
-    PartyDetails respondentTwoWithEmail;
-    PartyDetails applicantWithOutEmail;
-    PartyDetails applicantWithEmail;
+    private PartyDetails respondentOneWithEmail;
+    private PartyDetails respondentTwoWithEmail;
+    private PartyDetails applicantWithOutEmail;
+    private PartyDetails applicantWithEmail;
+    private PartyDetails secondRespondentWithEmailAndRepresentation;
+    private PartyDetails respondentOneWithEmailAndRepresentation;
 
     @BeforeEach
-    public void init() {
+    void setup() {
 
         respondentOneWithEmail = PartyDetails.builder()
             .firstName("Respondent")
@@ -72,32 +61,6 @@ public class C100CaseInviteServiceTest {
             .email("respondentTwo@email.com")
             .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
             .build();
-
-        List<Element<PartyDetails>> respondentsWithEmailsNoRepresentation = List.of(element(respondentOneWithEmail),
-                                                                                    element(respondentTwoWithEmail));
-
-        caseDataWithRespondentsAndEmailsNoRepresentation = CaseData.builder()
-            .caseTypeOfApplication("C100")
-            .applicants(List.of(element(PartyDetails.builder().canYouProvideEmailAddress(YesOrNo.No).build())))
-            .respondents(respondentsWithEmailsNoRepresentation).build();
-
-        PartyDetails respondentTwoWithEmailAndRepresentation = PartyDetails.builder()
-            .firstName("Respondent")
-            .lastName("Two")
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .email("respondentTwo@email.com")
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-            .build();
-
-        List<Element<PartyDetails>> respondentsWithEmailsOneNoRepresentation = List.of(element(respondentOneWithEmail),
-                                                                                       element(respondentTwoWithEmailAndRepresentation));
-
-
-        caseDataWithRespondentsAndEmailsOnePartyNoRepresentation = CaseData.builder()
-            .caseTypeOfApplication("C100")
-            .applicants(List.of(element(PartyDetails.builder().canYouProvideEmailAddress(YesOrNo.Yes)
-                                            .doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
-            .respondents(respondentsWithEmailsOneNoRepresentation).build();
 
         PartyDetails respondentOneNoEmail = PartyDetails.builder()
             .firstName("Respondent")
@@ -121,7 +84,7 @@ public class C100CaseInviteServiceTest {
             .applicants(List.of(element(PartyDetails.builder().canYouProvideEmailAddress(YesOrNo.No).build())))
             .respondents(respondentsNoEmailsNoRepresentation).build();
 
-        PartyDetails respondentOneWithEmailAndRepresentation = PartyDetails.builder()
+        respondentOneWithEmailAndRepresentation = PartyDetails.builder()
             .firstName("Respondent")
             .lastName("One")
             .canYouProvideEmailAddress(YesOrNo.Yes)
@@ -129,25 +92,12 @@ public class C100CaseInviteServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
 
-        PartyDetails secondRespondentWithEmailAndRepresentation = PartyDetails.builder()
+        secondRespondentWithEmailAndRepresentation = PartyDetails.builder()
             .firstName("Respondent")
             .lastName("Two")
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("respondentTwo@email.com")
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-            .build();
-
-        List<Element<PartyDetails>> respondentsWithEmailsAndRepresentation = List.of(element(respondentOneWithEmailAndRepresentation),
-                                                                                     element(secondRespondentWithEmailAndRepresentation));
-
-        caseDataWithRespondentsAllWithRepresentation = CaseData.builder()
-            .caseTypeOfApplication("C100")
-            .applicants(List.of(element(PartyDetails.builder().canYouProvideEmailAddress(YesOrNo.No).build())))
-            .respondents(respondentsWithEmailsAndRepresentation).build();
-
-
-        caseDataNoRespondents = CaseData.builder()
-            .caseTypeOfApplication("C100")
             .build();
 
         applicantWithEmail = PartyDetails.builder()
@@ -165,15 +115,6 @@ public class C100CaseInviteServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
             .build();
 
-        citizenCaseDataWithApplicantEmail = CaseData.builder()
-            .caseTypeOfApplication("C100")
-            .caseCreatedBy(CaseCreatedBy.CITIZEN)
-            .applicants(List.of(element(applicantWithEmail),
-                                element(applicantWithOutEmail)))
-            .respondents(List.of(element(respondentOneWithEmailAndRepresentation),
-                                 element(secondRespondentWithEmailAndRepresentation)))
-            .build();
-
         CaseData.builder()
             .caseTypeOfApplication("C100")
             .caseCreatedBy(CaseCreatedBy.SOLICITOR)
@@ -186,14 +127,40 @@ public class C100CaseInviteServiceTest {
     }
 
     @Test
-    public void givenRespondentsWithNoRepresentation_whenCaseInvitesGenerated_thenSentToAllRespondentsAndStoredInCaseData() {
+    void givenRespondentsWithNoRepresentation_whenCaseInvitesGenerated_thenSentToAllRespondentsAndStoredInCaseData() {
+        List<Element<PartyDetails>> respondentsWithEmailsNoRepresentation = List.of(element(respondentOneWithEmail),
+                                                                                    element(respondentTwoWithEmail));
+
+        CaseData caseDataWithRespondentsAndEmailsNoRepresentation = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(element(PartyDetails.builder().canYouProvideEmailAddress(YesOrNo.No).build())))
+            .respondents(respondentsWithEmailsNoRepresentation).build();
+
         c100CaseInviteService.sendCaseInviteEmail(caseDataWithRespondentsAndEmailsNoRepresentation);
 
         verify(caseInviteEmailService,times(2)).sendCaseInviteEmail(any(),any(),any());
     }
 
     @Test
-    public void givenRespondentWithRepresentation_whenCaseInvitesGenerated_thenSentToOnlyThoseWithoutRepresentation() {
+    void givenRespondentWithRepresentation_whenCaseInvitesGenerated_thenSentToOnlyThoseWithoutRepresentation() {
+        PartyDetails respondentTwoWithEmailAndRepresentation = PartyDetails.builder()
+            .firstName("Respondent")
+            .lastName("Two")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("respondentTwo@email.com")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+
+        List<Element<PartyDetails>> respondentsWithEmailsOneNoRepresentation = List.of(element(respondentOneWithEmail),
+                                                                                       element(respondentTwoWithEmailAndRepresentation));
+
+
+        CaseData caseDataWithRespondentsAndEmailsOnePartyNoRepresentation = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(element(PartyDetails.builder().canYouProvideEmailAddress(YesOrNo.Yes)
+                                            .doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
+            .respondents(respondentsWithEmailsOneNoRepresentation).build();
+
         c100CaseInviteService.sendCaseInviteEmail(caseDataWithRespondentsAndEmailsOnePartyNoRepresentation);
 
         //two respondents but only one should have a case invite generated
@@ -201,32 +168,41 @@ public class C100CaseInviteServiceTest {
     }
 
     @Test
-    public void givenMultipleRespondentsWithNoEmail_whenCaseInvitesGenerated_thenNoRespondentsReceiveInvite() {
+    void givenMultipleRespondentsWithNoEmail_whenCaseInvitesGenerated_thenNoRespondentsReceiveInvite() {
         verify(caseInviteEmailService,times(0)).sendCaseInviteEmail(any(),any(),any());
     }
 
     @Test
-    public void givenMultipleRespondentsWithEmailAndRepresentation_whenCaseInvitesGenerated_thenNoRespondentsReceiveInvite() {
+    void givenMultipleRespondentsWithEmailAndRepresentation_whenCaseInvitesGenerated_thenNoRespondentsReceiveInvite() {
         verify(caseInviteEmailService,times(0)).sendCaseInviteEmail(any(),any(),any());
     }
 
     @Test
-    public void givenNoRespondents_whenCaseInvitesGenerated_thenNoInvitesGenerated() {
+    void givenNoRespondents_whenCaseInvitesGenerated_thenNoInvitesGenerated() {
         verify(caseInviteEmailService,times(0)).sendCaseInviteEmail(any(),any(),any());
     }
 
     @Test
-    public void noCitizenApplicantsInvitesGeneratedAndSentWhenLdFlagIsTurnedOff() {
+    void noCitizenApplicantsInvitesGeneratedAndSentWhenLdFlagIsTurnedOff() {
         verify(caseInviteEmailService, times(0)).sendCaseInviteEmail(any(), any(), any());
     }
 
     @Test
-    public void noCitizenApplicantsInvitesGeneratedAndSentForCaseCreatedBySolicitor() {
+    void noCitizenApplicantsInvitesGeneratedAndSentForCaseCreatedBySolicitor() {
         verify(caseInviteEmailService,times(0)).sendCaseInviteEmail(any(),any(),any());
     }
 
     @Test
-    public void generateApplicantsInvitesAndSentForCaseCreatedByCitizen() {
+    void generateApplicantsInvitesAndSentForCaseCreatedByCitizen() {
+        CaseData citizenCaseDataWithApplicantEmail = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .caseCreatedBy(CaseCreatedBy.CITIZEN)
+            .applicants(List.of(element(applicantWithEmail),
+                                element(applicantWithOutEmail)))
+            .respondents(List.of(element(respondentOneWithEmailAndRepresentation),
+                                 element(secondRespondentWithEmailAndRepresentation)))
+            .build();
+
         when(launchDarklyClient.isFeatureEnabled("generate-ca-citizen-applicant-pin")).thenReturn(true);
 
         c100CaseInviteService.sendCaseInviteEmail(citizenCaseDataWithApplicantEmail);
@@ -234,20 +210,27 @@ public class C100CaseInviteServiceTest {
     }
 
     @Test
-    public void testToGenerateCaseInviteAndSendToC100Respondent() {
+    void testToGenerateCaseInviteAndSendToC100Respondent() {
+        List<Element<PartyDetails>> respondentsWithEmailsAndRepresentation = List.of(element(respondentOneWithEmailAndRepresentation),
+                                                                                     element(secondRespondentWithEmailAndRepresentation));
+
+        CaseData caseDataWithRespondentsAllWithRepresentation = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(element(PartyDetails.builder().canYouProvideEmailAddress(YesOrNo.No).build())))
+            .respondents(respondentsWithEmailsAndRepresentation).build();
 
         List<Element<CaseInvite>> respondentCaseInvites = c100CaseInviteService
             .generateAndSendCaseInviteForCaRespondent(caseDataWithRespondentsAllWithRepresentation, element(respondentTwoWithEmail));
         assertEquals(1, respondentCaseInvites.size());
-        assertEquals(YesOrNo.No, respondentCaseInvites.get(0).getValue().getIsApplicant());
-        assertEquals("respondentTwo@email.com", respondentCaseInvites.get(0).getValue()
+        assertEquals(YesOrNo.No, respondentCaseInvites.getFirst().getValue().getIsApplicant());
+        assertEquals("respondentTwo@email.com", respondentCaseInvites.getFirst().getValue()
             .getCaseInviteEmail());
     }
 
     @Test
-    public void testToGenerateCaseInviteAndSendToC100Applicant() {
+    void testToGenerateCaseInviteAndSendToC100Applicant() {
 
-        caseDataWithApplicants = CaseData.builder()
+        CaseData caseDataWithApplicants = CaseData.builder()
             .caseTypeOfApplication("C100")
             .applicantCaseName("test")
             .applicants(List.of(element(applicantWithEmail), element(applicantWithOutEmail)))
@@ -257,13 +240,13 @@ public class C100CaseInviteServiceTest {
         List<Element<CaseInvite>> applicantCaseInvites = c100CaseInviteService
             .generateAndSendCaseInviteEmailForCaApplicant(caseDataWithApplicants, element(applicantWithEmail));
         assertEquals(1, applicantCaseInvites.size());
-        assertEquals(YesOrNo.Yes, applicantCaseInvites.get(0).getValue().getIsApplicant());
-        assertEquals("applicant@email.com", applicantCaseInvites.get(0).getValue()
+        assertEquals(YesOrNo.Yes, applicantCaseInvites.getFirst().getValue().getIsApplicant());
+        assertEquals("applicant@email.com", applicantCaseInvites.getFirst().getValue()
             .getCaseInviteEmail());
     }
 
     @Test
-    public void testToGenerateCaseInviteAndSendToC100ApplicantAndRespondent() {
+    void testToGenerateCaseInviteAndSendToC100ApplicantAndRespondent() {
 
         PartyDetails respondentOne = PartyDetails.builder()
             .firstName("Respondent")
@@ -307,12 +290,12 @@ public class C100CaseInviteServiceTest {
         List<Element<CaseInvite>> partyCaseInvites = c100CaseInviteService
             .generateAndSendCaseInviteForAllC100AppAndResp(caseData);
         assertEquals(2, partyCaseInvites.size());
-        assertEquals(YesOrNo.No, partyCaseInvites.get(0).getValue().getIsApplicant());
+        assertEquals(YesOrNo.No, partyCaseInvites.getFirst().getValue().getIsApplicant());
 
     }
 
     @Test
-    public void testToGenerateCaseInviteAndSendToC100ApplicantAndRespondent2() {
+    void testToGenerateCaseInviteAndSendToC100ApplicantAndRespondent2() {
 
         PartyDetails respondentOne = PartyDetails.builder()
             .firstName("Respondent")
@@ -356,7 +339,7 @@ public class C100CaseInviteServiceTest {
         List<Element<CaseInvite>> partyCaseInvites = c100CaseInviteService
             .generateAndSendCaseInviteForAllC100AppAndResp(caseData);
         assertEquals(2, partyCaseInvites.size());
-        assertEquals(YesOrNo.Yes, partyCaseInvites.get(0).getValue().getIsApplicant());
+        assertEquals(YesOrNo.Yes, partyCaseInvites.getFirst().getValue().getIsApplicant());
 
     }
 }

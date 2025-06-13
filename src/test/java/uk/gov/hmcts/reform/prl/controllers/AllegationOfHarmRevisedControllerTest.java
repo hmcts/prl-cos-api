@@ -21,10 +21,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-
-
 @ExtendWith(MockitoExtension.class)
-public class AllegationOfHarmRevisedControllerTest {
+class AllegationOfHarmRevisedControllerTest {
+
+    @InjectMocks
+    private AllegationOfHarmRevisedController allegationOfHarmRevisedController;
 
     @Mock
     AllegationOfHarmRevisedService allegationOfHarmRevisedService;
@@ -32,19 +33,16 @@ public class AllegationOfHarmRevisedControllerTest {
     @Mock
     ObjectMapper objectMapper;
 
-    @InjectMocks
-    private AllegationOfHarmRevisedController allegationOfHarmRevisedController;
-
     @Mock
     private AuthorisationService authorisationService;
 
     private CaseDetails caseDetails;
 
-    public static final String authToken = "Bearer TestAuthToken";
-    public static final String s2sToken = "s2s AuthToken";
+    public static final String AUTH_TOKEN = "Bearer TestAuthToken";
+    public static final String S2S_TOKEN = "s2s AuthToken";
 
     @Test
-    public void testPrepopulateChildData() {
+    void testPrepopulateChildData() {
         CaseData caseData = CaseData.builder()
             .id(123L)
             .build();
@@ -76,7 +74,7 @@ public class AllegationOfHarmRevisedControllerTest {
     }
 
     @Test
-    public void testMidEvent() {
+    void testMidEvent() {
         CaseData caseData = CaseData.builder()
             .id(123L)
             .build();
@@ -89,7 +87,6 @@ public class AllegationOfHarmRevisedControllerTest {
             .lastModified(LocalDateTime.now())
             .build();
 
-        String authorisation = "authorisation";
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
@@ -102,7 +99,7 @@ public class AllegationOfHarmRevisedControllerTest {
             .id(caseDetails.getId())
             .state(State.valueOf(caseDetails.getState()))
             .build();
-        allegationOfHarmRevisedController.handleMidEvent(authToken, s2sToken, callbackRequest);
+        allegationOfHarmRevisedController.handleMidEvent(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         verify(allegationOfHarmRevisedService, times(1))
             .resetFields(caseData1, stringObjectMap);
     }

@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.gatekeeping;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,7 +26,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAGISTRATES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TIER_OF_JUDICIARY;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class AllocatedJudgeService {
@@ -66,11 +64,11 @@ public class AllocatedJudgeService {
                 allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
                 allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.judge));
                 if (null != judgeDetails && !judgeDetails.isEmpty()) {
-                    allocatedJudgeBuilder.judgeName(judgeDetails.get(0).getSurname());
-                    allocatedJudgeBuilder.judgeEmail(judgeDetails.get(0).getEmailId());
+                    allocatedJudgeBuilder.judgeName(judgeDetails.getFirst().getSurname());
+                    allocatedJudgeBuilder.judgeEmail(judgeDetails.getFirst().getEmailId());
                     allocatedJudgeBuilder.judgePersonalCode(judgePersonalCode[0]);
-                    allocatedJudgeBuilder.tierOfJudge(CollectionUtils.isNotEmpty(judgeDetails.get(0).getAppointments())
-                                                          ? judgeDetails.get(0).getAppointments().get(0).getAppointment()
+                    allocatedJudgeBuilder.tierOfJudge(CollectionUtils.isNotEmpty(judgeDetails.getFirst().getAppointments())
+                                                          ? judgeDetails.getFirst().getAppointments().getFirst().getAppointment()
                                                           : null);
                 }
             } else if (null != legalAdviserList && null != legalAdviserList.getValue()) {

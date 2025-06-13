@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -9,7 +8,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.ProceedingsEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
@@ -36,29 +34,26 @@ import static org.mockito.Mockito.when;
 
 @PropertySource(value = "classpath:application.yaml")
 @ExtendWith(MockitoExtension.class)
-public class OtherProceedingsControllerTest {
-
-    private MockMvc mockMvc;
-
-    private CaseData caseData;
+class OtherProceedingsControllerTest {
 
     @InjectMocks
     private OtherProceedingsController otherProceedingsController;
 
-    public static final String authToken = "Bearer TestAuthToken";
     @Mock
     private OtherProceedingsService otherProceedingsService;
+
     @Mock
     private ObjectMapper objectMapper;
 
-    public static final String s2sToken = "s2s AuthToken";
+    public static final String AUTH_TOKEN = "Bearer TestAuthToken";
+    public static final String S2S_TOKEN = "s2s AuthToken";
 
     @Mock
     private AuthorisationService authorisationService;
 
 
     @Test
-    public void testOtherProceedingsAboutToSubmit() throws Exception {
+    void testOtherProceedingsAboutToSubmit() throws Exception {
         ArrayList<TypeOfOrderEnum> typeOfOrder = new ArrayList<>();
         typeOfOrder.add(TypeOfOrderEnum.emergencyProtectionOrder);
         typeOfOrder.add(TypeOfOrderEnum.childArrangementsOrder);
@@ -73,7 +68,7 @@ public class OtherProceedingsControllerTest {
         Element<ProceedingDetails> proceedingDetailsElement = Element.<ProceedingDetails>builder()
                 .value(proceedingDetails).build();
         List<Element<ProceedingDetails>> existingProceedings = Collections.singletonList(proceedingDetailsElement);
-        caseData = CaseData.builder().existingProceedings(existingProceedings).build();
+        CaseData caseData = CaseData.builder().existingProceedings(existingProceedings).build();
         Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap.put("existingProceedings",existingProceedings);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -84,13 +79,13 @@ public class OtherProceedingsControllerTest {
                         .data(stringObjectMap).build()).build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = otherProceedingsController.otherProceedingsAboutToSubmit(
-                authToken,s2sToken,callbackRequest);
+                AUTH_TOKEN,S2S_TOKEN,callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse);
     }
 
 
     @Test
-    public void testExceptionForOtherProceedingsAboutToSubmit() throws Exception {
+    void testExceptionForOtherProceedingsAboutToSubmit() {
         CaseData caseData = CaseData.builder()
                 .id(123L)
                 .build();
@@ -99,20 +94,12 @@ public class OtherProceedingsControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
                 .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                         .data(stringObjectMap).build()).build();
-        doNothing().when(otherProceedingsService).populateCaseDocumentsData(
-                any(CaseData.class),any(Map.class));
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            otherProceedingsController
-                    .otherProceedingsAboutToSubmit(authToken,s2sToken,callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
+            otherProceedingsController.otherProceedingsAboutToSubmit(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
+        });
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
-
-    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
-                                                                 String expectedMessage) {
-        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
-        assertEquals(expectedMessage, exception.getMessage());
-    }
-
-
 }

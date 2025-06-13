@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
-public class AddCafcassOfficerServiceTest {
+class AddCafcassOfficerServiceTest {
 
     @InjectMocks
     private AddCafcassOfficerService addCafcassOfficerService;
@@ -34,9 +34,8 @@ public class AddCafcassOfficerServiceTest {
     @Mock
     ObjectMapper objectMapper;
 
-
     @Test
-    public void testPopulateCafcassOfficerDetails() {
+    void testPopulateCafcassOfficerDetails() {
         List<Element<Child>> children = new ArrayList<>();
         Child child = Child.builder()
             .firstName("test")
@@ -70,9 +69,8 @@ public class AddCafcassOfficerServiceTest {
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         addCafcassOfficerService.populateCafcassOfficerDetails(callbackRequest);
-        assertEquals("a a", caseData.getChildren().get(0).getValue().getCafcassOfficerName());
-        assertEquals("abc@test.net", caseData.getChildren().get(0).getValue().getCafcassOfficerEmailAddress());
-        assertEquals("01234567890", caseData.getChildren().get(0).getValue().getCafcassOfficerPhoneNo());
+        assertEquals("a a", caseData.getChildren().getFirst().getValue().getCafcassOfficerName());
+        assertEquals("abc@test.net", caseData.getChildren().getFirst().getValue().getCafcassOfficerEmailAddress());
+        assertEquals("01234567890", caseData.getChildren().getFirst().getValue().getCafcassOfficerPhoneNo());
     }
-
 }

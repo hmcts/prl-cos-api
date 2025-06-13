@@ -7,9 +7,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
@@ -46,7 +46,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 
 @Slf4j
 @SpringBootTest
-@ExtendWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration
 public class PrePopulateFeeAndSolicitorNameControllerIntegrationTest {
 
@@ -55,31 +55,31 @@ public class PrePopulateFeeAndSolicitorNameControllerIntegrationTest {
     @Autowired
     private WebApplicationContext webApplicationContext;
 
-    @MockBean
+    @MockitoBean
     FeeService feeService;
 
-    @MockBean
+    @MockitoBean
     UserService userService;
 
-    @MockBean
+    @MockitoBean
     CourtFinderService courtLocatorService;
 
-    @MockBean
+    @MockitoBean
     SubmitAndPayChecker submitAndPayChecker;
 
-    @MockBean
+    @MockitoBean
     DgsService dgsService;
 
-    @MockBean
+    @MockitoBean
     C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
 
-    @MockBean
+    @MockitoBean
     OrganisationService organisationService;
 
-    @MockBean
+    @MockitoBean
     DocumentLanguageService documentLanguageService;
 
-    @MockBean
+    @MockitoBean
     AuthorisationService authorisationService;
 
     @BeforeEach

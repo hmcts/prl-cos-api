@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.handlers;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +32,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import static org.apache.commons.lang3.RandomUtils.nextLong;
+import static java.util.concurrent.ThreadLocalRandom.current;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -86,7 +87,7 @@ public class NoticeOfChangeEventHandlerTest {
     private CaseData caseData;
 
     @BeforeEach
-    public void init() {
+    void init() {
         applicant1 = PartyDetails.builder()
             .firstName("af1").lastName("al1")
             .canYouProvideEmailAddress(YesOrNo.Yes)
@@ -128,7 +129,7 @@ public class NoticeOfChangeEventHandlerTest {
             .email("ofl@test.com")
             .build();
         caseData = CaseData.builder()
-            .id(nextLong())
+            .id(current().nextLong(1_000_000_000L, 9_999_999_999L))
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(Arrays.asList(element(applicant1), element(applicant2)))
             .respondents(Arrays.asList(element(respondent1), element(respondent2)))
@@ -152,7 +153,7 @@ public class NoticeOfChangeEventHandlerTest {
     }
 
     @Test
-    public void shouldNotifyLegalRepresentative() {
+    void shouldNotifyLegalRepresentative() {
 
         noticeOfChangeEventHandler.notifyLegalRepresentative(noticeOfChangeEvent);
 
@@ -163,7 +164,7 @@ public class NoticeOfChangeEventHandlerTest {
     }
 
     @Test
-    public void shouldNotifyWhenLegalRepresentativeRemoved() {
+    void shouldNotifyWhenLegalRepresentativeRemoved() {
         noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);
 
         verify(emailService,times(4)).send(Mockito.anyString(),
@@ -173,7 +174,7 @@ public class NoticeOfChangeEventHandlerTest {
     }
 
     @Test
-    public void shouldNotifyWhenCaRespondentRemoved() {
+    void shouldNotifyWhenCaRespondentRemoved() {
         noticeOfChangeEvent = noticeOfChangeEvent.toBuilder()
             .representing(CARESPONDENT).build();
 
@@ -186,7 +187,7 @@ public class NoticeOfChangeEventHandlerTest {
     }
 
     @Test
-    public void shouldNotifyWhenDaApplicantRemoved() {
+    void shouldNotifyWhenDaApplicantRemoved() {
         caseData = caseData.toBuilder()
             .applicants(Collections.emptyList())
             .respondents(Collections.emptyList())
@@ -206,7 +207,7 @@ public class NoticeOfChangeEventHandlerTest {
     }
 
     @Test
-    public void shouldNotifyWhenDaRespondentRemoved() {
+    void shouldNotifyWhenDaRespondentRemoved() {
         caseData = caseData.toBuilder()
             .applicants(Collections.emptyList())
             .respondents(Collections.emptyList())
@@ -229,7 +230,7 @@ public class NoticeOfChangeEventHandlerTest {
     }
 
     @Test
-    public void shouldNotifyWhenDaRespondentRemovedPreferencePost() {
+    void shouldNotifyWhenDaRespondentRemovedPreferencePost() {
         caseData = caseData.toBuilder()
             .applicants(Collections.emptyList())
             .respondents(Collections.emptyList())
@@ -252,7 +253,7 @@ public class NoticeOfChangeEventHandlerTest {
     }
 
     @Test
-    public void shouldNotSendAccessCodeToLipWhenAccessCodeNull() {
+    void shouldNotSendAccessCodeToLipWhenAccessCodeNull() {
 
         noticeOfChangeEvent = noticeOfChangeEvent.toBuilder()
             .accessCode(null)
@@ -260,11 +261,11 @@ public class NoticeOfChangeEventHandlerTest {
 
         noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);
 
-        Assert.assertNull(bulkPrintService.send(anyString(), anyString(), anyString(), anyList(), anyString()));
+        assertNull(bulkPrintService.send(anyString(), anyString(), anyString(), anyList(), anyString()));
     }
 
     @Test
-    public void shouldNotSendAccessCodeToLipWhenAddressIsNull() {
+    void shouldNotSendAccessCodeToLipWhenAddressIsNull() {
         applicant1 = applicant1.toBuilder()
             .contactPreferences(ContactPreferences.post)
             .build();
@@ -277,11 +278,11 @@ public class NoticeOfChangeEventHandlerTest {
 
         noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);
 
-        Assert.assertNull(bulkPrintService.send(anyString(), anyString(), anyString(), anyList(), anyString()));
+        assertNull(bulkPrintService.send(anyString(), anyString(), anyString(), anyList(), anyString()));
     }
 
     @Test
-    public void shouldSendAccessCodeToLipWhenAvailableViaEmail() {
+    void shouldSendAccessCodeToLipWhenAvailableViaEmail() {
         applicant1 = applicant1.toBuilder()
             .contactPreferences(ContactPreferences.post)
             .address(Address.builder()
@@ -316,7 +317,7 @@ public class NoticeOfChangeEventHandlerTest {
 
         noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);
 
-        Assert.assertNotNull(bulkPrintService.send(anyString(), anyString(), anyString(), anyList(), anyString()));
+        assertNotNull(bulkPrintService.send(anyString(), anyString(), anyString(), anyList(), anyString()));
         verify(emailService,times(4)).send(Mockito.anyString(),
                                            Mockito.any(),
                                            Mockito.any(), Mockito.any());

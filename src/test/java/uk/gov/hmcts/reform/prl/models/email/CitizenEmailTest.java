@@ -9,7 +9,7 @@ import static org.hamcrest.core.Is.is;
 public class CitizenEmailTest {
 
     @Test
-    public void customBuilderShouldWork() {
+    void customBuilderShouldWork() {
         assertThat(CitizenEmail.builder().petitionerName("a").build().getPetitionerName(), is("a"));
         assertThat(CitizenEmail.builder().respondentName("b").build().getRespondentName(), is("b"));
         assertThat(CitizenEmail.builder().caseReference("c").build().getCaseReference(), is("c"));

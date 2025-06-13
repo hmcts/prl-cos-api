@@ -30,14 +30,14 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
 @ExtendWith(MockitoExtension.class)
-public class HearingRequestDataMapperTest {
+class HearingRequestDataMapperTest {
 
     @InjectMocks
     HearingRequestDataMapper hearingRequestDataMapper;
 
 
     @Test
-    public void testHearingUrgencyMapperWithAllFields() {
+    void testHearingUrgencyMapperWithAllFields() {
         DynamicListElement dynamicListElement = DynamicListElement.builder()
             .code("test")
             .label("test")
@@ -140,13 +140,13 @@ public class HearingRequestDataMapperTest {
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.amendDischargedVaried)
             .build();
         hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, caseData);
-        assertEquals("INTER",hearingData.getHearingTypes().getListItems().get(0).getCode());
+        assertEquals("INTER",hearingData.getHearingTypes().getListItems().getFirst().getCode());
     }
 
 
 
     @Test
-    public void testHearingUrgencyMapperWithNull() {
+    void testHearingUrgencyMapperWithNull() {
         DynamicListElement dynamicListElement = DynamicListElement.builder()
             .code("test")
             .label("test")
@@ -212,7 +212,7 @@ public class HearingRequestDataMapperTest {
     }
 
     @Test
-    public void testHearingUrgencyMapperWithMultipleApplicants() {
+    void testHearingUrgencyMapperWithMultipleApplicants() {
         DynamicListElement dynamicListElement = DynamicListElement.builder()
             .code("test")
             .label("test")
@@ -295,7 +295,7 @@ public class HearingRequestDataMapperTest {
 
 
     @Test
-    public void testHearingUrgencyMapperWithAllFieldsWithHearingTypes() {
+    void testHearingUrgencyMapperWithAllFieldsWithHearingTypes() {
         DynamicListElement dynamicListElement = DynamicListElement.builder()
             .code("test")
             .label("test")
@@ -374,12 +374,12 @@ public class HearingRequestDataMapperTest {
             .respondentsFL401(partyDetails)
             .build();
         hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, caseData);
-        assertEquals("test",hearingData.getHearingTypes().getListItems().get(0).getCode());
-        assertEquals("test",hearingData.getCourtList().getListItems().get(0).getCode());
+        assertEquals("test",hearingData.getHearingTypes().getListItems().getFirst().getCode());
+        assertEquals("test",hearingData.getCourtList().getListItems().getFirst().getCode());
     }
 
     @Test
-    public void testHearingUrgencyMapperWithAllFieldsWithHearingTypesAndPartyDetailsNull() {
+    void testHearingUrgencyMapperWithAllFieldsWithHearingTypesAndPartyDetailsNull() {
         DynamicListElement dynamicListElement = DynamicListElement.builder()
             .code("test")
             .label("test")
@@ -451,8 +451,8 @@ public class HearingRequestDataMapperTest {
             .caseTypeOfApplication("FL401")
             .build();
         hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, caseData);
-        assertEquals("test",hearingData.getHearingTypes().getListItems().get(0).getCode());
-        assertEquals("test",hearingData.getCourtList().getListItems().get(0).getCode());
+        assertEquals("test",hearingData.getHearingTypes().getListItems().getFirst().getCode());
+        assertEquals("test",hearingData.getCourtList().getListItems().getFirst().getCode());
     }
 
 }

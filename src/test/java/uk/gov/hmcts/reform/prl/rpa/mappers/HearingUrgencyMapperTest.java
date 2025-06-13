@@ -10,14 +10,14 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(MockitoExtension.class)
-public class HearingUrgencyMapperTest {
+class HearingUrgencyMapperTest {
 
     @InjectMocks
     HearingUrgencyMapper hearingUrgencyMapper;
 
 
     @Test
-    public void testHearingUrgencyMapperWithAllFields() {
+    void testHearingUrgencyMapperWithAllFields() {
         CaseData caseData = CaseData.builder().isCaseUrgent(YesOrNo.Yes).setOutReasonsBelow(
             "Hearing with Reduced notice required due to some reasons")
             .caseUrgencyTimeAndReason("Please attend it by tomorrow eod").effortsMadeWithRespondents(
@@ -32,7 +32,7 @@ public class HearingUrgencyMapperTest {
     }
 
     @Test
-    public void testHearingUrgencyMapperWithSomeFields() {
+    void testHearingUrgencyMapperWithSomeFields() {
         CaseData caseData = CaseData.builder().isCaseUrgent(YesOrNo.Yes).setOutReasonsBelow(
             "Hearing with Reduced notice required due to some reasons")
             .caseUrgencyTimeAndReason("Please attend it by tomorrow eod").effortsMadeWithRespondents(

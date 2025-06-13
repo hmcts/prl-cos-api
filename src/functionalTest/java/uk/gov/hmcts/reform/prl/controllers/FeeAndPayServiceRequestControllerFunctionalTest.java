@@ -1,14 +1,14 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.Application;
@@ -29,9 +29,9 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 /*
    These test cases will be enabled once we have merged and integrated with Fee and Pay on Demo environment.
 */
-@ExtendWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
-@Ignore
+@Disabled
 public class FeeAndPayServiceRequestControllerFunctionalTest {
 
     private MockMvc mockMvc;
@@ -39,7 +39,7 @@ public class FeeAndPayServiceRequestControllerFunctionalTest {
     @Autowired
     private WebApplicationContext webApplicationContext;
 
-    @MockBean
+    @MockitoBean
     PaymentRequestService paymentRequestService;
 
     private static final String CREATE_SERVICE_REQUEST = "requests/call-back-controller-about-to-submit-case-creation.json";

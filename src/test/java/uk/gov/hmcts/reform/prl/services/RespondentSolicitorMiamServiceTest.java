@@ -10,13 +10,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
 @ExtendWith(MockitoExtension.class)
-public class RespondentSolicitorMiamServiceTest {
+class RespondentSolicitorMiamServiceTest {
 
     @InjectMocks
     private RespondentSolicitorMiamService respondentSolicitorMiamService;
 
     @Test
-    public void testCollapsableOfWhatIsMiamGettingPopulated() {
+    void testCollapsableOfWhatIsMiamGettingPopulated() {
 
         String responseMap = respondentSolicitorMiamService.getCollapsableOfWhatIsMiamPlaceHolder();
 
@@ -25,7 +25,7 @@ public class RespondentSolicitorMiamServiceTest {
     }
 
     @Test
-    public void testCollapsableOfWhatIsMiamGettingPopulatedWelsh() {
+    void testCollapsableOfWhatIsMiamGettingPopulatedWelsh() {
 
         String responseMap = respondentSolicitorMiamService.getCollapsableOfWhatIsMiamPlaceHolderWelsh();
 
@@ -34,7 +34,7 @@ public class RespondentSolicitorMiamServiceTest {
     }
 
     @Test
-    public void testCollapsableOfHelpMiamCostsExemptionsPlaceHolder() {
+    void testCollapsableOfHelpMiamCostsExemptionsPlaceHolder() {
 
         String responseMap = respondentSolicitorMiamService.getCollapsableOfHelpMiamCostsExemptionsPlaceHolder();
 
@@ -43,7 +43,7 @@ public class RespondentSolicitorMiamServiceTest {
     }
 
     @Test
-    public void testCollapsableOfHelpMiamCostsExemptionsPlaceHolderWelsh() {
+    void testCollapsableOfHelpMiamCostsExemptionsPlaceHolderWelsh() {
 
         String responseMap = respondentSolicitorMiamService.getCollapsableOfHelpMiamCostsExemptionsPlaceHolderWelsh();
 

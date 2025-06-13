@@ -16,14 +16,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @ExtendWith(MockitoExtension.class)
-public class TypeOfApplicationMapperTest {
+class TypeOfApplicationMapperTest {
 
     @InjectMocks
     TypeOfApplicationMapper typeOfApplicationMapper;
 
 
     @Test
-    public void testForTypeOfApplicationMapper() {
+    void testForTypeOfApplicationMapper() {
         List<OrderTypeEnum> orderType = new ArrayList<>();
         orderType.add(OrderTypeEnum.childArrangementsOrder);
         orderType.add(OrderTypeEnum.prohibitedStepsOrder);
@@ -36,7 +36,7 @@ public class TypeOfApplicationMapperTest {
     }
 
     @Test
-    public void testForNoDataTypeOfApplicationMapper() {
+    void testForNoDataTypeOfApplicationMapper() {
         CaseData caseDataInput = CaseData.builder().build();
         assertNotNull(typeOfApplicationMapper.map(caseDataInput));
     }

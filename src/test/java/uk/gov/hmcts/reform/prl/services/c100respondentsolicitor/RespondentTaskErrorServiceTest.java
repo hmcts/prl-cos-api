@@ -12,8 +12,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.apache.commons.lang3.RandomUtils.nextLong;
+import static java.util.concurrent.ThreadLocalRandom.current;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.ALLEGATIONS_OF_HARM_ERROR;
@@ -32,14 +33,14 @@ public class RespondentTaskErrorServiceTest {
 
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         respondentTaskErrorService = new RespondentTaskErrorService();
         respondentTaskErrorService.addEventError(event, error, errorString);
         previousMapSize = respondentTaskErrorService.eventErrors.size();
     }
 
     @Test
-    public void whenAddEventErrorCalledThenMapIncreasesInSize() {
+    void whenAddEventErrorCalledThenMapIncreasesInSize() {
         RespondentSolicitorEvents newEvent = MIAM;
         RespondentEventErrorsEnum newEventError = RespondentEventErrorsEnum.MIAM_ERROR;
 
@@ -49,23 +50,23 @@ public class RespondentTaskErrorServiceTest {
     }
 
     @Test
-    public void whenRemoveEventErrorCalledThenMapDecreasesInSize() {
+    void whenRemoveEventErrorCalledThenMapDecreasesInSize() {
         respondentTaskErrorService.removeError(error);
         assertThat(respondentTaskErrorService.eventErrors).hasSize(previousMapSize - 1);
-        assertTrue(!respondentTaskErrorService.eventErrors.containsKey(error));
+        assertFalse(respondentTaskErrorService.eventErrors.containsKey(error));
     }
 
     @Test
-    public void whenClearingErrorsCalledThenMapCleared() {
+    void whenClearingErrorsCalledThenMapCleared() {
         respondentTaskErrorService.clearErrors();
         assertThat(respondentTaskErrorService.eventErrors).isEmpty();
     }
 
     @Test
-    public void whenGetErrorsCalledThenListOfErrorsReturned() {
+    void whenGetErrorsCalledThenListOfErrorsReturned() {
         final CaseData caseData = CaseData.builder()
-                .id(nextLong())
-                .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .id(current().nextLong(1_000_000_000L, 9_999_999_999L))
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
                 .caseTypeOfApplication(C100_CASE_TYPE)
                 .build();
         respondentTaskErrorService.addEventError(event, error, errorString);

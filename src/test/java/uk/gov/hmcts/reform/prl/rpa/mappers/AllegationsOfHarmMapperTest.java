@@ -8,35 +8,31 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @ExtendWith(MockitoExtension.class)
-public class AllegationsOfHarmMapperTest {
+class AllegationsOfHarmMapperTest {
 
     @InjectMocks
-    AllegationsOfHarmMapper allegationsOfHarmMapper;
+    private AllegationsOfHarmMapper allegationsOfHarmMapper;
 
-    List<ApplicantOrChildren> physicalAbuseVictim;
-    List<ApplicantOrChildren> emotionalAbuseVictim;
-    List<ApplicantOrChildren> psychologicalAbuseVictim;
-    List<ApplicantOrChildren> sexualAbuseVictim;
-    List<ApplicantOrChildren> financialAbuseVictim;
-    List<Element<Behaviours>> listOfbehaviours;
-
-    Behaviours behaviours;
+    private List<ApplicantOrChildren> physicalAbuseVictim;
+    private List<ApplicantOrChildren> emotionalAbuseVictim;
+    private List<ApplicantOrChildren> psychologicalAbuseVictim;
+    private List<ApplicantOrChildren> sexualAbuseVictim;
+    private List<ApplicantOrChildren> financialAbuseVictim;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         physicalAbuseVictim = new ArrayList<>();
         physicalAbuseVictim.add(ApplicantOrChildren.applicants);
         emotionalAbuseVictim = new ArrayList<>();
@@ -47,36 +43,30 @@ public class AllegationsOfHarmMapperTest {
         sexualAbuseVictim.add(ApplicantOrChildren.applicants);
         financialAbuseVictim = new ArrayList<>();
         financialAbuseVictim.add(ApplicantOrChildren.applicants);
-        behaviours = Behaviours.builder().behavioursNature("Nature").behavioursApplicantSoughtHelp(YesOrNo.Yes)
-            .build();
-        Element<Behaviours> behavioursWithChildElement = Element
-            .<Behaviours>builder().value(behaviours).build();
-        listOfbehaviours = Collections.singletonList(behavioursWithChildElement);
-
     }
 
     @Test
-    public void testAllegationsOfHarmMapperWithSomeFields() {
+    void testAllegationsOfHarmMapperWithSomeFields() {
 
-        AllegationOfHarm allegationOfHarm = AllegationOfHarm.builder().allegationsOfHarmYesNo(YesOrNo.Yes)
-            .allegationsOfHarmChildAbuseYesNo(YesOrNo.Yes)
+        AllegationOfHarm allegationOfHarm = AllegationOfHarm.builder().allegationsOfHarmYesNo(Yes)
+            .allegationsOfHarmChildAbuseYesNo(Yes)
             .physicalAbuseVictim(physicalAbuseVictim)
             .emotionalAbuseVictim(emotionalAbuseVictim)
             .financialAbuseVictim(financialAbuseVictim)
             .psychologicalAbuseVictim(psychologicalAbuseVictim)
             .sexualAbuseVictim(sexualAbuseVictim)
-            .allegationsOfHarmChildAbductionYesNo(YesOrNo.Yes)
+            .allegationsOfHarmChildAbductionYesNo(Yes)
             .childAbductionReasons("reasons")
-            .previousAbductionThreats(YesOrNo.Yes)
+            .previousAbductionThreats(Yes)
             .previousAbductionThreatsDetails("ThreadDetails")
             .allegationsOfHarmOtherConcernsDetails("OtherHarm")
-            .agreeChildUnsupervisedTime(YesOrNo.Yes)
-            .agreeChildSupervisedTime(YesOrNo.Yes)
-            .agreeChildOtherContact(YesOrNo.Yes)
+            .agreeChildUnsupervisedTime(Yes)
+            .agreeChildSupervisedTime(Yes)
+            .agreeChildOtherContact(Yes)
             .childrenLocationNow("LocationNow")
-            .abductionPassportOfficeNotified(YesOrNo.Yes).agreeChildOtherContact(YesOrNo.Yes)
-            .childrenLocationNow("locationNow").abductionPassportOfficeNotified(YesOrNo.Yes)
-            .abductionChildHasPassport(YesOrNo.Yes).abductionChildPassportPosession(AbductionChildPassportPossessionEnum.father)
+            .abductionPassportOfficeNotified(Yes).agreeChildOtherContact(Yes)
+            .childrenLocationNow("locationNow").abductionPassportOfficeNotified(Yes)
+            .abductionChildHasPassport(Yes).abductionChildPassportPosession(AbductionChildPassportPossessionEnum.father)
             .abductionChildPassportPosessionOtherDetail("OtherDetails").build();
         CaseData caseData = CaseData.builder().allegationOfHarm(allegationOfHarm).build();
 
@@ -85,22 +75,31 @@ public class AllegationsOfHarmMapperTest {
     }
 
     @Test
-    public void testAllegationsOfHarmMapperMapBehaviours() {
+    void testAllegationsOfHarmMapperMapBehaviours() {
+
+        List<Element<Behaviours>> behaviours = List.of(
+            Element.<Behaviours>builder()
+                .value(Behaviours.builder()
+                           .behavioursNature("Nature")
+                           .behavioursApplicantSoughtHelp(Yes)
+                           .build())
+                .build());
+
 
         AllegationOfHarm allegationOfHarm = AllegationOfHarm.builder()
-            .allegationsOfHarmYesNo(YesOrNo.Yes)
-            .allegationsOfHarmChildAbuseYesNo(YesOrNo.Yes)
+            .allegationsOfHarmYesNo(Yes)
+            .allegationsOfHarmChildAbuseYesNo(Yes)
             .physicalAbuseVictim(physicalAbuseVictim)
             .emotionalAbuseVictim(emotionalAbuseVictim)
             .financialAbuseVictim(financialAbuseVictim)
             .psychologicalAbuseVictim(psychologicalAbuseVictim)
-            .sexualAbuseVictim(sexualAbuseVictim).behaviours(listOfbehaviours).build();
+            .sexualAbuseVictim(sexualAbuseVictim).behaviours(behaviours).build();
         CaseData caseData = CaseData.builder().allegationOfHarm(allegationOfHarm).build();
         assertNotNull(allegationsOfHarmMapper.map(caseData));
     }
 
     @Test
-    public void testNoDataAllegationsOfHarmMapperMapBehaviours() {
+    void testNoDataAllegationsOfHarmMapperMapBehaviours() {
 
         CaseData caseData = CaseData.builder()
             .allegationOfHarm(AllegationOfHarm.builder().build()).build();

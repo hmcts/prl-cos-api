@@ -25,7 +25,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class AmendedOrderStamperTest {
+class AmendedOrderStamperTest {
+
+    @InjectMocks
+    private AmendedOrderStamper stamper;
 
     @Mock
     private CaseDocumentClient caseDocumentClient;
@@ -36,24 +39,19 @@ public class AmendedOrderStamperTest {
     @Mock
     private Time time;
 
-    @InjectMocks
-    private AmendedOrderStamper stamper;
-
     private static final LocalDate FIXED_DATE = LocalDate.of(420, 6, 9);
     private static final String BINARY_URL = "binary url";
     private static final String FILE_NAME = "order.pdf";
     private static final String AUTH = "auth";
 
-
-
     @BeforeEach
-    public void init() {
+    void init() {
         when(authTokenGenerator.generate()).thenReturn("s2s");
         when(time.now()).thenReturn(LocalDateTime.of(FIXED_DATE, LocalTime.now()));
     }
 
     @Test
-    public void verifyAmendedPdfHasCorrectStamping() throws IOException {
+    void verifyAmendedPdfHasCorrectStamping() throws IOException {
         byte[] outputBinaries = new ClassPathResource("documents/document-amended.pdf").getInputStream().readAllBytes();
         Document inputPdf = Document.builder()
             .documentFileName(FILE_NAME)
@@ -70,5 +68,4 @@ public class AmendedOrderStamperTest {
         byte[] amendedPdf = stamper.amendDocument(inputPdf, AUTH);
         assertThat(amendedPdf).isEqualTo(outputBinaries);
     }
-
 }

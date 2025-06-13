@@ -12,11 +12,12 @@ import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationOptionsInfo
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-public class RespondentRelationshipCheckerTest {
+class RespondentRelationshipCheckerTest {
 
     @Mock
     TaskErrorService taskErrorService;
@@ -27,13 +28,13 @@ public class RespondentRelationshipCheckerTest {
     RespondentRelationshipChecker respondentRelationshipChecker;
 
     @Test
-    public void whenNoCaseDataPresentThenIsStartedReturnsFalse() {
+    void whenNoCaseDataPresentThenIsStartedReturnsFalse() {
         CaseData caseData = CaseData.builder().build();
-        assertTrue(!respondentRelationshipChecker.isStarted(caseData));
+        assertFalse(respondentRelationshipChecker.isStarted(caseData));
     }
 
     @Test
-    public void whenEmptyRelationshipDataPresentThenIsStartedReturnsTrue() {
+    void whenEmptyRelationshipDataPresentThenIsStartedReturnsTrue() {
         CaseData caseData = CaseData.builder()
             .respondentRelationObject(RespondentRelationObjectType.builder().build())
             .build();
@@ -42,7 +43,7 @@ public class RespondentRelationshipCheckerTest {
     }
 
     @Test
-    public void whenSomeRelationshipDataPresentThenIsStartedReturnsTrue() {
+    void whenSomeRelationshipDataPresentThenIsStartedReturnsTrue() {
         CaseData caseData = CaseData.builder()
             .respondentRelationObject(RespondentRelationObjectType.builder()
                                               .applicantRelationship(ApplicantRelationshipEnum.noneOfTheAbove)
@@ -52,27 +53,27 @@ public class RespondentRelationshipCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataPresentThenIsFinishedReturnsFalse() {
+    void whenNoCaseDataPresentThenIsFinishedReturnsFalse() {
         CaseData caseData = CaseData.builder().build();
 
-        assertTrue(!respondentRelationshipChecker.isFinished(caseData));
+        assertFalse(respondentRelationshipChecker.isFinished(caseData));
 
     }
 
     @Test
-    public void whenSomeRealtionshipDataPresentThenIsFinishedReturnsFalse() {
+    void whenSomeRealtionshipDataPresentThenIsFinishedReturnsFalse() {
         CaseData caseData = CaseData.builder()
             .respondentRelationObject(RespondentRelationObjectType.builder()
                                               .applicantRelationship(ApplicantRelationshipEnum.noneOfTheAbove)
                                               .build())
             .build();
 
-        assertTrue(!respondentRelationshipChecker.isFinished(caseData));
+        assertFalse(respondentRelationshipChecker.isFinished(caseData));
 
     }
 
     @Test
-    public void whenAllRelationshipDataPresentThenIsFinishedReturnsTrue() {
+    void whenAllRelationshipDataPresentThenIsFinishedReturnsTrue() {
 
         CaseData caseData = CaseData.builder()
             .respondentRelationObject(RespondentRelationObjectType.builder()
@@ -86,7 +87,7 @@ public class RespondentRelationshipCheckerTest {
     }
 
     @Test
-    public void whenRelationshipDataSelectedNotNoneOfTheAboveThenIsFinishedReturnsTrue() {
+    void whenRelationshipDataSelectedNotNoneOfTheAboveThenIsFinishedReturnsTrue() {
 
         CaseData caseData = CaseData.builder()
             .respondentRelationObject(RespondentRelationObjectType.builder()
@@ -97,7 +98,7 @@ public class RespondentRelationshipCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+    void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
         assertNotNull(respondentRelationshipChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

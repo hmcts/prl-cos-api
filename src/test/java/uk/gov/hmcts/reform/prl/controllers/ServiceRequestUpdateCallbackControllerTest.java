@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.RequestUpdateCallbackService;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -26,7 +27,7 @@ import static org.mockito.Mockito.when;
 
 @PropertySource(value = "classpath:application.yaml")
 @ExtendWith(MockitoExtension.class)
-public class ServiceRequestUpdateCallbackControllerTest {
+class ServiceRequestUpdateCallbackControllerTest {
 
     private MockMvc mockMvc;
 
@@ -57,7 +58,7 @@ public class ServiceRequestUpdateCallbackControllerTest {
 
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
 
         serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
             .serviceRequestStatus("paid").ccdCaseNumber("123456").build();
@@ -68,7 +69,7 @@ public class ServiceRequestUpdateCallbackControllerTest {
     }
 
     @Test
-    public void testServiceRequestCallBackDetails() throws Exception {
+    void testServiceRequestCallBackDetails() throws Exception {
 
         FeeType feeType = null;
 
@@ -76,7 +77,7 @@ public class ServiceRequestUpdateCallbackControllerTest {
         when(launchDarklyClient.isFeatureEnabled(any())).thenReturn(Boolean.TRUE);
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
-        serviceRequestUpdateCallbackController.serviceRequestUpdate(serviceAuthToken,serviceRequestUpdateDto);
+        serviceRequestUpdateCallbackController.serviceRequestUpdate(serviceAuthToken, serviceRequestUpdateDto);
 
         verify(requestUpdateCallbackService).processCallback(serviceRequestUpdateDto);
         verifyNoMoreInteractions(requestUpdateCallbackService);
@@ -84,7 +85,7 @@ public class ServiceRequestUpdateCallbackControllerTest {
     }
 
     @Test
-    public void testServiceRequestCallBackDetailsServiceAuthWithoutBearer() throws Exception {
+    void testServiceRequestCallBackDetailsServiceAuthWithoutBearer() throws Exception {
 
         FeeType feeType = null;
 
@@ -92,7 +93,10 @@ public class ServiceRequestUpdateCallbackControllerTest {
         when(launchDarklyClient.isFeatureEnabled(any())).thenReturn(Boolean.TRUE);
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
-        serviceRequestUpdateCallbackController.serviceRequestUpdate(serviceAuthTokenWithOutBearer,serviceRequestUpdateDto);
+        serviceRequestUpdateCallbackController.serviceRequestUpdate(
+            serviceAuthTokenWithOutBearer,
+            serviceRequestUpdateDto
+        );
 
         verify(requestUpdateCallbackService).processCallback(serviceRequestUpdateDto);
         verifyNoMoreInteractions(requestUpdateCallbackService);
@@ -100,7 +104,7 @@ public class ServiceRequestUpdateCallbackControllerTest {
     }
 
     @Test
-    public void testFeeServiceFeeCodeDetails() throws Exception {
+    void testFeeServiceFeeCodeDetails() throws Exception {
         FeeType feeType = null;
 
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
@@ -109,32 +113,37 @@ public class ServiceRequestUpdateCallbackControllerTest {
         when(launchDarklyClient.isFeatureEnabled(any())).thenReturn(Boolean.TRUE);
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
-        serviceRequestUpdateCallbackController.serviceRequestUpdate(serviceAuthToken,serviceRequestUpdateDto);
+        serviceRequestUpdateCallbackController.serviceRequestUpdate(serviceAuthToken, serviceRequestUpdateDto);
 
         verifyNoMoreInteractions(feesService);
 
     }
 
-    @Test(expected = WorkflowException.class)
-    public void testServiceRequestCallBackDetailsS2sValidationFailed() throws Exception {
+    @Test
+    void testServiceRequestCallBackDetailsS2sValidationFailed() throws Exception {
+        assertThrows(
+            WorkflowException.class, () -> {
+                FeeType feeType = null;
 
-        FeeType feeType = null;
+                when(authorisationService.authoriseService(any())).thenReturn(Boolean.FALSE);
+                when(launchDarklyClient.isFeatureEnabled(any())).thenReturn(Boolean.TRUE);
+                when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
-        when(authorisationService.authoriseService(any())).thenReturn(Boolean.FALSE);
-        when(launchDarklyClient.isFeatureEnabled(any())).thenReturn(Boolean.TRUE);
-        when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
-
-        serviceRequestUpdateCallbackController.serviceRequestUpdate(serviceAuthToken,serviceRequestUpdateDto);
-
+                serviceRequestUpdateCallbackController.serviceRequestUpdate(serviceAuthToken, serviceRequestUpdateDto);
+            }
+        );
     }
 
-    @Test(expected = WorkflowException.class)
-    public void testServiceRequestCallBackDetailsWorkFlowException() throws Exception {
-        when(authorisationService.authoriseService(any())).thenReturn(Boolean.TRUE);
-        when(launchDarklyClient.isFeatureEnabled(any())).thenReturn(Boolean.TRUE);
-        doThrow(new RuntimeException()).when(requestUpdateCallbackService).processCallback(serviceRequestUpdateDto);
-        serviceRequestUpdateCallbackController.serviceRequestUpdate(serviceAuthToken,serviceRequestUpdateDto);
-
+    @Test
+    void testServiceRequestCallBackDetailsWorkFlowException() throws Exception {
+        assertThrows(
+            WorkflowException.class, () -> {
+                when(authorisationService.authoriseService(any())).thenReturn(Boolean.TRUE);
+                when(launchDarklyClient.isFeatureEnabled(any())).thenReturn(Boolean.TRUE);
+                doThrow(new RuntimeException()).when(requestUpdateCallbackService).processCallback(
+                    serviceRequestUpdateDto);
+                serviceRequestUpdateCallbackController.serviceRequestUpdate(serviceAuthToken, serviceRequestUpdateDto);
+            }
+        );
     }
-
 }

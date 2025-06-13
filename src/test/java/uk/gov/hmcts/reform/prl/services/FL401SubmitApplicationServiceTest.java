@@ -142,7 +142,7 @@ public class FL401SubmitApplicationServiceTest {
     private CaseData caseData;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         caseData = CaseData.builder()
             .draftOrderDoc(Document.builder()
                                .documentUrl(generatedDocumentInfo.getUrl())
@@ -207,7 +207,7 @@ public class FL401SubmitApplicationServiceTest {
     }
 
     @Test
-    public void testCourtNameAndEmailAddressReturnedWhileFamilyEmailAddressReturned() throws Exception {
+    void testCourtNameAndEmailAddressReturnedWhileFamilyEmailAddressReturned() throws Exception {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -276,7 +276,7 @@ public class FL401SubmitApplicationServiceTest {
     }
 
     @Test
-    public void testtypeOfApplicationOrdersNull() throws Exception {
+    void testtypeOfApplicationOrdersNull() throws Exception {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -334,7 +334,7 @@ public class FL401SubmitApplicationServiceTest {
     }
 
     @Test
-    public void testC8FormGenerationBasedConfidentiality() throws Exception {
+    void testC8FormGenerationBasedConfidentiality() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -445,7 +445,7 @@ public class FL401SubmitApplicationServiceTest {
     }
 
     @Test
-    public void testC8FormGenerationBasedConfidentialityRefuge() throws Exception {
+    void testC8FormGenerationBasedConfidentialityRefuge() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -556,7 +556,7 @@ public class FL401SubmitApplicationServiceTest {
 
 
     @Test
-    public void testC8FormGenerationBasedConfidentiality2() throws Exception {
+    void testC8FormGenerationBasedConfidentiality2() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -659,7 +659,7 @@ public class FL401SubmitApplicationServiceTest {
 
 
     @Test
-    public void testC8Formgenerationbasedconconfidentiality_withoutTypeofOrders() throws Exception {
+    void testC8Formgenerationbasedconconfidentiality_withoutTypeofOrders() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -756,7 +756,7 @@ public class FL401SubmitApplicationServiceTest {
     }
 
     @Test
-    public void testC8Formgenerationbasedconconfidentiality_() throws Exception {
+    void testC8Formgenerationbasedconconfidentiality_() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -849,7 +849,7 @@ public class FL401SubmitApplicationServiceTest {
     }
 
     @Test
-    public void testCourtNameAndEmailAddressReturnedWhileFamilyEmailAddressReturned_WithNonMolestationOrder() throws Exception {
+    void testCourtNameAndEmailAddressReturnedWhileFamilyEmailAddressReturned_WithNonMolestationOrder() throws Exception {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -929,7 +929,7 @@ public class FL401SubmitApplicationServiceTest {
     }
 
     @Test
-    public void testCourtNameAndEmailAddressReturnedWhileFamilyEmailAddressReturned_WithOccupationalOrder() throws Exception {
+    void testCourtNameAndEmailAddressReturnedWhileFamilyEmailAddressReturned_WithOccupationalOrder() throws Exception {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -1006,7 +1006,7 @@ public class FL401SubmitApplicationServiceTest {
     }
 
     @Test
-    public void testFl401SendApplicationNotification() throws Exception {
+    void testFl401SendApplicationNotification() throws Exception {
 
         PartyDetails fl401Applicant = PartyDetails.builder()
             .canYouProvideEmailAddress(YesOrNo.No)
@@ -1036,7 +1036,7 @@ public class FL401SubmitApplicationServiceTest {
     }
 
     @Test
-    public void testFl401SendApplicationNotificationFailure() throws Exception {
+    void testFl401SendApplicationNotificationFailure() throws Exception {
 
         PartyDetails fl401Applicant = PartyDetails.builder()
             .canYouProvideEmailAddress(YesOrNo.No)
@@ -1064,7 +1064,7 @@ public class FL401SubmitApplicationServiceTest {
     }
 
     @Test
-    public void testCourtNameAndEmailAddressReturnedWhileFamilyEmailAddressReturnedForOfflineState() throws Exception {
+    void testCourtNameAndEmailAddressReturnedWhileFamilyEmailAddressReturnedForOfflineState() throws Exception {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")

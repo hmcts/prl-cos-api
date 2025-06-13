@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,12 +18,13 @@ import uk.gov.hmcts.reform.prl.services.TaskListService;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class TaskListControllerTest {
+class TaskListControllerTest {
 
     @InjectMocks
     TaskListController taskListController;
@@ -42,7 +42,7 @@ public class TaskListControllerTest {
     String auth = "authorisation";
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         caseDataMap = new HashMap<>();
         caseData = CaseData.builder()
             .id(12345678L)
@@ -59,38 +59,38 @@ public class TaskListControllerTest {
     }
 
     @Test
-    public void testHandleSubmitted() {
+    void testHandleSubmitted() {
         when(taskListService.updateTaskList(callbackRequest, auth))
             .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().build());
         AboutToStartOrSubmitCallbackResponse response = taskListController.handleSubmitted(callbackRequest, auth);
 
-        Assert.assertNotNull(response);
+        assertNotNull(response);
         verify(taskListService, times(1)).updateTaskList(callbackRequest,auth);
     }
 
     @Test
-    public void handleSubmitted() throws JsonProcessingException {
+    void handleSubmitted() throws JsonProcessingException {
         when(taskListService.updateTaskList(callbackRequest, auth))
             .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().build());
-        Assert.assertNotNull(taskListController.handleSubmitted(callbackRequest, auth));;
+        assertNotNull(taskListController.handleSubmitted(callbackRequest, auth));;
     }
 
     //    @Test
-    //    public void testHandleSubmittedWithoutCourtStaffRoles() throws JsonProcessingException {
+    //    void testHandleSubmittedWithoutCourtStaffRoles() throws JsonProcessingException {
     //        when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().roles(List.of("test role")).build());
     //        taskListController.handleSubmitted(callbackRequest,"testAuth");
     //        verify(tabService,times(1)).updateAllTabsIncludingConfTab(Mockito.any(CaseData.class));
     //    }
     //
     //    @Test
-    //    public void testHandleSubmittedWithCourtStaffRoles() throws JsonProcessingException {
+    //    void testHandleSubmittedWithCourtStaffRoles() throws JsonProcessingException {
     //        when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().roles(ROLES).build());
     //        taskListController.handleSubmitted(callbackRequest,"testAuth");
     //        verify(tabService,times(1)).updateAllTabsIncludingConfTab(Mockito.any(CaseData.class));
     //    }
     //
     //    @Test
-    //    public void testHandleSubmittedForGateKeepingState() throws Exception {
+    //    void testHandleSubmittedForGateKeepingState() throws Exception {
     //        Map<String, Object> documentMap = new HashMap<>();
     //        documentMap.put("c1ADocument", Document.builder().build());
     //        documentMap.put("c8Document", Document.builder().build());
@@ -106,7 +106,7 @@ public class TaskListControllerTest {
     //    }
     //
     //    @Test
-    //    public void testUpdateTaskListWhenSubmitted() {
+    //    void testUpdateTaskListWhenSubmitted() {
     //        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
     //        caseData = caseData.toBuilder().dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime)).build();
     //        CaseDataChanged caseDataChanged = new CaseDataChanged(caseData);

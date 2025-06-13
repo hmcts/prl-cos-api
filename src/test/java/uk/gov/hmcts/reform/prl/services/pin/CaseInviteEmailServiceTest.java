@@ -22,7 +22,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
-public class CaseInviteEmailServiceTest {
+class CaseInviteEmailServiceTest {
 
     @InjectMocks
     private CaseInviteEmailService caseInviteEmailService;
@@ -36,7 +36,7 @@ public class CaseInviteEmailServiceTest {
     PartyDetails respondent;
 
     @BeforeEach
-    public void init() {
+    void init() {
 
         applicant = PartyDetails.builder()
             .firstName("applfirst")
@@ -62,7 +62,7 @@ public class CaseInviteEmailServiceTest {
     }
 
     @Test
-    public void testBuildCaseInviteEmailForApplicant() {
+    void testBuildCaseInviteEmailForApplicant() {
 
         CaseInvite caseInvite = CaseInvite.builder()
             .partyId(UUID.randomUUID())
@@ -89,7 +89,7 @@ public class CaseInviteEmailServiceTest {
     }
 
     @Test
-    public void testBuildCaseInviteEmailForRespondent() {
+    void testBuildCaseInviteEmailForRespondent() {
 
         CaseInvite caseInvite = CaseInvite.builder()
             .partyId(UUID.randomUUID())
@@ -116,7 +116,7 @@ public class CaseInviteEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailForApplicant() {
+    void testSendEmailForApplicant() {
 
         CaseInvite caseInvite = CaseInvite.builder()
             .partyId(UUID.randomUUID())
@@ -143,7 +143,7 @@ public class CaseInviteEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailForRespondent() {
+    void testSendEmailForRespondent() {
 
         CaseInvite caseInvite = CaseInvite.builder()
             .partyId(UUID.randomUUID())
@@ -170,7 +170,7 @@ public class CaseInviteEmailServiceTest {
     }
 
     @Test
-    public void testSendCaseInviteEmailForApplicant() {
+    void testSendCaseInviteEmailForApplicant() {
 
         CaseInvite caseInvite = CaseInvite.builder()
             .partyId(UUID.randomUUID())
@@ -197,7 +197,7 @@ public class CaseInviteEmailServiceTest {
     }
 
     @Test
-    public void testSendCaseInviteEmailForRespondent() {
+    void testSendCaseInviteEmailForRespondent() {
 
         CaseInvite caseInvite = CaseInvite.builder()
             .partyId(UUID.randomUUID())

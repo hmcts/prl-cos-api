@@ -36,7 +36,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.apache.commons.lang3.RandomUtils.nextLong;
+import static java.util.concurrent.ThreadLocalRandom.current;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -78,7 +78,7 @@ public class TransferToAnotherCourtEventHandlerTest {
     private TransferToAnotherCourtEvent noTransferToAnotherCourtEvent;
 
     @BeforeEach
-    public void init() {
+    void init() {
         PartyDetails applicant1 = PartyDetails.builder()
             .firstName("af1").lastName("al1")
             .canYouProvideEmailAddress(YesOrNo.Yes)
@@ -109,7 +109,7 @@ public class TransferToAnotherCourtEventHandlerTest {
             .email("ofl@test.com")
             .build();
         final CaseData caseData = CaseData.builder()
-            .id(nextLong())
+            .id(current().nextLong(1_000_000_000L, 9_999_999_999L))
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(Arrays.asList(element(applicant1), element(applicant2)))
             .respondents(Arrays.asList(element(respondent1), element(respondent2)))
@@ -123,7 +123,7 @@ public class TransferToAnotherCourtEventHandlerTest {
 
         Document document = Document.builder().build();
         final CaseData caseDataWithDocs = CaseData.builder()
-            .id(nextLong())
+            .id(current().nextLong(1_000_000_000L, 9_999_999_999L))
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(Arrays.asList(element(applicant1), element(applicant2)))
             .respondents(Arrays.asList(element(respondent1), element(respondent2)))
@@ -147,7 +147,7 @@ public class TransferToAnotherCourtEventHandlerTest {
             .build();
 
         final CaseData caseDataWithDocsFl401 = CaseData.builder()
-            .id(nextLong())
+            .id(current().nextLong(1_000_000_000L, 9_999_999_999L))
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .applicants(Arrays.asList(element(applicant1), element(applicant2)))
             .respondents(Arrays.asList(element(respondent1), element(respondent2)))
@@ -186,7 +186,7 @@ public class TransferToAnotherCourtEventHandlerTest {
             .build();
 
         final CaseData caseDataForNoTransferToCourtEmail = CaseData.builder()
-            .id(nextLong())
+            .id(current().nextLong(1_000_000_000L, 9_999_999_999L))
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(Arrays.asList(element(applicant1), element(applicant2)))
             .respondents(Arrays.asList(element(respondent1), element(respondent2)))
@@ -237,7 +237,7 @@ public class TransferToAnotherCourtEventHandlerTest {
     }
 
     @Test
-    public void shouldNotifyCourtForTransfer() throws Exception {
+    void shouldNotifyCourtForTransfer() throws Exception {
 
         doNothing().when(emailService)
                 .send(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any());
@@ -261,7 +261,7 @@ public class TransferToAnotherCourtEventHandlerTest {
     }
 
     @Test
-    public void shouldGiveErrorWhenFailedToSendEmail() throws Exception {
+    void shouldGiveErrorWhenFailedToSendEmail() throws Exception {
 
         doNothing().when(emailService)
             .send(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any());
@@ -284,7 +284,7 @@ public class TransferToAnotherCourtEventHandlerTest {
     }
 
     @Test
-    public void shouldGiveErrorWhenFailedToSendEmailForFL401() throws Exception {
+    void shouldGiveErrorWhenFailedToSendEmailForFL401() throws Exception {
 
         doNothing().when(emailService)
             .send(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any());
@@ -310,7 +310,7 @@ public class TransferToAnotherCourtEventHandlerTest {
     //write a test case for transferCourtEmail method when CantFindCourtCheck is false
 
     @Test
-    public void shouldNotNotifyCourtForTransferWhenCantFindCourtCheckIsFalse() throws Exception {
+    void shouldNotNotifyCourtForTransferWhenCantFindCourtCheckIsFalse() throws Exception {
 
         doNothing().when(emailService)
             .send(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any());

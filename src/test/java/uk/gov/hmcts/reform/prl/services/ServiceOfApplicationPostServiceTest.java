@@ -61,7 +61,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
-public class ServiceOfApplicationPostServiceTest {
+class ServiceOfApplicationPostServiceTest {
 
     @InjectMocks
     private ServiceOfApplicationPostService serviceOfApplicationPostService;
@@ -100,7 +100,7 @@ public class ServiceOfApplicationPostServiceTest {
     private DynamicMultiSelectList dynamicMultiSelectList;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         dynamicMultiSelectList = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiselectListElement.builder().label("standardDirectionsOrder").build())).build();
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -111,7 +111,7 @@ public class ServiceOfApplicationPostServiceTest {
     }
 
     @Test
-    public void testSendViaPostToOtherPeopleInCase() {
+    void testSendViaPostToOtherPeopleInCase() {
 
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("Abc")
             .representativeLastName("Xyz")
@@ -179,7 +179,7 @@ public class ServiceOfApplicationPostServiceTest {
     }
 
     @Test
-    public void testGetCoverLetterGeneratedDocInfo() throws Exception {
+    void testGetCoverLetterGeneratedDocInfo() throws Exception {
 
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("Abc")
             .representativeLastName("Xyz")
@@ -241,7 +241,7 @@ public class ServiceOfApplicationPostServiceTest {
     }
 
     @Test
-    public void testGetCoverLetterGeneratedDocInfoWithWelsh() throws Exception {
+    void testGetCoverLetterGeneratedDocInfoWithWelsh() throws Exception {
 
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("Abc")
             .representativeLastName("Xyz")
@@ -305,7 +305,7 @@ public class ServiceOfApplicationPostServiceTest {
     }
 
     @Test
-    public void testStaticDocsForC100Applicant() {
+    void testStaticDocsForC100Applicant() {
         PartyDetails applicant = PartyDetails.builder()
             .solicitorEmail("test@gmail.com")
             .representativeLastName("LastName")
@@ -343,7 +343,7 @@ public class ServiceOfApplicationPostServiceTest {
 
 
     @Test
-    public void testStaticDocsForC100ApplicantNonConfidential() {
+    void testStaticDocsForC100ApplicantNonConfidential() {
         PartyDetails applicant = PartyDetails.builder()
             .solicitorEmail("test@gmail.com")
             .representativeLastName("LastName")
@@ -380,7 +380,7 @@ public class ServiceOfApplicationPostServiceTest {
     }
 
     @Test
-    public void testStaticDocsForFL401() {
+    void testStaticDocsForFL401() {
 
         PartyDetails applicant = PartyDetails.builder()
             .solicitorEmail("test@gmail.com")
@@ -418,7 +418,7 @@ public class ServiceOfApplicationPostServiceTest {
     }
 
     @Test
-    public void testAnnex1StaticDocsForFL401() {
+    void testAnnex1StaticDocsForFL401() {
 
         PartyDetails applicant = PartyDetails.builder()
             .solicitorEmail("test@gmail.com")
@@ -478,7 +478,7 @@ public class ServiceOfApplicationPostServiceTest {
     }
 
     @Test
-    public void testGetCoverLetterForEnglish() throws Exception {
+    void testGetCoverLetterForEnglish() throws Exception {
 
         final CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -500,7 +500,7 @@ public class ServiceOfApplicationPostServiceTest {
     }
 
     @Test
-    public void testGetCoverLetterForWelsh() throws Exception {
+    void testGetCoverLetterForWelsh() throws Exception {
 
         final CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -522,7 +522,7 @@ public class ServiceOfApplicationPostServiceTest {
     }
 
     @Test
-    public void testGetCoverLetterWithNoAddressLine1() throws Exception {
+    void testGetCoverLetterWithNoAddressLine1() throws Exception {
 
         final CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -543,7 +543,7 @@ public class ServiceOfApplicationPostServiceTest {
     }
 
     @Test
-    public void testRespondentCaseDataIsNotEmpty() {
+    void testRespondentCaseDataIsNotEmpty() {
         PartyDetails partyDetails = PartyDetails.builder()
             .lastName("Smith")
             .firstName("John")
@@ -555,12 +555,12 @@ public class ServiceOfApplicationPostServiceTest {
         assertNotNull(caseDataResponse);
         assertEquals(12345,caseDataResponse.getId());
         assertNotNull(caseDataResponse.getRespondents());
-        assertEquals("John", caseDataResponse.getRespondents().get(0).getValue().getFirstName());
-        assertEquals("Smith", caseDataResponse.getRespondents().get(0).getValue().getLastName());
+        assertEquals("John", caseDataResponse.getRespondents().getFirst().getValue().getFirstName());
+        assertEquals("Smith", caseDataResponse.getRespondents().getFirst().getValue().getLastName());
     }
 
     @Test
-    public void testUploadedDocumentsServiceOfApplication() {
+    void testUploadedDocumentsServiceOfApplication() {
         final CaseData caseData = CaseData.builder()
             .id(12345L)
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder()
@@ -579,16 +579,16 @@ public class ServiceOfApplicationPostServiceTest {
         List<GeneratedDocumentInfo> uploadedDocumentsList =
             serviceOfApplicationPostService.getUploadedDocumentsServiceOfApplication(caseData);
         assertNotNull(uploadedDocumentsList);
-        assertEquals("documentUrl", uploadedDocumentsList.get(0).getUrl());
-        assertEquals("documentBinaryUrl", uploadedDocumentsList.get(0).getBinaryUrl());
-        assertEquals("documentHash", uploadedDocumentsList.get(0).getHashToken());
+        assertEquals("documentUrl", uploadedDocumentsList.getFirst().getUrl());
+        assertEquals("documentBinaryUrl", uploadedDocumentsList.getFirst().getBinaryUrl());
+        assertEquals("documentHash", uploadedDocumentsList.getFirst().getHashToken());
         assertEquals("documentUrl1", uploadedDocumentsList.get(1).getUrl());
         assertEquals("documentBinaryUrl1", uploadedDocumentsList.get(1).getBinaryUrl());
         assertEquals("documentHash1", uploadedDocumentsList.get(1).getHashToken());
     }
 
     @Test
-    public void testFinalDocumentEnglish() {
+    void testFinalDocumentEnglish() {
         CaseData caseData =  CaseData.builder()
             .finalDocument(Document.builder()
                                .documentUrl("documentUrl")
@@ -604,7 +604,7 @@ public class ServiceOfApplicationPostServiceTest {
     }
 
     @Test
-    public void testFinalDocumentWelsh() {
+    void testFinalDocumentWelsh() {
         CaseData caseData =  CaseData.builder()
             .finalDocument(Document.builder()
                                .documentUrl("documentUrl")
@@ -625,7 +625,7 @@ public class ServiceOfApplicationPostServiceTest {
     }
 
     @Test
-    public void shouldReturnEmptyC1ADocumentIfNoAllegationOfHarm() {
+    void shouldReturnEmptyC1ADocumentIfNoAllegationOfHarm() {
         CaseData caseData =  CaseData.builder()
             .allegationOfHarm(AllegationOfHarm.builder()
                                   .allegationsOfHarmYesNo(No)
@@ -636,7 +636,7 @@ public class ServiceOfApplicationPostServiceTest {
     }
 
     @Test
-    public void shouldReturnEnglishC1ADocumentIfAllegationOfHarmIsYes() {
+    void shouldReturnEnglishC1ADocumentIfAllegationOfHarmIsYes() {
         CaseData caseData =  CaseData.builder()
             .allegationOfHarm(AllegationOfHarm.builder()
                                   .allegationsOfHarmYesNo(Yes)
@@ -660,7 +660,7 @@ public class ServiceOfApplicationPostServiceTest {
     }
 
     @Test
-    public void shouldReturnWelshC1ADocumentIfAllegationOfHarmIsYes() {
+    void shouldReturnWelshC1ADocumentIfAllegationOfHarmIsYes() {
         CaseData caseData =  CaseData.builder()
             .allegationOfHarm(AllegationOfHarm.builder()
                                   .allegationsOfHarmYesNo(Yes)
@@ -694,7 +694,7 @@ public class ServiceOfApplicationPostServiceTest {
     }
 
     @Test
-    public void shouldNotGetCoverSheetInfoWhenAddressNotPresent() {
+    void shouldNotGetCoverSheetInfoWhenAddressNotPresent() {
         CaseData caseData = CaseData.builder().build();
         final Address address = Address.builder().build();
         List<Document> coversheets = serviceOfApplicationPostService.getCoverSheets(caseData,AUTH,address,"test name",
@@ -703,7 +703,7 @@ public class ServiceOfApplicationPostServiceTest {
     }
 
     @Test
-    public void shouldReturnEmptyBulkPrintIdWhenBulkPrintServiceFails() {
+    void shouldReturnEmptyBulkPrintIdWhenBulkPrintServiceFails() {
 
         Document finalDoc = Document.builder()
             .documentUrl("finalDoc")
@@ -753,7 +753,7 @@ public class ServiceOfApplicationPostServiceTest {
     }
 
     @Test
-    public void shouldReturnEmptyBulkPrintIdWhenBulkPrintServiceFailsOne() {
+    void shouldReturnEmptyBulkPrintIdWhenBulkPrintServiceFailsOne() {
         Document finalDoc = Document.builder()
             .documentUrl("finalDoc")
             .documentBinaryUrl("finalDoc")

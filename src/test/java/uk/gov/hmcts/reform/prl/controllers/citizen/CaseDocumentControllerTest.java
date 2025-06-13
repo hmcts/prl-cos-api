@@ -54,6 +54,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -65,7 +66,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUCCESS;
 
 
 @ExtendWith(MockitoExtension.class)
-public class CaseDocumentControllerTest {
+class CaseDocumentControllerTest {
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "TestS2sToken";
@@ -97,7 +98,7 @@ public class CaseDocumentControllerTest {
     private CitizenDocumentService citizenDocumentService;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
 
         generateAndUploadDocumentRequest = GenerateAndUploadDocumentRequest.builder()
             .values(Map.of("fileName", "test.docx"))
@@ -105,7 +106,7 @@ public class CaseDocumentControllerTest {
     }
 
     @Test
-    public void testNotifyOtherPartiesRespondedentCA() throws Exception {
+    void testNotifyOtherPartiesRespondedentCA() throws Exception {
         User user = User.builder().idamId("577346ec-5c58-491d-938a-112c4bff06fb").build();
         PartyDetails applicant = PartyDetails.builder().user(user).email("test@hmcts.net").firstName("test").build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
@@ -137,7 +138,7 @@ public class CaseDocumentControllerTest {
     }
 
     @Test
-    public void testNotifyOtherPartiesRespondedentsCA() throws Exception {
+    void testNotifyOtherPartiesRespondedentsCA() throws Exception {
         User user = User.builder().idamId("577346ec-5c58-491d-938a-112c4bff06fb").build();
         PartyDetails applicant = PartyDetails.builder().user(user).email("test@hmcts.net").firstName("test").build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
@@ -180,7 +181,7 @@ public class CaseDocumentControllerTest {
     }
 
     @Test
-    public void testNotifyOtherPartiesApplicantCA() throws Exception {
+    void testNotifyOtherPartiesApplicantCA() throws Exception {
         User user = User.builder().idamId("577346ec-5c58-491d-938a-112c4bff06fb").build();
         PartyDetails applicant = PartyDetails.builder().user(user).email("test@hmcts.net").firstName("test").build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
@@ -212,7 +213,7 @@ public class CaseDocumentControllerTest {
     }
 
     @Test
-    public void testNotifyOtherPartiesApplicantDA() throws Exception {
+    void testNotifyOtherPartiesApplicantDA() throws Exception {
         User user = User.builder().idamId("577346ec-5c58-491d-938a-112c4bff06fb").build();
         PartyDetails applicant = PartyDetails.builder().user(user).email("test@hmcts.net").firstName("test").build();
 
@@ -240,7 +241,7 @@ public class CaseDocumentControllerTest {
     }
 
     @Test
-    public void testNotifyOtherPartiesRespondentDA() throws Exception {
+    void testNotifyOtherPartiesRespondentDA() throws Exception {
         User user = User.builder().idamId("577346ec-5c58-491d-938a-112c4bff06fb").build();
         PartyDetails applicant = PartyDetails.builder().user(user).email("test@hmcts.net").firstName("test").build();
 
@@ -268,7 +269,7 @@ public class CaseDocumentControllerTest {
     }
 
     @Test
-    public void testDocumentUpload() throws IOException {
+    void testDocumentUpload() throws IOException {
         //Given
         MultipartFile mockFile = mock(MultipartFile.class);
         Document mockDocument = Document.builder().build();
@@ -290,7 +291,7 @@ public class CaseDocumentControllerTest {
     }
 
     @Test
-    public void testGenerateCitizenStatementDocumentt() throws Exception {
+    void testGenerateCitizenStatementDocumentt() throws Exception {
         HashMap<String,String> map = new HashMap<>();
         map.put("caseId","1656350492135029");
         map.put("state","AWAITING_SUBMISSION_TO_HMCTS");
@@ -334,7 +335,7 @@ public class CaseDocumentControllerTest {
     }
 
     @Test
-    public void testUploadCitizenStatementDocument() {
+    void testUploadCitizenStatementDocument() {
         HashMap<String,String> map = new HashMap<>();
         map.put("caseId","1656350492135029");
         map.put("state","AWAITING_SUBMISSION_TO_HMCTS");
@@ -398,7 +399,7 @@ public class CaseDocumentControllerTest {
     }
 
     @Test
-    public void testDeleteCitizenStatementDocument() throws Exception {
+    void testDeleteCitizenStatementDocument() throws Exception {
         HashMap<String,String> map = new HashMap<>();
         map.put("caseId","1656350492135029");
         map.put("state","AWAITING_SUBMISSION_TO_HMCTS");
@@ -444,18 +445,20 @@ public class CaseDocumentControllerTest {
         assertNotNull(deleteStatus);
     }
 
-    @Test (expected = RuntimeException.class)
-    public void testDocumentUploadNotAuthorised() throws IOException {
-        MultipartFile mockFile = mock(MultipartFile.class);
+    @Test
+    void testDocumentUploadNotAuthorised() throws IOException {
+        assertThrows(RuntimeException.class, () -> {
+            MultipartFile mockFile = mock(MultipartFile.class);
 
-        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
+            when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
 
-        caseDocumentController
+            caseDocumentController
             .uploadCitizenDocument(authToken, s2sToken, mockFile);
+        });
     }
 
     @Test
-    public void testDeleteDocument() {
+    void testDeleteDocument() {
         //Given
         DocumentResponse documentResponse = DocumentResponse
                 .builder()
@@ -473,16 +476,18 @@ public class CaseDocumentControllerTest {
         assertEquals(documentResponse, response.getBody());
     }
 
-    @Test (expected = RuntimeException.class)
-    public void testDeleteDocumentNotAuthorised() {
-        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
+    @Test
+    void testDeleteDocumentNotAuthorised() {
+        assertThrows(RuntimeException.class, () -> {
+            when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
 
-        caseDocumentController
+            caseDocumentController
             .deleteDocument(authToken, s2sToken, "TEST_DOCUMENT_ID");
+        });
     }
 
     @Test
-    public void testDownloadDocument() throws Exception {
+    void testDownloadDocument() throws Exception {
         //Given
         Resource expectedResource = new ClassPathResource("documents/document.pdf");
         HttpHeaders headers = new HttpHeaders();
@@ -499,23 +504,27 @@ public class CaseDocumentControllerTest {
         assertEquals(OK, response.getStatusCode());
     }
 
-    @Test (expected = RuntimeException.class)
-    public void testDownloadDocumentNotAuthorised() throws Exception {
-        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
+    @Test
+    void testDownloadDocumentNotAuthorised() throws Exception {
+        assertThrows(RuntimeException.class, () -> {
+            when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
 
-        caseDocumentController
+            caseDocumentController
             .downloadDocument(authToken, s2sToken, "TEST_DOCUMENT_ID");
-    }
-
-    @Test (expected = RuntimeException.class)
-    public void testGenerateDocumentThrowInvalidClientException() {
-        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
-
-        caseDocumentController.citizenGenerateDocument(authToken, s2sToken, DocumentRequest.builder().build());
+        });
     }
 
     @Test
-    public void testGenerateDocumentThrowDocumentGenerationException() {
+    void testGenerateDocumentThrowInvalidClientException() {
+        assertThrows(RuntimeException.class, () -> {
+            when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
+
+            caseDocumentController.citizenGenerateDocument(authToken, s2sToken, DocumentRequest.builder().build());
+        });
+    }
+
+    @Test
+    void testGenerateDocumentThrowDocumentGenerationException() {
         when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
         when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
         when(caseDocumentController.citizenGenerateDocument(authToken, s2sToken, DocumentRequest.builder().build()))
@@ -528,7 +537,7 @@ public class CaseDocumentControllerTest {
     }
 
     @Test
-    public void testGenerateDocument() throws DocumentGenerationException {
+    void testGenerateDocument() throws DocumentGenerationException {
         //Given
         DocumentRequest documentRequest = DocumentRequest.builder()
             .caseId("123")
@@ -557,15 +566,17 @@ public class CaseDocumentControllerTest {
         assertNotNull(response.getBody());
     }
 
-    @Test (expected = RuntimeException.class)
-    public void testSubmitCitizenDocumentsThrowInvalidClientException() {
-        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
+    @Test
+    void testSubmitCitizenDocumentsThrowInvalidClientException() {
+        assertThrows(RuntimeException.class, () -> {
+            when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
 
-        caseDocumentController.citizenSubmitDocuments(authToken, s2sToken, DocumentRequest.builder().build());
+            caseDocumentController.citizenSubmitDocuments(authToken, s2sToken, DocumentRequest.builder().build());
+        });
     }
 
     @Test
-    public void testUploadAndMoveDocumentsToQuarantine() {
+    void testUploadAndMoveDocumentsToQuarantine() {
         //Given
         DocumentRequest documentRequest = DocumentRequest.builder()
             .caseId("123")

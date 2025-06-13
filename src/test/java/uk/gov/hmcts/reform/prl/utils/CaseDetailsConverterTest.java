@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -15,13 +14,14 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
-public class CaseDetailsConverterTest {
+class CaseDetailsConverterTest {
 
     private CaseDetailsConverter caseDetailsConverter;
 
@@ -30,7 +30,7 @@ public class CaseDetailsConverterTest {
 
 
     @Test
-    public void convertsCaseDetailsToCaseDataWithResponseMethod() {
+    void convertsCaseDetailsToCaseDataWithResponseMethod() {
         CaseDetails caseDetails = CaseDetails.builder().build();
 
         caseDetailsConverter = new CaseDetailsConverter(objectMapper);
@@ -55,6 +55,6 @@ public class CaseDetailsConverterTest {
         when(objectMapper.convertValue(caseDetails,CaseData.class))
             .thenReturn(caseData);
         caseData = caseDetailsConverter.extractCase(caseDetails);
-        Assert.assertNotNull(caseData);
+        assertNotNull(caseData);
     }
 }

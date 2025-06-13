@@ -8,11 +8,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-public class UploadDocumentCheckerTest {
+class UploadDocumentCheckerTest {
 
     @Mock
     TaskErrorService taskErrorService;
@@ -22,32 +22,32 @@ public class UploadDocumentCheckerTest {
     UploadDocumentChecker uploadDocumentChecker;
 
     @Test
-    public void whenNoCaseDataPresentThenIsStartedReturnsFalse() {
+    void whenNoCaseDataPresentThenIsStartedReturnsFalse() {
         CaseData caseData = CaseData.builder().build();
 
-        assertTrue(!uploadDocumentChecker.isStarted(caseData));
+        assertFalse(uploadDocumentChecker.isStarted(caseData));
     }
 
     @Test
-    public void whenAllChildDataPresentThenIsFinishedReturnsFalseWithNullYes() {
+    void whenAllChildDataPresentThenIsFinishedReturnsFalseWithNullYes() {
 
         CaseData caseData = CaseData.builder()
             .childrenNotInTheCase(null)
             .childrenNotPartInTheCaseYesNo(null)
             .build();
-        assertTrue(!uploadDocumentChecker.isFinished(caseData));
+        assertFalse(uploadDocumentChecker.isFinished(caseData));
     }
 
 
     @Test
-    public void whenNoCaseDataPresentThenHasMandatoryCompletedReturnsTrue() {
+    void whenNoCaseDataPresentThenHasMandatoryCompletedReturnsTrue() {
         CaseData caseData = CaseData.builder().build();
-        assertTrue(!uploadDocumentChecker.hasMandatoryCompleted(caseData));
+        assertFalse(uploadDocumentChecker.hasMandatoryCompleted(caseData));
     }
 
 
     @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+    void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
         assertNotNull(uploadDocumentChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

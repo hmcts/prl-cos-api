@@ -17,14 +17,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @ExtendWith(MockitoExtension.class)
-public class NoticeOfChangeContentProviderTest {
+class NoticeOfChangeContentProviderTest {
     @InjectMocks
     NoticeOfChangeContentProvider noticeOfChangeContentProvider;
 
     CaseData caseData;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         caseData = CaseData.builder()
             .id(123455)
             .caseTypeOfApplication("fl401")
@@ -45,20 +45,20 @@ public class NoticeOfChangeContentProviderTest {
     }
 
     @Test
-    public void testBuildNoticeOfChangeEmailSolicitor() {
+    void testBuildNoticeOfChangeEmailSolicitor() {
         EmailTemplateVars emailTemplateVars = noticeOfChangeContentProvider.buildNocEmailSolicitor(caseData, "Solicitor Name");
         assertEquals("123455",emailTemplateVars.getCaseReference());
     }
 
     @Test
-    public void testBuildNoticeOfChangeEmailCitizenForOtherParties() {
+    void testBuildNoticeOfChangeEmailCitizenForOtherParties() {
         EmailTemplateVars emailTemplateVars = noticeOfChangeContentProvider.buildNocEmailCitizen(caseData, "Solicitor Name", "test",
                                                                                                  true, true, "111");
         assertEquals("123455",emailTemplateVars.getCaseReference());
     }
 
     @Test
-    public void testBuildNoticeOfChangeEmailCitizen() {
+    void testBuildNoticeOfChangeEmailCitizen() {
         EmailTemplateVars emailTemplateVars = noticeOfChangeContentProvider.buildNocEmailCitizen(caseData, "Solicitor Name", "test",
                                                                                                  false, true,"111");
         assertEquals("123455",emailTemplateVars.getCaseReference());

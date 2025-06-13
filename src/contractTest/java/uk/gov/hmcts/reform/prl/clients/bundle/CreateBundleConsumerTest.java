@@ -102,7 +102,15 @@ public class CreateBundleConsumerTest {
             SERVICE_AUTHORIZATION_HEADER, BundleCreateRequest.builder().build()
         );
         assertNotNull(bundleCreateResponse);
-        assertEquals("DONE", bundleCreateResponse.getData().getCaseBundles().get(0).getValue().getStitchStatus());
-        assertEquals("StitchedPDF", bundleCreateResponse.getData().getCaseBundles().get(0).getValue().getStitchedDocument().getDocumentFilename());
+
+        assertEquals(
+            "DONE",
+            bundleCreateResponse.getData().getCaseBundles().getFirst().getValue().getStitchStatus()
+        );
+
+        assertEquals(
+            "StitchedPDF",
+            bundleCreateResponse.getData().getCaseBundles().getFirst().getValue().getStitchedDocument().getDocumentFilename()
+        );
     }
 }

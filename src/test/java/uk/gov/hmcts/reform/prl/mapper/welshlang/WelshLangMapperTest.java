@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.mapper.welshlang;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
@@ -21,10 +20,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class WelshLangMapperTest {
 
     @Test
-    public void shouldGetWelshValueForCA() throws Exception {
+    void shouldGetWelshValueForCA() throws Exception {
         WelshNeed welshNeed = WelshNeed.builder().whoNeedsWelsh("test").spokenOrWritten(Arrays.asList(
             SpokenOrWrittenWelshEnum.spoken,
             SpokenOrWrittenWelshEnum.both, SpokenOrWrittenWelshEnum.written)).build();
@@ -54,15 +55,15 @@ public class WelshLangMapperTest {
             }
         });
 
-        Assert.assertEquals(caseDataValues.get("ordersApplyingFor"),
+        assertEquals(caseDataValues.get("ordersApplyingFor"),
                             Arrays.asList(WelshLangMapper.CA_WELSH_MAP.get(OrderTypeEnum
                                                                                .childArrangementsOrder
                                                                                .getDisplayedValue())));
-        Assert.assertEquals(caseDataValues.get("sdoHearingUrgentCheckList"),
+        assertEquals(caseDataValues.get("sdoHearingUrgentCheckList"),
                             Arrays.asList(WelshLangMapper.CA_WELSH_MAP.get(SdoHearingUrgentCheckListEnum
                                                                                .immediateRisk
                                                                                .getDisplayedValue())));
-        Assert.assertEquals(caseDataValues.get("sdoTransferApplicationReason"),
+        assertEquals(caseDataValues.get("sdoTransferApplicationReason"),
                             Arrays.asList(WelshLangMapper.CA_WELSH_MAP.get(SdoTransferApplicationReasonEnum
                                                                                .ongoingProceedings
                                                                                .getDisplayedValue())));
@@ -70,7 +71,7 @@ public class WelshLangMapperTest {
 
 
     @Test
-    public void shouldGetWelshValueForDA() throws Exception {
+    void shouldGetWelshValueForDA() throws Exception {
         WelshNeed welshNeed = WelshNeed.builder().whoNeedsWelsh("test").spokenOrWritten(Arrays.asList(
             SpokenOrWrittenWelshEnum.spoken,
             SpokenOrWrittenWelshEnum.both, SpokenOrWrittenWelshEnum.written)).build();
@@ -101,6 +102,6 @@ public class WelshLangMapperTest {
         map.put("orderType", Arrays.asList(WelshLangMapper.DA_WELSH_MAP.get(FL401OrderTypeEnum
                                                                                 .nonMolestationOrder
                                                                                 .getDisplayedValue())));
-        Assert.assertEquals(caseDataValues.get("typeOfApplicationOrders"), map);
+        assertEquals(caseDataValues.get("typeOfApplicationOrders"), map);
     }
 }

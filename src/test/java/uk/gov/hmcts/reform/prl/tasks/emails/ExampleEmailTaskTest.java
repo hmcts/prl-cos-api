@@ -28,12 +28,12 @@ public class ExampleEmailTaskTest {
     private ExampleEmailTask task;
 
     @Test
-    public void getTemplateShouldReturnValidValue() {
+    void getTemplateShouldReturnValidValue() {
         assertThat(task.getTemplate(), is(EmailTemplateNames.EXAMPLE));
     }
 
     @Test
-    public void getPersonalisationShouldReturnModel() {
+    void getPersonalisationShouldReturnModel() {
         assertThat(
             task.getPersonalisation(TaskContextProvider.empty(), CaseDetailsProvider.empty()),
             is(expectedPersonalisation())
@@ -41,7 +41,7 @@ public class ExampleEmailTaskTest {
     }
 
     @Test
-    public void executeCallsEmailService() {
+    void executeCallsEmailService() {
         task.execute(TaskContextProvider.empty(), CaseDetailsProvider.empty());
 
         verify(emailService).send(

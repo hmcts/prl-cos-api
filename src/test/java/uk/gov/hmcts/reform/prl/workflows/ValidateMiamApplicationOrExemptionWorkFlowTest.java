@@ -15,7 +15,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-public class ValidateMiamApplicationOrExemptionWorkFlowTest {
+class ValidateMiamApplicationOrExemptionWorkFlowTest {
 
     @Mock private ValidateMiamApplicationOrExemptionTask validateMiamApplicationOrExemptionTask;
 
@@ -23,7 +23,7 @@ public class ValidateMiamApplicationOrExemptionWorkFlowTest {
     private ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
 
     @Test
-    public void whenWorkflowRun_thenExpectedTasksInvoked() throws WorkflowException {
+    void whenWorkflowRun_thenExpectedTasksInvoked() throws WorkflowException {
         validateMiamApplicationOrExemptionWorkflow.run(
             CallbackRequest.builder()
                 .caseDetails(CaseDetails.builder()

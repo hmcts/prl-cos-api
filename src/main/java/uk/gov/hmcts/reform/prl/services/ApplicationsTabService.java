@@ -187,7 +187,7 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put("fl401TypeOfApplicationTable", getFL401TypeOfApplicationTable(caseData));
             applicationTab.put("withoutNoticeOrderTable", getWithoutNoticeOrder(caseData));
             applicationTab.put("fl401ApplicantTable", getFl401ApplicantsTable(caseData));
-            applicationTab.put("fl401SolicitorDetailsTable", getFl401ApplicantsSolictorDetailsTable(caseData));
+            applicationTab.put("fl401SolicitorDetailsTable", getFl401ApplicantsSolicitorDetailsTable(caseData));
             applicationTab.put("fl401RespondentTable", getFl401RespondentTable(caseData));
             Map<String,Object> applicantFamilyMap = getApplicantsFamilyDetails(caseData);
             applicationTab.put("applicantFamilyTable", applicantFamilyMap);
@@ -554,7 +554,7 @@ public class ApplicationsTabService implements TabService {
         if (nonNull(solicitor)) {
             statementOfTruthPlaceHolder = solicitor;
         } else if (isNotEmpty(caseData.getUserInfo())) {
-            UserInfo userInfo = caseData.getUserInfo().get(0).getValue();
+            UserInfo userInfo = caseData.getUserInfo().getFirst().getValue();
             statementOfTruthPlaceHolder = userInfo.getFirstName() + " " + userInfo.getLastName();
         }
 
@@ -663,11 +663,11 @@ public class ApplicationsTabService implements TabService {
             urgencyEvidence = urgencyCheck.get().getDisplayedValue();
         }
 
-        String previousAttendenceEvidence = PrlAppsConstants.EMPTY_STRING;
+        String previousAttendanceEvidence = PrlAppsConstants.EMPTY_STRING;
         Optional<uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPreviousAttendanceChecklistEnum> prevCheck =
             ofNullable(caseData.getMiamPolicyUpgradeDetails().getMpuPreviousMiamAttendanceReason());
         if (prevCheck.isPresent()) {
-            previousAttendenceEvidence = prevCheck.get().getDisplayedValue();
+            previousAttendanceEvidence = prevCheck.get().getDisplayedValue();
         }
 
         String otherGroundsEvidence = PrlAppsConstants.EMPTY_STRING;
@@ -696,7 +696,7 @@ public class ApplicationsTabService implements TabService {
             .mpuDomesticAbuseEvidence(domesticAbuseEvidence)
             .mpuChildProtectionEvidence(childEvidence)
             .mpuUrgencyEvidence(urgencyEvidence)
-            .mpuPreviousAttendenceEvidence(previousAttendenceEvidence)
+            .mpuPreviousAttendenceEvidence(previousAttendanceEvidence)
             .mpuOtherGroundsEvidence(otherGroundsEvidence)
             .mpuIsDomesticAbuseEvidenceProvided(mpuIsDomesticAbuseEvidenceProvided)
             .mpuTypeOfPreviousMiamAttendanceEvidence(mpuTypeOfPreviousMiamAttendanceEvidence)
@@ -740,12 +740,12 @@ public class ApplicationsTabService implements TabService {
             urgencyEvidence = "";
         }
 
-        String previousAttendenceEvidence;
+        String previousAttendanceEvidence;
         Optional<MiamPreviousAttendanceChecklistEnum> prevCheck = ofNullable(caseData.getMiamDetails().getMiamPreviousAttendanceChecklist());
         if (prevCheck.isPresent()) {
-            previousAttendenceEvidence = caseData.getMiamDetails().getMiamPreviousAttendanceChecklist().getDisplayedValue();
+            previousAttendanceEvidence = caseData.getMiamDetails().getMiamPreviousAttendanceChecklist().getDisplayedValue();
         } else {
-            previousAttendenceEvidence = "";
+            previousAttendanceEvidence = "";
         }
 
         String otherGroundsEvidence;
@@ -772,7 +772,7 @@ public class ApplicationsTabService implements TabService {
             .domesticViolenceEvidence(domesticViolenceEvidence)
             .childProtectionEvidence(childEvidence)
             .urgencyEvidence(urgencyEvidence)
-            .previousAttendenceEvidence(previousAttendenceEvidence)
+            .previousAttendenceEvidence(previousAttendanceEvidence)
             .otherGroundsEvidence(otherGroundsEvidence)
             .build();
 
@@ -1068,9 +1068,9 @@ public class ApplicationsTabService implements TabService {
 
     public Map<String, Object> getDomesticAbuseTable(CaseData caseData) {
 
-        Optional<List<ApplicantOrChildren>> physVictm = ofNullable(caseData.getAllegationOfHarm().getPhysicalAbuseVictim());
+        Optional<List<ApplicantOrChildren>> physVictim = ofNullable(caseData.getAllegationOfHarm().getPhysicalAbuseVictim());
         String physVictimString = "";
-        if (physVictm.isPresent()) {
+        if (physVictim.isPresent()) {
             physVictimString = caseData.getAllegationOfHarm().getPhysicalAbuseVictim().stream()
                 .map(ApplicantOrChildren::getDisplayedValue)
                 .collect(Collectors.joining(", "));
@@ -1266,7 +1266,7 @@ public class ApplicationsTabService implements TabService {
         return toMap(applicant.toBuilder().gender(Gender.getDisplayedValueFromEnumString(applicant.getGender()).getDisplayedValue()).build());
     }
 
-    public Map<String, Object> getFl401ApplicantsSolictorDetailsTable(CaseData caseData) {
+    public Map<String, Object> getFl401ApplicantsSolicitorDetailsTable(CaseData caseData) {
         if (caseData.getApplicantsFL401() == null) {
             return Collections.emptyMap();
         }
@@ -1420,8 +1420,8 @@ public class ApplicationsTabService implements TabService {
             List<Element<HomeChild>> childList = new ArrayList<>();
             for (ChildrenLiveAtAddress eachChild : eachChildren) {
                 HomeChild.HomeChildBuilder builder =  HomeChild.builder()
-                    .childsAge(getMaskTextIfConfIsChoosenAsYes(eachChild.getChildsAge(), eachChild.getKeepChildrenInfoConfidential()))
-                    .childFullName(getMaskTextIfConfIsChoosenAsYes(eachChild.getChildFullName(), eachChild.getKeepChildrenInfoConfidential()));
+                    .childsAge(getMaskTextIfConfIsChosenAsYes(eachChild.getChildsAge(), eachChild.getKeepChildrenInfoConfidential()))
+                    .childFullName(getMaskTextIfConfIsChosenAsYes(eachChild.getChildFullName(), eachChild.getKeepChildrenInfoConfidential()));
                 builder.isRespondentResponsibleForChild(eachChild.getIsRespondentResponsibleForChild().getDisplayedValue());
                 if (YesOrNo.Yes.equals(eachChild.getKeepChildrenInfoConfidential())) {
                     builder.isRespondentResponsibleForChild(THIS_INFORMATION_IS_CONFIDENTIAL);
@@ -1435,7 +1435,7 @@ public class ApplicationsTabService implements TabService {
         return homeDetails;
     }
 
-    private String getMaskTextIfConfIsChoosenAsYes(String value, YesOrNo keepChildrenInfoConfidential) {
+    private String getMaskTextIfConfIsChosenAsYes(String value, YesOrNo keepChildrenInfoConfidential) {
         if (YesOrNo.Yes.equals(keepChildrenInfoConfidential)) {
             return THIS_INFORMATION_IS_CONFIDENTIAL;
         }
@@ -1460,7 +1460,7 @@ public class ApplicationsTabService implements TabService {
     public List<Element<ChildAndCafcassOfficer>> prePopulateChildAndCafcassOfficerDetails(CaseData caseData) {
         List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers = new ArrayList<>();
         if (caseData.getChildren() != null) {
-            caseData.getChildren().stream().forEach(childElement -> {
+            caseData.getChildren().forEach(childElement -> {
                 ChildAndCafcassOfficer childAndCafcassOfficer = ChildAndCafcassOfficer.builder()
                     .childId(childElement.getId().toString())
                     .childName(CHILD_NAME + childElement.getValue().getFirstName() + " " + childElement.getValue().getLastName())
@@ -1479,7 +1479,7 @@ public class ApplicationsTabService implements TabService {
     public List<Element<ChildAndCafcassOfficer>> prePopulateRevisedChildAndCafcassOfficerDetails(CaseData caseData) {
         List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers = new ArrayList<>();
         if (caseData.getNewChildDetails() != null) {
-            caseData.getNewChildDetails().stream().forEach(childElement -> {
+            caseData.getNewChildDetails().forEach(childElement -> {
                 ChildAndCafcassOfficer childAndCafcassOfficer = ChildAndCafcassOfficer.builder()
                         .childId(childElement.getId().toString())
                         .childName(CHILD_NAME + childElement.getValue().getFirstName() + " " + childElement.getValue().getLastName())

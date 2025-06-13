@@ -203,7 +203,7 @@ public class UpdatePartyDetailsService {
             }
             Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
             applicantList.ifPresent(elements -> setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData,
-                    ElementUtils.unwrapElements(elements).get(0)));
+                    ElementUtils.unwrapElements(elements).getFirst()));
             try {
                 generateC8DocumentsForRespondents(updatedCaseData,
                                                   callbackRequest,
@@ -326,7 +326,7 @@ public class UpdatePartyDetailsService {
                 .stream()
                 .map(Element::getValue)
                 .toList();
-            PartyDetails applicant1 = applicants.get(0);
+            PartyDetails applicant1 = applicants.getFirst();
             if (Objects.nonNull(applicant1)) {
                 updatedCaseData.put("applicantName", applicant1.getFirstName() + " " + applicant1.getLastName());
             }

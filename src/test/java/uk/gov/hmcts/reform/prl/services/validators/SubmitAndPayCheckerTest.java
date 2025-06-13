@@ -42,7 +42,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @ExtendWith(MockitoExtension.class)
-public class SubmitAndPayCheckerTest {
+class SubmitAndPayCheckerTest {
 
     @InjectMocks
     SubmitAndPayChecker submitAndPayChecker;
@@ -136,7 +136,7 @@ public class SubmitAndPayCheckerTest {
     private List<Element<PartyDetails>> respondentsList;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
 
         address = Address.builder()
             .addressLine1("Test")
@@ -225,13 +225,13 @@ public class SubmitAndPayCheckerTest {
     }
 
     @Test
-    public void whenNoDataEnteredThenIsStartedReturnFalse() {
+    void whenNoDataEnteredThenIsStartedReturnFalse() {
         caseData = CaseData.builder().build();
         assertFalse(submitAndPayChecker.isStarted(caseData));
     }
 
     @Test
-    public void whenNoDataEnteredThenIsFinishedReturnFalse() {
+    void whenNoDataEnteredThenIsFinishedReturnFalse() {
         caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V2).build();
 
         when(caseNameChecker.hasMandatoryCompleted(caseData)).thenReturn(false);
@@ -283,7 +283,7 @@ public class SubmitAndPayCheckerTest {
     }
 
     @Test
-    public void whenPartialCasaDataPresentThenIsFinshedReturnFalse() {
+    void whenPartialCasaDataPresentThenIsFinshedReturnFalse() {
 
         caseData = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -342,7 +342,7 @@ public class SubmitAndPayCheckerTest {
     }
 
     @Test
-    public void whenAllCaseDataPresentThenIsFinshedReturnTrue() {
+    void whenAllCaseDataPresentThenIsFinshedReturnTrue() {
 
         caseData = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -433,7 +433,7 @@ public class SubmitAndPayCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataPresentThenHasMandatoryCompletedReturnFalse() {
+    void whenNoCaseDataPresentThenHasMandatoryCompletedReturnFalse() {
 
         caseData = CaseData.builder().build();
 
@@ -486,7 +486,7 @@ public class SubmitAndPayCheckerTest {
     }
 
     @Test
-    public void whenAllMandatoryCaseDataPresentThenHasMandatoryCompletedReturnTrue() {
+    void whenAllMandatoryCaseDataPresentThenHasMandatoryCompletedReturnTrue() {
 
         caseData = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -577,7 +577,7 @@ public class SubmitAndPayCheckerTest {
 
 
     @Test
-    public void whenAllMandatoryCaseDataPresentThenHasMandatoryCompletedReturnTrueForV2() {
+    void whenAllMandatoryCaseDataPresentThenHasMandatoryCompletedReturnTrueForV2() {
         caseData = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicantCaseName("testing")
@@ -681,7 +681,7 @@ public class SubmitAndPayCheckerTest {
     }
 
     @Test
-    public void whenAllMandatoryCaseDataPresentThenHasMandatoryCompletedReturnTrueForV3() {
+    void whenAllMandatoryCaseDataPresentThenHasMandatoryCompletedReturnTrueForV3() {
         caseData = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicantCaseName("testing")
@@ -784,7 +784,7 @@ public class SubmitAndPayCheckerTest {
     }
 
     @Test
-    public void whenAllMandatoryCaseDataPresentThenHasMandatoryCompletedReturnTrueForV3ConsentOrderNo() {
+    void whenAllMandatoryCaseDataPresentThenHasMandatoryCompletedReturnTrueForV3ConsentOrderNo() {
         caseData = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicantCaseName("testing")
@@ -886,7 +886,7 @@ public class SubmitAndPayCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+    void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
         assertNotNull(submitAndPayChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 

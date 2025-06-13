@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
-public class OtherPeopleInTheCaseCheckerTest {
+class OtherPeopleInTheCaseCheckerTest {
 
     @Mock
     TaskErrorService taskErrorService;
@@ -33,7 +33,7 @@ public class OtherPeopleInTheCaseCheckerTest {
     OtherPeopleInTheCaseChecker otherPeopleInTheCaseChecker;
 
     @Test
-    public void whenNoCaseDataThenIsStartedReturnsFalse() {
+    void whenNoCaseDataThenIsStartedReturnsFalse() {
 
         CaseData caseData = CaseData.builder().build();
 
@@ -42,7 +42,7 @@ public class OtherPeopleInTheCaseCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataThenIsFinishedReturnsFalse() {
+    void whenNoCaseDataThenIsFinishedReturnsFalse() {
 
         CaseData caseData = CaseData.builder().build();
 
@@ -51,7 +51,7 @@ public class OtherPeopleInTheCaseCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataThenHasMandatoryReturnsFalse() {
+    void whenNoCaseDataThenHasMandatoryReturnsFalse() {
 
         CaseData caseData = CaseData.builder().build();
 
@@ -60,7 +60,7 @@ public class OtherPeopleInTheCaseCheckerTest {
     }
 
     @Test
-    public void whenMinimalRelevantCaseDataThenIsStartedReturnsTrue() {
+    void whenMinimalRelevantCaseDataThenIsStartedReturnsTrue() {
         PartyDetails other = PartyDetails.builder().firstName("TestName").build();
         Element<PartyDetails> wrappedOther = Element.<PartyDetails>builder().value(other).build();
         List<Element<PartyDetails>> otherList = Collections.singletonList(wrappedOther);
@@ -73,7 +73,7 @@ public class OtherPeopleInTheCaseCheckerTest {
     }
 
     @Test
-    public void whenNoRelevantCaseDataThenIsStartedReturnsFalse() {
+    void whenNoRelevantCaseDataThenIsStartedReturnsFalse() {
         PartyDetails other = null;
         Element<PartyDetails> wrappedOther = Element.<PartyDetails>builder().value(other).build();
         List<Element<PartyDetails>> otherList = Collections.singletonList(wrappedOther);
@@ -86,7 +86,7 @@ public class OtherPeopleInTheCaseCheckerTest {
     }
 
     @Test
-    public void whenIncompleteCaseDataValidateMandatoryFieldsForOtherReturnsFalse() {
+    void whenIncompleteCaseDataValidateMandatoryFieldsForOtherReturnsFalse() {
 
         OtherPersonRelationshipToChild personRelationshipToChild = OtherPersonRelationshipToChild.builder()
             .personRelationshipToChild("Test relationship")
@@ -108,7 +108,7 @@ public class OtherPeopleInTheCaseCheckerTest {
     }
 
     @Test
-    public void whenCompletePartyDetailsThenValidationReturnsTrue() {
+    void whenCompletePartyDetailsThenValidationReturnsTrue() {
 
         OtherPersonRelationshipToChild personRelationshipToChild = OtherPersonRelationshipToChild.builder()
             .personRelationshipToChild("Test relationship")
@@ -142,7 +142,7 @@ public class OtherPeopleInTheCaseCheckerTest {
     }
 
     @Test
-    public void whenCompletePartyDetailsButMissingOtherPersonRelationshipThenValidationReturnsFalse() {
+    void whenCompletePartyDetailsButMissingOtherPersonRelationshipThenValidationReturnsFalse() {
 
         PartyDetails partyDetails = PartyDetails.builder()
             .firstName("firstName")
@@ -170,7 +170,7 @@ public class OtherPeopleInTheCaseCheckerTest {
 
 
     @Test
-    public void whenOtherPeopleInTheCasePresentExceptPlaceOfBirth() {
+    void whenOtherPeopleInTheCasePresentExceptPlaceOfBirth() {
 
         OtherPersonRelationshipToChild personRelationshipToChild = OtherPersonRelationshipToChild.builder()
             .personRelationshipToChild("Test relationship")
@@ -210,7 +210,7 @@ public class OtherPeopleInTheCaseCheckerTest {
     }
 
     @Test
-    public void whenOtherPeopleInTheCasePresentNotWithRelationshipToChild() {
+    void whenOtherPeopleInTheCasePresentNotWithRelationshipToChild() {
 
         OtherPersonRelationshipToChild personRelationshipToChild = OtherPersonRelationshipToChild.builder()
             .personRelationshipToChild("Test relationship")
@@ -248,7 +248,7 @@ public class OtherPeopleInTheCaseCheckerTest {
 
 
     @Test
-    public void ifEmptyListOfPartyDetailsThenFinishedReturnsFalse() {
+    void ifEmptyListOfPartyDetailsThenFinishedReturnsFalse() {
 
         CaseData caseData = CaseData.builder()
             .othersToNotify(Collections.emptyList())
@@ -258,7 +258,7 @@ public class OtherPeopleInTheCaseCheckerTest {
     }
 
     @Test
-    public void whenCompletePartyDetailsThenFinishedReturnsTrue() {
+    void whenCompletePartyDetailsThenFinishedReturnsTrue() {
 
         OtherPersonRelationshipToChild personRelationshipToChild = OtherPersonRelationshipToChild.builder()
             .personRelationshipToChild("Test relationship")
@@ -296,7 +296,7 @@ public class OtherPeopleInTheCaseCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+    void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
         assertNotNull(otherPeopleInTheCaseChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 

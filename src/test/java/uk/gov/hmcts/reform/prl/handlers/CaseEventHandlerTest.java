@@ -36,7 +36,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.apache.commons.lang3.RandomUtils.nextLong;
+import static java.util.concurrent.ThreadLocalRandom.current;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
@@ -59,7 +59,7 @@ import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.NOT_STARTED;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
-public class CaseEventHandlerTest {
+class CaseEventHandlerTest {
 
     @Mock
     private TaskListService taskListService;
@@ -87,9 +87,9 @@ public class CaseEventHandlerTest {
     public static final String authToken = "Bearer TestAuthToken";
 
     @Test
-    public void shouldUpdateTaskListForCasesInOpenStateC100() {
+    void shouldUpdateTaskListForCasesInOpenStateC100() {
         final CaseData caseData = CaseData.builder()
-                .id(nextLong())
+                .id(current().nextLong(1_000_000_000L, 9_999_999_999L))
                 .state(State.AWAITING_SUBMISSION_TO_HMCTS)
                 .caseTypeOfApplication(C100_CASE_TYPE)
                 .build();
@@ -165,9 +165,9 @@ public class CaseEventHandlerTest {
     }
 
     @Test
-    public void shouldUpdateTaskListForCasesInOpenStateFl401() {
+    void shouldUpdateTaskListForCasesInOpenStateFl401() {
         final CaseData caseData = CaseData.builder()
-                .id(nextLong())
+                .id(current().nextLong(1_000_000_000L, 9_999_999_999L))
                 .state(State.AWAITING_SUBMISSION_TO_HMCTS)
                 .caseTypeOfApplication(FL401_CASE_TYPE)
                 .build();
@@ -232,7 +232,7 @@ public class CaseEventHandlerTest {
     }
 
     @Test
-    public void shouldUpdateTaskListForCasesInOpenStateC100WithRespondents() {
+    void shouldUpdateTaskListForCasesInOpenStateC100WithRespondents() {
         PartyDetails respondent = PartyDetails.builder()
                 .firstName("TestFirst")
                 .lastName("TestLast")
@@ -249,7 +249,7 @@ public class CaseEventHandlerTest {
         List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
 
         final CaseData caseData = CaseData.builder()
-                .id(nextLong())
+                .id(current().nextLong(1_000_000_000L, 9_999_999_999L))
                 .state(State.AWAITING_SUBMISSION_TO_HMCTS)
                 .caseTypeOfApplication(C100_CASE_TYPE)
                 .respondents(listOfRespondents)
@@ -333,7 +333,7 @@ public class CaseEventHandlerTest {
     }
 
     @Test
-    public void testGetRespondentTaskList() {
+    void testGetRespondentTaskList() {
         List<Element<PartyDetails>> respondents = new ArrayList<>();
         respondents.add(element(PartyDetails.builder()
                 .user(User.builder().solicitorRepresented(YesOrNo.Yes).build())
@@ -344,7 +344,7 @@ public class CaseEventHandlerTest {
                 .build()));
 
         final CaseData caseData = CaseData.builder()
-                .id(nextLong())
+                .id(current().nextLong(1_000_000_000L, 9_999_999_999L))
                 .caseTypeOfApplication(C100_CASE_TYPE)
                 .respondents(respondents)
                 .build();
@@ -397,7 +397,7 @@ public class CaseEventHandlerTest {
     }
 
     @Test
-    public void testGetRespondentTaskListWhenC7ResponseSubmitted() {
+    void testGetRespondentTaskListWhenC7ResponseSubmitted() {
         List<Element<PartyDetails>> respondents = new ArrayList<>();
         respondents.add(element(PartyDetails.builder()
                 .user(User.builder().solicitorRepresented(YesOrNo.Yes).build())
@@ -409,7 +409,7 @@ public class CaseEventHandlerTest {
                 .build()));
 
         final CaseData caseData = CaseData.builder()
-                .id(nextLong())
+                .id(current().nextLong(1_000_000_000L, 9_999_999_999L))
                 .state(State.AWAITING_RESUBMISSION_TO_HMCTS)
                 .caseTypeOfApplication(C100_CASE_TYPE)
                 .respondents(respondents)
@@ -464,9 +464,9 @@ public class CaseEventHandlerTest {
 
 
     @Test
-    public void shouldUpdateTaskListForCasesInReturnedStateC100() {
+    void shouldUpdateTaskListForCasesInReturnedStateC100() {
         final CaseData caseData = CaseData.builder()
-                .id(nextLong())
+                .id(current().nextLong(1_000_000_000L, 9_999_999_999L))
                 .state(State.AWAITING_RESUBMISSION_TO_HMCTS)
                 .caseTypeOfApplication(C100_CASE_TYPE)
                 .build();

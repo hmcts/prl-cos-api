@@ -43,7 +43,7 @@ import static uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100Respo
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
-public class CaseApplicantResponseServiceTest {
+class CaseApplicantResponseServiceTest {
 
     @InjectMocks
     private CaseApplicationResponseService caseApplicationResponseService;
@@ -87,7 +87,7 @@ public class CaseApplicantResponseServiceTest {
     private Map<String, Object> stringObjectMap;
 
     @BeforeEach
-    public void setUp() throws Exception {
+    void setUp() throws Exception {
         dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, true);
         caseData = CaseData.builder()
             .id(1234567891234567L)
@@ -123,7 +123,7 @@ public class CaseApplicantResponseServiceTest {
     }
 
     @Test
-    public void testGenerateC7finalDocument() throws Exception {
+    void testGenerateC7finalDocument() throws Exception {
         when(c100RespondentSolicitorService.populateDataMap(Mockito.any(CallbackRequest.class),
                                                             Mockito.any(Element.class), Mockito.anyString()))
             .thenReturn(dataMap);
@@ -144,7 +144,7 @@ public class CaseApplicantResponseServiceTest {
     }
 
     @Test
-    public void testGenerateC7finalDocumentForRespondent1() throws Exception {
+    void testGenerateC7finalDocumentForRespondent1() throws Exception {
         List<Element<OtherProceedingDetails>> proceedingsDetailsList = new ArrayList<>();
         OtherProceedingDetails proceedingDetails = OtherProceedingDetails
             .builder().orderDocument(Document.builder().documentFileName("C7_Document.pdf").build()).build();
@@ -199,7 +199,7 @@ public class CaseApplicantResponseServiceTest {
     }
 
     @Test
-    public void testGenerateC7finalDocumentForRespondent2() throws Exception {
+    void testGenerateC7finalDocumentForRespondent2() throws Exception {
         List<Element<OtherProceedingDetails>> proceedingsDetailsList = new ArrayList<>();
         OtherProceedingDetails proceedingDetails = OtherProceedingDetails
             .builder().orderDocument(Document.builder().build()).build();
@@ -275,7 +275,7 @@ public class CaseApplicantResponseServiceTest {
     }
 
     @Test
-    public void testGenerateC7finalDocumentForRespondent3() throws Exception {
+    void testGenerateC7finalDocumentForRespondent3() throws Exception {
 
         List<Element<OtherProceedingDetails>> proceedingsDetailsList = new ArrayList<>();
         OtherProceedingDetails proceedingDetails = OtherProceedingDetails
@@ -352,7 +352,7 @@ public class CaseApplicantResponseServiceTest {
     }
 
     @Test
-    public void testGenerateC7finalDocumentForRespondent4() throws Exception {
+    void testGenerateC7finalDocumentForRespondent4() throws Exception {
         Proceedings proceedings = Proceedings.builder().build();
 
         List<Element<Proceedings>> proceedingsList = new ArrayList<>();
@@ -422,7 +422,7 @@ public class CaseApplicantResponseServiceTest {
     }
 
     @Test
-    public void testGenerateC7finalDocumentForRespondent5() throws Exception {
+    void testGenerateC7finalDocumentForRespondent5() throws Exception {
         Element partyDetails1 =  Element.<PartyDetails>builder()
             .id(UUID.randomUUID())
             .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
@@ -484,7 +484,7 @@ public class CaseApplicantResponseServiceTest {
     }
 
     @Test
-    public void testGenerateC7finalDocumentTriggersDefault() throws Exception {
+    void testGenerateC7finalDocumentTriggersDefault() throws Exception {
         Element partyDetails1 =  Element.<PartyDetails>builder()
             .id(UUID.randomUUID())
             .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
@@ -554,14 +554,14 @@ public class CaseApplicantResponseServiceTest {
     }
 
     @Test
-    public void testGenerateC7DraftDocument() throws Exception {
+    void testGenerateC7DraftDocument() throws Exception {
         Document document = caseApplicationResponseService
             .generateC7DraftDocument(authToken, caseData,false);
         assertNotNull(document);
     }
 
     @Test
-    public void testUpdateCurrentRespondent() {
+    void testUpdateCurrentRespondent() {
         Element partyDetails1 =  Element.<PartyDetails>builder()
             .id(UUID.randomUUID())
             .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
@@ -577,7 +577,7 @@ public class CaseApplicantResponseServiceTest {
     }
 
     @Test
-    public void testUpdateCurrentRespondentIdsDontMatch() {
+    void testUpdateCurrentRespondentIdsDontMatch() {
         Element partyDetails1 =  Element.<PartyDetails>builder()
             .id(UUID.randomUUID())
             .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)

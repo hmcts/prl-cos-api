@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-public class FL401ApplicationTypeCheckerTest {
+class FL401ApplicationTypeCheckerTest {
 
     @Mock
     private TaskErrorService taskErrorService;
@@ -35,7 +35,7 @@ public class FL401ApplicationTypeCheckerTest {
     private LinkToCA linkToCA;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
 
         caseData = CaseData.builder().build();
@@ -55,12 +55,12 @@ public class FL401ApplicationTypeCheckerTest {
     }
 
     @Test
-    public void whenFieldsPartiallyCompleteIsFinishedReturnsFalse() {
+    void whenFieldsPartiallyCompleteIsFinishedReturnsFalse() {
         assertFalse(fl401ApplicationTypeChecker.isFinished(caseData));
     }
 
     @Test
-    public void whenAllRequiredFieldsCompletedThenIsFinishedReturnsTrue() {
+    void whenAllRequiredFieldsCompletedThenIsFinishedReturnsTrue() {
 
         CaseData caseData = CaseData.builder()
             .typeOfApplicationOrders(orders)
@@ -71,7 +71,7 @@ public class FL401ApplicationTypeCheckerTest {
     }
 
     @Test
-    public void whenAllRequiredFieldsCompletedIsFinishedReturnsTrue() {
+    void whenAllRequiredFieldsCompletedIsFinishedReturnsTrue() {
         List<FL401OrderTypeEnum> orderList = new ArrayList<>();
 
         orderList.add(FL401OrderTypeEnum.nonMolestationOrder);
@@ -95,7 +95,7 @@ public class FL401ApplicationTypeCheckerTest {
     }
 
     @Test
-    public void whenAllRequiredFieldsCompletedIsFinishedReturnsTrueWithLinkToCaIsNo() {
+    void whenAllRequiredFieldsCompletedIsFinishedReturnsTrueWithLinkToCaIsNo() {
         List<FL401OrderTypeEnum> orderList = new ArrayList<>();
 
         orderList.add(FL401OrderTypeEnum.nonMolestationOrder);
@@ -118,7 +118,7 @@ public class FL401ApplicationTypeCheckerTest {
     }
 
     @Test
-    public void whenAllRequiredFieldsCompletedIsFinishedReturnsTrueWithLinkToCaIsDontKnow() {
+    void whenAllRequiredFieldsCompletedIsFinishedReturnsTrueWithLinkToCaIsDontKnow() {
         List<FL401OrderTypeEnum> orderList = new ArrayList<>();
 
         orderList.add(FL401OrderTypeEnum.nonMolestationOrder);
@@ -139,17 +139,17 @@ public class FL401ApplicationTypeCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataThenIsStartedReturnsFalse() {
+    void whenNoCaseDataThenIsStartedReturnsFalse() {
         assertFalse(fl401ApplicationTypeChecker.isStarted(caseData));
     }
 
     @Test
-    public void whenNoCaseDataThenHasMandatoryReturnsFalse() {
+    void whenNoCaseDataThenHasMandatoryReturnsFalse() {
         assertFalse(fl401ApplicationTypeChecker.hasMandatoryCompleted(caseData));
     }
 
     @Test
-    public void whenCaseDataPresentThenHasMandatoryReturnsFalse() {
+    void whenCaseDataPresentThenHasMandatoryReturnsFalse() {
 
         LinkToCA linkToCA = LinkToCA.builder()
             .linkToCaApplication(YesOrNo.No)
@@ -164,7 +164,7 @@ public class FL401ApplicationTypeCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+    void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
         assertNotNull(fl401ApplicationTypeChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

@@ -33,7 +33,7 @@ import static uk.gov.hmcts.reform.prl.enums.FL401RejectReasonEnum.witnessStateme
 import static uk.gov.hmcts.reform.prl.enums.RejectReasonEnum.consentOrderNotProvided;
 
 @ExtendWith(MockitoExtension.class)
-public class ReturnApplicationServiceTest {
+class ReturnApplicationServiceTest {
 
     @InjectMocks
     ReturnApplicationService returnApplicationService;
@@ -101,7 +101,7 @@ public class ReturnApplicationServiceTest {
         + "solicitor@example.com Solicitor";
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         PartyDetails applicant = PartyDetails.builder().representativeFirstName("John").representativeLastName("Smith").build();
 
         casedata = CaseData.builder()
@@ -126,14 +126,14 @@ public class ReturnApplicationServiceTest {
     }
 
     @Test
-    public void whenNoOptionSelectedThenNoRejectReasonSelectedReturnTrue() {
+    void whenNoOptionSelectedThenNoRejectReasonSelectedReturnTrue() {
         casedata = CaseData.builder().build();
 
         assertTrue(returnApplicationService.noRejectReasonSelected(casedata));
     }
 
     @Test
-    public void whenHasOptionSelectedThenNoRejectReasonSelectedReturnFalse() {
+    void whenHasOptionSelectedThenNoRejectReasonSelectedReturnFalse() {
 
         casedata = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -144,7 +144,7 @@ public class ReturnApplicationServiceTest {
     }
 
     @Test
-    public void testOtherC1000therOptionSelectedFirst() {
+    void testOtherC1000therOptionSelectedFirst() {
 
         List<RejectReasonEnum>  rejectReasonList = new ArrayList<>();
         rejectReasonList.add(RejectReasonEnum.otherReason);
@@ -159,7 +159,7 @@ public class ReturnApplicationServiceTest {
     }
 
     @Test
-    public void testOtherOptionC100OtherOptionSelectedSecond() {
+    void testOtherOptionC100OtherOptionSelectedSecond() {
 
         List<RejectReasonEnum>  rejectReasonList = new ArrayList<>();
         rejectReasonList.add(consentOrderNotProvided);
@@ -174,7 +174,7 @@ public class ReturnApplicationServiceTest {
     }
 
     @Test
-    public void testOtherOptionFl401OtherOptionSelectedFirst() {
+    void testOtherOptionFl401OtherOptionSelectedFirst() {
 
         List<FL401RejectReasonEnum>  rejectReasonList = new ArrayList<>();
         rejectReasonList.add(FL401RejectReasonEnum.otherReason);
@@ -191,7 +191,7 @@ public class ReturnApplicationServiceTest {
     }
 
     @Test
-    public void testOtherOptionFl401OtherOptionSelectedSecond() {
+    void testOtherOptionFl401OtherOptionSelectedSecond() {
 
         List<FL401RejectReasonEnum>  rejectReasonList = new ArrayList<>();
         rejectReasonList.add(FL401RejectReasonEnum.applicationIncomplete);
@@ -208,7 +208,7 @@ public class ReturnApplicationServiceTest {
     }
 
     @Test
-    public void whenHasOptionSelectedThenNoFl401RejectReasonSelectedReturnFalse() {
+    void whenHasOptionSelectedThenNoFl401RejectReasonSelectedReturnFalse() {
 
         casedata = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
@@ -219,7 +219,7 @@ public class ReturnApplicationServiceTest {
     }
 
     @Test
-    public void whenMulitpleApplicantsGetLegalFullNameReturnsSolicitorFullNameWhoFileTheApplication() {
+    void whenMulitpleApplicantsGetLegalFullNameReturnsSolicitorFullNameWhoFileTheApplication() {
         PartyDetails applicant = PartyDetails.builder().representativeFirstName("John").representativeLastName("Smith").build();
         PartyDetails applicant2 = PartyDetails.builder().representativeFirstName("Mary").representativeLastName("Walker").build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
@@ -236,7 +236,7 @@ public class ReturnApplicationServiceTest {
     }
 
     @Test
-    public void whenOnlyOneApplicantWithOneSolicitorGetLegalFullNameReturnConstantInputSolicitorName() {
+    void whenOnlyOneApplicantWithOneSolicitorGetLegalFullNameReturnConstantInputSolicitorName() {
         PartyDetails applicant = PartyDetails.builder().representativeFirstName("John").representativeLastName("Smith").build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
@@ -247,7 +247,7 @@ public class ReturnApplicationServiceTest {
     }
 
     @Test
-    public void whenHasApplicantRepresentativeNameGetLegalFullNameReturnLegalRepresentativeFullName() {
+    void whenHasApplicantRepresentativeNameGetLegalFullNameReturnLegalRepresentativeFullName() {
         PartyDetails applicant = PartyDetails.builder().representativeFirstName("John").representativeLastName("Smith").build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
@@ -258,12 +258,12 @@ public class ReturnApplicationServiceTest {
     }
 
     @Test
-    public void whenHasApplicantRepresentativeNameGetLegalFullNameReturnLegalRepresentativeFullNameForFl401() {
+    void whenHasApplicantRepresentativeNameGetLegalFullNameReturnLegalRepresentativeFullNameForFl401() {
         assertEquals("John Smith",returnApplicationService.getLegalFullName(caseDataFl401));
     }
 
     @Test
-    public void testGetReturnMessage() {
+    void testGetReturnMessage() {
         StringBuilder returnMsgStr = new StringBuilder();
 
         returnMsgStr
@@ -285,7 +285,7 @@ public class ReturnApplicationServiceTest {
     }
 
     @Test
-    public void testGetFl401ReturnMessage() {
+    void testGetFl401ReturnMessage() {
         StringBuilder returnMsgStr = new StringBuilder();
 
         returnMsgStr
@@ -308,7 +308,7 @@ public class ReturnApplicationServiceTest {
     }
 
     @Test
-    public void testGetReturnMessageForTaskList() {
+    void testGetReturnMessageForTaskList() {
         StringBuilder returnMsgStr = new StringBuilder();
         returnMsgStr.append("""
                                 <br>
@@ -345,7 +345,7 @@ public class ReturnApplicationServiceTest {
     }
 
     @Test
-    public void testGetReturnMessageForTaskListfl401() {
+    void testGetReturnMessageForTaskListfl401() {
         StringBuilder returnMsgStr = new StringBuilder();
         returnMsgStr.append("""
                                 <br>
@@ -382,7 +382,7 @@ public class ReturnApplicationServiceTest {
     }
 
     @Test
-    public void testUpdateMiamPolicyUpgradeDataForConfidentialDocument() {
+    void testUpdateMiamPolicyUpgradeDataForConfidentialDocument() {
         casedata = casedata.toBuilder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder().build())
             .taskListVersion(TASK_LIST_VERSION_V3)

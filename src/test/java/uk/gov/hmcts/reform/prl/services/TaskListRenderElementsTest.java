@@ -21,7 +21,7 @@ public class TaskListRenderElementsTest {
     private TaskListRenderElements underTest = new TaskListRenderElements(BASE_URL);
 
     @Test
-    public void shouldRenderLink() {
+    void shouldRenderLink() {
         String actual = underTest.renderLink(Task.builder()
                                                  .event(Event.CASE_NAME)
                                                  .build());
@@ -32,7 +32,7 @@ public class TaskListRenderElementsTest {
     }
 
     @Test
-    public void shouldRenderDisabledLink() {
+    void shouldRenderDisabledLink() {
         String actual = underTest.renderDisabledLink(Task.builder()
                                                          .event(Event.CASE_NAME)
                                                          .build());
@@ -40,28 +40,28 @@ public class TaskListRenderElementsTest {
     }
 
     @Test
-    public void shouldRenderHint() {
+    void shouldRenderHint() {
         String actual = underTest.renderHint("Hint");
 
         assertThat(actual).isEqualToIgnoringCase("<span class='govuk-hint govuk-!-font-size-14'>Hint</span>");
     }
 
     @Test
-    public void shouldRenderInfo() {
+    void shouldRenderInfo() {
         String actual = underTest.renderInfo("Info");
 
         assertThat(actual).isEqualToIgnoringCase("<div class='panel panel-border-wide govuk-!-font-size-16'>Info</div>");
     }
 
     @Test
-    public void shouldRenderHeader() {
+    void shouldRenderHeader() {
         String actual = underTest.renderHeader("Header");
 
         assertThat(actual).isEqualToIgnoringCase("## Header");
     }
 
     @Test
-    public void shouldRenderCollapsable() {
+    void shouldRenderCollapsable() {
         List<String> expected = new ArrayList<>();
         expected.add("<details class='govuk-details'>");
         expected.add("<summary class='govuk-details__summary'>");
@@ -79,7 +79,7 @@ public class TaskListRenderElementsTest {
     }
 
     @Test
-    public void shouldRenderNestedCollapsable() {
+    void shouldRenderNestedCollapsable() {
         List<String> expected = new ArrayList<>();
         expected.add("<details class='govuk-details'>");
         expected.add("<summary class='govuk-details__summary'>");
@@ -97,7 +97,7 @@ public class TaskListRenderElementsTest {
     }
 
     @Test
-    public void testRenderRespondentSolicitorLink() {
+    void testRenderRespondentSolicitorLink() {
         RespondentTask respondentTask = RespondentTask.builder()
             .event(RespondentSolicitorEvents.CONSENT)
             .build();

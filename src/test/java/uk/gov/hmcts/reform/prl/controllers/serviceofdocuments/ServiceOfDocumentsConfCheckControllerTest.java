@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.serviceofdocuments;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,7 +35,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-public class ServiceOfDocumentsConfCheckControllerTest {
+class ServiceOfDocumentsConfCheckControllerTest {
 
     public static final String NO_DOCUMENTS_TO_REVIEW_ERROR = "There are no document(s) available for confidential check";
 
@@ -53,7 +52,7 @@ public class ServiceOfDocumentsConfCheckControllerTest {
     private Map<String, Object> caseDataMap;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         caseDataMap = new HashMap<>();
         callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
@@ -61,29 +60,38 @@ public class ServiceOfDocumentsConfCheckControllerTest {
                              .data(caseDataMap).build())
             .build();
 
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
     }
 
     @Test
-    public void testHandleAboutToStartNoDocsToReview() {
+    void testHandleAboutToStartNoDocsToReview() {
         AboutToStartOrSubmitCallbackResponse response = AboutToStartOrSubmitCallbackResponse.builder()
             .errors(List.of("There are no document(s) available for confidential check")).build();
-        when(serviceOfDocumentsService.handleConfCheckAboutToStart(Mockito.anyString(), Mockito.any(CallbackRequest.class))).thenReturn(response);
+        when(serviceOfDocumentsService.handleConfCheckAboutToStart(
+            Mockito.anyString(),
+            Mockito.any(CallbackRequest.class)
+        )).thenReturn(response);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfDocumentsConfCheckController
             .handleAboutToStart(anyString(), anyString(), callbackRequest);
 
         assertNotNull(aboutToStartOrSubmitCallbackResponse);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getErrors());
-        assertEquals(NO_DOCUMENTS_TO_REVIEW_ERROR, aboutToStartOrSubmitCallbackResponse.getErrors().get(0));
+        assertEquals(NO_DOCUMENTS_TO_REVIEW_ERROR, aboutToStartOrSubmitCallbackResponse.getErrors().getFirst());
     }
 
     @Test
-    public void testHandleAboutToStart() {
-        caseDataMap.put("sodUnServedPack", SodPack.builder().documents(List.of(Element.<Document>builder().build())).build());
+    void testHandleAboutToStart() {
+        caseDataMap.put(
+            "sodUnServedPack",
+            SodPack.builder().documents(List.of(Element.<Document>builder().build())).build()
+        );
         AboutToStartOrSubmitCallbackResponse response = AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseDataMap).build();
-        when(serviceOfDocumentsService.handleConfCheckAboutToStart(Mockito.anyString(), Mockito.any(CallbackRequest.class))).thenReturn(response);
+            .data(caseDataMap).build();
+        when(serviceOfDocumentsService.handleConfCheckAboutToStart(
+            Mockito.anyString(),
+            Mockito.any(CallbackRequest.class)
+        )).thenReturn(response);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfDocumentsConfCheckController
             .handleAboutToStart(anyString(), anyString(), callbackRequest);
@@ -93,9 +101,10 @@ public class ServiceOfDocumentsConfCheckControllerTest {
     }
 
     @Test
-    public void testHandleAboutToSubmit() {
+    void testHandleAboutToSubmit() {
         caseDataMap.put(WA_SOA_C8_CHECK_APPROVED, YES);
-        when(serviceOfDocumentsService.handleConfCheckAboutToSubmit(Mockito.any(CallbackRequest.class))).thenReturn(caseDataMap);
+        when(serviceOfDocumentsService.handleConfCheckAboutToSubmit(Mockito.any(CallbackRequest.class))).thenReturn(
+            caseDataMap);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfDocumentsConfCheckController
             .handleAboutToSubmit(anyString(), anyString(), callbackRequest);
@@ -105,7 +114,7 @@ public class ServiceOfDocumentsConfCheckControllerTest {
     }
 
     @Test
-    public void testHandleSubmitted() {
+    void testHandleSubmitted() {
         ResponseEntity<SubmittedCallbackResponse> submittedCallbackResponse = ResponseEntity.ok().build();
         when(serviceOfDocumentsService.handleConfCheckSubmitted(anyString(), Mockito.any(CallbackRequest.class)))
             .thenReturn(submittedCallbackResponse);
@@ -118,33 +127,40 @@ public class ServiceOfDocumentsConfCheckControllerTest {
     }
 
     @Test
-    public void testExceptionHandleAboutToStart() {
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
-        assertExpectedException(() -> {
-            serviceOfDocumentsConfCheckController.handleAboutToStart(any(), any(), callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+    void testExceptionHandleAboutToStart() {
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(false);
+
+        RuntimeException ex = assertThrows(
+            RuntimeException.class, () -> {
+                serviceOfDocumentsConfCheckController.handleAboutToStart(any(), any(), callbackRequest);
+            }
+        );
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 
     @Test
-    public void testExceptionHandleAboutToSubmit() {
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
-        assertExpectedException(() -> {
-            serviceOfDocumentsConfCheckController.handleAboutToSubmit(any(), any(), callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+    void testExceptionHandleAboutToSubmit() {
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(false);
+        RuntimeException ex = assertThrows(
+            RuntimeException.class, () -> {
+                serviceOfDocumentsConfCheckController.handleAboutToSubmit(any(), any(), callbackRequest);
+            }
+        );
+
+        assertEquals("Invalid Client", ex.getMessage());
+
     }
 
     @Test
-    public void testExceptionHandleSubmitted() {
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
-        assertExpectedException(() -> {
-            serviceOfDocumentsConfCheckController.handleSubmitted(any(), any(), callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
-    }
+    void testExceptionHandleSubmitted() {
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(false);
+        RuntimeException ex = assertThrows(
+            RuntimeException.class, () -> {
+                serviceOfDocumentsConfCheckController.handleSubmitted(any(), any(), callbackRequest);
+            }
+        );
 
-    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
-                                                                 String expectedMessage) {
-        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
-        assertEquals(expectedMessage, exception.getMessage());
+        assertEquals("Invalid Client", ex.getMessage());
     }
-
 }

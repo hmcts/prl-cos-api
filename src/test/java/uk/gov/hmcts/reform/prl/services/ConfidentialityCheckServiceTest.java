@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,18 +20,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 
 @ExtendWith(MockitoExtension.class)
-public class ConfidentialityCheckServiceTest {
+class ConfidentialityCheckServiceTest {
 
     @InjectMocks
     private ConfidentialityCheckService confidentialityCheckService;
 
     @Test
-    public void processRespondentsC8Documents() {
+    void processRespondentsC8Documents() {
         List<Element<PartyDetails>> respondents = new ArrayList<>();
         Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder().value(PartyDetails.builder().firstName("firstName")
                 .lastName("lastName").refugeConfidentialityC8Form(Document.builder().build()).build()).build();
@@ -92,13 +95,13 @@ public class ConfidentialityCheckServiceTest {
         Map<String, Object> caseDetails = new HashMap<>();
         confidentialityCheckService.processRespondentsC8Documents(caseDetails, caseData);
 
-        Assert.assertTrue(caseDetails.containsKey("respAC8EngDocument"));
+        assertTrue(caseDetails.containsKey("respAC8EngDocument"));
         Document responseDocuments = (Document) caseDetails.get("respAC8EngDocument");
-        Assert.assertEquals("with version", responseDocuments.getDocumentUrl());
+        assertEquals("with version", responseDocuments.getDocumentUrl());
     }
 
     @Test
-    public void processRespondentsC8DocumentsSceanrios_2() {
+    void processRespondentsC8DocumentsSceanrios_2() {
         List<Element<PartyDetails>> respondents = new ArrayList<>();
         Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder().value(PartyDetails.builder().firstName("firstName")
                 .lastName("lastName").build()).build();
@@ -156,15 +159,15 @@ public class ConfidentialityCheckServiceTest {
         Map<String, Object> caseDetails = new HashMap<>();
         confidentialityCheckService.processRespondentsC8Documents(caseDetails, caseData);
 
-        Assert.assertTrue(caseDetails.containsKey("respAC8EngDocument"));
+        assertTrue(caseDetails.containsKey("respAC8EngDocument"));
         Document responseDocuments = (Document) caseDetails.get("respAC8EngDocument");
-        Assert.assertEquals("with version", responseDocuments.getDocumentUrl());
+        assertEquals("with version", responseDocuments.getDocumentUrl());
     }
 
 
 
     @Test
-    public void processRespondentsC8Documents_without_version() {
+    void processRespondentsC8Documents_without_version() {
         List<Element<PartyDetails>> respondents = new ArrayList<>();
         respondents.add(Element.<PartyDetails>builder().value(PartyDetails.builder().firstName("firstName")
                 .lastName("lastName").build()).build());
@@ -188,14 +191,14 @@ public class ConfidentialityCheckServiceTest {
         Map<String, Object> caseDetails = new HashMap<>();
         confidentialityCheckService.processRespondentsC8Documents(caseDetails, caseData);
 
-        Assert.assertTrue(caseDetails.containsKey("respAC8EngDocument"));
+        assertTrue(caseDetails.containsKey("respAC8EngDocument"));
         Document responseDocuments = (Document) caseDetails.get("respAC8EngDocument");
-        Assert.assertEquals("without version", responseDocuments.getDocumentUrl());
+        assertEquals("without version", responseDocuments.getDocumentUrl());
     }
 
 
     @Test
-    public void processRespondentsC8Documents_Without_version_docs() {
+    void processRespondentsC8Documents_Without_version_docs() {
         List<Element<PartyDetails>> respondents = new ArrayList<>();
         Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder().value(PartyDetails.builder().firstName("firstName")
                 .lastName("lastName").build()).build();
@@ -209,21 +212,21 @@ public class ConfidentialityCheckServiceTest {
 
         Map<String, Object> caseDetails = new HashMap<>();
         confidentialityCheckService.processRespondentsC8Documents(caseDetails, caseData);
-        Assert.assertTrue(caseDetails.containsKey("respAC8EngDocument"));
+        assertTrue(caseDetails.containsKey("respAC8EngDocument"));
         Document responseDocuments = (Document) caseDetails.get("respAC8EngDocument");
-        Assert.assertEquals("without version", responseDocuments.getDocumentUrl());
+        assertEquals("without version", responseDocuments.getDocumentUrl());
     }
 
     @Test
-    public void clearRespondentsC8Documents() {
+    void clearRespondentsC8Documents() {
         Map<String, Object> caseDetails = new HashMap<>();
         caseDetails.put("respAC8EngDocument",Document.builder().build());
         confidentialityCheckService.clearRespondentsC8Documents(caseDetails);
-        Assert.assertNull(caseDetails.get("respAC8EngDocument"));
+        assertNull(caseDetails.get("respAC8EngDocument"));
     }
 
     @Test
-    public void processRespondentsC8DocumentsFL401() {
+    void processRespondentsC8DocumentsFL401() {
         PartyDetails partyDetails = PartyDetails.builder().firstName("firstName")
                 .lastName("lastName").build();
         ResponseDocuments responseDocument = ResponseDocuments.builder()
@@ -241,13 +244,13 @@ public class ConfidentialityCheckServiceTest {
 
         Map<String, Object> caseDetails = new HashMap<>();
         confidentialityCheckService.processRespondentsC8Documents(caseDetails, caseData);
-        Assert.assertTrue(caseDetails.containsKey("respAC8EngDocument"));
+        assertTrue(caseDetails.containsKey("respAC8EngDocument"));
         Document responseDocuments = (Document) caseDetails.get("respAC8EngDocument");
-        Assert.assertEquals("with version", responseDocuments.getDocumentUrl());
+        assertEquals("with version", responseDocuments.getDocumentUrl());
     }
 
     @Test
-    public void processApplicantC8DocumentsForC100() {
+    void processApplicantC8DocumentsForC100() {
         List<Element<PartyDetails>> applicants = new ArrayList<>();
         Document applicant1RefugeDocument = Document.builder().documentFileName("applicant 1 C8 Refuge Form").build();
         Document applicant2RefugeDocument = Document.builder().documentFileName("applicant 2 C8 Refuge Form").build();
@@ -314,21 +317,21 @@ public class ConfidentialityCheckServiceTest {
         Map<String, Object> caseDetails = new HashMap<>();
         confidentialityCheckService.processApplicantC8Documents(caseDetails, caseData);
 
-        Assert.assertTrue(caseDetails.containsKey("appAC8RefugeDocument"));
-        Assert.assertTrue(caseDetails.containsKey("appBC8RefugeDocument"));
-        Assert.assertTrue(caseDetails.containsKey("appCC8RefugeDocument"));
-        Assert.assertTrue(caseDetails.containsKey("appDC8RefugeDocument"));
-        Assert.assertTrue(caseDetails.containsKey("appEC8RefugeDocument"));
+        assertTrue(caseDetails.containsKey("appAC8RefugeDocument"));
+        assertTrue(caseDetails.containsKey("appBC8RefugeDocument"));
+        assertTrue(caseDetails.containsKey("appCC8RefugeDocument"));
+        assertTrue(caseDetails.containsKey("appDC8RefugeDocument"));
+        assertTrue(caseDetails.containsKey("appEC8RefugeDocument"));
 
-        Assert.assertEquals(applicant1RefugeDocument, caseDetails.get("appAC8RefugeDocument"));
-        Assert.assertEquals(applicant2RefugeDocument, caseDetails.get("appBC8RefugeDocument"));
-        Assert.assertEquals(applicant3RefugeDocument, caseDetails.get("appCC8RefugeDocument"));
-        Assert.assertEquals(applicant4RefugeDocument, caseDetails.get("appDC8RefugeDocument"));
-        Assert.assertEquals(null, caseDetails.get("appEC8RefugeDocument"));
+        assertEquals(applicant1RefugeDocument, caseDetails.get("appAC8RefugeDocument"));
+        assertEquals(applicant2RefugeDocument, caseDetails.get("appBC8RefugeDocument"));
+        assertEquals(applicant3RefugeDocument, caseDetails.get("appCC8RefugeDocument"));
+        assertEquals(applicant4RefugeDocument, caseDetails.get("appDC8RefugeDocument"));
+        assertEquals(null, caseDetails.get("appEC8RefugeDocument"));
     }
 
     @Test
-    public void processApplicantC8DocumentsForFL401() {
+    void processApplicantC8DocumentsForFL401() {
         Document applicant1RefugeDocument = Document.builder().documentFileName("applicant 1 C8 Refuge Form").build();
         PartyDetails partyDetails = PartyDetails.builder().firstName("firstName").lastName("lastName")
             .liveInRefuge(YesOrNo.Yes).refugeConfidentialityC8Form(applicant1RefugeDocument).build();
@@ -338,12 +341,12 @@ public class ConfidentialityCheckServiceTest {
         Map<String, Object> caseDetails = new HashMap<>();
         confidentialityCheckService.processApplicantC8Documents(caseDetails, caseData);
 
-        Assert.assertTrue(caseDetails.containsKey("appAC8RefugeDocument"));
-        Assert.assertEquals(applicant1RefugeDocument, caseDetails.get("appAC8RefugeDocument"));
+        assertTrue(caseDetails.containsKey("appAC8RefugeDocument"));
+        assertEquals(applicant1RefugeDocument, caseDetails.get("appAC8RefugeDocument"));
     }
 
     @Test
-    public void processOtherPeopleC8Documents() {
+    void processOtherPeopleC8Documents() {
         List<Element<PartyDetails>> otherPeople = new ArrayList<>();
         Document applicant1RefugeDocument = Document.builder().documentFileName("other person 1 C8 Refuge Form").build();
         Document applicant2RefugeDocument = Document.builder().documentFileName("other person 2 C8 Refuge Form").build();
@@ -409,21 +412,21 @@ public class ConfidentialityCheckServiceTest {
         Map<String, Object> caseDetails = new HashMap<>();
         confidentialityCheckService.processOtherC8Documents(caseDetails, caseData);
 
-        Assert.assertTrue(caseDetails.containsKey("otherAC8RefugeDocument"));
-        Assert.assertTrue(caseDetails.containsKey("otherBC8RefugeDocument"));
-        Assert.assertTrue(caseDetails.containsKey("otherCC8RefugeDocument"));
-        Assert.assertTrue(caseDetails.containsKey("otherDC8RefugeDocument"));
-        Assert.assertTrue(caseDetails.containsKey("otherEC8RefugeDocument"));
+        assertTrue(caseDetails.containsKey("otherAC8RefugeDocument"));
+        assertTrue(caseDetails.containsKey("otherBC8RefugeDocument"));
+        assertTrue(caseDetails.containsKey("otherCC8RefugeDocument"));
+        assertTrue(caseDetails.containsKey("otherDC8RefugeDocument"));
+        assertTrue(caseDetails.containsKey("otherEC8RefugeDocument"));
 
-        Assert.assertEquals(applicant1RefugeDocument, caseDetails.get("otherAC8RefugeDocument"));
-        Assert.assertEquals(applicant2RefugeDocument, caseDetails.get("otherBC8RefugeDocument"));
-        Assert.assertEquals(applicant3RefugeDocument, caseDetails.get("otherCC8RefugeDocument"));
-        Assert.assertEquals(applicant4RefugeDocument, caseDetails.get("otherDC8RefugeDocument"));
-        Assert.assertEquals(null, caseDetails.get("otherEC8RefugeDocument"));
+        assertEquals(applicant1RefugeDocument, caseDetails.get("otherAC8RefugeDocument"));
+        assertEquals(applicant2RefugeDocument, caseDetails.get("otherBC8RefugeDocument"));
+        assertEquals(applicant3RefugeDocument, caseDetails.get("otherCC8RefugeDocument"));
+        assertEquals(applicant4RefugeDocument, caseDetails.get("otherDC8RefugeDocument"));
+        assertEquals(null, caseDetails.get("otherEC8RefugeDocument"));
     }
 
     @Test
-    public void processOtherPeopleC8DocumentsForFl401() {
+    void processOtherPeopleC8DocumentsForFl401() {
         List<Element<PartyDetails>> otherPeople = new ArrayList<>();
         Document applicant1RefugeDocument = Document.builder().documentFileName("other person 1 C8 Refuge Form").build();
         Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder()
@@ -440,17 +443,17 @@ public class ConfidentialityCheckServiceTest {
         Map<String, Object> caseDetails = new HashMap<>();
         confidentialityCheckService.processOtherC8Documents(caseDetails, caseData);
 
-        Assert.assertFalse(caseDetails.containsKey("otherAC8RefugeDocument"));
-        Assert.assertFalse(caseDetails.containsKey("otherBC8RefugeDocument"));
-        Assert.assertFalse(caseDetails.containsKey("otherCC8RefugeDocument"));
-        Assert.assertFalse(caseDetails.containsKey("otherDC8RefugeDocument"));
-        Assert.assertFalse(caseDetails.containsKey("otherEC8RefugeDocument"));
+        assertFalse(caseDetails.containsKey("otherAC8RefugeDocument"));
+        assertFalse(caseDetails.containsKey("otherBC8RefugeDocument"));
+        assertFalse(caseDetails.containsKey("otherCC8RefugeDocument"));
+        assertFalse(caseDetails.containsKey("otherDC8RefugeDocument"));
+        assertFalse(caseDetails.containsKey("otherEC8RefugeDocument"));
 
-        Assert.assertEquals(null, caseDetails.get("otherAC8RefugeDocument"));
+        assertNull(caseDetails.get("otherAC8RefugeDocument"));
     }
 
     @Test
-    public void processOtherPeopleC8DocumentsC100NullOtherPartyList() {
+    void processOtherPeopleC8DocumentsC100NullOtherPartyList() {
         List<Element<PartyDetails>> otherPeople = null;
 
         List<Element<PartyDetails>> applicants = new ArrayList<>();
@@ -484,12 +487,12 @@ public class ConfidentialityCheckServiceTest {
         Map<String, Object> caseDetails = new HashMap<>();
         confidentialityCheckService.processOtherC8Documents(caseDetails, caseData);
 
-        Assert.assertFalse(caseDetails.containsKey("otherAC8RefugeDocument"));
-        Assert.assertFalse(caseDetails.containsKey("otherBC8RefugeDocument"));
-        Assert.assertFalse(caseDetails.containsKey("otherCC8RefugeDocument"));
-        Assert.assertFalse(caseDetails.containsKey("otherDC8RefugeDocument"));
-        Assert.assertFalse(caseDetails.containsKey("otherEC8RefugeDocument"));
+        assertFalse(caseDetails.containsKey("otherAC8RefugeDocument"));
+        assertFalse(caseDetails.containsKey("otherBC8RefugeDocument"));
+        assertFalse(caseDetails.containsKey("otherCC8RefugeDocument"));
+        assertFalse(caseDetails.containsKey("otherDC8RefugeDocument"));
+        assertFalse(caseDetails.containsKey("otherEC8RefugeDocument"));
 
-        Assert.assertEquals(null, caseDetails.get("otherAC8RefugeDocument"));
+        assertNull(caseDetails.get("otherAC8RefugeDocument"));
     }
 }

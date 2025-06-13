@@ -36,7 +36,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 import static uk.gov.hmcts.reform.prl.services.caseinitiation.CaseInitiationService.COURT_LIST;
 
 @ExtendWith(MockitoExtension.class)
-public class CaseInitiationServiceTest {
+class CaseInitiationServiceTest {
 
     public static final String AUTHORISATION = "Bearer token";
     @InjectMocks
@@ -62,7 +62,7 @@ public class CaseInitiationServiceTest {
     public static final String CASE_ID = "1234567891234567";
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         caseDataMap = new HashMap<>();
         caseDetails = CaseDetails.builder()
             .data(caseDataMap)
@@ -92,7 +92,7 @@ public class CaseInitiationServiceTest {
     }
 
     @Test
-    public void testHandleCaseInitiation() {
+    void testHandleCaseInitiation() {
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
         when(coreCaseDataApi.submitSupplementaryData(any(), any(), any(), any()))
             .thenReturn(CaseDetails.builder().build());
@@ -105,7 +105,7 @@ public class CaseInitiationServiceTest {
     }
 
     @Test
-    public void testHandlePrePopulateCourtDetailsC100() {
+    void testHandlePrePopulateCourtDetailsC100() {
         caseData = CaseData.builder()
                 .caseTypeOfApplication(C100_CASE_TYPE)
                 .build();
@@ -115,7 +115,7 @@ public class CaseInitiationServiceTest {
     }
 
     @Test
-    public void testHandlePrePopulateCourtDetailsFL401() {
+    void testHandlePrePopulateCourtDetailsFL401() {
         caseDataMap.put("caseTypeOfApplication",FL401_CASE_TYPE);
         caseData = CaseData.builder()
                 .caseTypeOfApplication(FL401_CASE_TYPE)

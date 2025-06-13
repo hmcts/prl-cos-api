@@ -16,7 +16,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class RoleAssignmentServiceForSystemUserTest {
+class RoleAssignmentServiceForSystemUserTest {
     @InjectMocks
     RoleAssignmentServiceForSystemUser roleAssignmentServiceForSystemUser;
 
@@ -30,7 +30,7 @@ public class RoleAssignmentServiceForSystemUserTest {
     AuthTokenGenerator authTokenGenerator;
 
     @Test
-    public void testAssignHearingRoleToSysUser() {
+    void testAssignHearingRoleToSysUser() {
         when(systemUserService.getSysUserToken()).thenReturn("systemUserToken");
         when(systemUserService.getUserId(any(String.class))).thenReturn("systemUserIdamID");
         when(roleAssignmentApi.updateRoleAssignment(any(), any(), any(), any(RoleAssignmentRequest.class)))

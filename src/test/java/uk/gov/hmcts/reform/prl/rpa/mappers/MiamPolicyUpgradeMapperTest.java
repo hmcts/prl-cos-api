@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.rpa.mappers;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,6 +11,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamPolicyUpgradeDetails;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_1;
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_2;
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuChildProtectionConcern;
@@ -25,19 +25,19 @@ import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPreviousAttend
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamUrgencyReasonChecklistEnum.miamPolicyUpgradeUrgencyReason_Value_1;
 
 @ExtendWith(MockitoExtension.class)
-public class MiamPolicyUpgradeMapperTest {
+class MiamPolicyUpgradeMapperTest {
 
     @InjectMocks
     MiamPolicyUpgradeMapper miamPolicyUpgradeMapper;
 
     @Test
-    public void testMapWithEmptyMiamDetails() {
+    void testMapWithEmptyMiamDetails() {
         CaseData caseData = CaseData.builder().miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder().build()).build();
-        Assert.assertNotNull(miamPolicyUpgradeMapper.map(caseData));
+        assertNotNull(miamPolicyUpgradeMapper.map(caseData));
     }
 
     @Test
-    public void testMap() {
+    void testMap() {
         CaseData caseData = CaseData
             .builder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
@@ -64,7 +64,7 @@ public class MiamPolicyUpgradeMapperTest {
                                           .mpuOtherExemptionReasons(miamPolicyUpgradeOtherGrounds_Value_3)
                                           .build())
             .build();
-        Assert.assertNotNull(miamPolicyUpgradeMapper.map(caseData));
+        assertNotNull(miamPolicyUpgradeMapper.map(caseData));
     }
 }
 

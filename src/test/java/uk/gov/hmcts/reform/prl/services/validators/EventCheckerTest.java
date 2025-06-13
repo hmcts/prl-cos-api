@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class EventCheckerTest {
+class EventCheckerTest {
 
     @Mock
     CaseNameChecker caseNameChecker;
@@ -76,13 +76,13 @@ public class EventCheckerTest {
     private final CaseData caseData = CaseData.builder().build();
 
     @BeforeEach
-    public void init() {
+    void init() {
         eventsChecker.init();
     }
 
 
     @Test
-    public void whenEventIsFinished_thenEventCheckerFinishedReturnsTrue() {
+    void whenEventIsFinished_thenEventCheckerFinishedReturnsTrue() {
         when(applicantsChecker.isFinished(caseData)).thenReturn(true);
         assertTrue(eventsChecker.getEventStatus().containsKey(Event.APPLICANT_DETAILS));
         assertTrue(eventsChecker.isFinished(Event.APPLICANT_DETAILS, caseData));
@@ -90,20 +90,20 @@ public class EventCheckerTest {
     }
 
     @Test
-    public void whenEventHasMandatoryCompleted_thenEventCheckerMandatoryReturnsTrue() {
+    void whenEventHasMandatoryCompleted_thenEventCheckerMandatoryReturnsTrue() {
         when(allegationsOfHarmChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
         assertTrue(eventsChecker.hasMandatoryCompleted(Event.ALLEGATIONS_OF_HARM, caseData));
 
     }
 
     @Test
-    public void whenEventIsStarted_thenEventCheckerStartedReturnsTrue() {
+    void whenEventIsStarted_thenEventCheckerStartedReturnsTrue() {
         when(fl401ApplicantFamilyChecker.isStarted(caseData)).thenReturn(true);
         assertTrue(eventsChecker.isStarted(Event.FL401_APPLICANT_FAMILY_DETAILS, caseData));
     }
 
     @Test
-    public void checkGetEventStatus() {
+    void checkGetEventStatus() {
         assertTrue(eventsChecker.getEventStatus().containsKey(Event.APPLICANT_DETAILS));
         assertTrue(eventsChecker.getEventStatus().containsValue(applicantsChecker));
     }

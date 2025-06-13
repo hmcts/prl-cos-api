@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import javassist.NotFoundException;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,7 +39,11 @@ import java.util.Optional;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
@@ -48,7 +51,7 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
-public class CourtFinderServiceTest {
+class CourtFinderServiceTest {
 
     @InjectMocks
     CourtFinderService courtFinderService;
@@ -72,7 +75,7 @@ public class CourtFinderServiceTest {
     private PartyDetails respondentNoPostcode;
 
     @BeforeEach
-    public void init() {
+    void init() {
 
         Address applicantAddress = Address.builder()
             .addressLine1("123 Test Address")
@@ -213,7 +216,7 @@ public class CourtFinderServiceTest {
     }
 
     @Test
-    public void givenValidCaseData_whenChildLivesWithRespondent_thenReturnCourtClosestToRespondent() throws NotFoundException {
+    void givenValidCaseData_whenChildLivesWithRespondent_thenReturnCourtClosestToRespondent() throws NotFoundException {
         Child child = Child.builder()
             .childLiveWith(Collections.singletonList(LiveWithEnum.respondent))
             .build();
@@ -231,7 +234,7 @@ public class CourtFinderServiceTest {
 
 
     @Test
-    public void givenValidCaseData_whenChildLivesWithRespondentWithNoPostcode() throws NotFoundException {
+    void givenValidCaseData_whenChildLivesWithRespondentWithNoPostcode() throws NotFoundException {
         Child child = Child.builder()
             .childLiveWith(Collections.singletonList(LiveWithEnum.respondent))
             .build();
@@ -257,7 +260,7 @@ public class CourtFinderServiceTest {
     }
 
     @Test
-    public void givenValidCaseData_whenChildLivesWithAnotherPersonNoPostcode() throws NotFoundException {
+    void givenValidCaseData_whenChildLivesWithAnotherPersonNoPostcode() throws NotFoundException {
         OtherPersonWhoLivesWithChild person = OtherPersonWhoLivesWithChild.builder()
             .address(Address.builder()
                          .postCode(null)
@@ -284,7 +287,7 @@ public class CourtFinderServiceTest {
     }
 
     @Test
-    public void givenValidCaseData_whenChildLivesWithRespondent_thenReturnNull() throws NotFoundException {
+    void givenValidCaseData_whenChildLivesWithRespondent_thenReturnNull() throws NotFoundException {
         C100RebuildData c100RebuildData = C100RebuildData.builder().c100RebuildChildPostCode("TW20 2PL").build();
         Child child = Child.builder()
             .childLiveWith(Collections.singletonList(LiveWithEnum.respondent))
@@ -303,12 +306,12 @@ public class CourtFinderServiceTest {
     }
 
     @Test
-    public void givenValidCaseData_whenChildLivesWithRespondent_thenReturnNull_logsException() throws NotFoundException {
+    void givenValidCaseData_whenChildLivesWithRespondent_thenReturnNull_logsException() throws NotFoundException {
         assertNull(courtFinderService.getNearestFamilyCourt(caseDataMock));
     }
 
     @Test
-    public void givenInvalidPostCode_NoServiceAreaReturned() throws NotFoundException {
+    void givenInvalidPostCode_NoServiceAreaReturned() throws NotFoundException {
 
         Child child = Child.builder()
             .childLiveWith(Collections.emptyList())
@@ -325,7 +328,7 @@ public class CourtFinderServiceTest {
     }
 
     @Test
-    public void givenInValidCaseData_NoCourtDetailsRetrieved() throws NotFoundException {
+    void givenInValidCaseData_NoCourtDetailsRetrieved() throws NotFoundException {
         Child child = Child.builder()
             .childLiveWith(Collections.singletonList(LiveWithEnum.respondent))
             .build();
@@ -342,7 +345,7 @@ public class CourtFinderServiceTest {
     }
 
     @Test
-    public void givenValidCaseData_whenChildLivesWithOther_thenReturnCourtClosestToOther() throws NotFoundException {
+    void givenValidCaseData_whenChildLivesWithOther_thenReturnCourtClosestToOther() throws NotFoundException {
         OtherPersonWhoLivesWithChild person = OtherPersonWhoLivesWithChild.builder()
             .address(Address.builder()
                          .postCode("W9 3HE")
@@ -368,7 +371,7 @@ public class CourtFinderServiceTest {
     }
 
     @Test
-    public void givenValidCaseData_whenChildLivesWithApplicant_thenReturnCourtClosestToApplicant() throws NotFoundException {
+    void givenValidCaseData_whenChildLivesWithApplicant_thenReturnCourtClosestToApplicant() throws NotFoundException {
         Child child = Child.builder()
             .childLiveWith(Collections.singletonList(LiveWithEnum.applicant))
             .build();
@@ -387,7 +390,7 @@ public class CourtFinderServiceTest {
     }
 
     @Test
-    public void givenValidCaseData_whenChildLivesWithApp_thenReturnCourtClosestToFirstApp() throws NotFoundException {
+    void givenValidCaseData_whenChildLivesWithApp_thenReturnCourtClosestToFirstApp() throws NotFoundException {
         Child child = Child.builder()
             .childLiveWith(Collections.singletonList(LiveWithEnum.applicant))
             .build();
@@ -410,7 +413,7 @@ public class CourtFinderServiceTest {
     }
 
     @Test
-    public void givenValidCourtSlug_thenReturnsCourtDetails() {
+    void givenValidCourtSlug_thenReturnsCourtDetails() {
         Court basicCourt = Court.builder()
             .courtSlug("central-family-court")
             .build();
@@ -430,7 +433,7 @@ public class CourtFinderServiceTest {
     }
 
     @Test
-    public void givenChildPresent_whenLivesWithApplicant_thenReturnApplicantPostcode() throws NotFoundException {
+    void givenChildPresent_whenLivesWithApplicant_thenReturnApplicantPostcode() throws NotFoundException {
         Child child = Child.builder()
             .childLiveWith(Collections.singletonList(LiveWithEnum.applicant))
             .build();
@@ -446,12 +449,12 @@ public class CourtFinderServiceTest {
             .build();
 
         assertEquals("AB12 3AL", courtFinderService.getCorrectPartyPostcode(caseData));
-        Assert.assertEquals("AB12 3AL", courtFinderService.getCorrectPartyPostcode(caseData));
+        assertEquals("AB12 3AL", courtFinderService.getCorrectPartyPostcode(caseData));
     }
 
 
     @Test
-    public void givenChildPresent_whenLivesWithApplicant_thenReturnApplicantPostcodeV2() throws NotFoundException {
+    void givenChildPresent_whenLivesWithApplicant_thenReturnApplicantPostcodeV2() throws NotFoundException {
 
         PartyDetails partyDetails = PartyDetails.builder()
             .firstName("Test")
@@ -540,12 +543,12 @@ public class CourtFinderServiceTest {
                 .build();
 
         assertEquals("AB12 3AL", courtFinderService.getCorrectPartyPostcode(caseData));
-        Assert.assertEquals("AB12 3AL", courtFinderService.getCorrectPartyPostcode(caseData));
+        assertEquals("AB12 3AL", courtFinderService.getCorrectPartyPostcode(caseData));
     }
 
 
     @Test
-    public void givenChildPresent_whenLivesWithApplicant_thenReturnRespondentsPostcodeV2() throws NotFoundException {
+    void givenChildPresent_whenLivesWithApplicant_thenReturnRespondentsPostcodeV2() throws NotFoundException {
 
         PartyDetails partyDetails = PartyDetails.builder()
             .firstName("Test")
@@ -634,12 +637,12 @@ public class CourtFinderServiceTest {
                 .build();
 
         assertEquals("N20 0EG", courtFinderService.getCorrectPartyPostcode(caseData));
-        Assert.assertEquals("N20 0EG", courtFinderService.getCorrectPartyPostcode(caseData));
+        assertEquals("N20 0EG", courtFinderService.getCorrectPartyPostcode(caseData));
     }
 
 
     @Test
-    public void givenChildPresent_whenLivesWithApplicant_thenReturnOtherWithPostcodeV2() throws NotFoundException {
+    void givenChildPresent_whenLivesWithApplicant_thenReturnOtherWithPostcodeV2() throws NotFoundException {
 
         PartyDetails partyDetails = PartyDetails.builder()
             .firstName("Test")
@@ -729,12 +732,12 @@ public class CourtFinderServiceTest {
                 .build();
 
         assertEquals("G511TQ", courtFinderService.getCorrectPartyPostcode(caseData));
-        Assert.assertEquals("G511TQ", courtFinderService.getCorrectPartyPostcode(caseData));
+        assertEquals("G511TQ", courtFinderService.getCorrectPartyPostcode(caseData));
     }
 
 
     @Test
-    public void givenChildPresent_whenLivesWithApplicant_thenReturnOtherPostcodeV2() throws NotFoundException {
+    void givenChildPresent_whenLivesWithApplicant_thenReturnOtherPostcodeV2() throws NotFoundException {
 
         PartyDetails partyDetails = PartyDetails.builder()
             .firstName("Test")
@@ -823,12 +826,12 @@ public class CourtFinderServiceTest {
             .build();
 
         assertEquals("AB12 3AL", courtFinderService.getCorrectPartyPostcode(caseData));
-        Assert.assertEquals("AB12 3AL", courtFinderService.getCorrectPartyPostcode(caseData));
+        assertEquals("AB12 3AL", courtFinderService.getCorrectPartyPostcode(caseData));
     }
 
 
     @Test
-    public void givenCaseDataWithNoCourtDetails_thenCourtDetailsUpdated() {
+    void givenCaseDataWithNoCourtDetails_thenCourtDetailsUpdated() {
         Child child = Child.builder()
             .childLiveWith(Collections.singletonList(LiveWithEnum.applicant))
             .build();
@@ -849,12 +852,12 @@ public class CourtFinderServiceTest {
             .build();
 
         assertEquals(courtFinderService.setCourtNameAndId(caseData, newcastleCourt), updatedCaseData);
-        Assert.assertEquals(courtFinderService.setCourtNameAndId(caseData, newcastleCourt), updatedCaseData);
+        assertEquals(courtFinderService.setCourtNameAndId(caseData, newcastleCourt), updatedCaseData);
 
     }
 
     @Test
-    public void givenCaseDataWithApplicantPostCode_thenReturnDaCourtNameAndEmailAddress() throws NotFoundException {
+    void givenCaseDataWithApplicantPostCode_thenReturnDaCourtNameAndEmailAddress() throws NotFoundException {
         Element<PartyDetails> wrappedApplicant1 = Element.<PartyDetails>builder().value(applicant).build();
 
         List<Element<PartyDetails>> applicants = new ArrayList<>();
@@ -869,7 +872,7 @@ public class CourtFinderServiceTest {
     }
 
     @Test
-    public void givenDescriptionAndExplanationMatchedReturnCourtEmailAddress() {
+    void givenDescriptionAndExplanationMatchedReturnCourtEmailAddress() {
 
         CourtEmailAddress courtEmailAddressWithBothFields = CourtEmailAddress.builder()
             .address("brighton.breathingspace@justice.gov.uk")
@@ -881,12 +884,12 @@ public class CourtFinderServiceTest {
 
         Optional<CourtEmailAddress> emailAddress = courtFinderService.getEmailAddress(horshamCourt);
 
-        Assert.assertTrue(emailAddress.isPresent());
-        Assert.assertEquals("brighton.breathingspace@justice.gov.uk", emailAddress.get().getAddress());
+        assertTrue(emailAddress.isPresent());
+        assertEquals("brighton.breathingspace@justice.gov.uk", emailAddress.get().getAddress());
     }
 
     @Test
-    public void givenFamilyDescriptionOnlyMatchedReturnCourtEmailAddress() {
+    void givenFamilyDescriptionOnlyMatchedReturnCourtEmailAddress() {
         CourtEmailAddress courtEmailAddressWithFamilyDetails = CourtEmailAddress.builder()
             .address("brighton.breathingspace@justice.gov.uk")
             .description("Family public law (children in care)")
@@ -897,12 +900,12 @@ public class CourtFinderServiceTest {
 
         Optional<CourtEmailAddress> emailAddress = courtFinderService.getEmailAddress(horshamCourt);
 
-        Assert.assertTrue(emailAddress.isPresent());
-        Assert.assertEquals("brighton.breathingspace@justice.gov.uk", emailAddress.get().getAddress());
+        assertTrue(emailAddress.isPresent());
+        assertEquals("brighton.breathingspace@justice.gov.uk", emailAddress.get().getAddress());
     }
 
     @Test
-    public void givenFamilyMatchedInDescriptionReturnCourtEmailAddress() {
+    void givenFamilyMatchedInDescriptionReturnCourtEmailAddress() {
 
         CourtEmailAddress courtEmailAddressWithFamily = CourtEmailAddress.builder()
             .address("brighton.breathingspace@justice.gov.uk")
@@ -913,12 +916,12 @@ public class CourtFinderServiceTest {
 
         Optional<CourtEmailAddress> emailAddress = courtFinderService.getEmailAddress(horshamCourt);
 
-        Assert.assertTrue(emailAddress.isPresent());
-        Assert.assertEquals("brighton.breathingspace@justice.gov.uk", emailAddress.get().getAddress());
+        assertTrue(emailAddress.isPresent());
+        assertEquals("brighton.breathingspace@justice.gov.uk", emailAddress.get().getAddress());
     }
 
     @Test
-    public void givenChildOnlyMatchedInDescriptionReturnCourtEmailAddress() {
+    void givenChildOnlyMatchedInDescriptionReturnCourtEmailAddress() {
 
 
         CourtEmailAddress courtEmailExplanationWithFamily = CourtEmailAddress.builder()
@@ -930,13 +933,13 @@ public class CourtFinderServiceTest {
 
         Optional<CourtEmailAddress> emailAddress = courtFinderService.getEmailAddress(horshamCourt);
 
-        Assert.assertTrue(emailAddress.isPresent());
-        Assert.assertEquals("brighton.breathingspace@justice.gov.uk", emailAddress.get().getAddress());
+        assertTrue(emailAddress.isPresent());
+        assertEquals("brighton.breathingspace@justice.gov.uk", emailAddress.get().getAddress());
 
     }
 
     @Test
-    public void givenFamilyMatchedInExplanationReturnCourtEmailAddress() {
+    void givenFamilyMatchedInExplanationReturnCourtEmailAddress() {
 
         CourtEmailAddress courtEmailAddressWithChild = CourtEmailAddress.builder()
             .address("brighton.breathingspace@justice.gov.uk")
@@ -947,12 +950,12 @@ public class CourtFinderServiceTest {
 
         Optional<CourtEmailAddress> emailAddress = courtFinderService.getEmailAddress(horshamCourt);
 
-        Assert.assertTrue(emailAddress.isPresent());
-        Assert.assertEquals("brighton.breathingspace@justice.gov.uk", emailAddress.get().getAddress());
+        assertTrue(emailAddress.isPresent());
+        assertEquals("brighton.breathingspace@justice.gov.uk", emailAddress.get().getAddress());
     }
 
     @Test
-    public void givenNoMatchFoundReturnFirstElementFromEmailList() {
+    void givenNoMatchFoundReturnFirstElementFromEmailList() {
 
         CourtEmailAddress courtEmailAddressWithNoOtherKey = CourtEmailAddress.builder()
             .address("brighton.breathingspace@justice.gov.uk")
@@ -962,11 +965,11 @@ public class CourtFinderServiceTest {
 
         Optional<CourtEmailAddress> emailAddress = courtFinderService.getEmailAddress(horshamCourt);
 
-        Assert.assertFalse(emailAddress.isPresent());
+        assertFalse(emailAddress.isPresent());
     }
 
     @Test
-    public void givenChildOnlyMatchedInExplanationReturnCourtEmailAddress() {
+    void givenChildOnlyMatchedInExplanationReturnCourtEmailAddress() {
 
         CourtEmailAddress courtEmailExplanationWithChild = CourtEmailAddress.builder()
             .address("brighton.breathingspace@justice.gov.uk")
@@ -978,23 +981,25 @@ public class CourtFinderServiceTest {
 
         Optional<CourtEmailAddress> emailAddress = courtFinderService.getEmailAddress(horshamCourt);
 
-        Assert.assertTrue(emailAddress.isPresent());
-        Assert.assertEquals("brighton.breathingspace@justice.gov.uk", emailAddress.get().getAddress());
-    }
-
-
-    @Test(expected = NotFoundException.class)
-    public void whenNoChildDetailsPresentThrowNotFoundException() throws NotFoundException {
-        CaseData caseData = CaseData.builder()
-            .children(Collections.emptyList())
-            .build();
-
-        courtFinderService.getCorrectPartyPostcode(caseData);
+        assertTrue(emailAddress.isPresent());
+        assertEquals("brighton.breathingspace@justice.gov.uk", emailAddress.get().getAddress());
     }
 
 
     @Test
-    public void givenC100ApplicationsMatchedInExplanationReturnCourtEmailAddress() {
+    void whenNoChildDetailsPresentThrowNotFoundException() throws NotFoundException {
+        assertThrows(NotFoundException.class, () -> {
+            CaseData caseData = CaseData.builder()
+                .children(Collections.emptyList())
+                .build();
+
+            courtFinderService.getCorrectPartyPostcode(caseData);
+        });
+    }
+
+
+    @Test
+    void givenC100ApplicationsMatchedInExplanationReturnCourtEmailAddress() {
 
         CourtEmailAddress courtEmailAddressWithC100ApplicationsKey = CourtEmailAddress.builder()
             .address("brighton.breathingspace@justice.gov.uk")
@@ -1005,11 +1010,11 @@ public class CourtFinderServiceTest {
 
         Optional<CourtEmailAddress> emailAddress = courtFinderService.getEmailAddress(horshamCourt);
 
-        Assert.assertTrue(emailAddress.isPresent());
+        assertTrue(emailAddress.isPresent());
     }
 
     @Test
-    public void givenDescriptionAndExplanationMatchedReturnCourtEmailAddressNull() {
+    void givenDescriptionAndExplanationMatchedReturnCourtEmailAddressNull() {
 
         CourtEmailAddress courtEmailAddressWithBothFields = CourtEmailAddress.builder()
             .address("brighton.breathingspace@justice.gov.uk")
@@ -1021,14 +1026,14 @@ public class CourtFinderServiceTest {
 
         Optional<CourtEmailAddress> emailAddress = courtFinderService.getEmailAddress(null);
 
-        Assert.assertFalse(emailAddress.isPresent());
+        assertFalse(emailAddress.isPresent());
     }
 
     @Test
-    public void testGetPostCodeOtherPerson() {
+    void testGetPostCodeOtherPerson() {
         PartyDetails partyDetails = PartyDetails.builder()
             .address(Address.builder().postCode("G511TQ").build())
             .build();
-        Assert.assertNotNull(courtFinderService.getPostCodeOtherPerson(partyDetails));
+        assertNotNull(courtFinderService.getPostCodeOtherPerson(partyDetails));
     }
 }

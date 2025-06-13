@@ -50,7 +50,7 @@ import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_SERVICE_AUTHORIZA
 
 @PropertySource(value = "classpath:application.yaml")
 @ExtendWith(MockitoExtension.class)
-public class CafcassDocumentManagementControllerTest {
+class CafcassDocumentManagementControllerTest {
 
     @Mock
     private CafcassCdamService cafcassCdamService;
@@ -71,13 +71,13 @@ public class CafcassDocumentManagementControllerTest {
     private UUID documentId;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         documentId = randomUUID();
     }
 
     @Test
     @DisplayName("Successful download of document through CDAM Service")
-    public void testCdamDocumentDownloadServiceResponseStatusOk() {
+    void testCdamDocumentDownloadServiceResponseStatusOk() {
         Resource documentResource = createNewResource();
 
         ResponseEntity<Resource> expectedResponse = ResponseEntity.status(OK).contentType(MediaType.APPLICATION_PDF).body(
@@ -105,7 +105,7 @@ public class CafcassDocumentManagementControllerTest {
 
     @Test
     @DisplayName("Failed download of document through CDAM Service")
-    public void testGetDocumentBinary() {
+    void testGetDocumentBinary() {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         when(authorisationService.getUserInfo()).thenReturn(userInfo);
@@ -131,7 +131,7 @@ public class CafcassDocumentManagementControllerTest {
     }
 
     @Test
-    public void testInvalidServicAuth_401UnAuthorized() {
+    void testInvalidServicAuth_401UnAuthorized() {
         when(authorisationService.authoriseService(any())).thenReturn(false);
         when(authorisationService.authoriseUser(any())).thenReturn(false);
         final ResponseEntity response = cafcassDocumentManagementController.downloadDocument(
@@ -144,7 +144,7 @@ public class CafcassDocumentManagementControllerTest {
 
 
     @Test
-    public void testFeignExceptionBadRequest() throws IOException {
+    void testFeignExceptionBadRequest() throws IOException {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         when(authorisationService.getUserInfo()).thenReturn(userInfo);
@@ -160,7 +160,7 @@ public class CafcassDocumentManagementControllerTest {
     }
 
     @Test
-    public void testFeignExceptionUnAuthorised() throws IOException {
+    void testFeignExceptionUnAuthorised() throws IOException {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         when(authorisationService.getUserInfo()).thenReturn(userInfo);
@@ -177,7 +177,7 @@ public class CafcassDocumentManagementControllerTest {
     }
 
     @Test
-    public void testExceptionInternalServerError() throws IOException {
+    void testExceptionInternalServerError() throws IOException {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         when(cafcassCdamService.getDocument(

@@ -15,13 +15,13 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
-public class RespondentPolicyConvertorTest {
+class RespondentPolicyConvertorTest {
 
     @InjectMocks
     RespondentPolicyConverter respondentPolicyConverter;
 
     @Test
-    public void generatePolicyTest() {
+    void generatePolicyTest() {
 
         SolicitorRole solicitorRole = SolicitorRole.C100RESPONDENTSOLICITOR1;
 
@@ -42,7 +42,7 @@ public class RespondentPolicyConvertorTest {
     }
 
     @Test
-    public void generatePolicyForDaTest() {
+    void generatePolicyForDaTest() {
         SolicitorRole solicitorRole = SolicitorRole.FL401RESPONDENTSOLICITOR;
 
         Organisation organisation = Organisation.builder().build();

@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.hearingmanagement;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,7 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -33,6 +32,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -43,7 +43,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 
 @ExtendWith(MockitoExtension.class)
-public class HearingsManagementControllerTest {
+class HearingsManagementControllerTest {
 
     @InjectMocks
     private HearingsManagementController hearingsManagementController;
@@ -64,13 +64,13 @@ public class HearingsManagementControllerTest {
     private AllTabServiceImpl allTabService;
 
     private HearingRequest hearingRequest;
-    @MockBean
+    @MockitoBean
     private State state;
 
     private NextHearingDateRequest nextHearingDateRequest;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
 
         hearingRequest = HearingRequest.builder()
             .hearingId("123")
@@ -87,7 +87,7 @@ public class HearingsManagementControllerTest {
     }
 
     @Test
-    public void shouldUpdateCaseStateWhenCalled() throws Exception {
+    void shouldUpdateCaseStateWhenCalled() throws Exception {
         CaseData caseData = CaseData.builder()
             .applicantCaseName("test")
             .id(123L)
@@ -104,7 +104,7 @@ public class HearingsManagementControllerTest {
     }
 
     @Test
-    public void shouldReturnErrorIfInvalidAuthTokenIsProvided() throws Exception {
+    void shouldReturnErrorIfInvalidAuthTokenIsProvided() throws Exception {
         CaseData caseData = CaseData.builder()
             .applicantCaseName("test")
             .id(123L)
@@ -120,7 +120,7 @@ public class HearingsManagementControllerTest {
     }
 
     @Test
-    public void shouldUpdateCaseNextHearingDateWhenCalled() throws Exception {
+    void shouldUpdateCaseNextHearingDateWhenCalled() throws Exception {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         doNothing().when(hearingManagementService).caseNextHearingDateChangeForHearingManagement(nextHearingDateRequest);
@@ -131,7 +131,7 @@ public class HearingsManagementControllerTest {
     }
 
     @Test
-    public void shouldReturnErrorIfInvalidAuthTokenIsProvidedForNextHearing() throws Exception {
+    void shouldReturnErrorIfInvalidAuthTokenIsProvidedForNextHearing() throws Exception {
         when(authorisationService.authoriseUser(any())).thenReturn(false);
         when(authorisationService.authoriseService(any())).thenReturn(false);
         doNothing().when(hearingManagementService).caseNextHearingDateChangeForHearingManagement(nextHearingDateRequest);
@@ -142,7 +142,7 @@ public class HearingsManagementControllerTest {
     }
 
     @Test
-    public void shouldDoNextHearingDetailsCallbackWhenAboutToSubmit() throws Exception {
+    void shouldDoNextHearingDetailsCallbackWhenAboutToSubmit() throws Exception {
         CaseData caseData = CaseData.builder()
             .applicantCaseName("test")
             .id(123L)
@@ -174,7 +174,7 @@ public class HearingsManagementControllerTest {
     }
 
     @Test
-    public void testUpdateAllTabsAfterHmcCaseState() {
+    void testUpdateAllTabsAfterHmcCaseState() {
         CaseData caseData = CaseData.builder().build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         CaseDetails caseDetails = CaseDetails.builder()
@@ -202,7 +202,7 @@ public class HearingsManagementControllerTest {
     }
 
     @Test
-    public void testValidateHearingState() {
+    void testValidateHearingState() {
         CaseData caseData = CaseData.builder().build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         CaseDetails caseDetails = CaseDetails.builder()
@@ -219,6 +219,6 @@ public class HearingsManagementControllerTest {
                 objectMapper
         )).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse response = hearingsManagementController.validateHearingState("authToken", callbackRequest);
-        Assert.assertNotNull(response.getData());
+        assertNotNull(response.getData());
     }
 }

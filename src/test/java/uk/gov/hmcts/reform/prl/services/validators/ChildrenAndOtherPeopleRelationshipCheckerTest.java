@@ -19,11 +19,12 @@ import uk.gov.hmcts.reform.prl.services.validators.eventschecker.EventsChecker;
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-public class ChildrenAndOtherPeopleRelationshipCheckerTest {
+class ChildrenAndOtherPeopleRelationshipCheckerTest {
     @Mock
     TaskErrorService taskErrorService;
 
@@ -31,7 +32,7 @@ public class ChildrenAndOtherPeopleRelationshipCheckerTest {
     EventsChecker eventsChecker;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
@@ -39,15 +40,15 @@ public class ChildrenAndOtherPeopleRelationshipCheckerTest {
     ChildrenAndOtherPeopleInThisApplicationChecker otherPeopleInTheCaseChecker;
 
     @Test
-    public void whenNoCaseDataPresentThenIsStartedReturnsFalse() {
+    void whenNoCaseDataPresentThenIsStartedReturnsFalse() {
         CaseData caseData = CaseData.builder()
                 .relations(Relations.builder().build()).build();
 
-        assertTrue(!otherPeopleInTheCaseChecker.isStarted(caseData));
+        assertFalse(otherPeopleInTheCaseChecker.isStarted(caseData));
     }
 
     @Test
-    public void whenEmptyChildDataPresentThenIsStartedReturnsFalse() {
+    void whenEmptyChildDataPresentThenIsStartedReturnsFalse() {
         ChildrenAndOtherPeopleRelation child = ChildrenAndOtherPeopleRelation.builder().build();
         Element<ChildrenAndOtherPeopleRelation> wrappedChildren =
             Element.<ChildrenAndOtherPeopleRelation>builder().value(child).build();
@@ -60,18 +61,18 @@ public class ChildrenAndOtherPeopleRelationshipCheckerTest {
     }
 
     @Test
-    public void whenSomeChildDataPresentThenIsStartedReturnsTrue() {
+    void whenSomeChildDataPresentThenIsStartedReturnsTrue() {
 
         CaseData caseData = CaseData.builder()
                 .relations(Relations.builder().build())
             .build();
 
-        assertTrue(!otherPeopleInTheCaseChecker.isStarted(caseData));
+        assertFalse(otherPeopleInTheCaseChecker.isStarted(caseData));
     }
 
 
     @Test
-    public void whenSomeChildDataPresentThenIsFinishedReturnsFalse() {
+    void whenSomeChildDataPresentThenIsFinishedReturnsFalse() {
         ChildrenAndOtherPeopleRelation child = ChildrenAndOtherPeopleRelation.builder()
             .otherPeopleFullName("Test").childFullName("Name")
             .childAndOtherPeopleRelation(RelationshipsEnum.father).build();
@@ -80,11 +81,11 @@ public class ChildrenAndOtherPeopleRelationshipCheckerTest {
 
         CaseData caseData = CaseData.builder().relations(Relations.builder().childAndOtherPeopleRelations(listOfChildren).build()).build();
 
-        assertTrue(!otherPeopleInTheCaseChecker.isFinished(caseData));
+        assertFalse(otherPeopleInTheCaseChecker.isFinished(caseData));
     }
 
     @Test
-    public void whenAllChildDataPresentThenIsFinishedReturnsTrue() {
+    void whenAllChildDataPresentThenIsFinishedReturnsTrue() {
         ChildrenAndOtherPeopleRelation child = ChildrenAndOtherPeopleRelation.builder()
             .otherPeopleFullName("Test")
             .childFullName("Name").childAndOtherPeopleRelation(RelationshipsEnum.other)
@@ -105,7 +106,7 @@ public class ChildrenAndOtherPeopleRelationshipCheckerTest {
     }
 
     @Test
-    public void whenValidateOtherChildrenNotInTheCaseReturnsTrue() {
+    void whenValidateOtherChildrenNotInTheCaseReturnsTrue() {
         ChildrenAndOtherPeopleRelation child = ChildrenAndOtherPeopleRelation.builder()
             .otherPeopleFullName("Test")
             .childFullName("Name").childAndOtherPeopleRelation(RelationshipsEnum.father)
@@ -126,16 +127,16 @@ public class ChildrenAndOtherPeopleRelationshipCheckerTest {
 
 
     @Test
-    public void whenValidateOtherChildrenNotInTheCaseReturnsFalse() {
+    void whenValidateOtherChildrenNotInTheCaseReturnsFalse() {
         CaseData caseData = CaseData.builder()
                 .relations(Relations.builder().build())
             .build();
-        assertTrue(!otherPeopleInTheCaseChecker.isFinished(caseData));
+        assertFalse(otherPeopleInTheCaseChecker.isFinished(caseData));
     }
 
 
     @Test
-    public void whenAllChildDataPresentThenIsFinishedReturnsNull() {
+    void whenAllChildDataPresentThenIsFinishedReturnsNull() {
         ChildrenAndOtherPeopleRelation child = ChildrenAndOtherPeopleRelation.builder()
             .otherPeopleFullName("Test")
             .childFullName("Name").childAndOtherPeopleRelation(null)
@@ -156,7 +157,7 @@ public class ChildrenAndOtherPeopleRelationshipCheckerTest {
 
 
     @Test
-    public void whenAllChildDataPresentThenIsFinishedReturnsTrueWithGenderOther() {
+    void whenAllChildDataPresentThenIsFinishedReturnsTrueWithGenderOther() {
         ChildrenAndOtherPeopleRelation child = ChildrenAndOtherPeopleRelation.builder()
             .otherPeopleFullName("Test")
             .childFullName("Name").childAndOtherPeopleRelation(RelationshipsEnum.father)
@@ -176,14 +177,14 @@ public class ChildrenAndOtherPeopleRelationshipCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataPresentThenHasMandatoryCompletedReturnsTrue() {
+    void whenNoCaseDataPresentThenHasMandatoryCompletedReturnsTrue() {
         CaseData caseData = CaseData.builder().build();
-        assertTrue(!otherPeopleInTheCaseChecker.hasMandatoryCompleted(caseData));
+        assertFalse(otherPeopleInTheCaseChecker.hasMandatoryCompleted(caseData));
     }
 
 
     @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+    void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
         assertNotNull(otherPeopleInTheCaseChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

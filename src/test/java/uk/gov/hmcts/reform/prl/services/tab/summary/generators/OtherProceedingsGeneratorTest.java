@@ -27,7 +27,7 @@ public class OtherProceedingsGeneratorTest {
     private final OtherProceedingsGenerator generator = new OtherProceedingsGenerator();
 
     @Test
-    public void testGenerate() {
+    void testGenerate() {
         ProceedingDetails proceedingDetails = ProceedingDetails.builder().build();
         Element<ProceedingDetails> wrappedProceedings = Element.<ProceedingDetails>builder().value(proceedingDetails).build();
         List<Element<ProceedingDetails>> listOfProceedings = Collections.singletonList(wrappedProceedings);
@@ -55,7 +55,7 @@ public class OtherProceedingsGeneratorTest {
     }
 
     @Test
-    public void testIfProcedingsSelectedAsNo() {
+    void testIfProcedingsSelectedAsNo() {
         ProceedingDetails proceedingDetails = ProceedingDetails.builder().build();
         Element<ProceedingDetails> wrappedProceedings = Element.<ProceedingDetails>builder().value(proceedingDetails).build();
         List<Element<ProceedingDetails>> listOfProceedings = Collections.singletonList(wrappedProceedings);
@@ -84,7 +84,7 @@ public class OtherProceedingsGeneratorTest {
     }
 
     @Test
-    public void testWithOtherProceedings() {
+    void testWithOtherProceedings() {
         ProceedingDetails proceedingDetails = ProceedingDetails.builder().caseNumber("123")
             .nameOfCourt("Test Court").typeOfOrder(Arrays.asList(TypeOfOrderEnum.careOrder)).nameOfJudge("Test").build();
         Element<ProceedingDetails> wrappedProceedings = Element.<ProceedingDetails>builder().value(proceedingDetails).build();
@@ -115,7 +115,7 @@ public class OtherProceedingsGeneratorTest {
     }
 
     @Test
-    public void testFl401WithOtherProceedings() {
+    void testFl401WithOtherProceedings() {
         FL401Proceedings proceedingDetails = FL401Proceedings.builder().caseNumber("123")
             .nameOfCourt("Test Court").typeOfCase("case").build();
         Element<FL401Proceedings> wrappedProceedings = Element.<FL401Proceedings>builder().value(proceedingDetails).build();
@@ -149,7 +149,7 @@ public class OtherProceedingsGeneratorTest {
     }
 
     @Test
-    public void testWithoutProceedings() {
+    void testWithoutProceedings() {
         CaseData caseData = CaseData.builder()
             .previousOrOngoingProceedingsForChildren(YesNoDontKnow.yes)
             .fl401OtherProceedingDetails(FL401OtherProceedingDetails.builder()

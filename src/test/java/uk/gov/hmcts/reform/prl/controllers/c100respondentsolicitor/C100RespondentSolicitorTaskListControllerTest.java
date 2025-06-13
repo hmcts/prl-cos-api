@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.c100respondentsolicitor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,20 +18,16 @@ import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
-import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -45,34 +40,27 @@ import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @ExtendWith(MockitoExtension.class)
-public class C100RespondentSolicitorTaskListControllerTest {
+class C100RespondentSolicitorTaskListControllerTest {
+
     @InjectMocks
     private C100RespondentSolicitorTaskListController c100RespondentSolicitorTaskListController;
 
-    private CaseData caseData;
+    @Mock
+    private EventService eventPublisher;
 
     @Mock
-    EventService eventPublisher;
-
-    @Mock
-    ObjectMapper objectMapper;
-
-    @Mock
-    CaseUtils caseUtils;
-
-    @Mock
-    C100RespondentSolicitorService respondentSolicitorService;
+    private ObjectMapper objectMapper;
 
     @Mock
     private AuthorisationService authorisationService;
 
-    public static final String authToken = "Bearer TestAuthToken";
-    public static final String s2sToken = "s2s AuthToken";
+    private static final String AUTH_TOKEN = "Bearer TestAuthToken";
+    private static final String S2S_TOKEN = "s2s AuthToken";
 
-    Map<String, Object> c7DraftMap = new HashMap<>();
+    private CaseData caseData;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
 
         List<ConfidentialityListEnum> confidentialityListEnums = new ArrayList<>();
 
@@ -108,14 +96,12 @@ public class C100RespondentSolicitorTaskListControllerTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
 
-        DynamicListElement dynamicListElement = DynamicListElement.builder().code(String.valueOf(0)).build();
-        DynamicList chooseRespondent = DynamicList.builder().value(dynamicListElement).build();
 
         Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
         List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
 
         caseData = CaseData.builder()
-            .courtName("testcourt")
+            .courtName("test court")
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
@@ -134,7 +120,7 @@ public class C100RespondentSolicitorTaskListControllerTest {
 
 
     @Test
-    public void testHandleAboutToSubmit() throws Exception {
+    void testHandleAboutToSubmit() {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -151,16 +137,16 @@ public class C100RespondentSolicitorTaskListControllerTest {
             callbackRequest.getCaseDetails(),
             objectMapper
         )).thenReturn(caseData);
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorTaskListController.handleSubmitted(
-            callbackRequest, authToken,s2sToken
+            callbackRequest, AUTH_TOKEN, S2S_TOKEN
         );
 
         assertTrue(response.getData().containsKey("state"));
     }
 
     @Test
-    public void testExceptionForHandleSubmitted() throws Exception {
+    void testExceptionForHandleSubmitted() {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
@@ -172,17 +158,13 @@ public class C100RespondentSolicitorTaskListControllerTest {
                              .build())
             .build();
 
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            c100RespondentSolicitorTaskListController.handleSubmitted(callbackRequest,s2sToken,authToken);
-        }, RuntimeException.class, "Invalid Client");
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
 
+        RuntimeException ex = assertThrows(
+            RuntimeException.class, () ->
+                c100RespondentSolicitorTaskListController.handleSubmitted(callbackRequest, S2S_TOKEN, AUTH_TOKEN)
+        );
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
-
-    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
-                                                                 String expectedMessage) {
-        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
-        assertEquals(expectedMessage, exception.getMessage());
-    }
-
 }

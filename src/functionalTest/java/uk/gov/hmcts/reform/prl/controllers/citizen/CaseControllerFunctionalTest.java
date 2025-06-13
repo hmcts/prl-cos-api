@@ -5,19 +5,18 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -28,6 +27,8 @@ import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -36,9 +37,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @Slf4j
-@Ignore
+@Disabled
 @SpringBootTest
-@ExtendWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration
 @TestPropertySource(
     properties = {
@@ -73,13 +74,13 @@ public class CaseControllerFunctionalTest {
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
-    @MockBean
+    @MockitoBean
     private AuthorisationService authorisationService;
 
-    @MockBean
+    @MockitoBean
     private CaseService caseService;
 
-    @MockBean
+    @MockitoBean
     private AuthTokenGenerator authTokenGenerator;
 
     private static CaseData caseData;
@@ -89,7 +90,7 @@ public class CaseControllerFunctionalTest {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void createCaseInCcd() throws Exception {
         String requestBody = ResourceLoader.loadJson(CASE_DATA_INPUT);
@@ -104,7 +105,7 @@ public class CaseControllerFunctionalTest {
             .assertThat().statusCode(200);
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void testRetrieveCitizenCases() {
         request
@@ -117,7 +118,7 @@ public class CaseControllerFunctionalTest {
             .assertThat().statusCode(200);
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void testLinkCitizenToCase() throws Exception {
         String requestBody = ResourceLoader.loadJson(LINK_CITIZEN_REQUEST_BODY);
@@ -134,10 +135,7 @@ public class CaseControllerFunctionalTest {
             .andReturn();
     }
 
-
-
-
-    @Ignore("as there is no end point existing with this link")
+    @Disabled("as there is no end point existing with this link")
     @Test
     public void testLinkCitizenToCaseWith401() throws Exception {
         String requestBody = ResourceLoader.loadJson(LINK_CITIZEN_REQUEST_BODY);
@@ -190,8 +188,8 @@ public class CaseControllerFunctionalTest {
             .then()
             .extract()
             .as(CaseData.class);
-        Assert.assertNotNull(caseData);
-        Assert.assertNotNull(caseData.getId());
+        assertNotNull(caseData);
+        assertNotNull(caseData.getId());
     }
 
     @Test
@@ -209,10 +207,16 @@ public class CaseControllerFunctionalTest {
             .extract()
             .as(CaseData.class);
 
-        Assert.assertNotNull(responseData);
-        Assert.assertNotNull(responseData.getOtherPartyInTheCaseRevised());
-        Assert.assertNotNull(responseData.getOtherPartyInTheCaseRevised().get(0));
-        Assert.assertEquals("Andrew",responseData.getOtherPartyInTheCaseRevised().get(0).getValue().getFirstName());
-        Assert.assertEquals("Smith",responseData.getOtherPartyInTheCaseRevised().get(0).getValue().getLastName());
+        assertNotNull(responseData);
+        assertNotNull(responseData.getOtherPartyInTheCaseRevised());
+        assertNotNull(responseData.getOtherPartyInTheCaseRevised().getFirst());
+        assertEquals(
+            "Andrew",
+            responseData.getOtherPartyInTheCaseRevised().getFirst().getValue().getFirstName()
+        );
+        assertEquals(
+            "Smith",
+            responseData.getOtherPartyInTheCaseRevised().getFirst().getValue().getLastName()
+        );
     }
 }

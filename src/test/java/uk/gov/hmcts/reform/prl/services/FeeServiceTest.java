@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
-import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,7 +47,7 @@ import static uk.gov.hmcts.reform.prl.enums.AwpApplicationReasonEnum.DELAY_CANCE
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
-public class FeeServiceTest {
+class FeeServiceTest {
 
     @InjectMocks
     private FeeService feeService;
@@ -91,7 +90,7 @@ public class FeeServiceTest {
 
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         //MockitoAnnotations.openMocks(this);
         feeResponse = FeeResponse.builder()
             .code("FEE0325")
@@ -124,7 +123,7 @@ public class FeeServiceTest {
     }
 
     @Test
-    public void testToCheckFeeAmount() throws Exception {
+    void testToCheckFeeAmount() throws Exception {
 
         FeesConfig.FeeParameters feeParameters = FeesConfig.FeeParameters
             .builder()
@@ -150,7 +149,7 @@ public class FeeServiceTest {
     }
 
     @Test
-    public void testToCheckFeeAmountException() {
+    void testToCheckFeeAmountException() {
 
         FeesConfig.FeeParameters feeParameters = FeesConfig.FeeParameters
             .builder()
@@ -165,17 +164,15 @@ public class FeeServiceTest {
         when(feesConfig.getFeeParametersByFeeType(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeParameters);
         when(feesRegisterApi.findFee(any(),any(),any(),any(),any(),any())).thenThrow(FeignException.class);
 
-        assertExpectedException(() -> {
+        WorkflowException ex = assertThrows(WorkflowException.class, () -> {
             feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
-        }, WorkflowException.class, null);
-
-
+        });
     }
 
 
 
     @Test
-    public void testToCheckFeeAmountWithWrongCode() throws Exception {
+    void testToCheckFeeAmountWithWrongCode() throws Exception {
 
         when(feesConfig.getFeeParametersByFeeType(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeParameters);
         when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
@@ -186,7 +183,7 @@ public class FeeServiceTest {
     }
 
     @Test
-    public void whenFeeDetailsNotFetchedThrowError() throws Exception {
+    void whenFeeDetailsNotFetchedThrowError() throws Exception {
 
         FeesConfig.FeeParameters feeParameters = FeesConfig.FeeParameters
             .builder()
@@ -204,7 +201,7 @@ public class FeeServiceTest {
     }
 
     @Test
-    public void testGetFeesDataForAdditionalApplications() throws Exception {
+    void testGetFeesDataForAdditionalApplications() throws Exception {
 
         List<FeeType> applicationsFeeTypes = List.of(FeeType.C2_WITH_NOTICE, FeeType.CHILD_ARRANGEMENTS_ORDER);
 
@@ -246,7 +243,7 @@ public class FeeServiceTest {
 
 
     @Test
-    public void testFetchFeeCode() throws Exception {
+    void testFetchFeeCode() throws Exception {
         FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID).applicationType(AwpApplicationTypeEnum.C2.toString()).applicationReason(
             AwpApplicationReasonEnum.PERMISSION_FOR_APPLICATION.getId()).build();
 
@@ -269,7 +266,7 @@ public class FeeServiceTest {
     }
 
     @Test
-    public void testFetchFeeCodeForC2DomesticAbuseApplicant() throws Exception {
+    void testFetchFeeCodeForC2DomesticAbuseApplicant() throws Exception {
         FeeRequest feeRequest = FeeRequest.builder()
             .caseId(TEST_CASE_ID)
             .caseType(PrlAppsConstants.FL401_CASE_TYPE)
@@ -289,7 +286,7 @@ public class FeeServiceTest {
     }
 
     @Test
-    public void testFetchFeeCodeForC2DomesticAbuseApplicantWithNotice() throws Exception {
+    void testFetchFeeCodeForC2DomesticAbuseApplicantWithNotice() throws Exception {
         FeeRequest feeRequest = FeeRequest.builder()
             .caseId(TEST_CASE_ID)
             .applicationType(AwpApplicationTypeEnum.C2.toString())
@@ -310,7 +307,7 @@ public class FeeServiceTest {
     }
 
     @Test
-    public void testFetchFeeCodeForC2DomesticAbuseRespondant() throws Exception {
+    void testFetchFeeCodeForC2DomesticAbuseRespondant() throws Exception {
         FeeRequest feeRequest = FeeRequest.builder()
             .caseId(TEST_CASE_ID)
             .applicationType(AwpApplicationTypeEnum.C2.toString())
@@ -338,7 +335,7 @@ public class FeeServiceTest {
     }
 
     @Test
-    public void testFetchFeeCodeForNonC2DomesticAbuseApplicant() throws Exception {
+    void testFetchFeeCodeForNonC2DomesticAbuseApplicant() throws Exception {
         FeeRequest feeRequest = FeeRequest.builder()
             .caseId(TEST_CASE_ID)
             .applicationType(AwpApplicationTypeEnum.N161.toString())
@@ -365,7 +362,7 @@ public class FeeServiceTest {
     }
 
     @Test
-    public void testFetchFeeCodeC2ProhibitedOrder() throws Exception {
+    void testFetchFeeCodeC2ProhibitedOrder() throws Exception {
         FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID).applicationType(AwpApplicationTypeEnum.C2.toString()).applicationReason(
             AwpApplicationReasonEnum.PROHIBITED_STEPS_ORDER.getId()).build();
 
@@ -388,7 +385,7 @@ public class FeeServiceTest {
     }
 
     @Test
-    public void testFetchFeeCodeC2ChildArrangemenetOrder() throws Exception {
+    void testFetchFeeCodeC2ChildArrangemenetOrder() throws Exception {
         FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID).applicationType(AwpApplicationTypeEnum.C2.toString()).applicationReason(
             AwpApplicationReasonEnum.CHILD_ARRANGEMENTS_ORDER_TO_LIVE_SPEND_TIME.getId()).build();
 
@@ -411,7 +408,7 @@ public class FeeServiceTest {
     }
 
     @Test
-    public void testFetchFeeCodeC2ChildArrangemenetOrderwithConsent() throws Exception {
+    void testFetchFeeCodeC2ChildArrangemenetOrderwithConsent() throws Exception {
         FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID).applicationType(AwpApplicationTypeEnum.C2.toString()).applicationReason(
             AwpApplicationReasonEnum.CHILD_ARRANGEMENTS_ORDER_TO_LIVE_SPEND_TIME.getId()).notice(YES).build();
 
@@ -434,7 +431,7 @@ public class FeeServiceTest {
     }
 
     @Test
-    public void testFetchFeeCodeC2SpecificIssueOrder() throws Exception {
+    void testFetchFeeCodeC2SpecificIssueOrder() throws Exception {
         FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID).applicationType(AwpApplicationTypeEnum.C2.toString()).applicationReason(
             AwpApplicationReasonEnum.SPECIFIC_ISSUE_ORDER.getId()).build();
 
@@ -457,7 +454,7 @@ public class FeeServiceTest {
     }
 
     @Test
-    public void testFetchFeeCodeWhenFeeTypeIsNull() throws Exception {
+    void testFetchFeeCodeWhenFeeTypeIsNull() throws Exception {
         FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID).applicationType(AwpApplicationTypeEnum.C3.toString()).build();
 
         when(feesConfig.getFeeParametersByFeeType(FeeType.C2_WITH_NOTICE)).thenReturn(feeParameters);
@@ -478,7 +475,7 @@ public class FeeServiceTest {
     }
 
     @Test
-    public void testFetchFeeCodeWhenFeeTypeOtherThanC2AndIsFl403ApplicationAlreadyPresent() throws Exception {
+    void testFetchFeeCodeWhenFeeTypeOtherThanC2AndIsFl403ApplicationAlreadyPresent() throws Exception {
         FeeRequest feeRequest = FeeRequest.builder()
             .caseId(TEST_CASE_ID).applicationType(AwpApplicationTypeEnum.FL403.toString()).partyType("respondent")
             .caseType("FL401").build();
@@ -513,7 +510,7 @@ public class FeeServiceTest {
     }
 
     @Test
-    public void testFetchFeeCodeWhenisHearingDate14DaysAwayFalseAndOtherPartyConsentNo() throws Exception {
+    void testFetchFeeCodeWhenisHearingDate14DaysAwayFalseAndOtherPartyConsentNo() throws Exception {
         FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID)
             .applicationType(AwpApplicationTypeEnum.C2.toString()).otherPartyConsent(NO)
             .applicationReason(DELAY_CANCEL_HEARING_DATE.getId())
@@ -537,7 +534,7 @@ public class FeeServiceTest {
     }
 
     @Test
-    public void testFetchFeeCodeWhenIsHearingDate14DaysAwayTrueAndOtherPartyConsentNo() throws Exception {
+    void testFetchFeeCodeWhenIsHearingDate14DaysAwayTrueAndOtherPartyConsentNo() throws Exception {
         FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID)
             .applicationType(AwpApplicationTypeEnum.C2.toString()).otherPartyConsent(NO)
             .applicationReason(DELAY_CANCEL_HEARING_DATE.getId())
@@ -561,7 +558,7 @@ public class FeeServiceTest {
     }
 
     @Test
-    public void testFetchFeeCodeWhenIsHearingDate14DaysAwayFalseAndOtherPartyConsentYes() throws Exception {
+    void testFetchFeeCodeWhenIsHearingDate14DaysAwayFalseAndOtherPartyConsentYes() throws Exception {
         FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID)
             .applicationType(AwpApplicationTypeEnum.C2.toString()).otherPartyConsent(YES)
             .applicationReason(DELAY_CANCEL_HEARING_DATE.getId())
@@ -584,7 +581,7 @@ public class FeeServiceTest {
     }
 
     @Test
-    public void testFetchFeeCodeWhenHearingDateBlankButPartyConsentYes() throws Exception {
+    void testFetchFeeCodeWhenHearingDateBlankButPartyConsentYes() throws Exception {
         FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID)
             .applicationType(AwpApplicationTypeEnum.C2.toString()).otherPartyConsent(YES)
             .applicationReason(DELAY_CANCEL_HEARING_DATE.getId())
@@ -609,7 +606,7 @@ public class FeeServiceTest {
     }
 
     @Test
-    public void testFetchFeeCodeWhenHearingDateBlankButPartyConsentNoAndNoticeNo() throws Exception {
+    void testFetchFeeCodeWhenHearingDateBlankButPartyConsentNoAndNoticeNo() throws Exception {
         FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID)
             .applicationType(AwpApplicationTypeEnum.C2.toString()).otherPartyConsent(NO)
             .applicationReason(DELAY_CANCEL_HEARING_DATE.getId())
@@ -634,7 +631,7 @@ public class FeeServiceTest {
     }
 
     @Test
-    public void testFetchFeeCodeWhenHearingDateBlankButPartyConsentNoAndNoticeYes() throws Exception {
+    void testFetchFeeCodeWhenHearingDateBlankButPartyConsentNoAndNoticeYes() throws Exception {
         FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID)
             .applicationType(AwpApplicationTypeEnum.C2.toString()).otherPartyConsent(NO)
             .applicationReason(DELAY_CANCEL_HEARING_DATE.getId())
@@ -659,7 +656,7 @@ public class FeeServiceTest {
     }
 
     @Test
-    public void testFetchFeeCodeWhenHearingDateBlankButPartyConsentNoAndNoticeIsNull() throws Exception {
+    void testFetchFeeCodeWhenHearingDateBlankButPartyConsentNoAndNoticeIsNull() throws Exception {
         FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID)
             .applicationType(AwpApplicationTypeEnum.C2.toString()).otherPartyConsent(NO)
             .applicationReason(DELAY_CANCEL_HEARING_DATE.getId())
@@ -682,14 +679,10 @@ public class FeeServiceTest {
         assertEquals("Invalid Parameters to fetch fee code",response.getErrorRetrievingResponse());
     }
 
-    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
-                                                                 String expectedMessage) {
-        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
-        assertEquals(expectedMessage, exception.getMessage());
-    }
+
 
     @Test
-    public void testFetchFeeCodeWithNoFees() throws Exception {
+    void testFetchFeeCodeWithNoFees() throws Exception {
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London")).plusDays(15);
         String currentDate = DateTimeFormatter.ofPattern("dd/MM/yyyy").format(zonedDateTime);
         String hearingDate = "First Hearing -- " + currentDate;
@@ -709,7 +702,7 @@ public class FeeServiceTest {
     }
 
     @Test
-    public void testFetchFeeSuccess() throws Exception {
+    void testFetchFeeSuccess() throws Exception {
         FeeResponse feeResponse1 = FeeResponse.builder()
             .code("FEE0336")
             .feeType(FeeType.C100_SUBMISSION_FEE.toString())
@@ -726,7 +719,7 @@ public class FeeServiceTest {
     }
 
     @Test
-    public void testFetchZeroFee() {
+    void testFetchZeroFee() {
         FeeResponseForCitizen response = feeService.fetchFee("C100_EX740_APPLICANT");
 
         assertNotNull(response);
@@ -735,7 +728,7 @@ public class FeeServiceTest {
     }
 
     @Test
-    public void testFetchFeeInvalidFeeType() {
+    void testFetchFeeInvalidFeeType() {
         FeeResponseForCitizen response = feeService.fetchFee("INVALID_FEE_TYPE");
 
         assertNotNull(response);
@@ -743,7 +736,7 @@ public class FeeServiceTest {
     }
 
     @Test
-    public void testFetchFeeNullFeeResponse() throws Exception {
+    void testFetchFeeNullFeeResponse() throws Exception {
         when(feesConfig.getFeeParametersByFeeType(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeParameters);
         when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(null);
         FeeResponseForCitizen response = feeService.fetchFee(FeeType.C100_SUBMISSION_FEE.toString());
@@ -753,7 +746,7 @@ public class FeeServiceTest {
     }
 
     @Test
-    public void testFetchFeeNullFeeAmount() throws Exception {
+    void testFetchFeeNullFeeAmount() throws Exception {
         FeeResponse feeResponse1 = FeeResponse.builder().amount(null).build();
         when(feesConfig.getFeeParametersByFeeType(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeParameters);
         when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse1);
@@ -763,11 +756,13 @@ public class FeeServiceTest {
         assertEquals(FETCH_FEE_ERROR.concat(FeeType.C100_SUBMISSION_FEE.toString()), response.getErrorRetrievingResponse());
     }
 
-    @Test(expected = RuntimeException.class)
-    public void testFetchFeeThrowsException() throws Exception {
-        when(feesConfig.getFeeParametersByFeeType(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeParameters);
-        when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenThrow(new RuntimeException());
+    @Test
+    void testFetchFeeThrowsException() throws Exception {
+        assertThrows(RuntimeException.class, () -> {
+            when(feesConfig.getFeeParametersByFeeType(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeParameters);
+            when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenThrow(new RuntimeException());
 
-        feeService.fetchFee(FeeType.C100_SUBMISSION_FEE.toString());
+            feeService.fetchFee(FeeType.C100_SUBMISSION_FEE.toString());
+        });
     }
 }

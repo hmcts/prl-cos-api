@@ -5,24 +5,24 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 import javax.json.spi.JsonProvider;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 @ExtendWith(MockitoExtension.class)
-public class NullAwareJsonObjectBuilderTest {
+class NullAwareJsonObjectBuilderTest {
 
     @InjectMocks
     NullAwareJsonObjectBuilder nullAwareJsonObjectBuilder;
 
     @Test
-    public void testNullAwareJsonBuilderWithStringParams() {
+    void testNullAwareJsonBuilderWithStringParams() {
         JsonObjectBuilder delegate = JsonProvider.provider().createObjectBuilder();
         delegate.add("keyString","value");
         delegate.add("keyJsonValue",JsonValue.FALSE);
@@ -31,14 +31,14 @@ public class NullAwareJsonObjectBuilderTest {
     }
 
     @Test
-    public void testNullAwareJsonBuilderWithStringAndBigIntegerParams() {
+    void testNullAwareJsonBuilderWithStringAndBigIntegerParams() {
         JsonObjectBuilder delegate = JsonProvider.provider().createObjectBuilder();
         delegate.add("keyBigInt",BigInteger.ONE);
         assertEquals(nullAwareJsonObjectBuilder.add("keyBigInt",BigInteger.ONE).build().get("keyBigInt"), delegate.build().get("keyBigInt"));
     }
 
     @Test
-    public void testNullAwareJsonBuilderWithStringAndBigDecimalParams() {
+    void testNullAwareJsonBuilderWithStringAndBigDecimalParams() {
         JsonObjectBuilder delegate = JsonProvider.provider().createObjectBuilder();
 
         delegate.add("key", BigDecimal.ONE);
@@ -46,35 +46,35 @@ public class NullAwareJsonObjectBuilderTest {
     }
 
     @Test
-    public void testNullAwareJsonBuilderWithStringAndIntParams() {
+    void testNullAwareJsonBuilderWithStringAndIntParams() {
         JsonObjectBuilder delegate = JsonProvider.provider().createObjectBuilder();
         delegate.add("key",1);
         assertEquals(nullAwareJsonObjectBuilder.add("key",1).build().get("key"),delegate.build().get("key"));
     }
 
     @Test
-    public void testNullAwareJsonBuilderWithStringAndLongParams() {
+    void testNullAwareJsonBuilderWithStringAndLongParams() {
         JsonObjectBuilder delegate = JsonProvider.provider().createObjectBuilder();
         delegate.add("key",1L);
         assertEquals(nullAwareJsonObjectBuilder.add("key",1L).build().get("key"),delegate.build().get("key"));
     }
 
     @Test
-    public void testNullAwareJsonBuilderWithStringAndBooleanParams() {
+    void testNullAwareJsonBuilderWithStringAndBooleanParams() {
         JsonObjectBuilder delegate = JsonProvider.provider().createObjectBuilder();
         delegate.add("key",Boolean.TRUE);
         assertEquals(nullAwareJsonObjectBuilder.add("key",Boolean.TRUE).build().get("key"),delegate.build().get("key"));
     }
 
     @Test
-    public void testNullAwareJsonBuilderWithStringAndDoubleParams() {
+    void testNullAwareJsonBuilderWithStringAndDoubleParams() {
         JsonObjectBuilder delegate = JsonProvider.provider().createObjectBuilder();
         delegate.add("key",Double.valueOf("1"));
         assertEquals(nullAwareJsonObjectBuilder.add("key",Double.valueOf("1")).build().get("key"),delegate.build().get("key"));
     }
 
     @Test
-    public void testNullAwareJsonBuilderWithStringAndJsonObjectParams() {
+    void testNullAwareJsonBuilderWithStringAndJsonObjectParams() {
         JsonObjectBuilder delegate = JsonProvider.provider().createObjectBuilder();
         JsonObjectBuilder delegate1 = JsonProvider.provider().createObjectBuilder();
         delegate.add("key",delegate1);
@@ -82,7 +82,7 @@ public class NullAwareJsonObjectBuilderTest {
     }
 
     @Test
-    public void testNullAwareJsonBuilderWithStringAndJsonArrayParams() {
+    void testNullAwareJsonBuilderWithStringAndJsonArrayParams() {
         JsonObjectBuilder delegate = JsonProvider.provider().createObjectBuilder();
         JsonArrayBuilder delegate1 = JsonProvider.provider().createArrayBuilder();
         delegate.add("key",delegate1);
@@ -90,7 +90,7 @@ public class NullAwareJsonObjectBuilderTest {
     }
 
     @Test
-    public void testNullAwareJsonBuilderAddNullParams() {
+    void testNullAwareJsonBuilderAddNullParams() {
         JsonObjectBuilder delegate = JsonProvider.provider().createObjectBuilder();
         delegate.addNull("key");
         assertEquals(nullAwareJsonObjectBuilder.addNull("key").build().get("key"),delegate.build().get("key"));

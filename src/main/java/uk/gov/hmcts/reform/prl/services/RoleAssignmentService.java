@@ -118,7 +118,7 @@ public class RoleAssignmentService {
         } else if (null != roleAssignmentDto.getJudicialUser()) {
             return getIdamId(roleAssignmentDto.getJudicialUser())[0];
         } else if (null != roleAssignmentDto.getJudgeEmail()) {
-            return userService.getUserByEmailId(authorization, roleAssignmentDto.getJudgeEmail()).get(0).getId();
+            return userService.getUserByEmailId(authorization, roleAssignmentDto.getJudgeEmail()).getFirst().getId();
         }
         return null;
     }
@@ -128,7 +128,7 @@ public class RoleAssignmentService {
             legalAdviserList,
             DynamicList.class
         ).getValue().getCode(), "(", ")");
-        return userService.getUserByEmailId(authorization, laEmailId).get(0).getId();
+        return userService.getUserByEmailId(authorization, laEmailId).getFirst().getId();
     }
 
     private String createRoleRequestReference(final CaseDetails caseDetails, final String userId) {
@@ -187,7 +187,7 @@ public class RoleAssignmentService {
             systemUserService.getSysUserToken(),
             authTokenGenerator.generate(),
             null,
-            userService.getUserByEmailId(authorisation, emailId).get(0).getId()
+            userService.getUserByEmailId(authorisation, emailId).getFirst().getId()
         );
 
         final int[] i = {0};

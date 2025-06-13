@@ -25,7 +25,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_EMAIL;
 
 @ExtendWith(MockitoExtension.class)
-public class SendEmailTaskTest {
+class SendEmailTaskTest {
 
     public static final EmailTemplateNames EMAIL_TEMPLATE_ID = EmailTemplateNames.EXAMPLE;
 
@@ -35,7 +35,7 @@ public class SendEmailTaskTest {
     private SendEmailTask task;
 
     @BeforeEach
-    public void getSendEmailTaskInstance() {
+    void getSendEmailTaskInstance() {
         task = new SendEmailTask(emailService) {
             @Override
             protected EmailTemplateVars getPersonalisation(TaskContext context, CaseDetails caseDetails) {
@@ -60,12 +60,12 @@ public class SendEmailTaskTest {
     }
 
     @Test
-    public void getLanguageShouldReturnEnglishWhenNotSpecified() {
+    void getLanguageShouldReturnEnglishWhenNotSpecified() {
         assertThat(task.getLanguage(CaseDetailsProvider.empty()), is(LanguagePreference.english));
     }
 
     @Test
-    public void getLanguageShouldReturnEnglishWhenSetEnglishOrEmpty() {
+    void getLanguageShouldReturnEnglishWhenSetEnglishOrEmpty() {
         asList(CaseDataProvider.english(), CaseDataProvider.empty()).forEach(caseData -> {
             assertThat(
                 task.getLanguage(CaseDetailsProvider.of(caseData)),
@@ -75,7 +75,7 @@ public class SendEmailTaskTest {
     }
 
     @Test
-    public void getLanguageShouldReturnWelshWhenSetWelsh() {
+    void getLanguageShouldReturnWelshWhenSetWelsh() {
         CaseData caseData = CaseDataProvider.welsh();
 
         assertThat(
@@ -85,17 +85,17 @@ public class SendEmailTaskTest {
     }
 
     @Test
-    public void canEmailBeSentShouldReturnTrue() {
+    void canEmailBeSentShouldReturnTrue() {
         assertThat(task.canEmailBeSent(CaseDetailsProvider.empty()), is(true));
     }
 
     @Test
-    public void getTemplateShouldReturnValidValue() {
+    void getTemplateShouldReturnValidValue() {
         assertThat(task.getTemplate(), is(EmailTemplateNames.EXAMPLE));
     }
 
     @Test
-    public void getPersonalisationShouldReturnModel() {
+    void getPersonalisationShouldReturnModel() {
         assertThat(
             task.getPersonalisation(TaskContextProvider.empty(), CaseDetailsProvider.empty()),
             is(EmailTemplateVarsProvider.empty())
@@ -106,7 +106,7 @@ public class SendEmailTaskTest {
      * This will be improved once we define email fields in CaseData model. For now it's fake.
      */
     @Test
-    public void getRecipientEmailShouldReturnEmail() {
+    void getRecipientEmailShouldReturnEmail() {
         assertThat(
             task.getRecipientEmail(CaseDetailsProvider.empty()),
             is(TEST_EMAIL)
@@ -114,7 +114,7 @@ public class SendEmailTaskTest {
     }
 
     @Test
-    public void executeCallsEmailService() {
+    void executeCallsEmailService() {
         task.execute(TaskContextProvider.empty(), CaseDetailsProvider.empty());
 
         verify(emailService).send(
@@ -126,7 +126,7 @@ public class SendEmailTaskTest {
     }
 
     @Test
-    public void executeDoesNotCallsEmailServiceWhenCaseDataIsNull() {
+    void executeDoesNotCallsEmailServiceWhenCaseDataIsNull() {
         task.execute(TaskContextProvider.empty(), CaseDetailsProvider.of(null));
 
         verifyNoInteractions(emailService);

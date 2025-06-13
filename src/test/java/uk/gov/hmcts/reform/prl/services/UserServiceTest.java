@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class UserServiceTest {
+class UserServiceTest {
 
     @InjectMocks
     private UserService userService;
@@ -42,7 +42,7 @@ public class UserServiceTest {
 
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
 
         roles =  new ArrayList<>();
         roles.add("solicitor");
@@ -66,7 +66,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testToCheckUserDetails() {
+    void testToCheckUserDetails() {
 
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
 
@@ -79,7 +79,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testToCheckUserDetailsWithBadAuthToken() {
+    void testToCheckUserDetailsWithBadAuthToken() {
 
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
 
@@ -89,7 +89,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testToCheckUserInfo() {
+    void testToCheckUserInfo() {
 
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
 
@@ -99,7 +99,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testToCheckGetUsersByUserId() {
+    void testToCheckGetUsersByUserId() {
 
         when(idamClient.getUserByUserId(authToken,"")).thenReturn(userDetails);
 
@@ -109,7 +109,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testToCheckGetUsersByEmailId() {
+    void testToCheckGetUsersByEmailId() {
 
         when(idamClient.searchUsers(authToken,"email:")).thenReturn(List.of(userDetails));
 

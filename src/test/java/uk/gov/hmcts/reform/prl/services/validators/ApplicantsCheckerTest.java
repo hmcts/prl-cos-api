@@ -25,7 +25,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 @ExtendWith(MockitoExtension.class)
-public class ApplicantsCheckerTest {
+class ApplicantsCheckerTest {
 
     @Mock
     private TaskErrorService taskErrorService;
@@ -37,13 +37,13 @@ public class ApplicantsCheckerTest {
     private CaseData caseData;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         caseData = CaseData.builder().build();
     }
 
 
     @Test
-    public void whenApplicantPresentButNotCompleteThenIsFinishedReturnsFalse() {
+    void whenApplicantPresentButNotCompleteThenIsFinishedReturnsFalse() {
 
         PartyDetails applicant = PartyDetails.builder().firstName("TestName").build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
@@ -58,7 +58,7 @@ public class ApplicantsCheckerTest {
     }
 
     @Test
-    public void whenApplicantPresentButNotCompleteThenIsFinishedReturnsFalseForFL401() {
+    void whenApplicantPresentButNotCompleteThenIsFinishedReturnsFalseForFL401() {
 
         PartyDetails applicant = PartyDetails.builder().firstName("TestName").build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
@@ -74,7 +74,7 @@ public class ApplicantsCheckerTest {
     }
 
     @Test
-    public void whenApplicantIsNotPresentThenIsFinishedReturnsFalse() {
+    void whenApplicantIsNotPresentThenIsFinishedReturnsFalse() {
 
         caseData = caseData.toBuilder()
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -85,7 +85,7 @@ public class ApplicantsCheckerTest {
     }
 
     @Test
-    public void whenApplicantPresentThenIsStartedReturnsTrue() {
+    void whenApplicantPresentThenIsStartedReturnsTrue() {
 
         PartyDetails applicant = PartyDetails.builder().firstName("TestName").build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
@@ -100,7 +100,7 @@ public class ApplicantsCheckerTest {
     }
 
     @Test
-    public void whenApplicantIsNotPresentThenIsStartedReturnsFalse() {
+    void whenApplicantIsNotPresentThenIsStartedReturnsFalse() {
         caseData = caseData.toBuilder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(null)
@@ -110,7 +110,7 @@ public class ApplicantsCheckerTest {
     }
 
     @Test
-    public void whenApplicantPresentButNotCompletedThenHasMandatoryReturnsFalse() {
+    void whenApplicantPresentButNotCompletedThenHasMandatoryReturnsFalse() {
 
         PartyDetails applicant = PartyDetails.builder().firstName("TestName").liveInRefuge(YesOrNo.Yes).build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
@@ -125,7 +125,7 @@ public class ApplicantsCheckerTest {
     }
 
     @Test
-    public void whenApplicantPresentButNotCompletedThenHasMandatoryReturnsFalseForFL401() {
+    void whenApplicantPresentButNotCompletedThenHasMandatoryReturnsFalseForFL401() {
 
         PartyDetails applicant = PartyDetails.builder().firstName("TestName").build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
@@ -141,8 +141,8 @@ public class ApplicantsCheckerTest {
     }
 
     @Test
-    public void whenApplicantIsNotPresentThenHasMandatoryReturnsFalse() {
-        CaseData caseData = CaseData.builder()
+    void whenApplicantIsNotPresentThenHasMandatoryReturnsFalse() {
+        caseData = CaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .applicants(null)
             .build();
@@ -151,7 +151,7 @@ public class ApplicantsCheckerTest {
     }
 
     @Test
-    public void whenApplicantIsNotPresentThenHasMandatoryReturnsFalseForCourtAdmin() {
+    void whenApplicantIsNotPresentThenHasMandatoryReturnsFalseForCourtAdmin() {
         caseData = CaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .caseCreatedBy(CaseCreatedBy.COURT_ADMIN)
@@ -162,7 +162,7 @@ public class ApplicantsCheckerTest {
     }
 
     @Test
-    public void whenApplicantPresentButNotCompletedThenHasMandatoryReturnsFalseForCourtAdmin() {
+    void whenApplicantPresentButNotCompletedThenHasMandatoryReturnsFalseForCourtAdmin() {
 
         PartyDetails applicant = PartyDetails.builder().firstName("TestName").build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
@@ -178,14 +178,14 @@ public class ApplicantsCheckerTest {
     }
 
     @Test
-    public void whenApplicantPresentButNotCompletedThenHasMandatoryReturnsFalseForSolicitorFields() {
+    void whenApplicantPresentButNotCompletedThenHasMandatoryReturnsFalseForSolicitorFields() {
 
         PartyDetails applicant = PartyDetails.builder().firstName("TestName")
             .representativeFirstName("test")
             .representativeLastName("test")
             .solicitorEmail("test@test.com")
             .solicitorAddress(Address.builder()
-                                  .addressLine1("address lin1")
+                                  .addressLine1("address line 1")
                                   .postCode("ADVWE11").build()).build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
@@ -200,7 +200,7 @@ public class ApplicantsCheckerTest {
     }
 
     @Test
-    public void whenApplicantWithOrgCompletedThenHasMandatoryReturnsFalseForSolicitorFields() {
+    void whenApplicantWithOrgCompletedThenHasMandatoryReturnsFalseForSolicitorFields() {
 
         PartyDetails applicant = PartyDetails.builder().firstName("TestName")
             .representativeFirstName("test")
@@ -208,7 +208,7 @@ public class ApplicantsCheckerTest {
             .solicitorEmail("test@test.com")
             .solicitorOrg(Organisation.builder().organisationID("testId").build())
             .solicitorAddress(Address.builder()
-                                  .addressLine1("address lin1")
+                                  .addressLine1("address line 1")
                                   .postCode("ADVWE11").build()).build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
@@ -223,7 +223,7 @@ public class ApplicantsCheckerTest {
     }
 
     @Test
-    public void whenSolicitorAddressIsEmptyThenHasMandatoryReturnsFalseForSolicitorFields() {
+    void whenSolicitorAddressIsEmptyThenHasMandatoryReturnsFalseForSolicitorFields() {
 
         PartyDetails applicant = PartyDetails.builder().firstName("TestName")
             .representativeFirstName("test")
@@ -245,14 +245,14 @@ public class ApplicantsCheckerTest {
     }
 
     @Test
-    public void whenApplicantPresentAndSolicitorCreateCaseThenHasMandatoryReturnsFalseForSolicitorFields() {
+    void whenApplicantPresentAndSolicitorCreateCaseThenHasMandatoryReturnsFalseForSolicitorFields() {
 
         PartyDetails applicant = PartyDetails.builder().firstName("TestName")
             .representativeFirstName("test")
             .representativeLastName("test")
             .solicitorEmail("test@test.com")
             .solicitorAddress(Address.builder()
-                                  .addressLine1("address lin1")
+                                  .addressLine1("address line 1")
                                   .postCode("ADVWE11").build()).build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
@@ -266,7 +266,7 @@ public class ApplicantsCheckerTest {
     }
 
     @Test
-    public void whenIncompleteAddressDataThenVerificationReturnsFalse() {
+    void whenIncompleteAddressDataThenVerificationReturnsFalse() {
         Address address = Address.builder()
             .addressLine2("Test")
             .country("UK")
@@ -276,7 +276,7 @@ public class ApplicantsCheckerTest {
     }
 
     @Test
-    public void whenCompleteAddressDataThenVerificationReturnsTrue() {
+    void whenCompleteAddressDataThenVerificationReturnsTrue() {
         Address address = Address.builder()
             .addressLine1("Test")
             .addressLine2("Test")
@@ -291,7 +291,7 @@ public class ApplicantsCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+    void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
         assertNotNull(applicantsChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 

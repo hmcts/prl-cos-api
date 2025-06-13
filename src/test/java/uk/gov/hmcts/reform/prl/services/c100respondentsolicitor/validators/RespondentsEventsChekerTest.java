@@ -68,63 +68,63 @@ public class RespondentsEventsChekerTest {
     final PartyDetails respondent = PartyDetails.builder().build();
 
     @BeforeEach
-    public void init() {
+    void init() {
         respondentEventsChecker.init();
     }
 
 
     @Test
-    public void whenConsentEventHasMandatory_thenReturnsTrue() {
+    void whenConsentEventHasMandatory_thenReturnsTrue() {
         when(consentToApplicationChecker.isFinished(respondent, true)).thenReturn(true);
         assertTrue(respondentEventsChecker.isFinished(CONSENT, respondent, true));
 
     }
 
     @Test
-    public void whenAllegationsOfHarmEventHasMandatoryCompleted_MandatoryReturnsTrue() {
+    void whenAllegationsOfHarmEventHasMandatoryCompleted_MandatoryReturnsTrue() {
         when(respondentAllegationsOfHarmChecker.isFinished(respondent, true)).thenReturn(true);
         assertTrue(respondentEventsChecker.isFinished(ALLEGATION_OF_HARM, respondent, true));
 
     }
 
     @Test
-    public void whenKeepDetailsPrivateEventIsStarted_thenEventCheckerStartedReturnsTrue() {
+    void whenKeepDetailsPrivateEventIsStarted_thenEventCheckerStartedReturnsTrue() {
         when(keepDetailsPrivateChecker.isStarted(respondent, true)).thenReturn(true);
         assertTrue(respondentEventsChecker.isStarted(KEEP_DETAILS_PRIVATE, respondent, true));
     }
 
     @Test
-    public void whenInternationalElementEventIsStarted_thenEventCheckerStartedReturnsTrue() {
+    void whenInternationalElementEventIsStarted_thenEventCheckerStartedReturnsTrue() {
         when(internationalElementsChecker.isStarted(respondent, true)).thenReturn(true);
         assertTrue(respondentEventsChecker.isStarted(INTERNATIONAL_ELEMENT, respondent, true));
     }
 
     @Test
-    public void checkGetMiamEventStatus() {
+    void checkGetMiamEventStatus() {
         when(respondentMiamChecker.isFinished(respondent, true)).thenReturn(true);
         assertTrue(respondentEventsChecker.isFinished(MIAM, respondent, true));
     }
 
     @Test
-    public void checkAttendToCourtEventStatus() {
+    void checkAttendToCourtEventStatus() {
         when(attendToCourtChecker.isFinished(respondent, true)).thenReturn(true);
         assertTrue(respondentEventsChecker.isFinished(ATTENDING_THE_COURT, respondent, true));
     }
 
     @Test
-    public void checkGetEventStatus() {
+    void checkGetEventStatus() {
         assertTrue(respondentEventsChecker.getEventStatus().containsKey(OTHER_PROCEEDINGS));
         assertTrue(respondentEventsChecker.getEventStatus().containsValue(currentOrPastProceedingsChecker));
     }
 
     @Test
-    public void checkContactDetailsEventStatus() {
+    void checkContactDetailsEventStatus() {
         assertTrue(respondentEventsChecker.getEventStatus().containsKey(CONFIRM_EDIT_CONTACT_DETAILS));
         assertTrue(respondentEventsChecker.getEventStatus().containsValue(respondentContactDetailsChecker));
     }
 
     @Test
-    public void testCheckerFields() {
+    void testCheckerFields() {
         assertNotNull(respondentEventsChecker.getConsentToApplicationChecker());
         assertNotNull(respondentEventsChecker.getKeepDetailsPrivateChecker());
         assertNotNull(respondentEventsChecker.getRespondentMiamChecker());

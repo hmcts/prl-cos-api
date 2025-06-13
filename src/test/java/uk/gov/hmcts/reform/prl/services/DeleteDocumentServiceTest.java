@@ -17,7 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class DeleteDocumentServiceTest {
+class DeleteDocumentServiceTest {
 
     @InjectMocks
     DeleteDocumentService deleteDocumentService;
@@ -31,12 +31,12 @@ public class DeleteDocumentServiceTest {
     CaseDocumentClient caseDocumentClient;
 
     @BeforeEach
-    public void init() {
+    void init() {
         ReflectionTestUtils.setField(deleteDocumentService, "caseDocumentClient", caseDocumentClient);
     }
 
     @Test
-    public void testDeleteDocument() {
+    void testDeleteDocument() {
         when(authTokenGenerator.generate()).thenReturn(authToken);
         deleteDocumentService.deleteDocument(authToken, "4f854707-91bf-4fa0-98ec-893ae0025cae");
         verify(caseDocumentClient, times(1))

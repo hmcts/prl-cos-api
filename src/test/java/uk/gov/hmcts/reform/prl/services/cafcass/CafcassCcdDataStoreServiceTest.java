@@ -24,7 +24,7 @@ import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_AUTHORIZATION;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_SERVICE_AUTHORIZATION;
 
 @ExtendWith(MockitoExtension.class)
-public class CafcassCcdDataStoreServiceTest {
+class CafcassCcdDataStoreServiceTest {
 
     @Mock
     private CoreCaseDataApi coreCaseDataApi;
@@ -33,13 +33,13 @@ public class CafcassCcdDataStoreServiceTest {
     private CafcassCcdDataStoreService cafcassCcdDataStoreService;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
     @Test
     @DisplayName("test case for CCD elastic search.")
-    public void testSearchCases() throws IOException {
+    void testSearchCases() throws IOException {
 
 
         String searchString = TestResourceUtil.readFileFrom("classpath:request/ccdsearchrequest.json");
@@ -53,6 +53,6 @@ public class CafcassCcdDataStoreServiceTest {
                                                                            TEST_SERVICE_AUTHORIZATION,
                                                                            PRL_CASE_TYPE);
         assertNotNull(searchResult);
-        assertEquals(PRL_CASE_TYPE, mockResult.getCases().get(0).getCaseTypeId());
+        assertEquals(PRL_CASE_TYPE, mockResult.getCases().getFirst().getCaseTypeId());
     }
 }

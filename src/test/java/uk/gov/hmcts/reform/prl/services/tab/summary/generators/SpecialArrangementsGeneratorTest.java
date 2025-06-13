@@ -15,7 +15,7 @@ public class SpecialArrangementsGeneratorTest {
     private final SpecialArrangementsGenerator generator = new SpecialArrangementsGenerator();
 
     @Test
-    public void testIfSpecialArrangementHasMarkedAsYes() {
+    void testIfSpecialArrangementHasMarkedAsYes() {
         CaseSummary caseSummary = generator.generate(CaseData.builder()
                                                          .attendHearing(AttendHearing.builder()
                                                                             .isSpecialArrangementsRequired(YesOrNo.Yes)
@@ -32,7 +32,7 @@ public class SpecialArrangementsGeneratorTest {
     }
 
     @Test
-    public void testIfSpecialArrangementHasMarkedAsNo() {
+    void testIfSpecialArrangementHasMarkedAsNo() {
         CaseSummary caseSummary = generator.generate(CaseData.builder()
                                                          .attendHearing(AttendHearing.builder()
                                                                             .isSpecialArrangementsRequired(YesOrNo.No)

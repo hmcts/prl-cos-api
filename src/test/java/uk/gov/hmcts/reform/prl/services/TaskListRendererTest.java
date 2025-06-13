@@ -273,7 +273,7 @@ public class TaskListRendererTest {
     );
 
     @Test
-    public void shouldRenderFl401TaskList() throws IOException {
+    void shouldRenderFl401TaskList() throws IOException {
 
         BufferedReader taskListMarkDown = new BufferedReader(new FileReader(
             "src/test/resources/fl401-task-list-markdown.md"));
@@ -312,7 +312,7 @@ public class TaskListRendererTest {
     }
 
     @Test
-    public void shouldRenderTaskList() throws IOException {
+    void shouldRenderTaskList() throws IOException {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
@@ -334,7 +334,7 @@ public class TaskListRendererTest {
     }
 
     @Test
-    public void shouldRenderTaskListIfResubmitted() throws IOException {
+    void shouldRenderTaskListIfResubmitted() throws IOException {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .state(State.AWAITING_RESUBMISSION_TO_HMCTS)
@@ -346,7 +346,7 @@ public class TaskListRendererTest {
     }
 
     @Test
-    public void shouldRenderTaskListWithNoErrors() throws IOException {
+    void shouldRenderTaskListWithNoErrors() throws IOException {
         List<EventValidationErrors> emptyErrors = Collections.emptyList();
 
         CaseData caseData = CaseData.builder()
@@ -372,7 +372,7 @@ public class TaskListRendererTest {
     }
 
     @Test
-    public void shouldRenderTaskListWithAllegationOfHarmRevisedNoErrors() throws IOException {
+    void shouldRenderTaskListWithAllegationOfHarmRevisedNoErrors() throws IOException {
         List<EventValidationErrors> emptyErrors = Collections.emptyList();
 
         CaseData caseData = CaseData.builder()
@@ -398,7 +398,7 @@ public class TaskListRendererTest {
     }
 
     @Test
-    public void shouldRenderFl401TaskListNonMolestationOrderType() throws IOException {
+    void shouldRenderFl401TaskListNonMolestationOrderType() throws IOException {
 
         BufferedReader taskListMarkDown = new BufferedReader(new FileReader("src/test/resources/fl401-task-list-markdown.md"));
 
@@ -435,7 +435,7 @@ public class TaskListRendererTest {
     }
 
     @Test
-    public void shouldRenderFl401TaskWithResubmit() throws IOException {
+    void shouldRenderFl401TaskWithResubmit() throws IOException {
 
         BufferedReader taskListMarkDown = new BufferedReader(new FileReader("src/test/resources/fl401-task-list-resubmit.md"));
 
@@ -472,7 +472,7 @@ public class TaskListRendererTest {
     }
 
     @Test
-    public void shouldRenderC100V2TaskList() throws IOException {
+    void shouldRenderC100V2TaskList() throws IOException {
         CaseData caseData = CaseData.builder()
                 .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
                 .state(State.AWAITING_SUBMISSION_TO_HMCTS)
@@ -495,7 +495,7 @@ public class TaskListRendererTest {
     }
 
     @Test
-    public void shouldRenderC100V2TaskListResubmission() throws IOException {
+    void shouldRenderC100V2TaskListResubmission() throws IOException {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .state(State.AWAITING_RESUBMISSION_TO_HMCTS)
@@ -508,7 +508,7 @@ public class TaskListRendererTest {
     }
 
     @Test
-    public void shouldRenderC100V3TaskList() {
+    void shouldRenderC100V3TaskList() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
@@ -520,7 +520,7 @@ public class TaskListRendererTest {
     }
 
     @Test
-    public void shouldRenderC100V3TaskListResubmitted() {
+    void shouldRenderC100V3TaskListResubmitted() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .state(State.AWAITING_RESUBMISSION_TO_HMCTS)

@@ -26,7 +26,7 @@ class EventCheckerHelperTest {
         }
 
         @Test
-        void testOneNull() {
+            void testOneNull() {
             assertThat(allNonEmpty(new Object[]{null})).isFalse();
         }
 
@@ -39,7 +39,6 @@ class EventCheckerHelperTest {
         void testNonEmpty() {
             assertThat(allNonEmpty("x")).isTrue();
         }
-
     }
 
     @Nested
@@ -47,7 +46,6 @@ class EventCheckerHelperTest {
 
         @Test
         void testEmptyAddress() {
-
             Address address = Address.builder().build();
             assertThat(isEmptyAddress(address)).isTrue();
         }
@@ -79,8 +77,5 @@ class EventCheckerHelperTest {
         void testOneNull() {
             assertThat(allEmpty(new Object[]{null})).isTrue();
         }
-
-
     }
-
 }

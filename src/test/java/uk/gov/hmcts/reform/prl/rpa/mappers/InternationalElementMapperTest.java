@@ -10,13 +10,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @ExtendWith(MockitoExtension.class)
-public class InternationalElementMapperTest {
+class InternationalElementMapperTest {
 
     @InjectMocks
     InternationalElementMapper internationalElementMapper;
 
     @Test
-    public void testInternationalElementMapper() {
+    void testInternationalElementMapper() {
         CaseData caseData = CaseData.builder().habitualResidentInOtherState(Yes)
             .habitualResidentInOtherStateGiveReason("Habitual Resident In Other Reason").jurisdictionIssueGiveReason(
                 "Jurisdiction Reason")

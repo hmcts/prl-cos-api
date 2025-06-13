@@ -25,7 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class CcdCoreCaseDataServiceTest {
+class CcdCoreCaseDataServiceTest {
 
     private final String jurisdiction = "PRIVATELAW";
     private final String caseType = "PRLAPPS";
@@ -47,7 +47,7 @@ public class CcdCoreCaseDataServiceTest {
     CcdCoreCaseDataService coreCaseDataService;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         startEventResponse = buildStartEventResponse(eventName, eventToken);
         Map<String, Object> eventData = Map.of("A", "B");
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
@@ -58,7 +58,7 @@ public class CcdCoreCaseDataServiceTest {
     }
 
     @Test
-    public void shouldStartEventWithEventData() {
+    void shouldStartEventWithEventData() {
         coreCaseDataService.startUpdate(userToken, EventRequestData
             .builder()
                 .userId(systemUserId)
@@ -72,7 +72,7 @@ public class CcdCoreCaseDataServiceTest {
     }
 
     @Test
-    public void shouldStartEventForCitizen() {
+    void shouldStartEventForCitizen() {
         Map<String, Object> eventData = Map.of("A", "B");
         coreCaseDataService.startUpdate(userToken, EventRequestData
             .builder()
@@ -87,7 +87,7 @@ public class CcdCoreCaseDataServiceTest {
     }
 
     @Test
-    public void shouldSubmitEventForCaseWorker() {
+    void shouldSubmitEventForCaseWorker() {
         Map<String, Object> eventData = Map.of("A", "B");
         coreCaseDataService.submitUpdate(userToken,
                                          EventRequestData
@@ -103,7 +103,7 @@ public class CcdCoreCaseDataServiceTest {
     }
 
     @Test
-    public void shouldSubmitEventForCitizen() {
+    void shouldSubmitEventForCitizen() {
         Map<String, Object> eventData = Map.of("A", "B");
         coreCaseDataService.submitUpdate(userToken,
                                          EventRequestData
@@ -121,19 +121,19 @@ public class CcdCoreCaseDataServiceTest {
     }
 
     @Test
-    public void testEventRequest() {
+    void testEventRequest() {
         EventRequestData eventRequestData = coreCaseDataService.eventRequest(CaseEvent.DELETE_APPLICATION, systemUserId);
         assertEquals(eventRequestData.getUserId(), systemUserId);
     }
 
     @Test
-    public void testCreateCaseDAtaContent() {
+    void testCreateCaseDAtaContent() {
         CaseDataContent caseDataContentReturned = coreCaseDataService.createCaseDataContent(startEventResponse, "");
         assertEquals(caseDataContentReturned.getEventToken(), eventToken);
     }
 
     @Test
-    public void testStartSubmitCreateForCaseWorker() {
+    void testStartSubmitCreateForCaseWorker() {
         coreCaseDataService.startSubmitCreate(userToken,
                                               serviceAuthToken,
                                               EventRequestData
@@ -149,7 +149,7 @@ public class CcdCoreCaseDataServiceTest {
     }
 
     @Test
-    public void testStartSubmitCreateForCitizen() {
+    void testStartSubmitCreateForCitizen() {
         coreCaseDataService.startSubmitCreate(userToken,
                                               serviceAuthToken,
                                               EventRequestData
@@ -165,7 +165,7 @@ public class CcdCoreCaseDataServiceTest {
     }
 
     @Test
-    public void shouldSubmitCreateEventForCaseWorker() {
+    void shouldSubmitCreateEventForCaseWorker() {
         coreCaseDataService.submitCreate(userToken,
                                          serviceAuthToken,
                                          systemUserId,
@@ -176,7 +176,7 @@ public class CcdCoreCaseDataServiceTest {
     }
 
     @Test
-    public void shouldSubmitStartEventForCitizen() {
+    void shouldSubmitStartEventForCitizen() {
         coreCaseDataService.submitCreate(userToken,
                                          serviceAuthToken,
                                          systemUserId,
@@ -187,7 +187,7 @@ public class CcdCoreCaseDataServiceTest {
     }
 
     @Test
-    public void findCaseById() {
+    void findCaseById() {
         coreCaseDataService.findCaseById(serviceAuthToken, String.valueOf(caseId));
         verify(coreCaseDataApi).getCase(serviceAuthToken, serviceAuthToken, String.valueOf(caseId));
     }
@@ -207,7 +207,7 @@ public class CcdCoreCaseDataServiceTest {
     }
 
     @Test
-    public void shouldCreateCaseDataContentOnlyWithSecurityClassification() {
+    void shouldCreateCaseDataContentOnlyWithSecurityClassification() {
         startEventResponse = StartEventResponse.builder()
             .caseDetails(CaseDetails.builder().build())
             .build();

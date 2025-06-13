@@ -4,7 +4,6 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -19,6 +18,8 @@ import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.AssertionsKt.assertNotNull;
 import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunctionalTest.VALID_CAFCASS_REQUEST_JSON;
 
 
@@ -71,8 +72,8 @@ public class C100RespondentSolicitorControllerFunctionalTest {
             .extract()
             .as(CaseDetails.class);
 
-        Assert.assertNotNull(caseDetails);
-        Assert.assertNotNull(caseDetails.getId());
+        assertNotNull(caseDetails);
+        assertNotNull(caseDetails.getId());
     }
 
     @Test
@@ -89,9 +90,9 @@ public class C100RespondentSolicitorControllerFunctionalTest {
             .then()
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
-        Assert.assertNotNull(responseData);
-        Assert.assertNotNull(responseData.getData().get("solicitorName"));
-        Assert.assertEquals("AAT Solicitor",responseData.getData().get("solicitorName"));
+        assertNotNull(responseData);
+        assertNotNull(responseData.getData().get("solicitorName"));
+        assertEquals("AAT Solicitor",responseData.getData().get("solicitorName"));
     }
 
     @Test
@@ -108,9 +109,9 @@ public class C100RespondentSolicitorControllerFunctionalTest {
             .then()
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
-        Assert.assertNotNull(responseData);
-        Assert.assertNotNull(responseData.getData().get("solicitorName"));
-        Assert.assertEquals("AAT Solicitor",responseData.getData().get("solicitorName"));
+        assertNotNull(responseData);
+        assertNotNull(responseData.getData().get("solicitorName"));
+        assertEquals("AAT Solicitor",responseData.getData().get("solicitorName"));
     }
 
     @Test
@@ -127,9 +128,9 @@ public class C100RespondentSolicitorControllerFunctionalTest {
             .then()
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
-        Assert.assertNotNull(responseData);
-        Assert.assertNotNull(responseData.getData().get("solicitorName"));
-        Assert.assertEquals("AAT Solicitor",responseData.getData().get("solicitorName"));
+        assertNotNull(responseData);
+        assertNotNull(responseData.getData().get("solicitorName"));
+        assertEquals("AAT Solicitor",responseData.getData().get("solicitorName"));
     }
 
     @Test
@@ -146,9 +147,9 @@ public class C100RespondentSolicitorControllerFunctionalTest {
             .then()
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
-        Assert.assertNotNull(responseData);
-        Assert.assertNotNull(responseData.getData().get("solicitorName"));
-        Assert.assertEquals("AAT Solicitor",responseData.getData().get("solicitorName"));
+        assertNotNull(responseData);
+        assertNotNull(responseData.getData().get("solicitorName"));
+        assertEquals("AAT Solicitor",responseData.getData().get("solicitorName"));
     }
 
     @Test
@@ -165,9 +166,9 @@ public class C100RespondentSolicitorControllerFunctionalTest {
             .then()
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
-        Assert.assertNotNull(responseData);
-        Assert.assertNotNull(responseData.getData().get("confidentialListDetails"));
-        Assert.assertEquals("<ul><li>Telephone number</li></ul>",responseData.getData().get("confidentialListDetails"));
+        assertNotNull(responseData);
+        assertNotNull(responseData.getData().get("confidentialListDetails"));
+        assertEquals("<ul><li>Telephone number</li></ul>",responseData.getData().get("confidentialListDetails"));
     }
 
     @Test
@@ -203,9 +204,9 @@ public class C100RespondentSolicitorControllerFunctionalTest {
             .then()
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
-        Assert.assertNotNull(responseData);
-        Assert.assertNotNull(responseData.getData().get("solicitorName"));
-        Assert.assertEquals("AAT Solicitor",responseData.getData().get("solicitorName"));
+        assertNotNull(responseData);
+        assertNotNull(responseData.getData().get("solicitorName"));
+        assertEquals("AAT Solicitor",responseData.getData().get("solicitorName"));
 
     }
 

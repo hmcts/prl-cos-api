@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class CaseWorkerEmailServiceTest {
+class CaseWorkerEmailServiceTest {
 
     private static final String manageCaseUrl = null;
     public static final String EMAIL_TEMPLATE_ID_1 = "111";
@@ -80,7 +80,7 @@ public class CaseWorkerEmailServiceTest {
 
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
 
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -102,7 +102,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void whenApplicantPresentThenApplicantStringCreated() {
+    void whenApplicantPresentThenApplicantStringCreated() {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -138,7 +138,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void whenRespondentPresentThenRespondentStringCreated() {
+    void whenRespondentPresentThenRespondentStringCreated() {
 
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -195,7 +195,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void whenTypeOfApplicationPresentThenOrdersApplyForWillBeDispalyed() {
+    void whenTypeOfApplicationPresentThenOrdersApplyForWillBeDispalyed() {
 
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -249,7 +249,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void whenTypeOfApplicationIsReducedNoticeThenOrdersApplyForWillBeDispalyed() {
+    void whenTypeOfApplicationIsReducedNoticeThenOrdersApplyForWillBeDispalyed() {
 
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -303,7 +303,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void sendEmailSuccessfully() {
+    void sendEmailSuccessfully() {
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -360,7 +360,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void testCourtAdminEmailWithNoUrgency() {
+    void testCourtAdminEmailWithNoUrgency() {
 
         PartyDetails applicant1 = PartyDetails.builder()
             .canYouProvideEmailAddress(YesOrNo.No)
@@ -419,7 +419,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void testCourtAdminEmailWithUrgencyAndConfidentialInfo() {
+    void testCourtAdminEmailWithUrgencyAndConfidentialInfo() {
 
         PartyDetails applicant1 = PartyDetails.builder()
             .canYouProvideEmailAddress(YesOrNo.Yes)
@@ -477,7 +477,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailToCourtAdmin() {
+    void testSendEmailToCourtAdmin() {
 
         LocalCourtAdminEmail localCourtAdminEmail = LocalCourtAdminEmail.builder()
             .email("test@demo.com")
@@ -530,7 +530,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void sendReturnApplicationEmailSuccessfully() {
+    void sendReturnApplicationEmailSuccessfully() {
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -580,7 +580,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void sendFl401ReturnApplicationEmailSuccessfully() {
+    void sendFl401ReturnApplicationEmailSuccessfully() {
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -618,7 +618,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void testGateKeeperEmailWithNoUrgency() {
+    void testGateKeeperEmailWithNoUrgency() {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -649,7 +649,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void testGateKeeperEmailWithUrgency() {
+    void testGateKeeperEmailWithUrgency() {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -680,7 +680,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailToGateKeeper() {
+    void testSendEmailToGateKeeper() {
 
         GatekeeperEmail gatekeeperEmail = GatekeeperEmail.builder()
             .email("test@demo.com")
@@ -708,7 +708,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailToGateKeeperFl401() {
+    void testSendEmailToGateKeeperFl401() {
 
         GatekeeperEmail gatekeeperEmail = GatekeeperEmail.builder()
             .email("test@demo.com")
@@ -736,7 +736,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void testFL401LocalCourtEmailWithoutConfidentialInformation() {
+    void testFL401LocalCourtEmailWithoutConfidentialInformation() {
 
         PartyDetails fl401Applicant = PartyDetails.builder()
             .firstName("testUser")
@@ -783,7 +783,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void testFL401LocalCourtEmailWithConfidentialInformation() {
+    void testFL401LocalCourtEmailWithConfidentialInformation() {
 
         PartyDetails fl401Applicant = PartyDetails.builder()
             .firstName("testUser")
@@ -830,7 +830,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailToFl401LocalCourt() {
+    void testSendEmailToFl401LocalCourt() {
 
         PartyDetails fl401Applicant = PartyDetails.builder()
             .firstName("testUser")
@@ -879,7 +879,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailToFl401LocalCourtWhenWithdrawnAfterIssued() {
+    void testSendEmailToFl401LocalCourtWhenWithdrawnAfterIssued() {
 
         PartyDetails fl401Applicant = PartyDetails.builder()
             .firstName("testUser")

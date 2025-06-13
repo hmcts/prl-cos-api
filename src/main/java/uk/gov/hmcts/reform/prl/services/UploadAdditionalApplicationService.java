@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
@@ -114,7 +114,7 @@ public class UploadAdditionalApplicationService {
     public void getAdditionalApplicationElements(String authorisation, String userAuthorisation, CaseData caseData,
                                                  List<Element<AdditionalApplicationsBundle>> additionalApplicationElements) {
         String author;
-        UserDetails userDetails = idamClient.getUserDetails(userAuthorisation);
+        UserInfo userDetails = idamClient.getUserInfo(userAuthorisation);
         if (caseData.getUploadAdditionalApplicationData() != null) {
             List<Element<ServedParties>> selectedParties = getSelectedParties(caseData);
             String partyName = getSelectedPartyName(selectedParties);
@@ -144,17 +144,17 @@ public class UploadAdditionalApplicationService {
         }
     }
 
-    private String getAuthor(UploadAdditionalApplicationData uploadAdditionalApplicationData, UserDetails userDetails, String partyName) {
+    private String getAuthor(UploadAdditionalApplicationData uploadAdditionalApplicationData, UserInfo userDetails, String partyName) {
         String author;
         if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue()) && StringUtils.isNotEmpty(
             uploadAdditionalApplicationData.getRepresentedPartyType())) {
             switch (uploadAdditionalApplicationData.getRepresentedPartyType()) {
                 case CA_APPLICANT, DA_APPLICANT -> author = LEGAL_REPRESENTATIVE_OF_APPLICANT + partyName;
                 case CA_RESPONDENT, DA_RESPONDENT -> author = LEGAL_REPRESENTATIVE_OF_RESPONDENT + partyName;
-                default -> author = userDetails.getFullName();
+                default -> author = userDetails.getName();
             }
         } else {
-            author = userDetails.getFullName();
+            author = userDetails.getName();
         }
         return author;
     }
@@ -571,7 +571,7 @@ public class UploadAdditionalApplicationService {
     }
 
     private String populateSolicitorRepresentingPartyType(String authorisation, CaseData caseData) {
-        UserDetails userDetails = idamClient.getUserDetails(authorisation);
+        UserInfo userDetails = idamClient.getUserInfo(authorisation);
         String representedPartyType = "";
         if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
             FindUserCaseRolesResponse findUserCaseRolesResponse

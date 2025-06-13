@@ -9,14 +9,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
 @ExtendWith(MockitoExtension.class)
-public class CourtSealFinderServiceTest {
+class CourtSealFinderServiceTest {
 
 
     @InjectMocks
     CourtSealFinderService courtSealFinderService;
 
     @Test
-    public void testSeal() {
+    void testSeal() {
         assertNotNull(courtSealFinderService.getCourtSeal("test"));
     }
 }

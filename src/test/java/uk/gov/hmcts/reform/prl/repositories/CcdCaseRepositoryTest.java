@@ -15,7 +15,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
 
 @ExtendWith(MockitoExtension.class)
-public class CcdCaseRepositoryTest {
+class CcdCaseRepositoryTest {
 
     @InjectMocks
     CcdCaseRepository ccdCaseRepository;
@@ -40,35 +40,35 @@ public class CcdCaseRepositoryTest {
     private CaseDetails emptyCaseDetails;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         caseId = "test_case";
         caseData = CaseData.builder().build();
         emptyCaseDetails = CaseDetails.builder().build();
     }
 
     @Test
-    public void testUpdateCase() {
+    void testUpdateCase() {
         when(ccdCaseApi.updateCase(authToken, caseId, caseData, CITIZEN_CASE_UPDATE)).thenReturn(CaseDetails.builder().build());
         CaseDetails caseDetails = ccdCaseRepository.updateCase(authToken, caseId, caseData, CITIZEN_CASE_UPDATE);
         assertEquals(emptyCaseDetails, caseDetails);
     }
 
     @Test
-    public void testUpdateCaseCaseEventNull() {
+    void testUpdateCaseCaseEventNull() {
         when(ccdCaseApi.updateCase(authToken, caseId, caseData, null)).thenReturn(null);
         CaseDetails caseDetails = ccdCaseRepository.updateCase(authToken, caseId, caseData, null);
         assertEquals(null, caseDetails);
     }
 
     @Test
-    public void testCreateCase() {
+    void testCreateCase() {
         when(ccdCaseApi.createCase(authToken, caseData)).thenReturn(CaseDetails.builder().build());
         CaseDetails caseDetails = ccdCaseRepository.createCase(authToken, caseData);
         assertEquals(emptyCaseDetails, caseDetails);
     }
 
     @Test
-    public void testGetCase() {
+    void testGetCase() {
         when(ccdCaseApi.getCase(authToken, caseId)).thenReturn(CaseDetails.builder().build());
         CaseDetails caseDetails = ccdCaseRepository.getCase(authToken, caseId);
         assertEquals(emptyCaseDetails, caseDetails);

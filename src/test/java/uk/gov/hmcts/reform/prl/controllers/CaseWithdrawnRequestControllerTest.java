@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class CaseWithdrawnRequestControllerTest {
+class CaseWithdrawnRequestControllerTest {
 
     @InjectMocks
     CaseWithdrawnRequestController caseWithdrawnRequestController;
@@ -46,7 +45,7 @@ public class CaseWithdrawnRequestControllerTest {
     CallbackRequest callbackRequest;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         caseDataMap = new HashMap<>();
         caseData = CaseData.builder()
             .id(12345678L)
@@ -63,25 +62,35 @@ public class CaseWithdrawnRequestControllerTest {
     }
 
     @Test
-    public void testAboutToSubmitCaseCreation() throws Exception {
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        caseWithdrawnRequestController.caseWithdrawnEmailNotificationWhenSubmitted(authToken,s2sToken, callbackRequest);
-        verify(caseWithdrawnRequestService, times(1)).caseWithdrawnEmailNotification(Mockito.any(CallbackRequest.class), Mockito.anyString());
+    void testAboutToSubmitCaseCreation() throws Exception {
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        caseWithdrawnRequestController.caseWithdrawnEmailNotificationWhenSubmitted(
+            authToken,
+            s2sToken,
+            callbackRequest
+        );
+        verify(caseWithdrawnRequestService, times(1)).caseWithdrawnEmailNotification(
+            Mockito.any(CallbackRequest.class),
+            Mockito.anyString()
+        );
     }
 
     @Test
-    public void testExceptionForCaseWithdrawnEmailNotificationWhenSubmitted() throws Exception {
+    void testExceptionForCaseWithdrawnEmailNotificationWhenSubmitted() throws Exception {
 
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            caseWithdrawnRequestController.caseWithdrawnEmailNotificationWhenSubmitted(authToken,s2sToken, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
-    }
 
-    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
-                                                                 String expectedMessage) {
-        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
-        assertEquals(expectedMessage, exception.getMessage());
+        RuntimeException ex = assertThrows(
+            RuntimeException.class, () -> {
+                caseWithdrawnRequestController.caseWithdrawnEmailNotificationWhenSubmitted(
+                    authToken,
+                    s2sToken,
+                    callbackRequest
+                );
+            }
+        );
+
+        assertEquals("Invalid Client", ex.getMessage());
     }
 }

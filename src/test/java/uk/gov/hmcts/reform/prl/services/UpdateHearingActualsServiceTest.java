@@ -46,7 +46,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-public class UpdateHearingActualsServiceTest {
+class UpdateHearingActualsServiceTest {
     private final String authToken = "authToken";
     private final String s2sAuthToken = "s2sAuthToken";
     @Mock
@@ -68,7 +68,7 @@ public class UpdateHearingActualsServiceTest {
     private UpdateHearingActualsService updateHearingActualsService;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         when(systemUserService.getSysUserToken()).thenReturn(authToken);
         when(authTokenGenerator.generate()).thenReturn(s2sAuthToken);
 
@@ -112,7 +112,7 @@ public class UpdateHearingActualsServiceTest {
     }
 
     @Test
-    public void testUpdateHearingActualTaskCreatedSuccessfully() {
+    void testUpdateHearingActualTaskCreatedSuccessfully() {
 
         caseData = caseData.toBuilder()
             .id(123L)
@@ -160,7 +160,7 @@ public class UpdateHearingActualsServiceTest {
     }
 
     @Test
-    public void testUpdateHearingActualTaskWhenException() {
+    void testUpdateHearingActualTaskWhenException() {
 
         caseData = caseData.toBuilder()
             .id(123L)
@@ -209,7 +209,7 @@ public class UpdateHearingActualsServiceTest {
     }
 
     @Test
-    public void testUpdateHearingActualTaskWhenHearingDataForDraftOrderIsNull() {
+    void testUpdateHearingActualTaskWhenHearingDataForDraftOrderIsNull() {
 
         caseData = caseData.toBuilder()
             .id(123L)
@@ -254,7 +254,7 @@ public class UpdateHearingActualsServiceTest {
     }
 
     @Test
-    public void testUpdateHearingActualTaskWhenHearingDataForOrderIsNull() {
+    void testUpdateHearingActualTaskWhenHearingDataForOrderIsNull() {
 
         caseData = caseData.toBuilder()
             .id(123L)
@@ -299,7 +299,7 @@ public class UpdateHearingActualsServiceTest {
     }
 
     @Test
-    public void testUpdateHearingActualTaskForDraftOrderCreatedForHearingId() {
+    void testUpdateHearingActualTaskForDraftOrderCreatedForHearingId() {
         caseData = caseData.toBuilder()
             .id(123L)
             .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)

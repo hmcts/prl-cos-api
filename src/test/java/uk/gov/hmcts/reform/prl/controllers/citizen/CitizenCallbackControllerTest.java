@@ -42,7 +42,7 @@ import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
 
 
 @ExtendWith(MockitoExtension.class)
-public class CitizenCallbackControllerTest {
+class CitizenCallbackControllerTest {
 
     @Mock
     private AllTabServiceImpl allTabsService;
@@ -77,7 +77,7 @@ public class CitizenCallbackControllerTest {
 
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -122,7 +122,7 @@ public class CitizenCallbackControllerTest {
     }
 
     @Test
-    public void updateCitizenApplicationTest() {
+    void updateCitizenApplicationTest() {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -137,7 +137,7 @@ public class CitizenCallbackControllerTest {
     }
 
     @Test
-    public void sendNotificationAfterCaseWithdrawnTest() {
+    void sendNotificationAfterCaseWithdrawnTest() {
         final String citizenSignUpLink = "https://privatelaw.aat.platform.hmcts.net";
         UserDetails userDetails = UserDetails.builder()
             .forename("test")

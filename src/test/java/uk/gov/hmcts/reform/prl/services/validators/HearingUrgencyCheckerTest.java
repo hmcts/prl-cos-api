@@ -17,7 +17,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @ExtendWith(MockitoExtension.class)
-public class HearingUrgencyCheckerTest {
+class HearingUrgencyCheckerTest {
 
     @Mock
     TaskErrorService taskErrorService;
@@ -26,12 +26,12 @@ public class HearingUrgencyCheckerTest {
     HearingUrgencyChecker hearingUrgencyChecker;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    public void notFinishedWhenIsCaseUrgentNotSet() {
+    void notFinishedWhenIsCaseUrgentNotSet() {
 
         CaseData casedata = CaseData.builder().build();
 
@@ -41,7 +41,7 @@ public class HearingUrgencyCheckerTest {
     }
 
     @Test
-    public void finishedWhenIsCaseUrgentSetToNo() {
+    void finishedWhenIsCaseUrgentSetToNo() {
 
         CaseData casedata = CaseData.builder().isCaseUrgent(No)
             .doYouNeedAWithoutNoticeHearing(No)
@@ -55,7 +55,7 @@ public class HearingUrgencyCheckerTest {
     }
 
     @Test
-    public void finishedWhenIsCaseUrgentSetToYes() {
+    void finishedWhenIsCaseUrgentSetToYes() {
 
         CaseData casedata = CaseData.builder().isCaseUrgent(Yes)
             .doYouNeedAWithoutNoticeHearing(Yes)
@@ -72,7 +72,7 @@ public class HearingUrgencyCheckerTest {
     }
 
     @Test
-    public void finishedWhenIsReducedNoticeHearingSetToYes() {
+    void finishedWhenIsReducedNoticeHearingSetToYes() {
 
         CaseData casedata = CaseData.builder().isCaseUrgent(Yes)
             .doYouNeedAWithoutNoticeHearing(Yes)
@@ -89,7 +89,7 @@ public class HearingUrgencyCheckerTest {
     }
 
     @Test
-    public void finishedWhenRespondentsAwareOfProceedingsSetToYes() {
+    void finishedWhenRespondentsAwareOfProceedingsSetToYes() {
 
         CaseData casedata = CaseData.builder().isCaseUrgent(Yes)
             .caseUrgencyTimeAndReason("reason")
@@ -106,7 +106,7 @@ public class HearingUrgencyCheckerTest {
     }
 
     @Test
-    public void startedWhenNonEmptyCaseData() {
+    void startedWhenNonEmptyCaseData() {
 
         CaseData casedata = CaseData.builder()
             .caseUrgencyTimeAndReason("reason")
@@ -118,7 +118,7 @@ public class HearingUrgencyCheckerTest {
     }
 
     @Test
-    public void notStartedWhenEmptyCaseData() {
+    void notStartedWhenEmptyCaseData() {
 
         CaseData casedata = CaseData.builder()
             .caseUrgencyTimeAndReason("reason")
@@ -130,7 +130,7 @@ public class HearingUrgencyCheckerTest {
     }
 
     @Test
-    public void mandatoryNotCompletedWhenCaseDataEmpty() {
+    void mandatoryNotCompletedWhenCaseDataEmpty() {
 
         CaseData casedata = CaseData.builder().build();
 
@@ -140,7 +140,7 @@ public class HearingUrgencyCheckerTest {
     }
 
     @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+    void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
         assertNotNull(hearingUrgencyChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

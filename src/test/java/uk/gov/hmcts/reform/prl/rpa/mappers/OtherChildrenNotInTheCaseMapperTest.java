@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-public class OtherChildrenNotInTheCaseMapperTest {
+class OtherChildrenNotInTheCaseMapperTest {
 
     @InjectMocks
     OtherChildrenNotInTheCaseMapper childrenNotInTheCaseMapper;
@@ -27,18 +27,18 @@ public class OtherChildrenNotInTheCaseMapperTest {
 
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
     }
 
     @Test
-    public void testChildrenMapperWithEmptyValues() {
+    void testChildrenMapperWithEmptyValues() {
         children = Collections.emptyList();
         assertTrue(childrenNotInTheCaseMapper.map(null).isEmpty());
 
     }
 
     @Test
-    public void testChildrenMapperWithAllFields() {
+    void testChildrenMapperWithAllFields() {
 
         child = OtherChildrenNotInTheCase.builder().firstName("Lewis").lastName("Christine")
             .dateOfBirth(LocalDate.of(1990, 8, 1))
@@ -49,7 +49,7 @@ public class OtherChildrenNotInTheCaseMapperTest {
     }
 
     @Test
-    public void testChildrenMapperWithAllFieldsWithOtherGender() {
+    void testChildrenMapperWithAllFieldsWithOtherGender() {
 
         child = OtherChildrenNotInTheCase.builder().firstName("Lewis").lastName("Christine")
             .dateOfBirth(LocalDate.of(1990, 8, 1))
@@ -62,7 +62,7 @@ public class OtherChildrenNotInTheCaseMapperTest {
 
 
     @Test
-    public void testChildrenMapperWithSomeFields() {
+    void testChildrenMapperWithSomeFields() {
 
         child = OtherChildrenNotInTheCase.builder().firstName("Lewis").lastName("Christine")
             .dateOfBirth(LocalDate.of(1990, 8, 1))

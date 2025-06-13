@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services.cafcass;
 import feign.FeignException;
 import feign.Request;
 import feign.Response;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,10 +27,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class HearingServiceTest {
+class HearingServiceTest {
 
     @Mock
     private AuthTokenGenerator authTokenGenerator;
@@ -54,7 +56,7 @@ public class HearingServiceTest {
 
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         final List<CaseHearing> caseHearings = new ArrayList();
 
         final CaseHearing caseHearing = CaseHearing.caseHearingWith().hearingID(Long.valueOf("1234"))
@@ -83,7 +85,7 @@ public class HearingServiceTest {
     }
 
     @BeforeEach
-    public void init() {
+    void init() {
         MockitoAnnotations.openMocks(this);
         s2sToken = "s2sToken";
         authToken = "Authorization";
@@ -95,17 +97,17 @@ public class HearingServiceTest {
 
     @Test
     @DisplayName("test case for HearingService.")
-    public void getHearingsTestSuccess() {
+    void getHearingsTestSuccess() {
 
         Hearings response =
             hearingService.getHearings(authToken, caseReferenceNumber);
 
-        Assert.assertEquals(null, response);
+        assertEquals(null, response);
     }
 
     @Test
     @DisplayName("test case for HearingService.")
-    public void getHearingsTestException() {
+    void getHearingsTestException() {
         when(authTokenGenerator.generate()).thenThrow(FeignException.errorStatus("getHearingDetails", Response.builder()
             .status(500)
             .reason("Internal Server Error")
@@ -115,12 +117,12 @@ public class HearingServiceTest {
         Hearings response =
             hearingService.getHearings(authToken, caseReferenceNumber);
 
-        Assert.assertEquals(null, response);
+        assertEquals(null, response);
     }
 
     @Test
     @DisplayName("test case for HearingService with Status LISTED.")
-    public void getHearingsTestSuccessHearingDataListed() {
+    void getHearingsTestSuccessHearingDataListed() {
 
         final List<CaseHearing> caseHearings = new ArrayList();
 
@@ -143,12 +145,12 @@ public class HearingServiceTest {
         Hearings response =
             hearingService.getHearings(authToken, caseReferenceNumber);
 
-        Assert.assertNotNull(response);
+        assertNotNull(response);
     }
 
     @Test
     @DisplayName("test case for HearingService with Status LISTED.")
-    public void getHearingsTestSuccessHearingDataNotListed() {
+    void getHearingsTestSuccessHearingDataNotListed() {
 
         final List<CaseHearing> caseHearings = new ArrayList();
 
@@ -171,30 +173,30 @@ public class HearingServiceTest {
         Hearings response =
             hearingService.getHearings(authToken, caseReferenceNumber);
 
-        Assert.assertNull(response);
+        assertNull(response);
     }
 
     @Test
     @DisplayName("test case to all hearings of all cases.")
-    public void getHearingsForAllCases() {
+    void getHearingsForAllCases() {
         ReflectionTestUtils.setField(hearingService, "hearingStatusList", List.of("LISTED"));
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
         when(hearingApiClient.getHearingDetailsForAllCaseIds(authToken, authTokenGenerator.generate(),caseIdWithRegionIdMap))
             .thenReturn(hearingsList);
         List<Hearings> response =
             hearingService.getHearingsForAllCases(authToken, caseIdWithRegionIdMap);
-        Assert.assertNotNull(response);
+        assertNotNull(response);
     }
 
     @Test
     @DisplayName("test case to all hearings of all cases exception")
-    public void getHearingsForAllCasesTestException() {
+    void getHearingsForAllCasesTestException() {
         when(authTokenGenerator.generate()).thenThrow(new RuntimeException());
 
         List<Hearings> response =
             hearingService.getHearingsForAllCases(authToken, caseIdWithRegionIdMap);
 
-        Assert.assertEquals(Collections.emptyList(), response);
+        assertEquals(Collections.emptyList(), response);
 
     }
 

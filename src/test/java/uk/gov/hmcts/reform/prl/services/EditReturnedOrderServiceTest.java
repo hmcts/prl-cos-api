@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,6 +35,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
@@ -45,7 +46,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
 
 @PropertySource(value = "classpath:application.yaml")
 @ExtendWith(MockitoExtension.class)
-public class EditReturnedOrderServiceTest {
+class EditReturnedOrderServiceTest {
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
@@ -77,7 +78,7 @@ public class EditReturnedOrderServiceTest {
     private static final String testAuth = "auth";
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         Mockito.when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder()
                                                                                      .email("test@gmail.com")
                                                                                      .build());
@@ -91,7 +92,7 @@ public class EditReturnedOrderServiceTest {
 
 
     @Test
-    public void testHandleAboutToStart() {
+    void testHandleAboutToStart() {
         List<Element<DraftOrder>> draftOrderCollection = List.of(Element.<DraftOrder>builder().value(DraftOrder.builder().otherDetails(
             OtherDraftOrderDetails.builder()
                 .status(OrderStatusEnum.rejectedByJudge.getDisplayedValue())
@@ -122,7 +123,7 @@ public class EditReturnedOrderServiceTest {
     }
 
     @Test
-    public void testHandleAboutToStartWithoutDraftOrderCollection() {
+    void testHandleAboutToStartWithoutDraftOrderCollection() {
         CaseData caseData = CaseData.builder()
             .id(123L)
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -140,7 +141,7 @@ public class EditReturnedOrderServiceTest {
     }
 
     @Test
-    public void testReturnedOrderDynamicList() {
+    void testReturnedOrderDynamicList() {
         List<Element<DraftOrder>> draftOrderCollection1 = List.of(Element.<DraftOrder>builder().value(DraftOrder.builder().otherDetails(
             OtherDraftOrderDetails.builder()
                 .status(OrderStatusEnum.rejectedByJudge.getDisplayedValue())
@@ -164,7 +165,7 @@ public class EditReturnedOrderServiceTest {
     }
 
     @Test
-    public void testInstructionToLegalRepresentative() {
+    void testInstructionToLegalRepresentative() {
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder()
                               .rejectedOrdersDynamicList(DynamicList.builder()
@@ -181,7 +182,7 @@ public class EditReturnedOrderServiceTest {
     }
 
     @Test
-    public void testInstructionToLegalRepresentativeElseCondition() {
+    void testInstructionToLegalRepresentativeElseCondition() {
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder()
                               .rejectedOrdersDynamicList(DynamicList.builder()
@@ -197,7 +198,7 @@ public class EditReturnedOrderServiceTest {
     }
 
     @Test
-    public void  testInstructionToLegalRepresentativeWithJudgeInstructions() {
+    void  testInstructionToLegalRepresentativeWithJudgeInstructions() {
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder()
                               .rejectedOrdersDynamicList(DynamicList.builder()
@@ -216,7 +217,7 @@ public class EditReturnedOrderServiceTest {
     }
 
     @Test
-    public void  testAboutToSubmitHandlerForDraftedOrder() {
+    void  testAboutToSubmitHandlerForDraftedOrder() {
         Map<String, Object> caseDataMap = new HashMap<>();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         DraftOrder draftOrder = DraftOrder.builder()
@@ -245,7 +246,7 @@ public class EditReturnedOrderServiceTest {
     }
 
     @Test
-    public void  testAboutToSubmitHandlerForUploadedOrder() {
+    void  testAboutToSubmitHandlerForUploadedOrder() {
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         DraftOrder draftOrder = DraftOrder.builder()
             .orderType(CreateSelectOrderOptionsEnum.generalForm)
@@ -274,7 +275,7 @@ public class EditReturnedOrderServiceTest {
     }
 
     @Test
-    public void testpopulateInstructionsAndFieldsForLegalRep() {
+    void testpopulateInstructionsAndFieldsForLegalRep() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderType(CreateSelectOrderOptionsEnum.generalForm)
             .otherDetails(OtherDraftOrderDetails.builder()
@@ -310,12 +311,12 @@ public class EditReturnedOrderServiceTest {
             null,
             PrlAppsConstants.ENGLISH
         );
-        Assert.assertEquals("u", response.getData().get("instructionsToLegalRepresentative"));
-        Assert.assertEquals("<span class='heading-h3'>General form of undertaking (N117)</span>", response.getData().get("orderName"));
+        assertEquals("u", response.getData().get("instructionsToLegalRepresentative"));
+        assertEquals("<span class='heading-h3'>General form of undertaking (N117)</span>", response.getData().get("orderName"));
     }
 
     @Test
-    public void testPopulateInstructionsWithEmptyDraftOrderCollection() {
+    void testPopulateInstructionsWithEmptyDraftOrderCollection() {
         CaseData caseData = CaseData.builder()
             .id(123L)
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -335,6 +336,6 @@ public class EditReturnedOrderServiceTest {
             .thenReturn(caseDataMap);
         AboutToStartOrSubmitCallbackResponse response = editReturnedOrderService
             .populateInstructionsAndFieldsForLegalRep(authToken,callbackRequest, null, PrlAppsConstants.ENGLISH);
-        Assert.assertTrue(response.getErrors().size() > 0);
+        assertFalse(response.getErrors().isEmpty());
     }
 }

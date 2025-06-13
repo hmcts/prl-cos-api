@@ -15,19 +15,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
-public class DefaultWorkflowTest {
+class DefaultWorkflowTest {
 
     private DefaultWorkflow<String> defaultWorkflow;
     private String payload;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         defaultWorkflow = new DefaultWorkflow<>();
         payload = "";
     }
 
     @Test
-    public void executeShouldReturnTheModifiedPayloadAfterRunningTasks() throws Exception {
+    void executeShouldReturnTheModifiedPayloadAfterRunningTasks() throws Exception {
         Task<String> taskOne = (context, payload) -> payload.concat("1");
         Task<String> taskTwo = (context, payload) -> payload.concat("2");
         Task<String> taskThree = (context, payload) -> payload.concat("3");
@@ -40,7 +40,7 @@ public class DefaultWorkflowTest {
     }
 
     @Test
-    public void executeShouldStopAfterContextStatusIsSetToFailed() throws Exception {
+    void executeShouldStopAfterContextStatusIsSetToFailed() throws Exception {
         Task<String> taskOne = (context, payload) -> payload.concat("1");
         Task<String> taskTwo = (context, payload) -> {
             context.setTaskFailed(true);
@@ -56,7 +56,7 @@ public class DefaultWorkflowTest {
     }
 
     @Test
-    public void executeShouldStopIfContextStatusIsSetToFailed() throws Exception {
+    void executeShouldStopIfContextStatusIsSetToFailed() throws Exception {
         Task<String> taskOne = (context, payload) -> payload.concat("1");
         Task<String> taskTwo = (context, payload) -> payload.concat("2");
         Task<String> taskThree = (context, payload) -> payload.concat("3");
@@ -70,7 +70,7 @@ public class DefaultWorkflowTest {
     }
 
     @Test
-    public void executeWillSetOptionalPairsIntoTheContext() throws Exception {
+    void executeWillSetOptionalPairsIntoTheContext() throws Exception {
         Task<String> task = (context, payload) -> context.getTransientObject("testKey").toString();
 
         Task[] tasks = new Task[] { task };
@@ -101,7 +101,7 @@ public class DefaultWorkflowTest {
     }
 
     @Test
-    public void errorsShouldReturnEmptyListWhenNoErrorsAreInContext() throws Exception {
+    void errorsShouldReturnEmptyListWhenNoErrorsAreInContext() throws Exception {
         Task<String> taskOne = (context, payload) -> {
             context.setTransientObject("hello", "world");
             return payload;
@@ -117,7 +117,7 @@ public class DefaultWorkflowTest {
     }
 
     @Test
-    public void errorsShouldReturnListOfErrorsWhenErrorsAreInContext() throws Exception {
+    void errorsShouldReturnListOfErrorsWhenErrorsAreInContext() throws Exception {
         Task<String> taskOne = (context, payload) -> {
             context.setTransientObject("one_Error", "error");
             return payload;

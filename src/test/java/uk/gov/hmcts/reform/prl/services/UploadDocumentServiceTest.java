@@ -36,7 +36,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
 
 @ExtendWith(MockitoExtension.class)
-public class UploadDocumentServiceTest {
+class UploadDocumentServiceTest {
 
     @Mock
     private AuthTokenGenerator authTokenGenerator;
@@ -52,7 +52,7 @@ public class UploadDocumentServiceTest {
     private static final String AUTH = "auth";
 
     @Test
-    public void uploadDocumentSuccess() {
+    void uploadDocumentSuccess() {
         byte[] pdf = new byte[]{1,2,3,4,5};
         MultipartFile file = new InMemoryMultipartFile("files", FILE_NAME, CONTENT_TYPE, pdf);
 
@@ -65,7 +65,7 @@ public class UploadDocumentServiceTest {
     }
 
     @Test
-    public void uploadCitizenDocumentSuccess() {
+    void uploadCitizenDocumentSuccess() {
         byte[] pdf = new byte[]{1,2,3,4,5};
         MultipartFile file = new InMemoryMultipartFile("files", FILE_NAME, CONTENT_TYPE, pdf);
         Document document = testDocument();
@@ -88,12 +88,12 @@ public class UploadDocumentServiceTest {
     }
 
     @Test
-    public void uploadCitizenDocumentFailure() {
+    void uploadCitizenDocumentFailure() {
         assertThrows(ResponseStatusException.class, () -> uploadDocumentService.uploadCitizenDocument(AUTH, null));
     }
 
     @Test
-    public void uploadDocumentFailure() {
+    void uploadDocumentFailure() {
         byte[] pdf = new byte[]{1,2,3,4,5};
         MultipartFile file = new InMemoryMultipartFile("files", FILE_NAME, CONTENT_TYPE, pdf);
         UploadResponse uploadResponse = new UploadResponse(Collections.emptyList());
@@ -104,7 +104,7 @@ public class UploadDocumentServiceTest {
     }
 
     @Test
-    public void testDownloadDocument() {
+    void testDownloadDocument() {
         //Given
         Resource expectedResource = new ClassPathResource("documents/document.pdf");
         HttpHeaders headers = new HttpHeaders();

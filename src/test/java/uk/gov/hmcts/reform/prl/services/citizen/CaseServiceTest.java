@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections.CollectionUtils;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -138,7 +137,7 @@ import static uk.gov.hmcts.reform.prl.services.citizen.CaseService.YYYY_MM_DD;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
-public class CaseServiceTest {
+class CaseServiceTest {
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "Bearer TestAuthToken";
@@ -223,7 +222,7 @@ public class CaseServiceTest {
     private OrderDetails orderDetails;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         partyDetails = PartyDetails.builder()
             .firstName("")
             .lastName("test")
@@ -437,22 +436,22 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testGetCase() {
+    void testGetCase() {
         assertNotNull(caseService.getCase("", ""));
     }
 
     @Test
-    public void testRetrieveCases() {
+    void testRetrieveCases() {
         assertNotNull(caseService.retrieveCases("", ""));
     }
 
     @Test
-    public void testRetrieveCasesTwoParams() {
+    void testRetrieveCasesTwoParams() {
         assertNotNull(caseService.retrieveCases("", ""));
     }
 
     @Test
-    public void shouldCreateCase() {
+    void shouldCreateCase() {
         //Given
         CaseData caseData = CaseData.builder()
             .id(1234567891234567L)
@@ -479,7 +478,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testGetPartyCaseFlags() {
+    void testGetPartyCaseFlags() {
         User user1 = User.builder().idamId("applicant-1").build();
         User user2 = User.builder().idamId("respondent-1").build();
         User user3 = User.builder().idamId("respondent-2").build();
@@ -535,7 +534,7 @@ public class CaseServiceTest {
 
         // Unhappy path - when the request is valid, but party details is invalid.
         Flags invalidUserExternalFlag = caseService.getPartyCaseFlags(authToken, caseId, "applicant-2");
-        Assert.assertNull(invalidUserExternalFlag);
+        assertNull(invalidUserExternalFlag);
 
         // Happy path 1 - when the request is valid and respondent party external flags is retrieved from the existing case data.
         when(partyLevelCaseFlagsService.getPartyCaseDataExternalField(
@@ -545,8 +544,8 @@ public class CaseServiceTest {
         )).thenReturn("caRespondent2ExternalFlags");
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Flags.class))).thenReturn(respondent2PartyFlags);
         Flags respondentExternalFlag = caseService.getPartyCaseFlags(authToken, caseId, "respondent-2");
-        Assert.assertNotNull(respondentExternalFlag);
-        Assert.assertEquals("Respondent 2 FN Respondent 2 LN", respondentExternalFlag.getPartyName());
+        assertNotNull(respondentExternalFlag);
+        assertEquals("Respondent 2 FN Respondent 2 LN", respondentExternalFlag.getPartyName());
 
         // Happy path 2 - when the request is valid and applicant party external flags is retrieved from the existing case data.
         when(partyLevelCaseFlagsService.getPartyCaseDataExternalField(
@@ -556,12 +555,12 @@ public class CaseServiceTest {
         )).thenReturn("caApplicant1ExternalFlags");
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Flags.class))).thenReturn(applicant1PartyFlags);
         Flags applicantExternalFlag = caseService.getPartyCaseFlags(authToken, caseId, "applicant-1");
-        Assert.assertNotNull(applicantExternalFlag);
-        Assert.assertEquals(applicant1PartyFlags, applicantExternalFlag);
+        assertNotNull(applicantExternalFlag);
+        assertEquals(applicant1PartyFlags, applicantExternalFlag);
     }
 
     @Test
-    public void shouldUpdateCaseWithCaseName() throws IOException {
+    void shouldUpdateCaseWithCaseName() throws IOException {
 
         C100RebuildData c100RebuildData = C100RebuildData.builder()
             .c100RebuildApplicantDetails(TestUtil.readFileFrom("classpath:c100-rebuild/appl.json"))
@@ -598,7 +597,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void shouldUpdateCaseWhenNonCitizenEventId() throws IOException {
+    void shouldUpdateCaseWhenNonCitizenEventId() throws IOException {
 
         C100RebuildData c100RebuildData = C100RebuildData.builder()
             .c100RebuildApplicantDetails(TestUtil.readFileFrom("classpath:c100-rebuild/appl.json"))
@@ -632,7 +631,7 @@ public class CaseServiceTest {
 
 
     @Test
-    public void shouldUpdateCaseWithCaseNameButNoApplicantOrRespondentDetails() throws IOException {
+    void shouldUpdateCaseWithCaseNameButNoApplicantOrRespondentDetails() throws IOException {
 
         C100RebuildData c100RebuildData = C100RebuildData.builder()
             .build();
@@ -667,7 +666,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void shouldUpdateCaseWithCaseNameButNoC100RebuildData() throws IOException {
+    void shouldUpdateCaseWithCaseNameButNoC100RebuildData() throws IOException {
 
         CaseData caseData = CaseData.builder()
             .id(1234567891234567L)
@@ -696,7 +695,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void shouldUpdateCaseWithCaseNameButCaseNameExists() throws IOException {
+    void shouldUpdateCaseWithCaseNameButCaseNameExists() throws IOException {
 
         CaseData caseData = CaseData.builder()
             .id(1234567891234567L)
@@ -727,7 +726,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void getCaseWithHearing() {
+    void getCaseWithHearing() {
         when(coreCaseDataService.findCaseById(authToken, caseId)).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         when(hearingService.getHearings(authToken, "123")).thenReturn(Hearings.hearingsWith().build());
@@ -736,7 +735,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void getCaseWithHearingHearingNotNeeded() {
+    void getCaseWithHearingHearingNotNeeded() {
         when(coreCaseDataService.findCaseById(authToken, caseId)).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         when(hearingService.getHearings(authToken, caseId)).thenReturn(Hearings.hearingsWith().build());
@@ -745,7 +744,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testGetCitizenDocuments() {
+    void testGetCitizenDocuments() {
         //Action
         CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, citizenCaseData);
 
@@ -757,7 +756,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testGetCitizenDocumentsWithFm5Reminders() {
+    void testGetCitizenDocumentsWithFm5Reminders() {
         CaseData citizenCaseData1 = citizenCaseData.toBuilder().fm5ReminderNotificationDetails(
                 FM5ReminderNotificationDetails.builder().fm5RemindersSent("YES").build())
             .documentManagementDetails(DocumentManagementDetails.builder().citizenQuarantineDocsList(List.of(
@@ -773,7 +772,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testGetCitizenDocumentsWithFm5RemindersSetToNO() {
+    void testGetCitizenDocumentsWithFm5RemindersSetToNO() {
         CaseData citizenCaseData1 = citizenCaseData.toBuilder().fm5ReminderNotificationDetails(
                 FM5ReminderNotificationDetails.builder().fm5RemindersSent("NO").build())
             .documentManagementDetails(DocumentManagementDetails.builder().citizenQuarantineDocsList(List.of(
@@ -789,7 +788,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testGetCitizenDocumentsWithFm5RemindersWhenPartyIdIsDiffer() {
+    void testGetCitizenDocumentsWithFm5RemindersWhenPartyIdIsDiffer() {
 
         QuarantineLegalDoc quarantineLegalDoc1 = QuarantineLegalDoc.builder()
             .fm5StatementsDocument(Document.builder().build())
@@ -817,7 +816,7 @@ public class CaseServiceTest {
 
 
     @Test
-    public void testEmptyCitizenDocumentsWhenNoDocs() {
+    void testEmptyCitizenDocumentsWhenNoDocs() {
         //Given
         citizenCaseData = CaseData.builder().state(State.DECISION_OUTCOME).build();
 
@@ -832,7 +831,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testFilterNonAccessibleCitizenDocuments() {
+    void testFilterNonAccessibleCitizenDocuments() {
         //Given
         QuarantineLegalDoc otherPartyDoc = QuarantineLegalDoc.builder()
             .uploaderRole(CITIZEN)
@@ -857,7 +856,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testGetCitizenApplicantOrdersC100() {
+    void testGetCitizenApplicantOrdersC100() {
         //Given
         caseData = caseData.toBuilder()
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -871,17 +870,17 @@ public class CaseServiceTest {
         //Assert
         assertNotNull(citizenDocumentsManagement);
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks()));
-        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks().get(0).getApplicantSoaPack()));
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks().getFirst().getApplicantSoaPack()));
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenOrders()));
         assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
-        assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+        assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().getFirst().getId());
         assertEquals(CA_SOA_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(1).getId());
     }
 
     @Test
-    public void testGetCitizenRespondentOrdersC100() {
+    void testGetCitizenRespondentOrdersC100() {
         //Given
         orderDetails = orderDetails.toBuilder()
             .serveOrderDetails(orderDetails.getServeOrderDetails().toBuilder()
@@ -909,14 +908,14 @@ public class CaseServiceTest {
         assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
-        assertEquals(ORDER_PERSONAL_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+        assertEquals(ORDER_PERSONAL_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().getFirst().getId());
         assertEquals(CA_SOA_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(1).getId());
     }
 
     @Test
-    public void testGetCitizenApplicantOrdersFL401() {
+    void testGetCitizenApplicantOrdersFL401() {
         //Given
-        finalServedApplicationDetailsList.get(0).getValue().getBulkPrintDetails().get(0).getValue().setPartyIds(testUuid.toString());
+        finalServedApplicationDetailsList.getFirst().getValue().getBulkPrintDetails().getFirst().getValue().setPartyIds(testUuid.toString());
         caseData = caseData.toBuilder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .state(State.DECISION_OUTCOME)
@@ -934,12 +933,12 @@ public class CaseServiceTest {
         assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
-        assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+        assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().getFirst().getId());
         assertEquals(DA_SOA_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(1).getId());
     }
 
     @Test
-    public void testGetCitizenRespondentOrdersFL401() {
+    void testGetCitizenRespondentOrdersFL401() {
         //Given
         orderDetails = orderDetails.toBuilder()
             .serveOrderDetails(orderDetails.getServeOrderDetails().toBuilder()
@@ -965,12 +964,12 @@ public class CaseServiceTest {
         assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
-        assertEquals(ORDER_PERSONAL_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+        assertEquals(ORDER_PERSONAL_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().getFirst().getId());
         assertEquals(DA_SOA_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(1).getId());
     }
 
     @Test
-    public void testCitizenOrdersSosCompletedC100() {
+    void testCitizenOrdersSosCompletedC100() {
         //Given
         orderDetails = orderDetails.toBuilder()
             .serveOrderDetails(orderDetails.getServeOrderDetails().toBuilder()
@@ -996,11 +995,11 @@ public class CaseServiceTest {
         assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
-        assertEquals(CA_ORDER_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+        assertEquals(CA_ORDER_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().getFirst().getId());
     }
 
     @Test
-    public void testCitizenOrdersSosCompletedFL401() {
+    void testCitizenOrdersSosCompletedFL401() {
         //Given
         orderDetails = orderDetails.toBuilder()
             .serveOrderDetails(orderDetails.getServeOrderDetails().toBuilder()
@@ -1044,11 +1043,11 @@ public class CaseServiceTest {
         assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
-        assertEquals(DA_ORDER_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+        assertEquals(DA_ORDER_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().getFirst().getId());
     }
 
     @Test
-    public void testCitizenOrdersSosCompletedFL401ForOccupationOrder() {
+    void testCitizenOrdersSosCompletedFL401ForOccupationOrder() {
 
         //Given
         OrderDetails orderDetails1 = orderDetails.toBuilder()
@@ -1104,11 +1103,11 @@ public class CaseServiceTest {
         assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
-        assertEquals(DA_ORDER_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+        assertEquals(DA_ORDER_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().getFirst().getId());
     }
 
     @Test
-    public void testCitizenOrdersSosCompletedFL401CustomFields1() {
+    void testCitizenOrdersSosCompletedFL401CustomFields1() {
 
         //Given
         OrderDetails orderDetails1 = orderDetails.toBuilder()
@@ -1160,11 +1159,11 @@ public class CaseServiceTest {
         assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
-        assertEquals(DA_ORDER_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+        assertEquals(DA_ORDER_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().getFirst().getId());
     }
 
     @Test
-    public void testCitizenOrdersSosCompletedFL401ForOccupationOrderWithNoPowerOfArrest() {
+    void testCitizenOrdersSosCompletedFL401ForOccupationOrderWithNoPowerOfArrest() {
         //Given
         OrderDetails orderDetails1 = orderDetails.toBuilder()
             .dateCreated(LocalDateTime.now())
@@ -1223,12 +1222,12 @@ public class CaseServiceTest {
         assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
-        assertEquals(DA_ORDER_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+        assertEquals(DA_ORDER_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().getFirst().getId());
     }
 
 
     @Test
-    public void testCitizenApplicantSoaPersonalServiceC100() {
+    void testCitizenApplicantSoaPersonalServiceC100() {
         //Given
         servedApplicationDetails = servedApplicationDetails.toBuilder()
             .whoIsResponsible(UNREPRESENTED_APPLICANT)
@@ -1250,17 +1249,17 @@ public class CaseServiceTest {
         //Assert
         assertNotNull(citizenDocumentsManagement);
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks()));
-        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks().get(0).getApplicantSoaPack()));
-        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks().get(0).getRespondentSoaPack()));
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks().getFirst().getApplicantSoaPack()));
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks().getFirst().getRespondentSoaPack()));
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
-        assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+        assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().getFirst().getId());
         assertEquals("CAN9_SOA_PERSONAL_APPLICANT", citizenDocumentsManagement.getCitizenNotifications().get(1).getId());
         assertEquals("CAN7_SOA_PERSONAL_APPLICANT", citizenDocumentsManagement.getCitizenNotifications().get(2).getId());
     }
 
     @Test
-    public void testCitizenApplicantSoaPersonalServiceFL401() {
+    void testCitizenApplicantSoaPersonalServiceFL401() {
         //Given
         servedApplicationDetails = servedApplicationDetails.toBuilder()
             .whoIsResponsible(UNREPRESENTED_APPLICANT)
@@ -1286,16 +1285,16 @@ public class CaseServiceTest {
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenOrders()));
         assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks()));
-        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks().get(0).getApplicantSoaPack()));
-        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks().get(0).getRespondentSoaPack()));
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks().getFirst().getApplicantSoaPack()));
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks().getFirst().getRespondentSoaPack()));
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
-        assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+        assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().getFirst().getId());
         assertEquals(DA_SOA_PERSONAL_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(1).getId());
     }
 
     @Test
-    public void testCitizenApplicantSosCompletedC100() {
+    void testCitizenApplicantSosCompletedC100() {
         //Given
         servedApplicationDetails = servedApplicationDetails.toBuilder()
             .whoIsResponsible(PERSONAL_SERVICE_SERVED_BY_CA)
@@ -1320,15 +1319,15 @@ public class CaseServiceTest {
         //Assert
         assertNotNull(citizenDocumentsManagement);
         assertNotNull(citizenDocumentsManagement.getCitizenApplicationPacks());
-        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks().get(0).getApplicantSoaPack()));
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks().getFirst().getApplicantSoaPack()));
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
-        assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+        assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().getFirst().getId());
         assertEquals(CA_SOA_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(1).getId());
     }
 
     @Test
-    public void testCitizenApplicantSosCompletedFL401() {
+    void testCitizenApplicantSosCompletedFL401() {
         //Given
         servedApplicationDetails = servedApplicationDetails.toBuilder()
             .whoIsResponsible(PERSONAL_SERVICE_SERVED_BY_CA)
@@ -1357,12 +1356,12 @@ public class CaseServiceTest {
         assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
-        assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+        assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().getFirst().getId());
         assertEquals(DA_SOA_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(1).getId());
     }
 
     @Test
-    public void testCitizenApplicantSosCompletedPostOnly() {
+    void testCitizenApplicantSosCompletedPostOnly() {
         //Given
         caseData = caseData.toBuilder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
@@ -1386,12 +1385,12 @@ public class CaseServiceTest {
         assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
-        assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+        assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().getFirst().getId());
         assertEquals(DA_SOA_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(1).getId());
     }
 
     @Test
-    public void testCitizenApplicantSosCompletedPostOnlyWhenCaseStatePrepareForHearingConductHearing() {
+    void testCitizenApplicantSosCompletedPostOnlyWhenCaseStatePrepareForHearingConductHearing() {
         OrderDetails orderDetails1 = orderDetails.toBuilder()
             .dateCreated(LocalDateTime.now())
             .fl404CustomFields(FL404.builder().fl404bIsPowerOfArrest1(NO).fl404bIsPowerOfArrest2(YES)
@@ -1428,12 +1427,12 @@ public class CaseServiceTest {
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenOrders()));
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
-        assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+        assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().getFirst().getId());
         assertEquals(DN3_SOA_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(1).getId());
     }
 
     @Test
-    public void testCitizenApplicantSosCompletedPostOnlyWhenBothPartiesIdamIdIsNull() {
+    void testCitizenApplicantSosCompletedPostOnlyWhenBothPartiesIdamIdIsNull() {
         //Given
         CaseData caseData1 = caseData.toBuilder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
@@ -1459,7 +1458,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testCitizenApplicantSosCompletedPostOnlyWhenCaseStateIsJudicialReview() {
+    void testCitizenApplicantSosCompletedPostOnlyWhenCaseStateIsJudicialReview() {
         //Given
         CaseData caseData1 = caseData.toBuilder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
@@ -1486,7 +1485,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testRespondentCitizenDocOrders() {
+    void testRespondentCitizenDocOrders() {
         List<Element<FL401Proceedings>> fl401Proceedings = new ArrayList<>();
         fl401Proceedings.add(ElementUtils.element(FL401Proceedings.builder().uploadRelevantOrder(Document.builder().build()).build()));
         List<Element<RespondentProceedingDetails>> respondentProceedingDetails = new ArrayList<>();
@@ -1519,7 +1518,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testCitizenDocOrdersWhenRespondentsFl401IdamIdIsNull() {
+    void testCitizenDocOrdersWhenRespondentsFl401IdamIdIsNull() {
         //Given
         CaseData caseData1 = caseData.toBuilder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
@@ -1546,7 +1545,7 @@ public class CaseServiceTest {
 
 
     @Test
-    public void testCitizenDocOrdersWhenC100IsCaseType() {
+    void testCitizenDocOrdersWhenC100IsCaseType() {
         //Given
         CaseData caseData1 = caseData.toBuilder()
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -1570,12 +1569,12 @@ public class CaseServiceTest {
         assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
-        assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+        assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().getFirst().getId());
     }
 
 
     @Test
-    public void testCitizenDocOrdersWhenRespondentPartyIdamIdIsNull() {
+    void testCitizenDocOrdersWhenRespondentPartyIdamIdIsNull() {
         List<Element<PartyDetails>> partyDetailsList = new ArrayList<>();
         partyDetailsList.add(Element.<PartyDetails>builder()
                                  .value(PartyDetails.builder()
@@ -1607,11 +1606,11 @@ public class CaseServiceTest {
         assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
-        assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+        assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().getFirst().getId());
     }
 
     @Test
-    public void testCitizenDocOrdersWhenApplicantAndRespondentPartyIdamIdIsNull() {
+    void testCitizenDocOrdersWhenApplicantAndRespondentPartyIdamIdIsNull() {
         List<Element<PartyDetails>> partyDetailsList = new ArrayList<>();
         partyDetailsList.add(Element.<PartyDetails>builder()
                                  .value(PartyDetails.builder()
@@ -1645,7 +1644,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testCitizenDocOrdersWhenApplicantAndRespondentPartyIdamIdIsNotSameAsUser() {
+    void testCitizenDocOrdersWhenApplicantAndRespondentPartyIdamIdIsNotSameAsUser() {
 
         List<Element<RespondentProceedingDetails>> respondentProceedingDetails = new ArrayList<>();
         respondentProceedingDetails.add(ElementUtils.element(RespondentProceedingDetails.builder().uploadRelevantOrder(
@@ -1689,7 +1688,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testCitizenDocOrdersWhenApplicationServedBy() {
+    void testCitizenDocOrdersWhenApplicationServedBy() {
 
         List<Element<RespondentProceedingDetails>> respondentProceedingDetails = new ArrayList<>();
         respondentProceedingDetails.add(ElementUtils.element(RespondentProceedingDetails.builder().uploadRelevantOrder(
@@ -1757,7 +1756,7 @@ public class CaseServiceTest {
 
 
     @Test
-    public void testUpdateCitizenRaFlagsWithNullPartyDetailsMeta() {
+    void testUpdateCitizenRaFlagsWithNullPartyDetailsMeta() {
         //Given
         CitizenPartyFlagsRequest citizenPartyFlagsRequest = CitizenPartyFlagsRequest.builder()
             .partyExternalFlags(FlagsRequest.builder().build())
@@ -1779,7 +1778,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testUpdateCitizenRaFlagsBadRequest() {
+    void testUpdateCitizenRaFlagsBadRequest() {
         //Given
         CitizenPartyFlagsRequest citizenPartyFlagsRequest = CitizenPartyFlagsRequest.builder()
             .partyExternalFlags(FlagsRequest.builder().build())
@@ -1793,7 +1792,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testUpdateCitizenRaFlagsWithPartyDetailsMetaEmptyExtCaseFlag() {
+    void testUpdateCitizenRaFlagsWithPartyDetailsMetaEmptyExtCaseFlag() {
         //Given
         caseData = caseData.toBuilder().caseTypeOfApplication(C100_CASE_TYPE).build();
         CitizenPartyFlagsRequest citizenPartyFlagsRequest = CitizenPartyFlagsRequest.builder()
@@ -1818,7 +1817,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testUpdateCitizenRaFlagsWithPartyDetailsMetaWithExtCaseFlag() {
+    void testUpdateCitizenRaFlagsWithPartyDetailsMetaWithExtCaseFlag() {
         //Given
         caseData = caseData.toBuilder().caseTypeOfApplication(C100_CASE_TYPE).build();
         when(idamClient.getUserInfo(Mockito.anyString())).thenReturn(UserInfo.builder().uid("test").build());
@@ -1849,7 +1848,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testFetchIdamRoles() {
+    void testFetchIdamRoles() {
         when(roleAssignmentService.fetchIdamAmRoles(Mockito.anyString(), Mockito.anyString())).thenReturn(Map.of("test", "role"));
         Map<String, String> roles = caseService.fetchIdamAmRoles(authToken, "test");
         assertEquals("role", roles.get("test"));

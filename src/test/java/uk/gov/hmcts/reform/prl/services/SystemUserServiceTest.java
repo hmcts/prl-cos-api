@@ -18,7 +18,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class SystemUserServiceTest {
+class SystemUserServiceTest {
     private static final String USERNAME = "username";
     private static final String PASSWORD = "password";
 
@@ -36,13 +36,13 @@ public class SystemUserServiceTest {
     String token = "";
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         systemUserService = new SystemUserService(auth, userConfig, idamClient);
         token = RandomStringUtils.randomAlphanumeric(10);
     }
 
     @Test
-    public void given_ValidUserNameAndPass_shouldReturnToken() {
+    void given_ValidUserNameAndPass_shouldReturnToken() {
         when(userConfig.getUserName()).thenReturn(USERNAME);
         when(userConfig.getPassword()).thenReturn(PASSWORD);
         when(idamClient.getAccessToken(anyString(), anyString())).thenReturn(token);
@@ -51,7 +51,7 @@ public class SystemUserServiceTest {
     }
 
     @Test
-    public void shouldReturnSystemUserId() {
+    void shouldReturnSystemUserId() {
         UserInfo userInfo = UserInfo.builder()
             .uid(UUID.randomUUID().toString())
             .build();

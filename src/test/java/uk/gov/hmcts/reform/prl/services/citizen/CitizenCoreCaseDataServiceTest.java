@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,12 +25,14 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.emptyList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 
 @ExtendWith(MockitoExtension.class)
-public class CitizenCoreCaseDataServiceTest {
+class CitizenCoreCaseDataServiceTest {
 
     @Mock
     private IdamClient idamClient;
@@ -66,7 +67,7 @@ public class CitizenCoreCaseDataServiceTest {
     private static final String LINK_CASE_TO_CITIZEN_DESCRIPTION = "Link case to Citizen account with access code";
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         userDetails = UserDetails.builder()
             .id("testUser").build();
         stringObjectMap = new HashMap<>();
@@ -107,7 +108,7 @@ public class CitizenCoreCaseDataServiceTest {
     }
 
     @Test
-    public void citizenCoreCaseShouldBeUpdated() {
+    void citizenCoreCaseShouldBeUpdated() {
         userDetails = UserDetails.builder()
             .id("testUser").roles(List.of(CITIZEN_ROLE)).build();
         when(idamClient.getUserDetails(bearerToken)).thenReturn(userDetails);
@@ -116,16 +117,18 @@ public class CitizenCoreCaseDataServiceTest {
                                                                            12345L,
                                                                            caseDataMock,
                                                                            CaseEvent.LINK_CITIZEN);
-        Assert.assertEquals(caseDetails, updatedDetails);
-    }
-
-    @Test(expected = CoreCaseDataStoreException.class)
-    public void updateCitizenCoreCaseShouldThrowException() {
-        citizenCoreCaseDataService.updateCase(bearerToken, 12345L, caseDataMock, CaseEvent.LINK_CITIZEN);
+        assertEquals(caseDetails, updatedDetails);
     }
 
     @Test
-    public void citizenCoreCaseShouldBeCreatedForCitizen() {
+    void updateCitizenCoreCaseShouldThrowException() {
+        assertThrows(CoreCaseDataStoreException.class, () -> {
+            citizenCoreCaseDataService.updateCase(bearerToken, 12345L, caseDataMock, CaseEvent.LINK_CITIZEN);
+        });
+    }
+
+    @Test
+    void citizenCoreCaseShouldBeCreatedForCitizen() {
 
         userDetails = UserDetails.builder()
             .id("testUser").roles(List.of(CITIZEN_ROLE)).build();
@@ -133,11 +136,11 @@ public class CitizenCoreCaseDataServiceTest {
 
         CaseDetails createdCaseDetails = citizenCoreCaseDataService.createCase(bearerToken, caseDataMock);
 
-        Assert.assertEquals(caseDetails, createdCaseDetails);
+        assertEquals(caseDetails, createdCaseDetails);
     }
 
     @Test
-    public void citizenCoreCaseShouldBeCreatedForCaseworker() {
+    void citizenCoreCaseShouldBeCreatedForCaseworker() {
 
         userDetails = UserDetails.builder()
             .id("testUser").roles(emptyList()).build();
@@ -145,13 +148,13 @@ public class CitizenCoreCaseDataServiceTest {
 
         CaseDetails createdCaseDetails = citizenCoreCaseDataService.createCase(bearerToken, caseDataMock);
 
-        Assert.assertEquals(caseDetails, createdCaseDetails);
+        assertEquals(caseDetails, createdCaseDetails);
     }
 
     @Test
-    public void shouldGetCitizenCoreCase() {
+    void shouldGetCitizenCoreCase() {
         CaseDetails retrievedCaseDetails = citizenCoreCaseDataService.getCase(bearerToken, "12345L");
 
-        Assert.assertEquals(caseDetails, retrievedCaseDetails);
+        assertEquals(caseDetails, retrievedCaseDetails);
     }
 }

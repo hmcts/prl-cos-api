@@ -102,7 +102,7 @@ public class SolicitorsMapper {
             return addressMapper.mapAddress(party.getSolicitorAddress());
         } else if (!ObjectUtils.isEmpty(org) && org.getContactInformation() != null
             && !org.getContactInformation().isEmpty()) {
-            return mapSolicitorAddress(org.getContactInformation().get(0));
+            return mapSolicitorAddress(org.getContactInformation().getFirst());
         } else {
             return JsonValue.EMPTY_JSON_OBJECT;
         }
@@ -112,12 +112,12 @@ public class SolicitorsMapper {
         if (applicant.getDxNumber() != null) {
             return applicant.getDxNumber();
         } else if (ObjectUtils.isEmpty(org) || ObjectUtils.isEmpty(org.getContactInformation())
-            || ObjectUtils.isEmpty(org.getContactInformation().get(0))) {
+            || ObjectUtils.isEmpty(org.getContactInformation().getFirst())) {
             return null;
-        } else if (!org.getContactInformation().get(0).getDxAddress().isEmpty()) {
-            return org.getContactInformation().get(0).getDxAddress()
-                .get(0).getDxNumber() != null ? org.getContactInformation().get(0).getDxAddress()
-                .get(0).getDxNumber() : null;
+        } else if (!org.getContactInformation().getFirst().getDxAddress().isEmpty()) {
+            return org.getContactInformation().getFirst().getDxAddress()
+                .getFirst().getDxNumber() != null ? org.getContactInformation().getFirst().getDxAddress()
+                .getFirst().getDxNumber() : null;
         } else {
             return null;
         }

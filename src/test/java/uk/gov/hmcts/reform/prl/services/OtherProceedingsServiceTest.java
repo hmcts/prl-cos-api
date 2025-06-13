@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
 
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,8 +20,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @ExtendWith(MockitoExtension.class)
-public class OtherProceedingsServiceTest {
+class OtherProceedingsServiceTest {
 
     @InjectMocks
     OtherProceedingsService otherProceedingsService;
@@ -30,18 +33,15 @@ public class OtherProceedingsServiceTest {
     ArrayList<TypeOfOrderEnum> typeOfOrder;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
 
         typeOfOrder = new ArrayList<>();
         typeOfOrder.add(TypeOfOrderEnum.emergencyProtectionOrder);
         typeOfOrder.add(TypeOfOrderEnum.childArrangementsOrder);
-
-
     }
 
-
     @Test
-    public void testExistingProceedingsNotEmpty() {
+    void testExistingProceedingsNotEmpty() {
 
         ProceedingDetails  proceedingDetails = ProceedingDetails.builder().dateEnded(LocalDate.of(1990, 8, 1))
                 .caseNumber("2344").dateStarted(LocalDate.of(2020, 8, 1))
@@ -56,12 +56,11 @@ public class OtherProceedingsServiceTest {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseData.builder().existingProceedings(existingProceedings).build();
         otherProceedingsService.populateCaseDocumentsData(caseData, caseDataUpdated);
-        Assert.assertTrue(caseDataUpdated.containsKey("existingProceedingsWithDoc"));
-
+        assertTrue(caseDataUpdated.containsKey("existingProceedingsWithDoc"));
     }
 
     @Test
-    public void testExistingProceedingsNotEmptyWithoutDoc() {
+    void testExistingProceedingsNotEmptyWithoutDoc() {
 
         ProceedingDetails  proceedingDetails = ProceedingDetails.builder().dateEnded(LocalDate.of(1990, 8, 1))
                 .caseNumber("2344").dateStarted(LocalDate.of(2020, 8, 1))
@@ -75,21 +74,19 @@ public class OtherProceedingsServiceTest {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseData.builder().existingProceedings(existingProceedings).build();
         otherProceedingsService.populateCaseDocumentsData(caseData, caseDataUpdated);
-        Assert.assertFalse(caseDataUpdated.containsKey("existingProceedingsWithDoc"));
-
+        assertFalse(caseDataUpdated.containsKey("existingProceedingsWithDoc"));
     }
 
     @Test
-    public void testExistingProceedingsEmpty() {
+    void testExistingProceedingsEmpty() {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseData.builder().build();
         otherProceedingsService.populateCaseDocumentsData(caseData, caseDataUpdated);
-        Assert.assertTrue(caseDataUpdated.isEmpty());
-
+        assertTrue(caseDataUpdated.isEmpty());
     }
 
     @Test
-    public void testExistingProceedingsNotEmptyWithOnlyOneDoc() {
+    void testExistingProceedingsNotEmptyWithOnlyOneDoc() {
         ProceedingDetails  proceedingDetails = ProceedingDetails.builder().dateEnded(LocalDate.of(1990, 8, 1))
                 .caseNumber("2344").dateStarted(LocalDate.of(2020, 8, 1))
                 .nameOfCourt("Court Name").nameOfJudge("Judge Name").typeOfOrder(typeOfOrder)
@@ -112,9 +109,7 @@ public class OtherProceedingsServiceTest {
         CaseData caseData = CaseData.builder().existingProceedings(existingProceedings).build();
         otherProceedingsService.populateCaseDocumentsData(caseData, caseDataUpdated);
         List<Element<ProceedingDetails>> results = (List<Element<ProceedingDetails>>) caseDataUpdated.get("existingProceedingsWithDoc");
-        Assert.assertEquals(1, results.size());
+        assertEquals(1, results.size());
     }
-
-
 }
 

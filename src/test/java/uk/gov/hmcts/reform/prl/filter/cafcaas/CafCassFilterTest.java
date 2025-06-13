@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(MockitoExtension.class)
-public class CafCassFilterTest {
+class CafCassFilterTest {
 
     @InjectMocks
     private CafCassFilter cafCassFilter;
@@ -28,7 +28,7 @@ public class CafCassFilterTest {
         "classpath:response/CafCaasResponse.json";
 
     @Test
-    public void filterTest() throws IOException {
+    void filterTest() throws IOException {
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
         objectMapper.registerModule(new ParameterNamesModule());
         CafCassResponse cafCassResponse = objectMapper.readValue(
@@ -40,13 +40,13 @@ public class CafCassFilterTest {
     }
 
     @Test
-    public void filterNonValueListTest() {
+    void filterNonValueListTest() {
         List<Element<InterpreterNeed>> elementList = new ArrayList<>();
         assertNotNull(cafCassFilter.filterNonValueList(elementList));
     }
 
     @Test
-    public void filterNonValueListTest1() {
+    void filterNonValueListTest1() {
         List<Element<InterpreterNeed>> elementList = new ArrayList<>();
         Element element = Element.builder().build();
         elementList.add(element);
@@ -54,7 +54,7 @@ public class CafCassFilterTest {
     }
 
     @Test
-    public void filterNonValueListTest2() {
+    void filterNonValueListTest2() {
         List<Element<InterpreterNeed>> elementList = new ArrayList<>();
         Element element = Element.builder().value(InterpreterNeed.builder().build()).build();
         elementList.add(element);

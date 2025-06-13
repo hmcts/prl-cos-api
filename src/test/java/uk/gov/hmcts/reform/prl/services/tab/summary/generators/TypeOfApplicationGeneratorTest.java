@@ -19,7 +19,7 @@ public class TypeOfApplicationGeneratorTest {
 
 
     @Test
-    public void testIfTypeOfApplicationIsOneOrMore() {
+    void testIfTypeOfApplicationIsOneOrMore() {
 
         List<FL401OrderTypeEnum> enumList = new ArrayList<>();
 
@@ -41,7 +41,7 @@ public class TypeOfApplicationGeneratorTest {
 
 
     @Test
-    public void testIfTypeOfApplicationIsNone() {
+    void testIfTypeOfApplicationIsNone() {
 
         List<FL401OrderTypeEnum> enumList = new ArrayList<>();
 

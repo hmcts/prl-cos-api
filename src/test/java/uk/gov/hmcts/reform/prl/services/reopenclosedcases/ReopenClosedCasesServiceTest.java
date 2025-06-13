@@ -40,7 +40,7 @@ import static uk.gov.hmcts.reform.prl.services.reopenclosedcases.ReopenClosedCas
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
-public class ReopenClosedCasesServiceTest {
+class ReopenClosedCasesServiceTest {
 
     @Mock
     private ObjectMapper objectMapper;
@@ -55,7 +55,7 @@ public class ReopenClosedCasesServiceTest {
     ReopenClosedCasesService reopenClosedCasesService;
 
     @Test
-    public void testReopenClosedCasesForC100V3() {
+    void testReopenClosedCasesForC100V3() {
         List<Element<ChildDetailsRevised>> newChildDetails = new ArrayList<>();
         ChildDetailsRevised childDetailsRevised1 = ChildDetailsRevised.builder()
             .firstName("Tom")
@@ -83,7 +83,7 @@ public class ReopenClosedCasesServiceTest {
     }
 
     @Test
-    public void testReopenClosedCasesForC100V2() {
+    void testReopenClosedCasesForC100V2() {
         List<Element<Child>> children = new ArrayList<>();
         Child child1 = Child.builder()
             .firstName("Tom")
@@ -115,7 +115,7 @@ public class ReopenClosedCasesServiceTest {
     }
 
     @Test
-    public void testReopenClosedCasesForFL401() {
+    void testReopenClosedCasesForFL401() {
         List<Element<ApplicantChild>> applicantChildDetail = new ArrayList<>();
         ApplicantChild child1 = ApplicantChild.builder()
             .fullName("Tom")

@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services.citizen;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,6 +44,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -57,7 +59,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_W
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
-public class CitizenResponseServiceTest {
+class CitizenResponseServiceTest {
 
     @InjectMocks
     CitizenResponseService citizenResponseService;
@@ -89,7 +91,7 @@ public class CitizenResponseServiceTest {
     StartAllTabsUpdateDataContent noneActiveStartAllTabsUpdateDataContent;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         UUID uuid2 = UUID.randomUUID();
 
         //Set up two respondents, one tp be the active respondent and one to not.
@@ -141,31 +143,35 @@ public class CitizenResponseServiceTest {
     }
 
     @Test
-    public void testGenerateDraftC7() throws Exception {
+    void testGenerateDraftC7() throws Exception {
         when(ccdCoreCaseDataService.findCaseById(authToken, caseId)).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(documentGenService.generateSingleDocument(authToken, caseData,  DOCUMENT_C7_DRAFT_HINT, false, new HashMap<>()))
             .thenReturn(Document.builder().documentFileName("testDoc").build());
 
         Document document = citizenResponseService.generateAndReturnDraftC7(caseId, uuid, authToken, false);
-        Assert.assertNotNull(document);
-        Assert.assertEquals("testDoc", document.getDocumentFileName());
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void testGenerateAndSubmitCitizenResponseFL401() throws Exception {
-        citizenResponseService.generateAndSubmitCitizenResponse(authToken, caseId, CitizenUpdatedCaseData.builder()
-            .caseTypeOfApplication("FL401").build());
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void testGenerateAndSubmitCitizenResponseButApplicant() throws Exception {
-        citizenResponseService.generateAndSubmitCitizenResponse(authToken, caseId, CitizenUpdatedCaseData.builder()
-            .caseTypeOfApplication("C100").partyType(PartyEnum.applicant).build());
+        assertNotNull(document);
+        assertEquals("testDoc", document.getDocumentFileName());
     }
 
     @Test
-    public void testGenerateAndSubmitCitizenResponse() throws Exception {
+    void testGenerateAndSubmitCitizenResponseFL401() throws Exception {
+        assertThrows(RuntimeException.class, () -> {
+            citizenResponseService.generateAndSubmitCitizenResponse(authToken, caseId, CitizenUpdatedCaseData.builder()
+                .caseTypeOfApplication("FL401").build());
+        });
+    }
+
+    @Test
+    void testGenerateAndSubmitCitizenResponseButApplicant() throws Exception {
+        assertThrows(RuntimeException.class, () -> {
+            citizenResponseService.generateAndSubmitCitizenResponse(authToken, caseId, CitizenUpdatedCaseData.builder()
+                .caseTypeOfApplication("C100").partyType(PartyEnum.applicant).build());
+        });
+    }
+
+    @Test
+    void testGenerateAndSubmitCitizenResponse() throws Exception {
         when(allTabService.getStartUpdateForSpecificUserEvent(caseId, CaseEvent.REVIEW_AND_SUBMIT.getValue(), authToken))
             .thenReturn(noneActiveStartAllTabsUpdateDataContent);
         when(documentLanguageService.docGenerateLang(noneActiveCaseData)).thenReturn(DocumentLanguage.builder()
@@ -176,12 +182,12 @@ public class CitizenResponseServiceTest {
             noneActiveStartAllTabsUpdateDataContent.userDetails())).thenReturn(caseDetails);
         CaseDetails returnedCaseDetails = citizenResponseService.generateAndSubmitCitizenResponse(authToken, caseId,
             citizenUpdatedCaseData);
-        Assert.assertNotNull(returnedCaseDetails);
-        Assert.assertEquals(new HashMap<>(), returnedCaseDetails.getData());
+        assertNotNull(returnedCaseDetails);
+        assertEquals(new HashMap<>(), returnedCaseDetails.getData());
     }
 
     @Test
-    public void testGenerateAndSubmitCitizenResponseForActiveCitizen() throws Exception {
+    void testGenerateAndSubmitCitizenResponseForActiveCitizen() throws Exception {
         when(allTabService.getStartUpdateForSpecificUserEvent(caseId, CaseEvent.REVIEW_AND_SUBMIT.getValue(), authToken))
             .thenReturn(startAllTabsUpdateDataContent);
 
@@ -227,19 +233,19 @@ public class CitizenResponseServiceTest {
 
         CaseDetails returnedCaseDetails = citizenResponseService.generateAndSubmitCitizenResponse(authToken, caseId,
             citizenUpdatedCaseData);
-        Assert.assertNotNull(returnedCaseDetails);
-        Assert.assertEquals(new HashMap<>(), returnedCaseDetails.getData());
+        assertNotNull(returnedCaseDetails);
+        assertEquals(new HashMap<>(), returnedCaseDetails.getData());
     }
 
     @Test
-    public void testGenerateAndReturnDraftC1A() throws Exception {
+    void testGenerateAndReturnDraftC1A() throws Exception {
         when(ccdCoreCaseDataService.findCaseById(authToken, caseId)).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(documentGenService.generateSingleDocument(authToken, caseData,  DOCUMENT_C1A_DRAFT_HINT, false, new HashMap<>()))
             .thenReturn(Document.builder().documentFileName("testDoc").build());
 
         Document document = citizenResponseService.generateAndReturnDraftC1A(caseId, uuid, authToken, false);
-        Assert.assertNotNull(document);
-        Assert.assertEquals("testDoc", document.getDocumentFileName());
+        assertNotNull(document);
+        assertEquals("testDoc", document.getDocumentFileName());
     }
 }

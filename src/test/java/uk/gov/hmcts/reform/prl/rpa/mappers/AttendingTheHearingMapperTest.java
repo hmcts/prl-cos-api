@@ -4,141 +4,106 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.SpokenOrWrittenWelshEnum;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AttendHearing;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static uk.gov.hmcts.reform.prl.enums.PartyEnum.applicant;
+import static uk.gov.hmcts.reform.prl.enums.PartyEnum.respondent;
+import static uk.gov.hmcts.reform.prl.enums.SpokenOrWrittenWelshEnum.spoken;
+import static uk.gov.hmcts.reform.prl.enums.SpokenOrWrittenWelshEnum.written;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @ExtendWith(MockitoExtension.class)
-public class AttendingTheHearingMapperTest {
+class AttendingTheHearingMapperTest {
 
     @InjectMocks
     AttendingTheHearingMapper attendingTheHearingMapper;
 
-    InterpreterNeed interpreterNeed;
-    WelshNeed welshNeed;
-    List<Element<InterpreterNeed>> interpreterNeeds;
-    List<Element<WelshNeed>> welshNeeds;
-
-
     @Test
-    public void testApplicantsMapperWithAllFields() {
-        List<PartyEnum> partyType = new ArrayList<>();
-        partyType.add(PartyEnum.applicant);
-        partyType.add(PartyEnum.respondent);
-        interpreterNeed = InterpreterNeed.builder().party(partyType)
+    void testApplicantsMapperWithAllFields() {
+        InterpreterNeed interpreterNeed = InterpreterNeed.builder().party(List.of(applicant, respondent))
             .name("Name").language("English").otherAssistance("yes").build();
         Element<InterpreterNeed> interpreterNeedElement = Element.<InterpreterNeed>builder().value(interpreterNeed).build();
-        interpreterNeeds = Collections.singletonList(interpreterNeedElement);
+        List<Element<InterpreterNeed>> interpreterNeeds = List.of(interpreterNeedElement);
 
-        List<SpokenOrWrittenWelshEnum> welshEnum = new ArrayList<>();
-        welshEnum.add(SpokenOrWrittenWelshEnum.spoken);
-        welshEnum.add(SpokenOrWrittenWelshEnum.written);
-
-        welshNeed = WelshNeed.builder().whoNeedsWelsh("Names of Welsh People")
-            .spokenOrWritten(welshEnum).build();
+        WelshNeed welshNeed = WelshNeed.builder().whoNeedsWelsh("Names of Welsh People")
+            .spokenOrWritten(List.of(spoken, written)).build();
         Element<WelshNeed> welshNeedElement = Element.<WelshNeed>builder().value(welshNeed).build();
-        welshNeeds = Collections.singletonList(welshNeedElement);
+        List<Element<WelshNeed>> welshNeeds = List.of(welshNeedElement);
 
         CaseData caseData = CaseData.builder().attendHearing(
             AttendHearing.builder()
-                .isWelshNeeded(YesOrNo.Yes)
-                .welshNeeds(welshNeeds).isIntermediaryNeeded(YesOrNo.Yes).interpreterNeeds(interpreterNeeds)
-                .isDisabilityPresent(YesOrNo.No).adjustmentsRequired("Adjustments Required details")
-                .isSpecialArrangementsRequired(YesOrNo.No).specialArrangementsRequired("Special Arrangements Required")
-                .isIntermediaryNeeded(YesOrNo.Yes)
+                .isWelshNeeded(Yes)
+                .welshNeeds(welshNeeds).isIntermediaryNeeded(Yes).interpreterNeeds(interpreterNeeds)
+                .isDisabilityPresent(No).adjustmentsRequired("Adjustments Required details")
+                .isSpecialArrangementsRequired(No).specialArrangementsRequired("Special Arrangements Required")
+                .isIntermediaryNeeded(Yes)
                 .build()
             )
             .build();
         assertNotNull(attendingTheHearingMapper.map(caseData));
-
     }
 
     @Test
-    public void testApplicantsMapperWithNullValuesInWelsh() {
-        List<PartyEnum> partyType = new ArrayList<>();
-        partyType.add(PartyEnum.applicant);
-        partyType.add(PartyEnum.respondent);
-        interpreterNeeds = null;
+    void testApplicantsMapperWithNullValuesInWelsh() {
         CaseData caseData = CaseData.builder().attendHearing(
             AttendHearing.builder()
-                .isWelshNeeded(YesOrNo.Yes)
-                .welshNeeds(null).isIntermediaryNeeded(YesOrNo.Yes).interpreterNeeds(interpreterNeeds)
-                .isDisabilityPresent(YesOrNo.No).adjustmentsRequired("Adjustments Required details")
-                .isSpecialArrangementsRequired(YesOrNo.No).specialArrangementsRequired("Special Arrangements Required")
+                .isWelshNeeded(Yes)
+                .welshNeeds(null).isIntermediaryNeeded(Yes).interpreterNeeds(null)
+                .isDisabilityPresent(No).adjustmentsRequired("Adjustments Required details")
+                .isSpecialArrangementsRequired(No).specialArrangementsRequired("Special Arrangements Required")
                 .build()
         ).build();
         assertNotNull(attendingTheHearingMapper.map(caseData));
-
     }
 
-
     @Test
-    public void testApplicantsMapperWithNullValuesInterpreter() {
-        List<SpokenOrWrittenWelshEnum> welshEnum = new ArrayList<>();
-        welshEnum.add(SpokenOrWrittenWelshEnum.spoken);
-        welshEnum.add(SpokenOrWrittenWelshEnum.written);
+    void testApplicantsMapperWithNullValuesInterpreter() {
+        List<SpokenOrWrittenWelshEnum> welshEnum = List.of(spoken, written);
 
-        welshNeed = WelshNeed.builder().whoNeedsWelsh("Names of Welsh People")
+        WelshNeed welshNeed = WelshNeed.builder().whoNeedsWelsh("Names of Welsh People")
             .spokenOrWritten(welshEnum).build();
         Element<WelshNeed> welshNeedElement = Element.<WelshNeed>builder().value(welshNeed).build();
-        welshNeeds = Collections.singletonList(welshNeedElement);
+        List<Element<WelshNeed>> welshNeeds = List.of(welshNeedElement);
 
         CaseData caseData = CaseData.builder().attendHearing(AttendHearing.builder()
-                                                                 .isWelshNeeded(YesOrNo.Yes)
-                                                                 .welshNeeds(welshNeeds).isIntermediaryNeeded(YesOrNo.Yes)
-                                                                 .isDisabilityPresent(YesOrNo.No).adjustmentsRequired("Adjustments Required details")
-                                                                 .isSpecialArrangementsRequired(YesOrNo.No)
+                                                                 .isWelshNeeded(Yes)
+                                                                 .welshNeeds(welshNeeds).isIntermediaryNeeded(Yes)
+                                                                 .isDisabilityPresent(No).adjustmentsRequired("Adjustments Required details")
+                                                                 .isSpecialArrangementsRequired(No)
                                                                  .specialArrangementsRequired("Special Arrangements Required")
                                                                  .build()
             )
             .build();
-        assertNotNull(attendingTheHearingMapper.map(caseData));
 
+        assertNotNull(attendingTheHearingMapper.map(caseData));
     }
 
     @Test
-    public void testApplicantsMapperWithSomeFields() {
-        List<PartyEnum> partyType = new ArrayList<>();
-        partyType.add(PartyEnum.applicant);
-        partyType.add(PartyEnum.respondent);
-        interpreterNeed = InterpreterNeed.builder().party(partyType)
-            .name("Name").language("English").otherAssistance("yes").build();
-        Element<InterpreterNeed> interpreterNeedElement = Element.<InterpreterNeed>builder().value(interpreterNeed).build();
-        interpreterNeeds = Collections.singletonList(interpreterNeedElement);
+    void testApplicantsMapperWithSomeFields() {
 
-        List<SpokenOrWrittenWelshEnum> welshEnum = new ArrayList<>();
-        welshEnum.add(SpokenOrWrittenWelshEnum.spoken);
-        welshEnum.add(SpokenOrWrittenWelshEnum.written);
-
-        welshNeed = WelshNeed.builder().whoNeedsWelsh("Names of Welsh People")
-            .spokenOrWritten(welshEnum).build();
+        WelshNeed welshNeed = WelshNeed.builder().whoNeedsWelsh("Names of Welsh People")
+            .spokenOrWritten(List.of(spoken, written)).build();
         Element<WelshNeed> welshNeedElement = Element.<WelshNeed>builder().value(welshNeed).build();
-        welshNeeds = Collections.singletonList(welshNeedElement);
+        List<Element<WelshNeed>> welshNeeds = List.of(welshNeedElement);
 
         CaseData caseData = CaseData.builder().attendHearing(AttendHearing.builder()
-                                                                 .welshNeeds(welshNeeds).isIntermediaryNeeded(YesOrNo.Yes)
-                                                                 .isWelshNeeded(YesOrNo.Yes)
-                                                                 .isDisabilityPresent(YesOrNo.No).adjustmentsRequired("Adjustments Required details")
-                                                                 .isSpecialArrangementsRequired(YesOrNo.No)
+                                                                 .welshNeeds(welshNeeds).isIntermediaryNeeded(Yes)
+                                                                 .isWelshNeeded(Yes)
+                                                                 .isDisabilityPresent(No).adjustmentsRequired("Adjustments Required details")
+                                                                 .isSpecialArrangementsRequired(No)
                                                                  .specialArrangementsRequired("Special Arrangements Required")
                                                                  .build())
             .build();
+
         assertNotNull(attendingTheHearingMapper.map(caseData));
-
     }
-
-
 }
-
-

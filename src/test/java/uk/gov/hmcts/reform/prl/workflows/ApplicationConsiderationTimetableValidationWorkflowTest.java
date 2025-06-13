@@ -22,7 +22,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-public class ApplicationConsiderationTimetableValidationWorkflowTest {
+class ApplicationConsiderationTimetableValidationWorkflowTest {
 
     @Mock
     private ApplicationTimetableTimeValidationTask applicationTimetableTimeValidationTask;
@@ -43,7 +43,7 @@ public class ApplicationConsiderationTimetableValidationWorkflowTest {
 
 
     @Test
-    public void whenWorkflowRun_thenExpectedTasksInvoked() throws WorkflowException {
+    void whenWorkflowRun_thenExpectedTasksInvoked() throws WorkflowException {
         ObjectMapper objectMapper = new ObjectMapper();
         CaseData caseData = CaseData.builder()
             .applicantCaseName("test")

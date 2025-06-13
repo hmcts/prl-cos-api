@@ -44,8 +44,8 @@ public class ReturnApplicationService {
                     .map(Element::getValue)
                     .toList();
 
-                String legalFirstName = applicants.get(0).getRepresentativeFirstName();
-                String legalLastName = applicants.get(0).getRepresentativeLastName();
+                String legalFirstName = applicants.getFirst().getRepresentativeFirstName();
+                String legalLastName = applicants.getFirst().getRepresentativeLastName();
 
                 legalName = legalFirstName + " " + legalLastName;
 

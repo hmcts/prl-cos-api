@@ -17,7 +17,7 @@ import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
-public class EventsCheckerTest {
+class EventsCheckerTest {
 
     @InjectMocks
     EventsChecker eventsChecker;
@@ -28,12 +28,12 @@ public class EventsCheckerTest {
 
 
     @BeforeEach
-    public void init() {
+    void init() {
         eventsChecker.init();
     }
 
     @Test
-    public void testIsFinished() {
+    void testIsFinished() {
         Event event = Event.CASE_NAME;
         CaseData caseData = CaseData.builder().build();
         when(caseNameChecker.isFinished(caseData)).thenReturn(Boolean.TRUE);
@@ -43,7 +43,7 @@ public class EventsCheckerTest {
     }
 
     @Test
-    public void testIsStarted() {
+    void testIsStarted() {
         Event event = Event.CASE_NAME;
         CaseData caseData = CaseData.builder().build();
         when(caseNameChecker.isStarted(caseData)).thenReturn(Boolean.TRUE);
@@ -53,7 +53,7 @@ public class EventsCheckerTest {
     }
 
     @Test
-    public void testHasMandatoryCompleted() {
+    void testHasMandatoryCompleted() {
         Event event = Event.CASE_NAME;
         CaseData caseData = CaseData.builder().build();
         when(caseNameChecker.hasMandatoryCompleted(caseData)).thenReturn(Boolean.TRUE);
@@ -63,7 +63,7 @@ public class EventsCheckerTest {
     }
 
     @Test
-    public void testGetDefaultState() {
+    void testGetDefaultState() {
         Event event = Event.CASE_NAME;
         CaseData caseData = CaseData.builder().build();
         when(caseNameChecker.getDefaultTaskState(caseData)).thenReturn(TaskState.NOT_STARTED);

@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
@@ -44,7 +44,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 
 @Slf4j
 @SpringBootTest
-@ExtendWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration
 public class ReviewDocumentsControllerFunctionalTest {
 
@@ -196,7 +196,7 @@ public class ReviewDocumentsControllerFunctionalTest {
                                                                      CASE_TYPE, JURISDICTION, newArrayList(file)
         );
 
-        uk.gov.hmcts.reform.ccd.document.am.model.Document stampedDocument = response.getDocuments().get(0);
+        uk.gov.hmcts.reform.ccd.document.am.model.Document stampedDocument = response.getDocuments().getFirst();
 
         return DocumentResponse.builder().status("Success").document(Document.builder()
                                                                                          .documentBinaryUrl(stampedDocument.links.binary.href)

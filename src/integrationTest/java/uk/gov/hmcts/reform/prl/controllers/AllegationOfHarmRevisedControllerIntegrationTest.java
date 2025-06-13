@@ -9,9 +9,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
@@ -31,7 +31,7 @@ import static uk.gov.hmcts.reform.prl.util.TestConstants.TEST_AUTH_TOKEN;
 
 @Slf4j
 @SpringBootTest
-@ExtendWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration
 public class AllegationOfHarmRevisedControllerIntegrationTest {
 
@@ -40,14 +40,14 @@ public class AllegationOfHarmRevisedControllerIntegrationTest {
     @Autowired
     private WebApplicationContext webApplicationContext;
 
-    @MockBean
-    AllegationOfHarmRevisedService allegationOfHarmRevisedService;
-
-    @MockBean
-    AuthorisationService authorisationService;
-
     @Autowired
     ObjectMapper objectMapper;
+
+    @MockitoBean
+    AllegationOfHarmRevisedService allegationOfHarmRevisedService;
+
+    @MockitoBean
+    AuthorisationService authorisationService;
 
     @BeforeEach
     public void setUp() {
@@ -57,29 +57,15 @@ public class AllegationOfHarmRevisedControllerIntegrationTest {
 
     @Test
     public void testPrePopulateChildData() throws Exception {
-        String url = "/pre-populate-child-data";
-        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
-
-        Mockito.when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        Mockito.when(allegationOfHarmRevisedService.getPrePopulatedChildData(any())).thenReturn(Map.of(
-            "childName",
-            "123"
-        ));
-
-        mockMvc.perform(
-                post(url)
-                    .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
-                    .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
-                    .accept(APPLICATION_JSON)
-                    .contentType(APPLICATION_JSON)
-                    .content(jsonRequest))
-            .andExpect(status().isOk())
-            .andReturn();
+        sendRequest("/pre-populate-child-data");
     }
 
     @Test
     public void testHandleMidEvent() throws Exception {
-        String url = "/allegation-of-harm/about-to-submit";
+        sendRequest("/allegation-of-harm/about-to-submit");
+    }
+
+    private void sendRequest(String url) throws Exception {
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         Mockito.when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
@@ -98,5 +84,4 @@ public class AllegationOfHarmRevisedControllerIntegrationTest {
             .andExpect(status().isOk())
             .andReturn();
     }
-
 }

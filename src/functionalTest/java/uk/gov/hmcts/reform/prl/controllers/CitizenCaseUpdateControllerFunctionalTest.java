@@ -5,16 +5,15 @@ import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
-import org.junit.Assert;
 import org.junit.FixMethodOrder;
-import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -23,16 +22,17 @@ import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Slf4j
-@Ignore
+@Disabled
 @SpringBootTest
-@ExtendWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class CitizenCaseUpdateControllerFunctionalTest {
-
 
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;
@@ -98,8 +98,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
             .extract()
             .as(CaseDetails.class);
 
-        Assert.assertNotNull(caseDetails1);
-        Assert.assertNotNull(caseDetails1.getId());
+        assertNotNull(caseDetails1);
+        assertNotNull(caseDetails1.getId());
 
     }
 
@@ -300,7 +300,7 @@ public class CitizenCaseUpdateControllerFunctionalTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void givenRequestBody_updateCitizenParty_Event_citizenContactPreference_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
 
@@ -321,7 +321,7 @@ public class CitizenCaseUpdateControllerFunctionalTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void givenRequestBody_updateCitizenParty_Event_citizenInternalFlagUpdates_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
 
@@ -375,8 +375,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
             .then()
             .extract()
             .as(CaseData.class);
-        Assert.assertNotNull(createNewCase);
-        Assert.assertNotNull(createNewCase.getId());
+        assertNotNull(createNewCase);
+        assertNotNull(createNewCase.getId());
 
         String requestBody = ResourceLoader.loadJson(SAVE_C100_DRAFT_CITIZEN_REQUEST_BODY);
 
@@ -394,20 +394,20 @@ public class CitizenCaseUpdateControllerFunctionalTest {
             .extract()
             .as(CaseData.class);
 
-        Assert.assertNotNull(createNewCase);
-        Assert.assertNotNull(saveedCaseData);
+        assertNotNull(createNewCase);
+        assertNotNull(saveedCaseData);
 
         JSONObject createCaseMiamResponse = new JSONObject(createNewCase.getC100RebuildData().getC100RebuildMaim());
         JSONObject savedMiamResponse = new JSONObject(saveedCaseData.getC100RebuildData().getC100RebuildMaim());
 
-        Assert.assertEquals(YesOrNo.Yes.toString(), createCaseMiamResponse.get("miam_consent"));
-        Assert.assertEquals(YesOrNo.No.toString(),savedMiamResponse.get("miam_consent"));
+        assertEquals(YesOrNo.Yes.toString(), createCaseMiamResponse.get("miam_consent"));
+        assertEquals(YesOrNo.No.toString(),savedMiamResponse.get("miam_consent"));
 
         JSONObject createCaseHwfResponse = new JSONObject(createNewCase.getC100RebuildData().getC100RebuildHelpWithFeesDetails());
         JSONObject savedHwfResponse = new JSONObject(saveedCaseData.getC100RebuildData().getC100RebuildHelpWithFeesDetails());
 
-        Assert.assertEquals(YesOrNo.No.toString(),createCaseHwfResponse.get("hwf_needHelpWithFees"));
-        Assert.assertEquals(YesOrNo.Yes.toString(),savedHwfResponse.get("hwf_needHelpWithFees"));
+        assertEquals(YesOrNo.No.toString(),createCaseHwfResponse.get("hwf_needHelpWithFees"));
+        assertEquals(YesOrNo.Yes.toString(),savedHwfResponse.get("hwf_needHelpWithFees"));
 
     }
 
@@ -424,8 +424,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
             .then()
             .extract()
             .as(CaseData.class);
-        Assert.assertNotNull(createNewCase);
-        Assert.assertNotNull(createNewCase.getId());
+        assertNotNull(createNewCase);
+        assertNotNull(createNewCase.getId());
 
         String requestBody = ResourceLoader.loadJson(DELETE_APPLICATION_CITIZEN_REQUEST_BODY);
 
@@ -443,8 +443,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
             .extract()
             .as(CaseData.class);
 
-        Assert.assertNotNull(createNewCase);
-        Assert.assertNotNull(deletedApplicationCaseData);
+        assertNotNull(createNewCase);
+        assertNotNull(deletedApplicationCaseData);
 
     }
 
@@ -464,8 +464,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
             .extract()
             .as(CaseDetails.class);
 
-        Assert.assertNotNull(caseDetails);
-        Assert.assertNotNull(caseDetails.getId());
+        assertNotNull(caseDetails);
+        assertNotNull(caseDetails.getId());
 
         String requestBody1 = ResourceLoader.loadJson(WITHDRAW_APPLICATION_CITIZEN_REQUEST_BODY);
 
@@ -481,8 +481,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
             .extract()
             .as(CaseData.class);
 
-        Assert.assertNotNull(caseDetails);
-        Assert.assertNotNull(withDrawCase);
+        assertNotNull(caseDetails);
+        assertNotNull(withDrawCase);
 
     }
 }

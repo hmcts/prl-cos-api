@@ -24,7 +24,7 @@ public class ConfidentialDetailsGeneratorTest {
     private final ConfidentialDetailsGenerator generator = new ConfidentialDetailsGenerator();
 
     @Test
-    public void testIfChildDetailsHasConfidential() {
+    void testIfChildDetailsHasConfidential() {
         Child child = Child.builder().firstName("Test").lastName("Name")
             .isChildAddressConfidential(YesOrNo.Yes).build();
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
@@ -43,7 +43,7 @@ public class ConfidentialDetailsGeneratorTest {
     }
 
     @Test
-    public void testIfChildDoesNotHaveDetailsHasConfidential() {
+    void testIfChildDoesNotHaveDetailsHasConfidential() {
         Child child = Child.builder().firstName("Test").lastName("Name")
             .isChildAddressConfidential(YesOrNo.No).build();
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
@@ -62,7 +62,7 @@ public class ConfidentialDetailsGeneratorTest {
     }
 
     @Test
-    public void testIfAnotherPersonDetailsHasConfidentialInfo() {
+    void testIfAnotherPersonDetailsHasConfidentialInfo() {
 
         Address address = Address.builder()
             .addressLine1("address")
@@ -97,7 +97,7 @@ public class ConfidentialDetailsGeneratorTest {
     }
 
     @Test
-    public void testIfApplicantAddressMarkedConfidentialInfo() {
+    void testIfApplicantAddressMarkedConfidentialInfo() {
         PartyDetails applicant = PartyDetails.builder().firstName("TestName")
             .isAddressConfidential(YesOrNo.Yes)
             .isEmailAddressConfidential(YesOrNo.No)
@@ -118,7 +118,7 @@ public class ConfidentialDetailsGeneratorTest {
     }
 
     @Test
-    public void testIfApplicantPhonesMarkedConfidentialInfo() {
+    void testIfApplicantPhonesMarkedConfidentialInfo() {
         PartyDetails applicant = PartyDetails.builder().firstName("TestName")
             .isAddressConfidential(YesOrNo.No)
             .isEmailAddressConfidential(YesOrNo.No)
@@ -139,7 +139,7 @@ public class ConfidentialDetailsGeneratorTest {
     }
 
     @Test
-    public void testIfApplicantConfidentialDetailsForDA() {
+    void testIfApplicantConfidentialDetailsForDA() {
 
         PartyDetails applicant = PartyDetails.builder().firstName("TestName")
             .isAddressConfidential(YesOrNo.No)
@@ -160,7 +160,7 @@ public class ConfidentialDetailsGeneratorTest {
     }
 
     @Test
-    public void testIfNoHomeConfidentialDetailsForDA() {
+    void testIfNoHomeConfidentialDetailsForDA() {
 
         PartyDetails applicant = PartyDetails.builder().firstName("TestName")
             .isAddressConfidential(YesOrNo.No)
@@ -185,7 +185,7 @@ public class ConfidentialDetailsGeneratorTest {
 
 
     @Test
-    public void testIfApplicantConfidentialDetailsNotAvailableForDA() {
+    void testIfApplicantConfidentialDetailsNotAvailableForDA() {
 
         ChildrenLiveAtAddress child = ChildrenLiveAtAddress.builder().keepChildrenInfoConfidential(
             YesOrNo.Yes).build();
@@ -208,7 +208,7 @@ public class ConfidentialDetailsGeneratorTest {
 
 
     @Test
-    public void testIfHomeDetailsNotAvailableForDA() {
+    void testIfHomeDetailsNotAvailableForDA() {
 
         PartyDetails applicant = PartyDetails.builder().firstName("TestName")
             .isAddressConfidential(YesOrNo.No)
@@ -237,7 +237,7 @@ public class ConfidentialDetailsGeneratorTest {
 
 
     @Test
-    public void testIfApplicantHomeConfidentialDetailsForDA() {
+    void testIfApplicantHomeConfidentialDetailsForDA() {
 
         PartyDetails applicant = PartyDetails.builder().firstName("TestName")
             .isAddressConfidential(YesOrNo.No)
@@ -266,7 +266,7 @@ public class ConfidentialDetailsGeneratorTest {
     }
 
     @Test
-    public void testIfApplicantEmailConfidentialDetailsForDA() {
+    void testIfApplicantEmailConfidentialDetailsForDA() {
 
         PartyDetails applicant = PartyDetails.builder().firstName("TestName")
             .isAddressConfidential(YesOrNo.No)
@@ -295,7 +295,7 @@ public class ConfidentialDetailsGeneratorTest {
     }
 
     @Test
-    public void testIfRespondentAddressMarkedConfidentialInfoYes() {
+    void testIfRespondentAddressMarkedConfidentialInfoYes() {
         PartyDetails respondent = PartyDetails.builder().firstName("TestName")
             .isAddressConfidential(YesOrNo.Yes)
             .isEmailAddressConfidential(YesOrNo.No)
@@ -316,7 +316,7 @@ public class ConfidentialDetailsGeneratorTest {
     }
 
     @Test
-    public void testIfRespondentAddressMarkedConfidentialInfoNo() {
+    void testIfRespondentAddressMarkedConfidentialInfoNo() {
         PartyDetails respondent = PartyDetails.builder().firstName("TestName")
             .isAddressConfidential(YesOrNo.No)
             .isEmailAddressConfidential(YesOrNo.No)
@@ -337,7 +337,7 @@ public class ConfidentialDetailsGeneratorTest {
     }
 
     @Test
-    public void testIfRespondentPhonesMarkedConfidentialInfo() {
+    void testIfRespondentPhonesMarkedConfidentialInfo() {
         PartyDetails respondent = PartyDetails.builder().firstName("TestName")
             .isAddressConfidential(YesOrNo.No)
             .isEmailAddressConfidential(YesOrNo.No)
@@ -358,7 +358,7 @@ public class ConfidentialDetailsGeneratorTest {
     }
 
     @Test
-    public void testIfRespondentEmailMarkedConfidentialInfo() {
+    void testIfRespondentEmailMarkedConfidentialInfo() {
         PartyDetails respondent = PartyDetails.builder().firstName("TestName")
             .isAddressConfidential(YesOrNo.No)
             .isEmailAddressConfidential(YesOrNo.Yes)
@@ -379,7 +379,7 @@ public class ConfidentialDetailsGeneratorTest {
     }
 
     @Test
-    public void testIfRespondentConfidentialDetailsForDAisYes() {
+    void testIfRespondentConfidentialDetailsForDAisYes() {
 
         PartyDetails respondent = PartyDetails.builder().firstName("TestName")
             .isAddressConfidential(YesOrNo.No)
@@ -400,7 +400,7 @@ public class ConfidentialDetailsGeneratorTest {
     }
 
     @Test
-    public void testIfRespondentConfidentialDetailsForDAisNo() {
+    void testIfRespondentConfidentialDetailsForDAisNo() {
 
         PartyDetails respondent = PartyDetails.builder().firstName("TestName")
             .isAddressConfidential(YesOrNo.No)

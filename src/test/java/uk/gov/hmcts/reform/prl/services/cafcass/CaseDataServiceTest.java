@@ -70,7 +70,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
 @ExtendWith(MockitoExtension.class)
-public class CaseDataServiceTest {
+class CaseDataServiceTest {
     private final String s2sToken = "s2s token";
 
     private final String userToken = "Bearer testToken";
@@ -106,14 +106,14 @@ public class CaseDataServiceTest {
     private ObjectMapper objMapper;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
     }
 
 
     @Test
-    public void getCaseData() throws IOException {
+    void getCaseData() throws IOException {
 
         final List<CaseHearing> caseHearings = new ArrayList();
 
@@ -185,7 +185,7 @@ public class CaseDataServiceTest {
     }
 
     @Test
-    public void testGetCaseDataWithRegion() throws IOException {
+    void testGetCaseDataWithRegion() throws IOException {
 
         final List<CaseHearing> caseHearings = new ArrayList();
 
@@ -270,7 +270,7 @@ public class CaseDataServiceTest {
     }
 
     @org.junit.Test
-    public void testGetCaseDataWithZeroRecords() throws IOException {
+    void testGetCaseDataWithZeroRecords() throws IOException {
 
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
         objectMapper.registerModule(new ParameterNamesModule());
@@ -295,7 +295,7 @@ public class CaseDataServiceTest {
     }
 
     @Test
-    public void testGetCaseDataThrowingException() throws Exception {
+    void testGetCaseDataThrowingException() throws Exception {
 
         final List<CaseHearing> caseHearings = new ArrayList();
 
@@ -342,7 +342,7 @@ public class CaseDataServiceTest {
     }
 
     @Test
-    public void testFilterCancelledHearingsBeforeListing() {
+    void testFilterCancelledHearingsBeforeListing() {
 
         final List<CaseHearing> caseHearings = new ArrayList();
 
@@ -383,12 +383,12 @@ public class CaseDataServiceTest {
 
         caseDataService.filterCancelledHearingsBeforeListing(listOfHearings);
 
-        assertEquals(2, listOfHearings.get(0).getCaseHearings().size());
+        assertEquals(2, listOfHearings.getFirst().getCaseHearings().size());
 
     }
 
     @Test
-    public void testCheckIfDocumentsNeedToExcludeScenario1() {
+    void testCheckIfDocumentsNeedToExcludeScenario1() {
         List<String> excludedDocumentList = List.of(
             "Draft_C100_application",
             "C8Document",
@@ -400,7 +400,7 @@ public class CaseDataServiceTest {
     }
 
     @Test
-    public void testCheckIfDocumentsNeedToExcludeScenario2() {
+    void testCheckIfDocumentsNeedToExcludeScenario2() {
         List<String> excludedDocumentList = List.of(
             "Draft_C100_application",
             "C8Document",
@@ -412,7 +412,7 @@ public class CaseDataServiceTest {
     }
 
     @Test
-    public void testaddSpecificDocumentsFromCaseFileViewBasedOnCategories() throws NoSuchMethodException,
+    void testaddSpecificDocumentsFromCaseFileViewBasedOnCategories() throws NoSuchMethodException,
         InvocationTargetException, IllegalAccessException {
         Document document = Document.builder().documentUrl("test").documentFileName("test").build();
         when(objMapper.convertValue(any(QuarantineLegalDoc.class), eq(Map.class))).thenReturn(new HashMap<>());
@@ -473,9 +473,9 @@ public class CaseDataServiceTest {
         privateMethod.setAccessible(true);
         privateMethod.invoke(caseDataService, cafCassResponse);
 
-        assertEquals("test", cafCassResponse.getCases().get(0).getCaseData().getOtherDocuments().get(0).getValue().getDocumentName());
-        assertNull(cafCassResponse.getCases().get(0).getCaseData().getCourtStaffUploadDocListDocTab());
-        assertNull(cafCassResponse.getCases().get(0).getCaseData().getCafcassUploadDocListDocTab());
+        assertEquals("test", cafCassResponse.getCases().getFirst().getCaseData().getOtherDocuments().getFirst().getValue().getDocumentName());
+        assertNull(cafCassResponse.getCases().getFirst().getCaseData().getCourtStaffUploadDocListDocTab());
+        assertNull(cafCassResponse.getCases().getFirst().getCaseData().getCafcassUploadDocListDocTab());
 
     }
 

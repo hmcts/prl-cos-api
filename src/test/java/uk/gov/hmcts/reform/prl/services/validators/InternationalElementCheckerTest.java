@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @ExtendWith(MockitoExtension.class)
-public class InternationalElementCheckerTest {
+class InternationalElementCheckerTest {
 
     @Mock
     TaskErrorService taskErrorService;
@@ -23,7 +23,7 @@ public class InternationalElementCheckerTest {
     InternationalElementChecker internationalElementChecker;
 
     @Test
-    public void mandatoryAlwaysFalse() {
+    void mandatoryAlwaysFalse() {
 
 
         CaseData caseData = CaseData.builder().build();
@@ -32,7 +32,7 @@ public class InternationalElementCheckerTest {
     }
 
     @Test
-    public void notFinishedWithEmptyFields() {
+    void notFinishedWithEmptyFields() {
 
         CaseData caseData = CaseData.builder().build();
         boolean isFinished = internationalElementChecker.isFinished(caseData);
@@ -40,7 +40,7 @@ public class InternationalElementCheckerTest {
     }
 
     @Test
-    public void notFinishedWithFieldValuesYes() {
+    void notFinishedWithFieldValuesYes() {
 
         CaseData caseData = CaseData.builder().habitualResidentInOtherState(Yes).jurisdictionIssue(Yes)
             .requestToForeignAuthority(Yes).build();
@@ -49,7 +49,7 @@ public class InternationalElementCheckerTest {
     }
 
     @Test
-    public void finishedWithFieldValuesYes() {
+    void finishedWithFieldValuesYes() {
 
         CaseData caseData = CaseData.builder()
             .habitualResidentInOtherState(Yes)
@@ -64,7 +64,7 @@ public class InternationalElementCheckerTest {
     }
 
     @Test
-    public void notStartedWithBlankOrEmptyFieldValues() {
+    void notStartedWithBlankOrEmptyFieldValues() {
 
         CaseData caseData = CaseData.builder().habitualResidentInOtherState(null).jurisdictionIssue(null)
             .requestToForeignAuthority(null).build();
@@ -73,14 +73,14 @@ public class InternationalElementCheckerTest {
     }
 
     @Test
-    public void notStartedWithUnattendedFieldValues() {
+    void notStartedWithUnattendedFieldValues() {
         CaseData caseData = CaseData.builder().build();
         boolean isStarted = internationalElementChecker.isStarted(caseData);
         assertFalse(isStarted);
     }
 
     @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+    void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
         assertNotNull(internationalElementChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
-public class CcdCaseApiTest {
+class CcdCaseApiTest {
 
 
     @InjectMocks
@@ -52,7 +52,7 @@ public class CcdCaseApiTest {
     private static final String AUTH = "auth";
 
     @Test
-    public void testCreateCase() {
+    void testCreateCase() {
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder()
                               .amendOrderDynamicList(DynamicList.builder()
@@ -66,7 +66,7 @@ public class CcdCaseApiTest {
     }
 
     @Test
-    public void testUpdateCase() {
+    void testUpdateCase() {
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder()
                               .amendOrderDynamicList(DynamicList.builder()
@@ -84,7 +84,7 @@ public class CcdCaseApiTest {
     }
 
     @Test
-    public void testGetCase() {
+    void testGetCase() {
 
         CaseDetails caseDetails = CaseDetails.builder().caseTypeId("dsd").build();
         when(citizenCoreCaseDataService.getCase(AUTH, "12345")).thenReturn(caseDetails);

@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class ExtendedCaseDataServiceTest {
+class ExtendedCaseDataServiceTest {
 
     @Mock
     private AuthTokenGenerator authTokenGenerator;
@@ -33,7 +33,7 @@ public class ExtendedCaseDataServiceTest {
 
 
     @Test
-    public void testGetDataClassification() {
+    void testGetDataClassification() {
         Map<String, Object> dataClassification = new HashMap<>();
         dataClassification.put("draftConsentOrderFile", "PUBLIC");
         dataClassification.put("effortsMadeWithRespondents", "PUBLIC");

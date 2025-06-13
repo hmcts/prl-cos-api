@@ -37,7 +37,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class CaseSummaryTabServiceTest {
+class CaseSummaryTabServiceTest {
 
     @InjectMocks
     CaseSummaryTabService caseSummaryTabService;
@@ -94,7 +94,7 @@ public class CaseSummaryTabServiceTest {
     private static final String[] EMPTY_ARRAY = {};
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         when(allocatedJudgeDetailsGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY0);
         when(refugeCaseGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY1);
         when(caseStatusGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY2);
@@ -132,7 +132,7 @@ public class CaseSummaryTabServiceTest {
     }
 
     @Test
-    public void testWhenAllGeneratedFieldsAreDisjointed() {
+    void testWhenAllGeneratedFieldsAreDisjointed() {
 
         final Map<String, Object> actual = caseSummaryTabService.updateTab(CASE_DATA);
 
@@ -153,7 +153,7 @@ public class CaseSummaryTabServiceTest {
     }
 
     @Test
-    public void testWhenAllGeneratedFieldsWithNullValuesWillKeep() {
+    void testWhenAllGeneratedFieldsWithNullValuesWillKeep() {
 
         Map<String, Object> objectObjectHashMap = new HashMap<>();
         objectObjectHashMap.put("field0", "value0");
@@ -185,7 +185,7 @@ public class CaseSummaryTabServiceTest {
     }
 
     @Test
-    public void testWhenAllGeneratedFieldsWithNullValuesWillOverrideWhenOtherNonNull() {
+    void testWhenAllGeneratedFieldsWithNullValuesWillOverrideWhenOtherNonNull() {
 
         Map<String, Object> map = new HashMap<>();
         map.put("field0", "value0");

@@ -234,7 +234,7 @@ public class HelpWithFeesService {
                                     HWF_APPLICATION_DYNAMIC_DATA,
                                     String.format("%s, %s", caseData.getApplicantCaseName(), caseData.getId()),
                                     caseData.getHelpWithFeesNumber(),
-                                    caseData.getApplicants().get(0).getValue().getLabelForDynamicList(),
+                                    caseData.getApplicants().getFirst().getValue().getLabelForDynamicList(),
                                     CommonUtils.formatLocalDateTime(
                                         caseData.getCaseSubmittedTimeStamp(),
                                         DD_MMM_YYYY_HH_MM_SS

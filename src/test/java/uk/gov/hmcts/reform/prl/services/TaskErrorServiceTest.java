@@ -13,6 +13,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
@@ -36,14 +37,14 @@ public class TaskErrorServiceTest {
     String errorString2 = TYPE_OF_APPLICATION_ERROR.toString();
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         taskErrorService = new TaskErrorService();
         taskErrorService.addEventError(event, error, errorString);
         previousMapSize = taskErrorService.eventErrors.size();
     }
 
     @Test
-    public void whenAddEventErrorCalledThenMapIncreasesInSize() {
+    void whenAddEventErrorCalledThenMapIncreasesInSize() {
         Event newEvent = MIAM;
         EventErrorsEnum newEventError = MIAM_ERROR;
 
@@ -53,20 +54,20 @@ public class TaskErrorServiceTest {
     }
 
     @Test
-    public void whenRemoveEventErrorCalledThenMapDecreasesInSize() {
+    void whenRemoveEventErrorCalledThenMapDecreasesInSize() {
         taskErrorService.removeError(error);
         assertThat(taskErrorService.eventErrors).hasSize(previousMapSize - 1);
-        assertTrue(!taskErrorService.eventErrors.containsKey(error));
+        assertFalse(taskErrorService.eventErrors.containsKey(error));
     }
 
     @Test
-    public void whenClearingErrorsCalledThenMapCleared() {
+    void whenClearingErrorsCalledThenMapCleared() {
         taskErrorService.clearErrors();
         assertThat(taskErrorService.eventErrors).isEmpty();
     }
 
     @Test
-    public void whenGetErrorsCalledThenListOfErrorsReturned() {
+    void whenGetErrorsCalledThenListOfErrorsReturned() {
         taskErrorService.addEventError(event, error, errorString);
 
         List<EventValidationErrors> expectedList = new ArrayList<>();
@@ -87,7 +88,7 @@ public class TaskErrorServiceTest {
     }
 
     @Test
-    public void testThatListOfErrorsInCorrectEventOrder() {
+    void testThatListOfErrorsInCorrectEventOrder() {
         TaskErrorService taskErrorServ = new TaskErrorService();
 
         taskErrorServ.addEventError(event, error, errorString);
@@ -113,7 +114,7 @@ public class TaskErrorServiceTest {
 
         List<EventValidationErrors> actualList = taskErrorServ.getEventErrors(caseData);
 
-        assertEquals(actualList.get(0), expectedList.get(0));
+        assertEquals(actualList.getFirst(), expectedList.getFirst());
         assertEquals(actualList.get(1), expectedList.get(1));
 
     }

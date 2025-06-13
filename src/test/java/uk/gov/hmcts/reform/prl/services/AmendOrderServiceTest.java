@@ -26,19 +26,18 @@ import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static java.util.UUID.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class AmendOrderServiceTest {
+class AmendOrderServiceTest {
 
     @InjectMocks
     private AmendOrderService amendOrderService;
@@ -60,20 +59,21 @@ public class AmendOrderServiceTest {
 
     private final String validAuth = "VALID";
     private uk.gov.hmcts.reform.prl.models.documents.Document originalOrder;
-    private Document stampedDocument = testDocument();
-    private UUID uuid = UUID.randomUUID();
+    private final UUID uuid = randomUUID();
     private List<Element<OrderDetails>> orderList;
     private CaseData caseData;
 
     @BeforeEach
-    public void setUp() throws IOException {
+    void setUp() {
         originalOrder = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
             .documentFileName("filename.pdf")
             .build();
-        Element<OrderDetails> orders = ElementUtils.element(uuid, OrderDetails.builder()
-            .orderDocument(originalOrder)
+        Element<OrderDetails> orders = ElementUtils.element(
+            uuid, OrderDetails.builder()
+                .orderDocument(originalOrder)
                 .dateCreated(LocalDateTime.now())
-            .otherDetails(OtherOrderDetails.builder().build()).build());
+                .otherDetails(OtherOrderDetails.builder().build()).build()
+        );
         orderList = new ArrayList<>();
         orderList.add(orders);
         caseData = CaseData.builder()
@@ -89,14 +89,6 @@ public class AmendOrderServiceTest {
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
             .build();
 
-        byte[] stampedBinaries = new byte[]{1, 2, 3, 4, 5};
-        /* when(stamper.amendDocument(originalOrder, validAuth)).thenReturn(stampedBinaries);
-           when(uploadDocumentService.uploadDocument(
-            stampedBinaries,
-            "amended_filename.pdf",
-            "application/pdf",
-            validAuth
-        )).thenReturn(stampedDocument);*/
         when(time.now()).thenReturn(LocalDateTime.now());
         when(manageOrderService.getLoggedInUserType(Mockito.anyString())).thenReturn("");
 
@@ -105,12 +97,12 @@ public class AmendOrderServiceTest {
     }
 
     @Test
-    public void documentUpdateAndReturnedInMap() throws IOException {
+    void documentUpdateAndReturnedInMap() {
         assertNotNull(amendOrderService.updateOrder(caseData, validAuth));
     }
 
     @Test
-    public void testWantToServeOrderNo() throws IOException {
+    void testWantToServeOrderNo() {
         caseData = caseData.toBuilder()
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.No).build())
             .build();
@@ -118,7 +110,7 @@ public class AmendOrderServiceTest {
     }
 
     @Test
-    public void testWantToServeOrderNoWithData() throws IOException {
+    void testWantToServeOrderNoWithData() {
         caseData = caseData.toBuilder()
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.No)
                                 .whatDoWithOrder(WhatToDoWithOrderEnum.finalizeSaveToServeLater)
@@ -128,16 +120,17 @@ public class AmendOrderServiceTest {
     }
 
     @Test
-    public void testDraftOrdeCollection() throws IOException {
-        assertNotNull(amendOrderService.setDraftOrderCollection(caseData,
-                                                                uk.gov.hmcts.reform.prl.models.documents.Document
-                                                                   .builder().build(),
-                                                                UserRoles.JUDGE.name(),"currentUserName"
+    void testDraftOrderCollection() {
+        assertNotNull(amendOrderService.setDraftOrderCollection(
+            caseData,
+            uk.gov.hmcts.reform.prl.models.documents.Document
+                .builder().build(),
+            UserRoles.JUDGE.name(), "currentUserName"
         ));
     }
 
     @Test
-    public void testDraftOrdeCollectionWithData() throws IOException {
+    void testDraftOrderCollectionWithData() {
         caseData = caseData.toBuilder()
             .draftOrderCollection(List.of(Element.<DraftOrder>builder()
                                               .value(DraftOrder.builder().otherDetails(OtherDraftOrderDetails.builder()
@@ -146,14 +139,16 @@ public class AmendOrderServiceTest {
                                                                                                AmendOrderCheckEnum.noCheck)
                                                                                            .build()).build())
                                               .build())).build();
-        assertNotNull(amendOrderService.setDraftOrderCollection(caseData,
-                                                                uk.gov.hmcts.reform.prl.models.documents.Document
-                                                                    .builder().build(),
-                                                                "","currentUserName"));
+        assertNotNull(amendOrderService.setDraftOrderCollection(
+            caseData,
+            uk.gov.hmcts.reform.prl.models.documents.Document
+                .builder().build(),
+            "", "currentUserName"
+        ));
     }
 
     @Test
-    public void testDraftOrdeCollectionWithManagerCheck() throws IOException {
+    void testDraftOrderCollectionWithManagerCheck() {
         caseData = caseData.toBuilder()
             .draftOrderCollection(List.of(Element.<DraftOrder>builder()
                                               .value(DraftOrder.builder().otherDetails(OtherDraftOrderDetails.builder()
@@ -162,14 +157,16 @@ public class AmendOrderServiceTest {
                                                                                                AmendOrderCheckEnum.managerCheck)
                                                                                            .build()).build())
                                               .build())).build();
-        assertNotNull(amendOrderService.setDraftOrderCollection(caseData,
-                                                                uk.gov.hmcts.reform.prl.models.documents.Document
-                                                                    .builder().build(),
-                                                                "","currentUserName"));
+        assertNotNull(amendOrderService.setDraftOrderCollection(
+            caseData,
+            uk.gov.hmcts.reform.prl.models.documents.Document
+                .builder().build(),
+            "", "currentUserName"
+        ));
     }
 
     @Test
-    public void testDraftOrdeCollectionWithJudgeCheck() throws IOException {
+    void testDraftOrderCollectionWithJudgeCheck() {
         caseData = caseData.toBuilder()
             .draftOrderCollection(List.of(Element.<DraftOrder>builder()
                                               .value(DraftOrder.builder().otherDetails(OtherDraftOrderDetails.builder()
@@ -178,14 +175,16 @@ public class AmendOrderServiceTest {
                                                                                                AmendOrderCheckEnum.judgeOrLegalAdvisorCheck)
                                                                                            .build()).build())
                                               .build())).build();
-        assertNotNull(amendOrderService.setDraftOrderCollection(caseData,
-                                                                uk.gov.hmcts.reform.prl.models.documents.Document
-                                                                    .builder().build(),
-                                                                "","currentUserName"));
+        assertNotNull(amendOrderService.setDraftOrderCollection(
+            caseData,
+            uk.gov.hmcts.reform.prl.models.documents.Document
+                .builder().build(),
+            "", "currentUserName"
+        ));
     }
 
     @Test
-    public void testDraftOrdeCollectionWithManagerCheck2() throws IOException {
+    void testDraftOrderCollectionWithManagerCheck2() {
         caseData = caseData.toBuilder()
             .orderCollection(orderList)
             .draftOrderCollection(List.of(Element.<DraftOrder>builder()
@@ -196,21 +195,23 @@ public class AmendOrderServiceTest {
                                                                                            .build()).build())
                                               .build()))
             .manageOrders(ManageOrders.builder()
-                         .manageOrdersDocumentToAmend(originalOrder)
-                         .amendOrderSelectCheckOptions(AmendOrderCheckEnum.managerCheck)
-                         .amendOrderDynamicList(DynamicList.builder()
-                                                    .value(DynamicListElement.builder()
-                                                               .code(uuid)
-                                                               .build()).build()).build())
+                              .manageOrdersDocumentToAmend(originalOrder)
+                              .amendOrderSelectCheckOptions(AmendOrderCheckEnum.managerCheck)
+                              .amendOrderDynamicList(DynamicList.builder()
+                                                         .value(DynamicListElement.builder()
+                                                                    .code(uuid)
+                                                                    .build()).build()).build())
             .build();
-        assertNotNull(amendOrderService.setDraftOrderCollection(caseData,
-                                                                uk.gov.hmcts.reform.prl.models.documents.Document
-                                                                    .builder().build(),
-                                                                "","currentUserName"));
+        assertNotNull(amendOrderService.setDraftOrderCollection(
+            caseData,
+            uk.gov.hmcts.reform.prl.models.documents.Document
+                .builder().build(),
+            "", "currentUserName"
+        ));
     }
 
     @Test
-    public void testDraftOrdeCollectionWithManagerCheck3() throws IOException {
+    void testDraftOrderCollectionWithManagerCheck3() {
         caseData = caseData.toBuilder()
             .orderCollection(orderList)
             .draftOrderCollection(List.of(Element.<DraftOrder>builder()
@@ -220,18 +221,22 @@ public class AmendOrderServiceTest {
                                                                                                AmendOrderCheckEnum.managerCheck)
                                                                                            .build()).build())
                                               .build())).build();
-        assertNotNull(amendOrderService.setDraftOrderCollection(caseData,
-                                                                uk.gov.hmcts.reform.prl.models.documents.Document
-                                                                    .builder().build(),
-                                                                UserRoles.JUDGE.name(),"currentUserName"));
+        assertNotNull(amendOrderService.setDraftOrderCollection(
+            caseData,
+            uk.gov.hmcts.reform.prl.models.documents.Document
+                .builder().build(),
+            UserRoles.JUDGE.name(), "currentUserName"
+        ));
     }
 
     @Test
-    public void testDraftOrdeCollectionWithManagerCheck1() throws IOException {
-        Element<OrderDetails> orders = ElementUtils.element(UUID.randomUUID(), OrderDetails.builder()
-            .orderDocument(originalOrder)
-            .dateCreated(LocalDateTime.now())
-            .otherDetails(OtherOrderDetails.builder().build()).build());
+    void testDraftOrderCollectionWithManagerCheck1() {
+        Element<OrderDetails> orders = ElementUtils.element(
+            randomUUID(), OrderDetails.builder()
+                .orderDocument(originalOrder)
+                .dateCreated(LocalDateTime.now())
+                .otherDetails(OtherOrderDetails.builder().build()).build()
+        );
         orderList = new ArrayList<>();
         orderList.add(orders);
         caseData = caseData.toBuilder()
@@ -243,22 +248,26 @@ public class AmendOrderServiceTest {
                                                                                                AmendOrderCheckEnum.managerCheck)
                                                                                            .build()).build())
                                               .build())).build();
-        assertNotNull(amendOrderService.setDraftOrderCollection(caseData,
-                                                                uk.gov.hmcts.reform.prl.models.documents.Document
-                                                                    .builder().build(),
-                                                                "","currentUserName"));
+        assertNotNull(amendOrderService.setDraftOrderCollection(
+            caseData,
+            uk.gov.hmcts.reform.prl.models.documents.Document
+                .builder().build(),
+            "", "currentUserName"
+        ));
     }
 
     @Test
-    public void documentUpdateAndReturnedInMap1() throws IOException {
+    void documentUpdateAndReturnedInMap1() {
 
         originalOrder = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
             .documentFileName("amended_filename.pdf")
             .build();
-        Element<OrderDetails> orders = ElementUtils.element(uuid, OrderDetails.builder()
-            .orderDocument(originalOrder)
-            .dateCreated(LocalDateTime.now())
-            .otherDetails(OtherOrderDetails.builder().build()).build());
+        Element<OrderDetails> orders = ElementUtils.element(
+            uuid, OrderDetails.builder()
+                .orderDocument(originalOrder)
+                .dateCreated(LocalDateTime.now())
+                .otherDetails(OtherOrderDetails.builder().build()).build()
+        );
         orderList = new ArrayList<>();
         orderList.add(orders);
         caseData = caseData.toBuilder()
@@ -270,9 +279,9 @@ public class AmendOrderServiceTest {
 
     public static Document testDocument() {
         Document.Link binaryLink = new Document.Link();
-        binaryLink.href = randomAlphanumeric(10);
+        binaryLink.href = randomUUID().toString().replace("-", "").substring(0, 10);
         Document.Link selfLink = new Document.Link();
-        selfLink.href = randomAlphanumeric(10);
+        selfLink.href = randomUUID().toString().replace("-", "").substring(0, 10);
 
         Document.Links links = new Document.Links();
         links.binary = binaryLink;
@@ -280,7 +289,7 @@ public class AmendOrderServiceTest {
 
         Document document = Document.builder().build();
         document.links = links;
-        document.originalDocumentName = randomAlphanumeric(10);
+        document.originalDocumentName = randomUUID().toString().replace("-", "").substring(0, 10);
 
         return document;
     }

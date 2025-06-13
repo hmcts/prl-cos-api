@@ -27,7 +27,6 @@ import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.rpa.mappers.json.NullAwareJsonObjectBuilder;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
-import javax.json.JsonObject;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -36,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.json.JsonObject;
 
 import static org.bouncycastle.cert.ocsp.OCSPResp.SUCCESSFUL;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -47,7 +47,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_AP
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
-public class SendgridServiceTest {
+class SendgridServiceTest {
 
     @InjectMocks
     private SendgridService sendgridService;
@@ -74,7 +74,7 @@ public class SendgridServiceTest {
 
 
     @Test
-    public void testSendEmailInvokingSendGridApi() throws IOException {
+    void testSendEmailInvokingSendGridApi() throws IOException {
         Response response = new Response();
         response.setStatusCode(200);
         JsonObject jsonObject = new NullAwareJsonObjectBuilder()
@@ -89,7 +89,7 @@ public class SendgridServiceTest {
 
 
     @Test
-    public void testSendEmailUsingTemplatesWithAttachments() throws Exception {
+    void testSendEmailUsingTemplatesWithAttachments() throws Exception {
 
         PartyDetails applicant = PartyDetails.builder()
             .solicitorEmail("test@gmail.com")
@@ -189,7 +189,7 @@ public class SendgridServiceTest {
     }
 
     @Test
-    public void testSendEmailUsingTemplatesWithAttachments_scenario3() throws Exception {
+    void testSendEmailUsingTemplatesWithAttachments_scenario3() throws Exception {
 
         PartyDetails applicant = PartyDetails.builder()
             .solicitorEmail("test@gmail.com")
@@ -294,7 +294,7 @@ public class SendgridServiceTest {
     }
 
     @Test
-    public void testSendEmailUsingTemplatesWithAttachments_scenario2() throws Exception {
+    void testSendEmailUsingTemplatesWithAttachments_scenario2() throws Exception {
 
         PartyDetails applicant = PartyDetails.builder()
             .solicitorEmail("test@gmail.com")
@@ -399,7 +399,7 @@ public class SendgridServiceTest {
     }
 
     @Test
-    public void testTransferCourtEmailWithAttachments() throws Exception {
+    void testTransferCourtEmailWithAttachments() throws Exception {
 
         PartyDetails applicant = PartyDetails.builder()
             .solicitorEmail("test@gmail.com")

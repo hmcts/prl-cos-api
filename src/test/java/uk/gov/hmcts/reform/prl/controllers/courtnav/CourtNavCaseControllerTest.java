@@ -38,15 +38,17 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.CAFCASS_USER_ROLE;
 
 @ExtendWith(MockitoExtension.class)
-public class CourtNavCaseControllerTest {
+class CourtNavCaseControllerTest {
 
-    private static final String FILE_NAME = "fileName";
-    private static final String CONTENT_TYPE = "application/json";
     private static final String AUTH = "auth";
+
+    private MockMultipartFile file;
 
     @InjectMocks
     private CourtNavCaseController courtNavCaseController;
@@ -66,8 +68,6 @@ public class CourtNavCaseControllerTest {
     @Mock
     private IdamClient idamClient;
 
-    MockMultipartFile file;
-
     @Mock
     private CafcassUploadDocService cafcassUploadDocService;
 
@@ -75,9 +75,8 @@ public class CourtNavCaseControllerTest {
     private PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     @BeforeEach
-    public void setUp() {
-        file
-            = new MockMultipartFile(
+    void setUp() {
+        file = new MockMultipartFile(
             "file",
             "hello.txt",
             MediaType.TEXT_PLAIN_VALUE,
@@ -86,36 +85,35 @@ public class CourtNavCaseControllerTest {
     }
 
     @Test
-    public void shouldCreateCaseWhenCalled() throws Exception {
+    void shouldCreateCaseWhenCalled() throws Exception {
         CaseData caseData = CaseData.builder()
             .applicantCaseName("test")
             .build();
-        when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
-        when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
-            1234567891234567L).data(Map.of("id", "1234567891234567")).build());
+
         CourtNavFl401 courtNavCaseData = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
                        .beforeStart(BeforeStart.builder().applicantHowOld(
                            ApplicantAge.eighteenOrOlder).build()).build())
             .build();
-        when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData,"Bearer:test")).thenReturn(caseData);
-
-        ResponseEntity response = courtNavCaseController.createCase("Bearer:test", "s2s token", courtNavCaseData);
-        assertEquals(201, response.getStatusCodeValue());
-
-    }
-
-    @Test
-    public void shouldUploadDocumentWhenCalledWithValidS2sAndAuthToken() throws Exception {
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
-        doNothing().when(courtNavCaseService).uploadDocument(any(), any(), any(), any());
+        when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(
+            CaseDetails.builder().id(1234567891234567L).data(Map.of("id", "1234567891234567")).build());
+        when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData, "Bearer:test")).thenReturn(caseData);
 
-        UserInfo userInfo = UserInfo.builder().roles(
-            List.of("COURTNAV")).build();
+        ResponseEntity response = courtNavCaseController.createCase("Bearer:test", "s2s token", courtNavCaseData);
+        assertEquals(CREATED, response.getStatusCode());
+    }
+
+    @Test
+    void shouldUploadDocumentWhenCalledWithValidS2sAndAuthToken() {
+        UserInfo userInfo = UserInfo.builder().roles(List.of("COURTNAV")).build();
+
         when(authorisationService.getUserInfo()).thenReturn(userInfo);
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        doNothing().when(courtNavCaseService).uploadDocument(any(), any(), any(), any());
 
         ResponseEntity response = courtNavCaseController.uploadDocument(
             AUTH,
@@ -124,22 +122,18 @@ public class CourtNavCaseControllerTest {
             file,
             "fl401Doc1"
         );
-        assertEquals(200, response.getStatusCodeValue());
-
+        assertEquals(OK, response.getStatusCode());
     }
 
     @Test
-    public void shouldUploadDocumentWhenCalledWithValidS2sAndAuthToken_Cafcass() throws Exception {
+    void shouldUploadDocumentWhenCalledWithValidS2sAndAuthToken_Cafcass() {
+        UserInfo userInfo = UserInfo.builder().roles(List.of(CAFCASS_USER_ROLE)).build();
 
+        when(authorisationService.getUserInfo()).thenReturn(userInfo);
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         doNothing().when(cafcassUploadDocService).uploadDocument(any(), any(), any(), any());
 
-        UserInfo userInfo = UserInfo.builder().roles(
-            List.of(CAFCASS_USER_ROLE)).build();
-
-        when(authorisationService.getUserInfo()).thenReturn(userInfo);
-
         ResponseEntity response = courtNavCaseController.uploadDocument(
             AUTH,
             "s2s token",
@@ -147,93 +141,97 @@ public class CourtNavCaseControllerTest {
             file,
             "fl401Doc1"
         );
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(OK, response.getStatusCode());
 
     }
 
     @Test
-    public void shouldGetForbiddenWhenCalledWithInvalidToken() throws Exception {
-        CaseData caseData = CaseData.builder()
-            .applicantCaseName("test")
-            .build();
-        when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
-            1234567891234567L).data(Map.of("id", "1234567891234567")).build());
+    void shouldGetForbiddenWhenCalledWithInvalidToken() {
+
         CourtNavFl401 courtNavCaseData = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
                        .beforeStart(BeforeStart.builder().applicantHowOld(
                            ApplicantAge.eighteenOrOlder).build()).build())
             .build();
-        when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData,"Bearer:test")).thenReturn(caseData);
-        assertThrows(ResponseStatusException.class, () -> courtNavCaseController.createCase("Bearer:test", "s2s token", courtNavCaseData));
+
+        assertThrows(ResponseStatusException.class, () ->
+            courtNavCaseController.createCase("Bearer:test", "s2s token", courtNavCaseData)
+        );
     }
 
     @Test
-    public void shouldGetForbiddenWhenCalledWithInvalidS2SToken() throws Exception {
-        CaseData caseData = CaseData.builder()
-            .applicantCaseName("test")
+    void shouldGetForbiddenWhenCalledWithInvalidS2SToken() {
+        CourtNavFl401 courtNavCaseData = CourtNavFl401.builder()
+            .fl401(CourtNavCaseData.builder()
+                       .beforeStart(BeforeStart.builder().applicantHowOld(
+                           ApplicantAge.eighteenOrOlder).build()).build())
             .build();
+
         when(authorisationService.authoriseUser(any())).thenReturn(true);
-        when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
-            1234567891234567L).data(Map.of("id", "1234567891234567")).build());
-        CourtNavFl401 courtNavCaseData = CourtNavFl401.builder()
-            .fl401(CourtNavCaseData.builder()
-                       .beforeStart(BeforeStart.builder().applicantHowOld(
-                           ApplicantAge.eighteenOrOlder).build()).build())
-            .build();
-        when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData,"Bearer:test")).thenReturn(caseData);
-        assertThrows(ResponseStatusException.class, () -> courtNavCaseController.createCase("Bearer:test", "s2s token", courtNavCaseData));
 
-    }
-
-    @Test(expected = ResponseStatusException.class)
-    public void shouldNotCreateCaseWhenCalledWithInvalidS2SToken() throws Exception {
-        CourtNavFl401 courtNavCaseData = CourtNavFl401.builder()
-            .fl401(CourtNavCaseData.builder()
-                       .beforeStart(BeforeStart.builder().applicantHowOld(
-                           ApplicantAge.eighteenOrOlder).build()).build())
-            .build();
-        ResponseEntity response = courtNavCaseController
-            .createCase("Bearer:test", "s2s token", courtNavCaseData);
+        assertThrows(ResponseStatusException.class, () ->
+            courtNavCaseController.createCase("Bearer:test", "s2s token", courtNavCaseData)
+        );
     }
 
     @Test
-    public void shouldUploadDocWhenCalledWithCorrectParameters() {
+    void shouldNotCreateCaseWhenCalledWithInvalidS2SToken() {
+        CourtNavFl401 courtNavCaseData = CourtNavFl401.builder()
+            .fl401(CourtNavCaseData.builder()
+                       .beforeStart(BeforeStart.builder().applicantHowOld(
+                           ApplicantAge.eighteenOrOlder).build()).build())
+            .build();
+
+        assertThrows(ResponseStatusException.class, () -> {
+            courtNavCaseController.createCase("Bearer:test", "s2s token", courtNavCaseData);
+        });
+    }
+
+    @Test
+    void shouldUploadDocWhenCalledWithCorrectParameters() {
+        UserInfo userInfo = UserInfo.builder().roles(List.of("COURTNAV")).build();
+
+        when(authorisationService.getUserInfo()).thenReturn(userInfo);
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         doNothing().when(courtNavCaseService).uploadDocument(any(), any(), any(), any());
-        UserInfo userInfo = UserInfo.builder().roles(
-            List.of("COURTNAV")).build();
-        when(authorisationService.getUserInfo()).thenReturn(userInfo);
 
         ResponseEntity response = courtNavCaseController
-            .uploadDocument("Bearer:test", "s2s token",
-                            "", file, "fl401Doc1"
+            .uploadDocument(
+                "Bearer:test", "s2s token",
+                "", file, "fl401Doc1"
             );
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(OK, response.getStatusCode());
 
-    }
-
-    @Test(expected = ResponseStatusException.class)
-    public void shouldNotUploadDocWhenCalledWithInvalidAuthToken() {
-        when(authorisationService.authoriseService(any())).thenReturn(true);
-        ResponseEntity response = courtNavCaseController
-            .uploadDocument("Bearer:invalid", "s2s token",
-                            "", file, "fl401Doc1"
-            );
-    }
-
-    @Test(expected = ResponseStatusException.class)
-    public void shouldNotUploadDocWhenCalledWithInvalidS2SToken() {
-        ResponseEntity response = courtNavCaseController
-            .uploadDocument("Bearer:test", "s2s token",
-                            "", file, "fl401Doc1"
-            );
     }
 
     @Test
-    public void shouldCreateCaseWhenFamilyHomeListIsEmpty() throws Exception {
-        Home testHome = Home.builder()
+    void shouldNotUploadDocWhenCalledWithInvalidAuthToken() {
+        assertThrows(
+            ResponseStatusException.class, () -> {
+                courtNavCaseController.uploadDocument(
+                    "Bearer:invalid", "s2s token",
+                    "", file, "fl401Doc1"
+                );
+            }
+        );
+    }
+
+    @Test
+    void shouldNotUploadDocWhenCalledWithInvalidS2SToken() {
+        assertThrows(
+            ResponseStatusException.class, () -> {
+                courtNavCaseController.uploadDocument(
+                    "Bearer:test", "s2s token",
+                    "", file, "fl401Doc1"
+                );
+            }
+        );
+    }
+
+    @Test
+    void shouldCreateCaseWhenFamilyHomeListIsEmpty() throws Exception {
+        Home home = Home.builder()
             .everLivedAtTheAddress(YesNoBothEnum.yesApplicant)
             .doesApplicantHaveHomeRights(No)
             .doAnyChildrenLiveAtAddress(No)
@@ -242,14 +240,17 @@ public class CourtNavCaseControllerTest {
             .isPropertyAdapted(No)
             .peopleLivingAtThisAddress(List.of(PeopleLivingAtThisAddressEnum.applicant))
             .familyHome(Collections.emptyList()).build();
+
         CaseData caseData = CaseData.builder()
             .applicantCaseName("test")
-            .home(testHome)
+            .home(home)
             .build();
+
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
-        when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
-            1234567891234567L).data(Map.of("id", "1234567891234567")).build());
+        when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(
+            CaseDetails.builder().id(1234567891234567L).data(Map.of("id", "1234567891234567")).build());
+
         CourtNavFl401 courtNavCaseData = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
                        .beforeStart(BeforeStart.builder().applicantHowOld(
@@ -259,9 +260,14 @@ public class CourtNavCaseControllerTest {
                                     .build())
                        .build())
             .build();
-        when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData,"Bearer:test")).thenReturn(caseData);
+        when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData, "Bearer:test")).thenReturn(caseData);
 
-        ResponseEntity<Object> response = courtNavCaseController.createCase("Bearer:test", "s2s token", courtNavCaseData);
-        assertEquals(201,  response.getStatusCode().value());
+        ResponseEntity<Object> response = courtNavCaseController.createCase(
+            "Bearer:test",
+            "s2s token",
+            courtNavCaseData
+        );
+
+        assertEquals(CREATED, response.getStatusCode());
     }
 }

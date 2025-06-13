@@ -23,7 +23,7 @@ public class ValidateMiamApplicationOrExemptionTaskTest {
         new ValidateMiamApplicationOrExemptionTask();
 
     @Test
-    public void givenApplicantHasNotAttendedMiam_whenApplicantDoesNotHaveMiamExemption_thenErrorReturnedInResult() {
+    void givenApplicantHasNotAttendedMiam_whenApplicantDoesNotHaveMiamExemption_thenErrorReturnedInResult() {
 
         WorkflowResult workflowData = new WorkflowResult(ImmutableMap.of(
             APPLICANT_ATTENDED_MIAM, NO,
@@ -31,11 +31,11 @@ public class ValidateMiamApplicationOrExemptionTaskTest {
 
         WorkflowResult workflowResult = validateMiamApplicationOrExemptionTask.execute(new DefaultTaskContext(), workflowData);
 
-        assertThat(workflowResult.getErrors().get(0), is(ERROR_MSG_MIAM));
+        assertThat(workflowResult.getErrors().getFirst(), is(ERROR_MSG_MIAM));
     }
 
     @Test
-    public void givenApplicantHasAttendedMiam_whenApplicantDoesNotHaveMiamExemption_thenNoErrorReturnedInResult() {
+    void givenApplicantHasAttendedMiam_whenApplicantDoesNotHaveMiamExemption_thenNoErrorReturnedInResult() {
 
         WorkflowResult workflowData = new WorkflowResult(ImmutableMap.of(
             APPLICANT_ATTENDED_MIAM, YES,
@@ -47,7 +47,7 @@ public class ValidateMiamApplicationOrExemptionTaskTest {
     }
 
     @Test
-    public void givenApplicantHasNotAttendedMiam_whenApplicantDoesHaveMiamExemption_thenNoErrorReturnedInResult() {
+    void givenApplicantHasNotAttendedMiam_whenApplicantDoesHaveMiamExemption_thenNoErrorReturnedInResult() {
 
         WorkflowResult workflowData = new WorkflowResult(ImmutableMap.of(
             APPLICANT_ATTENDED_MIAM, NO,
@@ -59,7 +59,7 @@ public class ValidateMiamApplicationOrExemptionTaskTest {
     }
 
     @Test
-    public void testV3ErrorMessageChildInvolved() {
+    void testV3ErrorMessageChildInvolved() {
 
         WorkflowResult workflowData = new WorkflowResult(ImmutableMap.of(
             "taskListVersion", "v3",
@@ -73,7 +73,7 @@ public class ValidateMiamApplicationOrExemptionTaskTest {
     }
 
     @Test
-    public void testV3ErrorMessageApplicantAttended() {
+    void testV3ErrorMessageApplicantAttended() {
 
         WorkflowResult workflowData = new WorkflowResult(ImmutableMap.of(
             "taskListVersion", "v3",
@@ -87,7 +87,7 @@ public class ValidateMiamApplicationOrExemptionTaskTest {
     }
 
     @Test
-    public void testV3ErrorMessageClaimingExemption() {
+    void testV3ErrorMessageClaimingExemption() {
 
         WorkflowResult workflowData = new WorkflowResult(ImmutableMap.of(
             "taskListVersion", "v3",
@@ -101,7 +101,7 @@ public class ValidateMiamApplicationOrExemptionTaskTest {
     }
 
     @Test
-    public void testV3ErrorMessageThrowsError() {
+    void testV3ErrorMessageThrowsError() {
 
         WorkflowResult workflowData = new WorkflowResult(ImmutableMap.of(
             "taskListVersion", "v3",
@@ -111,6 +111,6 @@ public class ValidateMiamApplicationOrExemptionTaskTest {
 
         WorkflowResult workflowResult = validateMiamApplicationOrExemptionTask.execute(new DefaultTaskContext(), workflowData);
 
-        assertThat(workflowResult.getErrors().get(0), is(ERROR_MSG_MIAM));
+        assertThat(workflowResult.getErrors().getFirst(), is(ERROR_MSG_MIAM));
     }
 }
