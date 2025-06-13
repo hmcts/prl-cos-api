@@ -398,7 +398,10 @@ dependencies {
 
   testImplementation group: 'org.awaitility', name: 'awaitility', version: versions.awaitility
   testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: versions.springCloud
+
+  testImplementation(platform("org.junit:junit-bom:5.13.1"))
   testImplementation("org.springframework.boot:spring-boot-starter-test")
+  testRuntimeOnly("org.junit.vintage:junit-vintage-engine")
 
   testImplementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
   testImplementation group: 'io.rest-assured', name: 'rest-assured', version: '5.5.5'
@@ -467,16 +470,6 @@ dependencies {
   contractTestRuntimeOnly group: 'au.com.dius.pact.consumer', name: 'java8', version: versions.pact
 
   contractTestImplementation group: 'org.apache.httpcomponents', name: 'httpclient', version: versions.httpComponents
-
-  testImplementation("org.junit.jupiter:junit-jupiter:5.13.1")
-  testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.13.1")
-
-  testImplementation("junit:junit:4.13.2")
-
-  testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.13.1")
-
-  testImplementation("org.junit.platform:junit-platform-commons:1.13.1")
-  testRuntimeOnly("org.junit.platform:junit-platform-engine:1.13.1")
 
   contractTestImplementation sourceSets.main.runtimeClasspath
   contractTestImplementation sourceSets.test.runtimeClasspath
