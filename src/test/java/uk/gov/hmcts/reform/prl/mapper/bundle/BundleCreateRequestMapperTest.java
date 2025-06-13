@@ -570,7 +570,7 @@ public class BundleCreateRequestMapperTest {
             );
         assertNotNull(bundleCreateRequest);
         assertEquals(
-            bundleCreateRequest.getCaseDetails().getCaseData().getData().getAllOtherDocuments().get(0).getValue(),
+            bundleCreateRequest.getCaseDetails().getCaseData().getData().getAllOtherDocuments().getFirst().getValue(),
             otherProceedingsBundleDoc
         );
     }
@@ -622,7 +622,7 @@ public class BundleCreateRequestMapperTest {
             );
         assertNotNull(bundleCreateRequest);
         assertEquals(
-            bundleCreateRequest.getCaseDetails().getCaseData().getData().getAllOtherDocuments().get(0).getValue(),
+            bundleCreateRequest.getCaseDetails().getCaseData().getData().getAllOtherDocuments().getFirst().getValue(),
             otherProceedingsBundleDoc
         );
     }

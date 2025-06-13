@@ -239,8 +239,8 @@ public class C100CaseInviteServiceTest {
         List<Element<CaseInvite>> respondentCaseInvites = c100CaseInviteService
             .generateAndSendCaseInviteForCaRespondent(caseDataWithRespondentsAllWithRepresentation, element(respondentTwoWithEmail));
         assertEquals(1, respondentCaseInvites.size());
-        assertEquals(YesOrNo.No, respondentCaseInvites.get(0).getValue().getIsApplicant());
-        assertEquals("respondentTwo@email.com", respondentCaseInvites.get(0).getValue()
+        assertEquals(YesOrNo.No, respondentCaseInvites.getFirst().getValue().getIsApplicant());
+        assertEquals("respondentTwo@email.com", respondentCaseInvites.getFirst().getValue()
             .getCaseInviteEmail());
     }
 
@@ -257,8 +257,8 @@ public class C100CaseInviteServiceTest {
         List<Element<CaseInvite>> applicantCaseInvites = c100CaseInviteService
             .generateAndSendCaseInviteEmailForCaApplicant(caseDataWithApplicants, element(applicantWithEmail));
         assertEquals(1, applicantCaseInvites.size());
-        assertEquals(YesOrNo.Yes, applicantCaseInvites.get(0).getValue().getIsApplicant());
-        assertEquals("applicant@email.com", applicantCaseInvites.get(0).getValue()
+        assertEquals(YesOrNo.Yes, applicantCaseInvites.getFirst().getValue().getIsApplicant());
+        assertEquals("applicant@email.com", applicantCaseInvites.getFirst().getValue()
             .getCaseInviteEmail());
     }
 
@@ -307,7 +307,7 @@ public class C100CaseInviteServiceTest {
         List<Element<CaseInvite>> partyCaseInvites = c100CaseInviteService
             .generateAndSendCaseInviteForAllC100AppAndResp(caseData);
         assertEquals(2, partyCaseInvites.size());
-        assertEquals(YesOrNo.No, partyCaseInvites.get(0).getValue().getIsApplicant());
+        assertEquals(YesOrNo.No, partyCaseInvites.getFirst().getValue().getIsApplicant());
 
     }
 
@@ -356,7 +356,7 @@ public class C100CaseInviteServiceTest {
         List<Element<CaseInvite>> partyCaseInvites = c100CaseInviteService
             .generateAndSendCaseInviteForAllC100AppAndResp(caseData);
         assertEquals(2, partyCaseInvites.size());
-        assertEquals(YesOrNo.Yes, partyCaseInvites.get(0).getValue().getIsApplicant());
+        assertEquals(YesOrNo.Yes, partyCaseInvites.getFirst().getValue().getIsApplicant());
 
     }
 }

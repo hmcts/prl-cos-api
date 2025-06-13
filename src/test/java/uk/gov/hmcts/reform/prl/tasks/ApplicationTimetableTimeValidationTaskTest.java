@@ -31,7 +31,7 @@ public class ApplicationTimetableTimeValidationTaskTest {
 
         workflowResult = applicationTimetableTimeValidationTask.execute(taskContext, workflowResult);
         assertThat(workflowResult.getErrors(), hasSize(1));
-        assertThat(workflowResult.getErrors().get(0), is(ERROR_MSG_NOTICE_DATE_OR_TIME_REQUIRED));
+        assertThat(workflowResult.getErrors().getFirst(), is(ERROR_MSG_NOTICE_DATE_OR_TIME_REQUIRED));
         assertThat(taskContext.hasTaskFailed(), is(true));
     }
 
