@@ -42,7 +42,6 @@ def versions = [
   jacksonDatatypeJsr           : '2.18.3',
   jsonAssert                   : '1.5.3',
   //  jsonPathAssert               : '2.2.0',
-  junit                        : '5.10.3',
   junitPlatform                : '5.7.2',
   lombok                       : '1.18.38',
   pact                         : '4.1.11',
@@ -397,15 +396,9 @@ dependencies {
 
   runtimeOnly('org.springframework.boot:spring-boot-devtools')
 
-
-    testImplementation group: 'org.awaitility', name: 'awaitility', version: versions.awaitility
-    testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: versions.springCloud
-    testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test') {
-    exclude(module: 'commons-logging')
-    exclude(module: 'android-json')
-    exclude module: 'junit'
-    exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
-  }
+  testImplementation group: 'org.awaitility', name: 'awaitility', version: versions.awaitility
+  testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: versions.springCloud
+  testImplementation("org.springframework.boot:spring-boot-starter-test")
 
   testImplementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
   testImplementation group: 'io.rest-assured', name: 'rest-assured', version: '5.5.5'
@@ -476,7 +469,14 @@ dependencies {
   contractTestImplementation group: 'org.apache.httpcomponents', name: 'httpclient', version: versions.httpComponents
 
   testImplementation("org.junit.jupiter:junit-jupiter:5.13.1")
-  testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+  testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.13.1")
+
+  testImplementation("junit:junit:4.13.2")
+
+  testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.13.1")
+
+  testImplementation("org.junit.platform:junit-platform-commons:1.13.1")
+  testRuntimeOnly("org.junit.platform:junit-platform-engine:1.13.1")
 
   contractTestImplementation sourceSets.main.runtimeClasspath
   contractTestImplementation sourceSets.test.runtimeClasspath
