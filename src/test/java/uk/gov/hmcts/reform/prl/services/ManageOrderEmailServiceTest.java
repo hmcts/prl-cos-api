@@ -1718,9 +1718,9 @@ public class ManageOrderEmailServiceTest {
         assertNotNull(caseDataMap.get("orderCollection"));
         //noinspection unchecked
         List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) caseDataMap.get("orderCollection");
-        assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails());
-        assertEquals(1, orderCollection.get(0).getValue().getBulkPrintOrderDetails().size());
-        assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails().get(0).getValue().getBulkPrintId());
+        assertNotNull(orderCollection.getFirst().getValue().getBulkPrintOrderDetails());
+        assertEquals(1, orderCollection.getFirst().getValue().getBulkPrintOrderDetails().size());
+        assertNotNull(orderCollection.getFirst().getValue().getBulkPrintOrderDetails().getFirst().getValue().getBulkPrintId());
     }
 
     @Test
@@ -1761,9 +1761,9 @@ public class ManageOrderEmailServiceTest {
         assertNotNull(caseDataMap.get("orderCollection"));
         //noinspection unchecked
         List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) caseDataMap.get("orderCollection");
-        assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails());
-        assertEquals(1, orderCollection.get(0).getValue().getBulkPrintOrderDetails().size());
-        assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails().get(0).getValue().getBulkPrintId());
+        assertNotNull(orderCollection.getFirst().getValue().getBulkPrintOrderDetails());
+        assertEquals(1, orderCollection.getFirst().getValue().getBulkPrintOrderDetails().size());
+        assertNotNull(orderCollection.getFirst().getValue().getBulkPrintOrderDetails().getFirst().getValue().getBulkPrintId());
     }
 
     @Test
@@ -1823,8 +1823,8 @@ public class ManageOrderEmailServiceTest {
         assertNotNull(caseDataMap.get("orderCollection"));
         //noinspection unchecked
         List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) caseDataMap.get("orderCollection");
-        assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails());
-        assertEquals(2, orderCollection.get(0).getValue().getBulkPrintOrderDetails().size());
+        assertNotNull(orderCollection.getFirst().getValue().getBulkPrintOrderDetails());
+        assertEquals(2, orderCollection.getFirst().getValue().getBulkPrintOrderDetails().size());
 
     }
 
@@ -3097,12 +3097,12 @@ public class ManageOrderEmailServiceTest {
 
         assertNotNull(dataMap.get("orderCollection"));
         List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) dataMap.get("orderCollection");
-        assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails());
-        assertEquals(1, orderCollection.get(0).getValue().getBulkPrintOrderDetails().size());
-        assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails().get(0).getValue().getBulkPrintId());
+        assertNotNull(orderCollection.getFirst().getValue().getBulkPrintOrderDetails());
+        assertEquals(1, orderCollection.getFirst().getValue().getBulkPrintOrderDetails().size());
+        assertNotNull(orderCollection.getFirst().getValue().getBulkPrintOrderDetails().getFirst().getValue().getBulkPrintId());
         assertEquals(
             bulkPrintId.toString(),
-            orderCollection.get(0).getValue().getBulkPrintOrderDetails().get(0).getValue().getBulkPrintId()
+            orderCollection.getFirst().getValue().getBulkPrintOrderDetails().getFirst().getValue().getBulkPrintId()
         );
 
         Mockito.verify(sendgridService, Mockito.times(1)).sendEmailUsingTemplateWithAttachments(
@@ -3171,8 +3171,8 @@ public class ManageOrderEmailServiceTest {
 
         assertNotNull(dataMap.get("orderCollection"));
         List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) dataMap.get("orderCollection");
-        assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails());
-        assertEquals(0, orderCollection.get(0).getValue().getBulkPrintOrderDetails().size());
+        assertNotNull(orderCollection.getFirst().getValue().getBulkPrintOrderDetails());
+        assertEquals(0, orderCollection.getFirst().getValue().getBulkPrintOrderDetails().size());
     }
 
     @Test
@@ -3232,9 +3232,9 @@ public class ManageOrderEmailServiceTest {
 
         assertNotNull(dataMap.get("orderCollection"));
         List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) dataMap.get("orderCollection");
-        assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails());
-        assertEquals(0, orderCollection.get(0).getValue().getBulkPrintOrderDetails().size());
-        assertEquals(new ArrayList<>(), orderCollection.get(0).getValue().getBulkPrintOrderDetails());
+        assertNotNull(orderCollection.getFirst().getValue().getBulkPrintOrderDetails());
+        assertEquals(0, orderCollection.getFirst().getValue().getBulkPrintOrderDetails().size());
+        assertEquals(new ArrayList<>(), orderCollection.getFirst().getValue().getBulkPrintOrderDetails());
     }
 
     @Test
@@ -3272,8 +3272,8 @@ public class ManageOrderEmailServiceTest {
         assertNotNull(caseDataMap.get("orderCollection"));
         //noinspection unchecked
         List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) caseDataMap.get("orderCollection");
-        assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails());
-        assertEquals(1, orderCollection.get(0).getValue().getBulkPrintOrderDetails().size());
+        assertNotNull(orderCollection.getFirst().getValue().getBulkPrintOrderDetails());
+        assertEquals(1, orderCollection.getFirst().getValue().getBulkPrintOrderDetails().size());
     }
 
     @Test
@@ -3306,7 +3306,7 @@ public class ManageOrderEmailServiceTest {
         assertNotNull(caseDataMap.get("orderCollection"));
         //noinspection unchecked
         List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) caseDataMap.get("orderCollection");
-        assertTrue(orderCollection.get(0).getValue().getBulkPrintOrderDetails().isEmpty());
+        assertTrue(orderCollection.getFirst().getValue().getBulkPrintOrderDetails().isEmpty());
     }
 
     @Test
@@ -3378,8 +3378,8 @@ public class ManageOrderEmailServiceTest {
         assertNotNull(caseDataMap.get("orderCollection"));
         //noinspection unchecked
         List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) caseDataMap.get("orderCollection");
-        assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails());
-        assertEquals(1, orderCollection.get(0).getValue().getBulkPrintOrderDetails().size());
+        assertNotNull(orderCollection.getFirst().getValue().getBulkPrintOrderDetails());
+        assertEquals(1, orderCollection.getFirst().getValue().getBulkPrintOrderDetails().size());
     }
 
     @Test
@@ -3411,7 +3411,7 @@ public class ManageOrderEmailServiceTest {
         assertNotNull(caseDataMap.get("orderCollection"));
         //noinspection unchecked
         List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) caseDataMap.get("orderCollection");
-        assertTrue(orderCollection.get(0).getValue().getBulkPrintOrderDetails().isEmpty());
+        assertTrue(orderCollection.getFirst().getValue().getBulkPrintOrderDetails().isEmpty());
     }
 
     @Test

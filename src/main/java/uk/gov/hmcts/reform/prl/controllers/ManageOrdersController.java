@@ -311,7 +311,7 @@ public class ManageOrdersController {
                 DRAFT_ORDER_COLLECTION);
 
             newDraftOrderCollectionId = CollectionUtils.isNotEmpty(draftOrderCollection)
-                ? draftOrderCollection.get(0).getId() : null;
+                ? draftOrderCollection.getFirst().getId() : null;
         }
         return newDraftOrderCollectionId;
     }

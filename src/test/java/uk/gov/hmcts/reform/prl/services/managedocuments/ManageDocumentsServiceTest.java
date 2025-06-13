@@ -348,8 +348,8 @@ public class ManageDocumentsServiceTest {
 
         CaseData updatedCaseData = manageDocumentsService.populateDocumentCategories(auth, caseData);
         String docCode = updatedCaseData.getDocumentManagementDetails()
-            .getManageDocuments().get(0).getValue().getDocumentCategories().getListItems()
-            .get(0).getCode();
+            .getManageDocuments().getFirst().getValue().getDocumentCategories().getListItems()
+            .getFirst().getCode();
         assertEquals(subCategory2.getCategoryId(), docCode);
 
     }
@@ -375,7 +375,7 @@ public class ManageDocumentsServiceTest {
         CaseData caseData = CaseData.builder().build();
 
         CaseData updatedCaseData = manageDocumentsService.populateDocumentCategories(auth, caseData);
-        List categoryList = updatedCaseData.getDocumentManagementDetails().getManageDocuments().get(0)
+        List categoryList = updatedCaseData.getDocumentManagementDetails().getManageDocuments().getFirst()
             .getValue().getDocumentCategories().getListItems();
         assertEquals(0, categoryList.size());
     }
@@ -387,7 +387,7 @@ public class ManageDocumentsServiceTest {
         CaseData caseData = CaseData.builder().build();
         CaseData updatedCaseData = manageDocumentsService.populateDocumentCategories(auth, caseData);
         List<DynamicListElement> listItems = updatedCaseData.getDocumentManagementDetails().getManageDocuments()
-            .get(0).getValue().getDocumentCategories().getListItems();
+            .getFirst().getValue().getDocumentCategories().getListItems();
         assertNull(listItems);
     }
 
@@ -1057,7 +1057,7 @@ public class ManageDocumentsServiceTest {
 
         assertNotNull(confidentialDocuments);
         assertEquals(1,confidentialDocuments.size());
-        assertEquals("test",confidentialDocuments.get(0).getValue().getDocument().getDocumentFileName());
+        assertEquals("test",confidentialDocuments.getFirst().getValue().getDocument().getDocumentFileName());
 
         assertNotNull(quarantineLegalDoc);
     }
@@ -1270,7 +1270,7 @@ public class ManageDocumentsServiceTest {
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
         List<String>  loggedInUserTypeList = manageDocumentsService.getLoggedInUserType(auth);
         assertNotNull(loggedInUserTypeList);
-        assertEquals(CITIZEN_ROLE, loggedInUserTypeList.get(0));
+        assertEquals(CITIZEN_ROLE, loggedInUserTypeList.getFirst());
     }
 
     @Test
@@ -1280,7 +1280,7 @@ public class ManageDocumentsServiceTest {
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
         List<String>  loggedInUserTypeList = manageDocumentsService.getLoggedInUserType(auth);
         assertNotNull(loggedInUserTypeList);
-        assertEquals(BULK_SCAN, loggedInUserTypeList.get(0));
+        assertEquals(BULK_SCAN, loggedInUserTypeList.getFirst());
     }
 
     private RoleAssignmentServiceResponse setAndGetRoleAssignmentServiceResponse(String roleName) {
@@ -1448,7 +1448,7 @@ public class ManageDocumentsServiceTest {
 
         assertNotNull(caseDataMapUpdated);
         assertTrue(!caseDataMapUpdated.isEmpty());
-        assertEquals("You must give a reason why the document should be restricted", caseDataMapUpdated.get(0));
+        assertEquals("You must give a reason why the document should be restricted", caseDataMapUpdated.getFirst());
 
     }
 
@@ -1485,7 +1485,7 @@ public class ManageDocumentsServiceTest {
 
         assertNotNull(caseDataMapUpdated);
         assertTrue(!caseDataMapUpdated.isEmpty());
-        assertEquals("Mae’n rhaid i chi roi rheswm pam na ddylai rhai pobl weld y ddogfen", caseDataMapUpdated.get(0));
+        assertEquals("Mae’n rhaid i chi roi rheswm pam na ddylai rhai pobl weld y ddogfen", caseDataMapUpdated.getFirst());
 
     }
 
@@ -1665,7 +1665,7 @@ public class ManageDocumentsServiceTest {
             userDetailsSolicitorRole, PrlAppsConstants.ENGLISH);
         assertNotNull(caseDataMapUpdated);
         assertEquals("The statement of position on non-court dispute resolution (form FM5) "
-            + "cannot contain confidential information or be restricted.", caseDataMapUpdated.get(0));
+            + "cannot contain confidential information or be restricted.", caseDataMapUpdated.getFirst());
     }
 
     @Test
@@ -1703,7 +1703,7 @@ public class ManageDocumentsServiceTest {
             userDetailsSolicitorRole, PrlAppsConstants.WELSH);
         assertNotNull(caseDataMapUpdated);
         assertEquals("Ni all y datganiad safbwynt ar ddatrys anghydfod y tu allan i’r llys (ffurflen FM5)"
-            + " gynnwys gwybodaeth gyfrinachol neu wybodaeth gyfyngedig.", caseDataMapUpdated.get(0));
+            + " gynnwys gwybodaeth gyfrinachol neu wybodaeth gyfyngedig.", caseDataMapUpdated.getFirst());
     }
 
     @Test
@@ -1731,7 +1731,7 @@ public class ManageDocumentsServiceTest {
         when(objectMapper.convertValue(callbackRequest.getCaseDetails(), CaseData.class)).thenReturn(caseData);
         List<String> list = manageDocumentsService.validateCourtUser(callbackRequest, userDetails, PrlAppsConstants.ENGLISH);
         Assert.assertNotNull(list);
-        Assert.assertEquals("Only court admin/Judge can select the value 'court' for 'submitting on behalf of'", list.get(0));
+        Assert.assertEquals("Only court admin/Judge can select the value 'court' for 'submitting on behalf of'", list.getFirst());
     }
 
     @Test
@@ -1759,7 +1759,7 @@ public class ManageDocumentsServiceTest {
         when(objectMapper.convertValue(callbackRequest.getCaseDetails(), CaseData.class)).thenReturn(caseData);
         List<String> list = manageDocumentsService.validateCourtUser(callbackRequest, userDetails, PrlAppsConstants.WELSH);
         Assert.assertNotNull(list);
-        Assert.assertEquals("Dim ond staff gweinyddol y llys/Barnwr all ddewis yr opsiwn ‘llys’ ar gyfer yr opsiwn ‘cyflwyno ar ran’", list.get(0));
+        Assert.assertEquals("Dim ond staff gweinyddol y llys/Barnwr all ddewis yr opsiwn ‘llys’ ar gyfer yr opsiwn ‘cyflwyno ar ran’", list.getFirst());
     }
 
     @Test
@@ -1923,7 +1923,7 @@ public class ManageDocumentsServiceTest {
         assertNotNull(caseDataUpdated);
         assertNotNull(caseDataUpdated.get("confidentialDocuments"));
         List<Element<QuarantineLegalDoc>> confidentialDocuments = (List<Element<QuarantineLegalDoc>>)caseDataUpdated.get("confidentialDocuments");
-        assertEquals(YesOrNo.Yes,confidentialDocuments.get(0).getValue().getHasTheConfidentialDocumentBeenRenamed());
+        assertEquals(YesOrNo.Yes,confidentialDocuments.getFirst().getValue().getHasTheConfidentialDocumentBeenRenamed());
 
     }
 
@@ -1974,7 +1974,7 @@ public class ManageDocumentsServiceTest {
         assertNotNull(caseDataUpdated);
         assertNotNull(caseDataUpdated.get("restrictedDocuments"));
         List<Element<QuarantineLegalDoc>> restrictedDocuments = (List<Element<QuarantineLegalDoc>>)caseDataUpdated.get("restrictedDocuments");
-        assertEquals(YesOrNo.Yes,restrictedDocuments.get(0).getValue().getHasTheConfidentialDocumentBeenRenamed());
+        assertEquals(YesOrNo.Yes,restrictedDocuments.getFirst().getValue().getHasTheConfidentialDocumentBeenRenamed());
     }
 
 
@@ -2203,7 +2203,7 @@ public class ManageDocumentsServiceTest {
 
         assertNotNull(confidentialDocuments);
         assertEquals(1,confidentialDocuments.size());
-        assertEquals("testFileName",confidentialDocuments.get(0).getValue().getCitizenQuarantineDocument().getDocumentFileName());
+        assertEquals("testFileName",confidentialDocuments.getFirst().getValue().getCitizenQuarantineDocument().getDocumentFileName());
 
         assertNotNull(quarantineLegalDoc);
     }
@@ -2287,7 +2287,7 @@ public class ManageDocumentsServiceTest {
 
         assertNotNull(confidentialDocuments);
         assertEquals(1,confidentialDocuments.size());
-        assertEquals("testFileName",confidentialDocuments.get(0).getValue().getCourtNavQuarantineDocument().getDocumentFileName());
+        assertEquals("testFileName",confidentialDocuments.getFirst().getValue().getCourtNavQuarantineDocument().getDocumentFileName());
 
         assertNotNull(quarantineLegalDoc);
     }
@@ -2493,7 +2493,7 @@ public class ManageDocumentsServiceTest {
         when(launchDarklyClient.isFeatureEnabled("caseworker-privatelaw-bulkscan")).thenReturn(true);
         List<String> loggedInUserTypeList = manageDocumentsService.getLoggedInUserType(auth);
         assertNotNull(loggedInUserTypeList);
-        assertEquals(BULK_SCAN, loggedInUserTypeList.get(0));
+        assertEquals(BULK_SCAN, loggedInUserTypeList.getFirst());
     }
 
     @Test
@@ -2503,7 +2503,7 @@ public class ManageDocumentsServiceTest {
         when(launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)).thenReturn(true);
         List<String> loggedInUserTypeList = manageDocumentsService.getLoggedInUserType(auth);
         assertNotNull(loggedInUserTypeList);
-        assertEquals(CITIZEN_ROLE, loggedInUserTypeList.get(0));
+        assertEquals(CITIZEN_ROLE, loggedInUserTypeList.getFirst());
     }
 
     @Test

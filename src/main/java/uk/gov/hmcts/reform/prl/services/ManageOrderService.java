@@ -647,7 +647,7 @@ public class ManageOrderService {
         if (!servedSavedOrders.equals(caseData.getManageOrdersOptions())) {
             //this is when we are trying to serve the order, auto selecting the chosen order
             List<DynamicMultiselectListElement> values = new ArrayList<>();
-            values.add(orderList.getListItems().get(0));
+            values.add(orderList.getListItems().getFirst());
             orderList = orderList.toBuilder().value(values).build();
         }
         headerMap.put("serveOrderDynamicList", orderList);
@@ -1208,7 +1208,7 @@ public class ManageOrderService {
         if (Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
             orderCollection = serveOrder(caseData, orderCollection);
         }
-        LocalDateTime currentOrderCreatedDateTime = newOrderDetails.get(0).getValue().getDateCreated();
+        LocalDateTime currentOrderCreatedDateTime = newOrderDetails.getFirst().getValue().getDateCreated();
         Map<String, Object> orderMap = new HashMap<>();
         orderMap.put("currentOrderCreatedDateTime", currentOrderCreatedDateTime);
         orderMap.put(ORDER_COLLECTION, orderCollection);
@@ -1230,7 +1230,7 @@ public class ManageOrderService {
         if (StringUtils.isNotBlank((currentOrderId))) {
             newOrderDetails.set(
                 0,
-                element(UUID.fromString(currentOrderId), newOrderDetails.get(0).getValue())
+                element(UUID.fromString(currentOrderId), newOrderDetails.getFirst().getValue())
             );
         }
     }
@@ -1567,7 +1567,7 @@ public class ManageOrderService {
 
     private void servedC100Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order, boolean isMultipleOrdersServed) {
         YesNoNotApplicable serveOnRespondent = caseData.getManageOrders().getServeToRespondentOptions();
-        Element<PartyDetails> partyDetailsElement = caseData.getApplicants().get(0);
+        Element<PartyDetails> partyDetailsElement = caseData.getApplicants().getFirst();
         String serveRecipientName = null;
         if (null != partyDetailsElement.getValue().getRepresentativeFullName()) {
             serveRecipientName =  partyDetailsElement.getValue().getRepresentativeFullName();
@@ -2113,9 +2113,9 @@ public class ManageOrderService {
     public CaseData getN117FormData(CaseData caseData, String language) {
 
         PartyDetails applicant1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-            ? caseData.getApplicants().get(0).getValue() : caseData.getApplicantsFL401();
+            ? caseData.getApplicants().getFirst().getValue() : caseData.getApplicantsFL401();
         PartyDetails respondent1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-            ? caseData.getRespondents().get(0).getValue() : caseData.getRespondentsFL401();
+            ? caseData.getRespondents().getFirst().getValue() : caseData.getRespondentsFL401();
         ManageOrders orderData = caseData.getManageOrders().toBuilder()
             .manageOrdersCaseNo(String.valueOf(caseData.getId()))
             .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
@@ -2176,10 +2176,10 @@ public class ManageOrderService {
 
             PartyDetails applicant1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
                 && CollectionUtils.isNotEmpty(caseData.getApplicants())
-                ? caseData.getApplicants().get(0).getValue() : caseData.getApplicantsFL401();
+                ? caseData.getApplicants().getFirst().getValue() : caseData.getApplicantsFL401();
             PartyDetails respondent1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
                 && CollectionUtils.isNotEmpty(caseData.getRespondents())
-                ? caseData.getRespondents().get(0).getValue() : caseData.getRespondentsFL401();
+                ? caseData.getRespondents().getFirst().getValue() : caseData.getRespondentsFL401();
             orderData = orderData.toBuilder()
                 .fl404bCaseNumber(String.valueOf(caseData.getId()))
                 .fl404bCourtName(caseData.getCourtName())
@@ -2537,7 +2537,7 @@ public class ManageOrderService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         List<DynamicMultiselectListElement> selectedServedOrderList = caseData.getManageOrders().getServeOrderDynamicList().getValue();
         if (selectedServedOrderList != null && selectedServedOrderList.size() == 1
-            && selectedServedOrderList.get(0).getLabel().contains(C_47_A)) {
+            && selectedServedOrderList.getFirst().getLabel().contains(C_47_A)) {
             caseDataUpdated.put(IS_ONLY_C_47_A_ORDER_SELECTED_TO_SERVE, Yes);
         } else {
             caseDataUpdated.put(IS_ONLY_C_47_A_ORDER_SELECTED_TO_SERVE, No);
@@ -2667,7 +2667,7 @@ public class ManageOrderService {
                     JudicialUsersApiRequest.builder()
                         .personalCode(personalCodes).build());
                 if (CollectionUtils.isNotEmpty(judicialUsersApiResponses)) {
-                    judgeFullName = judicialUsersApiResponses.get(0).getFullName();
+                    judgeFullName = judicialUsersApiResponses.getFirst().getFullName();
                 }
             } catch (FeignException e) {
                 log.error("User details not found for personal code {}", personalCodes, e);
@@ -2944,7 +2944,7 @@ public class ManageOrderService {
                 .filter(elem -> null != elem.getValue().getHearingDateConfirmOptionEnum()).toList();
 
             if (hearingsWithOptionsSelected.size() == 1) {
-                hearingOptionSelected =  hearingList.get(0).getHearingDateConfirmOptionEnum().toString();
+                hearingOptionSelected =  hearingList.getFirst().getHearingDateConfirmOptionEnum().toString();
                 isMultipleHearingSelected = NO;
             } else if (hearingsWithOptionsSelected.size() > 1) {
                 hearingOptionSelected = WA_MULTIPLE_OPTIONS_SELECTED_VALUE;
