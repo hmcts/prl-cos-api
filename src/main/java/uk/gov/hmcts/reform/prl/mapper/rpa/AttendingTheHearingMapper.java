@@ -4,11 +4,11 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.SpokenOrWrittenWelshEnum;
+import uk.gov.hmcts.reform.prl.mapper.rpa.json.NullAwareJsonObjectBuilder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.mapper.rpa.json.NullAwareJsonObjectBuilder;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
 import java.util.List;

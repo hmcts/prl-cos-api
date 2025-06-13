@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
+import uk.gov.hmcts.reform.prl.mapper.rpa.json.NullAwareJsonObjectBuilder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
@@ -13,7 +14,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ChildPassportDetails;
-import uk.gov.hmcts.reform.prl.mapper.rpa.json.NullAwareJsonObjectBuilder;
 import uk.gov.hmcts.reform.prl.services.AllegationOfHarmRevisedService;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 

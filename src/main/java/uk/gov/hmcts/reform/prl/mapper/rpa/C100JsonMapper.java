@@ -3,9 +3,9 @@ package uk.gov.hmcts.reform.prl.mapper.rpa;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.prl.mapper.rpa.json.NullAwareJsonObjectBuilder;
 import uk.gov.hmcts.reform.prl.models.EventsData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.mapper.rpa.json.NullAwareJsonObjectBuilder;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

@@ -1,8 +1,8 @@
 package uk.gov.hmcts.reform.prl.mapper.rpa;
 
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.mapper.rpa.json.NullAwareJsonObjectBuilder;
+import uk.gov.hmcts.reform.prl.models.Address;
 
 import javax.json.JsonObject;
 
