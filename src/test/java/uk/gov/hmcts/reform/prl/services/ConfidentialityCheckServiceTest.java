@@ -224,8 +224,8 @@ public class ConfidentialityCheckServiceTest {
 
     @Test
     public void processRespondentsC8DocumentsFL401() {
-        PartyDetails partyDetails = PartyDetails.builder().firstName("firstName")
-                .lastName("lastName").build();
+        PartyDetails partyDetails = PartyDetails.builder().firstName("firstName").lastName("lastName").build();
+
         ResponseDocuments responseDocument = ResponseDocuments.builder()
                 .dateTimeCreated(LocalDateTime.now()).respondentC8Document(Document.builder().documentUrl("with version").build())
                 .respondentC8DocumentWelsh(Document.builder().documentUrl("with version").build()).build();
@@ -335,6 +335,7 @@ public class ConfidentialityCheckServiceTest {
 
         CaseData caseData = CaseData.builder().id(12345L).applicantsFL401(partyDetails).caseTypeOfApplication(
             FL401_CASE_TYPE).build();
+
         Map<String, Object> caseDetails = new HashMap<>();
         confidentialityCheckService.processApplicantC8Documents(caseDetails, caseData);
 
@@ -452,8 +453,8 @@ public class ConfidentialityCheckServiceTest {
     @Test
     public void processOtherPeopleC8DocumentsC100NullOtherPartyList() {
         List<Element<PartyDetails>> otherPeople = null;
-
         List<Element<PartyDetails>> applicants = new ArrayList<>();
+
         Document applicant1RefugeDocument = Document.builder().documentFileName("applicant 1 C8 Refuge Form").build();
         Document applicant2RefugeDocument = Document.builder().documentFileName("applicant 2 C8 Refuge Form").build();
         Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder()
@@ -480,7 +481,7 @@ public class ConfidentialityCheckServiceTest {
             .applicants(applicants)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
-        
+
         Map<String, Object> caseDetails = new HashMap<>();
         confidentialityCheckService.processOtherC8Documents(caseDetails, caseData);
 

@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenRespondentAohElementsMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -23,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenFlags;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResponseToAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -45,6 +47,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
@@ -711,6 +714,35 @@ public class CitizenPartyDetailsMapperTest {
                                                                      List.of(element(ChildDetailsRevised.builder().build())));
         assertNotNull(updatedPartyDetailsBasedOnEvent);
 
+    }
+
+    @Test
+    public void testUpdatedPartyDetailsBasedOnEventHandlesUpdatedConfidentialDetails() {
+        PartyDetails existingPartyDetails = partyDetails.toBuilder().response(null).build();
+        PartyDetails citizenProvidedPartyDetails = partyDetails.toBuilder()
+            .response(Response.builder().keepDetailsPrivate(KeepDetailsPrivate.builder()
+                                                                .confidentiality(YesOrNo.Yes)
+                                                                .confidentialityList(Arrays.asList(
+                                                                    ConfidentialityListEnum.address,
+                                                                    ConfidentialityListEnum.phoneNumber,
+                                                                    ConfidentialityListEnum.email))
+                                                                .build()).build())
+            .build();
+
+        assertNull(existingPartyDetails.getIsAddressConfidential());
+        assertNull(existingPartyDetails.getIsPhoneNumberConfidential());
+        assertNull(existingPartyDetails.getIsEmailAddressConfidential());
+
+        PartyDetails updatedPartyDetailsBasedOnEvent = citizenPartyDetailsMapper.getUpdatedPartyDetailsBasedOnEvent(
+            citizenProvidedPartyDetails,
+            existingPartyDetails,
+            CaseEvent.KEEP_DETAILS_PRIVATE,
+            List.of(element(ChildDetailsRevised.builder().build()))
+        );
+
+        assertEquals(YesOrNo.Yes, updatedPartyDetailsBasedOnEvent.getIsAddressConfidential());
+        assertEquals(YesOrNo.Yes, updatedPartyDetailsBasedOnEvent.getIsPhoneNumberConfidential());
+        assertEquals(YesOrNo.Yes, updatedPartyDetailsBasedOnEvent.getIsEmailAddressConfidential());
     }
 }
 

@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -42,6 +43,8 @@ public class ConfidentialityC8RefugeServiceTest {
     Address address;
     PartyDetails refugePartyDetails1;
     PartyDetails refugePartyDetails2;
+
+    PartyDetails refugePartyDetails1NotConfidential;
 
     @Before
     public void setUp() {
@@ -67,6 +70,24 @@ public class ConfidentialityC8RefugeServiceTest {
             .isCurrentAddressKnown(YesOrNo.Yes)
             .canYouProvidePhoneNumber(YesOrNo.Yes)
             .isEmailAddressConfidential(YesOrNo.Yes)
+            .liveInRefuge(YesOrNo.Yes)
+            .build();
+
+        refugePartyDetails1NotConfidential = PartyDetails.builder()
+            .firstName("ABC 1")
+            .lastName("XYZ 2")
+            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .gender(Gender.male)
+            .address(address)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("abc1@xyz.com")
+            .phoneNumber("09876543211")
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isCurrentAddressKnown(YesOrNo.Yes)
+            .canYouProvidePhoneNumber(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.No)
             .liveInRefuge(YesOrNo.Yes)
             .build();
 
@@ -386,7 +407,6 @@ public class ConfidentialityC8RefugeServiceTest {
                 refugeDocumentHandlerParameters,
                 refugeConfidentialDocumentsRecord
             );
-
         assertNotNull(returnedRefuge);
     }
 
@@ -422,14 +442,20 @@ public class ConfidentialityC8RefugeServiceTest {
             .builder()
             .applicants(applicantList)
             .build();
-        assertNull(confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, ""));
+        assertEquals(
+            new RefugeConfidentialDocumentsRecord(List.of(), List.of()),
+            confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, "")
+        );
     }
 
     @Test
     public void processC8RefugeDocumentsOnAmendForC100OnSubmit() {
         CaseData caseDataBefore = CaseData.builder().build();
         CaseData caseData = CaseData.builder().build();
-        assertNull(confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, ""));
+        assertEquals(
+            new RefugeConfidentialDocumentsRecord(List.of(), List.of()),
+            confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, "")
+        );
     }
 
     @Test
