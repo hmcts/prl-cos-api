@@ -232,6 +232,7 @@ public class CitizenPartyDetailsMapper {
         if (PartyEnum.applicant.equals(citizenUpdatedCaseData.getPartyType())) {
             List<Element<ChildDetailsRevised>> childDetails = caseData.getNewChildDetails();// child details only
             List<Element<PartyDetails>> applicants = new ArrayList<>(caseData.getApplicants());
+            CaseData oldCaseData = caseData;
             applicants.stream()
                 .filter(party -> Objects.equals(
                     party.getValue().getUser().getIdamId(),
@@ -242,8 +243,14 @@ public class CitizenPartyDetailsMapper {
                     PartyDetails updatedPartyDetails = getUpdatedPartyDetailsBasedOnEvent(citizenUpdatedCaseData.getPartyDetails(),
                                                                                           party.getValue(),
                                                                                           caseEvent, childDetails);
+                    Element<PartyDetails> updatedPartyElement = element(party.getId(), updatedPartyDetails);
+                    int updatedApplicantPartyIndex = applicants.indexOf(party);
+                    applicants.set(updatedApplicantPartyIndex, updatedPartyElement));
 
-                    applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
+                    if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
+                        reGenerateRespondentC8Documents(caseDataMapToBeUpdated, updatedPartyElement,
+                                                        oldCaseData, updatedApplicantPartyIndex, authorisation);
+                    }
                 });
             caseData = caseData.toBuilder().applicants(applicants).build();
             caseDataMapToBeUpdated.put(C100_APPLICANTS, caseData.getApplicants());
@@ -271,6 +278,8 @@ public class CitizenPartyDetailsMapper {
                                                         oldCaseData, updatedRespondentPartyIndex, authorisation);
                     }
                 });
+
+
             caseData = caseData.toBuilder().respondents(respondents).build();
             caseDataMapToBeUpdated.put(C100_RESPONDENTS, caseData.getRespondents());
 
@@ -338,6 +347,11 @@ public class CitizenPartyDetailsMapper {
                     caseData.getApplicantsFL401(),
                     caseEvent, caseData.getNewChildDetails()
                 );
+                if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
+                    reGenerateRespondentC8Documents(caseDataMapToBeUpdated,
+                                                    element(partyDetails.getPartyId(), partyDetails),
+                                                    caseData, 0, authorisation);
+                }
                 caseData = caseData.toBuilder().applicantsFL401(partyDetails).build();
                 caseDataMapToBeUpdated.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
                 return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
@@ -350,7 +364,6 @@ public class CitizenPartyDetailsMapper {
                     caseData.getRespondentsFL401(),
                     caseEvent, caseData.getNewChildDetails()
                 );
-                //PRL-6790 - create C8 for DA respondent
                 if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
                     reGenerateRespondentC8Documents(caseDataMapToBeUpdated,
                                                     element(partyDetails.getPartyId(), partyDetails),
@@ -763,7 +776,6 @@ public class CitizenPartyDetailsMapper {
                               .build())
                 .build();
         }
-
         if (null != citizenProvidedPartyDetails.getResponse()
             && null != citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate()
             && Yes.equals(citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentiality())

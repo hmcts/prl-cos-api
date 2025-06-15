@@ -47,6 +47,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
@@ -716,7 +717,7 @@ public class CitizenPartyDetailsMapperTest {
     }
 
     @Test
-    public void testUpdatedPartyDetailsBasedOnEventHandlesUpdatesDetails() {
+    public void testUpdatedPartyDetailsBasedOnEventHandlesUpdatedConfidentialDetails() {
         PartyDetails existingPartyDetails = partyDetails.toBuilder().response(null).build();
         PartyDetails citizenProvidedPartyDetails = partyDetails.toBuilder()
             .response(Response.builder().keepDetailsPrivate(KeepDetailsPrivate.builder()
@@ -727,6 +728,10 @@ public class CitizenPartyDetailsMapperTest {
                                                                     ConfidentialityListEnum.email))
                                                                 .build()).build())
             .build();
+
+        assertNull(existingPartyDetails.getIsAddressConfidential());
+        assertNull(existingPartyDetails.getIsPhoneNumberConfidential());
+        assertNull(existingPartyDetails.getIsEmailAddressConfidential());
 
         PartyDetails updatedPartyDetailsBasedOnEvent = citizenPartyDetailsMapper.getUpdatedPartyDetailsBasedOnEvent(
             citizenProvidedPartyDetails,
