@@ -1,70 +1,47 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
 
-
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Getter
-@Setter
 @Builder(toBuilder = true)
 public class CourtNavCaseData implements MappableObject {
 
-    private final BeforeStart beforeStart;
+    @JsonProperty("beforeStart")
+    private BeforeStart beforeStart;
 
+    @JsonProperty("situation")
+    private Situation situation;
 
-    private final Situation situation;
+    @JsonProperty("applicantDetails")
+    private CourtNavApplicant courtNavApplicant;
 
+    @JsonProperty("respondentDetails")
+    private CourtNavRespondent courtNavRespondent;
 
-    /**
-     * Applicant details.
-     */
-    private final ApplicantsDetails applicantDetails;
+    @JsonProperty("family")
+    private Family family;
 
-    /**
-     * Respondent Details.
-     */
-    private final RespondentDetails respondentDetails;
+    @JsonProperty("relationshipWithRespondent")
+    private CourtNavRelationShipToRespondent relationshipWithRespondent;
 
-    /**
-     * Applicant's Family.
-     */
-    private final Family family;
+    @JsonProperty("respondentBehaviour")
+    private CourtNavRespondentBehaviour respondentBehaviour;
 
-    /**
-     * Relationship to Respondent.
-     */
-    private final CourtNavRelationShipToRespondent relationshipWithRespondent;
+    @JsonProperty("theHome")
+    private CourtNavHome courtNavHome;
 
+    @JsonProperty("statementOfTruth")
+    private CourtNavStatementOfTruth statementOfTruth;
 
-    /**
-     * Respondent's Behaviour.
-     */
-    private final CourtNavRespondentBehaviour respondentBehaviour;
-
-    /**
-     * Home.
-     */
-    private final TheHome theHome;
-
-
-    /**
-     * Statement of truth.
-     */
-    private final CourtNavStmtOfTruth statementOfTruth;
-
-
-    /**
-     * Going to court.
-     */
-    private final GoingToCourt goingToCourt;
-
-
+    @JsonProperty("goingToCourt")
+    private GoingToCourt goingToCourt;
 }

@@ -1,20 +1,22 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Getter
-@Setter
 @Builder(toBuilder = true)
 public class CourtNavFl401 {
 
-    private final CourtNavMetaData metaData;
-    private final CourtNavCaseData fl401;
+    @JsonProperty("metaData")
+    private CourtNavMetaData metaData;
+
+    @JsonProperty("fl401")
+    private CourtNavCaseData fl401;
 }

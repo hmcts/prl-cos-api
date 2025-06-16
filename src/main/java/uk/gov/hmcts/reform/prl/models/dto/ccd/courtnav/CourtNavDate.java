@@ -1,34 +1,30 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav;
 
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.jackson.Jacksonized;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
+@AllArgsConstructor
 @Data
 @Builder(toBuilder = true)
-@Getter
-@Setter
-@AllArgsConstructor
-@Jacksonized
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CourtNavDate {
 
-    private final Integer day;
-    private final Integer month;
-    private final Integer year;
+    private Integer day;
+    private Integer month;
+    private Integer year;
 
     public String mergeDate() {
-        String day1 = getDay().toString();
-        if (day1.length() < 2) {
-            day1 = "0" + day1;
+        if (day == null || month == null || year == null) {
+            return null;
         }
-        String month1 = getMonth().toString();
-        if (month1.length() < 2) {
-            month1 = "0" + month1;
-        }
-        return getYear().toString() + "-" + month1 + "-" + day1;
+
+        String dayStr = String.format("%02d", day);
+        String monthStr = String.format("%02d", month);
+        return String.format("%d-%s-%s", year, monthStr, dayStr);
     }
 }
