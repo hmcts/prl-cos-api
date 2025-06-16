@@ -20,13 +20,15 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
-import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsWaService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -100,20 +102,16 @@ public class CaseFlagsController extends AbstractCallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        List<String> errors = caseFlagsWaService.validateAllFlags(caseData.getSelectedFlags().get(0).getValue());
-        Flags flagToUpdate = caseData.getAllPartyFlags().getCaApplicant1ExternalFlags();
-        if (errors.isEmpty()) {
-            for (int i = 0; i < flagToUpdate.getDetails().size(); i++) {
-                if (flagToUpdate.getDetails().get(i).getId().toString()
-                    .equals(caseData.getSelectedFlags().get(0).getValue().getDetails().getFirst().getId().toString())) {
-                    flagToUpdate.getDetails().set(i, caseData.getSelectedFlags().get(0).getValue().getDetails().getFirst());
-                    break;
-                }
-            }
-        }
+        Element<FlagDetail> mostRecentlyModified = caseFlagsWaService.validateAllFlags(caseData);
 
+        List<String> errors = new ArrayList<>();
+
+        if (REQUESTED.equals(mostRecentlyModified.getValue().getStatus())) {
+            errors.add("Please select status other than Requested");
+        } else {
+            caseFlagsWaService.searchAndUpdateCaseFlags(caseData, mostRecentlyModified);
+        }
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
 
         return AboutToStartOrSubmitCallbackResponse.builder()

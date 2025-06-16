@@ -19,11 +19,13 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
 
 @Component
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
@@ -62,6 +64,10 @@ public class CaseFlagsWaService {
     public void setSelectedFlags(CaseData caseData) {
         AllPartyFlags allPartyFlags = caseData.getAllPartyFlags();
         List<Element<Flags>> selectedFlagsList = new ArrayList<>();
+
+        Flags caseLevelFlag = deepCopy(caseData.getCaseFlags(), Flags.class);
+        selectedFlagsList.add(ElementUtils.element(caseLevelFlag));
+
         Arrays.stream(allPartyFlags.getClass().getDeclaredFields())
             .filter(field -> field.getType().equals(Flags.class))
             .forEach(field -> {
@@ -74,6 +80,13 @@ public class CaseFlagsWaService {
                 }
             });
 
+        caseData.getCaseFlags().getDetails().stream().forEach(flagDetail -> {
+            if (!REQUESTED.equals(flagDetail.getValue().getStatus())) {
+                selectedFlagsList.forEach(selectedFlag -> {
+                    selectedFlag.getValue().getDetails().remove(flagDetail);
+                });
+            }
+        });
         List<Element<FlagDetail>> allFlagsDetails = extractAllPartyFlagDetails(allPartyFlags);
 
         allFlagsDetails.stream().forEach(flagDetail -> {
@@ -92,24 +105,12 @@ public class CaseFlagsWaService {
         caseData.setSelectedFlags(finalList);
     }
 
-    public void filterRequestedCaseLevelFlags(Flags caseLevelFlags) {
-        if (caseLevelFlags != null && CollectionUtils.isNotEmpty(caseLevelFlags.getDetails())) {
-            List<Element<FlagDetail>> flagDetails = deepCopyArray(caseLevelFlags.getDetails(),
-                                                                  new TypeReference<List<Element<FlagDetail>>>() {});
-            if (CollectionUtils.isNotEmpty(flagDetails)) {
-                for (Element<FlagDetail> flagDetail : flagDetails) {
-                    if (!REQUESTED.equals(flagDetail.getValue().getStatus())) {
-                        caseLevelFlags.getDetails().remove(flagDetail);
-                    }
-                }
-            }
-        }
-    }
-
     public Element<FlagDetail> validateAllFlags(CaseData caseData) {
-        List<Element<FlagDetail>> allFlagsDetails = new ArrayList<>();
-        allFlagsDetails.addAll(caseData.getCaseFlags().getDetails());
-        allFlagsDetails.addAll(extractAllPartyFlagDetails(caseData.getAllPartyFlags()));
+        List<Element<FlagDetail>> allFlagsDetails = caseData.getSelectedFlags().stream()
+            .filter(e -> e != null && e.getValue() != null)
+            .map(e -> e.getValue().getDetails())
+            .flatMap(Collection::stream)
+            .toList();
 
         List<Element<FlagDetail>> sortedAllFlagsDetails = allFlagsDetails.stream()
             .filter(detail -> detail.getValue() != null && detail.getValue().getDateTimeModified() != null)
@@ -121,15 +122,16 @@ public class CaseFlagsWaService {
         return mostRecentlyModified;
     }
 
-    public List<String> validateAllFlags(Flags selectedFlag) {
-        List<String> errorMessages = new ArrayList<>();
-        if (selectedFlag != null) {
-            if (selectedFlag.getDetails().stream().anyMatch(e -> REQUESTED.equals(e.getValue().getStatus()))) {
-                errorMessages.add("Please select status other than Requested");
-                return errorMessages;
+    public void searchAndUpdateCaseFlags(CaseData caseData, Element<FlagDetail> mostRecentlyModified) {
+        List<Element<FlagDetail>> allFlagsDetails = new ArrayList<>();
+        allFlagsDetails.addAll(caseData.getCaseFlags().getDetails());
+        allFlagsDetails.addAll(extractAllPartyFlagDetails(caseData.getAllPartyFlags()));
+
+        allFlagsDetails.stream().forEach(flagDetail -> {
+            if (mostRecentlyModified.getId().equals(flagDetail.getId())) {
+                flagDetail = mostRecentlyModified;
             }
-        }
-        return errorMessages;
+        });
     }
 
     private List<Element<FlagDetail>> extractAllPartyFlagDetails(AllPartyFlags allPartyFlags) {
