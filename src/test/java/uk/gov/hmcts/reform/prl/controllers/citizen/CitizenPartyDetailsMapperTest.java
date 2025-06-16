@@ -719,6 +719,11 @@ public class CitizenPartyDetailsMapperTest {
     @Test
     public void testUpdatedPartyDetailsBasedOnEventHandlesUpdatedConfidentialDetails() {
         PartyDetails existingPartyDetails = partyDetails.toBuilder().response(null).build();
+
+        assertNull(existingPartyDetails.getIsAddressConfidential());
+        assertNull(existingPartyDetails.getIsPhoneNumberConfidential());
+        assertNull(existingPartyDetails.getIsEmailAddressConfidential());
+
         PartyDetails citizenProvidedPartyDetails = partyDetails.toBuilder()
             .response(Response.builder().keepDetailsPrivate(KeepDetailsPrivate.builder()
                                                                 .confidentiality(YesOrNo.Yes)
@@ -728,10 +733,6 @@ public class CitizenPartyDetailsMapperTest {
                                                                     ConfidentialityListEnum.email))
                                                                 .build()).build())
             .build();
-
-        assertNull(existingPartyDetails.getIsAddressConfidential());
-        assertNull(existingPartyDetails.getIsPhoneNumberConfidential());
-        assertNull(existingPartyDetails.getIsEmailAddressConfidential());
 
         PartyDetails updatedPartyDetailsBasedOnEvent = citizenPartyDetailsMapper.getUpdatedPartyDetailsBasedOnEvent(
             citizenProvidedPartyDetails,
