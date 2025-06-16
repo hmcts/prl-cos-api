@@ -86,34 +86,41 @@ public class CaseFlagsWaServiceTest {
 
     @Test
     public void testSearchAndUpdateBothCaseLevelAndPartyLevelFlags() {
+        FlagDetail applicant1ExternalFlag1 = FlagDetail.builder().status("Requested").build();
+        FlagDetail applicant1ExternalFlag2 = FlagDetail.builder().status("Requested").build();
+        List<Element<FlagDetail>> partyLevelFlagDetails = new ArrayList<>();
+        partyLevelFlagDetails.add(ElementUtils.element(applicant1ExternalFlag1));
+        partyLevelFlagDetails.add(ElementUtils.element(applicant1ExternalFlag2));
+        Flags caApplicant1ExternalFlags = Flags.builder().details(partyLevelFlagDetails).build();
+
+        FlagDetail applicant2ExternalFlag1 = FlagDetail.builder().status("Requested").build();
+        List<Element<FlagDetail>> applicant2ExternalFlagDetails = new ArrayList<>();
+        applicant2ExternalFlagDetails.add(ElementUtils.element(applicant2ExternalFlag1));
+        Flags caApplicant2ExternalFlags = Flags.builder().details(applicant2ExternalFlagDetails).build();
+
         FlagDetail caseLevelDetail = FlagDetail.builder().status("Requested").build();
         List<Element<FlagDetail>> caseLevelFlagDetails = new ArrayList<>();
         caseLevelFlagDetails.add(ElementUtils.element(caseLevelDetail));
         Flags caseLevelFlags = Flags.builder().details(caseLevelFlagDetails).build();
-
-        FlagDetail partyLevelDetail = FlagDetail.builder().status("Requested").build();
-        List<Element<FlagDetail>> partyLevelFlagDetails = new ArrayList<>();
-        partyLevelFlagDetails.add(ElementUtils.element(partyLevelDetail));
-
-        Flags partyLevelFlags = Flags.builder().details(partyLevelFlagDetails).build();
 
         FlagDetail modifiedFlagDetail = FlagDetail.builder().status("Active").build();
 
         CaseData caseData = CaseData.builder()
             .caseFlags(caseLevelFlags)
             .allPartyFlags(AllPartyFlags.builder()
-                               .caApplicant1ExternalFlags(partyLevelFlags)
+                               .caApplicant1ExternalFlags(caApplicant1ExternalFlags)
+                               .caApplicant2ExternalFlags(caApplicant2ExternalFlags)
                                .build())
             .build();
 
         Element<FlagDetail> recentlyModifiedFlag =  Element.<FlagDetail>builder()
-            .id(partyLevelFlagDetails.get(0).getId())
+            .id(applicant2ExternalFlagDetails.get(0).getId())
             .value(modifiedFlagDetail)
             .build();
 
         caseFlagsWaService.searchAndUpdateCaseFlags(caseData, recentlyModifiedFlag);
 
         Assert.assertEquals(modifiedFlagDetail.getStatus(), caseData.getAllPartyFlags()
-            .getCaApplicant1ExternalFlags().getDetails().get(0).getValue().getStatus());
+            .getCaApplicant2ExternalFlags().getDetails().get(0).getValue().getStatus());
     }
 }

@@ -103,9 +103,8 @@ public class CaseFlagsWaService {
     }
 
     public void searchAndUpdateCaseFlags(CaseData caseData, Element<FlagDetail> mostRecentlyModified) {
-        List<Element<FlagDetail>> allCaseLevelFlagsDetails = new ArrayList<>();
         if (caseData.getCaseFlags() != null && CollectionUtils.isNotEmpty(caseData.getCaseFlags().getDetails())) {
-            allCaseLevelFlagsDetails.addAll(caseData.getCaseFlags().getDetails());
+            List<Element<FlagDetail>> allCaseLevelFlagsDetails = new ArrayList<>(caseData.getCaseFlags().getDetails());
             allCaseLevelFlagsDetails.forEach(flagDetail -> {
                 if (mostRecentlyModified.getId().equals(flagDetail.getId())) {
                     final int index =  caseData.getCaseFlags().getDetails().indexOf(flagDetail);
@@ -114,9 +113,8 @@ public class CaseFlagsWaService {
             });
         }
 
-        List<Element<FlagDetail>> allPartyLevelFlagsDetails = new ArrayList<>();
         AllPartyFlags allPartyFlags = caseData.getAllPartyFlags();
-        allPartyLevelFlagsDetails.addAll(extractAllPartyFlagDetails(allPartyFlags));
+        List<Element<FlagDetail>> allPartyLevelFlagsDetails = new ArrayList<>(extractAllPartyFlagDetails(allPartyFlags));
         allPartyLevelFlagsDetails.forEach(flagDetail -> {
             if (mostRecentlyModified.getId().equals(flagDetail.getId())) {
                 Arrays.stream(caseData.getAllPartyFlags().getClass().getDeclaredFields())
@@ -125,7 +123,7 @@ public class CaseFlagsWaService {
                         field.setAccessible(true);
                         try {
                             Flags flags = (Flags) field.get(allPartyFlags);
-                            if (flags != null && flags.getDetails() != null) {
+                            if (flags != null && flags.getDetails() != null && flags.getDetails().contains(flagDetail)) {
                                 final int index = flags.getDetails().indexOf(flagDetail);
                                 flags.getDetails().set(index, mostRecentlyModified);
                                 field.set(allPartyFlags, flags);
