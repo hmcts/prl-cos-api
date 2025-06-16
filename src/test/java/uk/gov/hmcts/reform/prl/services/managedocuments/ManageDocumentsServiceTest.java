@@ -1759,7 +1759,10 @@ public class ManageDocumentsServiceTest {
         when(objectMapper.convertValue(callbackRequest.getCaseDetails(), CaseData.class)).thenReturn(caseData);
         List<String> list = manageDocumentsService.validateCourtUser(callbackRequest, userDetails, PrlAppsConstants.WELSH);
         Assert.assertNotNull(list);
-        Assert.assertEquals("Dim ond staff gweinyddol y llys/Barnwr all ddewis yr opsiwn ‘llys’ ar gyfer yr opsiwn ‘cyflwyno ar ran’", list.getFirst());
+        Assert.assertEquals(
+            "Dim ond staff gweinyddol y llys/Barnwr all ddewis yr opsiwn ‘llys’ ar gyfer yr opsiwn ‘cyflwyno ar ran’",
+            list.getFirst()
+        );
     }
 
     @Test

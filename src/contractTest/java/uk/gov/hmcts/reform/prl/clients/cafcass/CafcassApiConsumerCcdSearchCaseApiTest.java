@@ -145,8 +145,8 @@ public class CafcassApiConsumerCcdSearchCaseApiTest {
                                     .object("case_data", (caseData) -> {
                                         caseData.stringType("dateSubmitted", "2022-08-22")
                                                 .stringType("caseTypeOfApplication", "C100")
-                                                .object("confidentialDetails", (confidential) ->
-                                                { confidential.stringType("isConfidentialDetailsAvailable", "No");})
+                                                .object("confidentialDetails", (confidential) -> {
+                                                    confidential.stringType("isConfidentialDetailsAvailable", "No"); })
                                                 .stringType("childrenKnownToLocalAuthority", "no")
                                                 .eachLike("children", (children) -> {
                                                     children.stringType("id",
