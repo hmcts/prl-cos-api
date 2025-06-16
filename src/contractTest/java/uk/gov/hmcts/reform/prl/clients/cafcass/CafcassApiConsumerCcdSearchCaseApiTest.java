@@ -122,7 +122,8 @@ public class CafcassApiConsumerCcdSearchCaseApiTest {
                         .header(CAFCASS_AUTHORISATION_HEADER, CAFCASS_TEST_AUTH_TOKEN)
                         .header(CAFCASS_SERVICE_AUTHORISATION_HEADER, CAFCASS_TEST_SERVICE_AUTH_TOKEN)
                         .contentType(ContentType.JSON)
-                        .get(mockServer.getUrl() + CCD_STORE_SEARCH_CASE_ENDPOINT + "?" + CAFCASS_CCD_CASE_TYPE_ID_QUERY_PARAM)
+                        .get(mockServer.getUrl()
+                                 + CCD_STORE_SEARCH_CASE_ENDPOINT + "?" + CAFCASS_CCD_CASE_TYPE_ID_QUERY_PARAM)
                         .then()
                         .log().all().extract().asString();
         JSONObject jsonResponse = new JSONObject(actualResponseBody);
@@ -144,10 +145,8 @@ public class CafcassApiConsumerCcdSearchCaseApiTest {
                                     .object("case_data", (caseData) -> {
                                         caseData.stringType("dateSubmitted", "2022-08-22")
                                                 .stringType("caseTypeOfApplication", "C100")
-                                                .object("confidentialDetails", (confidential) -> {
-                                                    confidential.stringType("isConfidentialDetailsAvailable",
-                                                            "No");
-                                                })
+                                                .object("confidentialDetails", (confidential) ->
+                                                { confidential.stringType("isConfidentialDetailsAvailable", "No");})
                                                 .stringType("childrenKnownToLocalAuthority", "no")
                                                 .eachLike("children", (children) -> {
                                                     children.stringType("id",

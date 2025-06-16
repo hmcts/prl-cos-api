@@ -68,7 +68,8 @@ public class CosApiSmokeTests {
             .then()
             .body("errors",
                   contains(
-                      "You cannot make this application unless the applicant has either attended, or is exempt from attending a MIAM")
+                      "You cannot make this application unless the applicant has either"
+                          + " attended, or is exempt from attending a MIAM")
             )
             .assertThat().statusCode(200);
     }
@@ -87,7 +88,9 @@ public class CosApiSmokeTests {
             .contentType("application/json")
             .post("/getSolicitorAndFeeDetails")
             .then()
-            .body("errors", contains("Submit and pay is not allowed for this case unless you finish all the mandatory events"))
+            .body("errors",
+                  contains("Submit and pay is not allowed for this case unless you finish all the mandatory events")
+            )
             .assertThat().statusCode(200);
     }
 

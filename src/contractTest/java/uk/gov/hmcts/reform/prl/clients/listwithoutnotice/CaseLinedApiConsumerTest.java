@@ -54,7 +54,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class CaseLinedApiConsumerTest {
 
     @Autowired
-    HearingApiClient hearingApiClient;
+    private HearingApiClient hearingApiClient;
 
     private static final String BEARER_TOKEN = "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre";
     private static final String SERVICE_AUTHORIZATION_HEADER = "eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre";
@@ -89,9 +89,14 @@ public class CaseLinedApiConsumerTest {
     public void verifyCaseLinkedDetails() {
         caseLinkedRequest = CaseLinkedRequest.caseLinkedRequestWith().caseReference("1677767515750127").build();
         List<CaseLinkedData>
-            caseLinkedData = hearingApiClient.getCaseLinkedData(BEARER_TOKEN,SERVICE_AUTHORIZATION_HEADER,caseLinkedRequest);
+            caseLinkedData = hearingApiClient.getCaseLinkedData(
+                BEARER_TOKEN,
+                SERVICE_AUTHORIZATION_HEADER,
+                caseLinkedRequest
+        );
+
         assertNotNull(caseLinkedData);
-        assertEquals(caseLinkedData.get(0).getCaseReference(),"1670601355422736");
-        assertEquals(caseLinkedData.get(0).getCaseName(),"Case_Flag_9_Dec_6");
+        assertEquals(caseLinkedData.getFirst().getCaseReference(),"1670601355422736");
+        assertEquals(caseLinkedData.getFirst().getCaseName(),"Case_Flag_9_Dec_6");
     }
 }

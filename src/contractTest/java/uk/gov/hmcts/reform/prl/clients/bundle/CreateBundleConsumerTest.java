@@ -60,8 +60,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 )
 @PactFolder("pacts")
 public class CreateBundleConsumerTest {
+
     @Autowired
-    BundleApiClient bundleApiClient;
+    private BundleApiClient bundleApiClient;
 
     private static final String BEARER_TOKEN = "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre";
     private static final String SERVICE_AUTHORIZATION_HEADER = "eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre";
@@ -75,10 +76,19 @@ public class CreateBundleConsumerTest {
         List<BundlingRequestDocument> bundlingRequestDocuments = new ArrayList<>();
         bundlingRequestDocuments.add(BundlingRequestDocument.builder().documentLink(Document.builder().build())
             .documentFileName("otherDocs").documentGroup(BundlingDocGroupEnum.positionStatements).build());
-        BundleCreateRequest.builder().eventId("createBundle").jurisdictionId("JURISDICTIONID").caseTypeId("CASETYPEID").caseDetails(
-            BundlingCaseDetails.builder().caseData(BundlingCaseData.builder().id("CaseID").bundleConfiguration("BUNDLE_config.yaml")
-                    .data(BundlingData.builder().allOtherDocuments(ElementUtils.wrapElements(bundlingRequestDocuments)).build())
-                .build()).build());
+        BundleCreateRequest.builder()
+            .eventId("createBundle")
+            .jurisdictionId("JURISDICTIONID")
+            .caseTypeId("CASETYPEID")
+            .caseDetails(BundlingCaseDetails.builder()
+                             .caseData(BundlingCaseData.builder()
+                                           .id("CaseID")
+                                           .bundleConfiguration("BUNDLE_config.yaml")
+                                           .data(BundlingData.builder()
+                                                     .allOtherDocuments(
+                                                         ElementUtils.wrapElements(bundlingRequestDocuments)).build())
+                                           .build())
+                             .build());
         return builder
             .given("A request to create a bundle in Bundling api")
             .uponReceiving("a request to create a bundle in bundling api with valid authorization")
@@ -98,11 +108,17 @@ public class CreateBundleConsumerTest {
     @Test
     @PactTestFor(pactMethod = "generateCreateBundleResponse")
     public void verifyCreateBundle() {
-        BundleCreateResponse bundleCreateResponse = bundleApiClient.createBundleServiceRequest(BEARER_TOKEN,
+        BundleCreateResponse response = bundleApiClient.createBundleServiceRequest(BEARER_TOKEN,
             SERVICE_AUTHORIZATION_HEADER, BundleCreateRequest.builder().build()
         );
-        assertNotNull(bundleCreateResponse);
-        assertEquals("DONE", bundleCreateResponse.getData().getCaseBundles().get(0).getValue().getStitchStatus());
-        assertEquals("StitchedPDF", bundleCreateResponse.getData().getCaseBundles().get(0).getValue().getStitchedDocument().getDocumentFilename());
+        assertNotNull(response);
+        assertEquals(
+            "DONE",
+            response.getData().getCaseBundles().getFirst().getValue().getStitchedDocument()
+        );
+        assertEquals(
+            "StitchedPDF",
+            response.getData().getCaseBundles().getFirst().getValue().getStitchedDocument().getDocumentFilename()
+        );
     }
 }
