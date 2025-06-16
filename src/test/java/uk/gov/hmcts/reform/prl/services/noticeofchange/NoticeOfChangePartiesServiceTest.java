@@ -1276,7 +1276,6 @@ public class NoticeOfChangePartiesServiceTest {
         assertNotNull(caseDataUpdated);
     }
 
-
     @Test
     public void testAboutToSubmitAdminRemoveLegalRepresentativeFL401Applicant() {
         DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
@@ -1458,10 +1457,8 @@ public class NoticeOfChangePartiesServiceTest {
 
     @Test
     public void testSendEmailAndUpdateCaseData_VerifiesSendEmailOnRemovalOfLegalRepresentation() throws Exception {
-        // --- Arrange ---
         NoticeOfChangePartiesService spyService = spy(noticeOfChangePartiesService);
 
-        // prepare old + new Elements
         Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap = new HashMap<>();
         Optional<SolicitorRole> role = Optional.of(SolicitorRole.C100RESPONDENTSOLICITOR1);
 
@@ -1492,23 +1489,22 @@ public class NoticeOfChangePartiesServiceTest {
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-
+        when(systemUserService.getSysUserToken()).thenReturn("test");
+        when(systemUserService.getUserId("test")).thenReturn("test");
         when(ccdCoreCaseDataService.startUpdate(
-            any(),                    // matches *any* object—including null—for the String param
-            any(),                    // matches *any* object—including null—for the EventRequestData param
+            any(),
+            any(),
             any(),
             eq(true)
         )).thenReturn(startEventResponse);
         when(ccdCoreCaseDataService.findCaseById(anyString(), anyString()))
             .thenReturn(caseDetails);
 
-        // --- Act ---
         Method m = NoticeOfChangePartiesService.class
             .getDeclaredMethod("sendEmailAndUpdateCaseData", Map.class, String.class);
         m.setAccessible(true);
-        m.invoke(spyService, selectedPartyDetailsMap, "12345678");
+        m.invoke(spyService, selectedPartyDetailsMap, "123456789");
 
-        // --- Assert ---
         verify(spyService).sendEmailOnRemovalOfLegalRepresentation(
             any(Element.class),
             eq(newElem),

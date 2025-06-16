@@ -709,6 +709,7 @@ public class NoticeOfChangePartiesService {
         sendEmailAndUpdateCaseData(selectedPartyDetailsMap, String.valueOf(newCaseData.getId()));
     }
 
+
     private void sendEmailAndUpdateCaseData(
         Map<Optional<SolicitorRole>,
             Element<PartyDetails>> selectedPartyDetailsMap,
@@ -899,7 +900,7 @@ public class NoticeOfChangePartiesService {
         }
     }
 
-    private void sendEmailOnRemovalOfLegalRepresentation(Element<PartyDetails> oldPartyDetails,
+    void sendEmailOnRemovalOfLegalRepresentation(Element<PartyDetails> oldPartyDetails,
                                                          Element<PartyDetails> newPartyDetails,
                                                          Optional<SolicitorRole> solicitorRole,
                                                          CaseData caseData) {
