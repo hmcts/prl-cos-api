@@ -81,7 +81,7 @@ public class CaseFlagsController extends AbstractCallbackController {
                                                                    @RequestBody CallbackRequest callbackRequest) {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        caseFlagsWaService.setSelectedFlagsWithoutDeepCopy(caseData);
+        caseFlagsWaService.setSelectedFlags(caseData);
 
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
 
@@ -110,7 +110,7 @@ public class CaseFlagsController extends AbstractCallbackController {
         if (REQUESTED.equals(mostRecentlyModified.getValue().getStatus())) {
             errors.add("Please select status other than Requested");
         } else {
-            //caseFlagsWaService.searchAndUpdateCaseFlags(caseData, mostRecentlyModified);
+            caseFlagsWaService.searchAndUpdateCaseFlags(caseData, mostRecentlyModified);
         }
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
 

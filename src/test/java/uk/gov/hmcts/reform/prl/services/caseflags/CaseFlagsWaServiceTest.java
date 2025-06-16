@@ -9,6 +9,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caseflags.AllPartyFlags;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -35,7 +36,7 @@ public class CaseFlagsWaServiceTest {
     }
 
     @Test
-    public void testSearchAndUpdateCaseFlags() {
+    public void testSearchAndUpdateCaseLevelFlags() {
         FlagDetail flagDetail = FlagDetail.builder().status("Requested").build();
         FlagDetail modifiedFlagDetail = FlagDetail.builder().status("Active").build();
         List<Element<FlagDetail>> caseLevelFlagDetails = new ArrayList<>();
@@ -52,5 +53,67 @@ public class CaseFlagsWaServiceTest {
         caseFlagsWaService.searchAndUpdateCaseFlags(caseData, recentlyModifiedFlag);
 
         Assert.assertEquals(modifiedFlagDetail.getStatus(), caseData.getCaseFlags().getDetails().get(0).getValue().getStatus());
+    }
+
+    @Test
+    public void testSearchAndUpdatePartyLevelFlags() {
+        FlagDetail flagDetail1 = FlagDetail.builder().status("Requested").build();
+        FlagDetail flagDetail2 = FlagDetail.builder().status("Requested").build();
+        FlagDetail modifiedFlagDetail = FlagDetail.builder().status("Active").build();
+
+        List<Element<FlagDetail>> partyLevelFlagDetails = new ArrayList<>();
+        partyLevelFlagDetails.add(ElementUtils.element(flagDetail1));
+        partyLevelFlagDetails.add(ElementUtils.element(flagDetail2));
+
+        Flags flags = Flags.builder().details(partyLevelFlagDetails).build();
+        CaseData caseData = CaseData.builder()
+            .caseFlags(Flags.builder().build())
+            .allPartyFlags(AllPartyFlags.builder()
+                               .caApplicant1ExternalFlags(flags)
+                               .build())
+            .build();
+
+        Element<FlagDetail> recentlyModifiedFlag =  Element.<FlagDetail>builder()
+            .id(partyLevelFlagDetails.get(0).getId())
+            .value(modifiedFlagDetail)
+            .build();
+
+        caseFlagsWaService.searchAndUpdateCaseFlags(caseData, recentlyModifiedFlag);
+
+        Assert.assertEquals(modifiedFlagDetail.getStatus(), caseData.getAllPartyFlags()
+            .getCaApplicant1ExternalFlags().getDetails().get(0).getValue().getStatus());
+    }
+
+    @Test
+    public void testSearchAndUpdateBothCaseLevelAndPartyLevelFlags() {
+        FlagDetail caseLevelDetail = FlagDetail.builder().status("Requested").build();
+        List<Element<FlagDetail>> caseLevelFlagDetails = new ArrayList<>();
+        caseLevelFlagDetails.add(ElementUtils.element(caseLevelDetail));
+        Flags caseLevelFlags = Flags.builder().details(caseLevelFlagDetails).build();
+
+        FlagDetail partyLevelDetail = FlagDetail.builder().status("Requested").build();
+        List<Element<FlagDetail>> partyLevelFlagDetails = new ArrayList<>();
+        partyLevelFlagDetails.add(ElementUtils.element(partyLevelDetail));
+
+        Flags partyLevelFlags = Flags.builder().details(partyLevelFlagDetails).build();
+
+        FlagDetail modifiedFlagDetail = FlagDetail.builder().status("Active").build();
+
+        CaseData caseData = CaseData.builder()
+            .caseFlags(caseLevelFlags)
+            .allPartyFlags(AllPartyFlags.builder()
+                               .caApplicant1ExternalFlags(partyLevelFlags)
+                               .build())
+            .build();
+
+        Element<FlagDetail> recentlyModifiedFlag =  Element.<FlagDetail>builder()
+            .id(partyLevelFlagDetails.get(0).getId())
+            .value(modifiedFlagDetail)
+            .build();
+
+        caseFlagsWaService.searchAndUpdateCaseFlags(caseData, recentlyModifiedFlag);
+
+        Assert.assertEquals(modifiedFlagDetail.getStatus(), caseData.getAllPartyFlags()
+            .getCaApplicant1ExternalFlags().getDetails().get(0).getValue().getStatus());
     }
 }

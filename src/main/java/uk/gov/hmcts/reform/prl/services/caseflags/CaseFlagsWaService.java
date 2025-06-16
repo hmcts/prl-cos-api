@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.caseflags;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
@@ -42,25 +41,6 @@ public class CaseFlagsWaService {
         eventPublisher.publishEvent(caseFlagsEvent);
     }
 
-    public void filterRequestedPartyFlags(AllPartyFlags allPartyFlags) {
-        if (allPartyFlags != null) {
-            Arrays.stream(allPartyFlags.getClass().getDeclaredFields())
-                .forEach(field -> {
-                    field.setAccessible(true);
-                    try {
-                        Flags flagsValue = (Flags) field.get(allPartyFlags);
-                        if (CollectionUtils.isNotEmpty(flagsValue.getDetails())) {
-                            if (flagsValue.getDetails().stream().noneMatch(e -> REQUESTED.equals(e.getValue().getStatus()))) {
-                                field.set(allPartyFlags, Flags.builder().build());
-                            }
-                        }
-                    } catch (IllegalAccessException e) {
-                        // ignore it
-                    }
-                });
-        }
-    }
-
     public void setSelectedFlags(CaseData caseData) {
         AllPartyFlags allPartyFlags = caseData.getAllPartyFlags();
         List<Element<Flags>> selectedFlagsList = new ArrayList<>();
@@ -74,49 +54,6 @@ public class CaseFlagsWaService {
                 field.setAccessible(true);
                 try {
                     Flags selectedFlag = deepCopy((Flags) field.get(allPartyFlags), Flags.class);
-                    selectedFlagsList.add(ElementUtils.element(selectedFlag));
-                } catch (IllegalAccessException e) {
-                    // ignore
-                }
-            });
-
-        caseData.getCaseFlags().getDetails().stream().forEach(flagDetail -> {
-            if (!REQUESTED.equals(flagDetail.getValue().getStatus())) {
-                selectedFlagsList.forEach(selectedFlag -> {
-                    selectedFlag.getValue().getDetails().remove(flagDetail);
-                });
-            }
-        });
-        List<Element<FlagDetail>> allFlagsDetails = extractAllPartyFlagDetails(allPartyFlags);
-
-        allFlagsDetails.stream().forEach(flagDetail -> {
-            if (!REQUESTED.equals(flagDetail.getValue().getStatus())) {
-                selectedFlagsList.forEach(selectedFlag -> {
-                    selectedFlag.getValue().getDetails().remove(flagDetail);
-                });
-            }
-        });
-
-        List<Element<Flags>> finalList = selectedFlagsList.stream()
-            .filter(f -> CollectionUtils.isNotEmpty(f.getValue().getDetails()))
-            .toList();
-
-
-        caseData.setSelectedFlags(finalList);
-    }
-
-    public void setSelectedFlagsWithoutDeepCopy(CaseData caseData) {
-        AllPartyFlags allPartyFlags = caseData.getAllPartyFlags();
-        List<Element<Flags>> selectedFlagsList = new ArrayList<>();
-
-        selectedFlagsList.add(ElementUtils.element(caseData.getCaseFlags()));
-
-        Arrays.stream(allPartyFlags.getClass().getDeclaredFields())
-            .filter(field -> field.getType().equals(Flags.class))
-            .forEach(field -> {
-                field.setAccessible(true);
-                try {
-                    Flags selectedFlag = (Flags) field.get(allPartyFlags);
                     selectedFlagsList.add(ElementUtils.element(selectedFlag));
                 } catch (IllegalAccessException e) {
                     // ignore
@@ -166,16 +103,40 @@ public class CaseFlagsWaService {
     }
 
     public void searchAndUpdateCaseFlags(CaseData caseData, Element<FlagDetail> mostRecentlyModified) {
-        List<Element<FlagDetail>> allFlagsDetails = new ArrayList<>();
-        allFlagsDetails.addAll(caseData.getCaseFlags().getDetails());
-        allFlagsDetails.addAll(extractAllPartyFlagDetails(caseData.getAllPartyFlags()));
+        List<Element<FlagDetail>> allCaseLevelFlagsDetails = new ArrayList<>();
+        if (caseData.getCaseFlags() != null && CollectionUtils.isNotEmpty(caseData.getCaseFlags().getDetails())) {
+            allCaseLevelFlagsDetails.addAll(caseData.getCaseFlags().getDetails());
+            allCaseLevelFlagsDetails.forEach(flagDetail -> {
+                if (mostRecentlyModified.getId().equals(flagDetail.getId())) {
+                    final int index =  caseData.getCaseFlags().getDetails().indexOf(flagDetail);
+                    caseData.getCaseFlags().getDetails().set(index, mostRecentlyModified);
+                }
+            });
+        }
 
-        allFlagsDetails.forEach(flagDetail -> {
+        List<Element<FlagDetail>> allPartyLevelFlagsDetails = new ArrayList<>();
+        AllPartyFlags allPartyFlags = caseData.getAllPartyFlags();
+        allPartyLevelFlagsDetails.addAll(extractAllPartyFlagDetails(allPartyFlags));
+        allPartyLevelFlagsDetails.forEach(flagDetail -> {
             if (mostRecentlyModified.getId().equals(flagDetail.getId())) {
-                caseData.getCaseFlags().getDetails().remove(flagDetail);
-                caseData.getCaseFlags().getDetails().add(mostRecentlyModified);
+                Arrays.stream(caseData.getAllPartyFlags().getClass().getDeclaredFields())
+                    .filter(field -> field.getType().equals(Flags.class))
+                    .forEach(field -> {
+                        field.setAccessible(true);
+                        try {
+                            Flags flags = (Flags) field.get(allPartyFlags);
+                            if (flags != null && flags.getDetails() != null) {
+                                final int index = flags.getDetails().indexOf(flagDetail);
+                                flags.getDetails().set(index, mostRecentlyModified);
+                                field.set(allPartyFlags, flags);
+                            }
+                        } catch (IllegalAccessException e) {
+                            //ignore
+                        }
+                    });
             }
         });
+
     }
 
     private List<Element<FlagDetail>> extractAllPartyFlagDetails(AllPartyFlags allPartyFlags) {
@@ -197,14 +158,6 @@ public class CaseFlagsWaService {
             .filter(Objects::nonNull)
             .flatMap(List::stream)
             .collect(Collectors.toList());
-    }
-
-    public <T> T deepCopyArray(T object, TypeReference<T> typeReference) {
-        try {
-            return objectMapper.readValue(objectMapper.writeValueAsString(object), typeReference);
-        } catch (IOException e) {
-            throw new IllegalStateException();
-        }
     }
 
     public <T> T deepCopy(T object, Class<T> objectClass) {
