@@ -554,7 +554,7 @@ public class ApplicationsTabService implements TabService {
         if (nonNull(solicitor)) {
             statementOfTruthPlaceHolder = solicitor;
         } else if (isNotEmpty(caseData.getUserInfo())) {
-            UserInfo userInfo = caseData.getUserInfo().get(0).getValue();
+            UserInfo userInfo = caseData.getUserInfo().getFirst().getValue();
             statementOfTruthPlaceHolder = userInfo.getFirstName() + " " + userInfo.getLastName();
         }
 

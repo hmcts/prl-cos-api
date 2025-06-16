@@ -21,8 +21,8 @@ import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
 
 import java.util.List;
 
-import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertNotNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RD_STAFF_FIRST_PAGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RD_STAFF_PAGE_SIZE;
 
@@ -93,9 +93,13 @@ public class ReferenceDataStaffUserConsumerTest {
             RD_STAFF_PAGE_SIZE,
             RD_STAFF_FIRST_PAGE
         ).getBody();
+
         assertNotNull(staffResponseList);
-        assertEquals("Rama",staffResponseList.get(0).getStaffProfile().getLastName());
-        assertEquals("crd_func_test_2.0_rdcc_3831_107@justice.gov.uk",staffResponseList.get(0).getStaffProfile().getEmailId());
+        assertEquals("Rama",staffResponseList.getFirst().getStaffProfile().getLastName());
+        assertEquals(
+            "crd_func_test_2.0_rdcc_3831_107@justice.gov.uk",
+            staffResponseList.getFirst().getStaffProfile().getEmailId()
+        );
     }
 
 }

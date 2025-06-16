@@ -54,7 +54,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class JudicialUsersApiConsumerTest {
 
     @Autowired
-    JudicialUserDetailsApi judicialUserDetailsApi;
+    private JudicialUserDetailsApi judicialUserDetailsApi;
 
     private static final String BEARER_TOKEN = "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre";
     private static final String SERVICE_AUTHORIZATION_HEADER = "eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre";
@@ -88,10 +88,13 @@ public class JudicialUsersApiConsumerTest {
     @PactTestFor(pactMethod = "generatePactFragmentForAllocateJudge")
     public void verifyAllocatedJudgeDetails() {
         List<JudicialUsersApiResponse>
-            judicialUsersList = judicialUserDetailsApi.getAllJudicialUserDetails(BEARER_TOKEN,SERVICE_AUTHORIZATION_HEADER,judicialUsersApiRequest);
+            judicialUsersList =
+            judicialUserDetailsApi.getAllJudicialUserDetails(BEARER_TOKEN,
+                                                             SERVICE_AUTHORIZATION_HEADER,
+                                                             judicialUsersApiRequest);
 
         assertNotNull(judicialUsersList);
-        JudicialUsersApiResponse judicialUsersApiResponse = judicialUsersList.get(0);
+        JudicialUsersApiResponse judicialUsersApiResponse = judicialUsersList.getFirst();
         assertNotNull(judicialUsersApiResponse);
         assertEquals(judicialUsersApiResponse.getPersonalCode(),"49933940");
         assertEquals(judicialUsersApiResponse.getEmailId(),"49933940EMP-@ejudiciary.net");

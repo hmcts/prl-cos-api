@@ -544,7 +544,7 @@ public class UploadAdditionalApplicationService {
         caseDataUpdated.put(AWP_WA_TASK_NAME, uploadAdditionalApplicationUtils.getAwPTaskName(caseData));
         caseDataUpdated.put(AWP_WA_TASK_TO_BE_CREATED, uploadAdditionalApplicationUtils.getValueOfAwpTaskToBeCreated(caseData));
         if (CollectionUtils.isNotEmpty(additionalApplicationElements)) {
-            caseDataUpdated.put(WA_ADDITIONAL_APPLICATION_COLLECTION_ID, additionalApplicationElements.get(0).getId());
+            caseDataUpdated.put(WA_ADDITIONAL_APPLICATION_COLLECTION_ID, additionalApplicationElements.getFirst().getId());
         }
         cleanOldUpUploadAdditionalApplicationData(caseDataUpdated);
         return caseDataUpdated;

@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.FixMethodOrder;
@@ -28,7 +27,6 @@ import java.util.List;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunctionalTest.VALID_CAFCASS_REQUEST_JSON;
 
-@Slf4j
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
@@ -74,6 +72,8 @@ public class StatementOfServiceControllerFunctionalTest {
             .as(CaseDetails.class);
 
         Assert.assertNotNull(caseDetails);
+
+        @SuppressWarnings("unchecked")
         List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient = (List<Element<StmtOfServiceAddRecipient>>) caseDetails.getData().get(
             "stmtOfServiceAddRecipient");
         Assert.assertEquals(1, stmtOfServiceAddRecipient.size());

@@ -492,7 +492,7 @@ public class ServiceOfDocumentsService {
         params.put(AUTHORIZATION, authorisation);
         params.put(SERVED_PARTY, SERVED_PARTY_APPLICANT_SOLICITOR);
         Element<PartyDetails> party = C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))
-            ? caseData.getApplicants().get(0) : element(
+            ? caseData.getApplicants().getFirst() : element(
             caseData.getApplicantsFL401().getPartyId(),
             caseData.getApplicantsFL401()
         );
@@ -981,15 +981,15 @@ public class ServiceOfDocumentsService {
 
     private boolean emptyCfvSelectedDocuments(CaseData caseData) {
         return CollectionUtils.isEmpty(caseData.getServiceOfDocuments().getSodDocumentsList())
-            || null == caseData.getServiceOfDocuments().getSodDocumentsList().get(0)
-            || null == caseData.getServiceOfDocuments().getSodDocumentsList().get(0).getValue();
+            || null == caseData.getServiceOfDocuments().getSodDocumentsList().getFirst()
+            || null == caseData.getServiceOfDocuments().getSodDocumentsList().getFirst().getValue();
     }
 
     private List<String> getPartiesToBeServedForPersonalService(CaseData caseData) {
         if (SodSolicitorServingRespondentsEnum.applicantLegalRepresentative.equals(
             caseData.getServiceOfDocuments().getSodSolicitorServingRespondentsOptions())) {
             return C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))
-                ? List.of(caseData.getApplicants().get(0).getValue().getRepresentativeFullName() + " (Applicant solicitor)")
+                ? List.of(caseData.getApplicants().getFirst().getValue().getRepresentativeFullName() + " (Applicant solicitor)")
                 : List.of(caseData.getApplicantsFL401().getRepresentativeFullName() + " (Applicant solicitor)");
         } else if (SodCitizenServingRespondentsEnum.unrepresentedApplicant.equals(
             caseData.getServiceOfDocuments().getSodCitizenServingRespondentsOptions())) {

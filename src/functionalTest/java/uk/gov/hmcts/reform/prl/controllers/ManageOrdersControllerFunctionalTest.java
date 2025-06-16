@@ -14,8 +14,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
@@ -62,13 +62,13 @@ public class ManageOrdersControllerFunctionalTest {
     @Autowired
     protected RoleAssignmentService roleAssignmentService;
 
-    @MockBean
+    @MockitoBean
     private ManageOrderService manageOrderService;
 
-    @MockBean
+    @MockitoBean
     private RoleAssignmentApi roleAssignmentApi;
 
-    @MockBean
+    @MockitoBean
     private HearingService hearingService;
 
     private static final String VALID_INPUT_JSON = "CallBackRequest.json";

@@ -996,7 +996,7 @@ public class CitizenPartyDetailsMapper {
     }
 
     private String getPartyName(List<Element<PartyDetails>> parties) {
-        return nullSafeList(parties).get(0).getValue().getLabelForDynamicList();
+        return nullSafeList(parties).getFirst().getValue().getLabelForDynamicList();
     }
 
     public String buildApplicantAndRespondentForCaseName(C100RebuildData c100RebuildData) throws JsonProcessingException {
@@ -1024,13 +1024,13 @@ public class CitizenPartyDetailsMapper {
         if (null != c100RebuildApplicantDetailsElements
             && null != c100RebuildApplicantDetailsElements.getApplicants()
             && !c100RebuildApplicantDetailsElements.getApplicants().isEmpty()
-            && null != c100RebuildApplicantDetailsElements.getApplicants().get(0)
+            && null != c100RebuildApplicantDetailsElements.getApplicants().getFirst()
             && null != c100RebuildRespondentDetailsElements
             && null != c100RebuildRespondentDetailsElements.getRespondentDetails()
             && !c100RebuildRespondentDetailsElements.getRespondentDetails().isEmpty()
-            && null != c100RebuildRespondentDetailsElements.getRespondentDetails().get(0)) {
-            caseName = c100RebuildApplicantDetailsElements.getApplicants().get(0).getApplicantLastName() + " V "
-                + c100RebuildRespondentDetailsElements.getRespondentDetails().get(0).getLastName();
+            && null != c100RebuildRespondentDetailsElements.getRespondentDetails().getFirst()) {
+            caseName = c100RebuildApplicantDetailsElements.getApplicants().getFirst().getApplicantLastName() + " V "
+                + c100RebuildRespondentDetailsElements.getRespondentDetails().getFirst().getLastName();
         }
 
         return caseName;

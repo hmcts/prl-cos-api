@@ -81,11 +81,12 @@ public class CommonRefDataConsumerTest {
     @Test
     @PactTestFor(pactMethod = "generatePactFragmentForCategoryId")
     public void verifyCommonDataDetails() {
-        CommonDataResponse allCategoryValuesByCategoryId = commonDataRefApi.getAllCategoryValuesByCategoryId(BEARER_TOKEN,
-                                                                                                             SERVICE_AUTHORIZATION_HEADER,
-                                                                                                             "hearingType",
-                                                                                                             "ABA5",
-                                                                                                             "N"
+        CommonDataResponse allCategoryValuesByCategoryId =
+            commonDataRefApi.getAllCategoryValuesByCategoryId(BEARER_TOKEN,
+                                                              SERVICE_AUTHORIZATION_HEADER,
+                                                              "hearingType",
+                                                              "ABA5",
+                                                              "N"
         );
 
         assertNotNull(allCategoryValuesByCategoryId);

@@ -113,12 +113,12 @@ public class BundleCreateRequestMapper {
             List<CaseHearing> listedCaseHearings = hearingDetails.getCaseHearings().stream()
                 .filter(caseHearing -> LISTED.equalsIgnoreCase(caseHearing.getHmcStatus())).toList();
             if (null != listedCaseHearings && !listedCaseHearings.isEmpty()) {
-                List<HearingDaySchedule> hearingDaySchedules = listedCaseHearings.get(0).getHearingDaySchedule();
+                List<HearingDaySchedule> hearingDaySchedules = listedCaseHearings.getFirst().getHearingDaySchedule();
                 if (null != hearingDaySchedules && !hearingDaySchedules.isEmpty()) {
-                    return BundleHearingInfo.builder().hearingVenueAddress(getHearingVenueAddress(hearingDaySchedules.get(0)))
-                        .hearingDateAndTime(null != hearingDaySchedules.get(0).getHearingStartDateTime()
-                            ? getBundleDateTime(hearingDaySchedules.get(0).getHearingStartDateTime()) : BLANK_STRING)
-                        .hearingJudgeName(hearingDaySchedules.get(0).getHearingJudgeName()).build();
+                    return BundleHearingInfo.builder().hearingVenueAddress(getHearingVenueAddress(hearingDaySchedules.getFirst()))
+                        .hearingDateAndTime(null != hearingDaySchedules.getFirst().getHearingStartDateTime()
+                            ? getBundleDateTime(hearingDaySchedules.getFirst().getHearingStartDateTime()) : BLANK_STRING)
+                        .hearingJudgeName(hearingDaySchedules.getFirst().getHearingJudgeName()).build();
                 }
             }
         }

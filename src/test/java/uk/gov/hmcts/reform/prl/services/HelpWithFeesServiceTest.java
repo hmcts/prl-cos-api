@@ -89,7 +89,7 @@ public class HelpWithFeesServiceTest {
         Map<String, Object> response = helpWithFeesService.handleAboutToStart(caseDetails);
         assertNotNull(response);
         DynamicList dynamicList = (DynamicList) response.get("hwfAppList");
-        assertEquals("Child arrangements application C100 - 24/06/2024 10:46:55", dynamicList.getListItems().get(0).getLabel());
+        assertEquals("Child arrangements application C100 - 24/06/2024 10:46:55", dynamicList.getListItems().getFirst().getLabel());
         assertEquals("C100",response.get("caseTypeOfApplication"));
     }
 

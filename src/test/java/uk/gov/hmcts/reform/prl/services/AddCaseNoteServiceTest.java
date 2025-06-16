@@ -75,9 +75,9 @@ public class AddCaseNoteServiceTest {
         List<Element<CaseNoteDetails>> result = addCaseNoteService.addCaseNoteDetails(caseData, userDetails);
 
         Assertions.assertEquals(1, result.size());
-        Assertions.assertEquals("testSubject1", result.get(0).getValue().getSubject());
-        Assertions.assertEquals("testCaseNote1", result.get(0).getValue().getCaseNote());
-        Assertions.assertEquals("forename surname", result.get(0).getValue().getUser());
+        Assertions.assertEquals("testSubject1", result.getFirst().getValue().getSubject());
+        Assertions.assertEquals("testCaseNote1", result.getFirst().getValue().getCaseNote());
+        Assertions.assertEquals("forename surname", result.getFirst().getValue().getUser());
     }
 
     @Test
@@ -97,8 +97,8 @@ public class AddCaseNoteServiceTest {
         List<Element<CaseNoteDetails>> result = addCaseNoteService.addCaseNoteDetails(caseData, userDetails);
 
         Assertions.assertEquals(2, result.size());
-        Assertions.assertEquals("testSubject1", result.get(0).getValue().getSubject());
-        Assertions.assertEquals("forename surname", result.get(0).getValue().getUser());
+        Assertions.assertEquals("testSubject1", result.getFirst().getValue().getSubject());
+        Assertions.assertEquals("forename surname", result.getFirst().getValue().getUser());
     }
 
     @Test

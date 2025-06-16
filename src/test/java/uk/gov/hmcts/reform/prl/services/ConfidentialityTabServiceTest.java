@@ -663,7 +663,7 @@ public class ConfidentialityTabServiceTest {
 
         // Assertions
         Assertions.assertEquals(1, result.size());
-        ChildConfidentialityDetails details = result.get(0).getValue();
+        ChildConfidentialityDetails details = result.getFirst().getValue();
         assertEquals("ChildFirstName", details.getFirstName());
         assertEquals("ChildLastName", details.getLastName());
         assertEquals(1, details.getOtherPerson().size());
@@ -763,7 +763,7 @@ public class ConfidentialityTabServiceTest {
 
         // Assertions
         Assertions.assertEquals(1, result.size());
-        PartyDetails updatedPartyDetails = result.get(0).getValue();
+        PartyDetails updatedPartyDetails = result.getFirst().getValue();
         Assertions.assertEquals(YesOrNo.Yes, updatedPartyDetails.getIsAddressConfidential());
         Assertions.assertEquals(YesOrNo.Yes, updatedPartyDetails.getIsPhoneNumberConfidential());
         Assertions.assertEquals(YesOrNo.Yes, updatedPartyDetails.getIsEmailAddressConfidential());
@@ -805,7 +805,7 @@ public class ConfidentialityTabServiceTest {
 
         // Assertions
         Assertions.assertEquals(1, result.size());
-        PartyDetails updatedPartyDetails = result.get(0).getValue();
+        PartyDetails updatedPartyDetails = result.getFirst().getValue();
         Assertions.assertEquals(YesOrNo.No, updatedPartyDetails.getIsAddressConfidential());
         Assertions.assertEquals(YesOrNo.No, updatedPartyDetails.getIsPhoneNumberConfidential());
         Assertions.assertEquals(YesOrNo.No, updatedPartyDetails.getIsEmailAddressConfidential());
@@ -839,7 +839,7 @@ public class ConfidentialityTabServiceTest {
 
         // Assertions
         Assertions.assertEquals(1, result.size());
-        PartyDetails updatedPartyDetails = result.get(0).getValue();
+        PartyDetails updatedPartyDetails = result.getFirst().getValue();
         Assertions.assertEquals(YesOrNo.No, updatedPartyDetails.getIsAddressConfidential());
         Assertions.assertEquals(YesOrNo.No, updatedPartyDetails.getIsPhoneNumberConfidential());
         Assertions.assertEquals(YesOrNo.No, updatedPartyDetails.getIsEmailAddressConfidential());
@@ -871,7 +871,7 @@ public class ConfidentialityTabServiceTest {
 
         // Assertions
         Assertions.assertEquals(1, result.size());
-        PartyDetails updatedPartyDetails = result.get(0).getValue();
+        PartyDetails updatedPartyDetails = result.getFirst().getValue();
         Assertions.assertEquals(YesOrNo.No, updatedPartyDetails.getIsAddressConfidential());
         Assertions.assertEquals(YesOrNo.No, updatedPartyDetails.getIsPhoneNumberConfidential());
         Assertions.assertEquals(YesOrNo.No, updatedPartyDetails.getIsEmailAddressConfidential());

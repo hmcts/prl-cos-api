@@ -70,7 +70,7 @@ import java.util.stream.IntStream;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.springframework.util.CollectionUtils.isEmpty;
-import static org.testng.util.Strings.isNotNullAndNotEmpty;
+import static org.springframework.util.StringUtils.hasText;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
@@ -639,8 +639,8 @@ public class CaseUtils {
         if (isNotEmpty(parties)) {
             applicantSolicitorList = parties.stream()
                 .map(Element::getValue)
-                .filter(partyDetails -> isNotNullAndNotEmpty(partyDetails.getRepresentativeFirstName())
-                    && isNotNullAndNotEmpty(partyDetails.getRepresentativeLastName()))
+                .filter(partyDetails -> hasText(partyDetails.getRepresentativeFirstName())
+                    && hasText(partyDetails.getRepresentativeLastName()))
                 .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
                 .toList();
         }
@@ -653,8 +653,8 @@ public class CaseUtils {
             respondentSolicitorList = parties.stream()
                 .map(Element::getValue)
                 .filter(partyDetails -> YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation())
-                    && isNotNullAndNotEmpty(partyDetails.getRepresentativeFirstName())
-                    && isNotNullAndNotEmpty(partyDetails.getRepresentativeLastName()))
+                    && hasText(partyDetails.getRepresentativeFirstName())
+                    && hasText(partyDetails.getRepresentativeLastName()))
                 .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
                 .toList();
         }
@@ -663,8 +663,8 @@ public class CaseUtils {
 
     public static String getFL401SolicitorName(PartyDetails party) {
         if (null != party
-            && isNotNullAndNotEmpty(party.getRepresentativeFirstName())
-            && isNotNullAndNotEmpty(party.getRepresentativeLastName())) {
+            && hasText(party.getRepresentativeFirstName())
+            && hasText(party.getRepresentativeLastName())) {
             return party.getRepresentativeFirstName() + " " + party.getRepresentativeLastName();
         }
         return null;
@@ -863,7 +863,7 @@ public class CaseUtils {
 
     public static String getApplicantNameForDaOrderSelectedForCaCase(CaseData caseData) {
         PartyDetails applicant1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-            ? caseData.getApplicants().get(0).getValue() : caseData.getApplicantsFL401();
+            ? caseData.getApplicants().getFirst().getValue() : caseData.getApplicantsFL401();
         return String.format(PrlAppsConstants.FORMAT, applicant1.getFirstName(),
                              applicant1.getLastName()
         );
@@ -872,13 +872,13 @@ public class CaseUtils {
 
     public static String getApplicantReferenceForDaOrderSelectedForCaCase(CaseData caseData) {
         PartyDetails applicant1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-            ? caseData.getApplicants().get(0).getValue() : caseData.getApplicantsFL401();
+            ? caseData.getApplicants().getFirst().getValue() : caseData.getApplicantsFL401();
         return applicant1.getSolicitorReference();
     }
 
     public static String getRespondentForDaOrderSelectedForCaCase(CaseData caseData) {
         PartyDetails respondent1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-            ? caseData.getRespondents().get(0).getValue() : caseData.getRespondentsFL401();
+            ? caseData.getRespondents().getFirst().getValue() : caseData.getRespondentsFL401();
         return String.format(
             PrlAppsConstants.FORMAT, respondent1.getFirstName(),
             respondent1.getLastName()
@@ -887,7 +887,7 @@ public class CaseUtils {
 
     public static LocalDate getRespondentDobForDaOrderSelectedForCaCase(CaseData caseData) {
         PartyDetails respondent1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-            ? caseData.getRespondents().get(0).getValue() : caseData.getRespondentsFL401();
+            ? caseData.getRespondents().getFirst().getValue() : caseData.getRespondentsFL401();
         if (ofNullable(respondent1.getDateOfBirth()).isPresent()) {
             return respondent1.getDateOfBirth();
         }

@@ -31,7 +31,7 @@ public class ApplicationTimetableEffortsValidationTaskTest {
 
         workflowResult = applicationTimetableEffortsValidationTask.execute(new DefaultTaskContext(), workflowResult);
         assertThat(workflowResult.getErrors(), hasSize(1));
-        assertThat(workflowResult.getErrors().get(0), is(ERROR_MSG_NOTICE_EFFORTS_REQUIRED));
+        assertThat(workflowResult.getErrors().getFirst(), is(ERROR_MSG_NOTICE_EFFORTS_REQUIRED));
     }
 
     @Test

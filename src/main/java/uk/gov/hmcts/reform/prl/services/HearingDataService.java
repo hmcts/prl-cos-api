@@ -183,7 +183,7 @@ public class HearingDataService {
         if (null != caseHearing.getNextHearingDate()) {
             return caseHearing.getNextHearingDate().format(customDateTimeFormatter);
         } else if (isNotEmpty(caseHearing.getHearingDaySchedule())) {
-            return caseHearing.getHearingDaySchedule().get(0)
+            return caseHearing.getHearingDaySchedule().getFirst()
                 .getHearingStartDateTime().format(customDateTimeFormatter);
         }
         return "";
@@ -412,13 +412,13 @@ public class HearingDataService {
         List<String> respondentSolicitorNames
     ) {
         return hearingData.toBuilder()
-            .respondentName1(0 < numberOfRespondents ? concat(respondentNames.get(0), " " + RESPONDENT_1) : null)
+            .respondentName1(0 < numberOfRespondents ? concat(respondentNames.getFirst(), " " + RESPONDENT_1) : null)
             .respondentName2(1 < numberOfRespondents ? concat(respondentNames.get(1), " (Respondent2)") : null)
             .respondentName3(2 < numberOfRespondents ? concat(respondentNames.get(2), " (Respondent3)") : null)
             .respondentName4(3 < numberOfRespondents ? concat(respondentNames.get(3), " (Respondent4)") : null)
             .respondentName5(4 < numberOfRespondents ? concat(respondentNames.get(4), " (Respondent5)") : null)
             .respondentSolicitor1(0 < numberOfRespondentSolicitors ? concat(
-                respondentSolicitorNames.get(0),
+                respondentSolicitorNames.getFirst(),
                 " (Respondent1 solicitor)"
             ) : null)
             .respondentSolicitor2(1 < numberOfRespondentSolicitors ? concat(
@@ -447,13 +447,13 @@ public class HearingDataService {
         List<String> applicantSolicitorNames
     ) {
         return hearingData.toBuilder()
-            .applicantName1(0 < numberOfApplicant ? concat(applicantNames.get(0), " " + APPLICANT_1) : null)
+            .applicantName1(0 < numberOfApplicant ? concat(applicantNames.getFirst(), " " + APPLICANT_1) : null)
             .applicantName2(1 < numberOfApplicant ? concat(applicantNames.get(1), " (Applicant2)") : null)
             .applicantName3(2 < numberOfApplicant ? concat(applicantNames.get(2), " (Applicant3)") : null)
             .applicantName4(3 < numberOfApplicant ? concat(applicantNames.get(3), " (Applicant4)") : null)
             .applicantName5(4 < numberOfApplicant ? concat(applicantNames.get(4), " (Applicant5)") : null)
             .applicantSolicitor1(0 < numberOfApplicantSolicitors ? concat(
-                applicantSolicitorNames.get(0),
+                applicantSolicitorNames.getFirst(),
                 " (Applicant1 solicitor)"
             ) : null)
             .applicantSolicitor2(1 < numberOfApplicantSolicitors ? concat(
@@ -688,17 +688,17 @@ public class HearingDataService {
 
         if (!getPartyNameList(caseData.getApplicants()).isEmpty() && isDaOrderForCaCase) {
             if (Optional.ofNullable(hearingData.getApplicantName1()).isEmpty()) {
-                hearingData.setApplicantName1(concat(getPartyNameList(caseData.getApplicants()).get(0),
+                hearingData.setApplicantName1(concat(getPartyNameList(caseData.getApplicants()).getFirst(),
                                                      " " + APPLICANT_1
                 ));
             }
             if (Optional.ofNullable(hearingData.getRespondentName1()).isEmpty()) {
-                hearingData.setRespondentName1(concat(getPartyNameList(caseData.getRespondents()).get(0),
+                hearingData.setRespondentName1(concat(getPartyNameList(caseData.getRespondents()).getFirst(),
                                                       " " + RESPONDENT_1
                 ));
             }
             if (Optional.ofNullable(hearingData.getApplicantSolicitor1()).isEmpty()) {
-                hearingData.setApplicantSolicitor1(concat(getApplicantSolicitorNameList(caseData.getApplicants()).get(0),
+                hearingData.setApplicantSolicitor1(concat(getApplicantSolicitorNameList(caseData.getApplicants()).getFirst(),
                                                           " " + APPLICANT_SOLICITOR
                 ));
             }
@@ -779,7 +779,7 @@ public class HearingDataService {
     private DynamicList getHearingArrangementsData(List<HearingDaySchedule> hearingDaySchedules, CaseData caseData) {
         DynamicList dynamicList = DynamicList.builder().build();
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
-        for (Attendee attendee : hearingDaySchedules.get(0).getAttendees()) {
+        for (Attendee attendee : hearingDaySchedules.getFirst().getAttendees()) {
             String partyName = CaseUtils.getPartyFromPartyId(attendee.getPartyID(), caseData);
             if (!partyName.isBlank() && null != attendee.getHearingSubChannel()) {
                 dynamicListElements.add(DynamicListElement.builder().code(partyName)
@@ -882,7 +882,7 @@ public class HearingDataService {
                                                           List<String> applicantSolicitorNames) {
         //applicants
         if (0 < numberOfApplicant) {
-            tempPartyNamesMap.put("applicantName1", concat(applicantNames.get(0), " " + APPLICANT_1));
+            tempPartyNamesMap.put("applicantName1", concat(applicantNames.getFirst(), " " + APPLICANT_1));
         }
         if (1 < numberOfApplicant) {
             tempPartyNamesMap.put("applicantName2", concat(applicantNames.get(1), " (Applicant2)"));
@@ -899,7 +899,7 @@ public class HearingDataService {
 
         //applicant solicitors
         if (0 < numberOfApplicantSolicitors) {
-            tempPartyNamesMap.put("applicantSolicitor1", concat(applicantSolicitorNames.get(0), " (Applicant1 solicitor)"));
+            tempPartyNamesMap.put("applicantSolicitor1", concat(applicantSolicitorNames.getFirst(), " (Applicant1 solicitor)"));
         }
         if (1 < numberOfApplicantSolicitors) {
             tempPartyNamesMap.put("applicantSolicitor2", concat(applicantSolicitorNames.get(1), " (Applicant2 solicitor)"));
@@ -922,7 +922,7 @@ public class HearingDataService {
                                                            List<String> respondentSolicitorNames) {
         //respondents
         if (0 < numberOfRespondents) {
-            tempPartyNamesMap.put("respondentName1", concat(respondentNames.get(0), " " + RESPONDENT_1));
+            tempPartyNamesMap.put("respondentName1", concat(respondentNames.getFirst(), " " + RESPONDENT_1));
         }
         if (1 < numberOfRespondents) {
             tempPartyNamesMap.put("respondentName2", concat(respondentNames.get(1), " (Respondent2)"));
@@ -939,7 +939,7 @@ public class HearingDataService {
 
         //respondent solicitors
         if (0 < numberOfRespondentSolicitors) {
-            tempPartyNamesMap.put("respondentSolicitor1", concat(respondentSolicitorNames.get(0), " (Respondent1 solicitor)"));
+            tempPartyNamesMap.put("respondentSolicitor1", concat(respondentSolicitorNames.getFirst(), " (Respondent1 solicitor)"));
         }
         if (1 < numberOfRespondentSolicitors) {
             tempPartyNamesMap.put("respondentSolicitor2", concat(respondentSolicitorNames.get(1), " (Respondent2 solicitor)"));

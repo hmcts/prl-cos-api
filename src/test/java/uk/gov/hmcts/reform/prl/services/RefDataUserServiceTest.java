@@ -107,7 +107,7 @@ public class RefDataUserServiceTest {
             RD_STAFF_FIRST_PAGE
         )).thenReturn(null);
         List<DynamicListElement> staffDetails = refDataUserService.getLegalAdvisorList();
-        assertNull(staffDetails.get(0).getCode());
+        assertNull(staffDetails.getFirst().getCode());
     }
 
     @Test
@@ -123,7 +123,7 @@ public class RefDataUserServiceTest {
         ))
             .thenThrow(FeignException.class);
         List<DynamicListElement> legalAdvisor = refDataUserService.getLegalAdvisorList();
-        assertNull(legalAdvisor.get(0).getCode());
+        assertNull(legalAdvisor.getFirst().getCode());
     }
 
     @Test
@@ -154,8 +154,8 @@ public class RefDataUserServiceTest {
         )).thenReturn(staffResponse);
 
         List<DynamicListElement> legalAdvisorList = refDataUserService.getLegalAdvisorList();
-        assertNotNull(legalAdvisorList.get(0).getCode());
-        assertEquals("David(test2@com)",legalAdvisorList.get(0).getCode());
+        assertNotNull(legalAdvisorList.getFirst().getCode());
+        assertEquals("David(test2@com)",legalAdvisorList.getFirst().getCode());
 
     }
 
@@ -177,7 +177,7 @@ public class RefDataUserServiceTest {
         )).thenReturn(listOfJudges);
         List<JudicialUsersApiResponse> expectedRespose = refDataUserService.getAllJudicialUserDetails(judicialUsersApiRequest);
         assertNotNull(expectedRespose);
-        assertEquals("lastName1",expectedRespose.get(0).getSurname());
+        assertEquals("lastName1",expectedRespose.getFirst().getSurname());
     }
 
     @Test
@@ -198,7 +198,7 @@ public class RefDataUserServiceTest {
         )).thenReturn(listOfJudges);
         List<JudicialUsersApiResponse> expectedRespose = refDataUserService.getAllJudicialUserDetails(judicialUsersApiRequest);
         assertNotNull(expectedRespose);
-        assertEquals("lastName1",expectedRespose.get(0).getSurname());
+        assertEquals("lastName1",expectedRespose.getFirst().getSurname());
     }
 
     @Test
@@ -222,7 +222,7 @@ public class RefDataUserServiceTest {
             IS_HEARINGCHILDREQUIRED_N
         );
         assertNotNull(commonResponse);
-        assertEquals("Celebration hearing",commonResponse.getCategoryValues().get(0).getValueEn());
+        assertEquals("Celebration hearing",commonResponse.getCategoryValues().getFirst().getValueEn());
     }
 
     @Test
@@ -244,7 +244,7 @@ public class RefDataUserServiceTest {
             authToken,
             FLAG_TYPE
         );
-        assertEquals("ABCD",caseFlag.getFlags().get(0).getFlagDetails().get(0).getFlagCode());
+        assertEquals("ABCD",caseFlag.getFlags().getFirst().getFlagDetails().getFirst().getFlagCode());
 
     }
 
@@ -290,8 +290,8 @@ public class RefDataUserServiceTest {
             IS_HEARINGCHILDREQUIRED_N
         );
         assertNotNull(commonResponse);
-        assertEquals("ONPPRS",commonResponse.getCategoryValues().get(0).getKey());
-        assertEquals("On the Papers",commonResponse.getCategoryValues().get(0).getValueEn());
+        assertEquals("ONPPRS",commonResponse.getCategoryValues().getFirst().getKey());
+        assertEquals("On the Papers",commonResponse.getCategoryValues().getFirst().getValueEn());
     }
 
     @Test
@@ -308,8 +308,8 @@ public class RefDataUserServiceTest {
         List<DynamicListElement> expectedResponse = refDataUserService.filterCategoryValuesByCategoryId(
             commonDataResponse,
             HEARINGTYPE);
-        assertEquals("AINTER",expectedResponse.get(0).getCode());
-        assertEquals("AIN Person",expectedResponse.get(0).getLabel());
+        assertEquals("AINTER",expectedResponse.getFirst().getCode());
+        assertEquals("AIN Person",expectedResponse.getFirst().getLabel());
 
     }
 
@@ -318,8 +318,8 @@ public class RefDataUserServiceTest {
         List<DynamicListElement> expectedResponse = refDataUserService.filterCategoryValuesByCategoryId(
             null,
             HEARINGTYPE);
-        assertEquals(null,expectedResponse.get(0).getCode());
-        assertEquals(null,expectedResponse.get(0).getLabel());
+        assertEquals(null,expectedResponse.getFirst().getCode());
+        assertEquals(null,expectedResponse.getFirst().getLabel());
 
     }
 
@@ -342,8 +342,8 @@ public class RefDataUserServiceTest {
         List<DynamicListElement> expectedResponse = refDataUserService.filterCategorySubValuesByCategoryId(
             commonDataResponse,
             VIDEOPLATFORM);
-        assertEquals("VIDPVL",expectedResponse.get(0).getCode());
-        assertEquals("Prison Video",expectedResponse.get(0).getLabel());
+        assertEquals("VIDPVL",expectedResponse.getFirst().getCode());
+        assertEquals("Prison Video",expectedResponse.getFirst().getLabel());
         assertEquals("VIDCVP",expectedResponse.get(1).getCode());
         assertEquals("Video - CVP",expectedResponse.get(1).getLabel());
         assertEquals("VIDOTHER",expectedResponse.get(2).getCode());
@@ -358,8 +358,8 @@ public class RefDataUserServiceTest {
         List<DynamicListElement> expectedResponse = refDataUserService.filterCategorySubValuesByCategoryId(
             null,
             VIDEOPLATFORM);
-        assertEquals(null,expectedResponse.get(0).getCode());
-        assertEquals(null,expectedResponse.get(0).getLabel());
+        assertEquals(null,expectedResponse.getFirst().getCode());
+        assertEquals(null,expectedResponse.getFirst().getLabel());
 
     }
 
@@ -390,8 +390,8 @@ public class RefDataUserServiceTest {
 
         List<DynamicListElement> legalAdvisorList = refDataUserService.getLegalAdvisorList();
 
-        assertNotNull(legalAdvisorList.get(0).getCode());
-        assertEquals("David(test2@com)",legalAdvisorList.get(0).getCode());
+        assertNotNull(legalAdvisorList.getFirst().getCode());
+        assertEquals("David(test2@com)",legalAdvisorList.getFirst().getCode());
         assertEquals(1, legalAdvisorList.size());
     }
 
@@ -437,8 +437,8 @@ public class RefDataUserServiceTest {
 
         List<DynamicListElement> legalAdvisorList = refDataUserService.getLegalAdvisorList();
 
-        assertNotNull(legalAdvisorList.get(0).getCode());
-        assertEquals("David(test2@com)",legalAdvisorList.get(0).getCode());
+        assertNotNull(legalAdvisorList.getFirst().getCode());
+        assertEquals("David(test2@com)",legalAdvisorList.getFirst().getCode());
         assertEquals(1, legalAdvisorList.size());
     }
 

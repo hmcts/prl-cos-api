@@ -526,7 +526,7 @@ public class ManageDocumentsService {
                         docData
                     ))
             );
-            newUploadedDocument = Document.buildFromDocument(uploadResponse.getDocuments().get(0));
+            newUploadedDocument = Document.buildFromDocument(uploadResponse.getDocuments().getFirst());
         } catch (Exception ex) {
             log.error("Failed to upload new document {}", ex.getMessage(), ex);
         }

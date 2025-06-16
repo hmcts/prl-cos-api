@@ -2614,7 +2614,7 @@ public class ManageOrdersControllerTest {
 
         assertNotNull(callbackResponse);
         assertNotNull(callbackResponse.getErrors());
-        assertEquals("Please provide at least one hearing details", callbackResponse.getErrors().get(0));
+        assertEquals("Please provide at least one hearing details", callbackResponse.getErrors().getFirst());
     }
 
     @Test
@@ -2644,7 +2644,7 @@ public class ManageOrdersControllerTest {
 
         assertNotNull(callbackResponse);
         assertNotNull(callbackResponse.getErrors());
-        assertEquals("Please provide at least one hearing details", callbackResponse.getErrors().get(0));
+        assertEquals("Please provide at least one hearing details", callbackResponse.getErrors().getFirst());
     }
 
     @Test
@@ -2680,7 +2680,7 @@ public class ManageOrdersControllerTest {
 
         assertNotNull(callbackResponse);
         assertNotNull(callbackResponse.getErrors());
-        assertEquals("Only one hearing can be created", callbackResponse.getErrors().get(0));
+        assertEquals("Only one hearing can be created", callbackResponse.getErrors().getFirst());
     }
 
     @Test
@@ -2716,7 +2716,7 @@ public class ManageOrdersControllerTest {
 
         assertNotNull(callbackResponse);
         assertNotNull(callbackResponse.getErrors());
-        assertEquals("You must select a hearing type", callbackResponse.getErrors().get(0));
+        assertEquals("You must select a hearing type", callbackResponse.getErrors().getFirst());
         assertEquals("Please enter numeric value for Hearing estimated days", callbackResponse.getErrors().get(1));
         assertEquals("Please enter numeric value for Hearing estimated hours", callbackResponse.getErrors().get(2));
         assertEquals("Please enter numeric value for Hearing estimated minutes", callbackResponse.getErrors().get(3));
@@ -3039,7 +3039,7 @@ public class ManageOrdersControllerTest {
 
         assertNotNull(callbackResponse);
         assertNotNull(callbackResponse.getErrors());
-        assertEquals("Please enter numeric value for Hearing estimated hours", callbackResponse.getErrors().get(0));
+        assertEquals("Please enter numeric value for Hearing estimated hours", callbackResponse.getErrors().getFirst());
     }
 
     @Test
@@ -3653,7 +3653,7 @@ public class ManageOrdersControllerTest {
 
         assertNotNull(callbackResponse);
         assertNotNull(callbackResponse.getErrors());
-        assertEquals(errors.get(0), callbackResponse.getErrors().get(0));
+        assertEquals(errors.getFirst(), callbackResponse.getErrors().getFirst());
     }
 
     @Test

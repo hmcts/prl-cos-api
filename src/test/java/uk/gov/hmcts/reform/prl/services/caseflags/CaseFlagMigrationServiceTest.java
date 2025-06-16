@@ -240,7 +240,7 @@ public class CaseFlagMigrationServiceTest {
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
         caseFlagMigrationService.migrateCaseForCaseFlags(caseDataMap);
         assertNotNull(caseData.getAllPartyFlags());
-        assertEquals("ABCD",caseData.getAllPartyFlags().getCaApplicant1ExternalFlags().getDetails().get(0).getValue().getFlagCode());
+        assertEquals("ABCD",caseData.getAllPartyFlags().getCaApplicant1ExternalFlags().getDetails().getFirst().getValue().getFlagCode());
     }
 
 
@@ -250,7 +250,7 @@ public class CaseFlagMigrationServiceTest {
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseDataFl401);
         caseFlagMigrationService.migrateCaseForCaseFlags(caseDataMap);
         assertNotNull(caseDataFl401.getAllPartyFlags());
-        assertEquals("ABCD",caseDataFl401.getAllPartyFlags().getDaApplicantExternalFlags().getDetails().get(0).getValue().getFlagCode());
+        assertEquals("ABCD",caseDataFl401.getAllPartyFlags().getDaApplicantExternalFlags().getDetails().getFirst().getValue().getFlagCode());
     }
 
 

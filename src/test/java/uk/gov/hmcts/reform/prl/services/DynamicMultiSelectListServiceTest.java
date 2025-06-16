@@ -208,8 +208,8 @@ public class DynamicMultiSelectListServiceTest {
     @Test
     public void testApplicantDetailsFl401() throws Exception {
         caseData = caseData.toBuilder()
-            .applicantsFL401(partyDetails.get(0).getValue())
-            .respondentsFL401(partyDetails.get(0).getValue())
+            .applicantsFL401(partyDetails.getFirst().getValue())
+            .respondentsFL401(partyDetails.getFirst().getValue())
             .applicants(null)
             .respondents(null)
             .caseTypeOfApplication("FL401")
@@ -262,8 +262,8 @@ public class DynamicMultiSelectListServiceTest {
                                                      .builder()
                                                      .value(List.of(listElement, listElement))
                                                      .build());
-        assertEquals(listElement.getCode(), servedParties.get(0).getValue().getPartyId());
-        assertEquals(listElement.getLabel(), servedParties.get(0).getValue().getPartyName());
+        assertEquals(listElement.getCode(), servedParties.getFirst().getValue().getPartyId());
+        assertEquals(listElement.getLabel(), servedParties.getFirst().getValue().getPartyName());
     }
 
     @Test

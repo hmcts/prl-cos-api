@@ -11,8 +11,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
@@ -93,7 +93,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
     @Autowired
     private WebApplicationContext webApplicationContext;
-    @MockBean
+    @MockitoBean
     private DraftAnOrderService draftAnOrderService;
 
 

@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
-import net.serenitybdd.rest.SerenityRest;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeAll;
@@ -11,8 +10,8 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -22,6 +21,7 @@ import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
+import static io.restassured.RestAssured.with;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
@@ -36,12 +36,12 @@ public class CaseApplicationResponseControllerFunctionalTest {
     @Autowired
     private WebApplicationContext webApplicationContext;
 
-    @MockBean
+    @MockitoBean
     private CaseService caseService;
-    @MockBean
+    @MockitoBean
     private CitizenResponseNotificationEmailService citizenResponseNotificationEmailService;
 
-    @MockBean
+    @MockitoBean
     private DocumentGenService documentGenService;
 
     private static final String SLASH = "/";
@@ -75,7 +75,7 @@ public class CaseApplicationResponseControllerFunctionalTest {
     }
 
     public RequestSpecification getMultipleAuthHeaders() {
-        return SerenityRest.with()
+        return with()
             .relaxedHTTPSValidation()
             .baseUri(cosApiUrl)
             .header("Content-Type", APPLICATION_JSON_VALUE)

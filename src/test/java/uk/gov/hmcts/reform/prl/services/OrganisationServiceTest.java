@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services;
 import feign.FeignException;
 import feign.Request;
 import feign.Response;
-import javassist.NotFoundException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import javax.ws.rs.NotFoundException;
 
 import static feign.Request.HttpMethod.GET;
 import static java.nio.charset.StandardCharsets.UTF_8;

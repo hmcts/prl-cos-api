@@ -70,9 +70,9 @@ public class AddCafcassOfficerServiceTest {
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         addCafcassOfficerService.populateCafcassOfficerDetails(callbackRequest);
-        assertEquals("a a", caseData.getChildren().get(0).getValue().getCafcassOfficerName());
-        assertEquals("abc@test.net", caseData.getChildren().get(0).getValue().getCafcassOfficerEmailAddress());
-        assertEquals("01234567890", caseData.getChildren().get(0).getValue().getCafcassOfficerPhoneNo());
+        assertEquals("a a", caseData.getChildren().getFirst().getValue().getCafcassOfficerName());
+        assertEquals("abc@test.net", caseData.getChildren().getFirst().getValue().getCafcassOfficerEmailAddress());
+        assertEquals("01234567890", caseData.getChildren().getFirst().getValue().getCafcassOfficerPhoneNo());
     }
 
 }

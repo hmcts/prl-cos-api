@@ -164,7 +164,7 @@ public class RemoveDraftOrderServiceTest {
 
         List<Element<DraftOrder>> returnDraftOrder = removeDraftOrderService.removeSelectedDraftOrder(caseData);
         assertNotNull(returnDraftOrder);
-        Element<DraftOrder> element = (Element<DraftOrder>) returnDraftOrder.get(0);
+        Element<DraftOrder> element = (Element<DraftOrder>) returnDraftOrder.getFirst();
         assertEquals(id, element.getId());
         assertNotNull(element.getValue());
     }
@@ -201,8 +201,8 @@ public class RemoveDraftOrderServiceTest {
         List<Element<DraftOrder>> returnDraftOrder = removeDraftOrderService.removeSelectedDraftOrder(caseData);
         assertNotNull(returnDraftOrder);
         assertEquals(2, returnDraftOrder.size());
-        Element<DraftOrder> element = (Element<DraftOrder>) returnDraftOrder.get(0);
-        assertEquals(UUID.fromString(PrlAppsConstants.TEST_UUID), ((Element<DraftOrder>) returnDraftOrder.get(0)).getId());
+        Element<DraftOrder> element = (Element<DraftOrder>) returnDraftOrder.getFirst();
+        assertEquals(UUID.fromString(PrlAppsConstants.TEST_UUID), ((Element<DraftOrder>) returnDraftOrder.getFirst()).getId());
         assertEquals(id, ((Element<DraftOrder>) returnDraftOrder.get(1)).getId());
     }
 

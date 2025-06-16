@@ -31,7 +31,7 @@ public class WelshCourtEmail {
             Arrays.stream(welshCourtEmailMapping.split(",")).forEach(
                 value -> {
                     List<String> courtMapping = Arrays.asList(value.split("--"));
-                    if (caseManagementLocation.getBaseLocationId().equals(courtMapping.get(0))
+                    if (caseManagementLocation.getBaseLocationId().equals(courtMapping.getFirst())
                         && caseManagementLocation.getRegionId().equals(courtMapping.get(1))) {
                         courtEmail[0] = courtMapping.get(3);
                     }
@@ -42,7 +42,7 @@ public class WelshCourtEmail {
             Arrays.stream(welshCourtEmailMapping.split(",")).forEach(
                 value -> {
                     List<String> courtMapping = Arrays.asList(value.split("--"));
-                    if (caseManagementLocation.getBaseLocation().equals(courtMapping.get(0))
+                    if (caseManagementLocation.getBaseLocation().equals(courtMapping.getFirst())
                         && caseManagementLocation.getRegion().equals(courtMapping.get(1))) {
                         courtEmail[0] = courtMapping.get(3);
                     }

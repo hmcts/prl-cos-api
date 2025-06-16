@@ -763,7 +763,7 @@ public class ServiceOfApplicationServiceTest {
             .build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
-        assertNotNull(serviceOfApplicationService.generateAccessCodeLetter(authorization, caseData,parties.get(0),
+        assertNotNull(serviceOfApplicationService.generateAccessCodeLetter(authorization, caseData,parties.getFirst(),
                                                                            caseInvite, template));
     }
 
@@ -807,8 +807,8 @@ public class ServiceOfApplicationServiceTest {
             CaseData caseData = CaseData.builder().id(12345L)
                 .applicants(parties)
                 .respondents(parties)
-                .applicantsFL401(parties.get(0).getValue())
-                .respondentsFL401(parties.get(0).getValue())
+                .applicantsFL401(parties.getFirst().getValue())
+                .respondentsFL401(parties.getFirst().getValue())
                 .caseInvites(caseInviteList)
                 .caseTypeOfApplication(caseType)
                 .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
@@ -2164,7 +2164,7 @@ public class ServiceOfApplicationServiceTest {
             .applicantCaseName("Test Case 45678")
             .applicantsFL401(PartyDetails.builder()
                                  .build())
-            .respondentsFL401(parties.get(0).getValue())
+            .respondentsFL401(parties.getFirst().getValue())
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .soaServeToRespondentOptions(YesNoNotApplicable.No)
@@ -2266,7 +2266,7 @@ public class ServiceOfApplicationServiceTest {
             .applicantsFL401(PartyDetails.builder()
                                  .partyId(testUuid)
                                  .build())
-            .respondentsFL401(parties.get(0).getValue())
+            .respondentsFL401(parties.getFirst().getValue())
             .c8Document(Document.builder().build())
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
@@ -2527,8 +2527,8 @@ public class ServiceOfApplicationServiceTest {
             .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         System.out.println(updatedcaseData.getFinalServedApplicationDetailsList());
-        assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
-        assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
+        assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getServedBy());
+        assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getWhoIsResponsible());
     }
 
     @Test
@@ -2579,7 +2579,7 @@ public class ServiceOfApplicationServiceTest {
         CaseData updatedcaseData = serviceOfApplicationService
             .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
-        assertEquals(UNREPRESENTED_APPLICANT, updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
+        assertEquals(UNREPRESENTED_APPLICANT, updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getWhoIsResponsible());
     }
 
     @Test
@@ -2630,8 +2630,8 @@ public class ServiceOfApplicationServiceTest {
         CaseData updatedcaseData = serviceOfApplicationService
             .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
-        assertEquals(UNREPRESENTED_APPLICANT, updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
-        assertEquals("By post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
+        assertEquals(UNREPRESENTED_APPLICANT, updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getWhoIsResponsible());
+        assertEquals("By post", updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getModeOfService());
     }
 
     @Test
@@ -2679,8 +2679,8 @@ public class ServiceOfApplicationServiceTest {
                 .caseTypeOfApplication(caseType)
                 .applicants(partyElementList)
                 .respondents(partyElementList)
-                .applicantsFL401(partyElementList.get(0).getValue())
-                .respondentsFL401(partyElementList.get(0).getValue())
+                .applicantsFL401(partyElementList.getFirst().getValue())
+                .respondentsFL401(partyElementList.getFirst().getValue())
                 .caseInvites(caseInviteList)
                 .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder()
                                                     .specialArrangementsLetter(Document.builder().build())
@@ -2732,11 +2732,11 @@ public class ServiceOfApplicationServiceTest {
             assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
             assertEquals(
                 "solicitorResp test",
-                updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy()
+                updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getServedBy()
             );
             assertEquals(
                 "Court",
-                updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible()
+                updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getWhoIsResponsible()
             );
         }
     }
@@ -2817,9 +2817,9 @@ public class ServiceOfApplicationServiceTest {
         CaseData updatedcaseData = serviceOfApplicationService
             .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
-        assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
-        assertEquals("By email", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
-        assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
+        assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getServedBy());
+        assertEquals("By email", updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getModeOfService());
+        assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getWhoIsResponsible());
     }
 
     @Test
@@ -2897,9 +2897,9 @@ public class ServiceOfApplicationServiceTest {
         CaseData updatedcaseData = serviceOfApplicationService
             .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
-        assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
-        assertEquals("By email", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
-        assertEquals("Applicant solicitor", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
+        assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getServedBy());
+        assertEquals("By email", updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getModeOfService());
+        assertEquals("Applicant solicitor", updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getWhoIsResponsible());
     }
 
     @Test
@@ -3479,7 +3479,7 @@ public class ServiceOfApplicationServiceTest {
             callbackRequest
         );
 
-        assertEquals(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR, response.getErrors().get(0));
+        assertEquals(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR, response.getErrors().getFirst());
     }
 
 
@@ -3518,7 +3518,7 @@ public class ServiceOfApplicationServiceTest {
             callbackRequest
         );
 
-        assertEquals(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR, response.getErrors().get(0));
+        assertEquals(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR, response.getErrors().getFirst());
     }
 
     @Test
@@ -3526,7 +3526,7 @@ public class ServiceOfApplicationServiceTest {
         AboutToStartOrSubmitCallbackResponse response = testSoaValidation(YesNoNotApplicable.NotApplicable,No,No,null,null);
         assertNotNull(response);
         assertNotNull(response.getErrors());
-        assertEquals(PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE, response.getErrors().get(0));
+        assertEquals(PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE, response.getErrors().getFirst());
     }
 
     @Test
@@ -3535,7 +3535,7 @@ public class ServiceOfApplicationServiceTest {
                                                                           ManageOrders.builder().cafcassServedOptions(No).build());
         assertNotNull(response);
         assertNotNull(response.getErrors());
-        assertEquals(PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE, response.getErrors().get(0));
+        assertEquals(PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE, response.getErrors().getFirst());
     }
 
     @Test
@@ -3570,7 +3570,7 @@ public class ServiceOfApplicationServiceTest {
         AboutToStartOrSubmitCallbackResponse response = testSoaValidation(YesNoNotApplicable.NotApplicable, No,No,soaOtherParties,null);
         assertNotNull(response);
         assertNotNull(response.getErrors());
-        assertEquals(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR, response.getErrors().get(0));
+        assertEquals(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR, response.getErrors().getFirst());
     }
 
     @Test
@@ -3587,7 +3587,7 @@ public class ServiceOfApplicationServiceTest {
         AboutToStartOrSubmitCallbackResponse response = testSoaValidation(YesNoNotApplicable.NotApplicable, No,No,soaOtherParties,null);
         assertNotNull(response);
         assertNotNull(response.getErrors());
-        assertEquals(PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE, response.getErrors().get(0));
+        assertEquals(PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE, response.getErrors().getFirst());
     }
 
     private AboutToStartOrSubmitCallbackResponse testSoaValidation(YesNoNotApplicable yesOrNOforSoaServeToRespOptions,
@@ -4284,8 +4284,8 @@ public class ServiceOfApplicationServiceTest {
                 .caseTypeOfApplication(caseType)
                 .applicants(partyElementList)
                 .respondents(partyElementList)
-                .applicantsFL401(partyElementList.get(0).getValue())
-                .respondentsFL401(partyElementList.get(0).getValue())
+                .applicantsFL401(partyElementList.getFirst().getValue())
+                .respondentsFL401(partyElementList.getFirst().getValue())
                 .caseInvites(caseInviteList)
                 .c1ADocument(Document.builder().build())
                 .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder()
@@ -4330,25 +4330,25 @@ public class ServiceOfApplicationServiceTest {
             assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
             assertEquals(
                 "solicitorResp test",
-                updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy()
+                updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getServedBy()
             );
             if (caseType.equalsIgnoreCase("C100")) {
                 assertEquals(
                     "By email",
-                    updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService()
+                    updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getModeOfService()
                 );
                 assertEquals(
                     "Court",
-                    updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible()
+                    updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getWhoIsResponsible()
                 );
             } else {
                 assertEquals(
                     "By email",
-                    updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService()
+                    updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getModeOfService()
                 );
                 assertEquals(
                     "Court",
-                    updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible()
+                    updatedcaseData.getFinalServedApplicationDetailsList().getFirst().getValue().getWhoIsResponsible()
                 );
             }
 

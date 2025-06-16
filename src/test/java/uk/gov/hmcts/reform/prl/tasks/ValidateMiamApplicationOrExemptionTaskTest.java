@@ -31,7 +31,7 @@ public class ValidateMiamApplicationOrExemptionTaskTest {
 
         WorkflowResult workflowResult = validateMiamApplicationOrExemptionTask.execute(new DefaultTaskContext(), workflowData);
 
-        assertThat(workflowResult.getErrors().get(0), is(ERROR_MSG_MIAM));
+        assertThat(workflowResult.getErrors().getFirst(), is(ERROR_MSG_MIAM));
     }
 
     @Test
@@ -111,6 +111,6 @@ public class ValidateMiamApplicationOrExemptionTaskTest {
 
         WorkflowResult workflowResult = validateMiamApplicationOrExemptionTask.execute(new DefaultTaskContext(), workflowData);
 
-        assertThat(workflowResult.getErrors().get(0), is(ERROR_MSG_MIAM));
+        assertThat(workflowResult.getErrors().getFirst(), is(ERROR_MSG_MIAM));
     }
 }

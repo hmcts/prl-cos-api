@@ -133,7 +133,7 @@ public class CourtNavCaseService {
             QuarantineLegalDoc courtNavQuarantineLegalDoc = getCourtNavQuarantineDocument(
                 document.getOriginalFilename(),
                 tempCaseData,
-                uploadResponse.getDocuments().get(0),
+                uploadResponse.getDocuments().getFirst(),
                 typeOfDocument
             );
 

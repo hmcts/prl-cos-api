@@ -271,9 +271,9 @@ public class BundlingControllerTest {
         Assert.assertNotNull(response.getData().get("bundleInformation"));
         BundlingInformation bundlingInformation = (BundlingInformation)response.getData().get("bundleInformation");
         Assert.assertEquals(1, bundlingInformation.getCaseBundles().size());
-        Assert.assertEquals("Bundle Title 1",((Bundle)bundlingInformation.getCaseBundles().get(0)).getValue().getTitle());
+        Assert.assertEquals("Bundle Title 1",((Bundle)bundlingInformation.getCaseBundles().getFirst()).getValue().getTitle());
         Assert.assertEquals(1, bundlingInformation.getHistoricalBundles().size());
-        Assert.assertEquals("Bundle Title 1",((Bundle)bundlingInformation.getHistoricalBundles().get(0)).getValue().getTitle());
+        Assert.assertEquals("Bundle Title 1",((Bundle)bundlingInformation.getHistoricalBundles().getFirst()).getValue().getTitle());
     }
 
     @Test
@@ -288,10 +288,10 @@ public class BundlingControllerTest {
         Assert.assertNotNull(response.getData().get("bundleInformation"));
         BundlingInformation bundlingInformation = (BundlingInformation)response.getData().get("bundleInformation");
         Assert.assertEquals(1, bundlingInformation.getCaseBundles().size());
-        Assert.assertEquals("Bundle Title 1",((Bundle)bundlingInformation.getCaseBundles().get(0))
+        Assert.assertEquals("Bundle Title 1",((Bundle)bundlingInformation.getCaseBundles().getFirst())
             .getValue().getTitle());
         Assert.assertEquals(2, bundlingInformation.getHistoricalBundles().size());
-        Assert.assertEquals("Bundle Title 1",((Bundle)bundlingInformation.getHistoricalBundles().get(0))
+        Assert.assertEquals("Bundle Title 1",((Bundle)bundlingInformation.getHistoricalBundles().getFirst())
             .getValue().getTitle());
         Assert.assertEquals("Case Bundle Title 1",((Bundle)bundlingInformation.getHistoricalBundles().get(1))
             .getValue().getTitle());

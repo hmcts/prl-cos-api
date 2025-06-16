@@ -58,12 +58,12 @@ public class CaseOrder {
         CaseHearing caseHearing = null;
         if (this.manageOrderHearingDetails != null && !this.manageOrderHearingDetails.isEmpty()) {
             caseHearing = CaseHearing.caseHearingWith()
-                .hearingType(manageOrderHearingDetails.get(0).getValue()
+                .hearingType(manageOrderHearingDetails.getFirst().getValue()
                                  .getHearingTypes().getValue() != null
-                                 ? manageOrderHearingDetails.get(0).getValue().getHearingTypes().getValue().getCode() : null)
-                .hearingTypeValue(manageOrderHearingDetails.get(0).getValue()
+                                 ? manageOrderHearingDetails.getFirst().getValue().getHearingTypes().getValue().getCode() : null)
+                .hearingTypeValue(manageOrderHearingDetails.getFirst().getValue()
                                       .getHearingTypes().getValue() != null
-                                      ? manageOrderHearingDetails.get(0).getValue().getHearingTypes().getValue().getLabel() : null)
+                                      ? manageOrderHearingDetails.getFirst().getValue().getHearingTypes().getValue().getLabel() : null)
                 .build();
             setHearingDetails(caseHearing);
         }

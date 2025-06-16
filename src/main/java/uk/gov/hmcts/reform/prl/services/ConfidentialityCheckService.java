@@ -196,25 +196,25 @@ public class ConfidentialityCheckService {
                 if (respondentC8Document.getRespondentBc8Documents() == null || respondentC8Document.getRespondentBc8Documents().isEmpty()) {
                     return null;
                 }
-                return respondentC8Document.getRespondentBc8Documents().get(0).getValue();
+                return respondentC8Document.getRespondentBc8Documents().getFirst().getValue();
             }
             case 2 -> {
                 if (respondentC8Document.getRespondentCc8Documents() == null || respondentC8Document.getRespondentCc8Documents().isEmpty()) {
                     return null;
                 }
-                return respondentC8Document.getRespondentCc8Documents().get(0).getValue();
+                return respondentC8Document.getRespondentCc8Documents().getFirst().getValue();
             }
             case 3 -> {
                 if (respondentC8Document.getRespondentDc8Documents() == null || respondentC8Document.getRespondentDc8Documents().isEmpty()) {
                     return null;
                 }
-                return respondentC8Document.getRespondentDc8Documents().get(0).getValue();
+                return respondentC8Document.getRespondentDc8Documents().getFirst().getValue();
             }
             case 4 -> {
                 if (respondentC8Document.getRespondentEc8Documents() == null || respondentC8Document.getRespondentEc8Documents().isEmpty()) {
                     return null;
                 }
-                return respondentC8Document.getRespondentEc8Documents().get(0).getValue();
+                return respondentC8Document.getRespondentEc8Documents().getFirst().getValue();
             }
 
             default -> log.info("no respondent found");
@@ -226,7 +226,7 @@ public class ConfidentialityCheckService {
         if (respondentC8Document.getRespondentAc8Documents() == null || respondentC8Document.getRespondentAc8Documents().isEmpty()) {
             return null;
         }
-        return respondentC8Document.getRespondentAc8Documents().get(0).getValue();
+        return respondentC8Document.getRespondentAc8Documents().getFirst().getValue();
     }
 
     public void clearRespondentsC8Documents(Map<String, Object> caseDataMap) {

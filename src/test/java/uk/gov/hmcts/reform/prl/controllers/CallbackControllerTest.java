@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import javassist.NotFoundException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
@@ -127,6 +126,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import javax.json.JsonValue;
+import javax.ws.rs.NotFoundException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -3221,7 +3221,7 @@ public class CallbackControllerTest {
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
             .fetchRoleAssignmentForUser(authToken, CallbackRequest.builder().build());
         assertEquals("The selected user does not have right roles to assign this case",
-            aboutToStartOrSubmitCallbackResponse.getErrors().get(0));
+            aboutToStartOrSubmitCallbackResponse.getErrors().getFirst());
     }
 
     @Test
@@ -3443,7 +3443,7 @@ public class CallbackControllerTest {
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
             .validateUrgentCaseCreation(authToken, s2sToken, CallbackRequest.builder().build());
         assertEquals("Sorry unable to create any urgent cases now",
-                     aboutToStartOrSubmitCallbackResponse.getErrors().get(0));
+                     aboutToStartOrSubmitCallbackResponse.getErrors().getFirst());
     }
 
     @Test

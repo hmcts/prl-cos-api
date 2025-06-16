@@ -184,7 +184,7 @@ public class RemoveDraftOrderControllerTest {
             .generateRemoveDraftOrderDropDown(authToken,s2sToken, callbackRequest);
         Assert.assertNotNull(response);
         Assert.assertNotNull(response.getErrors());
-        assertEquals("There are no draft orders", response.getErrors().get(0));
+        assertEquals("There are no draft orders", response.getErrors().getFirst());
     }
 
     @Test
@@ -253,7 +253,7 @@ public class RemoveDraftOrderControllerTest {
         List<Element<DraftOrder>> returnDraftOrderList = (List<Element<DraftOrder>>) response.getData()
             .get(RemoveDraftOrderController.DRAFT_ORDER_COLLECTION);
         assertEquals(1, returnDraftOrderList.size());
-        assertEquals(UUID.fromString(PrlAppsConstants.TEST_UUID), returnDraftOrderList.get(0).getId());
+        assertEquals(UUID.fromString(PrlAppsConstants.TEST_UUID), returnDraftOrderList.getFirst().getId());
         assertEquals("Draft removed",  response.getData().get(RemoveDraftOrderController.REMOVED_DRAFT_ORDER_TEXT));
     }
 

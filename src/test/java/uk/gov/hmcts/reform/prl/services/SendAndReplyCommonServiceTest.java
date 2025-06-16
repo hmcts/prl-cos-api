@@ -378,7 +378,7 @@ public class SendAndReplyCommonServiceTest {
             .state(State.SUBMITTED_PAID.getValue())
             .data(caseDataMap)
             .build();
-        UUID selectedValue = messages.get(0).getId();
+        UUID selectedValue = messages.getFirst().getId();
 
         List<Element<Message>> openMessagesBefore = messages;
 
@@ -391,7 +391,7 @@ public class SendAndReplyCommonServiceTest {
                 element.getValue().setUpdatedTime(dateTime.now());
                 return element;
             }).stream().collect(Collectors.toList());
-        closedMessage.add(listOfClosedMessages.get(0));
+        closedMessage.add(listOfClosedMessages.getFirst());
 
         DynamicList dynamicList =  ElementUtils.asDynamicList(messages, null, Message::getLabelForDynamicList);
 
@@ -457,7 +457,7 @@ public class SendAndReplyCommonServiceTest {
 
         msgHisElemList.add(element(messageHistory));
 
-        messagesWithHistory.get(0).getValue().setReplyHistory(msgHisElemList);
+        messagesWithHistory.getFirst().getValue().setReplyHistory(msgHisElemList);
 
         CaseData caseData = CaseData.builder().id(12345L)
             .chooseSendOrReply(REPLY)

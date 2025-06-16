@@ -95,7 +95,7 @@ public class CafcassUploadDocService {
         Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
         QuarantineLegalDoc quarantineLegalDoc = createQuarantineDocFromCafcassUploadedDoc(
             typeOfDocument,
-            uploadResponse.getDocuments().get(0)
+            uploadResponse.getDocuments().getFirst()
         );
 
         manageDocumentsService.setFlagsForWaTask(

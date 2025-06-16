@@ -1297,7 +1297,7 @@ public class C100RespondentSolicitorService {
 
         if (null != c8FinalDocument && solicitorRole.isPresent()) {
             updatedCaseData.put(
-                    getKeyForDoc(solicitorRole.get()).get(0),
+                    getKeyForDoc(solicitorRole.get()).getFirst(),
                     ResponseDocuments.builder()
                             .partyName(party)
                             .createdBy(createdBy)
@@ -2216,7 +2216,7 @@ public class C100RespondentSolicitorService {
                             .getSolicitorOrg().getOrganisationID()
             );
             if (null != orgDetails && null != orgDetails.getContactInformation()) {
-                address = orgDetails.getContactInformation().get(0).toAddress();
+                address = orgDetails.getContactInformation().getFirst().toAddress();
                 orgName = orgDetails.getName();
             } else if (null != respondingParty.getValue().getSendSignUpLink()) {
                 orgName = respondingParty.getValue().getSendSignUpLink();
@@ -2242,7 +2242,7 @@ public class C100RespondentSolicitorService {
                                                         UserDetails userDetails, List<QuarantineLegalDoc> quarantineLegalDocList) {
         CaseData parsedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
         String userRole = CaseUtils.getUserRole(userDetails);
-        manageDocumentsService.setFlagsForWaTask(parsedCaseData, caseDataUpdated, userRole, quarantineLegalDocList.get(0));
+        manageDocumentsService.setFlagsForWaTask(parsedCaseData, caseDataUpdated, userRole, quarantineLegalDocList.getFirst());
         for (QuarantineLegalDoc eachDoc : quarantineLegalDocList) {
             manageDocumentsService.moveDocumentsToQuarantineTab(eachDoc, parsedCaseData, caseDataUpdated, userRole);
             parsedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);

@@ -52,7 +52,7 @@ import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
 public class AmRoleAssignmentApiTest {
 
     @Autowired
-    RoleAssignmentApi roleAssignmentApi;
+    private RoleAssignmentApi roleAssignmentApi;
 
     private static final String X_CORRELATION_ID = "someXCorrelationId";
     private static final String APPLICATION_JSON = "application/json";
@@ -81,7 +81,8 @@ public class AmRoleAssignmentApiTest {
     }
 
     @Pact(provider = "am_role_assignment_service", consumer = "prl_cos")
-    public RequestResponsePact generatePactFragmentForRoleAssignmentBasedOffId(PactDslWithProvider builder) throws Exception {
+    public RequestResponsePact generatePactFragmentForRoleAssignmentBasedOffId(PactDslWithProvider builder)
+        throws Exception {
         String roleAssignmentResponseBody = "response/role-assignment-service-response.json";
 
         return builder

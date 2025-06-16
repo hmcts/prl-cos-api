@@ -49,7 +49,7 @@ public class CaseFlagMigrationService {
         log.info("making ref data call to get case flags");
         CaseFlag caseFlag = refDataUserService.retrieveCaseFlags(systemUserService.getSysUserToken(), FLAG_TYPE);
         List<uk.gov.hmcts.reform.prl.models.dto.datamigration.caseflag.FlagDetail> flagDetail
-            = caseFlag.getFlags().get(0).getFlagDetails();
+            = caseFlag.getFlags().getFirst().getFlagDetails();
         log.info("ref data call for case flags completed");
 
         CaseData caseData = objectMapper.convertValue(

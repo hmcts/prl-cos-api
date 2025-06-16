@@ -646,7 +646,7 @@ public class StmtOfServImplServiceTest {
         assertNotNull(updatedCaseData);
         assertEquals(TEST_UUID,
                      ((List<Element<StmtOfServiceAddRecipient>>)updatedCaseData.get("stmtOfServiceForApplication"))
-                         .get(0).getValue().getSelectedPartyId());
+                         .getFirst().getValue().getSelectedPartyId());
     }
 
     @Test

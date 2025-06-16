@@ -489,7 +489,7 @@ public class SendAndReplyControllerTest {
             .state(State.SUBMITTED_PAID.getValue())
             .data(caseDataMap)
             .build();
-        UUID selectedValue = messages.get(0).getId();
+        UUID selectedValue = messages.getFirst().getId();
 
         CaseData caseData = CaseData.builder().id(12345L)
             .chooseSendOrReply(REPLY)
@@ -549,6 +549,6 @@ public class SendAndReplyControllerTest {
         Assert.assertNotNull(response.getErrors());
         Assert.assertTrue(!response.getErrors().isEmpty());
         Assert.assertEquals("There are no messages to respond to.",
-            response.getErrors().get(0));
+            response.getErrors().getFirst());
     }
 }

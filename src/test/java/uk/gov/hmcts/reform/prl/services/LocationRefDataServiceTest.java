@@ -79,7 +79,7 @@ public class LocationRefDataServiceTest {
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
             .thenThrow(FeignException.class);
         List<DynamicListElement> courtLocations = locationRefDataService.getCourtLocations("test");
-        assertNull(courtLocations.get(0).getCode());
+        assertNull(courtLocations.getFirst().getCode());
     }
 
     @Test
@@ -87,7 +87,7 @@ public class LocationRefDataServiceTest {
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
             .thenThrow(NullPointerException.class);
         List<DynamicListElement> courtLocations = locationRefDataService.getDaCourtLocations("test");
-        assertNull(courtLocations.get(0).getCode());
+        assertNull(courtLocations.getFirst().getCode());
     }
 
     @Test

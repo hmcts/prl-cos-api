@@ -1415,9 +1415,9 @@ public class DraftAnOrderService {
         FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
         if (fl404CustomFields != null) {
             PartyDetails applicant1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-                ? caseData.getApplicants().get(0).getValue() : caseData.getApplicantsFL401();
+                ? caseData.getApplicants().getFirst().getValue() : caseData.getApplicantsFL401();
             PartyDetails respondent1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-                ? caseData.getRespondents().get(0).getValue() : caseData.getRespondentsFL401();
+                ? caseData.getRespondents().getFirst().getValue() : caseData.getRespondentsFL401();
             fl404CustomFields = fl404CustomFields.toBuilder().fl404bApplicantName(String.format(
                     PrlAppsConstants.FORMAT,
                     applicant1.getFirstName(),
@@ -2252,7 +2252,7 @@ public class DraftAnOrderService {
         }
         List<Element<DraftOrder>> draftOrderCollection = generateDraftOrderCollection(caseData, authorisation);
         caseDataUpdated.put(DRAFT_ORDER_COLLECTION, draftOrderCollection);
-        caseDataUpdated.put(WA_ORDER_COLLECTION_ID, draftOrderCollection.get(0).getId());
+        caseDataUpdated.put(WA_ORDER_COLLECTION_ID, draftOrderCollection.getFirst().getId());
         caseDataUpdated.put(
             WA_ORDER_NAME_SOLICITOR_CREATED,
             getDraftOrderNameForWA(caseData, callbackRequest.getEventId(), null)

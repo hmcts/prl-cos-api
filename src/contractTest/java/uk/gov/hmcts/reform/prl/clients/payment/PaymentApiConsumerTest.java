@@ -122,9 +122,12 @@ public class PaymentApiConsumerTest {
     @Test
     @PactTestFor(pactMethod = "getPaymentStatus")
     public void retrievePaymentStatus() {
-        PaymentStatusResponse paymentStatusResponse = paymentApi.fetchPaymentStatus(BEARER_TOKEN,
-                                                                                    SERVICE_AUTHORIZATION_HEADER, PAYMENT_REFERENCE
+        PaymentStatusResponse paymentStatusResponse =
+            paymentApi.fetchPaymentStatus(BEARER_TOKEN,
+                                          SERVICE_AUTHORIZATION_HEADER,
+                                          PAYMENT_REFERENCE
         );
+
         assertNotNull(paymentStatusResponse);
         assertEquals(STATUS,paymentStatusResponse.getStatus());
     }

@@ -54,9 +54,13 @@ public class ReferenceDataOrganisationalInternalUsersConsumerTest extends Refere
     @PactTestFor(pactMethod = "generatePactFragmentForGetOrganisationById")
     public void verifyGetOrganisationById() {
 
-        Organisations orgainisation = organisationApi.findOrganisation(AUTHORIZATION_TOKEN, SERVICE_AUTH_TOKEN, "orgId");
-        assertThat(orgainisation, is(notNullValue()));
-        assertThat(orgainisation.getOrganisationIdentifier(), is("someOrganisationIdentifier"));
+        Organisations organisation = organisationApi.findOrganisation(AUTHORIZATION_TOKEN,
+                                                                       SERVICE_AUTH_TOKEN,
+                                                                       "orgId"
+        );
+
+        assertThat(organisation, is(notNullValue()));
+        assertThat(organisation.getOrganisationIdentifier(), is("someOrganisationIdentifier"));
     }
 
 }

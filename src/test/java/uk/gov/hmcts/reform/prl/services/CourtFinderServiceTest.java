@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import javassist.NotFoundException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import javax.ws.rs.NotFoundException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -983,8 +983,8 @@ public class CourtFinderServiceTest {
     }
 
 
-    @Test(expected = NotFoundException.class)
-    public void whenNoChildDetailsPresentThrowNotFoundException() throws NotFoundException {
+    @Test(expected = RuntimeException.class)
+    public void whenNoChildDetailsPresentThrowRunTimeException() throws RuntimeException {
         CaseData caseData = CaseData.builder()
             .children(Collections.emptyList())
             .build();

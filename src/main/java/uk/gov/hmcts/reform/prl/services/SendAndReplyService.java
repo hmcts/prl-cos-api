@@ -1610,7 +1610,7 @@ public class SendAndReplyService {
         return roleAssignmentResponseList.stream()
             .filter(roleAssignmentResponse -> roleAssignmentResponse.getRoleName().equals(
                 ALLOCATE_JUDGE_ROLE) && roleAssignmentResponse.getAttributes().getCaseId().equals(
-                String.valueOf(caseId))).toList().get(0).getId();
+                String.valueOf(caseId))).toList().getFirst().getId();
     }
 
     private Optional<AllocatedJudgeForSendAndReply> retreiveExistingJudgeAllocationFromSendAndReply(

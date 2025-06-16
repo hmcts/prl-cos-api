@@ -75,7 +75,7 @@ public class ServiceOfDocumentsConfCheckControllerTest {
 
         assertNotNull(aboutToStartOrSubmitCallbackResponse);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getErrors());
-        assertEquals(NO_DOCUMENTS_TO_REVIEW_ERROR, aboutToStartOrSubmitCallbackResponse.getErrors().get(0));
+        assertEquals(NO_DOCUMENTS_TO_REVIEW_ERROR, aboutToStartOrSubmitCallbackResponse.getErrors().getFirst());
     }
 
     @Test

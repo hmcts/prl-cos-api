@@ -610,7 +610,7 @@ public class ReviewDocumentServiceTest {
         Assert.assertEquals(1, citizenUploadDocListConfTab.size());
         Assert.assertEquals(
             document.getDocumentFileName(),
-            citizenUploadDocListConfTab.get(0).getValue().getCitizenDocument().getDocumentFileName()
+            citizenUploadDocListConfTab.getFirst().getValue().getCitizenDocument().getDocumentFileName()
         );
     }
 
@@ -820,10 +820,10 @@ public class ReviewDocumentServiceTest {
 
         Assert.assertNotNull(caseDataMap.get("bulkScannedDocListDocTab"));
         Assert.assertEquals(1, bulkScannedDocListDocTab.size());
-        Assert.assertNotNull(bulkScannedDocListDocTab.get(0).getValue().getUrl());
-        Assert.assertNull(bulkScannedDocListDocTab.get(0).getValue().getCategoryId());
-        Assert.assertEquals("123", bulkScannedDocListDocTab.get(0).getValue().getControlNumber());
-        Assert.assertEquals("EXREF", bulkScannedDocListDocTab.get(0).getValue().getExceptionRecordReference());
+        Assert.assertNotNull(bulkScannedDocListDocTab.getFirst().getValue().getUrl());
+        Assert.assertNull(bulkScannedDocListDocTab.getFirst().getValue().getCategoryId());
+        Assert.assertEquals("123", bulkScannedDocListDocTab.getFirst().getValue().getControlNumber());
+        Assert.assertEquals("EXREF", bulkScannedDocListDocTab.getFirst().getValue().getExceptionRecordReference());
     }
 
     @Test
@@ -866,10 +866,10 @@ public class ReviewDocumentServiceTest {
         Assert.assertNotNull(caseDataMap.get(CONFIDENTIAL_DOCUMENTS));
         List<Element<QuarantineLegalDoc>> confidentialDocs =
             (List<Element<QuarantineLegalDoc>>) caseDataMap.get(CONFIDENTIAL_DOCUMENTS);
-        Assert.assertNotNull(confidentialDocs.get(0).getValue().getUrl());
-        Assert.assertNull(confidentialDocs.get(0).getValue().getCategoryId());
-        Assert.assertEquals("123", confidentialDocs.get(0).getValue().getControlNumber());
-        Assert.assertEquals("EXREF", confidentialDocs.get(0).getValue().getExceptionRecordReference());
+        Assert.assertNotNull(confidentialDocs.getFirst().getValue().getUrl());
+        Assert.assertNull(confidentialDocs.getFirst().getValue().getCategoryId());
+        Assert.assertEquals("123", confidentialDocs.getFirst().getValue().getControlNumber());
+        Assert.assertEquals("EXREF", confidentialDocs.getFirst().getValue().getExceptionRecordReference());
 
     }
 
@@ -912,9 +912,9 @@ public class ReviewDocumentServiceTest {
         Assert.assertNotNull(caseDataMap.get(CONFIDENTIAL_DOCUMENTS));
         List<Element<QuarantineLegalDoc>> restrictedDocs =
             (List<Element<QuarantineLegalDoc>>) caseDataMap.get(CONFIDENTIAL_DOCUMENTS);
-        Assert.assertNotNull(restrictedDocs.get(0).getValue().getMiamCertificateDocument());
-        Assert.assertEquals(YesOrNo.Yes, restrictedDocs.get(0).getValue().getIsConfidential());
-        Assert.assertEquals(YesOrNo.No, restrictedDocs.get(0).getValue().getIsRestricted());
+        Assert.assertNotNull(restrictedDocs.getFirst().getValue().getMiamCertificateDocument());
+        Assert.assertEquals(YesOrNo.Yes, restrictedDocs.getFirst().getValue().getIsConfidential());
+        Assert.assertEquals(YesOrNo.No, restrictedDocs.getFirst().getValue().getIsRestricted());
     }
 
     @Test
@@ -954,9 +954,9 @@ public class ReviewDocumentServiceTest {
         Assert.assertNotNull(caseDataMap.get(RESTRICTED_DOCUMENTS));
         List<Element<QuarantineLegalDoc>> restrictedDocs =
             (List<Element<QuarantineLegalDoc>>) caseDataMap.get(RESTRICTED_DOCUMENTS);
-        Assert.assertNotNull(restrictedDocs.get(0).getValue().getMiamCertificateDocument());
-        Assert.assertEquals(YesOrNo.Yes, restrictedDocs.get(0).getValue().getIsConfidential());
-        Assert.assertEquals(YesOrNo.Yes, restrictedDocs.get(0).getValue().getIsRestricted());
+        Assert.assertNotNull(restrictedDocs.getFirst().getValue().getMiamCertificateDocument());
+        Assert.assertEquals(YesOrNo.Yes, restrictedDocs.getFirst().getValue().getIsConfidential());
+        Assert.assertEquals(YesOrNo.Yes, restrictedDocs.getFirst().getValue().getIsRestricted());
     }
 
     @Test
@@ -992,9 +992,9 @@ public class ReviewDocumentServiceTest {
         Assert.assertEquals(1, legalProfUploadDocListDocTab.size());
         Assert.assertEquals(
             "test.pdf",
-            legalProfUploadDocListDocTab.get(0).getValue().getMiamCertificateDocument().getDocumentFileName()
+            legalProfUploadDocListDocTab.getFirst().getValue().getMiamCertificateDocument().getDocumentFileName()
         );
-        Assert.assertEquals("MIAMCertificate", legalProfUploadDocListDocTab.get(0).getValue().getCategoryId());
+        Assert.assertEquals("MIAMCertificate", legalProfUploadDocListDocTab.getFirst().getValue().getCategoryId());
 
     }
 
@@ -1044,9 +1044,9 @@ public class ReviewDocumentServiceTest {
             Assert.assertEquals(1, legalProfUploadDocListDocTab.size());
             Assert.assertEquals(
                 "test.pdf",
-                legalProfUploadDocListDocTab.get(0).getValue().getMiamCertificateDocument().getDocumentFileName()
+                legalProfUploadDocListDocTab.getFirst().getValue().getMiamCertificateDocument().getDocumentFileName()
             );
-            Assert.assertEquals(categoryId, legalProfUploadDocListDocTab.get(0).getValue().getCategoryId());
+            Assert.assertEquals(categoryId, legalProfUploadDocListDocTab.getFirst().getValue().getCategoryId());
         }
     }
 
@@ -1097,11 +1097,11 @@ public class ReviewDocumentServiceTest {
             Assert.assertEquals(1, citizenUploadedDocListDocTab.size());
             Assert.assertEquals(
                 "test.pdf",
-                citizenUploadedDocListDocTab.get(0).getValue().getMiamCertificateDocument().getDocumentFileName()
+                citizenUploadedDocListDocTab.getFirst().getValue().getMiamCertificateDocument().getDocumentFileName()
             );
             Assert.assertEquals(
                 categoryId,
-                citizenUploadedDocListDocTab.get(0).getValue().getCategoryId()
+                citizenUploadedDocListDocTab.getFirst().getValue().getCategoryId()
             );
         }
     }
@@ -1143,9 +1143,9 @@ public class ReviewDocumentServiceTest {
         Assert.assertNotNull(caseDataMap.get(CONFIDENTIAL_DOCUMENTS));
         List<Element<QuarantineLegalDoc>> restrictedDocs =
             (List<Element<QuarantineLegalDoc>>) caseDataMap.get(CONFIDENTIAL_DOCUMENTS);
-        Assert.assertNotNull(restrictedDocs.get(0).getValue().getMiamCertificateDocument());
-        Assert.assertEquals(YesOrNo.Yes, restrictedDocs.get(0).getValue().getIsConfidential());
-        Assert.assertEquals(YesOrNo.No, restrictedDocs.get(0).getValue().getIsRestricted());
+        Assert.assertNotNull(restrictedDocs.getFirst().getValue().getMiamCertificateDocument());
+        Assert.assertEquals(YesOrNo.Yes, restrictedDocs.getFirst().getValue().getIsConfidential());
+        Assert.assertEquals(YesOrNo.No, restrictedDocs.getFirst().getValue().getIsRestricted());
 
     }
 
@@ -1186,9 +1186,9 @@ public class ReviewDocumentServiceTest {
         Assert.assertNotNull(caseDataMap.get(RESTRICTED_DOCUMENTS));
         List<Element<QuarantineLegalDoc>> restrictedDocs =
             (List<Element<QuarantineLegalDoc>>) caseDataMap.get(RESTRICTED_DOCUMENTS);
-        Assert.assertNotNull(restrictedDocs.get(0).getValue().getMiamCertificateDocument());
-        Assert.assertEquals(YesOrNo.Yes, restrictedDocs.get(0).getValue().getIsConfidential());
-        Assert.assertEquals(YesOrNo.Yes, restrictedDocs.get(0).getValue().getIsRestricted());
+        Assert.assertNotNull(restrictedDocs.getFirst().getValue().getMiamCertificateDocument());
+        Assert.assertEquals(YesOrNo.Yes, restrictedDocs.getFirst().getValue().getIsConfidential());
+        Assert.assertEquals(YesOrNo.Yes, restrictedDocs.getFirst().getValue().getIsRestricted());
     }
 
     @Test
@@ -1219,9 +1219,9 @@ public class ReviewDocumentServiceTest {
         Assert.assertEquals(1, courtStaffUploadDocListDocTab.size());
         Assert.assertEquals(
             "test.pdf",
-            courtStaffUploadDocListDocTab.get(0).getValue().getMiamCertificateDocument().getDocumentFileName()
+            courtStaffUploadDocListDocTab.getFirst().getValue().getMiamCertificateDocument().getDocumentFileName()
         );
-        Assert.assertEquals("MIAMCertificate", courtStaffUploadDocListDocTab.get(0).getValue().getCategoryId());
+        Assert.assertEquals("MIAMCertificate", courtStaffUploadDocListDocTab.getFirst().getValue().getCategoryId());
     }
 
     //Cafcass
@@ -1261,9 +1261,9 @@ public class ReviewDocumentServiceTest {
         Assert.assertNotNull(caseDataMap.get(CONFIDENTIAL_DOCUMENTS));
         List<Element<QuarantineLegalDoc>> restrictedDocs =
             (List<Element<QuarantineLegalDoc>>) caseDataMap.get(CONFIDENTIAL_DOCUMENTS);
-        Assert.assertNotNull(restrictedDocs.get(0).getValue().getMiamCertificateDocument());
-        Assert.assertEquals(YesOrNo.Yes, restrictedDocs.get(0).getValue().getIsConfidential());
-        Assert.assertEquals(YesOrNo.No, restrictedDocs.get(0).getValue().getIsRestricted());
+        Assert.assertNotNull(restrictedDocs.getFirst().getValue().getMiamCertificateDocument());
+        Assert.assertEquals(YesOrNo.Yes, restrictedDocs.getFirst().getValue().getIsConfidential());
+        Assert.assertEquals(YesOrNo.No, restrictedDocs.getFirst().getValue().getIsRestricted());
 
     }
 
@@ -1304,9 +1304,9 @@ public class ReviewDocumentServiceTest {
         Assert.assertNotNull(caseDataMap.get(RESTRICTED_DOCUMENTS));
         List<Element<QuarantineLegalDoc>> restrictedDocs =
             (List<Element<QuarantineLegalDoc>>) caseDataMap.get(RESTRICTED_DOCUMENTS);
-        Assert.assertNotNull(restrictedDocs.get(0).getValue().getMiamCertificateDocument());
-        Assert.assertEquals(YesOrNo.Yes, restrictedDocs.get(0).getValue().getIsConfidential());
-        Assert.assertEquals(YesOrNo.Yes, restrictedDocs.get(0).getValue().getIsRestricted());
+        Assert.assertNotNull(restrictedDocs.getFirst().getValue().getMiamCertificateDocument());
+        Assert.assertEquals(YesOrNo.Yes, restrictedDocs.getFirst().getValue().getIsConfidential());
+        Assert.assertEquals(YesOrNo.Yes, restrictedDocs.getFirst().getValue().getIsRestricted());
     }
 
     @Test
@@ -1340,9 +1340,9 @@ public class ReviewDocumentServiceTest {
         Assert.assertEquals(1, cafcassUploadDocListDocTab.size());
         Assert.assertEquals(
             "test.pdf",
-            cafcassUploadDocListDocTab.get(0).getValue().getMiamCertificateDocument().getDocumentFileName()
+            cafcassUploadDocListDocTab.getFirst().getValue().getMiamCertificateDocument().getDocumentFileName()
         );
-        Assert.assertEquals("MIAMCertificate", cafcassUploadDocListDocTab.get(0).getValue().getCategoryId());
+        Assert.assertEquals("MIAMCertificate", cafcassUploadDocListDocTab.getFirst().getValue().getCategoryId());
     }
 
     @Test
@@ -1437,9 +1437,9 @@ public class ReviewDocumentServiceTest {
         Assert.assertNotNull(caseDataMap.get(CONFIDENTIAL_DOCUMENTS));
         List<Element<QuarantineLegalDoc>> restrictedDocs =
             (List<Element<QuarantineLegalDoc>>) caseDataMap.get(CONFIDENTIAL_DOCUMENTS);
-        Assert.assertNotNull(restrictedDocs.get(0).getValue().getMiamCertificateDocument());
-        Assert.assertEquals(YesOrNo.Yes, restrictedDocs.get(0).getValue().getIsConfidential());
-        Assert.assertEquals(YesOrNo.No, restrictedDocs.get(0).getValue().getIsRestricted());
+        Assert.assertNotNull(restrictedDocs.getFirst().getValue().getMiamCertificateDocument());
+        Assert.assertEquals(YesOrNo.Yes, restrictedDocs.getFirst().getValue().getIsConfidential());
+        Assert.assertEquals(YesOrNo.No, restrictedDocs.getFirst().getValue().getIsRestricted());
     }
 
     @Test
@@ -1502,9 +1502,9 @@ public class ReviewDocumentServiceTest {
         Assert.assertEquals(1, citizenUploadedDocListDocTab.size());
         Assert.assertEquals(
             "test.pdf",
-            citizenUploadedDocListDocTab.get(0).getValue().getMiamCertificateDocument().getDocumentFileName()
+            citizenUploadedDocListDocTab.getFirst().getValue().getMiamCertificateDocument().getDocumentFileName()
         );
-        Assert.assertEquals("respondentC1AResponse", citizenUploadedDocListDocTab.get(0).getValue().getCategoryId());
+        Assert.assertEquals("respondentC1AResponse", citizenUploadedDocListDocTab.getFirst().getValue().getCategoryId());
 
     }
 
@@ -1568,9 +1568,9 @@ public class ReviewDocumentServiceTest {
         Assert.assertEquals(1, citizenUploadedDocListDocTab.size());
         Assert.assertEquals(
             "test.pdf",
-            citizenUploadedDocListDocTab.get(0).getValue().getMiamCertificateDocument().getDocumentFileName()
+            citizenUploadedDocListDocTab.getFirst().getValue().getMiamCertificateDocument().getDocumentFileName()
         );
-        Assert.assertEquals(RESPONDENT_APPLICATION, citizenUploadedDocListDocTab.get(0).getValue().getCategoryId());
+        Assert.assertEquals(RESPONDENT_APPLICATION, citizenUploadedDocListDocTab.getFirst().getValue().getCategoryId());
 
     }
 
@@ -1609,9 +1609,9 @@ public class ReviewDocumentServiceTest {
         Assert.assertNotNull(caseDataMap.get(CONFIDENTIAL_DOCUMENTS));
         List<Element<QuarantineLegalDoc>> restrictedDocs =
             (List<Element<QuarantineLegalDoc>>) caseDataMap.get(CONFIDENTIAL_DOCUMENTS);
-        Assert.assertNotNull(restrictedDocs.get(0).getValue().getMiamCertificateDocument());
-        Assert.assertEquals(YesOrNo.Yes, restrictedDocs.get(0).getValue().getIsConfidential());
-        Assert.assertEquals(YesOrNo.No, restrictedDocs.get(0).getValue().getIsRestricted());
+        Assert.assertNotNull(restrictedDocs.getFirst().getValue().getMiamCertificateDocument());
+        Assert.assertEquals(YesOrNo.Yes, restrictedDocs.getFirst().getValue().getIsConfidential());
+        Assert.assertEquals(YesOrNo.No, restrictedDocs.getFirst().getValue().getIsRestricted());
 
     }
 
@@ -1690,9 +1690,9 @@ public class ReviewDocumentServiceTest {
         Assert.assertEquals(1, citizenUploadedDocListDocTab.size());
         Assert.assertEquals(
             "test.pdf",
-            citizenUploadedDocListDocTab.get(0).getValue().getMiamCertificateDocument().getDocumentFileName()
+            citizenUploadedDocListDocTab.getFirst().getValue().getMiamCertificateDocument().getDocumentFileName()
         );
-        Assert.assertEquals(RESPONDENT_C1A_APPLICATION, citizenUploadedDocListDocTab.get(0).getValue().getCategoryId());
+        Assert.assertEquals(RESPONDENT_C1A_APPLICATION, citizenUploadedDocListDocTab.getFirst().getValue().getCategoryId());
 
     }
 

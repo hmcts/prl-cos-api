@@ -216,7 +216,7 @@ public class FL401CaseInviteServiceTest {
         List<Element<CaseInvite>> partyCaseInvites = fl401CaseInviteService
             .generateAndSendCaseInviteForDaApplicant(caseData, applicant);
         assertEquals(2, partyCaseInvites.size());
-        assertEquals(YesOrNo.Yes, partyCaseInvites.get(0).getValue().getIsApplicant());
+        assertEquals(YesOrNo.Yes, partyCaseInvites.getFirst().getValue().getIsApplicant());
 
     }
 
@@ -249,7 +249,7 @@ public class FL401CaseInviteServiceTest {
         List<Element<CaseInvite>> partyCaseInvites = fl401CaseInviteService
             .generateAndSendCaseInviteForDaRespondent(caseData, respondent);
         assertEquals(1, partyCaseInvites.size());
-        assertEquals(YesOrNo.No, partyCaseInvites.get(0).getValue().getIsApplicant());
+        assertEquals(YesOrNo.No, partyCaseInvites.getFirst().getValue().getIsApplicant());
 
     }
 }

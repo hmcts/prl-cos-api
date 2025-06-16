@@ -140,7 +140,7 @@ public class HearingRequestDataMapperTest {
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.amendDischargedVaried)
             .build();
         hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, caseData);
-        assertEquals("INTER",hearingData.getHearingTypes().getListItems().get(0).getCode());
+        assertEquals("INTER",hearingData.getHearingTypes().getListItems().getFirst().getCode());
     }
 
 
@@ -374,8 +374,8 @@ public class HearingRequestDataMapperTest {
             .respondentsFL401(partyDetails)
             .build();
         hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, caseData);
-        assertEquals("test",hearingData.getHearingTypes().getListItems().get(0).getCode());
-        assertEquals("test",hearingData.getCourtList().getListItems().get(0).getCode());
+        assertEquals("test",hearingData.getHearingTypes().getListItems().getFirst().getCode());
+        assertEquals("test",hearingData.getCourtList().getListItems().getFirst().getCode());
     }
 
     @Test
@@ -451,8 +451,8 @@ public class HearingRequestDataMapperTest {
             .caseTypeOfApplication("FL401")
             .build();
         hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, caseData);
-        assertEquals("test",hearingData.getHearingTypes().getListItems().get(0).getCode());
-        assertEquals("test",hearingData.getCourtList().getListItems().get(0).getCode());
+        assertEquals("test",hearingData.getHearingTypes().getListItems().getFirst().getCode());
+        assertEquals("test",hearingData.getCourtList().getListItems().getFirst().getCode());
     }
 
 }

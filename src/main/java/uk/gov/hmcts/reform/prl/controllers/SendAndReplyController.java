@@ -189,7 +189,7 @@ public class SendAndReplyController extends AbstractCallbackController {
         }
         messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
 
-        Message mostRecentMessage = messages.get(0).getValue();
+        Message mostRecentMessage = messages.getFirst().getValue();
         if (mostRecentMessage.getStatus().equals(MessageStatus.OPEN)) {
             sendAndReplyService.sendNotificationEmail(caseData, mostRecentMessage);
         }

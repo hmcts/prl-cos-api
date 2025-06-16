@@ -1237,7 +1237,7 @@ public class ManageOrderServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
         manageOrderService.updateCaseDataWithAppointedGuardianNames(caseDetails, namesList);
-        assertEquals("Full Name", caseDataNameList.get(0).getValue().getGuardianFullName());
+        assertEquals("Full Name", caseDataNameList.getFirst().getValue().getGuardianFullName());
     }
 
 
@@ -3565,7 +3565,7 @@ public class ManageOrderServiceTest {
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(List.of(dynamicMultiselectListElementUpdated));
 
         CaseData caseData1 = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
-        Assert.assertEquals("John (Child 1)",caseData1.getManageOrders().getChildOption().getListItems().get(0).getLabel());
+        Assert.assertEquals("John (Child 1)",caseData1.getManageOrders().getChildOption().getListItems().getFirst().getLabel());
     }
 
     @Test
@@ -3734,7 +3734,7 @@ public class ManageOrderServiceTest {
         assertNotNull(caseDataUpdated.get("additionalOrderDocuments"));
         List<Element<AdditionalOrderDocument>> additionalOrderDocuments =
             (List<Element<AdditionalOrderDocument>>) caseDataUpdated.get("additionalOrderDocuments");
-        assertEquals(2, additionalOrderDocuments.get(0).getValue().getAdditionalDocuments().size());
+        assertEquals(2, additionalOrderDocuments.getFirst().getValue().getAdditionalDocuments().size());
     }
 
     @Test
@@ -4913,7 +4913,7 @@ public class ManageOrderServiceTest {
         List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) response.get("orderCollection");
 
         assertEquals("Financial compensation order following C79 enforcement application (C82)",
-                     orderCollection.get(0).getValue().getOrderTypeId());
+                     orderCollection.getFirst().getValue().getOrderTypeId());
         assertNotNull(response);
 
     }
@@ -5334,7 +5334,7 @@ public class ManageOrderServiceTest {
         CaseData caseDataResp = manageOrderService.setHearingDataForSdo(caseData, hearings, "auth");
         Assert.assertNull(caseData.getStandardDirectionOrder().getSdoDirectionsForFactFindingHearingDetails().getHearingdataFromHearingTab());
         Assert.assertEquals(uuid, caseDataResp.getStandardDirectionOrder()
-            .getSdoDirectionsForFactFindingHearingDetails().getHearingdataFromHearingTab().get(0).getId());
+            .getSdoDirectionsForFactFindingHearingDetails().getHearingdataFromHearingTab().getFirst().getId());
     }
 
     @Test
@@ -5437,14 +5437,14 @@ public class ManageOrderServiceTest {
         when(dateTime.now()).thenReturn(LocalDateTime.now());
         List<Element<OrderDetails>> orderDetails = manageOrderService.serveOrder(caseData, orderList);
         assertNotNull(orderDetails);
-        assertNotNull(orderDetails.get(0));
-        assertNotNull(orderDetails.get(0).getValue().getServeOrderDetails());
-        assertNotNull(orderDetails.get(0).getValue().getServeOrderDetails().getServedParties());
-        assertNotNull(orderDetails.get(0).getValue().getServeOrderDetails().getServedParties().get(0));
+        assertNotNull(orderDetails.getFirst());
+        assertNotNull(orderDetails.getFirst().getValue().getServeOrderDetails());
+        assertNotNull(orderDetails.getFirst().getValue().getServeOrderDetails().getServedParties());
+        assertNotNull(orderDetails.getFirst().getValue().getServeOrderDetails().getServedParties().getFirst());
         assertEquals(
-            orderDetails.get(0).getValue().getServeOrderDetails().getServedParties().get(0).getValue()
+            orderDetails.getFirst().getValue().getServeOrderDetails().getServedParties().getFirst().getValue()
                 .getPartyId(),
-            (orders.getValue().getServeOrderDetails().getServedParties().get(0).getValue().getPartyId())
+            (orders.getValue().getServeOrderDetails().getServedParties().getFirst().getValue().getPartyId())
         );
     }
 

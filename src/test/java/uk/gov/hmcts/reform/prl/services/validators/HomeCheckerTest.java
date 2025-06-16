@@ -28,8 +28,8 @@ import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.testng.AssertJUnit.assertNotNull;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HomeCheckerTest {
@@ -256,7 +256,7 @@ public class HomeCheckerTest {
 
         List<Optional<?>> fields = new ArrayList<>();
         homeChecker.getIntendToLiveAtTheAddress(home, fields);
-        Assert.assertTrue(fields.size() >= 1 && !fields.get(0).isEmpty());
+        Assert.assertTrue(fields.size() >= 1 && !fields.getFirst().isEmpty());
     }
 
     @Test
@@ -271,7 +271,7 @@ public class HomeCheckerTest {
 
         List<Optional<?>> fields = new ArrayList<>();
         homeChecker.getIntendToLiveAtTheAddress(home, fields);
-        Assert.assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
+        Assert.assertFalse(fields.size() > 1 && !fields.getFirst().isEmpty());
     }
 
     @Test
@@ -284,7 +284,7 @@ public class HomeCheckerTest {
         Optional<Home> home = ofNullable(caseData.getHome());
         List<Optional<?>> fields = new ArrayList<>();
         homeChecker.getDetailPeopleLivingAtThisAddress(home,fields);
-        Assert.assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
+        Assert.assertFalse(fields.size() > 1 && !fields.getFirst().isEmpty());
     }
 
     @Test
@@ -301,7 +301,7 @@ public class HomeCheckerTest {
 
         List<Optional<?>> fields = new ArrayList<>();
         homeChecker.getDetailPeopleLivingAtThisAddress(home, fields);
-        Assert.assertTrue(fields.size() >= 1 && !fields.get(0).isEmpty());
+        Assert.assertTrue(fields.size() >= 1 && !fields.getFirst().isEmpty());
     }
 
     @Test
@@ -314,7 +314,7 @@ public class HomeCheckerTest {
         Optional<Home> home = ofNullable(caseData.getHome());
         List<Optional<?>> fields = new ArrayList<>();
         homeChecker.isChildDetailsAreCompleted(home,fields);
-        Assert.assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
+        Assert.assertFalse(fields.size() > 1 && !fields.getFirst().isEmpty());
     }
 
     @Test
@@ -327,7 +327,7 @@ public class HomeCheckerTest {
         Optional<Home> home = ofNullable(caseData.getHome());
         List<Optional<?>> fields = new ArrayList<>();
         homeChecker.isHowIsThePropertyAdaptedComplete(home,fields);
-        Assert.assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
+        Assert.assertFalse(fields.size() > 1 && !fields.getFirst().isEmpty());
     }
 
     @Test
@@ -344,7 +344,7 @@ public class HomeCheckerTest {
 
         List<Optional<?>> fields = new ArrayList<>();
         homeChecker.isHowIsThePropertyAdaptedComplete(home, fields);
-        Assert.assertTrue(fields.size() >= 1 && !fields.get(0).isEmpty());
+        Assert.assertTrue(fields.size() >= 1 && !fields.getFirst().isEmpty());
     }
 
     @Test

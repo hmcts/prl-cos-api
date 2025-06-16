@@ -57,6 +57,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -65,7 +66,6 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static org.testng.AssertJUnit.assertNull;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
@@ -383,7 +383,7 @@ public class CaseDataServiceTest {
 
         caseDataService.filterCancelledHearingsBeforeListing(listOfHearings);
 
-        assertEquals(2, listOfHearings.get(0).getCaseHearings().size());
+        assertEquals(2, listOfHearings.getFirst().getCaseHearings().size());
 
     }
 
@@ -473,9 +473,9 @@ public class CaseDataServiceTest {
         privateMethod.setAccessible(true);
         privateMethod.invoke(caseDataService, cafCassResponse);
 
-        assertEquals("test", cafCassResponse.getCases().get(0).getCaseData().getOtherDocuments().get(0).getValue().getDocumentName());
-        assertNull(cafCassResponse.getCases().get(0).getCaseData().getCourtStaffUploadDocListDocTab());
-        assertNull(cafCassResponse.getCases().get(0).getCaseData().getCafcassUploadDocListDocTab());
+        assertEquals("test", cafCassResponse.getCases().getFirst().getCaseData().getOtherDocuments().getFirst().getValue().getDocumentName());
+        assertNull(cafCassResponse.getCases().getFirst().getCaseData().getCourtStaffUploadDocListDocTab());
+        assertNull(cafCassResponse.getCases().getFirst().getCaseData().getCafcassUploadDocListDocTab());
 
     }
 

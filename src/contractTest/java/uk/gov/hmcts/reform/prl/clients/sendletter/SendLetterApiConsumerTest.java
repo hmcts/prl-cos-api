@@ -29,8 +29,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertNotNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 @ExtendWith(PactConsumerTestExt.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -63,7 +63,7 @@ import static org.testng.AssertJUnit.assertNotNull;
 public class SendLetterApiConsumerTest {
 
     @Autowired
-    SendLetterApiProxy sendLetterApiProxy;
+    private SendLetterApiProxy sendLetterApiProxy;
 
     private LetterWithPdfsRequest letterWithPdfsRequest;
 
@@ -115,7 +115,11 @@ public class SendLetterApiConsumerTest {
     @Test
     @PactTestFor(pactMethod = "generateSendLetterPact")
     public void verifySendLetterPact() {
-        SendLetterResponse sendLetterResponse = sendLetterApiProxy.sendLetter(SERVICE_AUTHORIZATION_HEADER, isAsync, letterWithPdfsRequest);
+        SendLetterResponse sendLetterResponse = sendLetterApiProxy.sendLetter(SERVICE_AUTHORIZATION_HEADER,
+                                                                              isAsync,
+                                                                              letterWithPdfsRequest
+        );
+
         assertNotNull(sendLetterResponse);
         assertEquals("24ab9066-a0d9-409e-862d-164ff6eba545",sendLetterResponse.letterId.toString());
     }

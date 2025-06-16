@@ -643,8 +643,8 @@ public class CitizenPartyDetailsMapperTest {
         when(confidentialityTabService.updateOtherPeopleConfidentiality(any(), any())).thenReturn(Collections.singletonList(otherPartyElement));
         CaseData caseDataResult = citizenPartyDetailsMapper.buildUpdatedCaseData(caseData,c100RebuildData);
         assertNotNull(caseDataResult);
-        assertEquals(YesOrNo.Yes, caseDataResult.getOtherPartyInTheCaseRevised().get(0).getValue().getIsAddressConfidential());
-        assertEquals(YesOrNo.Yes, caseDataResult.getOtherPartyInTheCaseRevised().get(0).getValue().getLiveInRefuge());
+        assertEquals(YesOrNo.Yes, caseDataResult.getOtherPartyInTheCaseRevised().getFirst().getValue().getIsAddressConfidential());
+        assertEquals(YesOrNo.Yes, caseDataResult.getOtherPartyInTheCaseRevised().getFirst().getValue().getLiveInRefuge());
     }
 
     @Test
@@ -696,8 +696,8 @@ public class CitizenPartyDetailsMapperTest {
         when(confidentialityTabService.updateOtherPeopleConfidentiality(any(), any())).thenReturn(Collections.singletonList(otherPartyElement));
         CaseData caseDataResult = citizenPartyDetailsMapper.buildUpdatedCaseData(caseData,c100RebuildData);
         assertNotNull(caseDataResult);
-        assertEquals(YesOrNo.No, caseDataResult.getOtherPartyInTheCaseRevised().get(0).getValue().getIsAddressConfidential());
-        assertEquals(YesOrNo.No, caseDataResult.getOtherPartyInTheCaseRevised().get(0).getValue().getLiveInRefuge());
+        assertEquals(YesOrNo.No, caseDataResult.getOtherPartyInTheCaseRevised().getFirst().getValue().getIsAddressConfidential());
+        assertEquals(YesOrNo.No, caseDataResult.getOtherPartyInTheCaseRevised().getFirst().getValue().getLiveInRefuge());
     }
 
     @Test

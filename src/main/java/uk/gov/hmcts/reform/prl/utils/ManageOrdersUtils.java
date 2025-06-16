@@ -110,7 +110,7 @@ public class ManageOrdersUtils {
                     }
                 }
             } else if (isEmpty(ordersHearingDetails)
-                || ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingDateConfirmOptionEnum())) {
+                || ObjectUtils.isEmpty(ordersHearingDetails.getFirst().getValue().getHearingDateConfirmOptionEnum())) {
                 if (PrlAppsConstants.WELSH.equals(language)) {
                     errorList.add("Darparwch fanylion o leiaf un gwrandawiad");
                 } else {

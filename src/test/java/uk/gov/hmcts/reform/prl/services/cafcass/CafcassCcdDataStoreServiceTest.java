@@ -53,6 +53,6 @@ public class CafcassCcdDataStoreServiceTest {
                                                                            TEST_SERVICE_AUTHORIZATION,
                                                                            PRL_CASE_TYPE);
         assertNotNull(searchResult);
-        assertEquals(PRL_CASE_TYPE, mockResult.getCases().get(0).getCaseTypeId());
+        assertEquals(PRL_CASE_TYPE, mockResult.getCases().getFirst().getCaseTypeId());
     }
 }
