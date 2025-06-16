@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
@@ -19,12 +20,9 @@ public enum ConsentEnum {
     legalAidConfirm("legalAidConfirm", "The applicant believes that the facts stated in this form and any continuation "
                      + "sheets are true. I am authorised by the applicant to sign this statement. ");
 
+    @Getter
     private final String id;
     private final String displayedValue;
-
-    public String getId() {
-        return id;
-    }
 
     @JsonValue
     public String getDisplayedValue() {
