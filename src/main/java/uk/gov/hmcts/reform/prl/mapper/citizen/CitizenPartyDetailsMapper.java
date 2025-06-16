@@ -245,7 +245,7 @@ public class CitizenPartyDetailsMapper {
                                                                                           caseEvent, childDetails);
                     Element<PartyDetails> updatedPartyElement = element(party.getId(), updatedPartyDetails);
                     int updatedApplicantPartyIndex = applicants.indexOf(party);
-                    applicants.set(updatedApplicantPartyIndex, updatedPartyElement));
+                    applicants.set(updatedApplicantPartyIndex, updatedPartyElement);
 
                     if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
                         reGenerateRespondentC8Documents(caseDataMapToBeUpdated, updatedPartyElement,
