@@ -112,6 +112,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -219,6 +220,20 @@ public class ManageOrderServiceTest {
 
 
     public static final String authToken = "Bearer TestAuthToken";
+
+    private static final String CLIENT_CONTEXT = """
+        {
+          "client_context": {
+            "user_task": {
+              "task_data": {
+                "additional_properties": {
+                  "hearingId": "12345"
+                }
+              }
+            }
+          }
+        }
+        """;
 
     @Before
     public void setup() {
@@ -6262,6 +6277,41 @@ public class ManageOrderServiceTest {
         Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails("testAuth", callbackRequest, PrlAppsConstants.ENGLISH);
         assertEquals(YesOrNo.No, caseDataUpdated.get("isSdoSelected"));
 
+    }
+
+    @Test
+    public void testHandleFetchOrderDetailsWithClientContext() {
+        byte[] encode = Base64.getEncoder().encode(CLIENT_CONTEXT.getBytes());
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .isSdoSelected(YesOrNo.Yes)
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.noticeOfProceedings)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .applicants(List.of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrders(manageOrders)
+            .build();
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseDataMap)
+            .build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+
+        Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails(
+            "testAuth",
+            callbackRequest,
+            PrlAppsConstants.ENGLISH,
+            new String(encode));
+
+        assertEquals(YesOrNo.No, caseDataUpdated.get("isSdoSelected"));
     }
 
     @Test

@@ -85,6 +85,7 @@ import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
+import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
@@ -3130,6 +3131,24 @@ public class ManageOrderService {
         }
         return Collections.emptyList();
     }
+
+    public Map<String, Object> handleFetchOrderDetails(String authorisation,
+                                                       CallbackRequest callbackRequest,
+                                                       String language,
+                                                       String clientContext) {
+        WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
+        Optional<Long> hearingId = ofNullable(waMapper)
+            .map(value -> Long.valueOf(value
+                                              .getClientContext()
+                                              .getUserTask()
+                                              .getTaskData()
+                                              .getAdditionalProperties()
+                                              .getHearingId())
+            );
+
+        return handleFetchOrderDetails(authorisation, callbackRequest, language);
+    }
+
 
     public Map<String, Object> handleFetchOrderDetails(String authorisation,
                                                        CallbackRequest callbackRequest,

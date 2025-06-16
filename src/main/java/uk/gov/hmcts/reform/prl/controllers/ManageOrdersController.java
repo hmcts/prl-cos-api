@@ -137,6 +137,7 @@ public class ManageOrdersController {
     public AboutToStartOrSubmitCallbackResponse prepopulateFL401CaseDetails(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
@@ -156,7 +157,11 @@ public class ManageOrdersController {
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(manageOrderService.handleFetchOrderDetails(authorisation, callbackRequest, PrlAppsConstants.ENGLISH))
+                .data(manageOrderService.handleFetchOrderDetails(
+                    authorisation,
+                    callbackRequest,
+                    PrlAppsConstants.ENGLISH,
+                    clientContext))
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
