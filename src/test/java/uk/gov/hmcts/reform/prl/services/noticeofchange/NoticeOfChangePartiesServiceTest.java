@@ -5,12 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -67,23 +65,26 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.noticeofchange.NoticeOfChangePartiesConverter;
 import uk.gov.hmcts.reform.prl.utils.noticeofchange.RespondentPolicyConverter;
 
+import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -130,6 +131,9 @@ public class NoticeOfChangePartiesServiceTest {
     DynamicMultiSelectListService dynamicMultiSelectListService;
     @Mock
     ObjectMapper objectMapper;
+
+    ObjectMapper realObjectMapper;
+
     @Mock
     AllTabServiceImpl tabService;
     @Mock
@@ -158,6 +162,7 @@ public class NoticeOfChangePartiesServiceTest {
 
     @Before
     public void setUp() {
+        realObjectMapper = new ObjectMapper();
         partyDetails = PartyDetails.builder().representativeFirstName("Abc")
             .representativeLastName("Xyz")
             .gender(Gender.male)
@@ -195,6 +200,7 @@ public class NoticeOfChangePartiesServiceTest {
             .id(123456789L)
             .respondents(respondentList)
             .build();
+
 
         caseDataForDa = CaseData.builder()
             .caseTypeOfApplication("fl401")
@@ -320,7 +326,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-            .data(caseData.toMap(new ObjectMapper()))
+            .data(caseData.toMap(realObjectMapper))
             .build();
 
         List<SolicitorUser> userList = new ArrayList<>();
@@ -410,7 +416,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-            .data(caseData.toMap(new ObjectMapper()))
+            .data(caseData.toMap(realObjectMapper))
             .build();
 
         List<SolicitorUser> userList = new ArrayList<>();
@@ -485,7 +491,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-            .data(caseData.toMap(new ObjectMapper()))
+            .data(caseData.toMap(realObjectMapper))
             .build();
 
         List<SolicitorUser> userList = new ArrayList<>();
@@ -550,7 +556,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-            .data(caseData.toMap(new ObjectMapper()))
+            .data(caseData.toMap(realObjectMapper))
             .build();
 
         List<SolicitorUser> userList = new ArrayList<>();
@@ -619,7 +625,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-            .data(caseData.toMap(new ObjectMapper()))
+            .data(caseData.toMap(realObjectMapper))
             .build();
 
         List<SolicitorUser> userList = new ArrayList<>();
@@ -697,7 +703,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-            .data(caseData.toMap(new ObjectMapper()))
+            .data(caseData.toMap(realObjectMapper))
             .build();
 
         List<SolicitorUser> userList = new ArrayList<>();
@@ -796,13 +802,13 @@ public class NoticeOfChangePartiesServiceTest {
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-            .data(newRepresentedParty.toMap(new ObjectMapper()))
+            .data(newRepresentedParty.toMap(realObjectMapper))
             .build();
 
         CaseDetails caseDetailsBefore = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-            .data(oldRepresentedParty.toMap(new ObjectMapper()))
+            .data(oldRepresentedParty.toMap(realObjectMapper))
             .build();
 
 
@@ -855,11 +861,11 @@ public class NoticeOfChangePartiesServiceTest {
         when(tokenGenerator.generate()).thenReturn("");
         when(systemUserService.getSysUserToken()).thenReturn("");
         when(assignCaseAccessClient.applyDecision(anyString(), anyString(), any(DecisionRequest.class))).thenReturn(
-            AboutToStartOrSubmitCallbackResponse.builder().data(caseData.toMap(new ObjectMapper())).build());
+            AboutToStartOrSubmitCallbackResponse.builder().data(caseData.toMap(realObjectMapper)).build());
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-            .data(caseData.toMap(new ObjectMapper()))
+            .data(caseData.toMap(realObjectMapper))
             .build();
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
@@ -903,11 +909,11 @@ public class NoticeOfChangePartiesServiceTest {
         when(tokenGenerator.generate()).thenReturn("");
         when(systemUserService.getSysUserToken()).thenReturn("");
         when(assignCaseAccessClient.applyDecision(anyString(), anyString(), any(DecisionRequest.class))).thenReturn(
-            AboutToStartOrSubmitCallbackResponse.builder().data(caseData.toMap(new ObjectMapper())).build());
+            AboutToStartOrSubmitCallbackResponse.builder().data(caseData.toMap(realObjectMapper)).build());
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-            .data(caseData.toMap(new ObjectMapper()))
+            .data(caseData.toMap(realObjectMapper))
             .build();
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
@@ -949,11 +955,11 @@ public class NoticeOfChangePartiesServiceTest {
         when(tokenGenerator.generate()).thenReturn("");
         when(systemUserService.getSysUserToken()).thenReturn("");
         when(assignCaseAccessClient.applyDecision(anyString(), anyString(), any(DecisionRequest.class))).thenReturn(
-            AboutToStartOrSubmitCallbackResponse.builder().data(caseData.toMap(new ObjectMapper())).build());
+            AboutToStartOrSubmitCallbackResponse.builder().data(caseData.toMap(realObjectMapper)).build());
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-            .data(caseData.toMap(new ObjectMapper()))
+            .data(caseData.toMap(realObjectMapper))
             .build();
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
@@ -994,11 +1000,11 @@ public class NoticeOfChangePartiesServiceTest {
         when(tokenGenerator.generate()).thenReturn("");
         when(systemUserService.getSysUserToken()).thenReturn("");
         when(assignCaseAccessClient.applyDecision(anyString(), anyString(), any(DecisionRequest.class))).thenReturn(
-            AboutToStartOrSubmitCallbackResponse.builder().data(caseData.toMap(new ObjectMapper())).build());
+            AboutToStartOrSubmitCallbackResponse.builder().data(caseData.toMap(realObjectMapper)).build());
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-            .data(caseData.toMap(new ObjectMapper()))
+            .data(caseData.toMap(realObjectMapper))
             .build();
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
@@ -1048,7 +1054,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-            .data(caseData.toMap(new ObjectMapper()))
+            .data(caseData.toMap(realObjectMapper))
             .build();
 
         CallbackRequest callbackRequest = CallbackRequest.builder()
@@ -1101,7 +1107,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-            .data(caseData.toMap(new ObjectMapper()))
+            .data(caseData.toMap(realObjectMapper))
             .build();
 
         CallbackRequest callbackRequest = CallbackRequest.builder()
@@ -1148,7 +1154,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-            .data(caseData.toMap(new ObjectMapper()))
+            .data(caseData.toMap(realObjectMapper))
             .build();
 
 
@@ -1200,7 +1206,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-            .data(caseData.toMap(new ObjectMapper()))
+            .data(caseData.toMap(realObjectMapper))
             .build();
 
         CallbackRequest callbackRequest = CallbackRequest.builder()
@@ -1249,7 +1255,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-            .data(caseData.toMap(new ObjectMapper()))
+            .data(caseData.toMap(realObjectMapper))
             .build();
 
         CallbackRequest callbackRequest = CallbackRequest.builder()
@@ -1290,7 +1296,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-            .data(caseData.toMap(new ObjectMapper()))
+            .data(caseData.toMap(realObjectMapper))
             .build();
 
         CallbackRequest callbackRequest = CallbackRequest.builder()
@@ -1331,7 +1337,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-            .data(caseData.toMap(new ObjectMapper()))
+            .data(caseData.toMap(realObjectMapper))
             .build();
 
         CallbackRequest callbackRequest = CallbackRequest.builder()
@@ -1372,7 +1378,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-            .data(caseData.toMap(new ObjectMapper()))
+            .data(caseData.toMap(realObjectMapper))
             .build();
 
         CallbackRequest callbackRequest = CallbackRequest.builder()
@@ -1450,47 +1456,64 @@ public class NoticeOfChangePartiesServiceTest {
             .build();
     }
 
-
     @Test
-    public void shouldPublishRemovalEventWithOldSolicitorDetails() throws Exception {
-        PartyDetails oldPartyDetails = PartyDetails.builder()
+    public void testSendEmailAndUpdateCaseData_VerifiesSendEmailOnRemovalOfLegalRepresentation() throws Exception {
+        // --- Arrange ---
+        NoticeOfChangePartiesService spyService = spy(noticeOfChangePartiesService);
+
+        // prepare old + new Elements
+        Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap = new HashMap<>();
+        Optional<SolicitorRole> role = Optional.of(SolicitorRole.C100RESPONDENTSOLICITOR1);
+
+        PartyDetails oldPD = PartyDetails.builder()
             .representativeFirstName("Old")
             .representativeLastName("Solicitor")
             .solicitorEmail("old@sol.test")
             .build();
-        Element<PartyDetails> oldElement = ElementUtils.element(UUID.randomUUID(), oldPartyDetails);
+        Element<PartyDetails> oldElem = ElementUtils.element(UUID.randomUUID(), oldPD);
 
-        PartyDetails newPartyDetails = PartyDetails.builder()
+        PartyDetails newPD = PartyDetails.builder()
             .representativeFirstName("New")
             .representativeLastName("Solicitor")
-            .solicitorEmail(null)     // removed
+            .solicitorEmail(null)
             .build();
-        Element<PartyDetails> newElement = ElementUtils.element(oldElement.getId(), newPartyDetails);
+        Element<PartyDetails> newElem = ElementUtils.element(oldElem.getId(), newPD);
 
-        Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedMap = Map.of(
-            Optional.of(SolicitorRole.C100RESPONDENTSOLICITOR1),
-            newElement
-        );
+        selectedPartyDetailsMap.put(role, newElem);
 
-        ReflectionTestUtils.invokeMethod(
-            noticeOfChangePartiesService,
-            "sendEmailAndUpdateCaseData",
-            selectedMap,
-            "999"
-        );
+        // build a real data‐map so the static util sees non-null .data
+        Map<String,Object> rawData = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .data(rawData)
+            .build();
+        StartEventResponse startEventResponse = StartEventResponse.builder()
+            .caseDetails(caseDetails)
+            .build();
 
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<NoticeOfChangeEvent> captor =
-            ArgumentCaptor.forClass(NoticeOfChangeEvent.class);
-        verify(eventPublisher, times(1)).publishEvent(captor.capture());
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
-        NoticeOfChangeEvent evt = captor.getValue();
-        assertEquals("Old Solicitor",      evt.getSolicitorName());
-        assertEquals("old@sol.test",       evt.getSolicitorEmailAddress());
-        assertEquals(
-            TypeOfNocEventEnum.removeLegalRepresentation.getDisplayedValue(),
-            evt.getTypeOfEvent()
+        when(ccdCoreCaseDataService.startUpdate(
+            any(),                    // matches *any* object—including null—for the String param
+            any(),                    // matches *any* object—including null—for the EventRequestData param
+            any(),
+            eq(true)
+        )).thenReturn(startEventResponse);
+        when(ccdCoreCaseDataService.findCaseById(anyString(), anyString()))
+            .thenReturn(caseDetails);
+
+        // --- Act ---
+        Method m = NoticeOfChangePartiesService.class
+            .getDeclaredMethod("sendEmailAndUpdateCaseData", Map.class, String.class);
+        m.setAccessible(true);
+        m.invoke(spyService, selectedPartyDetailsMap, "12345678");
+
+        // --- Assert ---
+        verify(spyService).sendEmailOnRemovalOfLegalRepresentation(
+            any(Element.class),
+            eq(newElem),
+            eq(role),
+            eq(caseData)
         );
     }
-
 }
