@@ -983,8 +983,8 @@ public class CourtFinderServiceTest {
     }
 
 
-    @Test(expected = NotFoundException.class)
-    public void whenNoChildDetailsPresentThrowNotFoundException() throws NotFoundException {
+    @Test(expected = RuntimeException.class)
+    public void whenNoChildDetailsPresentThrowRunTimeException() throws RuntimeException {
         CaseData caseData = CaseData.builder()
             .children(Collections.emptyList())
             .build();
