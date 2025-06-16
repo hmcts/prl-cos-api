@@ -105,6 +105,49 @@ public class CaseFlagsWaService {
         caseData.setSelectedFlags(finalList);
     }
 
+    public void setSelectedFlagsWithoutDeepCopy(CaseData caseData) {
+        AllPartyFlags allPartyFlags = caseData.getAllPartyFlags();
+        List<Element<Flags>> selectedFlagsList = new ArrayList<>();
+
+        selectedFlagsList.add(ElementUtils.element(caseData.getCaseFlags()));
+
+        Arrays.stream(allPartyFlags.getClass().getDeclaredFields())
+            .filter(field -> field.getType().equals(Flags.class))
+            .forEach(field -> {
+                field.setAccessible(true);
+                try {
+                    Flags selectedFlag = (Flags) field.get(allPartyFlags);
+                    selectedFlagsList.add(ElementUtils.element(selectedFlag));
+                } catch (IllegalAccessException e) {
+                    // ignore
+                }
+            });
+
+        caseData.getCaseFlags().getDetails().stream().forEach(flagDetail -> {
+            if (!REQUESTED.equals(flagDetail.getValue().getStatus())) {
+                selectedFlagsList.forEach(selectedFlag -> {
+                    selectedFlag.getValue().getDetails().remove(flagDetail);
+                });
+            }
+        });
+        List<Element<FlagDetail>> allFlagsDetails = extractAllPartyFlagDetails(allPartyFlags);
+
+        allFlagsDetails.stream().forEach(flagDetail -> {
+            if (!REQUESTED.equals(flagDetail.getValue().getStatus())) {
+                selectedFlagsList.forEach(selectedFlag -> {
+                    selectedFlag.getValue().getDetails().remove(flagDetail);
+                });
+            }
+        });
+
+        List<Element<Flags>> finalList = selectedFlagsList.stream()
+            .filter(f -> CollectionUtils.isNotEmpty(f.getValue().getDetails()))
+            .toList();
+
+
+        caseData.setSelectedFlags(finalList);
+    }
+
     public Element<FlagDetail> validateAllFlags(CaseData caseData) {
         List<Element<FlagDetail>> allFlagsDetails = caseData.getSelectedFlags().stream()
             .filter(e -> e != null && e.getValue() != null)
@@ -127,9 +170,10 @@ public class CaseFlagsWaService {
         allFlagsDetails.addAll(caseData.getCaseFlags().getDetails());
         allFlagsDetails.addAll(extractAllPartyFlagDetails(caseData.getAllPartyFlags()));
 
-        allFlagsDetails.stream().forEach(flagDetail -> {
+        allFlagsDetails.forEach(flagDetail -> {
             if (mostRecentlyModified.getId().equals(flagDetail.getId())) {
-                flagDetail = mostRecentlyModified;
+                caseData.getCaseFlags().getDetails().remove(flagDetail);
+                caseData.getCaseFlags().getDetails().add(mostRecentlyModified);
             }
         });
     }
