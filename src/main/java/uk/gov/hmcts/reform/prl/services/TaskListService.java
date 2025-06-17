@@ -47,7 +47,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM_REVISED;
@@ -383,6 +382,7 @@ public class TaskListService {
         }
         return roles;
     }
+
     private boolean haveConfidentialDetailsChanged(CaseData current, CaseData previous) {
         boolean currentConfidential = YesOrNo.Yes.equals(getAddressConfidentialityFlag(current)) ? true : false;
         boolean previousConfidential = YesOrNo.Yes.equals(getAddressConfidentialityFlag(previous)) ? true : false;
