@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
@@ -364,6 +365,8 @@ public class CaseData extends BaseCaseData implements MappableObject {
      * Add case number.
      */
     private final String familymanCaseNumber;
+    @JsonIgnore
+    private final String fl401FamilymanCaseNumber; //field is no longer in use
 
     /**
      * Manage Documents.
@@ -764,6 +767,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
 
     @JsonUnwrapped
     private RespondentC8 respondentC8;
+    //PRL-3454 - send and reply message enhancements
     @JsonUnwrapped
     private SendOrReplyMessage sendOrReplyMessage;
 
