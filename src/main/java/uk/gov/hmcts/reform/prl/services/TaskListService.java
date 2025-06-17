@@ -16,10 +16,13 @@ import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
@@ -30,6 +33,7 @@ import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.validators.eventschecker.EventsChecker;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +47,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM_REVISED;
@@ -314,6 +319,21 @@ public class TaskListService {
                         startAllTabsUpdateDataContent.authorisation()
                     );
                 }
+                CaseData previousCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
+                boolean confidentialDetailsChanged = haveConfidentialDetailsChanged(caseData, previousCaseData);
+                if (confidentialDetailsChanged) {
+                    Document c8ToArchive = caseData.getC8Document();
+
+                    if (c8ToArchive != null) {
+                        List<Element<Document>> archived = ofNullable(caseData.getArchivedC8Documents())
+                            .orElse(new ArrayList<>());
+
+                        archived.add(ElementUtils.element(c8ToArchive));
+
+                        caseDataUpdated.put("archivedC8Documents", archived);
+                    }
+                }
+
                 caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
                 CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
                 caseData = caseData.toBuilder()
@@ -362,5 +382,21 @@ public class TaskListService {
             roles = CaseUtils.mapAmUserRolesToIdamRoles(roleAssignmentServiceResponse, authorisation, userDetails);
         }
         return roles;
+    }
+    private boolean haveConfidentialDetailsChanged(CaseData current, CaseData previous) {
+        boolean currentConfidential = YesOrNo.Yes.equals(getAddressConfidentialityFlag(current)) ? true : false;
+        boolean previousConfidential = YesOrNo.Yes.equals(getAddressConfidentialityFlag(previous)) ? true : false;
+
+        return currentConfidential != previousConfidential;
+    }
+
+    private YesOrNo getAddressConfidentialityFlag(CaseData caseData) {
+        if (caseData.getApplicants() != null && !caseData.getApplicants().isEmpty()) {
+            PartyDetails partyDetails = caseData.getApplicants().get(0).getValue();
+            if (partyDetails != null) {
+                return partyDetails.getIsAddressConfidential();
+            }
+        }
+        return null;
     }
 }
