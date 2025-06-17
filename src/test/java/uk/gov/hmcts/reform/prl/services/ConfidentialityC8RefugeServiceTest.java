@@ -442,20 +442,14 @@ public class ConfidentialityC8RefugeServiceTest {
             .builder()
             .applicants(applicantList)
             .build();
-        assertEquals(
-            new RefugeConfidentialDocumentsRecord(List.of(), List.of()),
-            confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, "")
-        );
+        assertNull(confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, ""));
     }
 
     @Test
     public void processC8RefugeDocumentsOnAmendForC100OnSubmit() {
         CaseData caseDataBefore = CaseData.builder().build();
         CaseData caseData = CaseData.builder().build();
-        assertEquals(
-            new RefugeConfidentialDocumentsRecord(List.of(), List.of()),
-            confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, "")
-        );
+        assertNull(confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, ""));
     }
 
     @Test
