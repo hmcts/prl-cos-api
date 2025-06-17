@@ -9,15 +9,14 @@ import uk.gov.hmcts.reform.prl.models.c100respondentsolicitor.RespondentC8;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ApplicantC8Document;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.RespondentC8Document;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 @Service
 @Slf4j
@@ -287,7 +286,7 @@ public class ConfidentialityCheckService {
         }
         switch (index) {
             case 0 -> {
-                    return getApplicantAC8Document(applicantC8Document);
+                return getApplicantAC8Document(applicantC8Document);
             }
             case 1 -> {
                 if (applicantC8Document.getApplicantBc8Documents() == null || applicantC8Document.getApplicantBc8Documents().isEmpty()) {
@@ -326,7 +325,7 @@ public class ConfidentialityCheckService {
         }
         switch (index) {
             case 0 -> {
-                    return getRespondentAC8Document(respondentC8Document);
+                return getRespondentAC8Document(respondentC8Document);
             }
             case 1 -> {
                 if (respondentC8Document.getRespondentBc8Documents() == null || respondentC8Document.getRespondentBc8Documents().isEmpty()) {
@@ -364,6 +363,7 @@ public class ConfidentialityCheckService {
         }
         return applicantC8Document.getApplicantAc8Documents().get(0).getValue();
     }
+    
     private static ResponseDocuments getRespondentAC8Document(RespondentC8Document respondentC8Document) {
         if (respondentC8Document.getRespondentAc8Documents() == null || respondentC8Document.getRespondentAc8Documents().isEmpty()) {
             return null;
