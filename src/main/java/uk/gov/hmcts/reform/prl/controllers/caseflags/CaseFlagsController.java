@@ -111,6 +111,7 @@ public class CaseFlagsController extends AbstractCallbackController {
             errors.add("Please select status other than Requested");
         } else {
             caseFlagsWaService.searchAndUpdateCaseFlags(caseData, mostRecentlyModified);
+            caseFlagsWaService.checkAllRequestedFlagsAndCloseTask(caseData);
         }
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
 

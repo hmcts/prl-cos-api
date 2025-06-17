@@ -25,7 +25,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.services.UserService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsWaService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -34,6 +35,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -50,7 +52,7 @@ public class CaseFlagsEventHandlerTest {
     @Mock
     private ObjectMapper objectMapper;
     @Mock
-    private AllTabServiceImpl allTabService;
+    private CaseFlagsWaService caseFlagsWaService;
 
     @InjectMocks
     private CaseFlagsEventHandler caseFlagsEventHandler;
@@ -68,24 +70,29 @@ public class CaseFlagsEventHandlerTest {
             .state(State.CASE_ISSUED)
             .build();
         Map<String, Object> caseDataMap = new HashMap<>();
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
-            = new StartAllTabsUpdateDataContent(TEST_AUTH, EventRequestData.builder().build(),
-                                                StartEventResponse.builder().build(), caseDataMap, caseData, null
-        );
-        Mockito.when(allTabService
-                         .getStartUpdateForSpecificEvent(Mockito.any(), Mockito.any())).thenReturn(
-            startAllTabsUpdateDataContent);
-        CaseFlagsEvent caseFlagsEvent = new CaseFlagsEvent(CallbackRequest.builder()
-                                                               .caseDetails(CaseDetails.builder()
-                                                                                .id(123L).build())
-                                                               .build(), TEST_AUTH);
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(123L).build())
+            .caseDetailsBefore(CaseDetails.builder()
+                                   .id(123L).build())
+            .build();
+        CaseFlagsEvent caseFlagsEvent = new CaseFlagsEvent(callbackRequest, TEST_AUTH);
+        when(CaseUtils.getCaseData(
+            callbackRequest.getCaseDetails(),
+            objectMapper
+        )).thenReturn(CaseData.builder().build());
+
+        when(CaseUtils.getCaseData(
+            callbackRequest.getCaseDetailsBefore(),
+            objectMapper
+        )).thenReturn(CaseData.builder().build());
+
         caseFlagsEventHandler.triggerDummyEventForCaseFlags(caseFlagsEvent);
         Mockito.verify(
-            allTabService,
+            caseFlagsWaService,
             Mockito.times(1)
-        ).getStartUpdateForSpecificEvent(Mockito.any(), Mockito.any());
-        Mockito.verify(allTabService, Mockito.times(1)).submitAllTabsUpdate(
-            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyMap());
+        ).checkCaseFlagsToCreateTask(Mockito.any(), Mockito.any());
+
     }
 
     @Test
@@ -106,9 +113,7 @@ public class CaseFlagsEventHandlerTest {
             = new StartAllTabsUpdateDataContent(TEST_AUTH, EventRequestData.builder().build(),
                                                 StartEventResponse.builder().build(), caseDataMap, caseData, null
         );
-        Mockito.when(allTabService
-                         .getStartUpdateForSpecificEvent(Mockito.any(), Mockito.any())).thenReturn(
-            startAllTabsUpdateDataContent);
+
         CaseFlagsEvent caseFlagsEvent = new CaseFlagsEvent(CallbackRequest.builder()
                                                                .caseDetails(CaseDetails.builder()
                                                                                 .id(123L).build())
@@ -116,11 +121,9 @@ public class CaseFlagsEventHandlerTest {
         caseFlagsEventHandler.triggerDummyEventForCaseFlags(caseFlagsEvent);
 
         Mockito.verify(
-            allTabService,
+            caseFlagsWaService,
             Mockito.times(0)
-        ).getStartUpdateForSpecificEvent(Mockito.any(), Mockito.any());
-        Mockito.verify(allTabService, Mockito.times(0)).submitAllTabsUpdate(
-            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyMap());
+        ).checkCaseFlagsToCreateTask(Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -141,9 +144,7 @@ public class CaseFlagsEventHandlerTest {
             = new StartAllTabsUpdateDataContent(TEST_AUTH, EventRequestData.builder().build(),
                                                 StartEventResponse.builder().build(), caseDataMap, caseData, null
         );
-        Mockito.when(allTabService
-                         .getStartUpdateForSpecificEvent(Mockito.any(), Mockito.any())).thenReturn(
-            startAllTabsUpdateDataContent);
+
         CaseFlagsEvent caseFlagsEvent = new CaseFlagsEvent(CallbackRequest.builder()
                                                                .caseDetails(CaseDetails.builder()
                                                                                 .id(123L).build())
@@ -151,11 +152,10 @@ public class CaseFlagsEventHandlerTest {
         caseFlagsEventHandler.triggerDummyEventForCaseFlags(caseFlagsEvent);
 
         Mockito.verify(
-            allTabService,
+            caseFlagsWaService,
             Mockito.times(0)
-        ).getStartUpdateForSpecificEvent(Mockito.any(), Mockito.any());
-        Mockito.verify(allTabService, Mockito.times(0)).submitAllTabsUpdate(
-            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyMap());
+        ).checkCaseFlagsToCreateTask(Mockito.any(), Mockito.any());
+
     }
 
     @Test
@@ -185,9 +185,6 @@ public class CaseFlagsEventHandlerTest {
             = new StartAllTabsUpdateDataContent(TEST_AUTH, EventRequestData.builder().build(),
                                                 StartEventResponse.builder().build(), caseDataMap, caseData, null
         );
-        Mockito.when(allTabService
-                         .getStartUpdateForSpecificEvent(Mockito.any(), Mockito.any())).thenReturn(
-            startAllTabsUpdateDataContent);
         CaseFlagsEvent caseFlagsEvent = new CaseFlagsEvent(CallbackRequest.builder()
                                                                .caseDetails(CaseDetails.builder()
                                                                                 .id(123L).build())
@@ -195,11 +192,10 @@ public class CaseFlagsEventHandlerTest {
         caseFlagsEventHandler.triggerDummyEventForCaseFlags(caseFlagsEvent);
 
         Mockito.verify(
-            allTabService,
+            caseFlagsWaService,
             Mockito.times(0)
-        ).getStartUpdateForSpecificEvent(Mockito.any(), Mockito.any());
-        Mockito.verify(allTabService, Mockito.times(0)).submitAllTabsUpdate(
-            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyMap());
+        ).checkCaseFlagsToCreateTask(Mockito.any(), Mockito.any());
+
     }
 
     @Test
@@ -237,9 +233,7 @@ public class CaseFlagsEventHandlerTest {
             = new StartAllTabsUpdateDataContent(TEST_AUTH, EventRequestData.builder().build(),
                                                 StartEventResponse.builder().build(), caseDataMap, caseData, null
         );
-        Mockito.when(allTabService
-                         .getStartUpdateForSpecificEvent(Mockito.any(), Mockito.any())).thenReturn(
-            startAllTabsUpdateDataContent);
+
         CaseFlagsEvent caseFlagsEvent = new CaseFlagsEvent(CallbackRequest.builder()
                                                                .caseDetails(CaseDetails.builder()
                                                                                 .id(123L).build())
@@ -247,11 +241,9 @@ public class CaseFlagsEventHandlerTest {
         caseFlagsEventHandler.triggerDummyEventForCaseFlags(caseFlagsEvent);
 
         Mockito.verify(
-            allTabService,
+            caseFlagsWaService,
             Mockito.times(0)
-        ).getStartUpdateForSpecificEvent(Mockito.any(), Mockito.any());
-        Mockito.verify(allTabService, Mockito.times(0)).submitAllTabsUpdate(
-            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyMap());
+        ).checkCaseFlagsToCreateTask(Mockito.any(), Mockito.any());
         assertNull(mappedCaseDataWithNullFlags.getCaseFlags().getDetails());
     }
 

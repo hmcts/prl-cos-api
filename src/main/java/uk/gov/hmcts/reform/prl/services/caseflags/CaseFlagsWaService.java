@@ -6,6 +6,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.events.CaseFlagsEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseflags.AllPartyFlags;
@@ -13,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.EventService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.io.IOException;
@@ -32,6 +35,7 @@ public class CaseFlagsWaService {
     private static final String REQUESTED = "Requested";
     private final EventService eventPublisher;
     private final ObjectMapper objectMapper;
+    private final AllTabServiceImpl allTabService;
 
     public void setUpWaTaskForCaseFlagsEventHandler(String authorisation, CallbackRequest callbackRequest) {
         CaseFlagsEvent caseFlagsEvent = CaseFlagsEvent.builder()
@@ -39,6 +43,69 @@ public class CaseFlagsWaService {
             .callbackRequest(callbackRequest)
             .build();
         eventPublisher.publishEvent(caseFlagsEvent);
+    }
+
+    public boolean checkAllRequestedFlagsAndCloseTask(CaseData caseData) {
+        List<Element<FlagDetail>> allFlagsDetails = new ArrayList<>();
+        allFlagsDetails.addAll(caseData.getCaseFlags().getDetails());
+        allFlagsDetails.addAll(extractAllPartyFlagDetails(caseData.getAllPartyFlags()));
+
+        boolean allFlagsAreActioned = allFlagsDetails.stream()
+            .filter(Objects::nonNull)
+            .noneMatch(detail -> REQUESTED.equals(detail.getValue().getStatus()));
+
+        if (allFlagsAreActioned) {
+            String caseId = String.valueOf(caseData.getId());
+            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
+                caseId,
+                CaseEvent.CLOSE_REVIEW_RA_REQUEST_TASK.getValue()
+            );
+
+            allTabService.submitAllTabsUpdate(
+                startAllTabsUpdateDataContent.authorisation(),
+                caseId,
+                startAllTabsUpdateDataContent.startEventResponse(),
+                startAllTabsUpdateDataContent.eventRequestData(),
+                startAllTabsUpdateDataContent.caseDataMap()
+            );
+        }
+
+        return allFlagsAreActioned;
+    }
+
+
+    public void checkCaseFlagsToCreateTask(CaseData caseData, CaseData caseDataBefore) {
+        List<Element<FlagDetail>> allFlagsDetailsBefore = new ArrayList<>();
+        allFlagsDetailsBefore.addAll(caseDataBefore.getCaseFlags().getDetails());
+        allFlagsDetailsBefore.addAll(extractAllPartyFlagDetails(caseDataBefore.getAllPartyFlags()));
+
+        boolean anyExistingCaseFlags = allFlagsDetailsBefore.stream()
+            .filter(Objects::nonNull)
+            .noneMatch(detail -> REQUESTED.equals(detail.getValue().getStatus()));
+
+        List<Element<FlagDetail>> allFlagsDetails = new ArrayList<>();
+        allFlagsDetails.addAll(caseData.getCaseFlags().getDetails());
+        allFlagsDetails.addAll(extractAllPartyFlagDetails(caseData.getAllPartyFlags()));
+
+        boolean anyNewCaseFlags = allFlagsDetails.stream()
+            .filter(Objects::nonNull)
+            .noneMatch(detail -> REQUESTED.equals(detail.getValue().getStatus()));
+
+        if (anyExistingCaseFlags && !anyNewCaseFlags) {
+            String caseId = String.valueOf(caseData.getId());
+            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
+                caseId,
+                CaseEvent.CREATE_WA_TASK_FOR_CTSC_CASE_FLAGS.getValue()
+            );
+
+            allTabService.submitAllTabsUpdate(
+                startAllTabsUpdateDataContent.authorisation(),
+                caseId,
+                startAllTabsUpdateDataContent.startEventResponse(),
+                startAllTabsUpdateDataContent.eventRequestData(),
+                startAllTabsUpdateDataContent.caseDataMap()
+            );
+        }
     }
 
     public void setSelectedFlags(CaseData caseData) {
