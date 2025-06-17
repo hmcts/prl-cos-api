@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
@@ -33,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @RestController
@@ -111,7 +114,6 @@ public class CaseFlagsController extends AbstractCallbackController {
             errors.add("Please select status other than Requested");
         } else {
             caseFlagsWaService.searchAndUpdateCaseFlags(caseData, mostRecentlyModified);
-            caseFlagsWaService.checkAllRequestedFlagsAndCloseTask(caseData);
         }
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
 
@@ -119,6 +121,15 @@ public class CaseFlagsController extends AbstractCallbackController {
             .errors(errors)
             .data(caseDataMap)
             .build();
+    }
+
+    @PostMapping("/submitted")
+    public ResponseEntity<SubmittedCallbackResponse> handleSubmittedSendAndReply(@RequestHeader("Authorization")
+                                                                                 @Parameter(hidden = true) String authorisation,
+                                                                                 @RequestBody CallbackRequest callbackRequest) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        caseFlagsWaService.checkAllRequestedFlagsAndCloseTask(caseData);
+        return ok(SubmittedCallbackResponse.builder().build());
     }
 
 }
