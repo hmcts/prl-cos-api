@@ -7,11 +7,13 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.c100respondentsolicitor.ApplicantC8;
 import uk.gov.hmcts.reform.prl.models.c100respondentsolicitor.RespondentC8;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ApplicantC8Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.RespondentC8Document;
 
 import java.time.LocalDate;
@@ -98,7 +100,72 @@ public class ConfidentialityCheckServiceTest {
     }
 
     @Test
-    public void processRespondentsC8DocumentsSceanrios_2() {
+    public void processApplicantsC8Documents() {
+        List<Element<PartyDetails>> applicants = new ArrayList<>();
+        Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder().value(PartyDetails.builder().firstName("firstName")
+                                                                                              .lastName("lastName").build()).build();
+        Element<PartyDetails> partyDetailsElement1 = Element.<PartyDetails>builder().value(PartyDetails.builder().firstName("firstName1")
+                                                                                               .lastName("lastName").build()).build();
+        Element<PartyDetails> partyDetailsElement2 = Element.<PartyDetails>builder().value(PartyDetails.builder().firstName("firstName2")
+                                                                                               .lastName("lastName").build()).build();
+        Element<PartyDetails> partyDetailsElement3 = Element.<PartyDetails>builder().value(PartyDetails.builder().firstName("firstName3")
+                                                                                               .lastName("lastName").build()).build();
+        Element<PartyDetails> partyDetailsElement4 = Element.<PartyDetails>builder().value(PartyDetails.builder().firstName("firstName4")
+                                                                                               .lastName("lastName").build()).build();
+        applicants.add(partyDetailsElement);
+        applicants.add(partyDetailsElement1);
+        applicants.add(partyDetailsElement2);
+        applicants.add(partyDetailsElement3);
+        applicants.add(partyDetailsElement4);
+        ResponseDocuments responseDocument1 = ResponseDocuments.builder().dateCreated(LocalDate.now())
+            .dateTimeCreated(LocalDateTime.now()).applicantC8Document(Document.builder().documentUrl("with version").build())
+            .applicantC8DocumentWelsh(Document.builder().documentUrl("with version").build()).build();
+
+        ResponseDocuments responseDocument2 = ResponseDocuments.builder().dateCreated(LocalDate.now())
+            .dateTimeCreated(LocalDateTime.now().minusDays(1))
+            .applicantC8Document(Document.builder().documentUrl("with version2").build()).build();
+
+
+        ResponseDocuments responseDocument3 = ResponseDocuments.builder().dateCreated(LocalDate.now())
+            .dateTimeCreated(LocalDateTime.now().minusDays(1))
+            .applicantC8Document(Document.builder().documentUrl("with version3").build()).build();
+
+        ResponseDocuments responseDocument4 = ResponseDocuments.builder().dateCreated(LocalDate.now())
+            .dateTimeCreated(LocalDateTime.now().minusDays(1))
+            .applicantC8Document(Document.builder().documentUrl("with version4").build()).build();
+
+
+        ResponseDocuments responseDocument5 = ResponseDocuments.builder().dateCreated(LocalDate.now())
+            .dateTimeCreated(LocalDateTime.now().minusDays(1))
+            .applicantC8Document(Document.builder().documentUrl("with version5").build()).build();
+
+        CaseData caseData = CaseData.builder().id(12345L).applicants(applicants).caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantC8Document(ApplicantC8Document.builder()
+                                     .applicantAc8Documents(List.of())
+                                     .applicantBc8Documents(List.of())
+                                     .applicantCc8Documents(List.of())
+                                     .applicantDc8Documents(List.of())
+                                     .applicantEc8Documents(List.of())
+                                     .build())
+            .applicantC8(ApplicantC8.builder()
+                             .applicantAc8(responseDocument1)
+                             .applicantBc8(responseDocument2)
+                             .applicantCc8(responseDocument3)
+                             .applicantDc8(responseDocument4)
+                             .applicantEc8(responseDocument5)
+                             .build()).build();
+
+        Map<String, Object> caseDetails = new HashMap<>();
+        confidentialityCheckService.processApplicantsC8Documents(caseDetails, caseData);
+
+        Assert.assertTrue(caseDetails.containsKey("appAC8EngDocument"));
+        Document responseDocuments = (Document) caseDetails.get("appAC8EngDocument");
+        Assert.assertEquals("with version", responseDocuments.getDocumentUrl());
+    }
+
+
+    @Test
+    public void processRespondentsC8DocumentsScenarios_2() {
         List<Element<PartyDetails>> respondents = new ArrayList<>();
         Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder().value(PartyDetails.builder().firstName("firstName")
                 .lastName("lastName").build()).build();
@@ -161,7 +228,68 @@ public class ConfidentialityCheckServiceTest {
         Assert.assertEquals("with version", responseDocuments.getDocumentUrl());
     }
 
+    @Test
+    public void processApplicantsC8DocumentsScenarios_2() {
+        List<Element<PartyDetails>> applicants = new ArrayList<>();
+        Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder().value(PartyDetails.builder().firstName("firstName")
+                                                                                              .lastName("lastName").build()).build();
+        Element<PartyDetails> partyDetailsElement1 = Element.<PartyDetails>builder().value(PartyDetails.builder().firstName("firstName1")
+                                                                                               .lastName("lastName").build()).build();
+        Element<PartyDetails> partyDetailsElement2 = Element.<PartyDetails>builder().value(PartyDetails.builder().firstName("firstName2")
+                                                                                               .lastName("lastName").build()).build();
+        Element<PartyDetails> partyDetailsElement3 = Element.<PartyDetails>builder().value(PartyDetails.builder().firstName("firstName3")
+                                                                                               .lastName("lastName").build()).build();
+        Element<PartyDetails> partyDetailsElement4 = Element.<PartyDetails>builder().value(PartyDetails.builder().firstName("firstName4")
+                                                                                               .lastName("lastName").build()).build();
+        applicants.add(partyDetailsElement);
+        applicants.add(partyDetailsElement1);
+        applicants.add(partyDetailsElement2);
+        applicants.add(partyDetailsElement3);
+        applicants.add(partyDetailsElement4);
+        ResponseDocuments responseDocument1 = ResponseDocuments.builder().dateCreated(LocalDate.now())
+            .dateTimeCreated(LocalDateTime.now()).applicantC8Document(Document.builder().documentUrl("with version").build())
+            .applicantC8DocumentWelsh(Document.builder().documentUrl("with version").build()).build();
 
+        ResponseDocuments responseDocument2 = ResponseDocuments.builder().dateCreated(LocalDate.now())
+            .dateTimeCreated(LocalDateTime.now().minusDays(1))
+            .applicantC8Document(Document.builder().documentUrl("with version2").build()).build();
+
+        ResponseDocuments responseDocument3 = ResponseDocuments.builder().dateCreated(LocalDate.now())
+            .dateTimeCreated(LocalDateTime.now().minusDays(1))
+            .applicantC8Document(Document.builder().documentUrl("with version3").build()).build();
+
+        ResponseDocuments responseDocument4 = ResponseDocuments.builder().dateCreated(LocalDate.now())
+            .dateTimeCreated(LocalDateTime.now().minusDays(1))
+            .applicantC8Document(Document.builder().documentUrl("with version4").build()).build();
+
+
+        ResponseDocuments responseDocument5 = ResponseDocuments.builder().dateCreated(LocalDate.now())
+            .dateTimeCreated(LocalDateTime.now().minusDays(1))
+            .applicantC8Document(Document.builder().documentUrl("with version5").build()).build();
+
+        CaseData caseData = CaseData.builder().id(12345L).applicants(applicants).caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantC8Document(ApplicantC8Document.builder()
+                                      .applicantAc8Documents(List.of())
+                                      .applicantBc8Documents(List.of())
+                                      .applicantCc8Documents(List.of())
+                                      .applicantDc8Documents(List.of())
+                                      .applicantEc8Documents(List.of())
+                                      .build())
+            .applicantC8(ApplicantC8.builder()
+                              .applicantAc8(responseDocument1)
+                              .applicantBc8(responseDocument2)
+                              .applicantCc8(responseDocument3)
+                              .applicantDc8(responseDocument4)
+                              .applicantEc8(responseDocument5)
+                              .build()).build();
+
+        Map<String, Object> caseDetails = new HashMap<>();
+        confidentialityCheckService.processApplicantsC8Documents(caseDetails, caseData);
+
+        Assert.assertTrue(caseDetails.containsKey("appAC8EngDocument"));
+        Document responseDocuments = (Document) caseDetails.get("appAC8EngDocument");
+        Assert.assertEquals("with version", responseDocuments.getDocumentUrl());
+    }
 
     @Test
     public void processRespondentsC8Documents_without_version() {
@@ -193,6 +321,35 @@ public class ConfidentialityCheckServiceTest {
         Assert.assertEquals("without version", responseDocuments.getDocumentUrl());
     }
 
+    @Test
+    public void processApplicantsC8Documents_without_version() {
+        List<Element<PartyDetails>> applicants = new ArrayList<>();
+        applicants.add(Element.<PartyDetails>builder().value(PartyDetails.builder().firstName("firstName")
+                                                                  .lastName("lastName").build()).build());
+        ResponseDocuments responseDocument = ResponseDocuments.builder()
+            .dateTimeCreated(LocalDateTime.now()).applicantC8Document(Document.builder().documentUrl("with version").build()).build();
+        Element<ResponseDocuments> responseDocumentsElement = Element.<ResponseDocuments>builder().value(responseDocument).build();
+        ResponseDocuments responseDocument1 = ResponseDocuments.builder()
+            .dateTimeCreated(LocalDateTime.now().minusDays(1)).applicantC8Document(Document.builder().build()).build();
+        Element<ResponseDocuments> responseDocumentsElement1 = Element.<ResponseDocuments>builder().value(responseDocument1).build();
+
+        ResponseDocuments responseDocument2 = ResponseDocuments.builder()
+            .dateTimeCreated(LocalDateTime.now().plusDays(2)).applicantC8Document(Document.builder()
+                                                                                       .documentUrl("without version").build()).build();
+
+        CaseData caseData = CaseData.builder().id(12345L).applicants(applicants).caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantC8Document(ApplicantC8Document.builder()
+                                      .applicantAc8Documents(List.of(responseDocumentsElement, responseDocumentsElement1)).build())
+            .applicantC8(ApplicantC8.builder().applicantAc8(responseDocument2)
+                              .build()).build();
+
+        Map<String, Object> caseDetails = new HashMap<>();
+        confidentialityCheckService.processApplicantsC8Documents(caseDetails, caseData);
+
+        Assert.assertTrue(caseDetails.containsKey("appAC8EngDocument"));
+        Document responseDocuments = (Document) caseDetails.get("appAC8EngDocument");
+        Assert.assertEquals("without version", responseDocuments.getDocumentUrl());
+    }
 
     @Test
     public void processRespondentsC8Documents_Without_version_docs() {
@@ -215,11 +372,39 @@ public class ConfidentialityCheckServiceTest {
     }
 
     @Test
+    public void processApplicantsC8Documents_Without_version_docs() {
+        List<Element<PartyDetails>> applicants = new ArrayList<>();
+        Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder().value(PartyDetails.builder().firstName("firstName")
+                                                                                              .lastName("lastName").build()).build();
+        applicants.add(partyDetailsElement);
+        ResponseDocuments responseDocument2 = ResponseDocuments.builder()
+            .dateCreated(LocalDate.now().minusDays(2)).applicantC8Document(Document.builder().documentUrl("without version").build()).build();
+
+        CaseData caseData = CaseData.builder().id(12345L).applicants(applicants).caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantC8(ApplicantC8.builder().applicantAc8(responseDocument2)
+                              .build()).build();
+
+        Map<String, Object> caseDetails = new HashMap<>();
+        confidentialityCheckService.processApplicantsC8Documents(caseDetails, caseData);
+        Assert.assertTrue(caseDetails.containsKey("appAC8EngDocument"));
+        Document responseDocuments = (Document) caseDetails.get("appAC8EngDocument");
+        Assert.assertEquals("without version", responseDocuments.getDocumentUrl());
+    }
+
+    @Test
     public void clearRespondentsC8Documents() {
         Map<String, Object> caseDetails = new HashMap<>();
         caseDetails.put("respAC8EngDocument",Document.builder().build());
         confidentialityCheckService.clearRespondentsC8Documents(caseDetails);
         Assert.assertNull(caseDetails.get("respAC8EngDocument"));
+    }
+
+    @Test
+    public void clearApplicantsC8Documents() {
+        Map<String, Object> caseDetails = new HashMap<>();
+        caseDetails.put("appAC8EngDocument",Document.builder().build());
+        confidentialityCheckService.clearApplicantsC8Documents(caseDetails);
+        Assert.assertNull(caseDetails.get("appAC8EngDocument"));
     }
 
     @Test
@@ -312,7 +497,7 @@ public class ConfidentialityCheckServiceTest {
 
         CaseData caseData = CaseData.builder().id(12345L).applicants(applicants).caseTypeOfApplication(C100_CASE_TYPE).build();
         Map<String, Object> caseDetails = new HashMap<>();
-        confidentialityCheckService.processApplicantC8Documents(caseDetails, caseData);
+        confidentialityCheckService.processApplicantsC8Documents(caseDetails, caseData);
 
         Assert.assertTrue(caseDetails.containsKey("appAC8RefugeDocument"));
         Assert.assertTrue(caseDetails.containsKey("appBC8RefugeDocument"));
@@ -337,7 +522,7 @@ public class ConfidentialityCheckServiceTest {
             FL401_CASE_TYPE).build();
 
         Map<String, Object> caseDetails = new HashMap<>();
-        confidentialityCheckService.processApplicantC8Documents(caseDetails, caseData);
+        confidentialityCheckService.processApplicantsC8Documents(caseDetails, caseData);
 
         Assert.assertTrue(caseDetails.containsKey("appAC8RefugeDocument"));
         Assert.assertEquals(applicant1RefugeDocument, caseDetails.get("appAC8RefugeDocument"));
