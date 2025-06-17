@@ -14,6 +14,8 @@ import lombok.experimental.SuperBuilder;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.reopenclosedcases.ValidReopenClosedCasesStatusEnum;
+import uk.gov.hmcts.reform.prl.models.c100respondentsolicitor.ApplicantC8;
+import uk.gov.hmcts.reform.prl.models.c100respondentsolicitor.RespondentC8;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.refuge.RefugeConfidentialDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -137,4 +139,15 @@ public class BaseCaseData {
 
     @JsonProperty("daApplicantContactInstructions")
     private String daApplicantContactInstructions;
+
+    @JsonUnwrapped
+    private ApplicantC8Document applicantC8Document;
+
+    @JsonUnwrapped
+    private ApplicantC8 applicantC8;
+    @JsonUnwrapped
+    private RespondentC8Document respondentC8Document;
+
+    @JsonUnwrapped
+    private RespondentC8 respondentC8;
 }
