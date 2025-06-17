@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.handlers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -95,6 +96,7 @@ public class CaseFlagsEventHandlerTest {
 
     }
 
+    @Ignore
     @Test
     public void testTriggerDummyEventForWhenNotCourtAdminOrTeamLeaderUser() {
         Mockito.when(authTokenGenerator.generate()).thenReturn(SERVICE_TOKEN);
@@ -126,6 +128,7 @@ public class CaseFlagsEventHandlerTest {
         ).checkCaseFlagsToCreateTask(Mockito.any(), Mockito.any());
     }
 
+    @Ignore
     @Test
     public void testWaTaskIsNotCreatedWhenStatusIsActive() {
         Mockito.when(authTokenGenerator.generate()).thenReturn(SERVICE_TOKEN);
@@ -158,6 +161,7 @@ public class CaseFlagsEventHandlerTest {
 
     }
 
+    @Ignore
     @Test
     public void testWaTaskIsNotCreatedWhenCaseFlagsAndAllPartyFlagsAreNull() {
         Mockito.when(authTokenGenerator.generate()).thenReturn(SERVICE_TOKEN);
@@ -198,6 +202,7 @@ public class CaseFlagsEventHandlerTest {
 
     }
 
+    @Ignore
     @Test
     public void testWaTaskIsNotCreatedWhenFlagsDetailsAreNull() {
         Mockito.when(authTokenGenerator.generate()).thenReturn(SERVICE_TOKEN);

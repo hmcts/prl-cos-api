@@ -50,6 +50,10 @@ public class CaseFlagsEventHandler {
             CaseData caseDataBefore = CaseUtils.getCaseData(event.callbackRequest().getCaseDetailsBefore(), objectMapper);
             CaseData caseData = CaseUtils.getCaseData(event.callbackRequest().getCaseDetails(), objectMapper);
             caseFlagsWaService.checkCaseFlagsToCreateTask(caseData, caseDataBefore);
+        } else {
+            CaseData caseDataBefore = CaseUtils.getCaseData(event.callbackRequest().getCaseDetailsBefore(), objectMapper);
+            CaseData caseData = CaseUtils.getCaseData(event.callbackRequest().getCaseDetails(), objectMapper);
+            caseFlagsWaService.checkCaseFlagsToCreateTask(caseData, caseDataBefore);
         }
     }
 }
