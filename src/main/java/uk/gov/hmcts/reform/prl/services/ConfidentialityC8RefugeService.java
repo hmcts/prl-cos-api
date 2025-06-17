@@ -393,14 +393,11 @@ public class ConfidentialityC8RefugeService {
                 RefugeDocumentHandlerParameters.builder()
                     .forAllParties(true)
                     .build();
-
-            refugeConfidentialDocumentsRecord = new RefugeConfidentialDocumentsRecord(new ArrayList<>(), new ArrayList<>());
-
-            processC8RefugeDocumentsChangesForC100OnSubmit(
+            refugeConfidentialDocumentsRecord = processC8RefugeDocumentsChangesForC100OnSubmit(
                 caseData,
                 ofNullable(caseData.getApplicants()),
                 refugeDocumentHandlerParameters,
-                refugeConfidentialDocumentsRecord
+                null
             );
             processC8RefugeDocumentsChangesForC100OnSubmit(
                 caseData,
