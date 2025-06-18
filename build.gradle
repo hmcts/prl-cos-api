@@ -621,7 +621,6 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/DraftAnOrderService.java',
   '**uk/gov/hmcts/reform/prl/services/ManageOrderService.java',
   '**uk/gov/hmcts/reform/prl/services/TaskListService.java',
-  '**uk/gov/hmcts/reform/prl/services/TaskListServiceTest.java',
   '**uk/gov/hmcts/reform/prl/controllers/EditAndApproveDraftOrderController.java'
 ]
 
