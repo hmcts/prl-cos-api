@@ -46,7 +46,7 @@ public class CaseFlagsWaService {
         eventPublisher.publishEvent(caseFlagsEvent);
     }
 
-    public boolean checkAllRequestedFlagsAndCloseTask(CaseData caseData) {
+    public void checkAllRequestedFlagsAndCloseTask(CaseData caseData) {
         List<Element<FlagDetail>> allFlagsDetails = new ArrayList<>();
         allFlagsDetails.addAll(caseData.getCaseFlags().getDetails());
         allFlagsDetails.addAll(extractAllPartyFlagDetails(caseData.getAllPartyFlags()));
@@ -70,8 +70,6 @@ public class CaseFlagsWaService {
                 startAllTabsUpdateDataContent.caseDataMap()
             );
         }
-
-        return allFlagsAreActioned;
     }
 
 
@@ -97,22 +95,6 @@ public class CaseFlagsWaService {
         }
     }
 
-    public void eventToCreateWaTask(CaseData caseData) {
-        String caseId = String.valueOf(caseData.getId());
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
-            caseId,
-            CaseEvent.CREATE_WA_TASK_FOR_CTSC_CASE_FLAGS.getValue()
-        );
-
-        allTabService.submitAllTabsUpdate(
-            startAllTabsUpdateDataContent.authorisation(),
-            caseId,
-            startAllTabsUpdateDataContent.startEventResponse(),
-            startAllTabsUpdateDataContent.eventRequestData(),
-            startAllTabsUpdateDataContent.caseDataMap()
-        );
-    }
-
     public void setSelectedFlags(CaseData caseData) {
         AllPartyFlags allPartyFlags = caseData.getAllPartyFlags();
         List<Element<Flags>> selectedFlagsList = new ArrayList<>();
@@ -122,18 +104,16 @@ public class CaseFlagsWaService {
 
         Arrays.stream(allPartyFlags.getClass().getDeclaredFields())
             .filter(field -> field.getType().equals(Flags.class))
-            .forEach(field -> {
-                addFlagsToList(field, allPartyFlags, selectedFlagsList);
-            });
+            .forEach(field -> addFlagsToList(field, allPartyFlags, selectedFlagsList));
 
-        caseData.getCaseFlags().getDetails().stream().forEach(flagDetail -> {
+        caseData.getCaseFlags().getDetails().forEach(flagDetail -> {
             if (!REQUESTED.equals(flagDetail.getValue().getStatus())) {
                 selectedFlagsList.forEach(selectedFlag -> selectedFlag.getValue().getDetails().remove(flagDetail));
             }
         });
         List<Element<FlagDetail>> allFlagsDetails = extractAllPartyFlagDetails(allPartyFlags);
 
-        allFlagsDetails.stream().forEach(flagDetail -> {
+        allFlagsDetails.forEach(flagDetail -> {
             if (!REQUESTED.equals(flagDetail.getValue().getStatus())) {
                 selectedFlagsList.forEach(selectedFlag -> selectedFlag.getValue().getDetails().remove(flagDetail));
             }
@@ -170,8 +150,7 @@ public class CaseFlagsWaService {
                                              detail.getValue().getDateTimeModified()).reversed())
             .toList();
 
-        Element<FlagDetail> mostRecentlyModified = sortedAllFlagsDetails.getFirst();
-        return mostRecentlyModified;
+        return sortedAllFlagsDetails.getFirst();
     }
 
     public void searchAndUpdateCaseFlags(CaseData caseData, Element<FlagDetail> mostRecentlyModified) {
@@ -191,9 +170,7 @@ public class CaseFlagsWaService {
             if (mostRecentlyModified.getId().equals(flagDetail.getId())) {
                 Arrays.stream(caseData.getAllPartyFlags().getClass().getDeclaredFields())
                     .filter(field -> field.getType().equals(Flags.class))
-                    .forEach(field -> {
-                        mapModifiedFieldToPartyFlags(mostRecentlyModified, flagDetail, field, allPartyFlags);
-                    });
+                    .forEach(field -> mapModifiedFieldToPartyFlags(mostRecentlyModified, flagDetail, field, allPartyFlags));
             }
         });
 
