@@ -70,7 +70,6 @@ public interface HearingApiClient {
     );
 
     //TODO: DO NOT COMMIT
-    @SuppressWarnings("squid:S00112")
     default Hearings getHearingDetailsHacked(
         @RequestHeader("Authorization") String authorisation,
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
