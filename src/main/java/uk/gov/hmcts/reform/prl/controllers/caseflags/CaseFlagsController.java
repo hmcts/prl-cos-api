@@ -124,9 +124,9 @@ public class CaseFlagsController extends AbstractCallbackController {
     }
 
     @PostMapping("/submitted")
-    public ResponseEntity<SubmittedCallbackResponse> handleSubmittedSendAndReply(@RequestHeader("Authorization")
-                                                                                 @Parameter(hidden = true) String authorisation,
-                                                                                 @RequestBody CallbackRequest callbackRequest) {
+    public ResponseEntity<SubmittedCallbackResponse> handleSubmitted(@RequestHeader("Authorization")
+                                                                         @Parameter(hidden = true) String authorisation,
+                                                                     @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseFlagsWaService.checkAllRequestedFlagsAndCloseTask(caseData);
         return ok(SubmittedCallbackResponse.builder().build());
