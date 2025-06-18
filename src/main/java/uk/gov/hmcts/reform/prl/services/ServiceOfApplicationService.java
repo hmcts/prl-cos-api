@@ -4078,6 +4078,7 @@ public class ServiceOfApplicationService {
         caseDataMap.put(APPLICATION_SERVED_YES_NO, null);
         caseDataMap.put(REJECTION_REASON, null);
         confidentialityCheckService.clearRespondentsC8Documents(caseDataMap);
+        confidentialityCheckService.clearApplicantsC8Documents(caseDataMap);
         allTabService.submitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),
             String.valueOf(callbackRequest.getCaseDetails().getId()),

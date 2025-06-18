@@ -1064,6 +1064,7 @@ public class ServiceOfDocumentsService {
         //Clean up the fields
         cleanUpSelections(caseDataMap);
         confidentialityCheckService.clearRespondentsC8Documents(caseDataMap);
+        confidentialityCheckService.clearApplicantsC8Documents(caseDataMap);
 
         allTabService.submitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),
