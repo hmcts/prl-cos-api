@@ -1,0 +1,132 @@
+{
+  "case_details": {
+    "callback_response_status": "string",
+    "case_data": {
+      "applicantCaseName": "John Smith",
+      "caseTypeOfApplication": "C100",
+      "caseFlags": {
+        "details": [
+          {
+            "id": "e04c2af1-a486-4151-b2dd-0b6fee8f2633",
+            "value": {
+              "name": "Closed material",
+              "path": [
+                {
+                  "id": "3cb1e567-257b-44ea-829f-01e2e702e52f",
+                  "value": "Case"
+                }
+              ],
+              "status": "Not approved",
+              "name_cy": "Deunydd caeedig",
+              "flagCode": "CF0013",
+              "subTypeKey": null,
+              "flagComment": "sdafa",
+              "subTypeValue": null,
+              "flagComment_cy": null,
+              "dateTimeCreated": "2025-06-18T15:22:11.073Z",
+              "hearingRelevant": "Yes",
+              "subTypeValue_cy": null,
+              "dateTimeModified": "2025-06-18T15:25:22.289Z",
+              "otherDescription": null,
+              "flagUpdateComment": "adsfas",
+              "availableExternally": "No",
+              "otherDescription_cy": null
+            }
+          },
+          {
+            "id": "52aea386-8937-443e-9698-1ce3fe2ab95c",
+            "value": {
+              "name": "Urgent case",
+              "path": [
+                {
+                  "id": "08d4e3f9-4e6d-4333-abf0-0ea31dafcc0c",
+                  "value": "Case"
+                }
+              ],
+              "status": "Requested",
+              "name_cy": "Achos brys",
+              "flagCode": "CF0007",
+              "subTypeKey": null,
+              "flagComment": "asdasf",
+              "subTypeValue": null,
+              "flagComment_cy": null,
+              "dateTimeCreated": "2025-06-18T15:15:10.156Z",
+              "hearingRelevant": "Yes",
+              "subTypeValue_cy": null,
+              "dateTimeModified": null,
+              "otherDescription": null,
+              "flagUpdateComment": "asdfas",
+              "availableExternally": "No",
+              "otherDescription_cy": null
+            }
+          }
+        ],
+        "groupId": null,
+        "partyName": null,
+        "roleOnCase": null,
+        "visibility": null
+      },
+      "caApplicant1ExternalFlags": {
+        "details": [
+          {
+            "id": "94797f94-304e-4df0-b683-c90b964d72e9",
+            "value": {
+              "name": "Language Interpreter",
+              "path": [
+                {
+                  "id": "9b399016-7f90-48ab-9ba7-9eac5e72828c",
+                  "value": "Party"
+                }
+              ],
+              "status": "Active",
+              "name_cy": "Cyfieithydd",
+              "flagCode": "PF0015",
+              "subTypeKey": "cym",
+              "flagComment": "adsaf",
+              "subTypeValue": "Welsh",
+              "flagComment_cy": null,
+              "dateTimeCreated": "2025-06-18T14:51:42.079Z",
+              "hearingRelevant": "Yes",
+              "subTypeValue_cy": null,
+              "dateTimeModified": "2025-06-18T14:54:31.295Z",
+              "otherDescription": null,
+              "flagUpdateComment": null,
+              "availableExternally": "Yes",
+              "otherDescription_cy": null
+            }
+          }
+        ],
+        "groupId": "caApplicant1",
+        "partyName": "John Doe",
+        "roleOnCase": "Applicant 1",
+        "visibility": "External"
+      },
+      "selectedFlags": []
+    },
+    "case_type_id": "string",
+    "created_date": "2022-03-15T15:02:33.880Z",
+    "id": "1701870369166430",
+    "jurisdiction": "string",
+    "last_modified": "2022-03-15T15:02:33.880Z",
+    "locked_by_user_id": 0,
+    "security_classification": "PRIVATE",
+    "security_level": 0,
+    "state": "string"
+  },
+  "case_details_before": {
+    "callback_response_status": "string",
+    "case_data": {
+      "applicantCaseName": "John Smith"
+    },
+    "case_type_id": "string",
+    "created_date": "2022-03-15T15:02:33.880Z",
+    "id": 0,
+    "jurisdiction": "string",
+    "last_modified": "2022-03-15T15:02:33.880Z",
+    "locked_by_user_id": 0,
+    "security_classification": "PRIVATE",
+    "security_level": 0,
+    "state": "string"
+  },
+  "event_id": "string"
+}
