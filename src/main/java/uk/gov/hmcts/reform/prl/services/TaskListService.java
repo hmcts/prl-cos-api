@@ -327,12 +327,12 @@ public class TaskListService {
                     Document c8ToArchive = caseData.getC8Document();
 
                     if (c8ToArchive != null) {
-                        List<Element<Document>> archived = ofNullable(caseData.getC8ArchiveDocuments())
+                        List<Element<Document>> archived = ofNullable(caseData.getC8ArchivedDocuments())
                             .orElse(new ArrayList<>());
 
                         archived.add(ElementUtils.element(c8ToArchive));
 
-                        caseDataUpdated.put("c8ArchiveDocument", archived);
+                        caseDataUpdated.put("c8ArchivedDocuments", archived);
                     }
                 }
 
