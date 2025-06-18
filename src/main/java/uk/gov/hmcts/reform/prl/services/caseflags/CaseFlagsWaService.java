@@ -100,8 +100,10 @@ public class CaseFlagsWaService {
         List<Element<Flags>> selectedFlagsList = new ArrayList<>();
 
         Flags caseLevelFlag = deepCopy(caseData.getCaseFlags(), Flags.class);
-        caseLevelFlag.setPartyName("Case Level");
-        selectedFlagsList.add(ElementUtils.element(caseLevelFlag));
+        if (caseLevelFlag != null) {
+            caseLevelFlag.setPartyName("Case Level");
+            selectedFlagsList.add(ElementUtils.element(caseLevelFlag));
+        }
 
         Arrays.stream(allPartyFlags.getClass().getDeclaredFields())
             .filter(field -> field.getType().equals(Flags.class))
