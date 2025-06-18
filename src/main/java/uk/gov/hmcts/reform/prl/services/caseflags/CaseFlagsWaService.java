@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,7 +27,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 
 @Component
@@ -118,29 +118,19 @@ public class CaseFlagsWaService {
         Arrays.stream(allPartyFlags.getClass().getDeclaredFields())
             .filter(field -> field.getType().equals(Flags.class))
             .forEach(field -> {
-                field.setAccessible(true);
-                try {
-                    Flags selectedFlag = deepCopy((Flags) field.get(allPartyFlags), Flags.class);
-                    selectedFlagsList.add(ElementUtils.element(selectedFlag));
-                } catch (IllegalAccessException e) {
-                    // ignore
-                }
+                addFlagsToList(field, allPartyFlags, selectedFlagsList);
             });
 
         caseData.getCaseFlags().getDetails().stream().forEach(flagDetail -> {
             if (!REQUESTED.equals(flagDetail.getValue().getStatus())) {
-                selectedFlagsList.forEach(selectedFlag -> {
-                    selectedFlag.getValue().getDetails().remove(flagDetail);
-                });
+                selectedFlagsList.forEach(selectedFlag -> selectedFlag.getValue().getDetails().remove(flagDetail));
             }
         });
         List<Element<FlagDetail>> allFlagsDetails = extractAllPartyFlagDetails(allPartyFlags);
 
         allFlagsDetails.stream().forEach(flagDetail -> {
             if (!REQUESTED.equals(flagDetail.getValue().getStatus())) {
-                selectedFlagsList.forEach(selectedFlag -> {
-                    selectedFlag.getValue().getDetails().remove(flagDetail);
-                });
+                selectedFlagsList.forEach(selectedFlag -> selectedFlag.getValue().getDetails().remove(flagDetail));
             }
         });
 
@@ -150,6 +140,16 @@ public class CaseFlagsWaService {
 
 
         caseData.setSelectedFlags(finalList);
+    }
+
+    private void addFlagsToList(Field field, AllPartyFlags allPartyFlags, List<Element<Flags>> selectedFlagsList) {
+        field.setAccessible(true);
+        try {
+            Flags selectedFlag = deepCopy((Flags) field.get(allPartyFlags), Flags.class);
+            selectedFlagsList.add(ElementUtils.element(selectedFlag));
+        } catch (IllegalAccessException e) {
+            // ignore
+        }
     }
 
     public Element<FlagDetail> validateAllFlags(CaseData caseData) {
@@ -187,21 +187,28 @@ public class CaseFlagsWaService {
                 Arrays.stream(caseData.getAllPartyFlags().getClass().getDeclaredFields())
                     .filter(field -> field.getType().equals(Flags.class))
                     .forEach(field -> {
-                        field.setAccessible(true);
-                        try {
-                            Flags flags = (Flags) field.get(allPartyFlags);
-                            if (flags != null && flags.getDetails() != null && flags.getDetails().contains(flagDetail)) {
-                                final int index = flags.getDetails().indexOf(flagDetail);
-                                flags.getDetails().set(index, mostRecentlyModified);
-                                field.set(allPartyFlags, flags);
-                            }
-                        } catch (IllegalAccessException e) {
-                            //ignore
-                        }
+                        mapModifiedFieldToPartyFlags(mostRecentlyModified, flagDetail, field, allPartyFlags);
                     });
             }
         });
 
+    }
+
+    private void mapModifiedFieldToPartyFlags(Element<FlagDetail> mostRecentlyModified,
+                                              Element<FlagDetail> flagDetail,
+                                              Field field,
+                                              AllPartyFlags allPartyFlags) {
+        field.setAccessible(true);
+        try {
+            Flags flags = (Flags) field.get(allPartyFlags);
+            if (flags != null && flags.getDetails() != null && flags.getDetails().contains(flagDetail)) {
+                final int index = flags.getDetails().indexOf(flagDetail);
+                flags.getDetails().set(index, mostRecentlyModified);
+                field.set(allPartyFlags, flags);
+            }
+        } catch (IllegalAccessException e) {
+            //ignore
+        }
     }
 
     private List<Element<FlagDetail>> extractAllPartyFlagDetails(AllPartyFlags allPartyFlags) {
@@ -222,7 +229,7 @@ public class CaseFlagsWaService {
             })
             .filter(Objects::nonNull)
             .flatMap(List::stream)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private  <T> T deepCopy(T object, Class<T> objectClass) {
