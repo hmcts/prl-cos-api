@@ -163,7 +163,6 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private final List<Document> contactOrderDocumentsUploaded;
     private final List<Document> c8FormDocumentsUploaded;
     private final List<Document> otherDocumentsUploaded;
-    private List<Element<Document>> c8ArchivedDocuments;
 
     /**
      * People in the case.
@@ -352,6 +351,8 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private final Document c8DraftDocument;
     @JsonProperty("c8WelshDraftDocument")
     private final Document c8WelshDraftDocument;
+    @JsonProperty("c8ArchivedDocuments")
+    private List<Element<Document>> c8ArchivedDocuments;
 
     @JsonProperty("isEngDocGen")
     private final String isEngDocGen;
