@@ -145,7 +145,7 @@ public class CaseFlagsWaService {
         });
 
         List<Element<Flags>> finalList = selectedFlagsList.stream()
-            .filter(f -> CollectionUtils.isNotEmpty(f.getValue().getDetails()))
+            .filter(f -> f.getValue() != null && CollectionUtils.isNotEmpty(f.getValue().getDetails()))
             .toList();
 
 
@@ -165,7 +165,7 @@ public class CaseFlagsWaService {
                                              detail.getValue().getDateTimeModified()).reversed())
             .toList();
 
-        Element<FlagDetail> mostRecentlyModified = sortedAllFlagsDetails.get(0);
+        Element<FlagDetail> mostRecentlyModified = sortedAllFlagsDetails.getFirst();
         return mostRecentlyModified;
     }
 
@@ -225,7 +225,7 @@ public class CaseFlagsWaService {
             .collect(Collectors.toList());
     }
 
-    public <T> T deepCopy(T object, Class<T> objectClass) {
+    private  <T> T deepCopy(T object, Class<T> objectClass) {
         try {
             return objectMapper.readValue(objectMapper.writeValueAsString(object), objectClass);
         } catch (IOException e) {
