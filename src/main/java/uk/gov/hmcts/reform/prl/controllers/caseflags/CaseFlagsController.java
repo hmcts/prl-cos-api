@@ -78,6 +78,28 @@ public class CaseFlagsController extends AbstractCallbackController {
         }
     }
 
+    @PostMapping(path = "/check-wa-task-status", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to check the work allocation status to decide if the task should be closed or not")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse checkWorkAllocationTaskStatus(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        caseFlagsWaService.checkCaseFlagsToCreateTask(caseData, caseDataBefore);
+        Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
+
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDataMap)
+            .build();
+    }
+
     @PostMapping("/about-to-start")
     public AboutToStartOrSubmitCallbackResponse handleAboutToStart(@RequestHeader("Authorization")
                                                                    @Parameter(hidden = true) String authorisation,
@@ -93,14 +115,14 @@ public class CaseFlagsController extends AbstractCallbackController {
             .build();
     }
 
-    @PostMapping(path = "/check-wa-task-status", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to check the work allocation status to decide if the task should be closed or not")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse checkWorkAllocationTaskStatus(
+    public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
@@ -130,6 +152,13 @@ public class CaseFlagsController extends AbstractCallbackController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseFlagsWaService.checkAllRequestedFlagsAndCloseTask(caseData);
         return ok(SubmittedCallbackResponse.builder().build());
+    }
+
+    @PostMapping("/submitted-to-close-wa-task")
+    public ResponseEntity<SubmittedCallbackResponse> handleSubmittedToCloseWaTask(@RequestHeader("Authorization")
+                                                                     @Parameter(hidden = true) String authorisation,
+                                                                     @RequestBody CallbackRequest callbackRequest) {
+        return handleSubmitted(authorisation, callbackRequest);
     }
 
 }

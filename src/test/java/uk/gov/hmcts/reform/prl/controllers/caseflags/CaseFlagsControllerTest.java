@@ -96,7 +96,7 @@ public class CaseFlagsControllerTest {
         when(caseFlagsWaService.validateAllFlags(caseData)).thenReturn(mostRecentlyModified);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
-        AboutToStartOrSubmitCallbackResponse response = caseFlagsController.checkWorkAllocationTaskStatus(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = caseFlagsController.handleAboutToSubmit(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
         Assert.assertTrue(response.getErrors().size() > 0);
         verify(caseFlagsWaService).validateAllFlags(caseData);
         verify(caseFlagsWaService, never()).searchAndUpdateCaseFlags(caseData, mostRecentlyModified);
@@ -119,7 +119,7 @@ public class CaseFlagsControllerTest {
         when(caseFlagsWaService.validateAllFlags(caseData)).thenReturn(mostRecentlyModified);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
-        AboutToStartOrSubmitCallbackResponse response = caseFlagsController.checkWorkAllocationTaskStatus(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = caseFlagsController.handleAboutToSubmit(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
         Assert.assertTrue(response.getErrors().isEmpty());
 
         verify(caseFlagsWaService).validateAllFlags(caseData);

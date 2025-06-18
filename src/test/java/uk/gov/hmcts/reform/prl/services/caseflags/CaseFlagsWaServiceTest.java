@@ -13,11 +13,13 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseflags.AllPartyFlags;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewRaRequestWrapper;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -163,6 +165,7 @@ public class CaseFlagsWaServiceTest {
 
         CaseData caseData = CaseData.builder()
             .id(123)
+            .reviewRaRequestWrapper(ReviewRaRequestWrapper.builder().isCaseFlagsTaskCreated(YesOrNo.Yes).build())
             .caseFlags(caseLevelFlags)
             .build();
 
@@ -212,25 +215,13 @@ public class CaseFlagsWaServiceTest {
         Flags caseLevelFlags = getCaseLevelFlags(REQUESTED);
         CaseData caseData = CaseData.builder()
             .id(123)
+            .reviewRaRequestWrapper(ReviewRaRequestWrapper.builder().isCaseFlagsTaskCreated(YesOrNo.No).build())
             .caseFlags(caseLevelFlags)
             .build();
 
-        StartAllTabsUpdateDataContent dataContent = new StartAllTabsUpdateDataContent("",
-                                                                                      EventRequestData.builder().build(),
-                                                                                      StartEventResponse.builder().build(),
-                                                                                      new HashMap<>(),
-                                                                                      caseData,
-                                                                                      UserDetails.builder().build());
-        when(allTabService.getStartUpdateForSpecificEvent(anyString(), eq(CaseEvent.CREATE_WA_TASK_FOR_CTSC_CASE_FLAGS.getValue())))
-            .thenReturn(dataContent);
-
         caseFlagsWaService.checkCaseFlagsToCreateTask(caseData, caseDataBefore);
 
-        verify(allTabService, times(1))
-            .getStartUpdateForSpecificEvent(anyString(), eq(CaseEvent.CREATE_WA_TASK_FOR_CTSC_CASE_FLAGS.getValue()));
-
-        verify(allTabService, times(1))
-            .submitAllTabsUpdate(anyString(), anyString(), any(StartEventResponse.class), any(EventRequestData.class), anyMap());
+        assertEquals(YesOrNo.No, caseData.getReviewRaRequestWrapper().getIsCaseFlagsTaskCreated());
     }
 
     @Test
@@ -240,16 +231,16 @@ public class CaseFlagsWaServiceTest {
         CaseData caseData = CaseData.builder()
             .id(123)
             .allPartyFlags(AllPartyFlags.builder().build())
-            .selectedFlags(new ArrayList<>())
+            .reviewRaRequestWrapper(ReviewRaRequestWrapper.builder().selectedFlags(new ArrayList<>()).build())
             .caseFlags(caseLevelFlags)
             .build();
 
-        Assert.assertTrue(caseData.getSelectedFlags().isEmpty());
+        Assert.assertTrue(caseData.getReviewRaRequestWrapper().getSelectedFlags().isEmpty());
         when(objectMapper.writeValueAsString(caseLevelFlags)).thenReturn("dummyObjectString");
         when(objectMapper.readValue("dummyObjectString", Flags.class)).thenReturn(caseLevelFlags);
         caseFlagsWaService.setSelectedFlags(caseData);
 
-        assertEquals(1, caseData.getSelectedFlags().size());
+        assertEquals(1, caseData.getReviewRaRequestWrapper().getSelectedFlags().size());
     }
 
     @Test
@@ -259,19 +250,19 @@ public class CaseFlagsWaServiceTest {
         CaseData caseData = CaseData.builder()
             .id(123)
             .allPartyFlags(AllPartyFlags.builder().caApplicant1ExternalFlags(caApplicant1ExternalFlags).build())
-            .selectedFlags(new ArrayList<>())
+            .reviewRaRequestWrapper(ReviewRaRequestWrapper.builder().selectedFlags(new ArrayList<>()).build())
             .caseFlags(Flags.builder().details(new ArrayList<>()).build())
             .build();
 
-        Assert.assertTrue(caseData.getSelectedFlags().isEmpty());
+        Assert.assertTrue(caseData.getReviewRaRequestWrapper().getSelectedFlags().isEmpty());
 
         when(objectMapper.writeValueAsString(caApplicant1ExternalFlags)).thenReturn("dummyObjectString");
         when(objectMapper.readValue("dummyObjectString", Flags.class)).thenReturn(caApplicant1ExternalFlags);
 
         caseFlagsWaService.setSelectedFlags(caseData);
 
-        assertEquals(1, caseData.getSelectedFlags().size());
-        assertEquals(2, caseData.getSelectedFlags().getFirst().getValue().getDetails().size());
+        assertEquals(1, caseData.getReviewRaRequestWrapper().getSelectedFlags().size());
+        assertEquals(2, caseData.getReviewRaRequestWrapper().getSelectedFlags().getFirst().getValue().getDetails().size());
     }
 
     @Test
@@ -282,12 +273,13 @@ public class CaseFlagsWaServiceTest {
         CaseData caseData = CaseData.builder()
             .id(123)
             .allPartyFlags(AllPartyFlags.builder().build())
-            .selectedFlags(selectedFlags)
+            .reviewRaRequestWrapper(ReviewRaRequestWrapper.builder().selectedFlags(selectedFlags).build())
             .caseFlags(Flags.builder().build())
             .build();
 
-        caseData.getSelectedFlags().getFirst().getValue().getDetails().getFirst().getValue().setDateTimeModified(LocalDateTime.now());
-        caseData.getSelectedFlags().getFirst().getValue().getDetails().getFirst().getValue().setStatus(ACTIVE);
+        caseData.getReviewRaRequestWrapper().getSelectedFlags()
+            .getFirst().getValue().getDetails().getFirst().getValue().setDateTimeModified(LocalDateTime.now());
+        caseData.getReviewRaRequestWrapper().getSelectedFlags().getFirst().getValue().getDetails().getFirst().getValue().setStatus(ACTIVE);
 
         Element<FlagDetail> actualDetails = caseFlagsWaService.validateAllFlags(caseData);
         assertEquals(ACTIVE, actualDetails.getValue().getStatus());

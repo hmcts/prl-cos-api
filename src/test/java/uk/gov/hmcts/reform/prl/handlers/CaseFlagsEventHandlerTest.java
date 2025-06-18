@@ -5,24 +5,29 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.events.CaseFlagsEvent;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.caseflags.AllPartyFlags;
-import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
-import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsWaService;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewRaRequestWrapper;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
+import java.util.HashMap;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -33,67 +38,63 @@ public class CaseFlagsEventHandlerTest {
     @Mock
     private ObjectMapper objectMapper;
     @Mock
-    private CaseFlagsWaService caseFlagsWaService;
+    private AllTabServiceImpl allTabService;
 
     @InjectMocks
     private CaseFlagsEventHandler caseFlagsEventHandler;
 
     @Test
-    public void testTriggerDummyEventForCaseFlags() {
+    public void testTriggerDummyEventForCaseFlagsWhenCaseFlagsTaskCreatedIsNo() {
 
-        getCaseFlagsAndAllPartyFlagsWithStatus("Requested");
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .reviewRaRequestWrapper(ReviewRaRequestWrapper.builder()
+                                        .isCaseFlagsTaskCreated(YesOrNo.No).build()).build();
 
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder()
-                             .id(123L).build())
-            .caseDetailsBefore(CaseDetails.builder()
-                                   .id(123L).build())
-            .build();
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        StartAllTabsUpdateDataContent dataContent = new StartAllTabsUpdateDataContent("",
+                                                                                      EventRequestData.builder().build(),
+                                                                                      StartEventResponse.builder().build(),
+                                                                                      new HashMap<>(),
+                                                                                      caseData,
+                                                                                      UserDetails.builder().build());
+
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), eq(CaseEvent.CREATE_WA_TASK_FOR_CTSC_CASE_FLAGS.getValue())))
+            .thenReturn(dataContent);
+
         CaseFlagsEvent caseFlagsEvent = new CaseFlagsEvent(callbackRequest, TEST_AUTH);
-        when(CaseUtils.getCaseData(
-            callbackRequest.getCaseDetails(),
-            objectMapper
-        )).thenReturn(CaseData.builder().build());
-
-        when(CaseUtils.getCaseData(
-            callbackRequest.getCaseDetailsBefore(),
-            objectMapper
-        )).thenReturn(CaseData.builder().build());
 
         caseFlagsEventHandler.triggerDummyEventForCaseFlags(caseFlagsEvent);
-        Mockito.verify(
-            caseFlagsWaService,
-            Mockito.times(1)
-        ).checkCaseFlagsToCreateTask(Mockito.any(), Mockito.any());
+
+        verify(allTabService, times(1))
+            .getStartUpdateForSpecificEvent(anyString(), eq(CaseEvent.CREATE_WA_TASK_FOR_CTSC_CASE_FLAGS.getValue()));
+
+        verify(allTabService, times(1))
+            .submitAllTabsUpdate(anyString(), anyString(), any(StartEventResponse.class), any(EventRequestData.class), anyMap());
 
     }
 
-    private void getCaseFlagsAndAllPartyFlagsWithStatus(String status) {
-        List<Element<FlagDetail>> flagDetails = List.of(
-            new Element<>(UUID.randomUUID(), FlagDetail.builder()
-                .status(status)
-                .dateTimeCreated(LocalDateTime.now())
-                .build())
-        );
+    @Test
+    public void testTriggerDummyEventForCaseFlagsWhenCaseFlagsTaskCreatedIsYes() {
 
-        Flags caseFlags = Flags.builder()
-            .details(flagDetails)
-            .build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .reviewRaRequestWrapper(ReviewRaRequestWrapper.builder()
+                                        .isCaseFlagsTaskCreated(YesOrNo.Yes).build()).build();
 
-        AllPartyFlags partyFlags = AllPartyFlags.builder()
-            .caApplicant1InternalFlags(caseFlags)
-            .build();
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
-        CaseData mappedCaseData = CaseData.builder()
-            .id(123L)
-            .caseTypeOfApplication("C100")
-            .state(State.CASE_ISSUED)
-            .caseFlags(caseFlags)
-            .allPartyFlags(partyFlags)
-            .build();
+        CaseFlagsEvent caseFlagsEvent = new CaseFlagsEvent(callbackRequest, TEST_AUTH);
 
-        Mockito.when(objectMapper.convertValue(Mockito.any(), Mockito.eq(CaseData.class)))
-            .thenReturn(mappedCaseData);
+        caseFlagsEventHandler.triggerDummyEventForCaseFlags(caseFlagsEvent);
+
+        verifyNoInteractions(allTabService);
+
     }
 
 }

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.events.CaseFlagsEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseflags.AllPartyFlags;
@@ -54,13 +55,13 @@ public class CaseFlagsWaService {
             .filter(Objects::nonNull)
             .noneMatch(detail -> REQUESTED.equals(detail.getValue().getStatus()));
 
-        if (allFlagsAreActioned) {
+        if (allFlagsAreActioned && YesOrNo.Yes.equals(caseData.getReviewRaRequestWrapper().getIsCaseFlagsTaskCreated())) {
             String caseId = String.valueOf(caseData.getId());
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
                 caseId,
                 CaseEvent.CLOSE_REVIEW_RA_REQUEST_TASK.getValue()
             );
-
+            startAllTabsUpdateDataContent.caseDataMap().put("isCaseFlagsTaskCreated", YesOrNo.No);
             allTabService.submitAllTabsUpdate(
                 startAllTabsUpdateDataContent.authorisation(),
                 caseId,
@@ -92,20 +93,24 @@ public class CaseFlagsWaService {
             .noneMatch(detail -> REQUESTED.equals(detail.getValue().getStatus()));
 
         if (anyExistingCaseFlags && !anyNewCaseFlags) {
-            String caseId = String.valueOf(caseData.getId());
-            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
-                caseId,
-                CaseEvent.CREATE_WA_TASK_FOR_CTSC_CASE_FLAGS.getValue()
-            );
-
-            allTabService.submitAllTabsUpdate(
-                startAllTabsUpdateDataContent.authorisation(),
-                caseId,
-                startAllTabsUpdateDataContent.startEventResponse(),
-                startAllTabsUpdateDataContent.eventRequestData(),
-                startAllTabsUpdateDataContent.caseDataMap()
-            );
+            caseData.getReviewRaRequestWrapper().setIsCaseFlagsTaskCreated(YesOrNo.No);
         }
+    }
+
+    public void eventToCreateWaTask(CaseData caseData) {
+        String caseId = String.valueOf(caseData.getId());
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
+            caseId,
+            CaseEvent.CREATE_WA_TASK_FOR_CTSC_CASE_FLAGS.getValue()
+        );
+
+        allTabService.submitAllTabsUpdate(
+            startAllTabsUpdateDataContent.authorisation(),
+            caseId,
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            startAllTabsUpdateDataContent.caseDataMap()
+        );
     }
 
     public void setSelectedFlags(CaseData caseData) {
@@ -139,7 +144,7 @@ public class CaseFlagsWaService {
             .toList();
 
 
-        caseData.setSelectedFlags(finalList);
+        caseData.getReviewRaRequestWrapper().setSelectedFlags(finalList);
     }
 
     private void addFlagsToList(Field field, AllPartyFlags allPartyFlags, List<Element<Flags>> selectedFlagsList) {
@@ -153,7 +158,7 @@ public class CaseFlagsWaService {
     }
 
     public Element<FlagDetail> validateAllFlags(CaseData caseData) {
-        List<Element<FlagDetail>> allFlagsDetails = caseData.getSelectedFlags().stream()
+        List<Element<FlagDetail>> allFlagsDetails = caseData.getReviewRaRequestWrapper().getSelectedFlags().stream()
             .filter(e -> e != null && e.getValue() != null)
             .map(e -> e.getValue().getDetails())
             .flatMap(Collection::stream)
