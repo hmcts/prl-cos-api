@@ -48,7 +48,7 @@ public interface HearingApiClient {
                    "hearingVenueId": "898213",
                    "hearingVenueName": "EAST LONDON FAMILY COURT",
                    "hearingVenueLocationCode": null,
-                   "hearingVenueAddress": "WESTFERRY CIRCUS (WESTFERRY HOUSE), PART GROUND, 6TH AND 7TH FLOORS, 11 WESTFERRY CIRCUS, CANARY WHARF, LONDON, E14 4HE",
+                   "hearingVenueAddress": "WESTFERRY CIRCUS (WESTFERRY HOUSE)",
                    "hearingRoomId": "East London Family Bench Court Central Hub",
                    "hearingJudgeId": null,
                    "hearingJudgeName": null,
