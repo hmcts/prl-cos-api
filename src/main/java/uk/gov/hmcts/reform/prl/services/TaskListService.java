@@ -318,8 +318,11 @@ public class TaskListService {
                         startAllTabsUpdateDataContent.authorisation()
                     );
                 }
-                CaseData previousCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
-                boolean confidentialDetailsChanged = haveConfidentialDetailsChanged(caseData, previousCaseData);
+                CaseData caseDataBefore = objectMapper.convertValue(
+                    callbackRequest.getCaseDetailsBefore().getData(),
+                    CaseData.class
+                );
+                boolean confidentialDetailsChanged = haveConfidentialDetailsChanged(caseData, caseDataBefore);
                 if (confidentialDetailsChanged) {
                     Document c8ToArchive = caseData.getC8Document();
 
