@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.events.CaseFlagsEvent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewRaRequestWrapper;
+import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsWaService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.HashMap;
@@ -39,12 +40,14 @@ public class CaseFlagsEventHandlerTest {
     private ObjectMapper objectMapper;
     @Mock
     private AllTabServiceImpl allTabService;
+    @Mock
+    private CaseFlagsWaService caseFlagsWaService;
 
     @InjectMocks
     private CaseFlagsEventHandler caseFlagsEventHandler;
 
     @Test
-    public void testTriggerDummyEventForCaseFlagsWhenCaseFlagsTaskCreatedIsNo() {
+    public void testTriggerDummyEventForCaseFlagsWhenCaseFlagsTaskCreatedIsNoAndNoRequestedCaseFlags() {
 
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
@@ -54,6 +57,7 @@ public class CaseFlagsEventHandlerTest {
                                         .isCaseFlagsTaskCreated(YesOrNo.No).build()).build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(caseFlagsWaService.isCaseHasNoRequestedFlags(any())).thenReturn(false);
 
         StartAllTabsUpdateDataContent dataContent = new StartAllTabsUpdateDataContent("",
                                                                                       EventRequestData.builder().build(),
@@ -74,11 +78,12 @@ public class CaseFlagsEventHandlerTest {
 
         verify(allTabService, times(1))
             .submitAllTabsUpdate(anyString(), anyString(), any(StartEventResponse.class), any(EventRequestData.class), anyMap());
+        verify(caseFlagsWaService).isCaseHasNoRequestedFlags(any());
 
     }
 
     @Test
-    public void testTriggerDummyEventForCaseFlagsWhenCaseFlagsTaskCreatedIsYes() {
+    public void testTriggerDummyEventForCaseFlagsWhenCaseFlagsTaskCreatedIsYesAndRequestedCaseFlag() {
 
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
@@ -88,6 +93,28 @@ public class CaseFlagsEventHandlerTest {
                                         .isCaseFlagsTaskCreated(YesOrNo.Yes).build()).build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(caseFlagsWaService.isCaseHasNoRequestedFlags(any())).thenReturn(true);
+
+        CaseFlagsEvent caseFlagsEvent = new CaseFlagsEvent(callbackRequest, TEST_AUTH);
+
+        caseFlagsEventHandler.triggerDummyEventForCaseFlags(caseFlagsEvent);
+
+        verifyNoInteractions(allTabService);
+
+    }
+
+    @Test
+    public void testTriggerDummyEventForCaseFlagsWhenCaseFlagsTaskCreatedIsNoAndRequestedCaseFlag() {
+
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .reviewRaRequestWrapper(ReviewRaRequestWrapper.builder()
+                                        .isCaseFlagsTaskCreated(YesOrNo.No).build()).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(caseFlagsWaService.isCaseHasNoRequestedFlags(any())).thenReturn(true);
 
         CaseFlagsEvent caseFlagsEvent = new CaseFlagsEvent(callbackRequest, TEST_AUTH);
 

@@ -74,25 +74,24 @@ public class CaseFlagsWaService {
 
 
     public void checkCaseFlagsToCreateTask(CaseData caseData, CaseData caseDataBefore) {
-        List<Element<FlagDetail>> allFlagsDetailsBefore = new ArrayList<>();
-        allFlagsDetailsBefore.addAll(caseDataBefore.getCaseFlags().getDetails());
-        allFlagsDetailsBefore.addAll(extractAllPartyFlagDetails(caseDataBefore.getAllPartyFlags()));
 
-        boolean anyExistingCaseFlags = allFlagsDetailsBefore.stream()
-            .filter(Objects::nonNull)
-            .noneMatch(detail -> REQUESTED.equals(detail.getValue().getStatus()));
+        boolean anyExistingCaseFlags = isCaseHasNoRequestedFlags(caseDataBefore);
 
-        List<Element<FlagDetail>> allFlagsDetails = new ArrayList<>();
-        allFlagsDetails.addAll(caseData.getCaseFlags().getDetails());
-        allFlagsDetails.addAll(extractAllPartyFlagDetails(caseData.getAllPartyFlags()));
-
-        boolean anyNewCaseFlags = allFlagsDetails.stream()
-            .filter(Objects::nonNull)
-            .noneMatch(detail -> REQUESTED.equals(detail.getValue().getStatus()));
+        boolean anyNewCaseFlags = isCaseHasNoRequestedFlags(caseData);
 
         if (anyExistingCaseFlags && !anyNewCaseFlags) {
             caseData.getReviewRaRequestWrapper().setIsCaseFlagsTaskCreated(YesOrNo.No);
         }
+    }
+
+    public boolean isCaseHasNoRequestedFlags(CaseData caseData) {
+        List<Element<FlagDetail>> allFlagsDetails = new ArrayList<>();
+        allFlagsDetails.addAll(caseData.getCaseFlags().getDetails());
+        allFlagsDetails.addAll(extractAllPartyFlagDetails(caseData.getAllPartyFlags()));
+
+        return allFlagsDetails.stream()
+            .filter(Objects::nonNull)
+            .noneMatch(detail -> REQUESTED.equals(detail.getValue().getStatus()));
     }
 
     public void setSelectedFlags(CaseData caseData) {

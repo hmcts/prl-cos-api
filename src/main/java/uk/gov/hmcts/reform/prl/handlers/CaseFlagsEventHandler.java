@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.events.CaseFlagsEvent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsWaService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -19,6 +20,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 public class CaseFlagsEventHandler {
     private final ObjectMapper objectMapper;
     private final AllTabServiceImpl allTabService;
+    private final CaseFlagsWaService caseFlagsWaService;
 
     @Async
     @EventListener
@@ -26,7 +28,8 @@ public class CaseFlagsEventHandler {
 
         CaseData caseData = CaseUtils.getCaseData(event.callbackRequest().getCaseDetails(), objectMapper);
         if (caseData.getReviewRaRequestWrapper() != null
-            && YesOrNo.No.equals(caseData.getReviewRaRequestWrapper().getIsCaseFlagsTaskCreated())) {
+            && YesOrNo.No.equals(caseData.getReviewRaRequestWrapper().getIsCaseFlagsTaskCreated())
+            && !caseFlagsWaService.isCaseHasNoRequestedFlags(caseData)) {
             String caseId = String.valueOf(caseData.getId());
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
                 caseId,
