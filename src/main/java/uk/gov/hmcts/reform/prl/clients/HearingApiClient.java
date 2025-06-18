@@ -28,38 +28,47 @@ public interface HearingApiClient {
 
     String hearingPayload = """
         {
-          "hmctsServiceCode" : "ABA5",
-          "caseRef" : "<caseRef>",
-          "caseHearings" : [ {
-            "hearingID" : "999999",
-            "hearingRequestDateTime" : null,
-            "hearingType" : "ABA5-FFH",
-            "hmcStatus" : "LISTED",
-            "lastResponseReceivedDateTime" : null,
-            "requestVersion" : null,
-            "hearingListingStatus" : null,
-            "listAssistCaseStatus" : null,
-            "hearingDaySchedule" : [ {
-              "hearingStartDateTime" : "2025-07-18T14:23:45.123",
-              "hearingEndDateTime" : "2025-07-20T14:23:45.123",
-              "listAssistSessionId" : null,
-              "hearingVenueId" : null,
-              "hearingVenueName" : null,
-              "hearingVenueLocationCode" : null,
-              "hearingVenueAddress" : null,
-              "hearingRoomId" : null,
-              "hearingJudgeId" : null,
-              "hearingJudgeName" : null,
-              "panelMemberIds" : null,
-              "attendees" : null
-            } ],
-            "hearingGroupRequestId" : null,
-            "hearingIsLinkedFlag" : null,
-            "hearingTypeValue" : null,
-            "nextHearingDate" : "2025-07-18T14:23:45.123",
-            "urgentFlag" : false
-          } ]
-        }
+           "hmctsServiceCode": "ABA5",
+           "caseRef": "<caseRef>",
+           "caseHearings": [
+             {
+               "hearingID": "999999",
+               "hearingRequestDateTime": null,
+               "hearingType": "ABA5-FFH",
+               "hmcStatus": "LISTED",
+               "lastResponseReceivedDateTime": null,
+               "requestVersion": null,
+               "hearingListingStatus": null,
+               "listAssistCaseStatus": null,
+               "hearingDaySchedule": [
+                 {
+                   "hearingStartDateTime": "2025-07-18T14:23:45.123",
+                   "hearingEndDateTime": "2025-07-20T14:23:45.123",
+                   "listAssistSessionId": null,
+                   "hearingVenueId": "898213",
+                   "hearingVenueName": "EAST LONDON FAMILY COURT",
+                   "hearingVenueLocationCode": null,
+                   "hearingVenueAddress": "WESTFERRY CIRCUS (WESTFERRY HOUSE), PART GROUND, 6TH AND 7TH FLOORS, 11 WESTFERRY CIRCUS, CANARY WHARF, LONDON, E14 4HE",
+                   "hearingRoomId": "East London Family Bench Court Central Hub",
+                   "hearingJudgeId": null,
+                   "hearingJudgeName": null,
+                   "panelMemberIds": null,
+                   "attendees": [
+                     {
+                       "partyID": "7663081e-778d-4317-b278-7642b740d317",
+                       "hearingSubChannel": "VID"
+                     }
+                   ]
+                 }
+               ],
+               "hearingGroupRequestId": "280",
+               "hearingIsLinkedFlag": null,
+               "hearingTypeValue": null,
+               "nextHearingDate": "2025-07-18T14:23:45.123",
+               "urgentFlag": false
+             }
+           ]
+         }
         """;
 
     @GetMapping(path = "/hearings")
