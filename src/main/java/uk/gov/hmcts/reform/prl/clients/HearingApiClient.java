@@ -41,7 +41,7 @@ public interface HearingApiClient {
             "listAssistCaseStatus" : null,
             "hearingDaySchedule" : [ {
               "hearingStartDateTime" : "2025-07-18T14:23:45.123",
-              "hearingEndDateTime" : null,
+              "hearingEndDateTime" : "2025-07-20T14:23:45.123",
               "listAssistSessionId" : null,
               "hearingVenueId" : null,
               "hearingVenueName" : null,
