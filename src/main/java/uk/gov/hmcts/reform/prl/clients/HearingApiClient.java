@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.clients;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.FeignClientProperties;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +26,41 @@ import java.util.Map;
 )
 public interface HearingApiClient {
 
+    String hearingPayload = """
+        {
+          "hmctsServiceCode" : "ABA5",
+          "caseRef" : "<caseRef>",
+          "caseHearings" : [ {
+            "hearingID" : "999999",
+            "hearingRequestDateTime" : null,
+            "hearingType" : "ABA5-FFH",
+            "hmcStatus" : "LISTED",
+            "lastResponseReceivedDateTime" : null,
+            "requestVersion" : null,
+            "hearingListingStatus" : null,
+            "listAssistCaseStatus" : null,
+            "hearingDaySchedule" : [ {
+              "hearingStartDateTime" : "2025-07-18T14:23:45.123",
+              "hearingEndDateTime" : null,
+              "listAssistSessionId" : null,
+              "hearingVenueId" : null,
+              "hearingVenueName" : null,
+              "hearingVenueLocationCode" : null,
+              "hearingVenueAddress" : null,
+              "hearingRoomId" : null,
+              "hearingJudgeId" : null,
+              "hearingJudgeName" : null,
+              "panelMemberIds" : null,
+              "attendees" : null
+            } ],
+            "hearingGroupRequestId" : null,
+            "hearingIsLinkedFlag" : null,
+            "hearingTypeValue" : null,
+            "nextHearingDate" : "2025-07-18T14:23:45.123",
+            "urgentFlag" : false
+          } ]
+        }
+        """;
 
     @GetMapping(path = "/hearings")
     Hearings getHearingDetails(
@@ -31,6 +68,23 @@ public interface HearingApiClient {
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
         @RequestHeader("caseReference") String caseReference
     );
+
+    //TODO: DO NOT COMMIT
+    default Hearings getHearingDetailsHacked(
+        @RequestHeader("Authorization") String authorisation,
+        @RequestHeader("ServiceAuthorization") String serviceAuthorization,
+        @RequestHeader("caseReference") String caseReference
+    ) throws RuntimeException {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.findAndRegisterModules();
+        String updatedHearingPayload = hearingPayload.replace("<caseRef>", caseReference);
+
+        try {
+            return mapper.readValue(updatedHearingPayload, Hearings.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 
     @PostMapping(value = "/serviceLinkedCases", consumes = "application/json")
