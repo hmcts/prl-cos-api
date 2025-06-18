@@ -12,6 +12,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -58,7 +59,7 @@ public class C100RespondentSolicitorControllerFunctionalTest {
 
     private static CaseDetails caseDetails;
 
-    @Mock
+    @MockBean
     AllTabServiceImpl allTabService;
 
     @Test
