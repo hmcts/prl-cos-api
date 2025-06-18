@@ -163,7 +163,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private final List<Document> contactOrderDocumentsUploaded;
     private final List<Document> c8FormDocumentsUploaded;
     private final List<Document> otherDocumentsUploaded;
-    private List<Element<Document>> archivedC8Documents;
+    private List<Element<Document>> c8ArchiveDocuments;
 
     /**
      * People in the case.
