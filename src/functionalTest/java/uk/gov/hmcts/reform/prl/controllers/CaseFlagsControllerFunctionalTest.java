@@ -33,7 +33,7 @@ public class CaseFlagsControllerFunctionalTest {
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
     @Test
-    public void givenBodyWithSendData_whenAboutToStartCallback() throws Exception {
+    public void givenBodyWithCaseFlags_whenAboutToStartCallback() throws Exception {
         String requestBody = ResourceLoader.loadJson(CASE_FLAG_CONTROLLER_REQUEST_JSON);
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
@@ -46,7 +46,7 @@ public class CaseFlagsControllerFunctionalTest {
     }
 
     @Test
-    public void givenBodyWithNoMessages_whenAboutToSubmit() throws Exception {
+    public void givenBodyWithCaseFlags_whenAboutToSubmit() throws Exception {
         String requestBody = ResourceLoader.loadJson(CASE_FLAG_CONTROLLER_REQUEST_JSON);
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
@@ -60,7 +60,7 @@ public class CaseFlagsControllerFunctionalTest {
     }
 
     @Test
-    public void givenBodyWithNoMessages_whenSubmitted() throws Exception {
+    public void givenBodyWithCaseFlags_whenSubmitted() throws Exception {
         String requestBody = ResourceLoader.loadJson(CASE_FLAG_CONTROLLER_REQUEST_JSON);
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
