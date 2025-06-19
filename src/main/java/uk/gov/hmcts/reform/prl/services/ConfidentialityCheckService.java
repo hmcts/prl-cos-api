@@ -25,7 +25,7 @@ public class ConfidentialityCheckService {
     public static final String RESP_AC_8_ENG_DOCUMENT = "respAC8EngDocument";
     public static final String RESP_AC_8_WEL_DOCUMENT = "respAC8WelDocument";
     public static final String APP_AC_8_ENG_DOCUMENT = "appAC8EngDocument";
-    public static final String APP_AC_8_WEL_DOCUMENT = "appAC8EngDocument";
+    public static final String APP_AC_8_WEL_DOCUMENT = "appAC8WelDocument";
 
 
     public void processRespondentsC8Documents(Map<String, Object> caseDataMap, CaseData caseData) {
@@ -94,7 +94,6 @@ public class ConfidentialityCheckService {
                     case 0 -> {
                         ResponseDocuments responseDocumentA = getApplicantDoc(findLatestApplicantC8Document(caseData.getApplicantC8Document(),
                                                                                                               caseData.getApplicantC8(), 0));
-
                         caseDataMap.put(APP_AC_8_ENG_DOCUMENT, responseDocumentA.getApplicantC8Document());
                         caseDataMap.put(APP_AC_8_WEL_DOCUMENT, responseDocumentA.getApplicantC8DocumentWelsh());
                         findAndShowC8RefugeDocs(caseDataMap, eachApp.getValue(), "appAC8RefugeDocument");
