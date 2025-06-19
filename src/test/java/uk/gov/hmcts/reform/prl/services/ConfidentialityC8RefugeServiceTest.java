@@ -43,6 +43,8 @@ public class ConfidentialityC8RefugeServiceTest {
     PartyDetails refugePartyDetails1;
     PartyDetails refugePartyDetails2;
 
+    PartyDetails refugePartyDetails1NotConfidential;
+
     @Before
     public void setUp() {
 
@@ -67,6 +69,24 @@ public class ConfidentialityC8RefugeServiceTest {
             .isCurrentAddressKnown(YesOrNo.Yes)
             .canYouProvidePhoneNumber(YesOrNo.Yes)
             .isEmailAddressConfidential(YesOrNo.Yes)
+            .liveInRefuge(YesOrNo.Yes)
+            .build();
+
+        refugePartyDetails1NotConfidential = PartyDetails.builder()
+            .firstName("ABC 1")
+            .lastName("XYZ 2")
+            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .gender(Gender.male)
+            .address(address)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("abc1@xyz.com")
+            .phoneNumber("09876543211")
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isCurrentAddressKnown(YesOrNo.Yes)
+            .canYouProvidePhoneNumber(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.No)
             .liveInRefuge(YesOrNo.Yes)
             .build();
 
@@ -386,7 +406,6 @@ public class ConfidentialityC8RefugeServiceTest {
                 refugeDocumentHandlerParameters,
                 refugeConfidentialDocumentsRecord
             );
-
         assertNotNull(returnedRefuge);
     }
 

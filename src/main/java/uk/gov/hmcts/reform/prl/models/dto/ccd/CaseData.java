@@ -41,7 +41,6 @@ import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
-import uk.gov.hmcts.reform.prl.models.c100respondentsolicitor.RespondentC8;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseflags.AllPartyFlags;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
@@ -211,8 +210,6 @@ public class CaseData extends BaseCaseData implements MappableObject {
      * caseNotes details.
      */
     private List<Element<CaseNoteDetails>> caseNotes;
-    //@JsonProperty("caseNoteDetails")
-    //private final CaseNoteDetails caseNoteDetails;
     private final String subject;
     private final String caseNote;
 
@@ -689,7 +686,6 @@ public class CaseData extends BaseCaseData implements MappableObject {
     @JsonProperty("cafcassUploadedDocs")
     private final List<Element<UploadedDocuments>> cafcassUploadedDocs;
 
-    // C100 Rebuild
     @JsonUnwrapped
     private final C100RebuildData c100RebuildData;
 
@@ -720,7 +716,6 @@ public class CaseData extends BaseCaseData implements MappableObject {
 
     private final List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers;
 
-    //Added for c100 rebuild
     private Long noOfDaysRemainingToSubmitCase;
 
     private final DynamicList legalAdviserList;
@@ -760,11 +755,6 @@ public class CaseData extends BaseCaseData implements MappableObject {
     @JsonUnwrapped
     private CitizenResponseDocuments citizenResponseDocuments;
 
-    @JsonUnwrapped
-    private RespondentC8Document respondentC8Document;
-
-    @JsonUnwrapped
-    private RespondentC8 respondentC8;
     //PRL-3454 - send and reply message enhancements
     @JsonUnwrapped
     private SendOrReplyMessage sendOrReplyMessage;
