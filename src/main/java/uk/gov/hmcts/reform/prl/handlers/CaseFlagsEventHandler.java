@@ -7,6 +7,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.events.CaseFlagsEvent;
@@ -35,7 +36,7 @@ public class CaseFlagsEventHandler {
                 caseId,
                 CaseEvent.CREATE_WA_TASK_FOR_CTSC_CASE_FLAGS.getValue()
             );
-            startAllTabsUpdateDataContent.caseDataMap().put("isCaseFlagsTaskCreated", YesOrNo.Yes);
+            startAllTabsUpdateDataContent.caseDataMap().put(PrlAppsConstants.WA_IS_CASE_FLAG_TASK_CREATED, YesOrNo.Yes);
             allTabService.submitAllTabsUpdate(
                 startAllTabsUpdateDataContent.authorisation(),
                 caseId,

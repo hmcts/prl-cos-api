@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.events.CaseFlagsEvent;
@@ -61,7 +62,7 @@ public class CaseFlagsWaService {
                 caseId,
                 CaseEvent.CLOSE_REVIEW_RA_REQUEST_TASK.getValue()
             );
-            startAllTabsUpdateDataContent.caseDataMap().put("isCaseFlagsTaskCreated", YesOrNo.No);
+            startAllTabsUpdateDataContent.caseDataMap().put(PrlAppsConstants.WA_IS_CASE_FLAG_TASK_CREATED, YesOrNo.No);
             allTabService.submitAllTabsUpdate(
                 startAllTabsUpdateDataContent.authorisation(),
                 caseId,
