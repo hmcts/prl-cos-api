@@ -101,6 +101,405 @@
         "roleOnCase": "Applicant 1",
         "visibility": "External"
       },
+      "caApplicant1InternalFlags": {
+        "details": [],
+        "groupId": "caApplicant1",
+        "partyName": "John Doe",
+        "roleOnCase": "Applicant 1",
+        "visibility": "Internal"
+      },
+      "caApplicant2ExternalFlags": {
+        "details": [],
+        "groupId": "caApplicant2",
+        "partyName": "Jeremy Anderson",
+        "roleOnCase": "Applicant 2",
+        "visibility": "External"
+      },
+      "caApplicant2InternalFlags": {
+        "details": [],
+        "groupId": "caApplicant2",
+        "partyName": "Jeremy Anderson",
+        "roleOnCase": "Applicant 2",
+        "visibility": "Internal"
+      },
+      "caApplicant3ExternalFlags": {
+        "details": [],
+        "groupId": "caApplicant3",
+        "partyName": "Martina Graham",
+        "roleOnCase": "Applicant 3",
+        "visibility": "External"
+      },
+      "caApplicant3InternalFlags": {
+        "details": [
+          {
+            "id": "6e0d7060-7aaa-4d30-ab7f-95fa5042bd55",
+            "value": {
+              "name": "Vulnerable user",
+              "path": [
+                {
+                  "id": "d770c21e-8445-487a-a2d1-385cf3fdd9cf",
+                  "value": "Party"
+                }
+              ],
+              "status": "Active",
+              "name_cy": "Defnyddiwr bregus",
+              "flagCode": "PF0002",
+              "subTypeKey": null,
+              "flagComment": "asdfa",
+              "subTypeValue": null,
+              "flagComment_cy": null,
+              "dateTimeCreated": "2025-06-18T15:11:07.607Z",
+              "hearingRelevant": "Yes",
+              "subTypeValue_cy": null,
+              "dateTimeModified": null,
+              "otherDescription": null,
+              "flagUpdateComment": "",
+              "availableExternally": "No",
+              "otherDescription_cy": null
+            }
+          }
+        ],
+        "groupId": "caApplicant3",
+        "partyName": "Martina Graham",
+        "roleOnCase": "Applicant 3",
+        "visibility": "Internal"
+      },
+      "caApplicant4ExternalFlags": {
+        "details": [],
+        "groupId": null,
+        "partyName": null,
+        "roleOnCase": null,
+        "visibility": null
+      },
+      "caApplicant4InternalFlags": {
+        "details": [],
+        "groupId": null,
+        "partyName": null,
+        "roleOnCase": null,
+        "visibility": null
+      },
+      "caApplicant5ExternalFlags": {
+        "details": [],
+        "groupId": null,
+        "partyName": null,
+        "roleOnCase": null,
+        "visibility": null
+      },
+      "caApplicant5InternalFlags": {
+        "details": [],
+        "groupId": null,
+        "partyName": null,
+        "roleOnCase": null,
+        "visibility": null
+      },
+      "caOtherParty1ExternalFlags": {
+        "details": [],
+        "groupId": "caOtherParty1",
+        "partyName": "Sam Nolan",
+        "roleOnCase": "Other people in the case 1",
+        "visibility": "External"
+      },
+      "caOtherParty1InternalFlags": {
+        "details": [
+          {
+            "id": "ed1c983d-2952-4861-a1ed-d126c3fc1dcc",
+            "value": {
+              "name": "Party Abroad",
+              "path": [
+                {
+                  "id": "a5815743-5ca5-4841-a544-6882c1419efe",
+                  "value": "Party"
+                }
+              ],
+              "status": "Requested",
+              "name_cy": "Mae’r Parti Dramor",
+              "flagCode": "PF0022",
+              "subTypeKey": null,
+              "flagComment": "adfsaaf",
+              "subTypeValue": null,
+              "flagComment_cy": null,
+              "dateTimeCreated": "2025-06-18T15:12:27.197Z",
+              "hearingRelevant": "Yes",
+              "subTypeValue_cy": null,
+              "dateTimeModified": null,
+              "otherDescription": null,
+              "flagUpdateComment": "",
+              "availableExternally": "No",
+              "otherDescription_cy": null
+            }
+          }
+        ],
+        "groupId": "caOtherParty1",
+        "partyName": "Sam Nolan",
+        "roleOnCase": "Other people in the case 1",
+        "visibility": "Internal"
+      },
+      "caOtherParty2ExternalFlags": {
+        "details": [],
+        "groupId": null,
+        "partyName": null,
+        "roleOnCase": null,
+        "visibility": null
+      },
+      "caOtherParty2InternalFlags": {
+        "details": [],
+        "groupId": null,
+        "partyName": null,
+        "roleOnCase": null,
+        "visibility": null
+      },
+      "caOtherParty3ExternalFlags": {
+        "details": [],
+        "groupId": null,
+        "partyName": null,
+        "roleOnCase": null,
+        "visibility": null
+      },
+      "caOtherParty3InternalFlags": {
+        "details": [],
+        "groupId": null,
+        "partyName": null,
+        "roleOnCase": null,
+        "visibility": null
+      },
+      "caOtherParty4ExternalFlags": {
+        "details": [],
+        "groupId": null,
+        "partyName": null,
+        "roleOnCase": null,
+        "visibility": null
+      },
+      "caOtherParty4InternalFlags": {
+        "details": [],
+        "groupId": null,
+        "partyName": null,
+        "roleOnCase": null,
+        "visibility": null
+      },
+      "caOtherParty5ExternalFlags": {
+        "details": [],
+        "groupId": null,
+        "partyName": null,
+        "roleOnCase": null,
+        "visibility": null
+      },
+      "caOtherParty5InternalFlags": {
+        "details": [],
+        "groupId": null,
+        "partyName": null,
+        "roleOnCase": null,
+        "visibility": null
+      },
+      "caRespondent1ExternalFlags": {
+        "details": [],
+        "groupId": "caRespondent1",
+        "partyName": "Mary Richards",
+        "roleOnCase": "Respondent 1",
+        "visibility": "External"
+      },
+      "caRespondent1InternalFlags": {
+        "details": [],
+        "groupId": "caRespondent1",
+        "partyName": "Mary Richards",
+        "roleOnCase": "Respondent 1",
+        "visibility": "Internal"
+      },
+      "caRespondent2ExternalFlags": {
+        "details": [],
+        "groupId": "caRespondent2",
+        "partyName": "Elise Lynn",
+        "roleOnCase": "Respondent 2",
+        "visibility": "External"
+      },
+      "caRespondent2InternalFlags": {
+        "details": [],
+        "groupId": "caRespondent2",
+        "partyName": "Elise Lynn",
+        "roleOnCase": "Respondent 2",
+        "visibility": "Internal"
+      },
+      "caRespondent3ExternalFlags": {
+        "details": [],
+        "groupId": "caRespondent3",
+        "partyName": "David Carman",
+        "roleOnCase": "Respondent 3",
+        "visibility": "External"
+      },
+      "caRespondent3InternalFlags": {
+        "details": [],
+        "groupId": "caRespondent3",
+        "partyName": "David Carman",
+        "roleOnCase": "Respondent 3",
+        "visibility": "Internal"
+      },
+      "caRespondent4ExternalFlags": {
+        "details": [],
+        "groupId": null,
+        "partyName": null,
+        "roleOnCase": null,
+        "visibility": null
+      },
+      "caRespondent4InternalFlags": {
+        "details": [],
+        "groupId": null,
+        "partyName": null,
+        "roleOnCase": null,
+        "visibility": null
+      },
+      "caRespondent5ExternalFlags": {
+        "details": [],
+        "groupId": null,
+        "partyName": null,
+        "roleOnCase": null,
+        "visibility": null
+      },
+      "caRespondent5InternalFlags": {
+        "details": [],
+        "groupId": null,
+        "partyName": null,
+        "roleOnCase": null,
+        "visibility": null
+      },
+      "caApplicantSolicitor1ExternalFlags": {
+        "details": [],
+        "groupId": "caApplicantSolicitor1",
+        "partyName": "Legal Solicitor",
+        "roleOnCase": "Applicant solicitor 1",
+        "visibility": "External"
+      },
+      "caApplicantSolicitor1InternalFlags": {
+        "details": [],
+        "groupId": "caApplicantSolicitor1",
+        "partyName": "Legal Solicitor",
+        "roleOnCase": "Applicant solicitor 1",
+        "visibility": "Internal"
+      },
+      "caApplicantSolicitor2ExternalFlags": {
+        "details": [],
+        "groupId": "caApplicantSolicitor2",
+        "partyName": "Legal Solicitor Jr",
+        "roleOnCase": "Applicant solicitor 2",
+        "visibility": "External"
+      },
+      "caApplicantSolicitor2InternalFlags": {
+        "details": [],
+        "groupId": "caApplicantSolicitor2",
+        "partyName": "Legal Solicitor Jr",
+        "roleOnCase": "Applicant solicitor 2",
+        "visibility": "Internal"
+      },
+      "caApplicantSolicitor3ExternalFlags": {
+        "details": [],
+        "groupId": "caApplicantSolicitor3",
+        "partyName": "Sr Legal Solicitor",
+        "roleOnCase": "Applicant solicitor 3",
+        "visibility": "External"
+      },
+      "caApplicantSolicitor3InternalFlags": {
+        "details": [],
+        "groupId": "caApplicantSolicitor3",
+        "partyName": "Sr Legal Solicitor",
+        "roleOnCase": "Applicant solicitor 3",
+        "visibility": "Internal"
+      },
+      "caApplicantSolicitor4ExternalFlags": {
+        "details": [],
+        "groupId": null,
+        "partyName": null,
+        "roleOnCase": null,
+        "visibility": null
+      },
+      "caApplicantSolicitor4InternalFlags": {
+        "details": [],
+        "groupId": null,
+        "partyName": null,
+        "roleOnCase": null,
+        "visibility": null
+      },
+      "caApplicantSolicitor5ExternalFlags": {
+        "details": [],
+        "groupId": null,
+        "partyName": null,
+        "roleOnCase": null,
+        "visibility": null
+      },
+      "caApplicantSolicitor5InternalFlags": {
+        "details": [],
+        "groupId": null,
+        "partyName": null,
+        "roleOnCase": null,
+        "visibility": null
+      },
+      "caRespondentSolicitor1ExternalFlags": {
+        "details": [],
+        "groupId": null,
+        "partyName": null,
+        "roleOnCase": null,
+        "visibility": null
+      },
+      "caRespondentSolicitor1InternalFlags": {
+        "details": [],
+        "groupId": null,
+        "partyName": null,
+        "roleOnCase": null,
+        "visibility": null
+      },
+      "caRespondentSolicitor2ExternalFlags": {
+        "details": [],
+        "groupId": null,
+        "partyName": null,
+        "roleOnCase": null,
+        "visibility": null
+      },
+      "caRespondentSolicitor2InternalFlags": {
+        "details": [],
+        "groupId": null,
+        "partyName": null,
+        "roleOnCase": null,
+        "visibility": null
+      },
+      "caRespondentSolicitor3ExternalFlags": {
+        "details": [],
+        "groupId": null,
+        "partyName": null,
+        "roleOnCase": null,
+        "visibility": null
+      },
+      "caRespondentSolicitor3InternalFlags": {
+        "details": [],
+        "groupId": null,
+        "partyName": null,
+        "roleOnCase": null,
+        "visibility": null
+      },
+      "caRespondentSolicitor4ExternalFlags": {
+        "details": [],
+        "groupId": null,
+        "partyName": null,
+        "roleOnCase": null,
+        "visibility": null
+      },
+      "caRespondentSolicitor4InternalFlags": {
+        "details": [],
+        "groupId": null,
+        "partyName": null,
+        "roleOnCase": null,
+        "visibility": null
+      },
+      "caRespondentSolicitor5ExternalFlags": {
+        "details": [],
+        "groupId": null,
+        "partyName": null,
+        "roleOnCase": null,
+        "visibility": null
+      },
+      "caRespondentSolicitor5InternalFlags": {
+        "details": [],
+        "groupId": null,
+        "partyName": null,
+        "roleOnCase": null,
+        "visibility": null
+      },
       "selectedFlags": []
     },
     "case_type_id": "string",
