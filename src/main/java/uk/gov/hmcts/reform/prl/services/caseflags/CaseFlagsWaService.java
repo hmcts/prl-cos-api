@@ -133,7 +133,9 @@ public class CaseFlagsWaService {
         field.setAccessible(true);
         try {
             Flags selectedFlag = deepCopy((Flags) field.get(allPartyFlags), Flags.class);
-            selectedFlagsList.add(ElementUtils.element(selectedFlag));
+            if (selectedFlag != null) {
+                selectedFlagsList.add(ElementUtils.element(selectedFlag));
+            }
         } catch (IllegalAccessException e) {
             // ignore
         }
