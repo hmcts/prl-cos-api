@@ -131,7 +131,15 @@ public class FlagsService {
             "caOtherParty2ExternalFlags",
             "caOtherParty3ExternalFlags",
             "caOtherParty4ExternalFlags",
-            "caOtherParty5ExternalFlags"
+            "caOtherParty5ExternalFlags",
+            "daApplicantInternalFlags",
+            "daApplicantSolicitorInternalFlags",
+            "daRespondentInternalFlags",
+            "daRespondentSolicitorInternalFlags",
+            "daApplicantExternalFlags",
+            "daApplicantSolicitorExternalFlags",
+            "daRespondentExternalFlags",
+            "daRespondentSolicitorExternalFlags"
         );
     }
 }
