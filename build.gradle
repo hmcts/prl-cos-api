@@ -167,7 +167,7 @@ allprojects {
         entry 'commons-fileupload'
       }
       //CVE-2022-45688
-      dependencySet(group: 'org.json', version: '20231013') {
+      dependencySet(group: 'org.json', version: '20250517') {
         entry 'json'
       }
       //CVE-2023-2976
