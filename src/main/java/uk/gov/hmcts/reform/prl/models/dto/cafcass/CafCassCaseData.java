@@ -628,6 +628,9 @@ public class CafCassCaseData {
                                                                       .email(partyDetails.getEmail())
                                                                       .canYouProvidePhoneNumber(partyDetails.getCanYouProvidePhoneNumber())
                                                                       .phoneNumber(partyDetails.getPhoneNumber())
+                                                                      .isAddressConfidential(partyDetails.getIsAddressConfidential())
+                                                                      .isEmailAddressConfidential(partyDetails.getIsEmailAddressConfidential())
+                                                                      .isPhoneNumberConfidential(partyDetails.getIsPhoneNumberConfidential())
                                                                       .build())
                                                            .build());
                 }
