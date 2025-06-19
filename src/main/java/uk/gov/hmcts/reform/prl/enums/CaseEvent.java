@@ -42,6 +42,7 @@ public enum CaseEvent {
     C100_REQUEST_SUPPORT("c100RequestSupport"),
     FL401_REQUEST_SUPPORT("fl401RequestSupport"),
     C100_MANAGE_SUPPORT("c100ManageSupport"),
+    C100_MANAGE_FLAGS("c100ManageFlags"),
     FL401_MANAGE_SUPPORT("fl401ManageSupport"),
     TS_ADMIN_APPLICATION_NOC("testingSupportDummyCase"),
     CITIZEN_STATEMENT_OF_SERVICE("citizenStatementOfService"),
@@ -73,7 +74,8 @@ public enum CaseEvent {
     AMEND_RESPONDENTS_DETAILS("amendRespondentsDetails"),
     AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED("amendOtherPeopleInTheCaseRevised"),
     APPLICANT_DETAILS("applicantsDetails"),
-    REVIEW_ADDITIONAL_APPLICATION("reviewAdditionalApplication");
+    REVIEW_ADDITIONAL_APPLICATION("reviewAdditionalApplication"),
+    CLOSE_REVIEW_RA_REQUEST_TASK("closeReviewRARequestTask");
 
     private final String value;
 
