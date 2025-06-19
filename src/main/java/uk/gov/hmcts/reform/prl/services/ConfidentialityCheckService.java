@@ -96,7 +96,7 @@ public class ConfidentialityCheckService {
                                                                                                               caseData.getApplicantC8(), 0));
 
                         caseDataMap.put(APP_AC_8_ENG_DOCUMENT, responseDocumentA.getApplicantC8Document());
-                        caseDataMap.put(RESP_AC_8_WEL_DOCUMENT, responseDocumentA.getApplicantC8DocumentWelsh());
+                        caseDataMap.put(APP_AC_8_WEL_DOCUMENT, responseDocumentA.getApplicantC8DocumentWelsh());
                         findAndShowC8RefugeDocs(caseDataMap, eachApp.getValue(), "appAC8RefugeDocument");
 
                     }
@@ -363,7 +363,7 @@ public class ConfidentialityCheckService {
         }
         return applicantC8Document.getApplicantAc8Documents().get(0).getValue();
     }
-    
+
     private static ResponseDocuments getRespondentAC8Document(RespondentC8Document respondentC8Document) {
         if (respondentC8Document.getRespondentAc8Documents() == null || respondentC8Document.getRespondentAc8Documents().isEmpty()) {
             return null;
