@@ -178,7 +178,7 @@ allprojects {
       }
 
       //CVE-2023-34034
-      dependency group: 'org.springframework.security', name: 'spring-security-crypto', version: '5.8.16'
+      dependency group: 'org.springframework.security', name: 'spring-security-crypto', version: '6.5.1'
 
       //CVE-2023-42795, CVE-2023-45648
       dependencySet(group: 'org.apache.tomcat.embed', version: '10.1.42') {
@@ -291,7 +291,7 @@ configurations.configureEach {
   resolutionStrategy {
     force 'org.bouncycastle:bcpkix-jdk18on:1.80'
     force 'org.springframework.security:spring-security-rsa:1.1.5'
-    force 'org.springframework.security:spring-security-crypto:5.8.16'
+    force 'org.springframework.security:spring-security-crypto:6.5.1'
     force 'ch.qos.logback:logback-classic:1.5.18'
     force 'ch.qos.logback:logback-core:1.5.18'
   }
@@ -370,10 +370,10 @@ dependencies {
   implementation group: 'commons-net', name: 'commons-net', version: '3.11.1'
 //  //implementation group: 'uk.gov.hmcts.reform.auth', name: 'auth-checker-lib', version: '2.1.4'
 //
-  implementation group: 'org.springframework.security', name: 'spring-security-web', version: '5.8.16'
+  implementation group: 'org.springframework.security', name: 'spring-security-web', version: '6.5.1'
 //  implementation group: 'org.springframework.security', name: 'spring-security-config'
 //  // CVE-2021-22112 - Privilege Escalation
-  implementation group: 'org.springframework.security', name: 'spring-security-core', version: '5.8.16'
+  implementation group: 'org.springframework.security', name: 'spring-security-core', version: '6.5.1'
 //  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-client'
 //  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-resource-server'
 
