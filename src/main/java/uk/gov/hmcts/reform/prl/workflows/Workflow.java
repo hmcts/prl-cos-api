@@ -1,9 +1,9 @@
-package uk.gov.hmcts.reform.prl.framework.workflow;
+package uk.gov.hmcts.reform.prl.workflows;
 
 import org.apache.commons.lang3.tuple.Pair;
-import uk.gov.hmcts.reform.prl.framework.context.DefaultTaskContext;
-import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
-import uk.gov.hmcts.reform.prl.framework.task.Task;
+import uk.gov.hmcts.reform.prl.exception.WorkflowException;
+import uk.gov.hmcts.reform.prl.tasks.DefaultTaskContext;
+import uk.gov.hmcts.reform.prl.tasks.Task;
 
 import java.util.Map;
 

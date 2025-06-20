@@ -4,12 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
-import uk.gov.hmcts.reform.prl.framework.task.Task;
-import uk.gov.hmcts.reform.prl.framework.workflow.DefaultWorkflow;
+import uk.gov.hmcts.reform.prl.exception.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.tasks.ApplicationTimetableEffortsValidationTask;
 import uk.gov.hmcts.reform.prl.tasks.ApplicationTimetableTimeValidationTask;
+import uk.gov.hmcts.reform.prl.tasks.Task;
 
 @Component
 @RequiredArgsConstructor

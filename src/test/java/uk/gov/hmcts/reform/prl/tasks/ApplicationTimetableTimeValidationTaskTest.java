@@ -2,8 +2,6 @@ package uk.gov.hmcts.reform.prl.tasks;
 
 import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
-import uk.gov.hmcts.reform.prl.framework.context.DefaultTaskContext;
-import uk.gov.hmcts.reform.prl.framework.context.TaskContext;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 
 import static org.hamcrest.CoreMatchers.is;
