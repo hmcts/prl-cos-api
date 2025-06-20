@@ -114,21 +114,21 @@ public class TaskListService {
 
     public List<Task> getTasksForOpenCase(CaseData caseData) {
         return getEvents(caseData).stream()
-                .map(event -> Task.builder()
-                        .event(event)
-                        .state(getTaskState(caseData, event))
-                        .build())
-                .toList();
+            .map(event -> Task.builder()
+                .event(event)
+                .state(getTaskState(caseData, event))
+                .build())
+            .toList();
     }
 
     public List<RespondentTask> getRespondentSolicitorTasks(PartyDetails respondingParty, CaseData caseData) {
         boolean isC1aApplicable = caseData.getC1ADocument() != null;
         return getRespondentsEvents(caseData).stream()
-                .map(event -> RespondentTask.builder()
-                        .event(event)
-                        .state(getRespondentTaskState(event, respondingParty, isC1aApplicable))
-                        .build())
-                .toList();
+            .map(event -> RespondentTask.builder()
+                .event(event)
+                .state(getRespondentTaskState(event, respondingParty, isC1aApplicable))
+                .build())
+            .toList();
     }
 
     private TaskState getTaskState(CaseData caseData, Event event) {
@@ -156,7 +156,7 @@ public class TaskListService {
 
     private List<Event> getEvents(CaseData caseData) {
         return (PrlAppsConstants.FL401_CASE_TYPE).equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-                ? getFL401Events(caseData) : getC100Events(caseData);
+            ? getFL401Events(caseData) : getC100Events(caseData);
     }
 
     public List<Event> getC100Events(CaseData caseData) {
@@ -317,8 +317,8 @@ public class TaskListService {
                         startAllTabsUpdateDataContent.authorisation()
                     );
                 }
-                CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(),objectMapper);
-                 CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(),objectMapper);
+                CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
+                CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
                 boolean confidentialDetailsChanged = haveConfidentialDetailsChanged(caseData, caseDataBefore);
                 if (confidentialDetailsChanged) {
                     Document c8ToArchive = caseData.getC8Document();
