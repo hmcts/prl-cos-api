@@ -16,10 +16,12 @@ import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
@@ -106,26 +108,27 @@ public class TaskListService {
     private final LaunchDarklyClient launchDarklyClient;
     private final RoleAssignmentApi roleAssignmentApi;
     private final AuthTokenGenerator authTokenGenerator;
+    private final AllTabServiceImpl allTabService;
 
     private final MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
 
     public List<Task> getTasksForOpenCase(CaseData caseData) {
         return getEvents(caseData).stream()
-                .map(event -> Task.builder()
-                        .event(event)
-                        .state(getTaskState(caseData, event))
-                        .build())
-                .toList();
+            .map(event -> Task.builder()
+                .event(event)
+                .state(getTaskState(caseData, event))
+                .build())
+            .toList();
     }
 
     public List<RespondentTask> getRespondentSolicitorTasks(PartyDetails respondingParty, CaseData caseData) {
         boolean isC1aApplicable = caseData.getC1ADocument() != null;
         return getRespondentsEvents(caseData).stream()
-                .map(event -> RespondentTask.builder()
-                        .event(event)
-                        .state(getRespondentTaskState(event, respondingParty, isC1aApplicable))
-                        .build())
-                .toList();
+            .map(event -> RespondentTask.builder()
+                .event(event)
+                .state(getRespondentTaskState(event, respondingParty, isC1aApplicable))
+                .build())
+            .toList();
     }
 
     private TaskState getTaskState(CaseData caseData, Event event) {
@@ -153,7 +156,7 @@ public class TaskListService {
 
     private List<Event> getEvents(CaseData caseData) {
         return (PrlAppsConstants.FL401_CASE_TYPE).equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-                ? getFL401Events(caseData) : getC100Events(caseData);
+            ? getFL401Events(caseData) : getC100Events(caseData);
     }
 
     public List<Event> getC100Events(CaseData caseData) {
@@ -314,7 +317,21 @@ public class TaskListService {
                         startAllTabsUpdateDataContent.authorisation()
                     );
                 }
+                CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
+                CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
+                boolean confidentialDetailsChanged = haveConfidentialDetailsChanged(caseData, caseDataBefore);
+                if (confidentialDetailsChanged) {
+                    Document c8ToArchive = caseData.getC8Document();
+
+                    if (c8ToArchive != null) {
+
+                        caseDataUpdated.put("c8ArchivedDocument", c8ToArchive);
+
+                    }
+                }
+
                 caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
+                caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
                 CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
                 caseData = caseData.toBuilder()
                     .c8Document(updatedCaseData.getC8Document())
@@ -362,5 +379,22 @@ public class TaskListService {
             roles = CaseUtils.mapAmUserRolesToIdamRoles(roleAssignmentServiceResponse, authorisation, userDetails);
         }
         return roles;
+    }
+
+    private boolean haveConfidentialDetailsChanged(CaseData current, CaseData previous) {
+        boolean currentConfidential = YesOrNo.Yes.equals(getAddressConfidentialityFlag(current)) ? true : false;
+        boolean previousConfidential = YesOrNo.Yes.equals(getAddressConfidentialityFlag(previous)) ? true : false;
+
+        return currentConfidential != previousConfidential;
+    }
+
+    private YesOrNo getAddressConfidentialityFlag(CaseData caseData) {
+        if (caseData.getApplicants() != null && !caseData.getApplicants().isEmpty()) {
+            PartyDetails partyDetails = caseData.getApplicants().get(0).getValue();
+            if (partyDetails != null) {
+                return partyDetails.getIsAddressConfidential();
+            }
+        }
+        return null;
     }
 }
