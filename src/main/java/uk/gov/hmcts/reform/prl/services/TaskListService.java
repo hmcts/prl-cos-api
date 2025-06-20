@@ -327,19 +327,15 @@ public class TaskListService {
                     Document c8ToArchive = caseData.getC8Document();
 
                     if (c8ToArchive != null) {
-                        List<Element<Document>> archived = ofNullable(caseData.getC8ArchivedDocuments())
-                            .orElse(new ArrayList<>());
 
-                        archived.add(ElementUtils.element(c8ToArchive));
-
-                        caseDataUpdated.put("c8ArchivedDocuments", archived);
+                        caseDataUpdated.put("c8ArchivedDocument", c8ToArchive);
                     }
                 }
 
                 caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
                 CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
                 caseData = caseData.toBuilder()
-                    .c8ArchivedDocuments(updatedCaseData.getC8ArchivedDocuments())
+                    .c8ArchivedDocument(updatedCaseData.getC8ArchivedDocument())
                     .c8Document(updatedCaseData.getC8Document())
                     .c1ADocument(updatedCaseData.getC1ADocument())
                     .c8WelshDocument(updatedCaseData.getC8WelshDocument())
