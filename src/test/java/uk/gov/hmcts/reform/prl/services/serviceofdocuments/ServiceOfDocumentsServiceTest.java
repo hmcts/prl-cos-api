@@ -698,6 +698,32 @@ public class ServiceOfDocumentsServiceTest {
         AboutToStartOrSubmitCallbackResponse response = serviceOfDocumentsService.handleConfCheckAboutToStart(TEST_AUTHORIZATION, callbackRequest);
         assertNotNull(response);
     }
+    @Test
+    public void testHandleConfCheckAboutToStartWhenSodUnServedPackWithNoDocsForApplicant() {
+        partyDetails = partyDetails.toBuilder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .solicitorEmail(null)
+            .contactPreferences(ContactPreferences.email)
+            .build();
+        sodPack = sodPack.toBuilder().documents(new ArrayList<>())
+            .build();
+        serviceOfDocuments = serviceOfDocuments.toBuilder()
+            .sodUnServedPack(sodPack)
+            .sodDocumentsCheckOptions(ServiceOfDocumentsCheckEnum.managerCheck)
+            .build();
+
+        CaseData caseData1 = CaseData.builder()
+            .serviceOfDocuments(serviceOfDocuments)
+            .applicants(List.of(element(UUID.fromString(TEST_UUID), partyDetails)))
+            .respondents(List.of(element(UUID.fromString(TEST_UUID),partyDetails)))
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData1);
+
+        doNothing().when(confidentialityCheckService).processApplicantsC8Documents(any(Map.class), any(CaseData.class));
+        AboutToStartOrSubmitCallbackResponse response = serviceOfDocumentsService.handleConfCheckAboutToStart(TEST_AUTHORIZATION, callbackRequest);
+        assertNotNull(response);
+    }
 
     @Test
     public void testHandleConfCheckAboutToSubmitForServiceOfDocumentsEvents() {

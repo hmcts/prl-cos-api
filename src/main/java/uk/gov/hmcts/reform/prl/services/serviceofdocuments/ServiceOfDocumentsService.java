@@ -1014,6 +1014,7 @@ public class ServiceOfDocumentsService {
             && null != caseData.getServiceOfDocuments().getSodUnServedPack()
             && CollectionUtils.isNotEmpty(caseData.getServiceOfDocuments().getSodUnServedPack().getDocuments())) {
             Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+            confidentialityCheckService.processApplicantsC8Documents(caseDataMap, caseData);
             confidentialityCheckService.processRespondentsC8Documents(caseDataMap, caseData);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
         }
