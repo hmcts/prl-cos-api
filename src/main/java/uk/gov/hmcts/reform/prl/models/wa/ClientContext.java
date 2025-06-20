@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.prl.models.languagecontext.UserLanguage;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)

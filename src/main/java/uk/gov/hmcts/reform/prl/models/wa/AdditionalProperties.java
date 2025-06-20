@@ -21,4 +21,6 @@ public class AdditionalProperties {
     private String caseNoteId;
     @JsonProperty("additionalApplicationId")
     private String additionalApplicationId;
+    @JsonProperty("hearingId")
+    private String hearingId;
 }
