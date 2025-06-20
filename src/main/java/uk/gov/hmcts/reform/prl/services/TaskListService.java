@@ -108,6 +108,7 @@ public class TaskListService {
     private final LaunchDarklyClient launchDarklyClient;
     private final RoleAssignmentApi roleAssignmentApi;
     private final AuthTokenGenerator authTokenGenerator;
+    private final AllTabServiceImpl allTabService;
 
     private final MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
 
@@ -316,10 +317,8 @@ public class TaskListService {
                         startAllTabsUpdateDataContent.authorisation()
                     );
                 }
-                CaseData caseDataBefore = objectMapper.convertValue(
-                    callbackRequest.getCaseDetailsBefore().getData(),
-                    CaseData.class
-                );
+                CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(),objectMapper);
+                 CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(),objectMapper);
                 boolean confidentialDetailsChanged = haveConfidentialDetailsChanged(caseData, caseDataBefore);
                 if (confidentialDetailsChanged) {
                     Document c8ToArchive = caseData.getC8Document();
@@ -327,13 +326,14 @@ public class TaskListService {
                     if (c8ToArchive != null) {
 
                         caseDataUpdated.put("c8ArchivedDocument", c8ToArchive);
+
                     }
                 }
 
                 caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
+                caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
                 CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
                 caseData = caseData.toBuilder()
-                    .c8ArchivedDocument(updatedCaseData.getC8ArchivedDocument())
                     .c8Document(updatedCaseData.getC8Document())
                     .c1ADocument(updatedCaseData.getC1ADocument())
                     .c8WelshDocument(updatedCaseData.getC8WelshDocument())
