@@ -26,7 +26,7 @@ def versions = [
   awaitility                   : '4.2.2',
   bcpkixJdk18on                : '1.80',
   ccdClient                    : '4.9.2',
-  commonsBeanUtils             : '1.9.4',
+  commonsBeanUtils             : '1.11.0',
   commonsIo                    : '2.16.1',
   commonsLang3                 : '3.17.0',
   commonsMath3                 : '3.6.1',
