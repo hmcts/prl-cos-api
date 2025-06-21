@@ -42,7 +42,7 @@ def versions = [
   jacksonDatatypeJsr           : '2.19.1',
   jsonAssert                   : '1.5.3',
   //  jsonPathAssert               : '2.2.0',
-  junit                        : '5.10.3',
+  junit                        : '5.13.1',
   junitPlatform                : '5.7.2',
   lombok                       : '1.18.38',
   pact                         : '4.1.11',
@@ -318,8 +318,8 @@ dependencies {
   implementation 'org.testng:testng:7.10.2'
   implementation 'org.testng:testng:7.10.2'
   implementation 'org.testng:testng:7.10.2'
-  implementation 'org.junit.jupiter:junit-jupiter:5.10.3'
-  implementation 'org.junit.jupiter:junit-jupiter:5.10.3'
+  implementation 'org.junit.jupiter:junit-jupiter:5.13.1'
+  implementation 'org.junit.jupiter:junit-jupiter:5.13.1'
   annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
   implementation("org.projectlombok:lombok:${versions.lombok}")
   testImplementation("org.projectlombok:lombok:${versions.lombok}")
@@ -485,16 +485,16 @@ dependencies {
 
   contractTestImplementation group: 'org.apache.httpcomponents', name: 'httpclient', version: versions.httpComponents
 
-  implementation 'org.junit.vintage:junit-vintage-engine:5.10.3'
-  testRuntimeOnly "org.junit.platform:junit-platform-commons:1.10.3"
+  implementation 'org.junit.vintage:junit-vintage-engine:5.13.1'
+  testRuntimeOnly "org.junit.platform:junit-platform-commons:1.13.1"
 
-  contractTestRuntimeOnly(platform('org.junit:junit-bom:5.10.3'))
-  contractTestImplementation("org.junit.jupiter:junit-jupiter-api:5.10.3")
+  contractTestRuntimeOnly(platform('org.junit:junit-bom:5.13.1'))
+  contractTestImplementation("org.junit.jupiter:junit-jupiter-api:5.13.1")
   contractTestRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
-  testRuntimeOnly(platform('org.junit:junit-bom:5.10.3'))
+  testRuntimeOnly(platform('org.junit:junit-bom:5.13.1'))
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
   testImplementation 'org.apiguardian:apiguardian-api:1.1.2'
-  contractTestImplementation('org.junit.jupiter:junit-jupiter-api:5.10.3')
+  contractTestImplementation('org.junit.jupiter:junit-jupiter-api:5.13.1')
 
   contractTestImplementation sourceSets.main.runtimeClasspath
   contractTestImplementation sourceSets.test.runtimeClasspath
