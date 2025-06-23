@@ -8,9 +8,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import org.springframework.beans.factory.annotation.Autowired;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,13 +29,10 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsWaService;
+import uk.gov.hmcts.reform.prl.services.caseflags.FlagsService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import uk.gov.hmcts.reform.prl.services.caseflags.FlagsService;
-
 import java.util.List;
 import java.util.Map;
 
@@ -58,14 +54,16 @@ public class CaseFlagsController extends AbstractCallbackController {
     public CaseFlagsController(ObjectMapper objectMapper,
                                EventService eventPublisher,
                                AuthorisationService authorisationService,
-                               CaseFlagsWaService caseFlagsWaService) {
+                               CaseFlagsWaService caseFlagsWaService,
+                               FlagsService flagsService) {
         super(objectMapper, eventPublisher);
         this.authorisationService = authorisationService;
         this.caseFlagsWaService = caseFlagsWaService;
+        this.flagsService = flagsService;
     }
 
     @PostMapping(path = "/setup-wa-task", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to validate case creator to decide on the WA task")
+    @Operation(description = "Callback to check and create WA task")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
@@ -87,7 +85,7 @@ public class CaseFlagsController extends AbstractCallbackController {
     }
 
     @PostMapping(path = "/check-wa-task-status", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to check the work allocation status to decide if the task should be closed or not")
+    @Operation(description = "Callback to check the work allocation status to decide if the task should be created or not")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
@@ -98,9 +96,7 @@ public class CaseFlagsController extends AbstractCallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        caseFlagsWaService.checkCaseFlagsToCreateTask(caseData, caseDataBefore);
+        CaseData caseData = checkIfNewFlagRequireToCreateWaTask(callbackRequest);
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
 
         return AboutToStartOrSubmitCallbackResponse.builder()
@@ -177,7 +173,7 @@ public class CaseFlagsController extends AbstractCallbackController {
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse handleAboutToStart(
+    public AboutToStartOrSubmitCallbackResponse handleAboutToStartForReviewLangSm(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
@@ -199,7 +195,7 @@ public class CaseFlagsController extends AbstractCallbackController {
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(
+    public AboutToStartOrSubmitCallbackResponse handleAboutToSubmitForReviewLangSm(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
@@ -207,9 +203,20 @@ public class CaseFlagsController extends AbstractCallbackController {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             Map<String, Object> caseDataCurrent = callbackRequest.getCaseDetails().getData();
             List<String> errors = flagsService.validateNewFlagStatus(caseDataCurrent);
+            if (errors.isEmpty()) {
+                CaseData caseData = checkIfNewFlagRequireToCreateWaTask(callbackRequest);
+                caseDataCurrent = caseData.toMap(CcdObjectMapper.getObjectMapper());
+            }
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataCurrent).errors(errors).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    private CaseData checkIfNewFlagRequireToCreateWaTask(CallbackRequest callbackRequest) {
+        CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        caseFlagsWaService.checkCaseFlagsToCreateTask(caseData, caseDataBefore);
+        return caseData;
     }
 }

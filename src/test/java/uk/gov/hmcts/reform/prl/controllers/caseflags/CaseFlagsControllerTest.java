@@ -15,9 +15,9 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsWaService;
+import uk.gov.hmcts.reform.prl.services.caseflags.FlagsService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
@@ -25,17 +25,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import uk.gov.hmcts.reform.prl.services.caseflags.FlagsService;
-
-import java.util.List;
-import java.util.Map;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -153,7 +145,7 @@ public class CaseFlagsControllerTest {
 
         verify(caseFlagsWaService).checkAllRequestedFlagsAndCloseTask(any(CaseData.class));
     }
-}
+
 
     @Test
     public void testReviewLangAndSmAboutToStart() {
@@ -165,7 +157,7 @@ public class CaseFlagsControllerTest {
                     .build())
             .build();
         caseFlagsController
-            .handleAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, CLIENT_CONTEXT,callbackRequest);
+            .handleAboutToStartForReviewLangSm(AUTH_TOKEN, SERVICE_TOKEN, CLIENT_CONTEXT,callbackRequest);
         verify(flagsService, times(1)).prepareSelectedReviewLangAndSmReq(Map.of(), CLIENT_CONTEXT);
         verify(authorisationService, times(1)).isAuthorized(AUTH_TOKEN, SERVICE_TOKEN);
     }
@@ -176,7 +168,7 @@ public class CaseFlagsControllerTest {
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
         assertThrows(RuntimeException.class, () -> {
             caseFlagsController
-                .handleAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, CLIENT_CONTEXT, callbackRequest);
+                .handleAboutToStartForReviewLangSm(AUTH_TOKEN, SERVICE_TOKEN, CLIENT_CONTEXT, callbackRequest);
         });
         verify(flagsService, never()).prepareSelectedReviewLangAndSmReq(Map.of(), CLIENT_CONTEXT);
     }
@@ -200,7 +192,7 @@ public class CaseFlagsControllerTest {
         when(flagsService.validateNewFlagStatus(Map.of()))
             .thenReturn(errors);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = caseFlagsController
-            .handleAboutToSubmit(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
+            .handleAboutToSubmitForReviewLangSm(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
         assertThat(aboutToStartOrSubmitCallbackResponse.getErrors()).containsAll(errors);
         verify(flagsService, times(1)).validateNewFlagStatus(Map.of());
     }
