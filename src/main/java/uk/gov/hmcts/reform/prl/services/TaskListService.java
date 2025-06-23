@@ -318,7 +318,6 @@ public class TaskListService {
                     );
                 }
                 CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
-                CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
                 boolean confidentialDetailsChanged = haveConfidentialDetailsChanged(caseData, caseDataBefore);
                 if (confidentialDetailsChanged) {
                     Document c8ToArchive = caseData.getC8Document();
@@ -331,9 +330,9 @@ public class TaskListService {
                 }
 
                 caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
-                caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
                 CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
                 caseData = caseData.toBuilder()
+                    .c8ArchivedDocument(updatedCaseData.getC8ArchivedDocument())
                     .c8Document(updatedCaseData.getC8Document())
                     .c1ADocument(updatedCaseData.getC1ADocument())
                     .c8WelshDocument(updatedCaseData.getC8WelshDocument())
