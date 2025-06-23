@@ -85,6 +85,7 @@ import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
+import uk.gov.hmcts.reform.prl.models.wa.ClientContext;
 import uk.gov.hmcts.reform.prl.models.wa.UserTask;
 import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
@@ -3148,21 +3149,8 @@ public class ManageOrderService {
             );
 
         Map<String, Object> caseData = handleFetchOrderDetails(authorisation, callbackRequest, language);
-        ofNullable(waMapper)
-            .map(value -> {
-                UserTask userTask = value.getClientContext().getUserTask();
-                return value.getClientContext().toBuilder()
-                    .userTask(userTask.toBuilder()
-                                  .completeTask(false)
-                                  .build())
-                    .build();
-            }).ifPresent(updatedClientContext ->
-                                         caseData.put("TransientClientContext", updatedClientContext)
-            );
-
         return caseData;
     }
-
 
     public Map<String, Object> handleFetchOrderDetails(String authorisation,
                                                        CallbackRequest callbackRequest,
@@ -3185,6 +3173,25 @@ public class ManageOrderService {
         populateHearingData(authorisation, caseData, caseDataUpdated);
 
         return caseDataUpdated;
+    }
+
+    public String setTaskCompletionToFalse(String clientContext, ObjectMapper objectMapper) {
+        WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
+
+        return ofNullable(waMapper)
+            .map(value -> {
+                UserTask userTask = value.getClientContext().getUserTask();
+                ClientContext updateClientContext = value.getClientContext().toBuilder()
+                    .userTask(userTask.toBuilder()
+                                  .completeTask(false)
+                                  .build())
+                    .build();
+                return WaMapper.builder()
+                    .clientContext(updateClientContext)
+                    .build();
+            })
+            .map(value -> CaseUtils.base64Encode(value, objectMapper))
+            .orElse(null);
     }
 
     private void populateHearingData(String authorisation,

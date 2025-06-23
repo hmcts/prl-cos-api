@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -906,6 +907,21 @@ public class CaseUtils {
             }
         }
         return null;
+    }
+
+    public static String base64Encode(WaMapper waMapper, ObjectMapper objectMapper) {
+        String base64EncodedClientContext = null;
+        if (waMapper != null) {
+            log.info("clientContext is present");
+            try {
+                String clientContextToEncode = objectMapper.writeValueAsString(waMapper);
+                base64EncodedClientContext =  Base64.getEncoder().encodeToString(clientContextToEncode.getBytes());
+            } catch (JsonProcessingException e) {
+                log.error("Exception while clientContext the Client-Context {}", e.getMessage());
+                throw new RuntimeException(e);
+            }
+        }
+        return base64EncodedClientContext;
     }
 
     public static String getDraftOrderId(WaMapper waMapper) {
