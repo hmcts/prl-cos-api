@@ -324,7 +324,7 @@ public class TaskListService {
 
 
                     if (c8ToArchive != null) {
-                        c8ToArchive.toBuilder().documentFileName("C8ArchiveDocument.pdf");
+                        c8ToArchive.toBuilder().documentFileName("C8ArchiveDocument.pdf").build();
                         caseDataUpdated.put("c8ArchivedDocument", c8ToArchive);
 
                     }
