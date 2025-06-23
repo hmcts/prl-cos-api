@@ -322,8 +322,9 @@ public class TaskListService {
                 if (confidentialDetailsChanged) {
                     Document c8ToArchive = caseData.getC8Document();
 
-                    if (c8ToArchive != null) {
 
+                    if (c8ToArchive != null) {
+                        c8ToArchive.toBuilder().documentFileName("C8ArchiveDocument.pdf");
                         caseDataUpdated.put("c8ArchivedDocument", c8ToArchive);
 
                     }
