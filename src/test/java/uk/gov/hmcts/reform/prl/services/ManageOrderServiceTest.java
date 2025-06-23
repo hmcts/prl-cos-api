@@ -240,7 +240,7 @@ public class ManageOrderServiceTest {
         }
         """;
 
-     private static final String RESPONSE_CLIENT_CONTEXT = """
+    private static final String RESPONSE_CLIENT_CONTEXT = """
         {
             "user_task": {
               "task_data": {
