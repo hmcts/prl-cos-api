@@ -3148,21 +3148,8 @@ public class ManageOrderService {
             );
 
         Map<String, Object> caseData = handleFetchOrderDetails(authorisation, callbackRequest, language);
-        ofNullable(waMapper)
-            .map(value -> {
-                UserTask userTask = value.getClientContext().getUserTask();
-                return value.getClientContext().toBuilder()
-                    .userTask(userTask.toBuilder()
-                                  .completeTask(false)
-                                  .build())
-                    .build();
-            }).ifPresent(updatedClientContext ->
-                                         caseData.put("TransientClientContext", updatedClientContext)
-            );
-
         return caseData;
     }
-
 
     public Map<String, Object> handleFetchOrderDetails(String authorisation,
                                                        CallbackRequest callbackRequest,
@@ -3185,6 +3172,21 @@ public class ManageOrderService {
         populateHearingData(authorisation, caseData, caseDataUpdated);
 
         return caseDataUpdated;
+    }
+
+    public String setTaskCompletionToFalse(String clientContext, ObjectMapper objectMapper) {
+        WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
+        return ofNullable(waMapper)
+            .map(value -> {
+                UserTask userTask = value.getClientContext().getUserTask();
+                return value.getClientContext().toBuilder()
+                    .userTask(userTask.toBuilder()
+                                  .completeTask(false)
+                                  .build())
+                    .build();
+            }).map(updatedClientContext ->
+                       CaseUtils.base64Encode(updatedClientContext, objectMapper)
+            ).orElse(null);
     }
 
     private void populateHearingData(String authorisation,

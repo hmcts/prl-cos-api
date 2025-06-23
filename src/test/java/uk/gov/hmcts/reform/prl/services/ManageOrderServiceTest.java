@@ -101,12 +101,14 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
+import uk.gov.hmcts.reform.prl.models.wa.ClientContext;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.AutomatedHearingTransactionRequestMapper;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -119,6 +121,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -229,7 +232,8 @@ public class ManageOrderServiceTest {
                 "additional_properties": {
                   "hearingId": "12345"
                 }
-              }
+              },
+              "complete_task" : true
             }
           }
         }
@@ -6355,4 +6359,24 @@ public class ManageOrderServiceTest {
         assertEquals(manageOrders.getIsTheOrderByConsent(), draftOrder.getIsTheOrderByConsent());
     }
 
+    @Test
+    public void testWhenClientContextSetTaskCompletionToFalse() throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.findAndRegisterModules();
+
+        String encodedClientContext = manageOrderService.setTaskCompletionToFalse(CLIENT_CONTEXT, mapper);
+        byte[] decodeClientContext = Base64.getDecoder().decode(encodedClientContext);
+        ClientContext clientContext = mapper.readValue(decodeClientContext, ClientContext.class);
+        assertThat(clientContext.getUserTask().isCompleteTask())
+            .isFalse();
+    }
+
+    @Test
+    public void testWhenClientContextNotPresent() throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.findAndRegisterModules();
+
+        assertThat(manageOrderService.setTaskCompletionToFalse(null, mapper))
+            .isNull();
+    }
 }
