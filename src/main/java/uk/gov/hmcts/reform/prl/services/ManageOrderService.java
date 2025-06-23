@@ -113,6 +113,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -626,6 +627,10 @@ public class ManageOrderService {
     private final AuthTokenGenerator authTokenGenerator;
     private final LaunchDarklyClient launchDarklyClient;
     private final DocumentSealingService documentSealingService;
+
+    public Predicate<CaseData> saveAsDraftCheck = caseData -> isNotEmpty(caseData.getServeOrderData()) && No.equals(
+        caseData.getServeOrderData().getDoYouWantToServeOrder())
+        && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder());
 
     public Map<String, Object> populateHeader(CaseData caseData) {
         Map<String, Object> headerMap = new HashMap<>();
@@ -1174,8 +1179,8 @@ public class ManageOrderService {
         throws DocumentGenerationException {
         String loggedInUserType = getLoggedInUserType(authorisation);
         UserDetails userDetails = userService.getUserDetails(authorisation);
-        boolean saveAsDraft = isNotEmpty(caseData.getServeOrderData()) && No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
-            && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder());
+        boolean saveAsDraft = saveAsDraftCheck.test(caseData);
+
         if (UserRoles.JUDGE.name().equals(loggedInUserType)) {
             return setDraftOrderCollection(caseData, loggedInUserType,userDetails);
         } else if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)) {
@@ -3176,18 +3181,15 @@ public class ManageOrderService {
     }
 
     public String setTaskCompletionToFalse(String clientContext, ObjectMapper objectMapper) {
-        WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
+        ClientContext clientContextObj = CaseUtils.getClientContext(clientContext);
 
-        return ofNullable(waMapper)
+        return ofNullable(clientContextObj)
             .map(value -> {
-                UserTask userTask = value.getClientContext().getUserTask();
-                ClientContext updateClientContext = value.getClientContext().toBuilder()
+                UserTask userTask = value.getUserTask();
+                return value.toBuilder()
                     .userTask(userTask.toBuilder()
                                   .completeTask(false)
                                   .build())
-                    .build();
-                return WaMapper.builder()
-                    .clientContext(updateClientContext)
                     .build();
             })
             .map(value -> CaseUtils.base64Encode(value, objectMapper))

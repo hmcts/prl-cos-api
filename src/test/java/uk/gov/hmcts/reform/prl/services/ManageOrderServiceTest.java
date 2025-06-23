@@ -101,7 +101,7 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
-import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
+import uk.gov.hmcts.reform.prl.models.wa.ClientContext;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
@@ -237,6 +237,19 @@ public class ManageOrderServiceTest {
               "complete_task" : true
             }
           }
+        }
+        """;
+
+     private static final String RESPONSE_CLIENT_CONTEXT = """
+        {
+            "user_task": {
+              "task_data": {
+                "additional_properties": {
+                  "hearingId": "12345"
+                }
+              },
+              "complete_task" : true
+            }
         }
         """;
 
@@ -6364,14 +6377,14 @@ public class ManageOrderServiceTest {
     public void testWhenClientContextSetTaskCompletionToFalse() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.findAndRegisterModules();
-        WaMapper waMapper = mapper.readValue(CLIENT_CONTEXT, WaMapper.class);
-        String encodedString = CaseUtils.base64Encode(waMapper, mapper);
+        ClientContext clientContext = mapper.readValue(RESPONSE_CLIENT_CONTEXT, ClientContext.class);
+        String encodedString = CaseUtils.base64Encode(clientContext, mapper);
         assertThat(encodedString).isNotNull();
 
         String encodedClientContext = manageOrderService.setTaskCompletionToFalse(encodedString, mapper);
         byte[] decodeClientContext = Base64.getDecoder().decode(encodedClientContext);
-        WaMapper updateWaMapper = mapper.readValue(decodeClientContext, WaMapper.class);
-        assertThat(updateWaMapper.getClientContext().getUserTask().isCompleteTask())
+        ClientContext updateClientContext = mapper.readValue(decodeClientContext, ClientContext.class);
+        assertThat(updateClientContext.getUserTask().isCompleteTask())
             .isFalse();
     }
 

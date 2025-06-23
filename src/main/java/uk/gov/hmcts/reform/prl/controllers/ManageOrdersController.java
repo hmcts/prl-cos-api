@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -456,9 +457,10 @@ public class ManageOrdersController {
             schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse whenToServeOrder(
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> whenToServeOrder(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -483,9 +485,19 @@ public class ManageOrdersController {
             } else {
                 caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, No);
             }
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseDataUpdated)
-                .build();
+            //TODO NEED TO ADD TEST
+            if (clientContext != null && manageOrderService.saveAsDraftCheck.test(caseData)) {
+                String encodedClientContext = manageOrderService.setTaskCompletionToFalse(clientContext, objectMapper);
+                return ResponseEntity.ok()
+                    .header(PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, encodedClientContext)
+                    .body(AboutToStartOrSubmitCallbackResponse.builder()
+                              .data(caseDataUpdated)
+                              .build());
+            }
+            return ResponseEntity.ok()
+                .body(AboutToStartOrSubmitCallbackResponse.builder()
+                            .data(caseDataUpdated)
+                            .build());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
