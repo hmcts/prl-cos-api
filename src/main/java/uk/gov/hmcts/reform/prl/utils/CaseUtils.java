@@ -45,7 +45,6 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.CitizenAwpPayment;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
-import uk.gov.hmcts.reform.prl.models.wa.ClientContext;
 import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 
 import java.time.Duration;
@@ -910,12 +909,12 @@ public class CaseUtils {
         return null;
     }
 
-    public static String base64Encode(ClientContext clientContext, ObjectMapper objectMapper) {
+    public static String base64Encode(WaMapper waMapper, ObjectMapper objectMapper) {
         String base64EncodedClientContext = null;
-        if (clientContext != null) {
+        if (waMapper != null) {
             log.info("clientContext is present");
             try {
-                String clientContextToEncode = objectMapper.writeValueAsString(clientContext);
+                String clientContextToEncode = objectMapper.writeValueAsString(waMapper);
                 base64EncodedClientContext =  Base64.getEncoder().encodeToString(clientContextToEncode.getBytes());
             } catch (JsonProcessingException e) {
                 log.error("Exception while clientContext the Client-Context {}", e.getMessage());

@@ -101,11 +101,12 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
-import uk.gov.hmcts.reform.prl.models.wa.ClientContext;
+import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.AutomatedHearingTransactionRequestMapper;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.io.IOException;
@@ -6363,11 +6364,14 @@ public class ManageOrderServiceTest {
     public void testWhenClientContextSetTaskCompletionToFalse() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.findAndRegisterModules();
+        WaMapper waMapper = mapper.readValue(CLIENT_CONTEXT, WaMapper.class);
+        String encodedString = CaseUtils.base64Encode(waMapper, mapper);
+        assertThat(encodedString).isNotNull();
 
-        String encodedClientContext = manageOrderService.setTaskCompletionToFalse(CLIENT_CONTEXT, mapper);
+        String encodedClientContext = manageOrderService.setTaskCompletionToFalse(encodedString, mapper);
         byte[] decodeClientContext = Base64.getDecoder().decode(encodedClientContext);
-        ClientContext clientContext = mapper.readValue(decodeClientContext, ClientContext.class);
-        assertThat(clientContext.getUserTask().isCompleteTask())
+        WaMapper updateWaMapper = mapper.readValue(decodeClientContext, WaMapper.class);
+        assertThat(updateWaMapper.getClientContext().getUserTask().isCompleteTask())
             .isFalse();
     }
 
