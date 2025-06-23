@@ -324,8 +324,11 @@ public class TaskListService {
 
 
                     if (c8ToArchive != null) {
-                        c8ToArchive.toBuilder().documentFileName("C8ArchiveDocument.pdf").build();
-                        caseDataUpdated.put("c8ArchivedDocument", c8ToArchive);
+                        Document archivedC8 = c8ToArchive.toBuilder()
+                            .documentFileName("C8ArchiveDocument.pdf")
+                            .build();
+
+                        caseDataUpdated.put("c8ArchivedDocument", archivedC8);
 
                     }
                 }
