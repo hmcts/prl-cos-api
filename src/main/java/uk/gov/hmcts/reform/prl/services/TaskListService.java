@@ -351,12 +351,13 @@ public class TaskListService {
             }
         }
 
-        tabService.mapAndSubmitAllTabsUpdate(
+
+        tabService.submitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),
             String.valueOf(callbackRequest.getCaseDetails().getId()),
             startAllTabsUpdateDataContent.startEventResponse(),
             startAllTabsUpdateDataContent.eventRequestData(),
-            caseData
+            caseDataUpdated
         );
 
         if (!isCourtStaff
