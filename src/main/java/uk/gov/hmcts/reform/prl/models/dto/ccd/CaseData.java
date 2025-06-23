@@ -71,6 +71,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ReasonForWithoutNoticeOrder;
+import uk.gov.hmcts.reform.prl.models.complextypes.RemovableDocument;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBailConditionDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationDateInfo;
@@ -803,4 +804,8 @@ public class CaseData extends BaseCaseData implements MappableObject {
 
     @JsonUnwrapped
     private RemoveDraftOrderFields removeDraftOrderFields;
+
+    private List<Element<RemovableDocument>> removableDocuments;
+    private String documentsToBeRemoved;
+
 }
