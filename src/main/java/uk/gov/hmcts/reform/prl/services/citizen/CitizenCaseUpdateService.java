@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
 import uk.gov.hmcts.reform.prl.mapper.citizen.awp.CitizenAwpMapper;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.LanguageSupportCaseNotesRequest;
 import uk.gov.hmcts.reform.prl.models.citizen.awp.CitizenAwpRequest;
@@ -56,6 +57,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.READY_FOR_DELET
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ADDITIONAL_APPLICATION_COLLECTION_ID;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_CASE_NOTE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
@@ -78,6 +80,8 @@ public class CitizenCaseUpdateService {
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
     private final CitizenAwpMapper citizenAwpMapper;
     private final CourtFinderService courtLocatorService;
+    public static final String DA_APPLICANT_CONTACT_INSTRUCTIONS = "daApplicantContactInstructions";
+
 
     protected static final List<CaseEvent> EVENT_IDS_FOR_ALL_TAB_REFRESHED = Arrays.asList(
         CaseEvent.CONFIRM_YOUR_DETAILS,
@@ -107,7 +111,7 @@ public class CitizenCaseUpdateService {
         if (citizenUpdatePartyDataContent.isPresent()) {
             Map<String, Object> caseDataMapToBeUpdated = citizenUpdatePartyDataContent.get().updatedCaseDataMap();
 
-            Iterables.removeIf(caseDataMapToBeUpdated.values(), Objects::isNull);
+            removeNullObjects(caseDataMapToBeUpdated, DA_APPLICANT_CONTACT_INSTRUCTIONS);
             caseDetails = allTabService.submitUpdateForSpecificUserEvent(
                 startAllTabsUpdateDataContent.authorisation(),
                 caseId,
@@ -125,22 +129,23 @@ public class CitizenCaseUpdateService {
     }
 
     public CaseDetails saveDraftCitizenApplication(String caseId, CaseData citizenUpdatedCaseData, String authToken)
-            throws JsonProcessingException {
+        throws JsonProcessingException {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
-                allTabService.getStartUpdateForSpecificUserEvent(
-                        caseId,
-                        CaseEvent.CITIZEN_SAVE_C100_DRAFT_INTERNAL.getValue(),
-                        authToken
-                );
-        Map<String, Object> caseDataMapToBeUpdated = citizenPartyDetailsMapper.getC100RebuildCaseDataMap(citizenUpdatedCaseData);
+            allTabService.getStartUpdateForSpecificUserEvent(
+                caseId,
+                CaseEvent.CITIZEN_SAVE_C100_DRAFT_INTERNAL.getValue(),
+                authToken
+            );
+        Map<String, Object> caseDataMapToBeUpdated = citizenPartyDetailsMapper.getC100RebuildCaseDataMap(
+            citizenUpdatedCaseData);
 
         return allTabService.submitUpdateForSpecificUserEvent(
-                startAllTabsUpdateDataContent.authorisation(),
-                caseId,
-                startAllTabsUpdateDataContent.startEventResponse(),
-                startAllTabsUpdateDataContent.eventRequestData(),
-                caseDataMapToBeUpdated,
-                startAllTabsUpdateDataContent.userDetails()
+            startAllTabsUpdateDataContent.authorisation(),
+            caseId,
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            caseDataMapToBeUpdated,
+            startAllTabsUpdateDataContent.userDetails()
         );
     }
 
@@ -150,21 +155,21 @@ public class CitizenCaseUpdateService {
                                                     CaseData citizenUpdatedCaseData)
         throws JsonProcessingException, NotFoundException {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
-                allTabService.getStartUpdateForSpecificUserEvent(
-                        caseId,
-                        CaseEvent.fromValue(eventId).getValue(),
-                        authToken
-                );
+            allTabService.getStartUpdateForSpecificUserEvent(
+                caseId,
+                CaseEvent.fromValue(eventId).getValue(),
+                authToken
+            );
 
         UserDetails userDetails = startAllTabsUpdateDataContent.userDetails();
         UserInfo userInfo = UserInfo
-                .builder()
-                .idamId(userDetails.getId())
-                .firstName(userDetails.getForename())
-                .lastName(userDetails.getSurname().orElse(null))
-                .emailAddress(userDetails.getEmail())
-                .build();
-        //Find nearest court for the child post code
+            .builder()
+            .idamId(userDetails.getId())
+            .firstName(userDetails.getForename())
+            .lastName(userDetails.getSurname().orElse(null))
+            .emailAddress(userDetails.getEmail())
+            .build();
+        // Find nearest court for the child post code
         Court nearestCourt = courtLocatorService.getNearestFamilyCourt(citizenUpdatedCaseData);
         CaseData dbCaseData = startAllTabsUpdateDataContent.caseData();
         dbCaseData = dbCaseData.toBuilder().userInfo(wrapElements(userInfo))
@@ -173,12 +178,15 @@ public class CitizenCaseUpdateService {
             .build();
 
         CaseData caseDataToSubmit = citizenPartyDetailsMapper
-                .buildUpdatedCaseData(dbCaseData, citizenUpdatedCaseData.getC100RebuildData());
+            .buildUpdatedCaseData(dbCaseData, citizenUpdatedCaseData.getC100RebuildData());
 
         caseDataToSubmit = setPaymentDetails(citizenUpdatedCaseData, caseDataToSubmit);
 
         Map<String, Object> caseDataMapToBeUpdated = objectMapper.convertValue(caseDataToSubmit, Map.class);
-        caseDataToSubmit = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(caseDataToSubmit, caseDataMapToBeUpdated);
+        caseDataToSubmit = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(
+            caseDataToSubmit,
+            caseDataMapToBeUpdated
+        );
 
         caseDataToSubmit = miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(
             caseDataToSubmit,
@@ -187,18 +195,19 @@ public class CitizenCaseUpdateService {
         allTabService.getNewMiamPolicyUpgradeDocumentMap(caseDataToSubmit, caseDataMapToBeUpdated);
         caseDataMapToBeUpdated.putAll(noticeOfChangePartiesService.generate(caseDataToSubmit, CARESPONDENT));
         caseDataMapToBeUpdated.putAll(noticeOfChangePartiesService.generate(caseDataToSubmit, CAAPPLICANT));
-        OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder().orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]").build();
+        OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder().orgPolicyCaseAssignedRole(
+            "[APPLICANTSOLICITOR]").build();
         caseDataMapToBeUpdated.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
         // Do not remove the next line as it will overwrite the case state change
         caseDataMapToBeUpdated.remove("state");
         Iterables.removeIf(caseDataMapToBeUpdated.values(), Objects::isNull);
         CaseDetails caseDetails = allTabService.submitUpdateForSpecificUserEvent(
-                startAllTabsUpdateDataContent.authorisation(),
-                caseId,
-                startAllTabsUpdateDataContent.startEventResponse(),
-                startAllTabsUpdateDataContent.eventRequestData(),
-                caseDataMapToBeUpdated,
-                startAllTabsUpdateDataContent.userDetails()
+            startAllTabsUpdateDataContent.authorisation(),
+            caseId,
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            caseDataMapToBeUpdated,
+            startAllTabsUpdateDataContent.userDetails()
         );
 
         return partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(caseDetails.getId()));
@@ -214,8 +223,9 @@ public class CitizenCaseUpdateService {
     }
 
     public CaseDetails deleteApplication(String caseId, CaseData citizenUpdatedCaseData, String authToken)
-            throws JsonProcessingException {
-        Map<String, Object> caseDataMapToBeUpdated = citizenPartyDetailsMapper.getC100RebuildCaseDataMap(citizenUpdatedCaseData);
+        throws JsonProcessingException {
+        Map<String, Object> caseDataMapToBeUpdated = citizenPartyDetailsMapper.getC100RebuildCaseDataMap(
+            citizenUpdatedCaseData);
         caseDataMapToBeUpdated.put(STATE, READY_FOR_DELETION_STATE);
         caseDataMapToBeUpdated.put(
             CASE_STATUS,
@@ -294,10 +304,26 @@ public class CitizenCaseUpdateService {
             startAllTabsUpdateDataContent.userDetails()
         );
         Map<String, Object> caseNotesMap = new HashMap<>();
+
+        List<Element<CaseNoteDetails>> caseNoteDetails = addCaseNoteService.getCaseNoteDetails(
+            dbCaseData,
+            currentCaseNoteDetails
+        );
+
         caseNotesMap.put(
             CASE_NOTES,
-            addCaseNoteService.getCaseNoteDetails(dbCaseData, currentCaseNoteDetails)
+            caseNoteDetails
         );
+
+        caseNoteDetails.stream()
+            .filter(caseNoteDetailsElement -> currentCaseNoteDetails.equals(caseNoteDetailsElement.getValue()))
+            .findFirst()
+            .map(Element::getId)
+            .ifPresent(id ->
+                           caseNotesMap.put(
+                               WA_CASE_NOTE_ID,
+                               id
+                           ));
 
         allTabService.submitUpdateForSpecificUserEvent(
             startAllTabsUpdateDataContent.authorisation(),
@@ -315,7 +341,7 @@ public class CitizenCaseUpdateService {
                                                  CitizenAwpRequest citizenAwpRequest) {
 
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = null;
-        //PRL-4023, PRL-4024 WA - trigger events based on help with fees opted
+        // PRL-4023, PRL-4024 WA - trigger events based on help with fees opted
         if (null != citizenAwpRequest
             && Yes.equals(citizenAwpRequest.getHaveHwfReference())
             && null != citizenAwpRequest.getHwfReferenceNumber()) {
@@ -335,19 +361,22 @@ public class CitizenCaseUpdateService {
         }
         CaseData caseData = startAllTabsUpdateDataContent.caseData();
 
-        //Map awp citizen data fields into solicitor fields
+        // Map awp citizen data fields into solicitor fields
         CaseData updatedCaseData = citizenAwpMapper.map(caseData, citizenAwpRequest);
 
         Map<String, Object> caseDataMapToBeUpdated = startAllTabsUpdateDataContent.caseDataMap();
-        //Update latest awp data after mapping into caseData
+        // Update latest awp data after mapping into caseData
         caseDataMapToBeUpdated.put("additionalApplicationsBundle", updatedCaseData.getAdditionalApplicationsBundle());
         if (!CollectionUtils.isEmpty(updatedCaseData.getAdditionalApplicationsBundle())) {
             caseDataMapToBeUpdated.put(WA_ADDITIONAL_APPLICATION_COLLECTION_ID, updatedCaseData.getAdditionalApplicationsBundle()
                 .getLast().getId());
         }
         caseDataMapToBeUpdated.put("citizenAwpPayments", updatedCaseData.getCitizenAwpPayments());
-        caseDataMapToBeUpdated.put("hwfRequestedForAdditionalApplicationsFlag", updatedCaseData.getHwfRequestedForAdditionalApplicationsFlag());
-        //WA fields
+        caseDataMapToBeUpdated.put(
+            "hwfRequestedForAdditionalApplicationsFlag",
+            updatedCaseData.getHwfRequestedForAdditionalApplicationsFlag()
+        );
+        // WA fields
         caseDataMapToBeUpdated.put(AWP_WA_TASK_NAME, updatedCaseData.getAwpWaTaskName());
         caseDataMapToBeUpdated.put(AWP_HWF_REF_NUMBER, updatedCaseData.getAwpHwfRefNo());
 
@@ -359,5 +388,12 @@ public class CitizenCaseUpdateService {
             caseDataMapToBeUpdated,
             startAllTabsUpdateDataContent.userDetails()
         );
+    }
+
+    private void removeNullObjects(Map<String, Object> caseDataMapToBeUpdated, String elementToNotBeDeleted) {
+        caseDataMapToBeUpdated.entrySet()
+            .removeIf(entry -> entry
+                .getValue() == null && !elementToNotBeDeleted.equals(entry.getKey())
+            );
     }
 }
