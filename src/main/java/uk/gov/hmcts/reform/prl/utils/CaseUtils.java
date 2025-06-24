@@ -910,29 +910,15 @@ public class CaseUtils {
         return null;
     }
 
-    public static ClientContext getClientContext(String clientContext) {
-        if (clientContext != null) {
-            log.info("clientContext is present");
-            byte[] decodedBytes = Base64.getDecoder().decode(clientContext);
-            String decodedString = new String(decodedBytes);
-            try {
-                return new ObjectMapper().readValue(decodedString, ClientContext.class);
-            } catch (Exception ex) {
-                log.error("Exception while parsing the Client-Context {}", ex.getMessage());
-            }
-        }
-        return null;
-    }
-
-    public static String base64Encode(ClientContext clientContext, ObjectMapper objectMapper) {
+    public static String base64Encode(WaMapper waMapper, ObjectMapper objectMapper) {
         String base64EncodedClientContext = null;
-        if (clientContext != null) {
+        if (waMapper != null) {
             log.info("clientContext is present");
             try {
-                String clientContextToEncode = objectMapper.writeValueAsString(clientContext);
+                String clientContextToEncode = objectMapper.writeValueAsString(waMapper);
                 //TODO REMOVE
                 log.info("Updated client context to prevent auto complete {}",
-                         objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(clientContext));
+                         objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(waMapper));
                 base64EncodedClientContext =  Base64.getEncoder().encodeToString(clientContextToEncode.getBytes());
             } catch (JsonProcessingException e) {
                 log.error("Exception while clientContext the Client-Context {}", e.getMessage());

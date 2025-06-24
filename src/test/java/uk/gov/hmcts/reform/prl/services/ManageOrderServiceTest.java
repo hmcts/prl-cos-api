@@ -101,12 +101,11 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
-import uk.gov.hmcts.reform.prl.models.wa.ClientContext;
+import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.AutomatedHearingTransactionRequestMapper;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.io.IOException;
@@ -122,6 +121,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static java.util.Base64.getDecoder;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -158,6 +158,7 @@ import static uk.gov.hmcts.reform.prl.services.ManageOrderService.CHILD_OPTION;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.SDO_FACT_FINDING_FLAG;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.VALIDATION_ADDRESS_ERROR_OTHER_PARTY;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.VALIDATION_ADDRESS_ERROR_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.base64Encode;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -237,19 +238,6 @@ public class ManageOrderServiceTest {
               "complete_task" : true
             }
           }
-        }
-        """;
-
-    private static final String RESPONSE_CLIENT_CONTEXT = """
-        {
-            "user_task": {
-              "task_data": {
-                "additional_properties": {
-                  "hearingId": "12345"
-                }
-              },
-              "complete_task" : true
-            }
         }
         """;
 
@@ -6377,14 +6365,14 @@ public class ManageOrderServiceTest {
     public void testWhenClientContextSetTaskCompletionToFalse() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.findAndRegisterModules();
-        ClientContext clientContext = mapper.readValue(RESPONSE_CLIENT_CONTEXT, ClientContext.class);
-        String encodedString = CaseUtils.base64Encode(clientContext, mapper);
+        WaMapper waMapper = mapper.readValue(CLIENT_CONTEXT, WaMapper.class);
+        String encodedString = base64Encode(waMapper, mapper);
         assertThat(encodedString).isNotNull();
 
         String encodedClientContext = manageOrderService.setTaskCompletionToFalse(encodedString, mapper);
-        byte[] decodeClientContext = Base64.getDecoder().decode(encodedClientContext);
-        ClientContext updateClientContext = mapper.readValue(decodeClientContext, ClientContext.class);
-        assertThat(updateClientContext.getUserTask().isCompleteTask())
+        byte[] decodeClientContext = getDecoder().decode(encodedClientContext);
+        WaMapper updatedWaMapper = mapper.readValue(decodeClientContext, WaMapper.class);
+        assertThat(updatedWaMapper.getClientContext().getUserTask().isCompleteTask())
             .isFalse();
     }
 

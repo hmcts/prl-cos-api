@@ -85,8 +85,6 @@ import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
-import uk.gov.hmcts.reform.prl.models.wa.ClientContext;
-import uk.gov.hmcts.reform.prl.models.wa.UserTask;
 import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
@@ -187,7 +185,9 @@ import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.respondentOrRespondentSolicitor;
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum.factFindingHearing;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.base64Encode;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getDynamicMultiSelectedValueLabels;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getWaMapper;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.isHearingPageNeeded;
 
@@ -3144,7 +3144,7 @@ public class ManageOrderService {
                                                        CallbackRequest callbackRequest,
                                                        String language,
                                                        String clientContext) {
-        WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
+        WaMapper waMapper = getWaMapper(clientContext);
         Optional<Long> hearingId = ofNullable(waMapper)
             .map(value -> Long.valueOf(value
                                               .getClientContext()
@@ -3182,18 +3182,22 @@ public class ManageOrderService {
     }
 
     public String setTaskCompletionToFalse(String clientContext, ObjectMapper objectMapper) {
-        ClientContext clientContextObj = CaseUtils.getClientContext(clientContext);
-
-        return ofNullable(clientContextObj)
-            .map(value -> {
-                UserTask userTask = value.getUserTask();
-                return value.toBuilder()
-                    .userTask(userTask.toBuilder()
-                                  .completeTask(false)
-                                  .build())
-                    .build();
-            })
-            .map(value -> CaseUtils.base64Encode(value, objectMapper))
+        WaMapper waMapper = getWaMapper(clientContext);
+        return ofNullable(waMapper)
+            .map(WaMapper::getClientContext)
+            .map(value ->
+                     value.toBuilder()
+                         .userTask(value.getUserTask().toBuilder()
+                                       .completeTask(false)
+                                       .build())
+                         .build())
+            .map(
+                updatedClientContext ->
+                    base64Encode(WaMapper.builder()
+                                     .clientContext(updatedClientContext)
+                                     .build(),
+                objectMapper)
+            )
             .orElse(null);
     }
 
