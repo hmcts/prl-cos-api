@@ -1,8 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers.c100respondentsolicitor;
 
-import java.util.Collections;
-import java.util.Map;
-
 import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +24,9 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
+
+import java.util.Collections;
+import java.util.Map;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
@@ -172,7 +172,7 @@ public class C100RespondentSolicitorControllerFunctionalTest {
         when(allTabService.getStartAllTabsUpdate(anyString()))
             .thenReturn(dummyContent);
 
-         CaseDetails returnedCase = CaseDetails.builder()
+        CaseDetails returnedCase = CaseDetails.builder()
             .data(Map.of("solicitorName", "AAT Solicitor"))
             .build();
 
