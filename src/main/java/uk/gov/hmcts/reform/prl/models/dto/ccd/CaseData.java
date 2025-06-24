@@ -806,4 +806,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
 
     @JsonUnwrapped
     private ReviewAdditionalApplicationWrapper reviewAdditionalApplicationWrapper;
+
+    @JsonUnwrapped
+    private ReviewRaRequestWrapper reviewRaRequestWrapper;
 }
