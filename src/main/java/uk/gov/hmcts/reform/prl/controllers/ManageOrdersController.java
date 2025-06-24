@@ -485,8 +485,8 @@ public class ManageOrdersController {
             } else {
                 caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, No);
             }
-            //TODO NEED TO ADD TEST
-            if (clientContext != null && manageOrderService.saveAsDraftCheck.test(caseData)) {
+
+            if (clientContext != null && manageOrderService.isSaveAsDraft(caseData)) {
                 String encodedClientContext = manageOrderService.setTaskCompletionToFalse(clientContext, objectMapper);
                 return ResponseEntity.ok()
                     .header(PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, encodedClientContext)

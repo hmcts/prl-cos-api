@@ -113,7 +113,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -628,9 +627,11 @@ public class ManageOrderService {
     private final LaunchDarklyClient launchDarklyClient;
     private final DocumentSealingService documentSealingService;
 
-    public Predicate<CaseData> saveAsDraftCheck = caseData -> isNotEmpty(caseData.getServeOrderData()) && No.equals(
-        caseData.getServeOrderData().getDoYouWantToServeOrder())
-        && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder());
+    public boolean isSaveAsDraft(CaseData caseData) {
+        return isNotEmpty(caseData.getServeOrderData()) && No.equals(
+            caseData.getServeOrderData().getDoYouWantToServeOrder())
+            && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder());
+    }
 
     public Map<String, Object> populateHeader(CaseData caseData) {
         Map<String, Object> headerMap = new HashMap<>();
@@ -1179,7 +1180,7 @@ public class ManageOrderService {
         throws DocumentGenerationException {
         String loggedInUserType = getLoggedInUserType(authorisation);
         UserDetails userDetails = userService.getUserDetails(authorisation);
-        boolean saveAsDraft = saveAsDraftCheck.test(caseData);
+        boolean saveAsDraft = isSaveAsDraft(caseData);
 
         if (UserRoles.JUDGE.name().equals(loggedInUserType)) {
             return setDraftOrderCollection(caseData, loggedInUserType,userDetails);
