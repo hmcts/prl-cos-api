@@ -488,10 +488,10 @@ public class ManageOrdersController {
                 caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, No);
             }
 
-            String encodedClientContext = manageOrderService.setTaskCompletion(
+            String encodedClientContext = CaseUtils.setTaskCompletion(
                 clientContext,
                 objectMapper,
-                () -> manageOrderService.isSaveAsDraft(updatedCaseData));
+                () -> !manageOrderService.isSaveAsDraft(updatedCaseData));
 
             ResponseEntity.BodyBuilder responseBuilder = ofNullable(encodedClientContext)
                 .map(value -> ResponseEntity.ok()

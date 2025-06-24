@@ -5,15 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
@@ -105,14 +101,12 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
-import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.AutomatedHearingTransactionRequestMapper;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -125,8 +119,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static java.util.Base64.getDecoder;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -162,11 +154,9 @@ import static uk.gov.hmcts.reform.prl.services.ManageOrderService.CHILD_OPTION;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.SDO_FACT_FINDING_FLAG;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.VALIDATION_ADDRESS_ERROR_OTHER_PARTY;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.VALIDATION_ADDRESS_ERROR_RESPONDENT;
-import static uk.gov.hmcts.reform.prl.utils.CaseUtils.base64Encode;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-@ExtendWith(MockitoExtension.class)
 public class ManageOrderServiceTest {
 
 
@@ -6364,30 +6354,5 @@ public class ManageOrderServiceTest {
         assertEquals(caseData.getJusticeLegalAdviserFullName(), draftOrder.getJusticeLegalAdviserFullName());
         assertEquals(caseData.getMagistrateLastName(), draftOrder.getMagistrateLastName());
         assertEquals(manageOrders.getIsTheOrderByConsent(), draftOrder.getIsTheOrderByConsent());
-    }
-
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    public void testWhenClientContextSetTaskCompletionFlag(boolean completeTask) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.findAndRegisterModules();
-        WaMapper waMapper = mapper.readValue(CLIENT_CONTEXT, WaMapper.class);
-        String encodedString = base64Encode(waMapper, mapper);
-        assertThat(encodedString).isNotNull();
-
-        String encodedClientContext = manageOrderService.setTaskCompletion(encodedString, mapper, () -> completeTask);
-        byte[] decodeClientContext = getDecoder().decode(encodedClientContext);
-        WaMapper updatedWaMapper = mapper.readValue(decodeClientContext, WaMapper.class);
-        assertThat(updatedWaMapper.getClientContext().getUserTask().isCompleteTask())
-            .isEqualTo(completeTask);
-    }
-
-    @Test
-    public void testWhenClientContextNotPresent() throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.findAndRegisterModules();
-
-        assertThat(manageOrderService.setTaskCompletion(null, mapper, () -> false))
-            .isNull();
     }
 }

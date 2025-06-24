@@ -111,7 +111,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -186,7 +185,6 @@ import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.respondentOrRespondentSolicitor;
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum.factFindingHearing;
-import static uk.gov.hmcts.reform.prl.utils.CaseUtils.base64Encode;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getDynamicMultiSelectedValueLabels;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getWaMapper;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -3181,32 +3179,6 @@ public class ManageOrderService {
 
         return caseDataUpdated;
     }
-
-    public String setTaskCompletion(
-        String clientContext,
-        ObjectMapper objectMapper,
-        Supplier<Boolean> completeTask) {
-
-        return ofNullable(clientContext)
-            .map(value -> getWaMapper(clientContext))
-            .map(WaMapper::getClientContext)
-            .map(value ->
-                     value.toBuilder()
-                         .userTask(value.getUserTask().toBuilder()
-                                       .completeTask(completeTask.get())
-                                       .build())
-                         .build())
-            .map(
-                updatedClientContext ->
-                    base64Encode(WaMapper.builder()
-                                     .clientContext(updatedClientContext)
-                                     .build(),
-                                 objectMapper)
-            )
-            .orElse(null);
-    }
-
-
 
     private void populateHearingData(String authorisation,
                                      CaseData caseData,

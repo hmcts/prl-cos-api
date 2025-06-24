@@ -65,6 +65,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -909,6 +910,30 @@ public class CaseUtils {
         return null;
     }
 
+    public static String setTaskCompletion(
+        String clientContext,
+        ObjectMapper objectMapper,
+        Supplier<Boolean> completeTask) {
+
+        return ofNullable(clientContext)
+            .map(value -> getWaMapper(clientContext))
+            .map(WaMapper::getClientContext)
+            .map(value ->
+                     value.toBuilder()
+                         .userTask(value.getUserTask().toBuilder()
+                                       .completeTask(completeTask.get())
+                                       .build())
+                         .build())
+            .map(
+                updatedClientContext ->
+                    base64Encode(WaMapper.builder()
+                                     .clientContext(updatedClientContext)
+                                     .build(),
+                                 objectMapper)
+            )
+            .orElse(null);
+    }
+
     public static String base64Encode(WaMapper waMapper, ObjectMapper objectMapper) {
         String base64EncodedClientContext = null;
         if (waMapper != null) {
@@ -917,7 +942,7 @@ public class CaseUtils {
                 String clientContextToEncode = objectMapper.writeValueAsString(waMapper);
                 //TODO REMOVE
                 log.info("Updated client context to prevent auto complete {}",
-                         objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(waMapper));
+                         objectMapper.writeValueAsString(waMapper));
                 base64EncodedClientContext =  Base64.getEncoder().encodeToString(clientContextToEncode.getBytes());
             } catch (JsonProcessingException e) {
                 log.error("Exception while clientContext the Client-Context {}", e.getMessage());
