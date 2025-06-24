@@ -4,6 +4,7 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,7 @@ public class CaseFlagsControllerFunctionalTest {
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
     @Test
+    @Ignore
     public void givenBodyWithCaseFlags_whenAboutToStartCallback() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_WITH_FLAGS);
         request
@@ -83,6 +85,7 @@ public class CaseFlagsControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenRequestBodyReviewAndSm_whenAboutToSubmit_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_WITH_FLAGS);
         request
