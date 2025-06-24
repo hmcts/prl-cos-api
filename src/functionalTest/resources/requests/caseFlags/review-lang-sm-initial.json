@@ -45,7 +45,44 @@
             "dateCreated": "2025-06-02T16:27:44.593764142"
           }
         }
-      ]
+      ],
+      "caseFlags": {
+        "details": [
+          {
+            "id": "52aea386-8937-443e-9698-1ce3fe2ab95c",
+            "value": {
+              "name": "Urgent case",
+              "path": [
+                {
+                  "id": "08d4e3f9-4e6d-4333-abf0-0ea31dafcc0c",
+                  "value": "Case"
+                }
+              ],
+              "status": "Requested",
+              "name_cy": "Achos brys",
+              "flagCode": "CF0007",
+              "subTypeKey": null,
+              "flagComment": "asdasf",
+              "subTypeValue": null,
+              "flagComment_cy": null,
+              "dateTimeCreated": "2025-06-18T15:15:10.156Z",
+              "hearingRelevant": "Yes",
+              "subTypeValue_cy": null,
+              "dateTimeModified": null,
+              "otherDescription": null,
+              "flagUpdateComment": "asdfas",
+              "availableExternally": "No",
+              "otherDescription_cy": null
+            }
+          }
+        ],
+        "groupId": null,
+        "partyName": null,
+        "roleOnCase": null,
+        "visibility": null
+      },
+      "isCaseFlagsTaskCreated": "No",
+      "selectedFlags": []
     }
   }
 }

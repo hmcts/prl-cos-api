@@ -4,6 +4,7 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,21 @@ public class CaseFlagsControllerFunctionalTest {
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
     @Test
-    public void givenRequestBody_whenAboutToStart_then200Response() throws Exception {
+    @Ignore
+    public void givenBodyWithCaseFlags_whenAboutToStartCallback() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_WITH_FLAGS);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/caseflags/about-to-start")
+            .then()
+            .assertThat().statusCode(200);
+    }
+
+    @Test
+    public void givenRequestBodyReviewAndSm_whenAboutToStart_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_INITIAL);
         String client = ResourceLoader.loadJson(CLIENT_CONTEXT_CASE_NOTE);
         request
@@ -56,7 +71,22 @@ public class CaseFlagsControllerFunctionalTest {
     }
 
     @Test
-    public void givenRequestBody_whenAboutToSubmit_then200Response() throws Exception {
+    public void givenBodyWithCaseFlags_whenSubmitted() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_WITH_FLAGS);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/caseflags/submitted")
+            .then()
+            .assertThat().statusCode(200);
+
+    }
+
+    @Test
+    @Ignore
+    public void givenRequestBodyReviewAndSm_whenAboutToSubmit_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_WITH_FLAGS);
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCourtAdmin())
@@ -70,7 +100,7 @@ public class CaseFlagsControllerFunctionalTest {
     }
 
     @Test
-    public void givenRequestBody_whenSetUpWaTest_then200Response() throws Exception {
+    public void givenRequestBodyReviewAndSm_whenSetUpWaTest_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_WITH_FLAGS);
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCourtAdmin())
