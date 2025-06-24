@@ -166,21 +166,6 @@ public class ManageOrdersControllerTest {
     @Mock
     AllTabServiceImpl allTabService;
 
-    private static final String CLIENT_CONTEXT = """
-        {
-          "client_context": {
-            "user_task": {
-              "task_data": {
-                "additional_properties": {
-                  "hearingId": "12345"
-                }
-              },
-              "complete_task" : true
-            }
-          }
-        }
-        """;
-
     @Before
     public void setUp() {
         List<String> roles = new ArrayList();
