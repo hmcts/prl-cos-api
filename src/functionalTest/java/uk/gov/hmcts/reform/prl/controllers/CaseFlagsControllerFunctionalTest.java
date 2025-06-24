@@ -4,7 +4,6 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,21 +43,6 @@ public class CaseFlagsControllerFunctionalTest {
             .post("/caseflags/about-to-start")
             .then()
             .assertThat().statusCode(200);
-    }
-
-    @Ignore
-    @Test
-    public void givenBodyWithCaseFlags_whenAboutToSubmit() throws Exception {
-        String requestBody = ResourceLoader.loadJson(CASE_FLAG_CONTROLLER_REQUEST_JSON);
-        request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/caseflags/about-to-submit")
-            .then()
-            .assertThat().statusCode(200);
-
     }
 
     @Test
