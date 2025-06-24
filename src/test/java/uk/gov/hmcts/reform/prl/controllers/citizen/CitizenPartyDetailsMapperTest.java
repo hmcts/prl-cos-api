@@ -183,9 +183,12 @@ public class CitizenPartyDetailsMapperTest {
     @Test
     public void testMapUpdatedPartyDetailsEventConfirmDetails() throws IOException {
         setUpDa();
-        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, updateCaseData,
-                                                                                                                       CaseEvent.CONFIRM_YOUR_DETAILS,
-                                                                                                                       authToken);
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(
+            caseData,
+            updateCaseData,
+            CaseEvent.CONFIRM_YOUR_DETAILS,
+            authToken
+        );
         assertNotNull(citizenUpdatePartyDataContent);
     }
 
@@ -228,14 +231,19 @@ public class CitizenPartyDetailsMapperTest {
 
             .c100RebuildData(c100RebuildData)
             .build();
-        doNothing().when(c100RespondentSolicitorService).populateConfidentialAndMiscDataMap(any(), any(),
-                                                                                            anyString());
-        when(updatePartyDetailsService.checkIfConfidentialityDetailsChangedRespondent(any(),any())).thenReturn(true);
+        doNothing().when(c100RespondentSolicitorService).populateConfidentialAndMiscDataMap(
+            any(), any(),
+            anyString()
+        );
+        when(updatePartyDetailsService.checkIfConfidentialityDetailsChangedRespondent(any(), any())).thenReturn(true);
         Map<String, Object> updatedCaseData = new HashMap<>();
         Element<PartyDetails> respondent = null;
-        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, updateCaseData,
-                                                                                                                       CaseEvent.KEEP_DETAILS_PRIVATE,
-                                                                                                                       authToken);
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(
+            caseData,
+            updateCaseData,
+            CaseEvent.KEEP_DETAILS_PRIVATE,
+            authToken
+        );
         assertNotNull(citizenUpdatePartyDataContent);
     }
 
@@ -279,54 +287,72 @@ public class CitizenPartyDetailsMapperTest {
             .build();
         Map<String, Object> updatedCaseData = new HashMap<>();
         Element<PartyDetails> respondent = null;
-        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, updateCaseData,
-                                                                                                                       CaseEvent.KEEP_DETAILS_PRIVATE,
-                                                                                                                       authToken);
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(
+            caseData,
+            updateCaseData,
+            CaseEvent.KEEP_DETAILS_PRIVATE,
+            authToken
+        );
         assertNotNull(citizenUpdatePartyDataContent);
     }
 
     @Test
     public void testMapUpdatedPartyDetailsEventDetailPrivate() throws IOException {
         setUpDa();
-        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, updateCaseData,
-                                                                                                                       CaseEvent.KEEP_DETAILS_PRIVATE,
-                                                                                                                       authToken);
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(
+            caseData,
+            updateCaseData,
+            CaseEvent.KEEP_DETAILS_PRIVATE,
+            authToken
+        );
         assertNotNull(citizenUpdatePartyDataContent);
     }
 
     @Test
     public void testMapUpdatedPartyDetailsEventConsentApplication() throws IOException {
         setUpDa();
-        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, updateCaseData,
-                                                                                                                 CaseEvent.CONSENT_TO_APPLICATION,
-                                                                                                                       authToken);
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(
+            caseData,
+            updateCaseData,
+            CaseEvent.CONSENT_TO_APPLICATION,
+            authToken
+        );
         assertNotNull(citizenUpdatePartyDataContent);
     }
 
     @Test
     public void testMapUpdatedPartyDetailsEventRespMiam() throws IOException {
         setUpDa();
-        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, updateCaseData,
-                                                                                                                CaseEvent.EVENT_RESPONDENT_MIAM,
-                                                                                                                       authToken);
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(
+            caseData,
+            updateCaseData,
+            CaseEvent.EVENT_RESPONDENT_MIAM,
+            authToken
+        );
         assertNotNull(citizenUpdatePartyDataContent);
     }
 
     @Test
     public void testMapUpdatedPartyDetailsEventLegalRep() throws IOException {
         setUpDa();
-        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, updateCaseData,
-                                                                                                                       CaseEvent.LEGAL_REPRESENTATION,
-                                                                                                                       authToken);
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(
+            caseData,
+            updateCaseData,
+            CaseEvent.LEGAL_REPRESENTATION,
+            authToken
+        );
         assertNotNull(citizenUpdatePartyDataContent);
     }
 
     @Test
     public void testMapUpdatedPartyDetailsEventInternational() throws IOException {
         setUpDa();
-        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, updateCaseData,
-                                                                                                      CaseEvent.EVENT_INTERNATIONAL_ELEMENT,
-                                                                                                                       authToken);
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(
+            caseData,
+            updateCaseData,
+            CaseEvent.EVENT_INTERNATIONAL_ELEMENT,
+            authToken
+        );
         assertNotNull(citizenUpdatePartyDataContent);
     }
 
@@ -334,54 +360,72 @@ public class CitizenPartyDetailsMapperTest {
     @Test
     public void testMapUpdatedPartyDetailsCaseEventRespSafetyConcern() throws IOException {
         setUpDa();
-        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData,updateCaseData,
-                                                                                                     CaseEvent.EVENT_RESPONDENT_AOH,
-                                                                                                                       authToken);
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(
+            caseData,
+            updateCaseData,
+            CaseEvent.EVENT_RESPONDENT_AOH,
+            authToken
+        );
         assertNotNull(citizenUpdatePartyDataContent);
     }
 
     @Test
     public void testMapUpdatedPartyDetailsCaseEventRemoveLegalRep() throws IOException {
         setUpDa();
-        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData,updateCaseData,
-                                                                                                     CaseEvent.CITIZEN_REMOVE_LEGAL_REPRESENTATIVE,
-                                                                                                                       authToken);
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(
+            caseData,
+            updateCaseData,
+            CaseEvent.CITIZEN_REMOVE_LEGAL_REPRESENTATIVE,
+            authToken
+        );
         assertNotNull(citizenUpdatePartyDataContent);
     }
 
     @Test
     public void testMapUpdatedPartyDetailsCaseEventSupportCase() throws IOException {
         setUpDa();
-        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData,updateCaseData,
-                                                                                                    CaseEvent.SUPPORT_YOU_DURING_CASE,
-                                                                                                                       authToken);
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(
+            caseData,
+            updateCaseData,
+            CaseEvent.SUPPORT_YOU_DURING_CASE,
+            authToken
+        );
         assertNotNull(citizenUpdatePartyDataContent);
     }
 
     @Test
     public void testMapUpdatedPartyDetailsCaseEventContactPref() throws IOException {
         setUpDa();
-        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData,updateCaseData,
-                                                                                                         CaseEvent.CITIZEN_CONTACT_PREFERENCE,
-                                                                                                                       authToken);
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(
+            caseData,
+            updateCaseData,
+            CaseEvent.CITIZEN_CONTACT_PREFERENCE,
+            authToken
+        );
         assertNotNull(citizenUpdatePartyDataContent);
     }
 
     @Test
     public void testMapUpdatedPartyDetailsCaseEventCitizenInternalFlag() throws IOException {
         setUpDa();
-        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, updateCaseData,
-                                                                                             CaseEvent.CITIZEN_INTERNAL_FLAG_UPDATES,
-                                                                                                                       authToken);
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(
+            caseData,
+            updateCaseData,
+            CaseEvent.CITIZEN_INTERNAL_FLAG_UPDATES,
+            authToken
+        );
         assertNotNull(citizenUpdatePartyDataContent);
     }
 
     @Test
     public void testMapUpdatedPartyDetailsCaseEventConfirmDetails() throws IOException {
         setUpCA();
-        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData,updateCaseData,
-                                                                                                                       CaseEvent.CONFIRM_YOUR_DETAILS,
-                                                                                                                       authToken);
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(
+            caseData,
+            updateCaseData,
+            CaseEvent.CONFIRM_YOUR_DETAILS,
+            authToken
+        );
         assertNotNull(citizenUpdatePartyDataContent);
     }
 
@@ -391,25 +435,27 @@ public class CitizenPartyDetailsMapperTest {
         updateCaseData = CitizenUpdatedCaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .partyDetails(PartyDetails.builder()
-                .firstName("Test")
-                .lastName("User")
-                .isAtAddressLessThan5Years(YesOrNo.Yes)
-                .isAtAddressLessThan5YearsWithDontKnow(YesNoDontKnow.yes)
-                .response(Response.builder().build())
-                .user(User.builder()
-                    .email("test@gmail.com")
-                    .idamId("123")
-                    .solicitorRepresented(YesOrNo.Yes)
-                    .build())
-                .citizenSosObject(CitizenSos.builder()
-                    .partiesServed(List.of("123,234,1234"))
-                    .build())
-                .build())
+                              .firstName("Test")
+                              .lastName("User")
+                              .isAtAddressLessThan5Years(YesOrNo.Yes)
+                              .isAtAddressLessThan5YearsWithDontKnow(YesNoDontKnow.yes)
+                              .response(Response.builder().build())
+                              .user(User.builder()
+                                        .email("test@gmail.com")
+                                        .idamId("123")
+                                        .solicitorRepresented(YesOrNo.Yes)
+                                        .build())
+                              .citizenSosObject(CitizenSos.builder()
+                                                    .partiesServed(List.of("123,234,1234"))
+                                                    .build())
+                              .build())
             .partyType(PartyEnum.applicant)
             .build();
-        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData,updateCaseData,
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(
+            caseData, updateCaseData,
             CaseEvent.CONFIRM_YOUR_DETAILS,
-            authToken);
+            authToken
+        );
         assertNotNull(citizenUpdatePartyDataContent);
     }
 
@@ -419,34 +465,39 @@ public class CitizenPartyDetailsMapperTest {
         updateCaseData = CitizenUpdatedCaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .partyDetails(PartyDetails.builder()
-                .firstName("Test")
-                .lastName("User")
-                .isAtAddressLessThan5Years(YesOrNo.No)
-                .isAtAddressLessThan5YearsWithDontKnow(YesNoDontKnow.no)
-                .response(Response.builder().build())
-                .user(User.builder()
-                    .email("test@gmail.com")
-                    .idamId("123")
-                    .solicitorRepresented(YesOrNo.Yes)
-                    .build())
-                .citizenSosObject(CitizenSos.builder()
-                    .partiesServed(List.of("123,234,1234"))
-                    .build())
-                .build())
+                              .firstName("Test")
+                              .lastName("User")
+                              .isAtAddressLessThan5Years(YesOrNo.No)
+                              .isAtAddressLessThan5YearsWithDontKnow(YesNoDontKnow.no)
+                              .response(Response.builder().build())
+                              .user(User.builder()
+                                        .email("test@gmail.com")
+                                        .idamId("123")
+                                        .solicitorRepresented(YesOrNo.Yes)
+                                        .build())
+                              .citizenSosObject(CitizenSos.builder()
+                                                    .partiesServed(List.of("123,234,1234"))
+                                                    .build())
+                              .build())
             .partyType(PartyEnum.applicant)
             .build();
-        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData,updateCaseData,
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(
+            caseData, updateCaseData,
             CaseEvent.CONFIRM_YOUR_DETAILS,
-            authToken);
+            authToken
+        );
         assertNotNull(citizenUpdatePartyDataContent);
     }
 
     @Test
     public void testMapUpdatedPartyDetailsCaseEventLinkCitizen() throws IOException {
         setUpDa();
-        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, updateCaseData,
-                                                                                                                       CaseEvent.LINK_CITIZEN,
-                                                                                                                       authToken);
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(
+            caseData,
+            updateCaseData,
+            CaseEvent.LINK_CITIZEN,
+            authToken
+        );
         assertNotNull(citizenUpdatePartyDataContent);
     }
 
@@ -454,7 +505,12 @@ public class CitizenPartyDetailsMapperTest {
     public void testMapUpdatedPartyDetailsEventCurrentProceedings() throws IOException {
         setUpDa();
         CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper
-            .mapUpdatedPartyDetails(caseData, updateCaseData, CaseEvent.CITIZEN_CURRENT_OR_PREVIOUS_PROCCEDINGS, authToken);
+            .mapUpdatedPartyDetails(
+                caseData,
+                updateCaseData,
+                CaseEvent.CITIZEN_CURRENT_OR_PREVIOUS_PROCCEDINGS,
+                authToken
+            );
         assertNotNull(citizenUpdatePartyDataContent);
     }
 
@@ -482,7 +538,7 @@ public class CitizenPartyDetailsMapperTest {
             .caseTypeOfApplication(C100_CASE_TYPE)
             .c100RebuildData(c100RebuildData)
             .build();
-        CaseData caseDataResult = citizenPartyDetailsMapper.buildUpdatedCaseData(caseData,c100RebuildData);
+        CaseData caseDataResult = citizenPartyDetailsMapper.buildUpdatedCaseData(caseData, c100RebuildData);
         assertNotNull(caseDataResult);
     }
 
@@ -509,7 +565,7 @@ public class CitizenPartyDetailsMapperTest {
             .caseTypeOfApplication(C100_CASE_TYPE)
             .c100RebuildData(c100RebuildData)
             .build();
-        CaseData caseDataResult = citizenPartyDetailsMapper.buildUpdatedCaseData(caseData,c100RebuildData);
+        CaseData caseDataResult = citizenPartyDetailsMapper.buildUpdatedCaseData(caseData, c100RebuildData);
         assertNotNull(caseDataResult);
     }
 
@@ -541,7 +597,7 @@ public class CitizenPartyDetailsMapperTest {
             .caseTypeOfApplication(C100_CASE_TYPE)
             .c100RebuildData(c100RebuildData)
             .build();
-        CaseData caseDataResult = citizenPartyDetailsMapper.buildUpdatedCaseData(caseData,c100RebuildData);
+        CaseData caseDataResult = citizenPartyDetailsMapper.buildUpdatedCaseData(caseData, c100RebuildData);
         assertNotNull(caseDataResult);
     }
 
@@ -584,8 +640,9 @@ public class CitizenPartyDetailsMapperTest {
             .respondents(Arrays.asList(element(applicant1)))
             .c100RebuildData(c100RebuildData)
             .build();
-        doNothing().when(c100RespondentSolicitorService).populateConfidentialAndMiscDataMap(any(), any(),
-                                                                                            anyString()
+        doNothing().when(c100RespondentSolicitorService).populateConfidentialAndMiscDataMap(
+            any(), any(),
+            anyString()
         );
         when(updatePartyDetailsService.checkIfConfidentialityDetailsChangedRespondent(any(), any())).thenReturn(true);
         CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(
@@ -621,32 +678,43 @@ public class CitizenPartyDetailsMapperTest {
             .c100RebuildData(c100RebuildData)
             .build();
         Element<PartyDetails> otherPartyElement = element(PartyDetails.builder()
-            .firstName("c1")
-            .lastName("c1")
-            .liveInRefuge(YesOrNo.Yes)
-            .refugeConfidentialityC8Form(Document.builder()
-               .documentUrl("http://dm-store-aat.service.core-compute-aat.internal/documents/79e841a4-f232-4f2e-9e86-e4fc8f70fcac")
-               .documentBinaryUrl("http://dm-store-aat.service.core-compute-aat.internal/documents/79e841a4-f232-4f2e-9e86-e4fc8f70fcac/binary")
-               .documentFileName("Sample_doc_2.pdf")
-               .documentCreatedOn(
-                   Date.from(ZonedDateTime.parse("2024-05-14T14:13:44Z").toInstant()))
-               .build())
-            .address(Address.builder()
-                 .addressLine1("add1")
-                 .addressLine2("add2")
-                 .addressLine3("add3")
-                 .postTown("")
-                 .county("thames")
-                 .country("uk")
-                 .postCode("tw22tr8")
-                 .build())
-            .isAddressConfidential(YesOrNo.Yes)
-            .liveInRefuge(YesOrNo.Yes)
-            .build());
-        when(confidentialityTabService.updateOtherPeopleConfidentiality(any(), any())).thenReturn(Collections.singletonList(otherPartyElement));
-        CaseData caseDataResult = citizenPartyDetailsMapper.buildUpdatedCaseData(caseData,c100RebuildData);
+                                                              .firstName("c1")
+                                                              .lastName("c1")
+                                                              .liveInRefuge(YesOrNo.Yes)
+                                                              .refugeConfidentialityC8Form(Document.builder()
+                                                                                               .documentUrl(
+                                                                                                   "http://dm-store-aat.service.core-compute-aat.internal/documents/79e841a4-f232-4f2e-9e86-e4fc8f70fcac")
+                                                                                               .documentBinaryUrl(
+                                                                                                   "http://dm-store-aat.service.core-compute-aat.internal/documents/79e841a4-f232-4f2e-9e86-e4fc8f70fcac/binary")
+                                                                                               .documentFileName(
+                                                                                                   "Sample_doc_2.pdf")
+                                                                                               .documentCreatedOn(
+                                                                                                   Date.from(
+                                                                                                       ZonedDateTime.parse(
+                                                                                                           "2024-05-14T14:13:44Z").toInstant()))
+                                                                                               .build())
+                                                              .address(Address.builder()
+                                                                           .addressLine1("add1")
+                                                                           .addressLine2("add2")
+                                                                           .addressLine3("add3")
+                                                                           .postTown("")
+                                                                           .county("thames")
+                                                                           .country("uk")
+                                                                           .postCode("tw22tr8")
+                                                                           .build())
+                                                              .isAddressConfidential(YesOrNo.Yes)
+                                                              .liveInRefuge(YesOrNo.Yes)
+                                                              .build());
+        when(confidentialityTabService.updateOtherPeopleConfidentiality(
+            any(),
+            any()
+        )).thenReturn(Collections.singletonList(otherPartyElement));
+        CaseData caseDataResult = citizenPartyDetailsMapper.buildUpdatedCaseData(caseData, c100RebuildData);
         assertNotNull(caseDataResult);
-        assertEquals(YesOrNo.Yes, caseDataResult.getOtherPartyInTheCaseRevised().get(0).getValue().getIsAddressConfidential());
+        assertEquals(
+            YesOrNo.Yes,
+            caseDataResult.getOtherPartyInTheCaseRevised().get(0).getValue().getIsAddressConfidential()
+        );
         assertEquals(YesOrNo.Yes, caseDataResult.getOtherPartyInTheCaseRevised().get(0).getValue().getLiveInRefuge());
     }
 
@@ -674,32 +742,43 @@ public class CitizenPartyDetailsMapperTest {
             .c100RebuildData(c100RebuildData)
             .build();
         Element<PartyDetails> otherPartyElement = element(PartyDetails.builder()
-              .firstName("c1")
-              .lastName("c1")
-              .liveInRefuge(YesOrNo.Yes)
-              .refugeConfidentialityC8Form(Document.builder()
-                   .documentUrl("http://dm-store-aat.service.core-compute-aat.internal/documents/79e841a4-f232-4f2e-9e86-e4fc8f70fcac")
-                   .documentBinaryUrl("http://dm-store-aat.service.core-compute-aat.internal/documents/79e841a4-f232-4f2e-9e86-e4fc8f70fcac/binary")
-                   .documentFileName("Sample_doc_2.pdf")
-                   .documentCreatedOn(
-                       Date.from(ZonedDateTime.parse("2024-05-14T14:13:44Z").toInstant()))
-                   .build())
-              .address(Address.builder()
-                   .addressLine1("add1")
-                   .addressLine2("add2")
-                   .addressLine3("add3")
-                   .postTown("")
-                   .county("thames")
-                   .country("uk")
-                   .postCode("tw22tr8")
-                   .build())
-              .isAddressConfidential(YesOrNo.No)
-              .liveInRefuge(YesOrNo.No)
-              .build());
-        when(confidentialityTabService.updateOtherPeopleConfidentiality(any(), any())).thenReturn(Collections.singletonList(otherPartyElement));
-        CaseData caseDataResult = citizenPartyDetailsMapper.buildUpdatedCaseData(caseData,c100RebuildData);
+                                                              .firstName("c1")
+                                                              .lastName("c1")
+                                                              .liveInRefuge(YesOrNo.Yes)
+                                                              .refugeConfidentialityC8Form(Document.builder()
+                                                                                               .documentUrl(
+                                                                                                   "http://dm-store-aat.service.core-compute-aat.internal/documents/79e841a4-f232-4f2e-9e86-e4fc8f70fcac")
+                                                                                               .documentBinaryUrl(
+                                                                                                   "http://dm-store-aat.service.core-compute-aat.internal/documents/79e841a4-f232-4f2e-9e86-e4fc8f70fcac/binary")
+                                                                                               .documentFileName(
+                                                                                                   "Sample_doc_2.pdf")
+                                                                                               .documentCreatedOn(
+                                                                                                   Date.from(
+                                                                                                       ZonedDateTime.parse(
+                                                                                                           "2024-05-14T14:13:44Z").toInstant()))
+                                                                                               .build())
+                                                              .address(Address.builder()
+                                                                           .addressLine1("add1")
+                                                                           .addressLine2("add2")
+                                                                           .addressLine3("add3")
+                                                                           .postTown("")
+                                                                           .county("thames")
+                                                                           .country("uk")
+                                                                           .postCode("tw22tr8")
+                                                                           .build())
+                                                              .isAddressConfidential(YesOrNo.No)
+                                                              .liveInRefuge(YesOrNo.No)
+                                                              .build());
+        when(confidentialityTabService.updateOtherPeopleConfidentiality(
+            any(),
+            any()
+        )).thenReturn(Collections.singletonList(otherPartyElement));
+        CaseData caseDataResult = citizenPartyDetailsMapper.buildUpdatedCaseData(caseData, c100RebuildData);
         assertNotNull(caseDataResult);
-        assertEquals(YesOrNo.No, caseDataResult.getOtherPartyInTheCaseRevised().get(0).getValue().getIsAddressConfidential());
+        assertEquals(
+            YesOrNo.No,
+            caseDataResult.getOtherPartyInTheCaseRevised().get(0).getValue().getIsAddressConfidential()
+        );
         assertEquals(YesOrNo.No, caseDataResult.getOtherPartyInTheCaseRevised().get(0).getValue().getLiveInRefuge());
     }
 
@@ -709,9 +788,11 @@ public class CitizenPartyDetailsMapperTest {
         PartyDetails partyDetails2 = partyDetails.toBuilder()
             .response(Response.builder().responseToAllegationsOfHarm(ResponseToAllegationsOfHarm.builder().build()).build())
             .build();
-        PartyDetails updatedPartyDetailsBasedOnEvent = citizenPartyDetailsMapper.getUpdatedPartyDetailsBasedOnEvent(partyDetails2, partyDetails1,
-                                                                     CaseEvent.CITIZEN_RESPONSE_TO_AOH,
-                                                                     List.of(element(ChildDetailsRevised.builder().build())));
+        PartyDetails updatedPartyDetailsBasedOnEvent = citizenPartyDetailsMapper.getUpdatedPartyDetailsBasedOnEvent(
+            partyDetails2, partyDetails1,
+            CaseEvent.CITIZEN_RESPONSE_TO_AOH,
+            List.of(element(ChildDetailsRevised.builder().build()))
+        );
         assertNotNull(updatedPartyDetailsBasedOnEvent);
 
     }
@@ -730,7 +811,8 @@ public class CitizenPartyDetailsMapperTest {
                                                                 .confidentialityList(Arrays.asList(
                                                                     ConfidentialityListEnum.address,
                                                                     ConfidentialityListEnum.phoneNumber,
-                                                                    ConfidentialityListEnum.email))
+                                                                    ConfidentialityListEnum.email
+                                                                ))
                                                                 .build()).build())
             .build();
 
@@ -744,6 +826,7 @@ public class CitizenPartyDetailsMapperTest {
         assertEquals(YesOrNo.Yes, updatedPartyDetailsBasedOnEvent.getIsAddressConfidential());
         assertEquals(YesOrNo.Yes, updatedPartyDetailsBasedOnEvent.getIsPhoneNumberConfidential());
         assertEquals(YesOrNo.Yes, updatedPartyDetailsBasedOnEvent.getIsEmailAddressConfidential());
+    }
 
     @Test
     public void testMapUpdatedPartyDetailsCaseEventConfirmDetailsWithSafeTimeToCall() throws IOException {
@@ -776,7 +859,10 @@ public class CitizenPartyDetailsMapperTest {
         );
         assertNotNull(citizenUpdatePartyDataContent);
         assertEquals("7pm", citizenUpdatePartyDataContent.updatedCaseDataMap().get("daApplicantContactInstructions"));
-        assertEquals("7pm", citizenUpdatePartyDataContent.updatedCaseData().getApplicantsFL401().getResponse().getSafeToCallOption());
+        assertEquals(
+            "7pm",
+            citizenUpdatePartyDataContent.updatedCaseData().getApplicantsFL401().getResponse().getSafeToCallOption()
+        );
     }
 
     @Test
@@ -810,7 +896,10 @@ public class CitizenPartyDetailsMapperTest {
         );
         assertNotNull(citizenUpdatePartyDataContent);
         assertNull(citizenUpdatePartyDataContent.updatedCaseDataMap().get("daApplicantContactInstructions"));
-        assertEquals("", citizenUpdatePartyDataContent.updatedCaseData().getApplicantsFL401().getResponse().getSafeToCallOption());
+        assertEquals(
+            "",
+            citizenUpdatePartyDataContent.updatedCaseData().getApplicantsFL401().getResponse().getSafeToCallOption()
+        );
     }
 }
 
