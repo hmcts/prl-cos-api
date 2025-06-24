@@ -5,11 +5,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
@@ -162,6 +166,7 @@ import static uk.gov.hmcts.reform.prl.utils.CaseUtils.base64Encode;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
+@ExtendWith(MockitoExtension.class)
 public class ManageOrderServiceTest {
 
 
@@ -6361,19 +6366,20 @@ public class ManageOrderServiceTest {
         assertEquals(manageOrders.getIsTheOrderByConsent(), draftOrder.getIsTheOrderByConsent());
     }
 
-    @Test
-    public void testWhenClientContextSetTaskCompletionToFalse() throws IOException {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testWhenClientContextSetTaskCompletionFlag(boolean completeTask) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.findAndRegisterModules();
         WaMapper waMapper = mapper.readValue(CLIENT_CONTEXT, WaMapper.class);
         String encodedString = base64Encode(waMapper, mapper);
         assertThat(encodedString).isNotNull();
 
-        String encodedClientContext = manageOrderService.setTaskCompletionToFalse(encodedString, mapper);
+        String encodedClientContext = manageOrderService.setTaskCompletion(encodedString, mapper, () -> completeTask);
         byte[] decodeClientContext = getDecoder().decode(encodedClientContext);
         WaMapper updatedWaMapper = mapper.readValue(decodeClientContext, WaMapper.class);
         assertThat(updatedWaMapper.getClientContext().getUserTask().isCompleteTask())
-            .isFalse();
+            .isEqualTo(completeTask);
     }
 
     @Test
@@ -6381,7 +6387,7 @@ public class ManageOrderServiceTest {
         ObjectMapper mapper = new ObjectMapper();
         mapper.findAndRegisterModules();
 
-        assertThat(manageOrderService.setTaskCompletionToFalse(null, mapper))
+        assertThat(manageOrderService.setTaskCompletion(null, mapper, () -> false))
             .isNull();
     }
 }

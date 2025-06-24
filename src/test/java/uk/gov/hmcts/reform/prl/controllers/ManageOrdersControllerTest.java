@@ -6,6 +6,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -79,6 +81,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -88,7 +91,7 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.never;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -165,6 +168,9 @@ public class ManageOrdersControllerTest {
     RoleAssignmentService roleAssignmentService;
     @Mock
     AllTabServiceImpl allTabService;
+
+    @Captor
+    ArgumentCaptor<Supplier<Boolean>> captor;
 
     @Before
     public void setUp() {
@@ -2054,9 +2060,12 @@ public class ManageOrdersControllerTest {
             .thenReturn(stringObjectMap);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
             .thenReturn(caseData);
+        when(manageOrderService.isSaveAsDraft(any(CaseData.class)))
+            .thenReturn(false);
         String clientContext = "clientContext";
         String response = "encoded response";
-        when(manageOrderService.setTaskCompletionToFalse(clientContext, objectMapper))
+
+        when(manageOrderService.setTaskCompletion(eq(clientContext), eq(objectMapper), any()))
             .thenReturn(response);
         when(manageOrderService.isSaveAsDraft(caseData))
             .thenReturn(true);
@@ -2076,7 +2085,10 @@ public class ManageOrdersControllerTest {
             clientContext,
             callbackRequest
         );
-        verify(manageOrderService).setTaskCompletionToFalse(clientContext, objectMapper);
+        verify(manageOrderService)
+            .setTaskCompletion(eq(clientContext), eq(objectMapper), captor.capture());
+        assertThat(captor.getValue().get())
+            .isTrue();
         assertThat(No.getDisplayedValue())
             .isEqualTo(responseResponseEntity.getBody().getData().get("doYouWantToServeOrder"));
         assertThat(responseResponseEntity.getHeaders())
@@ -2119,9 +2131,9 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
             .thenReturn(caseData);
         String clientContext = "clientContext";
-        String response = "encoded response";
-        when(manageOrderService.setTaskCompletionToFalse(clientContext, objectMapper))
-            .thenReturn(response);
+
+        when(manageOrderService.setTaskCompletion(eq(clientContext), eq(objectMapper), any()))
+            .thenReturn(null);
         when(manageOrderService.isSaveAsDraft(caseData))
             .thenReturn(false);
 
@@ -2140,7 +2152,10 @@ public class ManageOrdersControllerTest {
             clientContext,
             callbackRequest
         );
-        verify(manageOrderService, never()).setTaskCompletionToFalse(clientContext, objectMapper);
+        verify(manageOrderService)
+            .setTaskCompletion(eq(clientContext), eq(objectMapper), captor.capture());
+        assertThat(captor.getValue().get())
+            .isFalse();
         assertThat(No.getDisplayedValue())
             .isEqualTo(responseResponseEntity.getBody().getData().get("doYouWantToServeOrder"));
         assertThat(responseResponseEntity.getHeaders())

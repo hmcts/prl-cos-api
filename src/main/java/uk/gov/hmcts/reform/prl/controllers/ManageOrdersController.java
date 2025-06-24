@@ -57,10 +57,12 @@ import java.util.Map;
 import java.util.UUID;
 import javax.ws.rs.core.HttpHeaders;
 
+import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -106,7 +108,7 @@ public class ManageOrdersController {
     public AboutToStartOrSubmitCallbackResponse populatePreviewOrderWhenOrderUploaded(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
+        @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -138,7 +140,7 @@ public class ManageOrdersController {
     public AboutToStartOrSubmitCallbackResponse prepopulateCaseDetails(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
+        @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
@@ -460,20 +462,20 @@ public class ManageOrdersController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> whenToServeOrder(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
+        @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
+            final CaseData updatedCaseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            if (caseData.getServeOrderData().getDoYouWantToServeOrder().equals(YesOrNo.Yes)) {
+            if (updatedCaseData.getServeOrderData().getDoYouWantToServeOrder().equals(YesOrNo.Yes)) {
                 caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, YesOrNo.Yes);
-                if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
-                    caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
+                if (amendOrderUnderSlipRule.equals(updatedCaseData.getManageOrdersOptions())) {
+                    caseDataUpdated.putAll(amendOrderService.updateOrder(updatedCaseData, authorisation));
                 } else {
                     caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
                         authorisation,
-                        caseData,
+                        updatedCaseData,
                         PrlAppsConstants.ENGLISH
                     ));
                 }
@@ -486,18 +488,19 @@ public class ManageOrdersController {
                 caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, No);
             }
 
-            if (clientContext != null && manageOrderService.isSaveAsDraft(caseData)) {
-                String encodedClientContext = manageOrderService.setTaskCompletionToFalse(clientContext, objectMapper);
-                return ResponseEntity.ok()
-                    .header(PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, encodedClientContext)
-                    .body(AboutToStartOrSubmitCallbackResponse.builder()
-                              .data(caseDataUpdated)
-                              .build());
-            }
-            return ResponseEntity.ok()
-                .body(AboutToStartOrSubmitCallbackResponse.builder()
-                            .data(caseDataUpdated)
-                            .build());
+            String encodedClientContext = manageOrderService.setTaskCompletion(
+                clientContext,
+                objectMapper,
+                () -> manageOrderService.isSaveAsDraft(updatedCaseData));
+
+            ResponseEntity.BodyBuilder responseBuilder = ofNullable(encodedClientContext)
+                .map(value -> ResponseEntity.ok()
+                    .header(CLIENT_CONTEXT_HEADER_PARAMETER, value))
+                .orElseGet(ResponseEntity::ok);
+
+            return responseBuilder.body(AboutToStartOrSubmitCallbackResponse.builder()
+                                      .data(caseDataUpdated)
+                                      .build());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

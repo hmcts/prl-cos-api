@@ -111,6 +111,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -3181,14 +3182,18 @@ public class ManageOrderService {
         return caseDataUpdated;
     }
 
-    public String setTaskCompletionToFalse(String clientContext, ObjectMapper objectMapper) {
-        WaMapper waMapper = getWaMapper(clientContext);
-        return ofNullable(waMapper)
+    public String setTaskCompletion(
+        String clientContext,
+        ObjectMapper objectMapper,
+        Supplier<Boolean> completeTask) {
+
+        return ofNullable(clientContext)
+            .map(value -> getWaMapper(clientContext))
             .map(WaMapper::getClientContext)
             .map(value ->
                      value.toBuilder()
                          .userTask(value.getUserTask().toBuilder()
-                                       .completeTask(false)
+                                       .completeTask(completeTask.get())
                                        .build())
                          .build())
             .map(
@@ -3196,10 +3201,12 @@ public class ManageOrderService {
                     base64Encode(WaMapper.builder()
                                      .clientContext(updatedClientContext)
                                      .build(),
-                objectMapper)
+                                 objectMapper)
             )
             .orElse(null);
     }
+
+
 
     private void populateHearingData(String authorisation,
                                      CaseData caseData,
