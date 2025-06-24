@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.services.validators.eventschecker.EventsChecker;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -328,14 +329,18 @@ public class TaskListService {
                             .documentFileName("C8ArchivedDocument.pdf")
                             .build();
 
-                        caseDataUpdated.put("c8ArchivedDocument", archivedC8);
+                        List<Document> archivedDocuments = new ArrayList<>(
+                            Optional.ofNullable(caseData.getC8ArchivedDocuments()).orElse(Collections.emptyList())
+                        );
+                        archivedDocuments.add(archivedC8);
+
+                        caseDataUpdated.put("c8ArchivedDocuments", archivedDocuments);
 
                     }
                 }
 
                 caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
                 CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
-                caseDataUpdated.put("c8ArchivedDocument", updatedCaseData.getC8ArchivedDocument());
                 caseDataUpdated.put("c8Document", updatedCaseData.getC8Document());
                 caseDataUpdated.put("c1ADocument", updatedCaseData.getC1ADocument());
                 caseDataUpdated.put("c8WelshDocument", updatedCaseData.getC8WelshDocument());
