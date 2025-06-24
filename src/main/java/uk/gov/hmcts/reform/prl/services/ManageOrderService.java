@@ -85,8 +85,6 @@ import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
-import uk.gov.hmcts.reform.prl.models.wa.ClientContext;
-import uk.gov.hmcts.reform.prl.models.wa.UserTask;
 import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
@@ -188,6 +186,7 @@ import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.app
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.respondentOrRespondentSolicitor;
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum.factFindingHearing;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getDynamicMultiSelectedValueLabels;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getWaMapper;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.isHearingPageNeeded;
 
@@ -626,6 +625,12 @@ public class ManageOrderService {
     private final AuthTokenGenerator authTokenGenerator;
     private final LaunchDarklyClient launchDarklyClient;
     private final DocumentSealingService documentSealingService;
+
+    public boolean isSaveAsDraft(CaseData caseData) {
+        return isNotEmpty(caseData.getServeOrderData()) && No.equals(
+            caseData.getServeOrderData().getDoYouWantToServeOrder())
+            && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder());
+    }
 
     public Map<String, Object> populateHeader(CaseData caseData) {
         Map<String, Object> headerMap = new HashMap<>();
@@ -1174,8 +1179,8 @@ public class ManageOrderService {
         throws DocumentGenerationException {
         String loggedInUserType = getLoggedInUserType(authorisation);
         UserDetails userDetails = userService.getUserDetails(authorisation);
-        boolean saveAsDraft = isNotEmpty(caseData.getServeOrderData()) && No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
-            && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder());
+        boolean saveAsDraft = isSaveAsDraft(caseData);
+
         if (UserRoles.JUDGE.name().equals(loggedInUserType)) {
             return setDraftOrderCollection(caseData, loggedInUserType,userDetails);
         } else if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)) {
@@ -3138,7 +3143,7 @@ public class ManageOrderService {
                                                        CallbackRequest callbackRequest,
                                                        String language,
                                                        String clientContext) {
-        WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
+        WaMapper waMapper = getWaMapper(clientContext);
         Optional<Long> hearingId = ofNullable(waMapper)
             .map(value -> Long.valueOf(value
                                               .getClientContext()
@@ -3173,25 +3178,6 @@ public class ManageOrderService {
         populateHearingData(authorisation, caseData, caseDataUpdated);
 
         return caseDataUpdated;
-    }
-
-    public String setTaskCompletionToFalse(String clientContext, ObjectMapper objectMapper) {
-        WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
-
-        return ofNullable(waMapper)
-            .map(value -> {
-                UserTask userTask = value.getClientContext().getUserTask();
-                ClientContext updateClientContext = value.getClientContext().toBuilder()
-                    .userTask(userTask.toBuilder()
-                                  .completeTask(false)
-                                  .build())
-                    .build();
-                return WaMapper.builder()
-                    .clientContext(updateClientContext)
-                    .build();
-            })
-            .map(value -> CaseUtils.base64Encode(value, objectMapper))
-            .orElse(null);
     }
 
     private void populateHearingData(String authorisation,

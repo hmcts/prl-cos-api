@@ -12,6 +12,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
@@ -73,12 +74,14 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -90,6 +93,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
@@ -118,6 +122,22 @@ public class ManageOrdersControllerTest {
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "s2s AuthToken";
+    private static final String CLIENT_CONTEXT = """
+        {
+          "client_context": {
+            "user_task": {
+              "task_data": {
+                "additional_properties": {
+                  "hearingId": "12345"
+                }
+              },
+              "complete_task" : true
+            }
+          }
+        }
+        """;
+
+    private static final String ENCRYPTED_CLIENT_CONTEXT = Base64.getEncoder().encodeToString(CLIENT_CONTEXT.getBytes());
 
     @Mock
     private ManageOrderEmailService manageOrderEmailService;
@@ -162,6 +182,8 @@ public class ManageOrdersControllerTest {
     RoleAssignmentService roleAssignmentService;
     @Mock
     AllTabServiceImpl allTabService;
+
+
 
     @Before
     public void setUp() {
@@ -1901,12 +1923,15 @@ public class ManageOrdersControllerTest {
                              .build())
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.whenToServeOrder(
+        ResponseEntity<AboutToStartOrSubmitCallbackResponse> responseResponseEntity = manageOrdersController.whenToServeOrder(
             authToken,
             s2sToken,
+            null,
             callbackRequest
         );
-        assertEquals(Yes.getDisplayedValue(), aboutToStartOrSubmitCallbackResponse.getData().get("doYouWantToServeOrder"));
+        assertEquals(Yes.getDisplayedValue(), responseResponseEntity.getBody().getData().get("doYouWantToServeOrder"));
+        assertThat(responseResponseEntity.getHeaders())
+            .doesNotContainKey(CLIENT_CONTEXT_HEADER_PARAMETER);
     }
 
     @Test
@@ -1952,12 +1977,15 @@ public class ManageOrdersControllerTest {
                              .build())
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.whenToServeOrder(
+        ResponseEntity<AboutToStartOrSubmitCallbackResponse> responseResponseEntity = manageOrdersController.whenToServeOrder(
             authToken,
             s2sToken,
+            null,
             callbackRequest
         );
-        assertEquals(Yes.getDisplayedValue(), aboutToStartOrSubmitCallbackResponse.getData().get("doYouWantToServeOrder"));
+        assertEquals(Yes.getDisplayedValue(), responseResponseEntity.getBody().getData().get("doYouWantToServeOrder"));
+        assertThat(responseResponseEntity.getHeaders())
+            .doesNotContainKey(CLIENT_CONTEXT_HEADER_PARAMETER);
     }
 
     @Test
@@ -2003,13 +2031,80 @@ public class ManageOrdersControllerTest {
                              .build())
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.whenToServeOrder(
+        ResponseEntity<AboutToStartOrSubmitCallbackResponse> responseResponseEntity = manageOrdersController.whenToServeOrder(
             authToken,
             s2sToken,
+            null,
             callbackRequest
         );
-        assertEquals(No.getDisplayedValue(), aboutToStartOrSubmitCallbackResponse.getData().get("doYouWantToServeOrder"));
+        assertEquals(No.getDisplayedValue(), responseResponseEntity.getBody().getData().get("doYouWantToServeOrder"));
+        assertThat(responseResponseEntity.getHeaders())
+            .doesNotContainKey(CLIENT_CONTEXT_HEADER_PARAMETER);
     }
+
+    @Test
+    public void testAddUploadOrderDoesntNeedServingWithClientContextAndDraft() throws Exception {
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(Yes)
+            .build();
+
+        caseData = CaseData.builder()
+            .id(12345L)
+            .courtName("testcourt")
+            .manageOrders(manageOrders)
+            .previewOrderDoc(Document.builder()
+                                 .documentUrl(generatedDocumentInfo.getUrl())
+                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                 .documentHash(generatedDocumentInfo.getHashToken())
+                                 .documentFileName("PRL-ORDER-C21-COMMON.docx")
+                                 .build())
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .previewOrderDoc(Document.builder().build())
+            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(No).build())
+            .build();
+
+        List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
+            OrderDetails.builder().build()).build());
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
+            .thenReturn(Map.of("orderCollection", orderDetailsList));
+        when(manageOrderService.populateHeader(caseData))
+            .thenReturn(stringObjectMap);
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
+            .thenReturn(caseData);
+        when(manageOrderService.isSaveAsDraft(any(CaseData.class)))
+            .thenReturn(false);
+        when(manageOrderService.isSaveAsDraft(caseData))
+            .thenReturn(true);
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(objectMapper.writeValueAsString(any())).thenReturn("clientContext");
+
+        ResponseEntity<AboutToStartOrSubmitCallbackResponse> responseResponseEntity = manageOrdersController.whenToServeOrder(
+            authToken,
+            s2sToken,
+            ENCRYPTED_CLIENT_CONTEXT,
+            callbackRequest
+        );
+
+        assertThat(No.getDisplayedValue())
+            .isEqualTo(responseResponseEntity.getBody().getData().get("doYouWantToServeOrder"));
+        assertThat(responseResponseEntity.getHeaders())
+            .containsKey(CLIENT_CONTEXT_HEADER_PARAMETER);
+    }
+
 
     @Test
     public void testupdateManageOrdersisSdoSelectedNo() throws Exception {
@@ -2486,7 +2581,7 @@ public class ManageOrdersControllerTest {
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
         assertExpectedException(() -> {
-            manageOrdersController.whenToServeOrder(authToken, s2sToken, callbackRequest);
+            manageOrdersController.whenToServeOrder(authToken, s2sToken, null,callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 
