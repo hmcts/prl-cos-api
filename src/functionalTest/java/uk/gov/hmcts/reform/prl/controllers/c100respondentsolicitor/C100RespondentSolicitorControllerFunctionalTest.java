@@ -1,5 +1,8 @@
 package uk.gov.hmcts.reform.prl.controllers.c100respondentsolicitor;
 
+import java.util.Collections;
+import java.util.Map;
+
 import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +18,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
@@ -142,16 +150,49 @@ public class C100RespondentSolicitorControllerFunctionalTest {
     @Order(5)
     public void givenRequestBody_whenSubmit_c7_response_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-        when(allTabService.submitAllTabsUpdate(anyString(), anyString(), any(), any(), any())).thenReturn(CaseDetails.builder().build());
+
+        StartEventResponse dummyStart = StartEventResponse.builder()
+            .eventId("DUMMY_EVENT")
+            .token("DUMMY_TOKEN")
+            .build();
+        EventRequestData dummyRequest = EventRequestData.builder().build();
+        Map<String, Object> dummyMap = Collections.emptyMap();
+        CaseData dummyCaseData = CaseData.builder().build();
+        UserDetails dummyUser = UserDetails.builder().build();
+
+        StartAllTabsUpdateDataContent dummyContent = new StartAllTabsUpdateDataContent(
+            /* authorisation:     */ "Bearer dummy-auth",
+            /* eventRequestData:  */ dummyRequest,
+            /* startEventResponse:*/ dummyStart,
+            /* caseDataMap:       */ dummyMap,
+            /* caseData:          */ dummyCaseData,
+            /* userDetails:       */ dummyUser
+        );
+
+        when(allTabService.getStartAllTabsUpdate(anyString()))
+            .thenReturn(dummyContent);
+
+         CaseDetails returnedCase = CaseDetails.builder()
+            .data(Map.of("solicitorName", "AAT Solicitor"))
+            .build();
+
+        when(allTabService.submitAllTabsUpdate(
+            anyString(),
+            anyString(),
+            any(StartEventResponse.class),
+            any(EventRequestData.class),
+            any(Map.class)))
+            .thenReturn(returnedCase);
 
         AboutToStartOrSubmitCallbackResponse responseData = request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("Authorization",        idamTokenGenerator.generateIdamTokenForSolicitor())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType("application/json")
             .post("/respondent-solicitor/submit-c7-response")
             .then()
+            .statusCode(200)
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
         Assert.assertNotNull(responseData);
