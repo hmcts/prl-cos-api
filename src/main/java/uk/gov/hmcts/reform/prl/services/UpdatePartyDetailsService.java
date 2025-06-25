@@ -304,7 +304,6 @@ public class UpdatePartyDetailsService {
                     .build();
             }
         }
-
         return partyDetails;
     }
 

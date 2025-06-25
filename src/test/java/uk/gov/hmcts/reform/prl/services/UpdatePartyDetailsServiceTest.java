@@ -2305,7 +2305,7 @@ public class UpdatePartyDetailsServiceTest {
 
 
     @Test
-    public void shouldUpdateRespondentWhenConfidentialityChangedAndResponseNotNull() {
+    public void shouldUpdateRespondentWhenAddressConfidentialityChangedNoToYesAndResponseNotNull() {
         PartyDetails partyDetailsBefore = PartyDetails.builder()
             .address(Address.builder()
                          .addressLine1("test1")
@@ -2328,6 +2328,155 @@ public class UpdatePartyDetailsServiceTest {
 
         assertNotNull(result.getResponse());
     }
+
+    @Test
+    public void shouldUpdateRespondentWhenAddressConfidentialityChangedYesToNoAndResponseNotNull() {
+        PartyDetails partyDetailsBefore = PartyDetails.builder()
+            .address(Address.builder()
+                         .addressLine1("test1")
+                         .build())
+            .isAddressConfidential(YesOrNo.Yes)
+            .build();
+        Response response = Response.builder()
+            .keepDetailsPrivate(KeepDetailsPrivate.builder()
+                                    .build()).build();
+        PartyDetails partyDetails = PartyDetails.builder()
+            .address(Address.builder()
+                         .addressLine1("test2")
+                         .build())
+            .isAddressConfidential(YesOrNo.No)
+            .response(response)
+            .build();
+
+        PartyDetails result = updatePartyDetailsService.checkRespondentConfidentialDetailsForExistingUser(
+            partyDetails, partyDetailsBefore);
+
+        assertNotNull(result.getResponse());
+    }
+
+    @Test
+    public void shouldUpdateRespondentWhenEmailConfidentialityChangedNoToYesAndResponseNotNull() {
+        PartyDetails partyDetailsBefore = PartyDetails.builder()
+            .address(Address.builder()
+                         .addressLine1("test1")
+                         .build())
+            .isEmailAddressConfidential(YesOrNo.No)
+            .build();
+        Response response = Response.builder()
+            .keepDetailsPrivate(KeepDetailsPrivate.builder()
+                                    .build()).build();
+        PartyDetails partyDetails = PartyDetails.builder()
+            .address(Address.builder()
+                         .addressLine1("test2")
+                         .build())
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .response(response)
+            .build();
+
+        PartyDetails result = updatePartyDetailsService.checkRespondentConfidentialDetailsForExistingUser(
+            partyDetails, partyDetailsBefore);
+
+        assertNotNull(result.getResponse());
+    }
+
+    @Test
+    public void shouldUpdateRespondentWhenEmailConfidentialityChangedYesToNoAndResponseNotNull() {
+        PartyDetails partyDetailsBefore = PartyDetails.builder()
+            .address(Address.builder()
+                         .addressLine1("test1")
+                         .build())
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .build();
+        Response response = Response.builder()
+            .keepDetailsPrivate(KeepDetailsPrivate.builder()
+                                    .build()).build();
+        PartyDetails partyDetails = PartyDetails.builder()
+            .address(Address.builder()
+                         .addressLine1("test2")
+                         .build())
+            .isEmailAddressConfidential(YesOrNo.No)
+            .response(response)
+            .build();
+
+        PartyDetails result = updatePartyDetailsService.checkRespondentConfidentialDetailsForExistingUser(
+            partyDetails, partyDetailsBefore);
+
+        assertNotNull(result.getResponse());
+    }
+
+    @Test
+    public void shouldUpdateRespondentWhenPhoneConfidentialityChangedNoToYesAndResponseNotNull() {
+        PartyDetails partyDetailsBefore = PartyDetails.builder()
+            .address(Address.builder()
+                         .addressLine1("test1")
+                         .build())
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+        Response response = Response.builder()
+            .keepDetailsPrivate(KeepDetailsPrivate.builder()
+                                    .build()).build();
+        PartyDetails partyDetails = PartyDetails.builder()
+            .address(Address.builder()
+                         .addressLine1("test2")
+                         .build())
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .response(response)
+            .build();
+
+        PartyDetails result = updatePartyDetailsService.checkRespondentConfidentialDetailsForExistingUser(
+            partyDetails, partyDetailsBefore);
+
+        assertNotNull(result.getResponse());
+    }
+
+    @Test
+    public void shouldUpdateRespondentWhenPhoneConfidentialityChangedYesToNoAndResponseNotNull() {
+        PartyDetails partyDetailsBefore = PartyDetails.builder()
+            .address(Address.builder()
+                         .addressLine1("test1")
+                         .build())
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .build();
+        Response response = Response.builder()
+            .keepDetailsPrivate(KeepDetailsPrivate.builder()
+                                    .build()).build();
+        PartyDetails partyDetails = PartyDetails.builder()
+            .address(Address.builder()
+                         .addressLine1("test2")
+                         .build())
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .response(response)
+            .build();
+
+        PartyDetails result = updatePartyDetailsService.checkRespondentConfidentialDetailsForExistingUser(
+            partyDetails, partyDetailsBefore);
+
+        assertNotNull(result.getResponse());
+    }
+
+    @Test
+    public void shouldNotUpdateRespondentWhenNoConfidentialityChange() {
+        PartyDetails partyDetailsBefore = PartyDetails.builder()
+            .isAddressConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .response(Response.builder().build())
+            .build();
+
+        PartyDetails partyDetails = PartyDetails.builder()
+            .isAddressConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .response(Response.builder().build())
+            .build();
+
+        PartyDetails result = updatePartyDetailsService.checkRespondentConfidentialDetailsForExistingUser(
+            partyDetails, partyDetailsBefore);
+
+        // Should return the same object (no update)
+        assertEquals(partyDetails, result);
+    }
+
 
 
     @Test

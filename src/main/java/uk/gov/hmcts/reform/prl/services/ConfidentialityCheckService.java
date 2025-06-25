@@ -177,7 +177,7 @@ public class ConfidentialityCheckService {
         return ResponseDocuments.builder().build();
     }
 
-    private ResponseDocuments getApplicantDoc(ResponseDocuments latestC8Document) {
+    public ResponseDocuments getApplicantDoc(ResponseDocuments latestC8Document) {
         if (latestC8Document != null) {
             Document welFromDoc = null;
             Document engFromDoc = latestC8Document.getApplicantC8Document() == null
@@ -227,7 +227,7 @@ public class ConfidentialityCheckService {
         return null;
     }
 
-    private static ResponseDocuments getApplicantC8(ApplicantC8 applicantC8, int index) {
+    public static ResponseDocuments getApplicantC8(ApplicantC8 applicantC8, int index) {
         if (applicantC8 == null) {
             return null;
         }
@@ -252,7 +252,7 @@ public class ConfidentialityCheckService {
         return null;
     }
 
-    private static ResponseDocuments getRespondentC8(RespondentC8 respondentC8, int index) {
+    public static ResponseDocuments getRespondentC8(RespondentC8 respondentC8, int index) {
         if (respondentC8 == null) {
 
             return null;
@@ -278,7 +278,7 @@ public class ConfidentialityCheckService {
         return null;
     }
 
-    private static ResponseDocuments getApplicantC8Document(ApplicantC8Document applicantC8Document, int index) {
+    public static ResponseDocuments getApplicantC8Document(ApplicantC8Document applicantC8Document, int index) {
 
         if (applicantC8Document == null) {
             return null;

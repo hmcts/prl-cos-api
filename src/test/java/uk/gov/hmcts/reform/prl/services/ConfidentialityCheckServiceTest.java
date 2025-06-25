@@ -678,4 +678,75 @@ public class ConfidentialityCheckServiceTest {
 
         Assert.assertEquals(null, caseDetails.get("otherAC8RefugeDocument"));
     }
+
+    @Test
+    public void getApplicantC8_shouldReturnNull_whenIndexIsOutOfRange() {
+        ApplicantC8 applicantC8 = ApplicantC8.builder().build();
+        ResponseDocuments result = ConfidentialityCheckService.getApplicantC8(applicantC8, 6);
+        Assert.assertNull(result);
+    }
+
+    @Test
+    public void getRespondentC8_shouldReturnNull_whenIndexIsOutOfRange() {
+        RespondentC8 respondentC8 = RespondentC8.builder().build();
+        ResponseDocuments result = ConfidentialityCheckService.getRespondentC8(respondentC8, 6);
+        Assert.assertNull(result);
+    }
+
+    @Test
+    public void getApplicantC8Document_shouldReturnNull_whenApplicantC8DocumentIsNull() {
+        ResponseDocuments result = ConfidentialityCheckService.getApplicantC8Document(null, 0);
+        Assert.assertNull(result);
+    }
+
+    @Test
+    public void getApplicantC8Document_shouldReturnNull_whenApplicantAc8DocumentsIsNullOrEmpty() {
+        ApplicantC8Document docWithNullList = ApplicantC8Document.builder().applicantAc8Documents(null).build();
+        Assert.assertNull(ConfidentialityCheckService.getApplicantC8Document(docWithNullList, 0));
+
+        ApplicantC8Document docWithEmptyList = ApplicantC8Document.builder().applicantAc8Documents(List.of()).build();
+        Assert.assertNull(ConfidentialityCheckService.getApplicantC8Document(docWithEmptyList, 0));
+    }
+
+    @Test
+    public void getApplicantC8Document_shouldReturnNull_whenApplicantBc8DocumentsIsNullOrEmpty() {
+        ApplicantC8Document docWithNullList = ApplicantC8Document.builder().applicantBc8Documents(null).build();
+        Assert.assertNull(ConfidentialityCheckService.getApplicantC8Document(docWithNullList, 1));
+
+        ApplicantC8Document docWithEmptyList = ApplicantC8Document.builder().applicantBc8Documents(List.of()).build();
+        Assert.assertNull(ConfidentialityCheckService.getApplicantC8Document(docWithEmptyList, 1));
+    }
+
+    @Test
+    public void getApplicantC8Document_shouldReturnNull_whenApplicantCc8DocumentsIsNullOrEmpty() {
+        ApplicantC8Document docWithNullList = ApplicantC8Document.builder().applicantCc8Documents(null).build();
+        Assert.assertNull(ConfidentialityCheckService.getApplicantC8Document(docWithNullList, 2));
+
+        ApplicantC8Document docWithEmptyList = ApplicantC8Document.builder().applicantCc8Documents(List.of()).build();
+        Assert.assertNull(ConfidentialityCheckService.getApplicantC8Document(docWithEmptyList, 2));
+    }
+
+    @Test
+    public void getApplicantC8Document_shouldReturnNull_whenApplicantDc8DocumentsIsNullOrEmpty() {
+        ApplicantC8Document docWithNullList = ApplicantC8Document.builder().applicantDc8Documents(null).build();
+        Assert.assertNull(ConfidentialityCheckService.getApplicantC8Document(docWithNullList, 3));
+
+        ApplicantC8Document docWithEmptyList = ApplicantC8Document.builder().applicantDc8Documents(List.of()).build();
+        Assert.assertNull(ConfidentialityCheckService.getApplicantC8Document(docWithEmptyList, 3));
+    }
+
+    @Test
+    public void getApplicantC8Document_shouldReturnNull_whenApplicantEc8DocumentsIsNullOrEmpty() {
+        ApplicantC8Document docWithNullList = ApplicantC8Document.builder().applicantEc8Documents(null).build();
+        Assert.assertNull(ConfidentialityCheckService.getApplicantC8Document(docWithNullList, 4));
+
+        ApplicantC8Document docWithEmptyList = ApplicantC8Document.builder().applicantEc8Documents(List.of()).build();
+        Assert.assertNull(ConfidentialityCheckService.getApplicantC8Document(docWithEmptyList, 4));
+    }
+
+    @Test
+    public void getApplicantC8Document_shouldReturnNull_whenIndexIsOutOfRange() {
+        ApplicantC8Document doc = ApplicantC8Document.builder().build();
+        Assert.assertNull(ConfidentialityCheckService.getApplicantC8Document(doc, 99));
+    }
 }
