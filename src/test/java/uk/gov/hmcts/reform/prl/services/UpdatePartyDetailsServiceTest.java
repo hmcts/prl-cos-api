@@ -2309,12 +2309,17 @@ public class UpdatePartyDetailsServiceTest {
         PartyDetails partyDetailsBefore = PartyDetails.builder()
             .address(Address.builder()
                          .addressLine1("test1")
-                         .build()).build();
-        Response response = Response.builder().build();
+                         .build())
+            .isAddressConfidential(YesOrNo.No)
+            .build();
+        Response response = Response.builder()
+            .keepDetailsPrivate(KeepDetailsPrivate.builder()
+                                    .build()).build();
         PartyDetails partyDetails = PartyDetails.builder()
             .address(Address.builder()
                          .addressLine1("test2")
                          .build())
+            .isAddressConfidential(YesOrNo.Yes)
             .response(response)
             .build();
 
