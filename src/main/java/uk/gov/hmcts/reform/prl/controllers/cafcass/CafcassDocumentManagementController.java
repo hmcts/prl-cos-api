@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +21,7 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassCdamService;
 
+import java.net.URLConnection;
 import java.util.UUID;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -54,7 +57,23 @@ public class CafcassDocumentManagementController {
                 authorisationService.authoriseService(serviceAuthorisation))
                 && authorisationService.getUserInfo().getRoles().contains(CAFCASS_USER_ROLE)) {
                 log.info("processing cafcass request after authorization");
-                return (ResponseEntity<T>) cafcassCdamService.getDocument(authorisation, serviceAuthorisation, documentId);
+                 // Fetch downstream response
+            ResponseEntity<T> downstream =
+                (ResponseEntity<T>) cafcassCdamService.getDocument(authorisation, serviceAuthorisation, documentId);
+            T body = downstream.getBody();
+
+            HttpHeaders outHeaders = new HttpHeaders();
+            outHeaders.putAll(downstream.getHeaders());
+
+            // Only override Content-Type for successful byte[] payloads
+            if (downstream.getStatusCode().is2xxSuccessful() && body instanceof byte[]) {
+                String filename = downstream.getHeaders().getFirst("originalfilename");
+                String guessed = URLConnection.guessContentTypeFromName(filename);
+                String mimeType = (guessed != null ? guessed : MediaType.APPLICATION_OCTET_STREAM_VALUE);
+                outHeaders.set(HttpHeaders.CONTENT_TYPE, mimeType);
+            }
+
+            return new ResponseEntity<>(body, outHeaders, downstream.getStatusCode());
 
             } else {
                 throw new ResponseStatusException(UNAUTHORIZED);
