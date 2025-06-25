@@ -113,6 +113,8 @@
         "roleOnCase": "Applicant 2",
         "visibility": "External"
       },
+      "isCaseFlagsTaskCreated": "Yes",
+      "selectedFlags": [],
       "caApplicant3ExternalFlags": {}
     }
   }
