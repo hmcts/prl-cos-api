@@ -2303,6 +2303,49 @@ public class UpdatePartyDetailsServiceTest {
         assertNotNull(updatedCaseData);
     }
 
+
+    @Test
+    public void shouldUpdateRespondentWhenConfidentialityChangedAndResponseNotNull() {
+        PartyDetails partyDetailsBefore = PartyDetails.builder()
+            .address(Address.builder()
+                         .addressLine1("test1")
+                         .build())            .build();
+        Response response = Response.builder().build();
+        PartyDetails partyDetails = PartyDetails.builder()
+            .address(Address.builder()
+                         .addressLine1("test2")
+                         .build())
+            .response(response)
+            .build();
+
+        PartyDetails result = updatePartyDetailsService.checkRespondentConfidentialDetailsForExistingUser(
+            partyDetails, partyDetailsBefore);
+
+        assertNotNull(result.getResponse());
+    }
+
+
+    @Test
+    public void shouldUpdateApplicantWhenConfidentialityChangedAndResponseNotNull() {
+        PartyDetails partyDetailsBefore = PartyDetails.builder()
+            .address(Address.builder()
+                         .addressLine1("test1")
+                         .build())            .build();
+        Response response = Response.builder().build();
+        PartyDetails partyDetails = PartyDetails.builder()
+            .address(Address.builder()
+                         .addressLine1("test2")
+                         .build())
+            .response(response)
+            .build();
+
+        PartyDetails result = updatePartyDetailsService.checkApplicantConfidentialDetailsForExistingUser(
+            partyDetails, partyDetailsBefore);
+
+        assertNotNull(result.getResponse());
+    }
+
+
     @Test
     public void testSetApplicantDefaultApplicant() {
 

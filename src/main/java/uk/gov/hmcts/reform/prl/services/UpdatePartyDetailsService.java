@@ -279,7 +279,7 @@ public class UpdatePartyDetailsService {
         return partyDetails;
     }
 
-    private PartyDetails checkRespondentConfidentialDetailsForExistingUser(PartyDetails partyDetails,
+    public PartyDetails checkRespondentConfidentialDetailsForExistingUser(PartyDetails partyDetails,
                                                                            PartyDetails partyDetailsBefore) {
         if (checkIfAddressConfidentialityHasChanged(partyDetails, partyDetailsBefore)
             || checkIfPhoneConfidentialityHasChanged(partyDetails, partyDetailsBefore)
@@ -308,7 +308,7 @@ public class UpdatePartyDetailsService {
         return partyDetails;
     }
 
-    private PartyDetails checkApplicantConfidentialDetailsForExistingUser(PartyDetails partyDetails,
+    public PartyDetails checkApplicantConfidentialDetailsForExistingUser(PartyDetails partyDetails,
                                                                            PartyDetails partyDetailsBefore) {
         if (checkIfAddressConfidentialityHasChanged(partyDetails, partyDetailsBefore)
             || checkIfPhoneConfidentialityHasChanged(partyDetails, partyDetailsBefore)
