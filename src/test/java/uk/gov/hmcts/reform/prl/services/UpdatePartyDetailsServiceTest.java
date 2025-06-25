@@ -2309,7 +2309,7 @@ public class UpdatePartyDetailsServiceTest {
         PartyDetails partyDetailsBefore = PartyDetails.builder()
             .address(Address.builder()
                          .addressLine1("test1")
-                         .build())            .build();
+                         .build()).build();
         Response response = Response.builder().build();
         PartyDetails partyDetails = PartyDetails.builder()
             .address(Address.builder()
@@ -2330,7 +2330,7 @@ public class UpdatePartyDetailsServiceTest {
         PartyDetails partyDetailsBefore = PartyDetails.builder()
             .address(Address.builder()
                          .addressLine1("test1")
-                         .build())            .build();
+                         .build()).build();
         Response response = Response.builder().build();
         PartyDetails partyDetails = PartyDetails.builder()
             .address(Address.builder()
