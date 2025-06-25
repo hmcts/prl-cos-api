@@ -53,6 +53,7 @@ import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
@@ -170,6 +171,11 @@ public class UpdatePartyDetailsService {
                                                   authorisation,
                                                   caseData,
                                                   List.of(ElementUtils.element(fl401respondent.getPartyId(), fl401respondent)));
+                generateC8DocumentsForApplicants(updatedCaseData,
+                                                  callbackRequest,
+                                                  authorisation,
+                                                  caseData,
+                                                  List.of(ElementUtils.element(fl401Applicant.getPartyId(), fl401Applicant)));
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for Fl401 case {}", e.getMessage());
             }
@@ -212,6 +218,11 @@ public class UpdatePartyDetailsService {
                                                   authorisation,
                                                   caseData,
                                                   caseData.getRespondents());
+                generateC8DocumentsForApplicants(updatedCaseData,
+                                                 callbackRequest,
+                                                 authorisation,
+                                                 caseData,
+                                                 caseData.getApplicants());
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
             }
@@ -244,13 +255,13 @@ public class UpdatePartyDetailsService {
 
                 if (indexExists(applicantDetailsBeforeList, index)) {
                     PartyDetails partyDetailsBefore = applicantDetailsBeforeList.get(index).getValue();
-                    partyDetails = checkConfidentialDetailsForExistingUser(partyDetails, partyDetailsBefore);
+                    partyDetails = checkApplicantConfidentialDetailsForExistingUser(partyDetails, partyDetailsBefore);
                 } else {
                     partyDetails = partyDetails
                         .toBuilder()
                         .response(Response
                             .builder()
-                            .keepDetailsPrivate(updateRespondentKeepYourDetailsPrivateInformation(partyDetails))
+                            .keepDetailsPrivate(updateApplicantKeepYourDetailsPrivateInformation(partyDetails))
                             .build())
                         .build();
                 }
@@ -263,13 +274,13 @@ public class UpdatePartyDetailsService {
     private PartyDetails setCitizenConfidentialDetailsFL401(PartyDetails partyDetails,
                                                                    PartyDetails partyDetailsBefore) {
         if (null != partyDetailsBefore && null != partyDetails) {
-            partyDetails = checkConfidentialDetailsForExistingUser(partyDetails, partyDetailsBefore);
+            partyDetails = checkRespondentConfidentialDetailsForExistingUser(partyDetails, partyDetailsBefore);
         }
         return partyDetails;
     }
 
-    private PartyDetails checkConfidentialDetailsForExistingUser(PartyDetails partyDetails,
-                                                                        PartyDetails partyDetailsBefore) {
+    private PartyDetails checkRespondentConfidentialDetailsForExistingUser(PartyDetails partyDetails,
+                                                                           PartyDetails partyDetailsBefore) {
         if (checkIfAddressConfidentialityHasChanged(partyDetails, partyDetailsBefore)
             || checkIfPhoneConfidentialityHasChanged(partyDetails, partyDetailsBefore)
             || checkIfEmailConfidentialityHasChanged(partyDetails, partyDetailsBefore)) {
@@ -290,6 +301,35 @@ public class UpdatePartyDetailsService {
                         .builder()
                         .keepDetailsPrivate(updateRespondentKeepYourDetailsPrivateInformation(partyDetails))
                         .build())
+                    .build();
+            }
+        }
+
+        return partyDetails;
+    }
+
+    private PartyDetails checkApplicantConfidentialDetailsForExistingUser(PartyDetails partyDetails,
+                                                                           PartyDetails partyDetailsBefore) {
+        if (checkIfAddressConfidentialityHasChanged(partyDetails, partyDetailsBefore)
+            || checkIfPhoneConfidentialityHasChanged(partyDetails, partyDetailsBefore)
+            || checkIfEmailConfidentialityHasChanged(partyDetails, partyDetailsBefore)) {
+
+            if (null != partyDetails.getResponse()) {
+                return partyDetails
+                    .toBuilder()
+                    .response(partyDetails
+                                  .getResponse()
+                                  .toBuilder()
+                                  .keepDetailsPrivate(updateApplicantKeepYourDetailsPrivateInformation(partyDetails))
+                                  .build())
+                    .build();
+            } else {
+                return partyDetails
+                    .toBuilder()
+                    .response(Response
+                                  .builder()
+                                  .keepDetailsPrivate(updateApplicantKeepYourDetailsPrivateInformation(partyDetails))
+                                  .build())
                     .build();
             }
         }
@@ -407,6 +447,12 @@ public class UpdatePartyDetailsService {
                                             ? partyDetails.getIsEmailAddressConfidential() : null)
             .refugeConfidentialityC8Form(YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
                                              ? partyDetails.getRefugeConfidentialityC8Form() : null)
+            .email(YesOrNo.Yes.equals(partyDetails.getCanYouProvideEmailAddress()) ? partyDetails.getEmail() : null)
+            .isEmailAddressConfidential(YesOrNo.Yes.equals(partyDetails.getCanYouProvideEmailAddress())
+                                            ? partyDetails.getIsEmailAddressConfidential() : null)
+            .phoneNumber(YesOrNo.Yes.equals(partyDetails.getCanYouProvidePhoneNumber()) ? partyDetails.getPhoneNumber() : null)
+            .isPhoneNumberConfidential(YesOrNo.Yes.equals(partyDetails.getCanYouProvidePhoneNumber())
+                                           ? partyDetails.getIsPhoneNumberConfidential() : null)
             .build();
 
         return partyDetails;
@@ -529,8 +575,8 @@ public class UpdatePartyDetailsService {
                                                        CaseData caseData, List<Element<PartyDetails>> currentRespondents)
         throws Exception {
         int respondentIndex = 0;
-        Map<String, Object> casDataMap = callbackRequest.getCaseDetailsBefore().getData();
-        CaseData caseDataBefore = objectMapper.convertValue(casDataMap, CaseData.class);
+        Map<String, Object> caseDataMap = callbackRequest.getCaseDetailsBefore().getData();
+        CaseData caseDataBefore = objectMapper.convertValue(caseDataMap, CaseData.class);
         for (Element<PartyDetails> respondent: currentRespondents) {
             PartyDetails updatedPartyDetails = respondent.getValue().toBuilder().response(getPartyResponse(respondent.getValue()).toBuilder()
                                                                                               .keepDetailsPrivate(
@@ -555,6 +601,36 @@ public class UpdatePartyDetailsService {
         }
     }
 
+    private void generateC8DocumentsForApplicants(Map<String, Object> updatedCaseData, CallbackRequest callbackRequest, String authorisation,
+                                                  CaseData caseData, List<Element<PartyDetails>> currentApplicants)
+        throws Exception {
+        int applicantIndex = 0;
+        Map<String, Object> caseDataMap = callbackRequest.getCaseDetailsBefore().getData();
+        CaseData caseDataBefore = objectMapper.convertValue(caseDataMap, CaseData.class);
+        for (Element<PartyDetails> applicant: currentApplicants) {
+            PartyDetails updatedPartyDetails = applicant.getValue().toBuilder().response(getPartyResponse(applicant.getValue()).toBuilder()
+                                                                                              .keepDetailsPrivate(
+                                                                                                  updateRespondentKeepYourDetailsPrivateInformation(
+                                                                                                      applicant.getValue()))
+                                                                                              .build()).build();
+            applicant = element(applicant.getId(), updatedPartyDetails);
+            Map<String, Object> dataMap = c100RespondentSolicitorService.populateDataMap(
+                callbackRequest,
+                applicant,
+                SOLICITOR
+            );
+            dataMap.put(APPLICANT, applicant.getValue());
+            populateC8Documents(authorisation,
+                                updatedCaseData,
+                                caseData,
+                                dataMap, checkIfConfidentialityDetailsChangedApplicant(caseDataBefore, applicant),
+                                applicantIndex, applicant
+            );
+            applicantIndex++;
+        }
+
+    }
+
     private KeepDetailsPrivate updateRespondentKeepYourDetailsPrivateInformation(PartyDetails respondent) {
         KeepDetailsPrivate keepDetailsPrivate;
         if (null != respondent.getResponse() && null != respondent.getResponse().getKeepDetailsPrivate()) {
@@ -572,6 +648,31 @@ public class UpdatePartyDetailsService {
             confidentialityList.add(ConfidentialityListEnum.phoneNumber);
         }
         if (YesOrNo.Yes.equals(respondent.getCanYouProvideEmailAddress()) && YesOrNo.Yes.equals(respondent.getIsEmailAddressConfidential())) {
+            confidentialityList.add(ConfidentialityListEnum.email);
+        }
+        return keepDetailsPrivate.toBuilder()
+            .confidentiality(CollectionUtils.isEmpty(confidentialityList) ? YesOrNo.No : YesOrNo.Yes)
+            .confidentialityList(confidentialityList)
+            .build();
+    }
+
+    private KeepDetailsPrivate updateApplicantKeepYourDetailsPrivateInformation(PartyDetails applicant) {
+        KeepDetailsPrivate keepDetailsPrivate;
+        if (null != applicant.getResponse() && null != applicant.getResponse().getKeepDetailsPrivate()) {
+            keepDetailsPrivate = applicant.getResponse().getKeepDetailsPrivate();
+        } else {
+            keepDetailsPrivate = KeepDetailsPrivate.builder().build();
+        }
+        List<ConfidentialityListEnum> confidentialityList = new ArrayList<>();
+        if ((YesOrNo.Yes.equals(applicant.getIsCurrentAddressKnown()) && YesOrNo.Yes.equals(applicant.getIsAddressConfidential()))
+            || (null != applicant.getAddress() && YesOrNo.Yes.equals(applicant.getIsAddressConfidential()))) {
+            confidentialityList.add(ConfidentialityListEnum.address);
+        }
+        if (YesOrNo.Yes.equals(applicant.getCanYouProvidePhoneNumber()) && YesOrNo.Yes.equals(applicant.getIsPhoneNumberConfidential())
+            || (null != applicant.getPhoneNumber() && YesOrNo.Yes.equals(applicant.getIsPhoneNumberConfidential()))) {
+            confidentialityList.add(ConfidentialityListEnum.phoneNumber);
+        }
+        if (YesOrNo.Yes.equals(applicant.getCanYouProvideEmailAddress()) && YesOrNo.Yes.equals(applicant.getIsEmailAddressConfidential())) {
             confidentialityList.add(ConfidentialityListEnum.email);
         }
         return keepDetailsPrivate.toBuilder()
@@ -601,6 +702,32 @@ public class UpdatePartyDetailsService {
             }
         }
         if (respondentList != null && !respondentList.isEmpty()) {
+            return true;
+        }
+        return false;
+    }
+
+    public Boolean checkIfConfidentialityDetailsChangedApplicant(CaseData caseDataBefore, Element<PartyDetails> applicant) {
+        List<Element<PartyDetails>> applicantList = null;
+        if (caseDataBefore.getCaseTypeOfApplication().equals(C100_CASE_TYPE)) {
+            applicantList = caseDataBefore.getApplicants().stream()
+                .filter(resp1 -> resp1.getId().equals(applicant.getId())
+                    && (CaseUtils.isEmailAddressChanged(applicant.getValue(), resp1.getValue())
+                    || CaseUtils.checkIfAddressIsChanged(applicant.getValue(), resp1.getValue())
+                    || CaseUtils.isPhoneNumberChanged(applicant.getValue(), resp1.getValue())
+                    || !StringUtils.equals(resp1.getValue().getLabelForDynamicList(), applicant.getValue()
+                    .getLabelForDynamicList()))).toList();
+        } else {
+            PartyDetails applicantDetailsFL401 = caseDataBefore.getApplicantsFL401();
+            if ((CaseUtils.isEmailAddressChanged(applicant.getValue(), applicantDetailsFL401))
+                || CaseUtils.checkIfAddressIsChanged(applicant.getValue(), applicantDetailsFL401)
+                || (CaseUtils.isPhoneNumberChanged(applicant.getValue(), applicantDetailsFL401))
+                || !StringUtils.equals(applicant.getValue().getLabelForDynamicList(), applicantDetailsFL401
+                .getLabelForDynamicList())) {
+                return true;
+            }
+        }
+        if (applicantList != null && !applicantList.isEmpty()) {
             return true;
         }
         return false;

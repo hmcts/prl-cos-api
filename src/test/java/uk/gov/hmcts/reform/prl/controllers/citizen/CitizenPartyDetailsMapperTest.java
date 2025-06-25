@@ -248,6 +248,44 @@ public class CitizenPartyDetailsMapperTest {
     }
 
     @Test
+    public void testMapUpdatedPartyDetailsDaApplicant() throws Exception {
+        setUpDa();
+        updateCaseData = CitizenUpdatedCaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .partyDetails(PartyDetails.builder()
+                              .firstName("TestApplicant")
+                              .lastName("UserApplicant")
+                              .response(Response.builder().citizenFlags(CitizenFlags.builder().build()).build())
+                              .user(User.builder()
+                                        .email("applicant@gmail.com")
+                                        .idamId("123")
+                                        .solicitorRepresented(YesOrNo.Yes)
+                                        .build())
+                              .citizenSosObject(CitizenSos.builder()
+                                                    .partiesServed(List.of("123", "234", "1234"))
+                                                    .build())
+                              .build())
+            .partyType(PartyEnum.applicant)
+            .build();
+
+        caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(partyDetails)
+            .c100RebuildData(c100RebuildData)
+            .build();
+
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(
+            caseData,
+            updateCaseData,
+            CaseEvent.CONFIRM_YOUR_DETAILS,
+            authToken
+        );
+        assertNotNull(citizenUpdatePartyDataContent);
+    }
+
+
+    @Test
     public void testMapUpdatedPartyDetailsDa13() throws Exception {
         setUpDa();
         updateCaseData = CitizenUpdatedCaseData.builder()

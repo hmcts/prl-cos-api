@@ -12,10 +12,16 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDoc
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CitizenResponseDocuments {
 
+    private ResponseDocuments applicantAc8;
+    private ResponseDocuments applicantBc8;
+    private ResponseDocuments applicantCc8;
+    private ResponseDocuments applicantDc8;
+    private ResponseDocuments applicantEc8;
     private ResponseDocuments respondentAc8;
     private ResponseDocuments respondentBc8;
     private ResponseDocuments respondentCc8;
     private ResponseDocuments respondentDc8;
     private ResponseDocuments respondentEc8;
+
 
 }

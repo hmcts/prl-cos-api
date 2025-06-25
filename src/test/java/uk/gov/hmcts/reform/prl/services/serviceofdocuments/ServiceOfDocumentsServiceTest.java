@@ -698,7 +698,7 @@ public class ServiceOfDocumentsServiceTest {
         AboutToStartOrSubmitCallbackResponse response = serviceOfDocumentsService.handleConfCheckAboutToStart(TEST_AUTHORIZATION, callbackRequest);
         assertNotNull(response);
     }
-    
+
     @Test
     public void testHandleConfCheckAboutToStartWhenSodUnServedPackWithNoDocsForApplicant() {
         partyDetails = partyDetails.toBuilder()
