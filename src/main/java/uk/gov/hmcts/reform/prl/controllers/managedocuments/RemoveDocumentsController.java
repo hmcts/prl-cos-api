@@ -25,7 +25,6 @@ import java.util.List;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
-
 @Slf4j
 @RestController
 @RequestMapping("/remove-documents")
@@ -65,7 +64,7 @@ public class RemoveDocumentsController extends AbstractCallbackController {
 
         // add list of documents we've identified as being removed
         caseData = caseData.toBuilder()
-            .documentsToBeRemoved(removeDocumentsService.docsBeingRemovedString(caseData, old))
+            .documentsToBeRemoved(removeDocumentsService.getConfirmationTextForDocsBeingRemoved(caseData, old))
             .build();
 
         return CallbackResponse.builder()
@@ -80,7 +79,7 @@ public class RemoveDocumentsController extends AbstractCallbackController {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         CaseData old = getCaseData(callbackRequest.getCaseDetailsBefore());
 
-        List<Element<RemovableDocument>> docsToRemove = removeDocumentsService.docsBeingRemoved(caseData, old);
+        List<Element<RemovableDocument>> docsToRemove = removeDocumentsService.getDocsBeingRemoved(caseData, old);
         caseData = removeDocumentsService.removeDocuments(caseData, docsToRemove);
         // add list of documents we've identified as being removed
         return CallbackResponse.builder()

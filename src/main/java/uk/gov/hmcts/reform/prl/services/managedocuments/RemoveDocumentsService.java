@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -43,19 +44,20 @@ public class RemoveDocumentsService {
     }
 
     private List<Element<RemovableDocument>> getRemovableDocuments(CaseData caseData) {
-        return Stream.of(
-                caseData.getReviewDocuments().getAllRemovableDocuments(),
-                caseData.getDocumentManagementDetails().getRemovableDocuments()
-            )
-            .flatMap(List::stream)
-            .map(doc -> Element.<RemovableDocument>builder()
-                .id(doc.getId())
-                .value(convertQuarantineDoc(doc.getValue()))
-                .build())
-            .toList();
+        Stream<Element<RemovableDocument>> removableReviewDocs = caseData.getReviewDocuments() != null
+            ? caseData.getReviewDocuments().getAllRemovableDocuments().stream()
+            .map(this::convertQuarantineDoc)
+            : Stream.empty();
+
+        Stream<Element<RemovableDocument>> removableDocMgmtDocs = caseData.getDocumentManagementDetails() != null
+            ? caseData.getDocumentManagementDetails().getRemovableDocuments().stream()
+            .map(this::convertQuarantineDoc)
+            : Stream.empty();
+
+        return Stream.concat(removableReviewDocs, removableDocMgmtDocs).toList();
     }
 
-    public List<Element<RemovableDocument>> docsBeingRemoved(CaseData caseData, CaseData old) {
+    public List<Element<RemovableDocument>> getDocsBeingRemoved(CaseData caseData, CaseData old) {
         List<Element<RemovableDocument>> current = caseData.getRemovableDocuments();
         List<Element<RemovableDocument>> previous = getRemovableDocuments(old);
         return previous.stream()
@@ -64,25 +66,28 @@ public class RemoveDocumentsService {
             .toList();
     }
 
-    public String docsBeingRemovedString(CaseData caseData, CaseData old) {
-        List<Element<RemovableDocument>> removedDocs = docsBeingRemoved(caseData, old);
+    public String getConfirmationTextForDocsBeingRemoved(CaseData caseData, CaseData old) {
+        List<Element<RemovableDocument>> removedDocs = getDocsBeingRemoved(caseData, old);
         if (removedDocs.isEmpty()) {
             return "No documents removed.";
         }
         return removedDocs.stream()
-            .map(doc -> String.format(" • %s - %s, %s (%s)",
+            .map(doc -> String.format(
+                " • %s - %s, %s (%s)",
                 doc.getValue().getCategoryName(),
                 doc.getValue().getDocument().getDocumentFileName(),
                 doc.getValue().getDocumentParty(),
                 CommonUtils.formatDateTime(DATE_TIME_PATTERN, doc.getValue().getDocumentUploadedDate())
-                ))
+            ))
             .reduce((doc1, doc2) -> doc1 + ", \n" + doc2)
             .orElse("");
     }
 
     public CaseData removeDocuments(CaseData caseData, List<Element<RemovableDocument>> documentsToRemove) {
-        DocumentManagementDetails docMgmt = caseData.getDocumentManagementDetails();
-        ReviewDocuments reviewDocs = caseData.getReviewDocuments();
+        DocumentManagementDetails docMgmt = Optional.ofNullable(caseData.getDocumentManagementDetails())
+            .orElseGet(() -> DocumentManagementDetails.builder().build());
+        ReviewDocuments reviewDocs = Optional.ofNullable(caseData.getReviewDocuments())
+            .orElseGet(() -> ReviewDocuments.builder().build());
 
         // Remove from DocumentManagementDetails collections
         DocumentManagementDetails updatedDocMgmt = docMgmt.toBuilder()
@@ -125,23 +130,37 @@ public class RemoveDocumentsService {
             .toList();
     }
 
-    public RemovableDocument convertQuarantineDoc(QuarantineLegalDoc quarantineLegalDoc) {
-        Map<String, Object> docObject = objectMapper.convertValue(quarantineLegalDoc, new TypeReference<Map<String, Object>>() {});
-        String documentFieldName = DocumentUtils.populateAttributeNameFromCategoryId(quarantineLegalDoc.getCategoryId(), null);
+    public Element<RemovableDocument> convertQuarantineDoc(Element<QuarantineLegalDoc> quarantineLegalDocElement) {
+        QuarantineLegalDoc quarantineLegalDoc = quarantineLegalDocElement.getValue();
+
+        Map<String, Object> docObject = objectMapper.convertValue(
+            quarantineLegalDoc,
+            new TypeReference<Map<String, Object>>() {
+            }
+        );
+        String documentFieldName = DocumentUtils.populateAttributeNameFromCategoryId(
+            quarantineLegalDoc.getCategoryId(),
+            null
+        );
         Document doc;
+
         try {
             doc = objectMapper.convertValue(docObject.get(documentFieldName), Document.class);
         } catch (NullPointerException e) {
             log.error("Field {} did not exist in QuarantineLegalDoc", documentFieldName, e);
             return null; // todo how to handle this if the document isn't where we expect - could this actually happen?
         }
-        return RemovableDocument.builder()
+
+        // make a new element with the same ID
+        return new Element<>(
+            quarantineLegalDocElement.getId(), RemovableDocument.builder()
             .categoryName(quarantineLegalDoc.getCategoryName())
             .documentParty(quarantineLegalDoc.getDocumentParty())
             .documentUploadedDate(quarantineLegalDoc.getDocumentUploadedDate())
             .uploadedBy(quarantineLegalDoc.getUploadedBy())
             .document(doc)
-            .build();
+            .build()
+        );
     }
 
     public void deleteDocumentsInCdam(CaseData caseData, CaseData old) {
@@ -169,8 +188,10 @@ public class RemoveDocumentsService {
                 log.info("Deleting document with ID: {} from CDAM for case ID: {}", documentId, caseData.getId());
                 caseDocumentClient.deleteDocument(systemAuthorisation, authTokenGenerator.generate(), documentId, true);
             } catch (Exception e) {
-                log.error("Failed to delete document with ID: {} from CDAM for case ID: {}. Error: {}",
-                    documentId, caseData.getId(), e.getMessage());
+                log.error(
+                    "Failed to delete document with ID: {} from CDAM for case ID: {}. Error: {}",
+                    documentId, caseData.getId(), e.getMessage()
+                );
             }
         });
     }
