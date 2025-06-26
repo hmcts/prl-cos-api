@@ -496,7 +496,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
     /**
      * Confidentiality details.
      */
-    private final List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails;
+    private final List<Element<ApplicantConfidentialityDetails>> applicantConfidentialDetails;
     private final List<Element<ApplicantConfidentialityDetails>> respondentConfidentialDetails;
     private final List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails;
 

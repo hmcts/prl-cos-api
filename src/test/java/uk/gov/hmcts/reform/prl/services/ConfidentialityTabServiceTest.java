@@ -415,7 +415,7 @@ public class ConfidentialityTabServiceTest {
             .caseTypeOfApplication(C100_CASE_TYPE).build();
         Map<String, Object> stringObjectMap = confidentialityTabService.updateConfidentialityDetails(caseData);
 
-        assertTrue(stringObjectMap.containsKey("applicantsConfidentialDetails"));
+        assertTrue(stringObjectMap.containsKey("applicantConfidentialDetails"));
         assertTrue(stringObjectMap.containsKey("childrenConfidentialDetails"));
 
     }
@@ -497,7 +497,7 @@ public class ConfidentialityTabServiceTest {
             .caseTypeOfApplication(FL401_CASE_TYPE).build();
         Map<String, Object> stringObjectMap = confidentialityTabService.updateConfidentialityDetails(caseData);
 
-        assertTrue(stringObjectMap.containsKey("applicantsConfidentialDetails"));
+        assertTrue(stringObjectMap.containsKey("applicantConfidentialDetails"));
         assertTrue(stringObjectMap.containsKey("fl401ChildrenConfidentialDetails"));
 
     }
@@ -511,9 +511,9 @@ public class ConfidentialityTabServiceTest {
             .caseTypeOfApplication(C100_CASE_TYPE).build();
         Map<String, Object> stringObjectMap = confidentialityTabService.updateConfidentialityDetails(caseData);
 
-        assertTrue(stringObjectMap.containsKey("applicantsConfidentialDetails"));
+        assertTrue(stringObjectMap.containsKey("applicantConfidentialDetails"));
         assertTrue(stringObjectMap.containsKey("childrenConfidentialDetails"));
-        assertEquals(Collections.EMPTY_LIST,stringObjectMap.get("applicantsConfidentialDetails"));
+        assertEquals(Collections.EMPTY_LIST,stringObjectMap.get("applicantConfidentialDetails"));
         assertEquals(Collections.EMPTY_LIST,stringObjectMap.get("childrenConfidentialDetails"));
 
     }
@@ -546,7 +546,7 @@ public class ConfidentialityTabServiceTest {
             .caseTypeOfApplication(FL401_CASE_TYPE).build();
         Map<String, Object> stringObjectMap = confidentialityTabService.updateConfidentialityDetails(caseData);
 
-        assertEquals(Collections.EMPTY_LIST,stringObjectMap.get("applicantsConfidentialDetails"));
+        assertEquals(Collections.EMPTY_LIST,stringObjectMap.get("applicantConfidentialDetails"));
         assertTrue(stringObjectMap.containsKey("fl401ChildrenConfidentialDetails"));
 
     }

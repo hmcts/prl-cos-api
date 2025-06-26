@@ -699,7 +699,7 @@
       "OrgPolicyReference": null,
       "OrgPolicyCaseAssignedRole": "[APPLICANTSOLICITOR]"
     },
-    "applicantsConfidentialDetails": [
+    "applicantConfidentialDetails": [
       {
         "id": "6a455ec4-cccf-484a-99a3-209cf04801d3",
         "value": {

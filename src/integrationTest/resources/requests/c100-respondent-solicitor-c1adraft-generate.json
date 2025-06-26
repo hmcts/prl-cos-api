@@ -3913,7 +3913,7 @@
         "visibility": "Internal"
       },
       "typeOfChildArrangementsOrder": "spendTimeWithOrder",
-      "applicantsConfidentialDetails": [
+      "applicantConfidentialDetails": [
         {
           "id": "296a848e-6599-4a5d-90bf-e17a33ad21ec",
           "value": {

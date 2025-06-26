@@ -4640,7 +4640,7 @@
       "allegationsOfHarmSubstanceAbuseYesNo": "No",
       "ordersOtherInjunctiveDocument": null,
       "typeOfChildArrangementsOrder": "spendTimeWithOrder",
-      "applicantsConfidentialDetails": [
+      "applicantConfidentialDetails": [
         {
           "id": "131851ad-f682-41d2-9822-996d9d3edee3",
           "value": {

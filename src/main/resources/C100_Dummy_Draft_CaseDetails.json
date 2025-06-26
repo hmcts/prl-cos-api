@@ -4451,7 +4451,7 @@
       "typeOfChildArrangementsOrder": "Spend time with order"
     },
     "typeOfChildArrangementsOrder": "spendTimeWithOrder",
-    "applicantsConfidentialDetails": [
+    "applicantConfidentialDetails": [
       {
         "id": "0b72ee60-1703-47d2-8673-bf716e06fe19",
         "value": {

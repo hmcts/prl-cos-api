@@ -339,7 +339,7 @@ public class CallbackController {
             cleanUpC8RefugeFields(caseData, caseDataUpdated);
             caseData = caseData
                 .toBuilder()
-                .applicantsConfidentialDetails(
+                .applicantConfidentialDetails(
                     confidentialityTabService
                         .getConfidentialApplicantDetails(
                             caseData.getApplicants().stream()

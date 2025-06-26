@@ -115,7 +115,7 @@ public class UpdatePartyDetailsService {
 
         CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
         updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
-        updatedCaseData.put(APPLICANT_CONFIDENTIAL_DETAILS, caseDataTemp.getApplicantsConfidentialDetails());
+        updatedCaseData.put(APPLICANT_CONFIDENTIAL_DETAILS, caseDataTemp.getApplicantConfidentialDetails());
         updatedCaseData.putAll(confidentialityTabService.updateConfidentialityDetails(caseData));
 
         //Added partyId for Hearings Api Spec, C100 applications
