@@ -111,6 +111,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -3143,23 +3144,7 @@ public class ManageOrderService {
                                                        CallbackRequest callbackRequest,
                                                        String language,
                                                        String clientContext) {
-        WaMapper waMapper = getWaMapper(clientContext);
-        Optional<Long> hearingId = ofNullable(waMapper)
-            .map(value -> Long.valueOf(value
-                                              .getClientContext()
-                                              .getUserTask()
-                                              .getTaskData()
-                                              .getAdditionalProperties()
-                                              .getHearingId())
-            );
 
-        Map<String, Object> caseData = handleFetchOrderDetails(authorisation, callbackRequest, language);
-        return caseData;
-    }
-
-    public Map<String, Object> handleFetchOrderDetails(String authorisation,
-                                                       CallbackRequest callbackRequest,
-                                                       String language) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
@@ -3174,18 +3159,30 @@ public class ManageOrderService {
         //common fields
         updateOrderDetails(authorisation, caseData, caseDataUpdated, language);
 
+        WaMapper waMapper = getWaMapper(clientContext);
+        Optional<Long> taskHearingId = ofNullable(waMapper)
+            .map(value -> Long.valueOf(value
+                                           .getClientContext()
+                                           .getUserTask()
+                                           .getTaskData()
+                                           .getAdditionalProperties()
+                                           .getHearingId())
+            );
+
+
         //PRL-4212 - populate hearing details only orders where it's needed
-        populateHearingData(authorisation, caseData, caseDataUpdated);
+        populateHearingData(authorisation, caseData, caseDataUpdated, taskHearingId);
 
         return caseDataUpdated;
     }
 
     private void populateHearingData(String authorisation,
                                      CaseData caseData,
-                                     Map<String, Object> caseDataUpdated) {
+                                     Map<String, Object> caseDataUpdated,
+                                     Optional<Long> taskHearingId) {
         //Set only in case order needs hearing details
         if (isHearingPageNeeded(caseData.getCreateSelectOrderOptions(), caseData.getManageOrders().getC21OrderOptions())) {
-            HearingData hearingData = getHearingData(authorisation, caseData);
+            HearingData hearingData = getHearingData(authorisation, caseData, taskHearingId);
             caseDataUpdated.put(ORDER_HEARING_DETAILS, ElementUtils.wrapElements(hearingData));
             //add hearing screen field show params
             ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated, caseData);
@@ -3193,7 +3190,7 @@ public class ManageOrderService {
 
         //For DIO
         if (CreateSelectOrderOptionsEnum.directionOnIssue.equals(caseData.getCreateSelectOrderOptions())) {
-            HearingData hearingData = getHearingData(authorisation, caseData);
+            HearingData hearingData = getHearingData(authorisation, caseData, taskHearingId);
             //add hearing screen field show params
             ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated, caseData);
 
@@ -3207,16 +3204,63 @@ public class ManageOrderService {
         }
     }
 
+    private HearingData getHearingData(String authorization,
+                                       CaseData caseData,
+                                       Optional<Long> taskHearingId) {
+        String caseReferenceNumber = String.valueOf(caseData.getId());
+
+        Supplier<Hearings> hearingsSupplier = taskHearingId.<Supplier<Hearings>>map(hearingId -> () -> {
+            Hearings hearings = hearingService.getHearings(authorization, caseReferenceNumber);
+            List<CaseHearing> filteredHearing = hearings.getCaseHearings().stream()
+                .filter(caseHearing -> hearingId.equals(caseHearing.getHearingID()))
+                .toList();
+            return hearings.toBuilder()
+                .caseHearings(filteredHearing)
+                .build();
+        }).orElseGet(() -> () ->
+            hearingService.getHearings(authorization, caseReferenceNumber)
+        );
+        HearingData hearingData = getHearingData(
+            authorization,
+            caseData,
+            hearingsSupplier
+        );
+        //TODO reset this in about to submit
+        taskHearingId.ifPresent(id ->
+                                    hearingData.setTransientConfirmedHearingDate(
+                                        hearingData.getConfirmedHearingDates()
+                                            .getListItems()
+                                            .getFirst()
+                                            .getLabel()
+                                    )
+        );
+        return hearingData;
+    }
+
     public HearingData getHearingData(String authorization,
                                       CaseData caseData) {
-        String caseReferenceNumber = String.valueOf(caseData.getId());
-        log.info("Inside Prepopulate getHearingData for the case id {}", caseReferenceNumber);
-        Hearings hearings = hearingService.getHearings(authorization, caseReferenceNumber);
-        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-            hearingDataService.populateHearingDynamicLists(authorization, caseReferenceNumber, caseData, hearings);
+        return getHearingData(authorization,
+                              caseData,
+                              () -> {
+                                  String caseReferenceNumber = String.valueOf(caseData.getId());
+                                  return hearingService.getHearings(authorization, caseReferenceNumber);
+                              });
+    }
 
+    public HearingData getHearingData(String authorization,
+                                      CaseData caseData,
+                                      Supplier<Hearings> hearingsSupplier) {
+        log.info("Inside Prepopulate getHearingData for the case id {}", String.valueOf(caseData.getId()));
+        Hearings hearings = hearingsSupplier.get();
+        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+            hearingDataService.populateHearingDynamicLists(authorization,
+                                                           String.valueOf(caseData.getId()),
+                                                           caseData,
+                                                           hearings);
         return hearingDataService.generateHearingData(hearingDataPrePopulatedDynamicLists, caseData);
     }
+
+
 
     private void addC21OrderDetails(CaseData caseData,
                                     Map<String, Object> caseDataUpdated) {

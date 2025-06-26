@@ -937,7 +937,6 @@ public class CaseUtils {
     public static String base64Encode(WaMapper waMapper, ObjectMapper objectMapper) {
         String base64EncodedClientContext = null;
         if (waMapper != null) {
-            log.info("clientContext is present");
             try {
                 String clientContextToEncode = objectMapper.writeValueAsString(waMapper);
                 //TODO REMOVE
