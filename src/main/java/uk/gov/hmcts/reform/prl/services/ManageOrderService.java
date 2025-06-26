@@ -3225,14 +3225,17 @@ public class ManageOrderService {
             caseData,
             hearingsSupplier
         );
+        hearingData.setDisplayConfirmedHearing(No);
         //TODO reset this in about to submit
-        taskHearingId.ifPresent(id ->
-                                    hearingData.setTransientConfirmedHearingDate(
-                                        hearingData.getConfirmedHearingDates()
-                                            .getListItems()
-                                            .getFirst()
-                                            .getLabel()
-                                    )
+        taskHearingId.ifPresent(id -> {
+                hearingData.setDisplayConfirmedHearing(Yes);
+                hearingData.setTransientConfirmedHearingDetail(
+                    hearingData.getConfirmedHearingDates()
+                        .getListItems()
+                        .getFirst()
+                        .getLabel()
+                );
+            }
         );
         return hearingData;
     }

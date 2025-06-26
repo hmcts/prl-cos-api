@@ -39,7 +39,9 @@ public class HearingData {
 
     private DynamicList confirmedHearingDates;
 
-    private String transientConfirmedHearingDate;
+    private String transientConfirmedHearingDetail;
+
+    private YesOrNo displayConfirmedHearing;
 
     private DynamicList hearingChannels;
 
