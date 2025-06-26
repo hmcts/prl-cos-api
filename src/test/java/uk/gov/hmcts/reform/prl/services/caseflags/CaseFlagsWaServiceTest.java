@@ -31,6 +31,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyMap;
 import static org.mockito.Mockito.anyString;
@@ -283,6 +285,34 @@ public class CaseFlagsWaServiceTest {
 
         Element<FlagDetail> actualDetails = caseFlagsWaService.validateAllFlags(caseData);
         assertEquals(ACTIVE, actualDetails.getValue().getStatus());
+    }
+
+    @Test
+    public void testIsCaseHasNoRequestedFlagsWhenCaseFlagIsNull() {
+        Flags caApplicant1ExternalFlags = getApplicant1ExternalFlag1();
+        CaseData caseData = CaseData.builder()
+            .id(123)
+            .allPartyFlags(AllPartyFlags.builder().caApplicant1ExternalFlags(caApplicant1ExternalFlags).build())
+            .reviewRaRequestWrapper(ReviewRaRequestWrapper.builder().selectedFlags(new ArrayList<>()).build())
+            .build();
+
+        boolean actual = caseFlagsWaService.isCaseHasNoRequestedFlags(caseData);
+
+        assertFalse(actual);
+    }
+
+    @Test
+    public void testIsCaseHasNoRequestedFlagsWhenAllPartyFlagsIsNull() {
+        Flags caApplicant1ExternalFlags = getApplicant1ExternalFlag1();
+        CaseData caseData = CaseData.builder()
+            .id(123)
+            .caseFlags(Flags.builder().build())
+            .reviewRaRequestWrapper(ReviewRaRequestWrapper.builder().selectedFlags(new ArrayList<>()).build())
+            .build();
+
+        boolean actual = caseFlagsWaService.isCaseHasNoRequestedFlags(caseData);
+
+        assertTrue(actual);
     }
 
     private Flags getCaseLevelFlags(String status) {
