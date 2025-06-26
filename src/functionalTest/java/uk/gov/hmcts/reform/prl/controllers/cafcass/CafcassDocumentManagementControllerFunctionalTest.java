@@ -97,6 +97,7 @@ public class CafcassDocumentManagementControllerFunctionalTest {
             .then()
             .assertThat().statusCode(200)
             .contentType("application/pdf")
+            .contentType("application/octet-stream")
             .header("content-type", equalTo("application/pdf"))
             .header("originalfilename",equalTo("C7_Response_Draft_Document.pdf"))
             .extract()
