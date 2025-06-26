@@ -159,11 +159,11 @@ allprojects {
 
 
       //CVE-2023-24998
-      dependencySet(group: 'commons-fileupload', version: '1.5') {
+      dependencySet(group: 'commons-fileupload', version: '1.6.0') {
         entry 'commons-fileupload'
       }
       //CVE-2023-24998
-      dependencySet(group: 'commons-fileupload', version: '1.5') {
+      dependencySet(group: 'commons-fileupload', version: '1.6.0') {
         entry 'commons-fileupload'
       }
       //CVE-2022-45688
@@ -398,7 +398,6 @@ dependencies {
   implementation group: 'io.netty', name: 'netty-transport-native-epoll', version: '4.1.118.Final'
   constraints{
     implementation group: 'com.warrenstrange', name: 'googleauth', version: '1.5.0'
-    implementation group: 'commons-fileupload', name: 'commons-fileupload', version: '1.5'
   }
 
   implementation(group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.18')
