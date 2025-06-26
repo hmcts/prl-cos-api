@@ -993,6 +993,7 @@ public class PrlAppsConstants {
     public static final String AWP_WA_TASK_TO_BE_CREATED = "awpWaTaskToBeCreated";
     public static final String AWP_HWF_REF_NUMBER = "awpHwfRefNo";
 
+    public static final String WA_IS_CASE_FLAG_TASK_CREATED = "isCaseFlagsTaskCreated";
     public static final String WA_ORDER_NAME_JUDGE_CREATED = "orderNameForJudgeCreatedOrder";
     public static final String WA_ORDER_NAME_SOLICITOR_CREATED = "orderNameForSolicitorCreatedOrder";
     public static final String WA_ORDER_COLLECTION_ID = "draftOrderCollectionId";
