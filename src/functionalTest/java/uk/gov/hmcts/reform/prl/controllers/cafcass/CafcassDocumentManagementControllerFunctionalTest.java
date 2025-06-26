@@ -4,7 +4,6 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Ignore;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -87,7 +86,6 @@ public class CafcassDocumentManagementControllerFunctionalTest {
 
     @Test
     @Order(2)
-    @Ignore
     public void givenValidUuidDownloadFileWith200Response() throws Exception {
 
         request
