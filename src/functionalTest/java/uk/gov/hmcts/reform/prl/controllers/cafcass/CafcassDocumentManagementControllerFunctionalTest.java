@@ -86,6 +86,20 @@ public class CafcassDocumentManagementControllerFunctionalTest {
     }
 
     @Test
+    @Order(2)
+    @Ignore
+    public void givenValidUuidDownloadFileWith200Response() throws Exception {
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCafcass())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .when()
+            .contentType("application/json")
+            .get("/cases/documents/{documentId}/binary", documentId);
+
+    }
+
+    @Test
     public void givenInvalidUuidDownloadFileWith400Response() throws Exception {
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCafcass())
