@@ -6695,7 +6695,7 @@
       "isApplicant3SolicitorPresent": "Yes",
       "whatToDoWithOrderSolicitor": "sendToAdminToServe",
       "typeOfChildArrangementsOrder": "spendTimeWithOrder",
-      "applicantConfidentialDetails": [
+      "applicantsConfidentialDetails": [
         {
           "id": "7935f473-b0c2-4333-8144-356929c5b7c8",
           "value": {

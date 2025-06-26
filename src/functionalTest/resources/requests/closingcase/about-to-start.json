@@ -6013,7 +6013,7 @@
         "visibility": "Internal"
       },
       "typeOfChildArrangementsOrder": "spendTimeWithOrder",
-      "applicantConfidentialDetails": [
+      "applicantsConfidentialDetails": [
         {
           "id": "c1a3f1be-14e3-4726-a30e-568c76f0c2b3",
           "value": {

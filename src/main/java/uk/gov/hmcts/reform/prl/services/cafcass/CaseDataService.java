@@ -747,7 +747,7 @@ public class CaseDataService {
             "data.partyIdAndPartyTypeMap",
             "data.applicants",
             "data.respondents",
-            "data.applicantConfidentialDetails",
+            "data.applicantsConfidentialDetails",
             "data.applicantSolicitorEmailAddress",
             "data.solicitorName",
             "data.courtEpimsId",

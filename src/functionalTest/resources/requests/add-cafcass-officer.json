@@ -2379,7 +2379,7 @@
       "isApplicant3SolicitorPresent": "Yes",
       "whatToDoWithOrderSolicitor": "askLegalRepToMakeChanges",
       "typeOfChildArrangementsOrder": "spendTimeWithOrder",
-      "applicantConfidentialDetails": [
+      "applicantsConfidentialDetails": [
         {
           "id": "cba04745-f01d-4789-9f28-d58b4dc1c4a1",
           "value": {

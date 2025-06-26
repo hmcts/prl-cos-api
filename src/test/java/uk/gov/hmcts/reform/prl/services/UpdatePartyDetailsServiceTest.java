@@ -2493,7 +2493,7 @@ public class UpdatePartyDetailsServiceTest {
             .response(response)
             .build();
 
-        PartyDetails result = updatePartyDetailsService.checkApplicantConfidentialDetailsForExistingUser(
+        PartyDetails result = updatePartyDetailsService.checkApplicantsConfidentialDetailsForExistingUser(
             partyDetails, partyDetailsBefore);
 
         assertNotNull(result.getResponse());

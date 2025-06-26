@@ -112,7 +112,7 @@ public class ConfidentialityTabServiceTest {
     }
 
     @Test
-    public void testApplicantConfidentialDetails() {
+    public void testApplicantsConfidentialDetails() {
 
         partyDetails1 = PartyDetails.builder()
             .firstName("ABC 1")
@@ -158,7 +158,7 @@ public class ConfidentialityTabServiceTest {
     }
 
     @Test
-    public void testApplicantConfidentialDetailsWhenNull() {
+    public void testApplicantsConfidentialDetailsWhenNull() {
 
         partyDetails1 = PartyDetails.builder()
             .firstName("ABC 1")
@@ -415,7 +415,7 @@ public class ConfidentialityTabServiceTest {
             .caseTypeOfApplication(C100_CASE_TYPE).build();
         Map<String, Object> stringObjectMap = confidentialityTabService.updateConfidentialityDetails(caseData);
 
-        assertTrue(stringObjectMap.containsKey("applicantConfidentialDetails"));
+        assertTrue(stringObjectMap.containsKey("applicantsConfidentialDetails"));
         assertTrue(stringObjectMap.containsKey("childrenConfidentialDetails"));
 
     }
@@ -497,13 +497,13 @@ public class ConfidentialityTabServiceTest {
             .caseTypeOfApplication(FL401_CASE_TYPE).build();
         Map<String, Object> stringObjectMap = confidentialityTabService.updateConfidentialityDetails(caseData);
 
-        assertTrue(stringObjectMap.containsKey("applicantConfidentialDetails"));
+        assertTrue(stringObjectMap.containsKey("applicantsConfidentialDetails"));
         assertTrue(stringObjectMap.containsKey("fl401ChildrenConfidentialDetails"));
 
     }
 
     @Test
-    public void testApplicantConfidentialDetailsWhenNoApplicantsPresent() {
+    public void testApplicantsConfidentialDetailsWhenNoApplicantsPresent() {
 
         CaseData caseData = CaseData.builder()
             .applicants(null)
@@ -511,15 +511,15 @@ public class ConfidentialityTabServiceTest {
             .caseTypeOfApplication(C100_CASE_TYPE).build();
         Map<String, Object> stringObjectMap = confidentialityTabService.updateConfidentialityDetails(caseData);
 
-        assertTrue(stringObjectMap.containsKey("applicantConfidentialDetails"));
+        assertTrue(stringObjectMap.containsKey("applicantsConfidentialDetails"));
         assertTrue(stringObjectMap.containsKey("childrenConfidentialDetails"));
-        assertEquals(Collections.EMPTY_LIST,stringObjectMap.get("applicantConfidentialDetails"));
+        assertEquals(Collections.EMPTY_LIST,stringObjectMap.get("applicantsConfidentialDetails"));
         assertEquals(Collections.EMPTY_LIST,stringObjectMap.get("childrenConfidentialDetails"));
 
     }
 
     @Test
-    public void testApplicantConfidentialDetailsWhenNoFL401ApplicantsPresent() {
+    public void testApplicantsConfidentialDetailsWhenNoFL401ApplicantsPresent() {
 
         ChildrenLiveAtAddress child = ChildrenLiveAtAddress.builder()
             .childFullName("Test")
@@ -546,13 +546,13 @@ public class ConfidentialityTabServiceTest {
             .caseTypeOfApplication(FL401_CASE_TYPE).build();
         Map<String, Object> stringObjectMap = confidentialityTabService.updateConfidentialityDetails(caseData);
 
-        assertEquals(Collections.EMPTY_LIST,stringObjectMap.get("applicantConfidentialDetails"));
+        assertEquals(Collections.EMPTY_LIST,stringObjectMap.get("applicantsConfidentialDetails"));
         assertTrue(stringObjectMap.containsKey("fl401ChildrenConfidentialDetails"));
 
     }
 
     @Test
-    public void testRefugeApplicantConfidentialDetails() {
+    public void testRefugeApplicantsConfidentialDetails() {
 
         refugePartyDetails1 = refugePartyDetails1.toBuilder()
             .firstName("ABC 1")

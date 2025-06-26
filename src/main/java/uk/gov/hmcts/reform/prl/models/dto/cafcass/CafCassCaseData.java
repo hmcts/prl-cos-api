@@ -521,7 +521,7 @@ public class CafCassCaseData {
     private List<Element<ApplicantDetails>> respondents;
 
 
-    private List<Element<ApplicantConfidentialityDetails>> applicantConfidentialDetails;
+    private List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails;
 
     private String applicantSolicitorEmailAddress;
 

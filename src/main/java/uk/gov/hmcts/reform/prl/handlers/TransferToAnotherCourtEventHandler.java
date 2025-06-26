@@ -95,7 +95,7 @@ public class TransferToAnotherCourtEventHandler {
     }
 
     private boolean isCaseContainConfidentialDetails(CaseData caseData) {
-        return CollectionUtils.isNotEmpty(caseData.getApplicantConfidentialDetails())
+        return CollectionUtils.isNotEmpty(caseData.getApplicantsConfidentialDetails())
             || CollectionUtils.isNotEmpty(caseData.getRespondentConfidentialDetails())
             || CollectionUtils.isNotEmpty(caseData.getChildrenConfidentialDetails());
     }

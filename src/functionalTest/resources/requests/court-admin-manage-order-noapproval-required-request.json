@@ -6176,7 +6176,7 @@
       "requestToForeignAuthorityGiveReason": "Yes",
       "isApplicant3SolicitorPresent": "Yes",
       "typeOfChildArrangementsOrder": "spendTimeWithOrder",
-      "applicantConfidentialDetails": [
+      "applicantsConfidentialDetails": [
         {
           "id": "a68b0e3d-c4ea-4d11-95dc-946fbb53c243",
           "value": {

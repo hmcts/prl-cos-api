@@ -548,14 +548,14 @@ public class ResubmitApplicationControllerTest {
         when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataIssued);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(confidentialityTabService.updateConfidentialityDetails(Mockito.any(CaseData.class))).thenReturn(Map.of(
-            "applicantConfidentialDetails",
+            "applicantsConfidentialDetails",
             List.of(Element.builder().value(ApplicantConfidentialityDetails.builder().build())),
             "childrenConfidentialDetails",
             List.of(Element.builder().value(ChildConfidentialityDetails.builder().build()))
         ));
         when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
         AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(authToken, s2sToken, callbackRequest);
-        assertTrue(response.getData().containsKey("applicantConfidentialDetails"));
+        assertTrue(response.getData().containsKey("applicantsConfidentialDetails"));
         assertTrue(response.getData().containsKey("childrenConfidentialDetails"));
 
     }
@@ -573,14 +573,14 @@ public class ResubmitApplicationControllerTest {
         when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataIssued);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(confidentialityTabService.updateConfidentialityDetails(Mockito.any(CaseData.class))).thenReturn(Map.of(
-            "applicantConfidentialDetails",
+            "applicantsConfidentialDetails",
             List.of(Element.builder().value(ApplicantConfidentialityDetails.builder().build())),
             "childrenConfidentialDetails",
             List.of(Element.builder().value(ChildConfidentialityDetails.builder().build()))
         ));
         when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
         AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(authToken, s2sToken, callbackRequest);
-        assertTrue(response.getData().containsKey("applicantConfidentialDetails"));
+        assertTrue(response.getData().containsKey("applicantsConfidentialDetails"));
         assertTrue(response.getData().containsKey("childrenConfidentialDetails"));
     }
 
@@ -597,7 +597,7 @@ public class ResubmitApplicationControllerTest {
         when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataIssued);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(confidentialityTabService.updateConfidentialityDetails(Mockito.any(CaseData.class))).thenReturn(Map.of(
-            "applicantConfidentialDetails",
+            "applicantsConfidentialDetails",
             List.of(Element.builder().value(ApplicantConfidentialityDetails.builder().build())),
             "childrenConfidentialDetails",
             List.of(Element.builder().value(ChildConfidentialityDetails.builder().build()))
@@ -620,7 +620,7 @@ public class ResubmitApplicationControllerTest {
         when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataIssued);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(confidentialityTabService.updateConfidentialityDetails(Mockito.any(CaseData.class))).thenReturn(Map.of(
-            "applicantConfidentialDetails",
+            "applicantsConfidentialDetails",
             List.of(Element.builder().value(ApplicantConfidentialityDetails.builder().build())),
             "childrenConfidentialDetails",
             List.of(Element.builder().value(ChildConfidentialityDetails.builder().build()))
@@ -645,7 +645,7 @@ public class ResubmitApplicationControllerTest {
         when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataIssued);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(confidentialityTabService.updateConfidentialityDetails(Mockito.any(CaseData.class))).thenReturn(Map.of(
-            "applicantConfidentialDetails",
+            "applicantsConfidentialDetails",
             List.of(Element.builder().value(ApplicantConfidentialityDetails.builder().build())),
             "childrenConfidentialDetails",
             List.of(Element.builder().value(ChildConfidentialityDetails.builder().build()))

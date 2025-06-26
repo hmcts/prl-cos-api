@@ -2033,7 +2033,7 @@
       "isApplicant3SolicitorPresent": "Yes",
       "whatToDoWithOrderSolicitor": "giveAdminFurtherDirectionsAndServe",
       "typeOfChildArrangementsOrder": "spendTimeWithOrder",
-      "applicantConfidentialDetails": [
+      "applicantsConfidentialDetails": [
         {
           "id": "db728a8f-ebdd-4e8d-954a-42991f527577",
           "value": {
