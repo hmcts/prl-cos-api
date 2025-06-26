@@ -3226,13 +3226,16 @@ public class ManageOrderService {
             hearingsSupplier
         );
         hearingData.setDisplayConfirmedHearing(No);
-        //TODO reset this in about to submit
         taskHearingId.ifPresent(id -> {
                 hearingData.setDisplayConfirmedHearing(Yes);
+                DynamicListElement confirmedHearingDates = hearingData.getConfirmedHearingDates()
+                    .getListItems()
+                    .getFirst();
+                hearingData.getConfirmedHearingDates()
+                    .setValue(confirmedHearingDates);
+                //TODO reset this in about to submit
                 hearingData.setTransientConfirmedHearingDetail(
-                    hearingData.getConfirmedHearingDates()
-                        .getListItems()
-                        .getFirst()
+                    confirmedHearingDates
                         .getLabel()
                 );
             }
