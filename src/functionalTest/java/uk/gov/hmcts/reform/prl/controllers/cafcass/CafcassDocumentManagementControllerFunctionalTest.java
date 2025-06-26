@@ -99,6 +99,7 @@ public class CafcassDocumentManagementControllerFunctionalTest {
             .extract()
             .response();
 
+
         System.out.println("Status: " + response.getStatusCode());
         System.out.println("Headers: " + response.getHeaders());
         System.out.println("Body: " + response.getBody().asString());
