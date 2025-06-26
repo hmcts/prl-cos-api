@@ -578,11 +578,12 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            log.info("Hearing trasient display obtained {}",
-                     caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getTransientConfirmedHearingDate());
 
             /*
             //TODO set hearing new values
+            log.info("Hearing trasient display obtained {}",
+             caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getTransientConfirmedHearingDate());
+
             List<Element<HearingData>> ordersHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
             ordersHearingDetails.stream()
                     .map(Element::getValue)
