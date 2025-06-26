@@ -6,7 +6,7 @@ import uk.gov.hmcts.reform.prl.models.Address;
 
 @Builder
 @Data
-public class ApplicantConfidentialityDetails {
+public class ApplicantsConfidentialityDetails {
     private final String firstName;
     private final String lastName;
     private final String email;
