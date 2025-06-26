@@ -50,30 +50,30 @@ public class CafcassDocumentManagementController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
     public <T> ResponseEntity<T> downloadDocument(@RequestHeader(AUTHORIZATION) String authorisation,
-                                                     @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorisation,
-                                                     @PathVariable UUID documentId) {
+                                                  @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorisation,
+                                                  @PathVariable UUID documentId) {
         try {
             if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
                 authorisationService.authoriseService(serviceAuthorisation))
                 && authorisationService.getUserInfo().getRoles().contains(CAFCASS_USER_ROLE)) {
                 log.info("processing cafcass request after authorization");
-                 // Fetch downstream response
-            ResponseEntity<T> downstream =
-                (ResponseEntity<T>) cafcassCdamService.getDocument(authorisation, serviceAuthorisation, documentId);
-            T body = downstream.getBody();
+                // Fetch downstream response
+                ResponseEntity<T> downstream =
+                    (ResponseEntity<T>) cafcassCdamService.getDocument(authorisation, serviceAuthorisation, documentId);
+                T body = downstream.getBody();
 
-            HttpHeaders outHeaders = new HttpHeaders();
-            outHeaders.putAll(downstream.getHeaders());
+                HttpHeaders outHeaders = new HttpHeaders();
+                outHeaders.putAll(downstream.getHeaders());
 
-            // Only override Content-Type for successful byte[] payloads
-            if (downstream.getStatusCode().is2xxSuccessful() && body instanceof byte[]) {
-                String filename = downstream.getHeaders().getFirst("originalfilename");
-                String guessed = URLConnection.guessContentTypeFromName(filename);
-                String mimeType = (guessed != null ? guessed : MediaType.APPLICATION_OCTET_STREAM_VALUE);
-                outHeaders.set(HttpHeaders.CONTENT_TYPE, mimeType);
-            }
+                // Only override Content-Type for successful byte[] payloads
+                if (downstream.getStatusCode().is2xxSuccessful() && body instanceof byte[]) {
+                    String filename = downstream.getHeaders().getFirst("originalfilename");
+                    String guessed = URLConnection.guessContentTypeFromName(filename);
+                    String mimeType = (guessed != null ? guessed : MediaType.APPLICATION_OCTET_STREAM_VALUE);
+                    outHeaders.set(HttpHeaders.CONTENT_TYPE, mimeType);
+                }
 
-            return new ResponseEntity<>(body, outHeaders, downstream.getStatusCode());
+                return new ResponseEntity<>(body, outHeaders, downstream.getStatusCode());
 
             } else {
                 throw new ResponseStatusException(UNAUTHORIZED);
