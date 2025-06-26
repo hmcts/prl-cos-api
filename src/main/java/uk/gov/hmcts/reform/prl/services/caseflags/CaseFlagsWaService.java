@@ -87,7 +87,9 @@ public class CaseFlagsWaService {
 
     public boolean isCaseHasNoRequestedFlags(CaseData caseData) {
         List<Element<FlagDetail>> allFlagsDetails = new ArrayList<>();
-        allFlagsDetails.addAll(caseData.getCaseFlags().getDetails());
+        if (caseData.getCaseFlags() != null) {
+            allFlagsDetails.addAll(caseData.getCaseFlags().getDetails());
+        }
         allFlagsDetails.addAll(extractAllPartyFlagDetails(caseData.getAllPartyFlags()));
 
         return allFlagsDetails.stream()
