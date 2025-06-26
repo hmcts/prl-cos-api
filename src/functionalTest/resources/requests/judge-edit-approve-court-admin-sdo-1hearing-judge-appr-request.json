@@ -2881,7 +2881,7 @@
         "visibility": "Internal"
       },
       "typeOfChildArrangementsOrder": "spendTimeWithOrder",
-      "applicantsConfidentialDetails": [
+      "applicantConfidentialDetails": [
         {
           "id": "f9116814-7b2c-411b-80ae-befbe417392d",
           "value": {

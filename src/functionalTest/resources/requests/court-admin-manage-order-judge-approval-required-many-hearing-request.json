@@ -6757,7 +6757,7 @@
       "requestToForeignAuthorityGiveReason": "Yes",
       "isApplicant3SolicitorPresent": "Yes",
       "typeOfChildArrangementsOrder": "spendTimeWithOrder",
-      "applicantsConfidentialDetails": [
+      "applicantConfidentialDetails": [
         {
           "id": "7352b344-e575-44a9-9b9d-b0ec4b1448e1",
           "value": {

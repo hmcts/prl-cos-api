@@ -6049,7 +6049,7 @@
       "visibility": null
     },
     "typeOfChildArrangementsOrder": "spendTimeWithOrder",
-    "applicantsConfidentialDetails": [
+    "applicantConfidentialDetails": [
       {
         "id": "ff744cec-50ab-4463-be65-9707df42abcc",
         "value": {

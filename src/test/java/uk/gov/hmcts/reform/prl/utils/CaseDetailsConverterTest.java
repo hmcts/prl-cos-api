@@ -47,7 +47,7 @@ public class CaseDetailsConverterTest {
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
-            .applicantsConfidentialDetails(List.of(element(ApplicantConfidentialityDetails.builder().build())))
+            .applicantConfidentialDetails(List.of(element(ApplicantConfidentialityDetails.builder().build())))
             .childrenConfidentialDetails(List.of(element(ChildConfidentialityDetails.builder().build())))
             .id(123L)
             .build();

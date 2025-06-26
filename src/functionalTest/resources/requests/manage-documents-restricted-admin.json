@@ -5738,7 +5738,7 @@
       ],
       "requestToForeignAuthorityGiveReason": "Yes",
       "typeOfChildArrangementsOrder": "spendTimeWithOrder",
-      "applicantsConfidentialDetails": [
+      "applicantConfidentialDetails": [
         {
           "id": "dd6c31c2-e7a9-446e-b968-271e00933121",
           "value": {

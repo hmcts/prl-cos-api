@@ -288,7 +288,7 @@ public class DocumentGenServiceTest {
             .applicants(listOfApplicants)
             .state(State.CASE_ISSUED)
             //.allegationsOfHarmYesNo(No)
-            .applicantsConfidentialDetails(applicantConfidentialList)
+            .applicantConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
             .build();
 
@@ -302,7 +302,7 @@ public class DocumentGenServiceTest {
             .applicants(listOfApplicants)
             .state(State.CASE_WITHDRAWN)
             //.allegationsOfHarmYesNo(No)
-            .applicantsConfidentialDetails(applicantConfidentialList)
+            .applicantConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
             .build();
 
@@ -318,7 +318,7 @@ public class DocumentGenServiceTest {
             .applicants(listOfApplicants)
             .state(State.CASE_ISSUED)
             //.allegationsOfHarmYesNo(No)
-            .applicantsConfidentialDetails(applicantConfidentialList)
+            .applicantConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
             .build();
 
@@ -333,7 +333,7 @@ public class DocumentGenServiceTest {
             .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(YesOrNo.Yes).build())
             .taskListVersion(TASK_LIST_VERSION_V2)
             //.allegationsOfHarmYesNo(Yes)
-            .applicantsConfidentialDetails(applicantConfidentialList)
+            .applicantConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
             .build();
 
@@ -3017,7 +3017,7 @@ public class DocumentGenServiceTest {
         );
 
         c100CaseData = c100CaseData.toBuilder()
-            .applicantsConfidentialDetails(new ArrayList<>())
+            .applicantConfidentialDetails(new ArrayList<>())
             .childrenConfidentialDetails(new ArrayList<>())
             .allegationOfHarmRevised(AllegationOfHarmRevised
                                          .builder().newAllegationsOfHarmYesNo(No).build()).allegationOfHarm(null).build();

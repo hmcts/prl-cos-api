@@ -117,7 +117,7 @@
             }
           }
         ],
-        "applicantsConfidentialDetails": [],
+        "applicantConfidentialDetails": [],
         "applicantSolicitorEmailAddress": "prl-e2etestsolicitor@mailinator.com",
         "solicitorName": "E2E Test Solicitor",
         "courtName": "West London Family Court",
@@ -252,7 +252,7 @@
             }
           }
         ],
-        "applicantsConfidentialDetails": [],
+        "applicantConfidentialDetails": [],
         "applicantSolicitorEmailAddress": "prl_aat@mailinator.com",
         "solicitorName": "private law aat user",
         "courtName": "East London Family Court",

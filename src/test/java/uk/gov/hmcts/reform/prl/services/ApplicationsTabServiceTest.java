@@ -420,7 +420,7 @@ public class ApplicationsTabServiceTest {
     }
 
     @Test
-    public void testApplicantsConfidentialDetails() {
+    public void testApplicantConfidentialDetails() {
         PartyDetails partyDetails = PartyDetails.builder()
             .firstName("First name")
             .lastName("Last name")

@@ -103,7 +103,7 @@
                     }
                   }
                 ],
-                "applicantsConfidentialDetails": [
+                "applicantConfidentialDetails": [
                   {
 
                   }
@@ -868,7 +868,7 @@
               ],
               "combine": "AND"
             },
-            "$.cases[0].case_data.applicantsConfidentialDetails": {
+            "$.cases[0].case_data.applicantConfidentialDetails": {
               "matchers": [
                 {
                   "match": "type",
@@ -1011,7 +1011,7 @@
           "cases": [
             {
               "case_data": {
-                "applicantsConfidentialDetails": [
+                "applicantConfidentialDetails": [
                   {
 
                   }
@@ -1825,7 +1825,7 @@
               ],
               "combine": "AND"
             },
-            "$.cases[0].case_data.applicantsConfidentialDetails": {
+            "$.cases[0].case_data.applicantConfidentialDetails": {
               "matchers": [
                 {
                   "match": "type",
@@ -2017,7 +2017,7 @@
                     }
                   }
                 ],
-                "applicantsConfidentialDetails": [
+                "applicantConfidentialDetails": [
                   {
 
                   }
@@ -2782,7 +2782,7 @@
               ],
               "combine": "AND"
             },
-            "$.cases[0].case_data.applicantsConfidentialDetails": {
+            "$.cases[0].case_data.applicantConfidentialDetails": {
               "matchers": [
                 {
                   "match": "type",
