@@ -6272,6 +6272,8 @@ public class ManageOrderServiceTest {
             .caseDetails(caseDetails)
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        when(hearingDataService.generateHearingData(any(), any()))
+            .thenReturn(HearingData.builder().build());
 
         Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails(
             "testAuth", callbackRequest, ENGLISH, null);
@@ -6302,6 +6304,9 @@ public class ManageOrderServiceTest {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
+        when(hearingDataService.generateHearingData(any(), any()))
+            .thenReturn(HearingData.builder().build());
+
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
 
         Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails(
@@ -6362,6 +6367,9 @@ public class ManageOrderServiceTest {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
+        when(hearingDataService.generateHearingData(any(), any()))
+            .thenReturn(HearingData.builder().build());
+
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
 
         Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails(
