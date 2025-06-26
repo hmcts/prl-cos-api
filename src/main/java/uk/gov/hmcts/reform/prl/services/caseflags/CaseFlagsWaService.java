@@ -49,7 +49,7 @@ public class CaseFlagsWaService {
 
     public void checkAllRequestedFlagsAndCloseTask(CaseData caseData) {
         List<Element<FlagDetail>> allFlagsDetails = new ArrayList<>();
-        allFlagsDetails.addAll(caseData.getCaseFlags().getDetails());
+        addCaseFlags(caseData, allFlagsDetails);
         allFlagsDetails.addAll(extractAllPartyFlagDetails(caseData.getAllPartyFlags()));
 
         boolean allFlagsAreActioned = allFlagsDetails.stream()
@@ -73,6 +73,12 @@ public class CaseFlagsWaService {
         }
     }
 
+    private void addCaseFlags(CaseData caseData, List<Element<FlagDetail>> allFlagsDetails) {
+        if (caseData.getCaseFlags() != null && caseData.getCaseFlags().getDetails() != null) {
+            allFlagsDetails.addAll(caseData.getCaseFlags().getDetails());
+        }
+    }
+
 
     public void checkCaseFlagsToCreateTask(CaseData caseData, CaseData caseDataBefore) {
 
@@ -87,7 +93,7 @@ public class CaseFlagsWaService {
 
     public boolean isCaseHasNoRequestedFlags(CaseData caseData) {
         List<Element<FlagDetail>> allFlagsDetails = new ArrayList<>();
-        allFlagsDetails.addAll(caseData.getCaseFlags().getDetails());
+        addCaseFlags(caseData, allFlagsDetails);
         allFlagsDetails.addAll(extractAllPartyFlagDetails(caseData.getAllPartyFlags()));
 
         return allFlagsDetails.stream()
@@ -109,11 +115,13 @@ public class CaseFlagsWaService {
             .filter(field -> field.getType().equals(Flags.class))
             .forEach(field -> addFlagsToList(field, allPartyFlags, selectedFlagsList));
 
-        caseData.getCaseFlags().getDetails().forEach(flagDetail -> {
-            if (!REQUESTED.equals(flagDetail.getValue().getStatus())) {
-                selectedFlagsList.forEach(selectedFlag -> selectedFlag.getValue().getDetails().remove(flagDetail));
-            }
-        });
+        if (caseData.getCaseFlags() != null && caseData.getCaseFlags().getDetails() != null) {
+            caseData.getCaseFlags().getDetails().forEach(flagDetail -> {
+                if (!REQUESTED.equals(flagDetail.getValue().getStatus())) {
+                    selectedFlagsList.forEach(selectedFlag -> selectedFlag.getValue().getDetails().remove(flagDetail));
+                }
+            });
+        }
         List<Element<FlagDetail>> allFlagsDetails = extractAllPartyFlagDetails(allPartyFlags);
 
         allFlagsDetails.forEach(flagDetail -> {
