@@ -1,35 +1,33 @@
 package uk.gov.hmcts.reform.prl.services.cafcass;
 
-import org.junit.Assert;
-import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 
 import java.util.UUID;
 
-import static java.util.UUID.randomUUID;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class CafcassCdamServiceTest {
+
+@ExtendWith(MockitoExtension.class)
+class CafcassCdamServiceTest {
 
     @Mock
     private AuthTokenGenerator authTokenGenerator;
-
-    private UUID uuid;
-
-    private String authToken;
-    private String s2sToken;
 
     @Mock
     private CaseDocumentClient caseDocumentClient;
@@ -37,38 +35,104 @@ public class CafcassCdamServiceTest {
     @InjectMocks
     private CafcassCdamService cafcassCdamService;
 
+    private UUID uuid;
+    private String auth;
+    private String s2s;
+
     @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
-        uuid = randomUUID();
-        authToken = "auth-token";
-        s2sToken = "s2sToken";
-        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+    void setUp() {
+        uuid = UUID.randomUUID();
+        auth = "auth-token";
+        s2s  = "s2s-token";
+        when(authTokenGenerator.generate()).thenReturn(s2s);
     }
 
     @Test
-    @DisplayName("test case for Case document API.")
-    public void testGetDocumentBinary() {
+    void when2xxAndNoContentType_thenGuessPdf() {
+        Resource pdf = new ByteArrayResource(new byte[]{}) {
+            @Override public String getFilename() { return "file.pdf"; }
+        };
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("originalfilename", "file.pdf");
+        ResponseEntity<Resource> upstream =
+            new ResponseEntity<>(pdf, headers, HttpStatus.OK);
 
-        when(caseDocumentClient.getDocumentBinary(authToken, s2sToken, uuid)).thenReturn(new ResponseEntity<Resource>(
-            HttpStatus.OK));
+        when(caseDocumentClient.getDocumentBinary(auth, s2s, uuid))
+            .thenReturn(upstream);
 
-        final ResponseEntity<Resource> response = cafcassCdamService.getDocument(authToken, s2sToken, uuid);
+        ResponseEntity<Resource> resp = cafcassCdamService.getDocument(auth, s2s, uuid);
 
-        Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
-
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
+        assertEquals("application/pdf", resp.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE));
     }
 
     @Test
-    @DisplayName("test case for Case document API when document id is incorrect.")
-    public void testGetDocumentBinaryNotFound() {
+    void when2xxAndHasContentType_thenPreserve() {
+        Resource img = new ByteArrayResource(new byte[]{}) {
+            @Override public String getFilename() { return "pic.png"; }
+        };
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_PNG);
+        headers.add("originalfilename", "pic.png");
+        ResponseEntity<Resource> upstream =
+            new ResponseEntity<>(img, headers, HttpStatus.OK);
 
-        when(caseDocumentClient.getDocumentBinary(authToken, s2sToken, uuid)).thenReturn(new ResponseEntity<Resource>(
-            HttpStatus.NOT_FOUND));
+        when(caseDocumentClient.getDocumentBinary(auth, s2s, uuid))
+            .thenReturn(upstream);
 
-        final ResponseEntity<Resource> response = cafcassCdamService.getDocument(authToken, s2sToken, uuid);
+        ResponseEntity<Resource> resp = cafcassCdamService.getDocument(auth, s2s, uuid);
 
-        Assert.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
+        assertEquals(MediaType.IMAGE_PNG, resp.getHeaders().getContentType());
+    }
 
+    @Test
+    void whenNon2xx_thenNoGuessingOrOverride() {
+        ResponseEntity<Resource> upstream =
+            new ResponseEntity<>(null, new HttpHeaders(), HttpStatus.BAD_REQUEST);
+        when(caseDocumentClient.getDocumentBinary(auth, s2s, uuid))
+            .thenReturn(upstream);
+
+        ResponseEntity<Resource> resp = cafcassCdamService.getDocument(auth, s2s, uuid);
+
+        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+        assertFalse(resp.getHeaders().containsKey(HttpHeaders.CONTENT_TYPE));
+        assertNull(resp.getBody());
+    }
+
+    @Test
+    void when2xxAndUnknownExtension_thenOctetStream() {
+        Resource unknown = new ByteArrayResource(new byte[]{}) {
+            @Override public String getFilename() { return "file.unknownext"; }
+        };
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("originalfilename", "file.unknownext");
+        ResponseEntity<Resource> upstream =
+            new ResponseEntity<>(unknown, headers, HttpStatus.OK);
+
+        when(caseDocumentClient.getDocumentBinary(auth, s2s, uuid))
+            .thenReturn(upstream);
+
+        ResponseEntity<Resource> resp = cafcassCdamService.getDocument(auth, s2s, uuid);
+
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
+        assertEquals(MediaType.APPLICATION_OCTET_STREAM, resp.getHeaders().getContentType());
+    }
+
+    @Test
+    void whenFilenameHeaderMissing_thenUseResourceFilename() {
+        Resource pdf = new ByteArrayResource(new byte[]{}) {
+            @Override public String getFilename() { return "other.pdf"; }
+        };
+        ResponseEntity<Resource> upstream =
+            new ResponseEntity<>(pdf, new HttpHeaders(), HttpStatus.OK);
+
+        when(caseDocumentClient.getDocumentBinary(auth, s2s, uuid))
+            .thenReturn(upstream);
+
+        ResponseEntity<Resource> resp = cafcassCdamService.getDocument(auth, s2s, uuid);
+
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
+        assertEquals("application/pdf", resp.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE));
     }
 }
