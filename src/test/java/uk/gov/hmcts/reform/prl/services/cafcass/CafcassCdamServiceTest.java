@@ -43,14 +43,17 @@ class CafcassCdamServiceTest {
     void setUp() {
         uuid = UUID.randomUUID();
         auth = "auth-token";
-        s2s  = "s2s-token";
+        s2s = "s2s-token";
         when(authTokenGenerator.generate()).thenReturn(s2s);
     }
 
     @Test
     void when2xxAndNoContentType_thenGuessPdf() {
-        Resource pdf = new ByteArrayResource(new byte[]{}) {
-            @Override public String getFilename() { return "file.pdf"; }
+        Resource pdf = new ByteArrayResource(new byte[] {}) {
+            @Override
+            public String getFilename() {
+                return "file.pdf";
+            }
         };
         HttpHeaders headers = new HttpHeaders();
         headers.add("originalfilename", "file.pdf");
@@ -68,8 +71,11 @@ class CafcassCdamServiceTest {
 
     @Test
     void when2xxAndHasContentType_thenPreserve() {
-        Resource img = new ByteArrayResource(new byte[]{}) {
-            @Override public String getFilename() { return "pic.png"; }
+        Resource img = new ByteArrayResource(new byte[] {}) {
+            @Override
+            public String getFilename() {
+                return "pic.png";
+            }
         };
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.IMAGE_PNG);
@@ -102,8 +108,11 @@ class CafcassCdamServiceTest {
 
     @Test
     void when2xxAndUnknownExtension_thenOctetStream() {
-        Resource unknown = new ByteArrayResource(new byte[]{}) {
-            @Override public String getFilename() { return "file.unknownext"; }
+        Resource unknown = new ByteArrayResource(new byte[] {}) {
+            @Override
+            public String getFilename() {
+                return "file.unknownext";
+            }
         };
         HttpHeaders headers = new HttpHeaders();
         headers.add("originalfilename", "file.unknownext");
@@ -121,8 +130,11 @@ class CafcassCdamServiceTest {
 
     @Test
     void whenFilenameHeaderMissing_thenUseResourceFilename() {
-        Resource pdf = new ByteArrayResource(new byte[]{}) {
-            @Override public String getFilename() { return "other.pdf"; }
+        Resource pdf = new ByteArrayResource(new byte[] {}) {
+            @Override
+            public String getFilename() {
+                return "other.pdf";
+            }
         };
         ResponseEntity<Resource> upstream =
             new ResponseEntity<>(pdf, new HttpHeaders(), HttpStatus.OK);
