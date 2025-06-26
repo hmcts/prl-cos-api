@@ -2865,7 +2865,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void testPopulateC8DocumentsWhenPartyIndexIsZero() throws Exception {
+    public void testPopulateRespondentC8DocumentsWhenPartyIndexIsZero() throws Exception {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .respondentC8Document(RespondentC8Document.builder().respondentAc8Documents(new ArrayList<>(List.of(element(
@@ -2876,7 +2876,7 @@ public class UpdatePartyDetailsServiceTest {
         Map<String, Object> updatedCaseData = new HashMap<>();
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, new ArrayList<>());
-        updatePartyDetailsService.populateC8Documents(
+        updatePartyDetailsService.populateRespondentC8Documents(
             "authToken", updatedCaseData, caseData, dataMap, true, 0, element(
                 PartyDetails.builder().firstName("firstName").lastName("lastName").build())
         );
@@ -2885,7 +2885,27 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void testPopulateC8DocumentsWhenPartyIndexIsOne() throws Exception {
+    public void testPopulateApplicantC8DocumentsWhenPartyIndexIsZero() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicantC8Document(ApplicantC8Document.builder().applicantAc8Documents(new ArrayList<>(List.of(element(
+                ResponseDocuments.builder().dateTimeCreated(LocalDateTime.now()).build())))).build())
+            .build();
+        when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
+        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().isGenWelsh(true).build());
+        Map<String, Object> updatedCaseData = new HashMap<>();
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, new ArrayList<>());
+        updatePartyDetailsService.populateApplicantC8Documents(
+            "authToken", updatedCaseData, caseData, dataMap, true, 0, element(
+                PartyDetails.builder().firstName("firstName").lastName("lastName").build())
+        );
+        assertNotNull(dataMap);
+        assertNotNull(updatedCaseData.get("applicantAc8Documents"));
+    }
+
+    @Test
+    public void testPopulateRespondentC8DocumentsWhenPartyIndexIsOne() throws Exception {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .respondentC8Document(RespondentC8Document.builder().respondentBc8Documents(new ArrayList<>(List.of(element(
@@ -2896,7 +2916,7 @@ public class UpdatePartyDetailsServiceTest {
         Map<String, Object> updatedCaseData = new HashMap<>();
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, new ArrayList<>());
-        updatePartyDetailsService.populateC8Documents(
+        updatePartyDetailsService.populateRespondentC8Documents(
             "authToken", updatedCaseData, caseData, dataMap, true, 1, element(
                 PartyDetails.builder().firstName("firstName").lastName("lastName").build())
         );
@@ -2905,7 +2925,27 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void testPopulateC8DocumentsWhenPartyIndexIsTwo() throws Exception {
+    public void testPopulateApplicantC8DocumentsWhenPartyIndexIsOne() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicantC8Document(ApplicantC8Document.builder().applicantBc8Documents(new ArrayList<>(List.of(element(
+                ResponseDocuments.builder().dateTimeCreated(LocalDateTime.now()).build())))).build())
+            .build();
+        when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
+        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().isGenWelsh(false).build());
+        Map<String, Object> updatedCaseData = new HashMap<>();
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, new ArrayList<>());
+        updatePartyDetailsService.populateApplicantC8Documents(
+            "authToken", updatedCaseData, caseData, dataMap, true, 1, element(
+                PartyDetails.builder().firstName("firstName").lastName("lastName").build())
+        );
+        assertNotNull(dataMap);
+        assertNotNull(updatedCaseData.get("applicantBc8Documents"));
+    }
+
+    @Test
+    public void testPopulateRespondentC8DocumentsWhenPartyIndexIsTwo() throws Exception {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .respondentC8Document(RespondentC8Document.builder().respondentCc8Documents(new ArrayList<>(List.of(element(
@@ -2916,7 +2956,7 @@ public class UpdatePartyDetailsServiceTest {
         Map<String, Object> updatedCaseData = new HashMap<>();
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, new ArrayList<>());
-        updatePartyDetailsService.populateC8Documents(
+        updatePartyDetailsService.populateRespondentC8Documents(
             "authToken", updatedCaseData, caseData, dataMap, false, 2, element(
                 PartyDetails.builder().firstName("firstName").lastName("lastName").build())
         );
@@ -2925,7 +2965,27 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void testPopulateC8DocumentsWhenPartyIndexIsThree() throws Exception {
+    public void testPopulateApplicantC8DocumentsWhenPartyIndexIsTwo() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicantC8Document(ApplicantC8Document.builder().applicantCc8Documents(new ArrayList<>(List.of(element(
+                ResponseDocuments.builder().dateTimeCreated(LocalDateTime.now()).build())))).build())
+            .build();
+        when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
+        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().isGenWelsh(false).build());
+        Map<String, Object> updatedCaseData = new HashMap<>();
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, new ArrayList<>());
+        updatePartyDetailsService.populateApplicantC8Documents(
+            "authToken", updatedCaseData, caseData, dataMap, false, 2, element(
+                PartyDetails.builder().firstName("firstName").lastName("lastName").build())
+        );
+        assertNotNull(dataMap);
+        assertNotNull(updatedCaseData.get("applicantCc8Documents"));
+    }
+
+    @Test
+    public void testPopulateRespondentC8DocumentsWhenPartyIndexIsThree() throws Exception {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .respondentC8Document(RespondentC8Document.builder().respondentDc8Documents(new ArrayList<>(List.of(element(
@@ -2936,7 +2996,7 @@ public class UpdatePartyDetailsServiceTest {
         Map<String, Object> updatedCaseData = new HashMap<>();
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, new ArrayList<>());
-        updatePartyDetailsService.populateC8Documents(
+        updatePartyDetailsService.populateRespondentC8Documents(
             "authToken", updatedCaseData, caseData, dataMap, true, 3, element(
                 PartyDetails.builder().firstName("firstName").lastName("lastName").build())
         );
@@ -2945,7 +3005,27 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void testPopulateC8DocumentsWhenPartyIndexIsFour() throws Exception {
+    public void testPopulateApplicantC8DocumentsWhenPartyIndexIsThree() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicantC8Document(ApplicantC8Document.builder().applicantDc8Documents(new ArrayList<>(List.of(element(
+                ResponseDocuments.builder().dateTimeCreated(LocalDateTime.now()).build())))).build())
+            .build();
+        when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
+        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().build());
+        Map<String, Object> updatedCaseData = new HashMap<>();
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, new ArrayList<>());
+        updatePartyDetailsService.populateApplicantC8Documents(
+            "authToken", updatedCaseData, caseData, dataMap, true, 3, element(
+                PartyDetails.builder().firstName("firstName").lastName("lastName").build())
+        );
+        assertNotNull(dataMap);
+        assertNotNull(updatedCaseData.get("applicantDc8Documents"));
+    }
+
+    @Test
+    public void testPopulateRespondentC8DocumentsWhenPartyIndexIsFour() throws Exception {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .respondentC8Document(RespondentC8Document.builder().respondentEc8Documents(new ArrayList<>(List.of(element(
@@ -2956,7 +3036,7 @@ public class UpdatePartyDetailsServiceTest {
         Map<String, Object> updatedCaseData = new HashMap<>();
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, new ArrayList<>());
-        updatePartyDetailsService.populateC8Documents(
+        updatePartyDetailsService.populateRespondentC8Documents(
             "authToken", updatedCaseData, caseData, dataMap, false, 4, element(
                 PartyDetails.builder().firstName("firstName").lastName("lastName").build())
         );
@@ -2965,7 +3045,27 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void testPopulateC8DocumentsWhenPartyIndexIsNotValid() throws Exception {
+    public void testPopulateApplicantC8DocumentsWhenPartyIndexIsFour() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicantC8Document(ApplicantC8Document.builder().applicantEc8Documents(new ArrayList<>(List.of(element(
+                ResponseDocuments.builder().dateTimeCreated(LocalDateTime.now()).build())))).build())
+            .build();
+        when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
+        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().isGenEng(true).build());
+        Map<String, Object> updatedCaseData = new HashMap<>();
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, new ArrayList<>());
+        updatePartyDetailsService.populateApplicantC8Documents(
+            "authToken", updatedCaseData, caseData, dataMap, false, 4, element(
+                PartyDetails.builder().firstName("firstName").lastName("lastName").build())
+        );
+        assertNotNull(dataMap);
+        assertNotNull(updatedCaseData.get("applicantEc8Documents"));
+    }
+
+    @Test
+    public void testPopulateRespondentC8DocumentsWhenPartyIndexIsNotValid() throws Exception {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .respondentC8Document(RespondentC8Document.builder().respondentEc8Documents(new ArrayList<>(List.of(element(
@@ -2976,13 +3076,13 @@ public class UpdatePartyDetailsServiceTest {
         Map<String, Object> updatedCaseData = new HashMap<>();
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, new ArrayList<>());
-        updatePartyDetailsService.populateC8Documents(
+        updatePartyDetailsService.populateRespondentC8Documents(
             "authToken", updatedCaseData, caseData, dataMap, false, 5, element(
                 PartyDetails.builder().firstName("firstName").lastName("lastName").build())
         );
         assertEquals(0,updatedCaseData.size());
 
-        updatePartyDetailsService.populateC8Documents(
+        updatePartyDetailsService.populateRespondentC8Documents(
             "authToken", updatedCaseData, caseData, dataMap, false, -1, element(
                 PartyDetails.builder().firstName("firstName").lastName("lastName").build())
         );
@@ -2990,7 +3090,32 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void testPopulateC8DocumentsWhenThereAreNoRespondentC8Documents() throws Exception {
+    public void testPopulateApplicantC8DocumentsWhenPartyIndexIsNotValid() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicantC8Document(ApplicantC8Document.builder().applicantEc8Documents(new ArrayList<>(List.of(element(
+                ResponseDocuments.builder().dateTimeCreated(LocalDateTime.now()).build())))).build())
+            .build();
+        when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
+        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().isGenEng(true).build());
+        Map<String, Object> updatedCaseData = new HashMap<>();
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, new ArrayList<>());
+        updatePartyDetailsService.populateRespondentC8Documents(
+            "authToken", updatedCaseData, caseData, dataMap, false, 5, element(
+                PartyDetails.builder().firstName("firstName").lastName("lastName").build())
+        );
+        assertEquals(0,updatedCaseData.size());
+
+        updatePartyDetailsService.populateRespondentC8Documents(
+            "authToken", updatedCaseData, caseData, dataMap, false, -1, element(
+                PartyDetails.builder().firstName("firstName").lastName("lastName").build())
+        );
+        assertEquals(0,updatedCaseData.size());
+    }
+
+    @Test
+    public void testPopulateRespondentC8DocumentsWhenThereAreNoRespondents() throws Exception {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .respondentC8Document(RespondentC8Document.builder().build())
@@ -3000,7 +3125,7 @@ public class UpdatePartyDetailsServiceTest {
         Map<String, Object> updatedCaseData = new HashMap<>();
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, new ArrayList<>());
-        updatePartyDetailsService.populateC8Documents(
+        updatePartyDetailsService.populateRespondentC8Documents(
             "authToken", updatedCaseData, caseData, dataMap, true, 1, element(
                 PartyDetails.builder().firstName("firstName").lastName("lastName").build())
         );
@@ -3009,7 +3134,26 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void testPopulateC8DocumentsWhenThereIsNoConfendentialData() throws Exception {
+    public void testPopulateApplicantC8DocumentsWhenThereAreNoApplicant() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicantC8Document(ApplicantC8Document.builder().build())
+            .build();
+        when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
+        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().isGenEng(true).build());
+        Map<String, Object> updatedCaseData = new HashMap<>();
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, new ArrayList<>());
+        updatePartyDetailsService.populateApplicantC8Documents(
+            "authToken", updatedCaseData, caseData, dataMap, true, 1, element(
+                PartyDetails.builder().firstName("firstName").lastName("lastName").build())
+        );
+        assertNotNull(updatedCaseData.get("applicantBc8Documents"));
+        assertEquals(1, ((ArrayList) updatedCaseData.get("applicantBc8Documents")).size());
+    }
+
+    @Test
+    public void testPopulateRespondentC8DocumentsWhenThereIsNoConfidentialData() throws Exception {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .respondentC8Document(RespondentC8Document.builder().build())
@@ -3018,12 +3162,30 @@ public class UpdatePartyDetailsServiceTest {
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().isGenEng(true).build());
         Map<String, Object> updatedCaseData = new HashMap<>();
         Map<String, Object> dataMap = new HashMap<>();
-        updatePartyDetailsService.populateC8Documents(
+        updatePartyDetailsService.populateRespondentC8Documents(
             "authToken", updatedCaseData, caseData, dataMap, true, 1, element(
                 PartyDetails.builder().firstName("firstName").lastName("lastName").build())
         );
         assertNotNull(updatedCaseData.get("respondentBc8Documents"));
         assertEquals(Collections.emptyList(), (updatedCaseData.get("respondentBc8Documents")));
+    }
+
+    @Test
+    public void testPopulateApplicantC8DocumentsWhenThereIsNoConfidentialData() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .applicantC8Document(ApplicantC8Document.builder().build())
+            .build();
+        when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
+        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().isGenEng(true).build());
+        Map<String, Object> updatedCaseData = new HashMap<>();
+        Map<String, Object> dataMap = new HashMap<>();
+        updatePartyDetailsService.populateApplicantC8Documents(
+            "authToken", updatedCaseData, caseData, dataMap, true, 1, element(
+                PartyDetails.builder().firstName("firstName").lastName("lastName").build())
+        );
+        assertNotNull(updatedCaseData.get("applicantBc8Documents"));
+        assertEquals(Collections.emptyList(), (updatedCaseData.get("applicantBc8Documents")));
     }
 
 }

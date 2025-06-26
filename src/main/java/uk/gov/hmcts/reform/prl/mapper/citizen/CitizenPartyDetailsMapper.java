@@ -308,13 +308,13 @@ public class CitizenPartyDetailsMapper {
         );
 
         try {
-            updatePartyDetailsService.populateC8Documents(authorisation,
-                                                          caseDataMapToBeUpdated, oldCaseData, dataMapForC8Document,
-                                                          updatePartyDetailsService
+            updatePartyDetailsService.populateRespondentC8Documents(authorisation,
+                                                                    caseDataMapToBeUpdated, oldCaseData, dataMapForC8Document,
+                                                                    updatePartyDetailsService
                                                               .checkIfConfidentialityDetailsChangedRespondent(
                                                                   oldCaseData, updatedPartyElement
                                                               ),
-                                                          respondentIndex, updatedPartyElement
+                                                                    respondentIndex, updatedPartyElement
             );
         } catch (Exception e) {
             log.error("Failed to generate C8 document for Case id - {}",

@@ -590,11 +590,11 @@ public class UpdatePartyDetailsService {
             );
             //PRL-6790 - Add updated respondent details to dataMap for C8 document generation
             dataMap.put(RESPONDENT, respondent.getValue());
-            populateC8Documents(authorisation,
-                                updatedCaseData,
-                                caseData,
-                                dataMap, checkIfConfidentialityDetailsChangedRespondent(caseDataBefore, respondent),
-                                respondentIndex, respondent
+            populateRespondentC8Documents(authorisation,
+                                          updatedCaseData,
+                                          caseData,
+                                          dataMap, checkIfConfidentialityDetailsChangedRespondent(caseDataBefore, respondent),
+                                          respondentIndex, respondent
             );
             respondentIndex++;
         }
@@ -619,11 +619,11 @@ public class UpdatePartyDetailsService {
                 SOLICITOR
             );
             dataMap.put(APPLICANT, applicant.getValue());
-            populateC8Documents(authorisation,
-                                updatedCaseData,
-                                caseData,
-                                dataMap, checkIfConfidentialityDetailsChangedApplicant(caseDataBefore, applicant),
-                                applicantIndex, applicant
+            populateApplicantC8Documents(authorisation,
+                                          updatedCaseData,
+                                          caseData,
+                                          dataMap, checkIfConfidentialityDetailsChangedApplicant(caseDataBefore, applicant),
+                                          applicantIndex, applicant
             );
             applicantIndex++;
         }
@@ -734,12 +734,12 @@ public class UpdatePartyDetailsService {
 
 
 
-    public void populateC8Documents(String authorisation, Map<String, Object> updatedCaseData, CaseData caseData,
-                                      Map<String, Object> dataMap, Boolean isDetailsChanged, int partyIndex,
-                                      Element<PartyDetails> respondent) throws Exception {
+    public void populateRespondentC8Documents(String authorisation, Map<String, Object> updatedCaseData, CaseData caseData,
+                                              Map<String, Object> dataMap, Boolean isDetailsChanged, int partyIndex,
+                                              Element<PartyDetails> respondent) throws Exception {
         dataMap.put("loggedInUserRole", manageOrderService.getLoggedInUserType(authorisation));
 
-        log.info("inside populateC8Documents for partyIndex " + partyIndex);
+        log.info("inside populateRespondentC8Documents for partyIndex " + partyIndex);
         if (partyIndex >= 0) {
             switch (partyIndex) {
                 case 0:
@@ -785,6 +785,64 @@ public class UpdatePartyDetailsService {
                                                                                     .getRespondentEc8Documents(),
                                                                                 isDetailsChanged,
                                                                                 respondent));
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    public void populateApplicantC8Documents(String authorisation, Map<String, Object> updatedCaseData, CaseData caseData,
+                                              Map<String, Object> dataMap, Boolean isDetailsChanged, int partyIndex,
+                                              Element<PartyDetails> applicant) throws Exception {
+        dataMap.put("loggedInUserRole", manageOrderService.getLoggedInUserType(authorisation));
+
+        log.info("inside populateApplicantC8Documents for partyIndex " + partyIndex);
+        if (partyIndex >= 0) {
+            switch (partyIndex) {
+                case 0:
+                    updatedCaseData
+                        .put("applicantAc8Documents",getOrCreateC8DocumentList(authorisation, caseData, dataMap,
+                                                                                caseData.getApplicantC8Document()
+                                                                                    .getApplicantAc8Documents(),
+                                                                                isDetailsChanged,
+                                                                                applicant));
+                    break;
+                case 1:
+                    updatedCaseData
+                        .put("applicantBc8Documents",getOrCreateC8DocumentList(authorisation, caseData,
+                                                                                dataMap,
+                                                                                caseData.getApplicantC8Document()
+                                                                                    .getApplicantBc8Documents(),
+                                                                                isDetailsChanged,
+                                                                                applicant));
+                    break;
+                case 2:
+                    updatedCaseData
+                        .put("applicantCc8Documents",getOrCreateC8DocumentList(authorisation, caseData,
+                                                                                dataMap,
+                                                                                caseData.getApplicantC8Document()
+                                                                                    .getApplicantCc8Documents(),
+                                                                                isDetailsChanged,
+                                                                                applicant));
+                    break;
+                case 3:
+                    updatedCaseData
+                        .put("applicantDc8Documents",getOrCreateC8DocumentList(authorisation, caseData,
+                                                                                dataMap,
+                                                                                caseData.getApplicantC8Document()
+                                                                                    .getApplicantDc8Documents(),
+                                                                                isDetailsChanged,
+                                                                                applicant));
+                    break;
+                case 4:
+                    updatedCaseData
+                        .put("applicantEc8Documents",getOrCreateC8DocumentList(authorisation, caseData,
+                                                                                dataMap,
+                                                                                caseData.getApplicantC8Document()
+                                                                                    .getApplicantEc8Documents(),
+                                                                                isDetailsChanged,
+                                                                                applicant));
                     break;
                 default:
                     break;
