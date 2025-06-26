@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 
@@ -166,13 +167,16 @@ public class CaseFlagsWaService {
         return sortedAllFlagsDetails.getFirst();
     }
 
-    public void searchAndUpdateCaseFlags(CaseData caseData, Element<FlagDetail> mostRecentlyModified) {
+    public void searchAndUpdateCaseFlags(CaseData caseData,
+                                         Map<String, Object> caseDataMap,
+                                         Element<FlagDetail> mostRecentlyModified) {
         if (caseData.getCaseFlags() != null && CollectionUtils.isNotEmpty(caseData.getCaseFlags().getDetails())) {
             List<Element<FlagDetail>> allCaseLevelFlagsDetails = new ArrayList<>(caseData.getCaseFlags().getDetails());
             allCaseLevelFlagsDetails.forEach(flagDetail -> {
                 if (mostRecentlyModified.getId().equals(flagDetail.getId())) {
                     final int index =  caseData.getCaseFlags().getDetails().indexOf(flagDetail);
                     caseData.getCaseFlags().getDetails().set(index, mostRecentlyModified);
+                    caseDataMap.put("caseFlags", caseData.getCaseFlags());
                 }
             });
         }
@@ -183,7 +187,11 @@ public class CaseFlagsWaService {
             if (mostRecentlyModified.getId().equals(flagDetail.getId())) {
                 Arrays.stream(caseData.getAllPartyFlags().getClass().getDeclaredFields())
                     .filter(field -> field.getType().equals(Flags.class))
-                    .forEach(field -> mapModifiedFieldToPartyFlags(mostRecentlyModified, flagDetail, field, allPartyFlags));
+                    .forEach(field -> mapModifiedFieldToPartyFlags(mostRecentlyModified,
+                                                                   flagDetail,
+                                                                   field,
+                                                                   allPartyFlags,
+                                                                   caseDataMap));
             }
         });
 
@@ -192,7 +200,8 @@ public class CaseFlagsWaService {
     private void mapModifiedFieldToPartyFlags(Element<FlagDetail> mostRecentlyModified,
                                               Element<FlagDetail> flagDetail,
                                               Field field,
-                                              AllPartyFlags allPartyFlags) {
+                                              AllPartyFlags allPartyFlags,
+                                              Map<String, Object> caseDataMap) {
         field.setAccessible(true);
         try {
             Flags flags = (Flags) field.get(allPartyFlags);
@@ -200,6 +209,7 @@ public class CaseFlagsWaService {
                 final int index = flags.getDetails().indexOf(flagDetail);
                 flags.getDetails().set(index, mostRecentlyModified);
                 field.set(allPartyFlags, flags);
+                caseDataMap.put(field.getName(), field.get(allPartyFlags));
             }
         } catch (IllegalAccessException e) {
             //ignore

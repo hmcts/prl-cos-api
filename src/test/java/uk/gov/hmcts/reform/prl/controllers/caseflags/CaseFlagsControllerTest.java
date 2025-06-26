@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewRaRequestWrapper;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsWaService;
 import uk.gov.hmcts.reform.prl.services.caseflags.FlagsService;
@@ -78,9 +79,9 @@ public class CaseFlagsControllerTest {
         Map<String, Object> aboutToStartMap = new HashMap<>();
         aboutToStartMap.put("selectedFlags", new ArrayList<>());
 
-        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        CaseDetails caseDetails = CaseDetails.builder().data(aboutToStartMap).id(12345L).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        CaseData caseData = CaseData.builder().id(12345L).build();
+        CaseData caseData = CaseData.builder().id(12345L).reviewRaRequestWrapper(ReviewRaRequestWrapper.builder().build()).build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
         caseFlagsController.handleAboutToStart(AUTH_TOKEN, callbackRequest);
@@ -90,13 +91,13 @@ public class CaseFlagsControllerTest {
 
     @Test
     public void testCheckWorkAllocationTaskStatusWhenCaseFlagsStatusIsRequested() {
-
+        Map<String, Object> caseDataMap = new HashMap<>();
         FlagDetail caseLevelDetail = FlagDetail.builder().status(REQUESTED).build();
         List<Element<FlagDetail>> caseLevelFlagDetails = new ArrayList<>();
         caseLevelFlagDetails.add(ElementUtils.element(caseLevelDetail));
         Flags caseLevelFlag = Flags.builder().details(caseLevelFlagDetails).build();
 
-        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        CaseDetails caseDetails = CaseDetails.builder().data(caseDataMap).id(12345L).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         CaseData caseData = CaseData.builder().id(12345L).build();
         Element<FlagDetail> mostRecentlyModified = caseLevelFlag.getDetails().getFirst();
@@ -106,18 +107,19 @@ public class CaseFlagsControllerTest {
         AboutToStartOrSubmitCallbackResponse response = caseFlagsController.handleAboutToSubmit(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
         Assert.assertTrue(response.getErrors().size() > 0);
         verify(caseFlagsWaService).validateAllFlags(caseData);
-        verify(caseFlagsWaService, never()).searchAndUpdateCaseFlags(caseData, mostRecentlyModified);
+        verify(caseFlagsWaService, never()).searchAndUpdateCaseFlags(caseData, caseDataMap, mostRecentlyModified);
 
     }
 
     @Test
     public void testCheckWorkAllocationTaskStatusWhenCaseFlagsStatusIsNotRequested() {
+        Map<String, Object> caseDataMap = new HashMap<>();
         FlagDetail caseLevelDetail = FlagDetail.builder().status(REQUESTED).build();
         List<Element<FlagDetail>> caseLevelFlagDetails = new ArrayList<>();
         caseLevelFlagDetails.add(ElementUtils.element(caseLevelDetail));
         Flags caseLevelFlag = Flags.builder().details(caseLevelFlagDetails).build();
 
-        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        CaseDetails caseDetails = CaseDetails.builder().data(caseDataMap).id(12345L).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         CaseData caseData = CaseData.builder().id(12345L).build();
         Element<FlagDetail> mostRecentlyModified = caseLevelFlag.getDetails().getFirst();
@@ -130,7 +132,7 @@ public class CaseFlagsControllerTest {
         Assert.assertTrue(response.getErrors().isEmpty());
 
         verify(caseFlagsWaService).validateAllFlags(caseData);
-        verify(caseFlagsWaService).searchAndUpdateCaseFlags(caseData, mostRecentlyModified);
+        verify(caseFlagsWaService).searchAndUpdateCaseFlags(caseData, caseDataMap, mostRecentlyModified);
 
     }
 

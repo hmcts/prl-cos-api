@@ -29,6 +29,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -70,6 +71,7 @@ public class CaseFlagsWaServiceTest {
 
     @Test
     public void testSearchAndUpdateCaseLevelFlags() {
+        Map<String, Object> caseDataMap = new HashMap<>();
         FlagDetail modifiedFlagDetail = FlagDetail.builder().status("Active").build();
         Flags flags = getCaseLevelFlags(REQUESTED);
         CaseData caseData = CaseData.builder().caseFlags(flags)
@@ -80,13 +82,14 @@ public class CaseFlagsWaServiceTest {
             .value(modifiedFlagDetail)
             .build();
 
-        caseFlagsWaService.searchAndUpdateCaseFlags(caseData, recentlyModifiedFlag);
+        caseFlagsWaService.searchAndUpdateCaseFlags(caseData, caseDataMap, recentlyModifiedFlag);
 
         assertEquals(modifiedFlagDetail.getStatus(), caseData.getCaseFlags().getDetails().getFirst().getValue().getStatus());
     }
 
     @Test
     public void testSearchAndUpdatePartyLevelFlags() {
+        Map<String, Object> caseDataMap = new HashMap<>();
         FlagDetail flagDetail1 = FlagDetail.builder().status("Requested").build();
         FlagDetail flagDetail2 = FlagDetail.builder().status("Requested").build();
         FlagDetail modifiedFlagDetail = FlagDetail.builder().status("Active").build();
@@ -108,7 +111,7 @@ public class CaseFlagsWaServiceTest {
             .value(modifiedFlagDetail)
             .build();
 
-        caseFlagsWaService.searchAndUpdateCaseFlags(caseData, recentlyModifiedFlag);
+        caseFlagsWaService.searchAndUpdateCaseFlags(caseData, caseDataMap, recentlyModifiedFlag);
 
         assertEquals(modifiedFlagDetail.getStatus(), caseData.getAllPartyFlags()
             .getCaApplicant1ExternalFlags().getDetails().getFirst().getValue().getStatus());
@@ -116,7 +119,7 @@ public class CaseFlagsWaServiceTest {
 
     @Test
     public void testSearchAndUpdateBothCaseLevelAndPartyLevelFlags() {
-
+        Map<String, Object> caseDataMap = new HashMap<>();
         Flags caApplicant1ExternalFlags = getApplicant1ExternalFlag1();
 
         FlagDetail applicant2ExternalFlag1 = FlagDetail.builder().status("Requested").build();
@@ -141,7 +144,7 @@ public class CaseFlagsWaServiceTest {
             .value(modifiedFlagDetail)
             .build();
 
-        caseFlagsWaService.searchAndUpdateCaseFlags(caseData, recentlyModifiedFlag);
+        caseFlagsWaService.searchAndUpdateCaseFlags(caseData, caseDataMap, recentlyModifiedFlag);
 
         assertEquals(modifiedFlagDetail.getStatus(), caseData.getAllPartyFlags()
             .getCaApplicant2ExternalFlags().getDetails().getFirst().getValue().getStatus());
