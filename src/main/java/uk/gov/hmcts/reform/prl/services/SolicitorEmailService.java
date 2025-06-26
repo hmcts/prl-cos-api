@@ -85,11 +85,11 @@ public class SolicitorEmailService {
                 buildEmail(caseDetails, false),
                 LanguagePreference.english
             );
-            log.info("Email sent to applicant solicitor [{}] for case ID: {}", email, caseDetails.getId());
+            log.info("Email sent to applicant solicitor for case ID: {}", caseDetails.getId());
 
         } catch (Exception e) {
-            log.error("Failed to send email to applicant solicitor [{}] for case ID: {}. Error: {}",
-                      email, caseDetails.getId(), e.getMessage(), e);
+            log.error("Failed to send email to applicant solicitor for case ID: {}. Error: {}",
+                      caseDetails.getId(), e.getMessage(), e);
         }
     }
 

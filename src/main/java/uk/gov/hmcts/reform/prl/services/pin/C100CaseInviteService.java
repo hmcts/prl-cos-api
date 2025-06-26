@@ -67,7 +67,7 @@ public class C100CaseInviteService implements CaseInviteService {
         if ((YesNoDontKnow.no.equals(partyDetails.getValue().getDoTheyHaveLegalRepresentation()) || YesNoDontKnow.dontKnow.equals(
             partyDetails.getValue().getDoTheyHaveLegalRepresentation()))
             && Yes.equals(partyDetails.getValue().getCanYouProvideEmailAddress())) {
-            log.info("Generating case invites and sending notification to C100 respondent with email address present");
+            log.info("Generating case invites and sending notification to C100 respondent with email address present on caseid {}", caseData.getId());
             CaseInvite caseInvite = generateCaseInvite(partyDetails, No);
             caseInvites.add(element(caseInvite));
             sendCaseInvite(caseInvite, partyDetails.getValue(), caseData);
@@ -77,7 +77,7 @@ public class C100CaseInviteService implements CaseInviteService {
 
     public List<Element<CaseInvite>> generateAndSendCaseInviteEmailForCaApplicant(CaseData caseData, Element<PartyDetails> applicant) {
         List<Element<CaseInvite>> caseInvites = new ArrayList<>();
-        log.info("Generating case invites and sending notification to C100 citizen applicants with email");
+        log.info("Generating case invites and sending notification to C100 citizen applicants with email on caseid {}", caseData.getId());
         if (YesNoDontKnow.no.equals(applicant.getValue().getDoTheyHaveLegalRepresentation())
             && Yes.equals(applicant.getValue().getCanYouProvideEmailAddress())) {
             CaseInvite caseInvite = generateCaseInvite(applicant, Yes);

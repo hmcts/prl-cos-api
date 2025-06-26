@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 import java.util.LinkedHashMap;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 @Slf4j
@@ -88,12 +89,24 @@ public class CafcassDocumentManagementControllerFunctionalTest {
     @Order(2)
     public void givenValidUuidDownloadFileWith200Response() throws Exception {
 
-        request
+        var response = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCafcass())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .when()
             .contentType("application/json")
-            .get("/cases/documents/{documentId}/binary", documentId);
+            .get("/cases/documents/{documentId}/binary", documentId)
+            .then()
+            .extract()
+            .response();
+
+
+        System.out.println("Status: " + response.getStatusCode());
+        System.out.println("Headers: " + response.getHeaders());
+        System.out.println("Body: " + response.getBody().asString());
+
+        assertThat(response.getStatusCode()).isEqualTo(200);
+        assertThat(response.getContentType()).isEqualTo("application/pdf");
+        assertThat(response.getHeader("originalfilename")).isEqualTo("C7_Response_Draft_Document.pdf");
 
     }
 

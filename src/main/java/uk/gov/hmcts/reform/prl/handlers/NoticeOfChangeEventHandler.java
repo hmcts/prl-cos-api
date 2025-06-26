@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.events.NoticeOfChangeEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
@@ -23,8 +25,9 @@ import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationPostService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangeContentProvider;
+import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
+import uk.gov.hmcts.reform.prl.services.pin.FL401CaseInviteService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
-import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,9 +36,10 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
-import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @Component
@@ -49,6 +53,8 @@ public class NoticeOfChangeEventHandler {
     private final ServiceOfApplicationPostService serviceOfApplicationPostService;
     private final BulkPrintService bulkPrintService;
     private final SystemUserService systemUserService;
+    private final C100CaseInviteService c100CaseInviteService;
+    private final FL401CaseInviteService fl401CaseInviteService;
 
     @Async
     @EventListener(condition = "#event.typeOfEvent eq 'Add Legal Representation'")
@@ -175,6 +181,7 @@ public class NoticeOfChangeEventHandler {
 
     private void sendEmailToSolicitor(CaseData caseData, NoticeOfChangeEvent event, EmailTemplateNames emailTemplateName) {
         if (null != event.getSolicitorEmailAddress()) {
+            log.info("Sending solicitor email on case id {}", caseData.getId());
             emailService.send(
                 event.getSolicitorEmailAddress(),
                 emailTemplateName,
@@ -200,13 +207,13 @@ public class NoticeOfChangeEventHandler {
                 partyDetailsElement = caseData.getRespondents().get(representingPartyIndex);
                 break;
             case DAAPPLICANT:
-                partyDetailsElement = ElementUtils.element(
+                partyDetailsElement = element(
                     caseData.getApplicantsFL401().getPartyId(),
                     caseData.getApplicantsFL401()
                 );
                 break;
             case DARESPONDENT:
-                partyDetailsElement = ElementUtils.element(
+                partyDetailsElement = element(
                     caseData.getRespondentsFL401().getPartyId(),
                     caseData.getRespondentsFL401()
                 );
@@ -215,6 +222,67 @@ public class NoticeOfChangeEventHandler {
                 break;
         }
         return partyDetailsElement;
+    }
+
+    /**
+     * Fetches the existing access code for this litigant, or generates (and persists)
+     * a new invite + code if none exists yet.
+     */
+    public String fetchOrCreateAccessCode(
+        CaseData caseData,
+        Element<PartyDetails> partyElement,
+        SolicitorRole.Representing representing
+    ) {
+
+        if (partyElement == null || partyElement.getId() == null) {
+            return null;
+        }
+        // Check for existing invite
+        CaseInvite caseInvite = CaseUtils.getCaseInvite(partyElement.getId(), caseData.getCaseInvites());
+        if (caseInvite != null && caseInvite.getAccessCode() != null) {
+            log.info("Fetched access code for case id {}", caseData.getId());
+            return caseInvite.getAccessCode();
+        }
+
+        // need Yes/No based on applicant/respondent
+        boolean isApplicant = switch (representing) {
+            case CAAPPLICANT, DAAPPLICANT -> true;
+            case CARESPONDENT, DARESPONDENT -> false;
+            default -> {
+                log.error("NOC lip email error unknown representing: {} on caseid {}", representing, caseData.getId());
+                throw new IllegalArgumentException(
+                    String.format("NOC lip email error unknown representing: %s on caseid %s",
+                                  representing, caseData.getId()));
+            }
+        };
+
+        // choose service
+        String caseType = CaseUtils.getCaseTypeOfApplication(caseData);
+        CaseInvite generated;
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseType)) {
+            generated = c100CaseInviteService.generateCaseInvite(
+                partyElement,
+                isApplicant ? YesOrNo.Yes : YesOrNo.No
+            );
+        } else {
+            generated = fl401CaseInviteService.generateCaseInvite(
+                partyElement.getValue(),
+                isApplicant ? YesOrNo.Yes : YesOrNo.No
+            );
+        }
+        if (generated == null) {
+            log.error("CaseInvite generation returned null for partyId {} on caseId {}",
+                      partyElement.getId(), caseData.getId());
+            return null;
+        }
+        // persist it back into caseData
+        if (caseData.getCaseInvites() == null) {
+            caseData.setCaseInvites(new ArrayList<>());
+        }
+
+        caseData.getCaseInvites().add(element(generated));
+        log.info("Generated case invite on case {}", caseData.getId());
+        return generated.getAccessCode();
     }
 
     @Async
@@ -226,20 +294,19 @@ public class NoticeOfChangeEventHandler {
 
         //Get LiP
         Element<PartyDetails> partyElement = getLitigantParty(caseData, event);
-        String accessCode = null;
-        if (null != partyElement && null != partyElement.getId()) {
-            CaseInvite caseInvite = CaseUtils.getCaseInvite(partyElement.getId(), caseData.getCaseInvites());
-            if (null != caseInvite) {
-                accessCode = caseInvite.getAccessCode();
-            }
-        }
-        if (null != accessCode && launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)) {
+
+        String accessCode = fetchOrCreateAccessCode(
+            caseData,
+            partyElement,
+            event.getRepresenting()
+        );
+
+        if (null != accessCode) {
             //PRL-5300 - send email/post to LiP based on contact pref
             sendNotificationToLitigant(caseData, event, partyElement, accessCode);
-
-            //PRL-3215 - notify applicants/respondents other parties for the litigants in case
-            sendEmailToApplicantsRespondents(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_REMOVE_NOC, true, partyElement);
         }
+        //PRL-3215 - notify applicants/respondents other parties for the litigants in case
+        sendEmailToApplicantsRespondents(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_REMOVE_NOC, true, partyElement);
 
         //PRL-3215 - notify other persons if any
         sendEmailToOtherParties(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_REMOVE_NOC_REVISED, true);
@@ -249,31 +316,41 @@ public class NoticeOfChangeEventHandler {
     }
 
 
-    private void sendNotificationToLitigant(CaseData caseData,
-                                            NoticeOfChangeEvent event,
-                                            Element<PartyDetails> party, String accessCode) {
+    private void sendNotificationToLitigant(
+        CaseData caseData,
+        NoticeOfChangeEvent event,
+        Element<PartyDetails> party,
+        String accessCode
+    ) {
         log.info("*** Send notifications to LiP after legal rep is removed ***");
-        if (null != party && null != party.getValue()) {
-            if (ContactPreferences.email.equals(party.getValue().getContactPreferences())) {
+        if (party != null && party.getValue() != null) {
+            String lipEmail = party.getValue().getEmail();
+            ContactPreferences pref = party.getValue().getContactPreferences();
+            boolean hasEmail = lipEmail != null && !lipEmail.isBlank();
+            boolean wantsEmail = ContactPreferences.email.equals(pref);
+
+            if (wantsEmail && hasEmail) {
                 log.info("Send email to LiP");
-                //PRL-3215 - send email to LiP
-                sendEmailToLitigant(caseData,
-                                    event,
-                                    EmailTemplateNames.CA_DA_APPLICANT_REMOVE_RESPONDENT_NOC,
-                                    true,
-                                    party,
-                                    accessCode
+                sendEmailToLitigant(
+                    caseData,
+                    event,
+                    EmailTemplateNames.CA_DA_APPLICANT_REMOVE_RESPONDENT_NOC,
+                    true,
+                    party,
+                    accessCode
                 );
             } else {
+                if (hasEmail && !wantsEmail) {
+                    log.info("LiP has an email address but prefers post");
+                } else if (!hasEmail && wantsEmail) {
+                    log.warn("LiP prefers email but no address—falling back to post");
+                }
                 log.info("Send post to LiP via bulk print");
-                sendPostViaBulkprint(caseData,
-                                     party,
-                                     accessCode
-                );
+                sendPostViaBulkprint(caseData, party, accessCode);
             }
-
         }
     }
+
 
     private void sendPostViaBulkprint(CaseData caseData,
                                       Element<PartyDetails> party,
