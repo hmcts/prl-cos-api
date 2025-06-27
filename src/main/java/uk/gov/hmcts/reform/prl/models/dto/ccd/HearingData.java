@@ -41,7 +41,7 @@ public class HearingData {
 
     private String transientConfirmedHearingDetail;
 
-    private YesOrNo displayConfirmedHearing;
+    private YesOrNo displayConfirmedHearing = YesOrNo.No;
 
     private DynamicList hearingChannels;
 

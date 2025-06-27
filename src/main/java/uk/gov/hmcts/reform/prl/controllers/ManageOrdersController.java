@@ -574,30 +574,9 @@ public class ManageOrdersController {
     public AboutToStartOrSubmitCallbackResponse validateAndPopulateHearingData(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        //@RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
-            /*
-            //TODO set hearing new values
-            log.info("Hearing trasient display obtained {}",
-             caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getTransientConfirmedHearingDate());
-
-            List<Element<HearingData>> ordersHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
-            ordersHearingDetails.stream()
-                    .map(Element::getValue)
-                        .map(hearingData -> hearingData.toBuilder()
-                            .confirmedHearingDates(hearingData.getConfirmedHearingDates())
-                                .instructionsForRemoteHearing(hearingData.getInstructionsForRemoteHearing())
-                                    .additionalHearingDetails(hearingData.getAdditionalHearingDetails())
-                                        .build())
-                            .map(hearingData -> Element.builder().id())
-
-            caseData.getManageOrders().toBuilder()
-                .ordersHearingDetails().build();
-            */
-
             List<String> errorList = new ArrayList<>();
             String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
 

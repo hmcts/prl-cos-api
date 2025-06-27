@@ -3225,7 +3225,6 @@ public class ManageOrderService {
             caseData,
             hearingsSupplier
         );
-        hearingData.setDisplayConfirmedHearing(No);
         taskHearingId.ifPresent(id -> {
                 hearingData.setDisplayConfirmedHearing(Yes);
                 DynamicListElement confirmedHearingDates = hearingData.getConfirmedHearingDates()
