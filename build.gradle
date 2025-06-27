@@ -49,7 +49,7 @@ def versions = [
   pitest                       : '1.16.3',
   puppyCrawl                   : '8.45.1',
   reformsJavaLogging           : '6.1.9',
-  sendLetterClient             : '5.0.3',
+  sendLetterClient             : '5.1.1',
   serenity                     : '4.2.34',
   serenityCucumber             : '4.2.34',
   serviceTokenGenerator        : '4.1.2',
@@ -356,11 +356,11 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-quartz', version: versions.springBoot
   implementation group: 'uk.gov.service.notify', name: 'notifications-java-client', version: versions.hmctsNotify
   implementation group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.1.1'
-  implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '2.1.1'
+  implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '2.1.2'
   implementation group: 'com.github.hmcts', name:'ccd-case-document-am-client', version: versions.ccdCaseDocumentAmClient
   implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
 
-  implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '7.9.0'
+  implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '7.9.1'
   implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '8.15.3'
   implementation group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
   implementation group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
