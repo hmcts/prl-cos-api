@@ -12,11 +12,13 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.RemovableDocument;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.RemoveDocumentsService;
@@ -24,6 +26,7 @@ import uk.gov.hmcts.reform.prl.services.managedocuments.RemoveDocumentsService;
 import java.util.List;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @Slf4j
 @RestController
@@ -31,21 +34,28 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @SecurityRequirement(name = "Bearer Authentication")
 public class RemoveDocumentsController extends AbstractCallbackController {
     private final RemoveDocumentsService removeDocumentsService;
+    private final AuthorisationService authorisationService;
     private final UserService userService;
 
     @Autowired
     protected RemoveDocumentsController(ObjectMapper objectMapper, EventService eventPublisher,
                                         RemoveDocumentsService removeDocumentsService,
-                                        UserService userService) {
+                                        UserService userService,
+                                        AuthorisationService authorisationService) {
         super(objectMapper, eventPublisher);
         this.removeDocumentsService = removeDocumentsService;
         this.userService = userService;
+        this.authorisationService = authorisationService;
     }
 
     @PostMapping("/about-to-start")
     public CallbackResponse handleAboutToStart(
         @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
+        if (!authorisationService.isAuthorized(authorisation, s2sToken)) {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
 
         caseData = removeDocumentsService.populateRemovalList(caseData);
@@ -57,8 +67,13 @@ public class RemoveDocumentsController extends AbstractCallbackController {
     @PostMapping(path = "/confirm-removals", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     public CallbackResponse confirmRemovals(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
+        if (!authorisationService.isAuthorized(authorisation, s2sToken)) {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         CaseData old = getCaseData(callbackRequest.getCaseDetailsBefore());
 
@@ -74,8 +89,13 @@ public class RemoveDocumentsController extends AbstractCallbackController {
     @PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     public CallbackResponse aboutToSubmit(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
+        if (!authorisationService.isAuthorized(authorisation, s2sToken)) {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         CaseData old = getCaseData(callbackRequest.getCaseDetailsBefore());
 
@@ -89,8 +109,13 @@ public class RemoveDocumentsController extends AbstractCallbackController {
     @PostMapping(path = "/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     public CallbackResponse submitted(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
+        if (!authorisationService.isAuthorized(authorisation, s2sToken)) {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         CaseData old = getCaseData(callbackRequest.getCaseDetailsBefore());
 

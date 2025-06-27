@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers.managedocuments;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.RemoveDocumentsService;
 
@@ -39,18 +41,27 @@ public class RemoveDocumentsControllerTest {
     private UserService userService;
 
     @Mock
+    private AuthorisationService authorisationService;
+
+    @Mock
     private ObjectMapper objectMapper;
 
     @InjectMocks
     private RemoveDocumentsController removeDocumentsController;
 
     private final String auth = "authorisation";
+    private final String serviceAuthToken = "serviceAuthToken";
 
     private static final Document TEST_DOCUMENT = Document.builder()
         .documentFileName("test.pdf")
         .documentBinaryUrl("http://example.com/test.pdf")
         .documentUrl("http://example.com/test.pdf")
         .build();
+
+    @Before
+    public void setUp() {
+        when(authorisationService.isAuthorized(auth, serviceAuthToken)).thenReturn(true);
+    }
 
     @Test
     public void testHandleAboutToStart() {
@@ -96,7 +107,7 @@ public class RemoveDocumentsControllerTest {
             .caseDetails(caseDetails)
             .build();
 
-        CallbackResponse response = removeDocumentsController.handleAboutToStart(auth, cb);
+        CallbackResponse response = removeDocumentsController.handleAboutToStart(auth, serviceAuthToken, cb);
 
         assertNotNull(response.getData().getRemovableDocuments());
 
@@ -134,7 +145,7 @@ public class RemoveDocumentsControllerTest {
                                    .build())
             .build();
 
-        CallbackResponse response = removeDocumentsController.confirmRemovals(auth, cb);
+        CallbackResponse response = removeDocumentsController.confirmRemovals(auth, serviceAuthToken, cb);
 
         verify(removeDocumentsService).getConfirmationTextForDocsBeingRemoved(caseData, old);
         assertThat(response.getData()).isEqualTo(caseDataUpdated);
@@ -196,7 +207,7 @@ public class RemoveDocumentsControllerTest {
                                    .build())
             .build();
 
-        removeDocumentsController.aboutToSubmit(auth, cb);
+        removeDocumentsController.aboutToSubmit(auth, serviceAuthToken, cb);
 
         verify(removeDocumentsService).getDocsBeingRemoved(caseData, old);
         verify(removeDocumentsService).removeDocuments(caseData, removalList);
@@ -242,7 +253,7 @@ public class RemoveDocumentsControllerTest {
                                    .build())
             .build();
 
-        removeDocumentsController.submitted(auth, cb);
+        removeDocumentsController.submitted(auth, serviceAuthToken, cb);
 
         verify(removeDocumentsService).deleteDocumentsInCdam(caseData, old);
     }
