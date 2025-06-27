@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -54,7 +55,9 @@ public class RemoveDocumentsService {
             .map(this::convertQuarantineDoc)
             : Stream.empty();
 
-        return Stream.concat(removableReviewDocs, removableDocMgmtDocs).toList();
+        return Stream.concat(removableReviewDocs, removableDocMgmtDocs)
+                .filter(Objects::nonNull)
+                .toList();
     }
 
     public List<Element<RemovableDocument>> getDocsBeingRemoved(CaseData caseData, CaseData old) {
@@ -118,26 +121,23 @@ public class RemoveDocumentsService {
             .build();
     }
 
-    /**
-     * Removes elements from the source list whose IDs match any in the toRemove list.
-     */
     private List<Element<QuarantineLegalDoc>> removeById(List<Element<QuarantineLegalDoc>> source, List<Element<RemovableDocument>> toRemove) {
         if (source == null) {
             return null;
         }
+        List<UUID> toRemoveIds = toRemove.stream()
+            .map(Element::getId)
+            .toList();
+
         return source.stream()
-            .filter(doc -> toRemove.stream().noneMatch(r -> r.getId().equals(doc.getId())))
+            .filter(doc -> !toRemoveIds.contains(doc.getId()))
             .toList();
     }
 
     public Element<RemovableDocument> convertQuarantineDoc(Element<QuarantineLegalDoc> quarantineLegalDocElement) {
         QuarantineLegalDoc quarantineLegalDoc = quarantineLegalDocElement.getValue();
 
-        Map<String, Object> docObject = objectMapper.convertValue(
-            quarantineLegalDoc,
-            new TypeReference<Map<String, Object>>() {
-            }
-        );
+        Map<String, Object> docObject = objectMapper.convertValue(quarantineLegalDoc, new TypeReference<>() {});
         String documentFieldName = DocumentUtils.populateAttributeNameFromCategoryId(
             quarantineLegalDoc.getCategoryId(),
             null
@@ -148,7 +148,7 @@ public class RemoveDocumentsService {
             doc = objectMapper.convertValue(docObject.get(documentFieldName), Document.class);
         } catch (NullPointerException e) {
             log.error("Field {} did not exist in QuarantineLegalDoc", documentFieldName, e);
-            return null; // todo how to handle this if the document isn't where we expect - could this actually happen?
+            return null;
         }
 
         // make a new element with the same ID
@@ -189,7 +189,7 @@ public class RemoveDocumentsService {
                 caseDocumentClient.deleteDocument(systemAuthorisation, authTokenGenerator.generate(), documentId, true);
             } catch (Exception e) {
                 log.error(
-                    "Failed to delete document with ID: {} from CDAM for case ID: {}. Error: {}",
+                    "Failed to delete document with ID: {} from CDAM for case ID: {}, {}",
                     documentId, caseData.getId(), e.getMessage()
                 );
             }
