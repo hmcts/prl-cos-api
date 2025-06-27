@@ -1,12 +1,12 @@
 package uk.gov.hmcts.reform.prl.controllers.managedocuments;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -25,13 +25,13 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
+@ExtendWith(MockitoExtension.class)
 public class RemoveDocumentsControllerTest {
 
     @Mock
@@ -58,13 +58,13 @@ public class RemoveDocumentsControllerTest {
         .documentUrl("http://example.com/test.pdf")
         .build();
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         when(authorisationService.isAuthorized(auth, serviceAuthToken)).thenReturn(true);
     }
 
     @Test
-    public void testHandleAboutToStart() {
+    void testHandleAboutToStart() {
         UUID elementId = UUID.randomUUID();
         List<Element<RemovableDocument>> removalList = List.of(
             element(
@@ -116,7 +116,7 @@ public class RemoveDocumentsControllerTest {
     }
 
     @Test
-    public void testConfirmRemovals() {
+    void testConfirmRemovals() {
         String expectedText = "No documents to be removed.";
 
         CaseData old = CaseData.builder().build();
@@ -153,7 +153,7 @@ public class RemoveDocumentsControllerTest {
 
 
     @Test
-    public void testAboutToSubmit() {
+    void testAboutToSubmit() {
         UUID elementId = UUID.randomUUID();
         CaseData old = CaseData.builder()
             .reviewDocuments(ReviewDocuments.builder()
@@ -214,7 +214,7 @@ public class RemoveDocumentsControllerTest {
     }
 
     @Test
-    public void testSubmitted() {
+    void testSubmitted() {
         UUID elementId = UUID.randomUUID();
         CaseData old = CaseData.builder()
             .reviewDocuments(ReviewDocuments.builder()

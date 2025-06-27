@@ -2,13 +2,13 @@ package uk.gov.hmcts.reform.prl.services.managedocuments;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -31,7 +31,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
+@ExtendWith(MockitoExtension.class)
 public class RemoveDocumentsServiceTest {
 
     @Spy
@@ -58,15 +58,13 @@ public class RemoveDocumentsServiceTest {
         .documentHash("hash123")
         .build();
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         objectMapper.registerModule(new JavaTimeModule());
-        when(systemUserService.getSysUserToken()).thenReturn("systemUserToken");
-        when(authTokenGenerator.generate()).thenReturn("authToken");
     }
 
     @Test
-    public void shouldPopulateRemovalListFromReviewDocuments() {
+    void shouldPopulateRemovalListFromReviewDocuments() {
         UUID elementId = UUID.randomUUID();
         QuarantineLegalDoc doc = QuarantineLegalDoc.builder()
             .caseSummaryDocument(TEST_DOCUMENT)
@@ -89,7 +87,7 @@ public class RemoveDocumentsServiceTest {
     }
 
     @Test
-    public void shouldPopulateRemovalListFromDocMgmtDocuments() {
+    void shouldPopulateRemovalListFromDocMgmtDocuments() {
         UUID elementId = UUID.randomUUID();
         QuarantineLegalDoc doc = QuarantineLegalDoc.builder()
             .caseSummaryDocument(TEST_DOCUMENT)
@@ -112,7 +110,7 @@ public class RemoveDocumentsServiceTest {
     }
 
     @Test
-    public void shouldGetDocsBeingRemoved() {
+    void shouldGetDocsBeingRemoved() {
         UUID documentId = UUID.randomUUID();
 
         CaseData caseData = CaseData.builder()
@@ -139,7 +137,7 @@ public class RemoveDocumentsServiceTest {
     }
 
     @Test
-    public void shouldGetConfirmationTextForDocsBeingRemoved() {
+    void shouldGetConfirmationTextForDocsBeingRemoved() {
         CaseData caseData = CaseData.builder()
             .removableDocuments(List.of())
             .build();
@@ -167,7 +165,7 @@ public class RemoveDocumentsServiceTest {
     }
 
     @Test
-    public void shouldGetConfirmationTextWhenNoDocsRemoved() {
+    void shouldGetConfirmationTextWhenNoDocsRemoved() {
         UUID documentId = UUID.randomUUID();
 
         CaseData caseData = CaseData.builder()
@@ -197,7 +195,7 @@ public class RemoveDocumentsServiceTest {
 
 
     @Test
-    public void shouldRemoveDocumentsFromOriginalField() {
+    void shouldRemoveDocumentsFromOriginalField() {
         UUID elementId = UUID.randomUUID();
 
         List<Element<RemovableDocument>> docsToRemove = List.of(
@@ -224,11 +222,27 @@ public class RemoveDocumentsServiceTest {
     }
 
     @Test
-    public void shouldConvertQuarantineDoc() {
+    void shouldConvertQuarantineDoc() {
+        UUID elementId = UUID.randomUUID();
+        QuarantineLegalDoc quarantineDoc = QuarantineLegalDoc.builder()
+            .respondentStatementsDocument(TEST_DOCUMENT)
+            .categoryName("Respondent Statements")
+            .categoryId("respondentStatements")
+            .build();
+
+        Element<QuarantineLegalDoc> element = new Element<>(elementId, quarantineDoc);
+
+        Element<RemovableDocument> removableDocument = removeDocumentsService.convertQuarantineDoc(element);
+
+        assertThat(removableDocument.getValue().getDocument()).isEqualTo(TEST_DOCUMENT);
+        assertThat(removableDocument.getValue().getCategoryName()).isEqualTo("Respondent Statements");
     }
 
     @Test
-    public void shouldDeleteDocumentsInCdam() {
+    void shouldDeleteDocumentsInCdam() {
+        when(systemUserService.getSysUserToken()).thenReturn("systemUserToken");
+        when(authTokenGenerator.generate()).thenReturn("authToken");
+
         UUID documentId = UUID.randomUUID();
         CaseData caseData = CaseData.builder()
             .id(12345L)
