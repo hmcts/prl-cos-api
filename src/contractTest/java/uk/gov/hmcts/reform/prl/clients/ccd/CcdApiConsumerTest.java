@@ -24,17 +24,18 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.ccd.client"})
 @ExtendWith(PactConsumerTestExt.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(SpringExtension.class)
-@PactTestFor(providerName = "ccd", port = "5001")
+@PactTestFor(providerName = "ccd_submitForCitizen_api", port = "5001")
 @TestPropertySource(properties = {"core_case_data.api.url=http://localhost:5001"})
 @PactFolder("pacts")
 @SpringBootTest
@@ -47,7 +48,7 @@ public class CcdApiConsumerTest {
     @Autowired
     CoreCaseDataApi coreCaseDataApi;
 
-    @Pact(provider = "ccd", consumer = "prl_cos")
+    @Pact(provider = "ccd_submitForCitizen_api", consumer = "prl_cos")
     private RequestResponsePact createCaseInCcd(PactDslWithProvider builder) throws JsonProcessingException {
         return builder
             .given("A request to create a case in CCD")
@@ -60,7 +61,7 @@ public class CcdApiConsumerTest {
             .matchQuery("ignore-warning", "true")
             .body(new ObjectMapper().writeValueAsString(buildCaseDataContent()), "application/json")
             .willRespondWith()
-            .status(HttpStatus.SC_OK)
+            .status(HttpStatus.SC_CREATED)
             .body(createCaseResponse())
             .toPact();
     }
@@ -73,24 +74,33 @@ public class CcdApiConsumerTest {
                                                                    true, buildCaseDataContent()
         );
         assertNotNull(caseDetails);
-        assertEquals("DRAFT", caseDetails.getState());
+        assertEquals("CaseCreated", caseDetails.getState());
         assertEquals("PRLAPPS", caseDetails.getCaseTypeId());
-        assertEquals("1658508917240231", caseDetails.getId().toString());
         assertEquals("C100", caseDetails.getData().get("caseTypeOfApplication"));
     }
 
+    private void addLocalDateTimeArray(PactDslJsonBody body, String fieldName, LocalDateTime dateTime) {
+        body.array(fieldName)
+            .numberValue(dateTime.getYear())
+            .numberValue(dateTime.getMonthValue())
+            .numberValue(dateTime.getDayOfMonth())
+            .numberValue(dateTime.getHour())
+            .numberValue(dateTime.getMinute())
+            .closeArray();
+    }
+
     private PactDslJsonBody createCaseResponse() {
-        return new PactDslJsonBody()
-            .stringType("id", "1658508917240231")
-            .stringType("case_type", "PRLAPPS")
-            .stringType("callbackResponseStatus", "Success")
-            .stringType("state", "DRAFT")
-            .integerType("securityLevel", 23)
-            .date("createdDate", "dd/mm/yyyy")
-            .date("lastModified", "dd/mm/yyyy")
-            .object("data")
-            .stringType("caseTypeOfApplication", "C100")
+        PactDslJsonBody body = new PactDslJsonBody()
+            .stringType("case_type_id", "PRLAPPS")
+            .stringType("state", "CaseCreated")
+            .stringType("security_classification", "PUBLIC")
+            .object("case_data")
+                .stringType("caseTypeOfApplication", "C100")
             .closeObject().asBody();
+
+        addLocalDateTimeArray(body, "created_date", LocalDateTime.of(2025, 6, 16, 10, 0));
+        addLocalDateTimeArray(body, "last_modified", LocalDateTime.of(2025, 6, 16, 10, 5));
+        return body;
     }
 
     private CaseDataContent buildCaseDataContent() {

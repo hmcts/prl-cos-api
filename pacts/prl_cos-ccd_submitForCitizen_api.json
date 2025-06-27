@@ -1,0 +1,139 @@
+{
+  "provider": {
+    "name": "ccd_submitForCitizen_api"
+  },
+  "consumer": {
+    "name": "prl_cos"
+  },
+  "interactions": [
+    {
+      "description": "a request to create a case in CCD with valid authorization",
+      "request": {
+        "method": "POST",
+        "path": "/citizens/UserID/jurisdictions/jurisdictionId/case-types/caseType/cases",
+        "headers": {
+          "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre",
+          "ServiceAuthorization": "eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre",
+          "Content-Type": "application/json"
+        },
+        "query": {
+          "ignore-warning": [
+            "true"
+          ]
+        },
+        "body": {
+          "event": null,
+          "data": {
+            "caseTypeOfApplication": "C100"
+          },
+          "supplementary_data_request": null,
+          "security_classification": null,
+          "event_token": "EventToken",
+          "ignore_warning": false,
+          "case_reference": "CaseReference"
+        },
+        "matchingRules": {
+          "query": {
+            "ignore-warning": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "true"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "Content-Type": "application/json; charset=UTF-8"
+        },
+        "body": {
+          "case_data": {
+            "caseTypeOfApplication": "C100"
+          },
+          "state": "CaseCreated",
+          "security_classification": "PUBLIC",
+          "created_date": [
+            2025,
+            6,
+            16,
+            10,
+            0
+          ],
+          "last_modified": [
+            2025,
+            6,
+            16,
+            10,
+            5
+          ],
+          "case_type_id": "PRLAPPS"
+        },
+        "matchingRules": {
+          "body": {
+            "$.case_type_id": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.state": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.security_classification": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.case_data.caseTypeOfApplication": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "providerStates": [
+        {
+          "name": "A request to create a case in CCD"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "3.0.0"
+    },
+    "pact-jvm": {
+      "version": "4.1.11"
+    }
+  }
+}
