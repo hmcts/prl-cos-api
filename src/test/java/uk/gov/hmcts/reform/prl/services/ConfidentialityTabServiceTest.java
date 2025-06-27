@@ -112,7 +112,7 @@ public class ConfidentialityTabServiceTest {
     }
 
     @Test
-    public void testApplicantConfidentialDetails() {
+    public void testApplicantsConfidentialDetails() {
 
         partyDetails1 = PartyDetails.builder()
             .firstName("ABC 1")
@@ -158,7 +158,7 @@ public class ConfidentialityTabServiceTest {
     }
 
     @Test
-    public void testApplicantConfidentialDetailsWhenNull() {
+    public void testApplicantsConfidentialDetailsWhenNull() {
 
         partyDetails1 = PartyDetails.builder()
             .firstName("ABC 1")
@@ -503,7 +503,7 @@ public class ConfidentialityTabServiceTest {
     }
 
     @Test
-    public void testApplicantConfidentialDetailsWhenNoApplicantsPresent() {
+    public void testApplicantsConfidentialDetailsWhenNoApplicantsPresent() {
 
         CaseData caseData = CaseData.builder()
             .applicants(null)
@@ -519,7 +519,7 @@ public class ConfidentialityTabServiceTest {
     }
 
     @Test
-    public void testApplicantConfidentialDetailsWhenNoFL401ApplicantsPresent() {
+    public void testApplicantsConfidentialDetailsWhenNoFL401ApplicantsPresent() {
 
         ChildrenLiveAtAddress child = ChildrenLiveAtAddress.builder()
             .childFullName("Test")
@@ -552,7 +552,7 @@ public class ConfidentialityTabServiceTest {
     }
 
     @Test
-    public void testRefugeApplicantConfidentialDetails() {
+    public void testRefugeApplicantsConfidentialDetails() {
 
         refugePartyDetails1 = refugePartyDetails1.toBuilder()
             .firstName("ABC 1")

@@ -276,7 +276,7 @@ public class CafcassApiConsumerCcdSearchCaseApiTest {
                                                             });
                                                 })
                                                 .eachLike("applicantsConfidentialDetails",
-                                                    (applicantConfidentialDetails) -> {
+                                                    (applicantsConfidentialDetails) -> {
                                                     })
                                                 .stringType("applicantSolicitorEmailAddress",
                                                         "prl-e2etestsolicitor@mailinator.com")

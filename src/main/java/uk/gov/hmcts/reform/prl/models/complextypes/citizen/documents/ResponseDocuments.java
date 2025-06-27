@@ -14,6 +14,8 @@ public class ResponseDocuments {
     private final String createdBy;
     private final LocalDate dateCreated;
     private final Document citizenDocument;
+    private final Document applicantC8Document;
+    private final Document applicantC8DocumentWelsh;
     private final Document respondentC8Document;
     private final Document respondentC8DocumentWelsh;
     private final LocalDateTime dateTimeCreated;

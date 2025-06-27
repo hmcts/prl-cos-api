@@ -139,7 +139,7 @@ public class ConfidentialDetailsGeneratorTest {
     }
 
     @Test
-    public void testIfApplicantConfidentialDetailsForDA() {
+    public void testIfApplicantsConfidentialDetailsForDA() {
 
         PartyDetails applicant = PartyDetails.builder().firstName("TestName")
             .isAddressConfidential(YesOrNo.No)
@@ -185,7 +185,7 @@ public class ConfidentialDetailsGeneratorTest {
 
 
     @Test
-    public void testIfApplicantConfidentialDetailsNotAvailableForDA() {
+    public void testIfApplicantsConfidentialDetailsNotAvailableForDA() {
 
         ChildrenLiveAtAddress child = ChildrenLiveAtAddress.builder().keepChildrenInfoConfidential(
             YesOrNo.Yes).build();

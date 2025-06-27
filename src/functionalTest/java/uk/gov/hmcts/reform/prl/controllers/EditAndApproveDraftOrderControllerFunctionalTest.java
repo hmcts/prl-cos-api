@@ -101,6 +101,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     public void createCcdTestCase() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
+        System.out.print("==========Request Body: " + requestBody + "==========");
         caseDetails = request1
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
@@ -113,6 +114,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
             .extract()
             .as(CaseDetails.class);
 
+        System.out.print("==========caseDetails: " + caseDetails + "==========");
         Assert.assertNotNull(caseDetails);
         Assert.assertNotNull(caseDetails.getId());
     }

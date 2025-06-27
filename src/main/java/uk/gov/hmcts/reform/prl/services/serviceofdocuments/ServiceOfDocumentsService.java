@@ -1014,6 +1014,7 @@ public class ServiceOfDocumentsService {
             && null != caseData.getServiceOfDocuments().getSodUnServedPack()
             && CollectionUtils.isNotEmpty(caseData.getServiceOfDocuments().getSodUnServedPack().getDocuments())) {
             Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+            confidentialityCheckService.processApplicantsC8Documents(caseDataMap, caseData);
             confidentialityCheckService.processRespondentsC8Documents(caseDataMap, caseData);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
         }
@@ -1064,6 +1065,7 @@ public class ServiceOfDocumentsService {
         //Clean up the fields
         cleanUpSelections(caseDataMap);
         confidentialityCheckService.clearRespondentsC8Documents(caseDataMap);
+        confidentialityCheckService.clearApplicantsC8Documents(caseDataMap);
 
         allTabService.submitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),

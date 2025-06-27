@@ -762,6 +762,11 @@ public class CafCassCaseData {
     private List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> restrictedDocuments;
     private List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> confidentialDocuments;
 
+    private List<uk.gov.hmcts.reform.prl.models.Element<ResponseDocuments>> applicantAc8Documents;
+    private List<uk.gov.hmcts.reform.prl.models.Element<ResponseDocuments>> applicantBc8Documents;
+    private List<uk.gov.hmcts.reform.prl.models.Element<ResponseDocuments>> applicantCc8Documents;
+    private List<uk.gov.hmcts.reform.prl.models.Element<ResponseDocuments>> applicantDc8Documents;
+    private List<uk.gov.hmcts.reform.prl.models.Element<ResponseDocuments>> applicantEc8Documents;
 
     private List<uk.gov.hmcts.reform.prl.models.Element<ResponseDocuments>> respondentAc8Documents;
     private List<uk.gov.hmcts.reform.prl.models.Element<ResponseDocuments>> respondentBc8Documents;
