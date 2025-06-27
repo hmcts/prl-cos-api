@@ -16,10 +16,12 @@ import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
@@ -32,6 +34,7 @@ import uk.gov.hmcts.reform.prl.services.validators.eventschecker.EventsChecker;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -106,26 +109,27 @@ public class TaskListService {
     private final LaunchDarklyClient launchDarklyClient;
     private final RoleAssignmentApi roleAssignmentApi;
     private final AuthTokenGenerator authTokenGenerator;
+    private final AllTabServiceImpl allTabService;
 
     private final MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
 
     public List<Task> getTasksForOpenCase(CaseData caseData) {
         return getEvents(caseData).stream()
-                .map(event -> Task.builder()
-                        .event(event)
-                        .state(getTaskState(caseData, event))
-                        .build())
-                .toList();
+            .map(event -> Task.builder()
+                .event(event)
+                .state(getTaskState(caseData, event))
+                .build())
+            .toList();
     }
 
     public List<RespondentTask> getRespondentSolicitorTasks(PartyDetails respondingParty, CaseData caseData) {
         boolean isC1aApplicable = caseData.getC1ADocument() != null;
         return getRespondentsEvents(caseData).stream()
-                .map(event -> RespondentTask.builder()
-                        .event(event)
-                        .state(getRespondentTaskState(event, respondingParty, isC1aApplicable))
-                        .build())
-                .toList();
+            .map(event -> RespondentTask.builder()
+                .event(event)
+                .state(getRespondentTaskState(event, respondingParty, isC1aApplicable))
+                .build())
+            .toList();
     }
 
     private TaskState getTaskState(CaseData caseData, Event event) {
@@ -153,7 +157,7 @@ public class TaskListService {
 
     private List<Event> getEvents(CaseData caseData) {
         return (PrlAppsConstants.FL401_CASE_TYPE).equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-                ? getFL401Events(caseData) : getC100Events(caseData);
+            ? getFL401Events(caseData) : getC100Events(caseData);
     }
 
     public List<Event> getC100Events(CaseData caseData) {
@@ -314,34 +318,59 @@ public class TaskListService {
                         startAllTabsUpdateDataContent.authorisation()
                     );
                 }
+                CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
+                boolean confidentialDetailsChanged = haveConfidentialDetailsChanged(caseData, caseDataBefore);
+                if (confidentialDetailsChanged) {
+                    Document c8ToArchive = caseData.getC8Document();
+
+                    if (c8ToArchive != null) {
+                        Document archivedC8 = c8ToArchive.toBuilder()
+                            .documentFileName("C8ArchivedDocument.pdf")
+                            .build();
+
+                        List<Document> archivedDocuments = new ArrayList<>(
+                            Optional.ofNullable(caseData.getC8ArchivedDocuments()).orElse(Collections.emptyList())
+                        );
+                        archivedDocuments.add(archivedC8);
+
+                        caseDataUpdated.put("c8ArchivedDocuments", archivedDocuments);
+                    }
+                }
+
                 caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
                 CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
-                caseData = caseData.toBuilder()
-                    .c8Document(updatedCaseData.getC8Document())
-                    .c1ADocument(updatedCaseData.getC1ADocument())
-                    .c8WelshDocument(updatedCaseData.getC8WelshDocument())
-                    .finalDocument(!JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)
-                                       ? updatedCaseData.getFinalDocument() : caseData.getFinalDocument())
-                    .finalWelshDocument(!JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)
-                                            ? updatedCaseData.getFinalWelshDocument() : caseData.getFinalWelshDocument())
-                    .c1AWelshDocument(updatedCaseData.getC1AWelshDocument())
-                    .c1ADraftDocument(SUBMITTED_STATE.equalsIgnoreCase(state)
-                                          ? updatedCaseData.getC1ADraftDocument() : caseData.getC1ADraftDocument())
-                    .c1AWelshDraftDocument(SUBMITTED_STATE.equalsIgnoreCase(state)
-                                               ? updatedCaseData.getC1AWelshDraftDocument() : caseData.getC1AWelshDraftDocument())
-                    .build();
+                caseDataUpdated.put("c8Document", updatedCaseData.getC8Document());
+                caseDataUpdated.put("c1ADocument", updatedCaseData.getC1ADocument());
+                caseDataUpdated.put("c8WelshDocument", updatedCaseData.getC8WelshDocument());
+
+                caseDataUpdated.put("finalDocument", !JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)
+                    ? updatedCaseData.getFinalDocument() : caseData.getFinalDocument());
+
+                caseDataUpdated.put("finalWelshDocument", !JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)
+                    ? updatedCaseData.getFinalWelshDocument() : caseData.getFinalWelshDocument());
+
+                caseDataUpdated.put("c1AWelshDocument", updatedCaseData.getC1AWelshDocument());
+
+                caseDataUpdated.put("c1ADraftDocument", SUBMITTED_STATE.equalsIgnoreCase(state)
+                    ? updatedCaseData.getC1ADraftDocument() : caseData.getC1ADraftDocument());
+
+                caseDataUpdated.put("c1AWelshDraftDocument", SUBMITTED_STATE.equalsIgnoreCase(state)
+                    ? updatedCaseData.getC1AWelshDraftDocument() : caseData.getC1AWelshDraftDocument());
+
             } catch (Exception e) {
                 log.error("Error regenerating the document {}", e.getMessage());
             }
         }
 
-        tabService.mapAndSubmitAllTabsUpdate(
+
+        tabService.submitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),
             String.valueOf(callbackRequest.getCaseDetails().getId()),
             startAllTabsUpdateDataContent.startEventResponse(),
             startAllTabsUpdateDataContent.eventRequestData(),
-            caseData
+            caseDataUpdated
         );
+        caseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
 
         if (!isCourtStaff
             || (isCourtStaff && (AWAITING_SUBMISSION_TO_HMCTS.getValue().equalsIgnoreCase(state)
@@ -362,5 +391,22 @@ public class TaskListService {
             roles = CaseUtils.mapAmUserRolesToIdamRoles(roleAssignmentServiceResponse, authorisation, userDetails);
         }
         return roles;
+    }
+
+    private boolean haveConfidentialDetailsChanged(CaseData current, CaseData previous) {
+        boolean currentConfidential = YesOrNo.Yes.equals(getAddressConfidentialityFlag(current)) ? true : false;
+        boolean previousConfidential = YesOrNo.Yes.equals(getAddressConfidentialityFlag(previous)) ? true : false;
+
+        return currentConfidential != previousConfidential;
+    }
+
+    private YesOrNo getAddressConfidentialityFlag(CaseData caseData) {
+        if (caseData.getApplicants() != null && !caseData.getApplicants().isEmpty()) {
+            PartyDetails partyDetails = caseData.getApplicants().get(0).getValue();
+            if (partyDetails != null) {
+                return partyDetails.getIsAddressConfidential();
+            }
+        }
+        return null;
     }
 }

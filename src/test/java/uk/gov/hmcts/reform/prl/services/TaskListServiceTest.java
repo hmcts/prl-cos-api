@@ -52,6 +52,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
@@ -704,11 +705,11 @@ public class TaskListServiceTest {
         when(tabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         when(userService.getUserDetails(authToken))
                 .thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-courtadmin")).build());
-        when(dgsService.generateDocuments(authToken, caseData)).thenReturn(documentMap);
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        lenient().when(dgsService.generateDocuments(authToken, caseData)).thenReturn(documentMap);
+        lenient().when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
             "senior-tribunal-caseworker");
-        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
+        lenient().when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
         when(roleAssignmentApi.getRoleAssignments(authToken, authTokenGenerator.generate(), null, null)).thenReturn(
             roleAssignmentServiceResponse);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -746,8 +747,8 @@ public class TaskListServiceTest {
             roleAssignmentServiceResponse);
         when(userService.getUserDetails(authToken))
                 .thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-courtadmin")).build());
-        when(dgsService.generateDocuments(authToken, caseData)).thenReturn(documentMap);
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        lenient().when(dgsService.generateDocuments(authToken, caseData)).thenReturn(documentMap);
+        lenient().when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
                 .CallbackRequest.builder()
                 .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -830,8 +831,8 @@ public class TaskListServiceTest {
             roleAssignmentServiceResponse);
         when(userService.getUserDetails(authToken))
                 .thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-courtadmin")).build());
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(dgsService.generateDocuments(authToken, caseData)).thenReturn(documentMap);
+        lenient().when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        lenient().when(dgsService.generateDocuments(authToken, caseData)).thenReturn(documentMap);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
                 .CallbackRequest.builder()
                 .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
