@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 
 import java.io.IOException;
@@ -11,6 +12,7 @@ import java.io.IOException;
 import static java.util.Base64.getDecoder;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.base64Encode;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.setTaskCompletion;
 
 public class CaseUtilsTest {
 
@@ -38,7 +40,10 @@ public class CaseUtilsTest {
         String encodedString = base64Encode(waMapper, mapper);
         assertThat(encodedString).isNotNull();
 
-        String encodedClientContext = CaseUtils.setTaskCompletion(encodedString, mapper, () -> completeTask);
+        String encodedClientContext = setTaskCompletion(encodedString,
+                                                                  mapper,
+                                                                  CaseData.builder().build(),
+                                                                  (data) -> completeTask);
         byte[] decodeClientContext = getDecoder().decode(encodedClientContext);
         WaMapper updatedWaMapper = mapper.readValue(decodeClientContext, WaMapper.class);
         assertThat(updatedWaMapper.getClientContext().getUserTask().isCompleteTask())
@@ -50,7 +55,7 @@ public class CaseUtilsTest {
         ObjectMapper mapper = new ObjectMapper();
         mapper.findAndRegisterModules();
 
-        assertThat(CaseUtils.setTaskCompletion(null, mapper, () -> false))
+        assertThat(setTaskCompletion(null, mapper, CaseData.builder().build(), (data) -> false))
             .isNull();
     }
 }

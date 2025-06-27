@@ -269,9 +269,10 @@ public class ManageOrdersController {
             schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse saveOrderDetails(
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> saveOrderDetails(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             log.info("Inside about-to-submit callback --------->>>>>>");
@@ -301,7 +302,23 @@ public class ManageOrdersController {
 
             cleanUpSelectedManageOrderOptions(caseDataUpdated);
 
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+            String encodedClientContext = CaseUtils.setTaskCompletion(
+                clientContext,
+                objectMapper,
+                caseData,
+                (data) -> !manageOrderService.isSaveAsDraft(data)
+                    || !ManageOrdersUtils.isHearingPageNeeded(data.getCreateSelectOrderOptions(),
+                                                              data.getManageOrders().getC21OrderOptions()));
+
+            ResponseEntity.BodyBuilder responseBuilder = ofNullable(encodedClientContext)
+                .map(value -> ResponseEntity.ok()
+                    .header(CLIENT_CONTEXT_HEADER_PARAMETER, value))
+                .orElseGet(ResponseEntity::ok);
+
+            return responseBuilder
+                .body(AboutToStartOrSubmitCallbackResponse.builder()
+                         .data(caseDataUpdated)
+                         .build());
         } else {
             throw (new InvalidClientException(INVALID_CLIENT));
         }
@@ -466,16 +483,16 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            final CaseData updatedCaseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
+            caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            if (updatedCaseData.getServeOrderData().getDoYouWantToServeOrder().equals(YesOrNo.Yes)) {
+            if (caseData.getServeOrderData().getDoYouWantToServeOrder().equals(YesOrNo.Yes)) {
                 caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, YesOrNo.Yes);
-                if (amendOrderUnderSlipRule.equals(updatedCaseData.getManageOrdersOptions())) {
-                    caseDataUpdated.putAll(amendOrderService.updateOrder(updatedCaseData, authorisation));
+                if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
+                    caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
                 } else {
                     caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
                         authorisation,
-                        updatedCaseData,
+                        caseData,
                         PrlAppsConstants.ENGLISH
                     ));
                 }
@@ -487,7 +504,7 @@ public class ManageOrdersController {
             } else {
                 caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, No);
             }
-
+            /*
             String encodedClientContext = CaseUtils.setTaskCompletion(
                 clientContext,
                 objectMapper,
@@ -497,10 +514,13 @@ public class ManageOrdersController {
                 .map(value -> ResponseEntity.ok()
                     .header(CLIENT_CONTEXT_HEADER_PARAMETER, value))
                 .orElseGet(ResponseEntity::ok);
+             */
 
-            return responseBuilder.body(AboutToStartOrSubmitCallbackResponse.builder()
-                                      .data(caseDataUpdated)
-                                      .build());
+            return ResponseEntity
+                .ok()
+                .body(AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseDataUpdated)
+                .build());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
