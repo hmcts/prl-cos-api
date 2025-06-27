@@ -45,7 +45,7 @@ public class RemoveDocumentsService {
 
     private List<Element<RemovableDocument>> getRemovableDocuments(CaseData caseData) {
         Stream<Element<RemovableDocument>> removableReviewDocs = caseData.getReviewDocuments() != null
-            ? caseData.getReviewDocuments().getAllRemovableDocuments().stream()
+            ? caseData.getReviewDocuments().getRemovableDocuments().stream()
             .map(this::convertQuarantineDoc)
             : Stream.empty();
 

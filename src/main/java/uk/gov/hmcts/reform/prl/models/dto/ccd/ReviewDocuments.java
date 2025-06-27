@@ -56,7 +56,7 @@ public class ReviewDocuments {
     }
 
     @JsonIgnore
-    public List<Element<QuarantineLegalDoc>> getAllRemovableDocuments() {
+    public List<Element<QuarantineLegalDoc>> getRemovableDocuments() {
         return Stream.of(
                 legalProfUploadDocListDocTab,
                 cafcassUploadDocListDocTab,
