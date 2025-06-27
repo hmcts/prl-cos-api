@@ -176,7 +176,7 @@ public class CaseFlagsWaService {
                 if (mostRecentlyModified.getId().equals(flagDetail.getId())) {
                     final int index =  caseData.getCaseFlags().getDetails().indexOf(flagDetail);
                     caseData.getCaseFlags().getDetails().set(index, mostRecentlyModified);
-                    caseDataMap.put("caseFlags", caseData.getCaseFlags());
+                    caseDataMap.put(PrlAppsConstants.CASE_LEVEL_FLAGS, caseData.getCaseFlags());
                 }
             });
         }
