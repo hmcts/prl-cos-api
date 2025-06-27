@@ -93,7 +93,14 @@ public class CafcassDocumentManagementControllerFunctionalTest {
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .when()
             .contentType("application/json")
-            .get("/cases/documents/{documentId}/binary", documentId);
+            .get("/cases/documents/{documentId}/binary", documentId)
+            .then()
+            .assertThat().statusCode(200)
+            .contentType("application/pdf")
+            .header("content-type", equalTo("application/pdf"))
+            .header("originalfilename",equalTo("C7_Response_Draft_Document.pdf"))
+            .extract()
+            .response();
 
     }
 
