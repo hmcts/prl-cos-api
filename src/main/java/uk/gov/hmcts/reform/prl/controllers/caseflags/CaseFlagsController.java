@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
-import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -39,6 +38,8 @@ import java.util.Map;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ALL_SELECTED_FLAGS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_CASE_FLAG_TASK_CREATED;
 
 @Slf4j
 @RestController
@@ -97,7 +98,8 @@ public class CaseFlagsController extends AbstractCallbackController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         CaseData caseData = checkIfNewFlagRequireToCreateWaTask(callbackRequest);
-        Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
+        Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+        caseDataMap.put(WA_IS_CASE_FLAG_TASK_CREATED, caseData.getReviewRaRequestWrapper().getIsCaseFlagsTaskCreated());
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataMap)
@@ -112,7 +114,8 @@ public class CaseFlagsController extends AbstractCallbackController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseFlagsWaService.setSelectedFlags(caseData);
 
-        Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
+        Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+        caseDataMap.put(WA_ALL_SELECTED_FLAGS, caseData.getReviewRaRequestWrapper().getSelectedFlags());
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataMap)
@@ -135,13 +138,12 @@ public class CaseFlagsController extends AbstractCallbackController {
         Element<FlagDetail> mostRecentlyModified = caseFlagsWaService.validateAllFlags(caseData);
 
         List<String> errors = new ArrayList<>();
-
+        Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         if (REQUESTED.equals(mostRecentlyModified.getValue().getStatus())) {
             errors.add("Please select status other than Requested");
         } else {
-            caseFlagsWaService.searchAndUpdateCaseFlags(caseData, mostRecentlyModified);
+            caseFlagsWaService.searchAndUpdateCaseFlags(caseData, caseDataMap, mostRecentlyModified);
         }
-        Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .errors(errors)
@@ -205,7 +207,7 @@ public class CaseFlagsController extends AbstractCallbackController {
             List<String> errors = flagsService.validateNewFlagStatus(caseDataCurrent);
             if (errors.isEmpty()) {
                 CaseData caseData = checkIfNewFlagRequireToCreateWaTask(callbackRequest);
-                caseDataCurrent = caseData.toMap(CcdObjectMapper.getObjectMapper());
+                caseDataCurrent.put(WA_IS_CASE_FLAG_TASK_CREATED, caseData.getReviewRaRequestWrapper().getIsCaseFlagsTaskCreated());
             }
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataCurrent).errors(errors).build();
         } else {
