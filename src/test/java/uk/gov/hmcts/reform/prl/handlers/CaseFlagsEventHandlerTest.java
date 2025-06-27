@@ -5,121 +5,123 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
-import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.events.CaseFlagsEvent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
-import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
-import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewRaRequestWrapper;
+import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagsWaService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CaseFlagsEventHandlerTest {
 
     public static final String TEST_AUTH = "test-auth";
-    public static final String SERVICE_TOKEN = "service-token";
-    @Mock
-    private UserService userService;
-    @Mock
-    private RoleAssignmentApi roleAssignmentApi;
-    @Mock
-    private AuthTokenGenerator authTokenGenerator;
+
     @Mock
     private ObjectMapper objectMapper;
     @Mock
     private AllTabServiceImpl allTabService;
+    @Mock
+    private CaseFlagsWaService caseFlagsWaService;
 
     @InjectMocks
     private CaseFlagsEventHandler caseFlagsEventHandler;
 
     @Test
-    public void testTriggerDummyEventForCaseFlags() {
-        List<RoleAssignmentResponse> roleAssignmentResponses =  new ArrayList<>();
-        RoleAssignmentResponse roleAssignmentResponse =  new RoleAssignmentResponse();
-        roleAssignmentResponse.setRoleName("ctsc");
-        roleAssignmentResponses.add(roleAssignmentResponse);
-        Mockito.when(authTokenGenerator.generate()).thenReturn(SERVICE_TOKEN);
-        Mockito.when(roleAssignmentApi
-                         .getRoleAssignments(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any()))
-                .thenReturn(RoleAssignmentServiceResponse.builder()
-                                .roleAssignmentResponse(roleAssignmentResponses)
-                                .build());
-        Mockito.when(userService.getUserDetails(Mockito.any())).thenReturn(UserDetails.builder().build());
+    public void testTriggerDummyEventForCaseFlagsWhenCaseFlagsTaskCreatedIsNoAndNoRequestedCaseFlags() {
+
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         CaseData caseData = CaseData.builder()
-            .id(123L)
-            .caseTypeOfApplication(C100_CASE_TYPE)
-            .state(State.CASE_ISSUED)
-            .build();
-        Map<String, Object> caseDataMap = new HashMap<>();
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
-            = new StartAllTabsUpdateDataContent(TEST_AUTH, EventRequestData.builder().build(),
-                                                StartEventResponse.builder().build(), caseDataMap, caseData, null);
-        Mockito.when(allTabService
-                         .getStartUpdateForSpecificEvent(Mockito.any(),Mockito.any())).thenReturn(
-            startAllTabsUpdateDataContent);
-        CaseFlagsEvent caseFlagsEvent = new CaseFlagsEvent(CallbackRequest.builder()
-                                                               .caseDetails(CaseDetails.builder()
-                                                                                .id(123L).build())
-                                                               .build(), TEST_AUTH);
+            .id(12345L)
+            .reviewRaRequestWrapper(ReviewRaRequestWrapper.builder()
+                                        .isCaseFlagsTaskCreated(YesOrNo.No).build()).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(caseFlagsWaService.isCaseHasNoRequestedFlags(any())).thenReturn(false);
+
+        StartAllTabsUpdateDataContent dataContent = new StartAllTabsUpdateDataContent("",
+                                                                                      EventRequestData.builder().build(),
+                                                                                      StartEventResponse.builder().build(),
+                                                                                      new HashMap<>(),
+                                                                                      caseData,
+                                                                                      UserDetails.builder().build());
+
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), eq(CaseEvent.CREATE_WA_TASK_FOR_CTSC_CASE_FLAGS.getValue())))
+            .thenReturn(dataContent);
+
+        CaseFlagsEvent caseFlagsEvent = new CaseFlagsEvent(callbackRequest, TEST_AUTH);
+
         caseFlagsEventHandler.triggerDummyEventForCaseFlags(caseFlagsEvent);
 
-        Mockito.verify(allTabService,
-                       Mockito.times(1)).getStartUpdateForSpecificEvent(Mockito.any(),Mockito.any());
-        Mockito.verify(allTabService,Mockito.times(1)).submitAllTabsUpdate(
-            Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any(),Mockito.anyMap());
+        verify(allTabService, times(1))
+            .getStartUpdateForSpecificEvent(anyString(), eq(CaseEvent.CREATE_WA_TASK_FOR_CTSC_CASE_FLAGS.getValue()));
+
+        verify(allTabService, times(1))
+            .submitAllTabsUpdate(anyString(), anyString(), any(StartEventResponse.class), any(EventRequestData.class), anyMap());
+        verify(caseFlagsWaService).isCaseHasNoRequestedFlags(any());
+
     }
 
     @Test
-    public void testTriggerDummyEventForWhenNotCTscUser() {
-        List<RoleAssignmentResponse> roleAssignmentResponses =  new ArrayList<>();
-        RoleAssignmentResponse roleAssignmentResponse =  new RoleAssignmentResponse();
-        roleAssignmentResponse.setRoleName("admin");
-        roleAssignmentResponses.add(roleAssignmentResponse);
-        Mockito.when(authTokenGenerator.generate()).thenReturn(SERVICE_TOKEN);
-        Mockito.when(roleAssignmentApi
-                         .getRoleAssignments(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any()))
-            .thenReturn(RoleAssignmentServiceResponse.builder()
-                            .roleAssignmentResponse(roleAssignmentResponses)
-                            .build());
-        Mockito.when(userService.getUserDetails(Mockito.any())).thenReturn(UserDetails.builder().build());
+    public void testTriggerDummyEventForCaseFlagsWhenCaseFlagsTaskCreatedIsYesAndRequestedCaseFlag() {
+
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         CaseData caseData = CaseData.builder()
-            .id(123L)
-            .caseTypeOfApplication(C100_CASE_TYPE)
-            .state(State.CASE_ISSUED)
-            .build();
-        Map<String, Object> caseDataMap = new HashMap<>();
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
-            = new StartAllTabsUpdateDataContent(TEST_AUTH, EventRequestData.builder().build(),
-                                                StartEventResponse.builder().build(), caseDataMap, caseData, null);
-        Mockito.when(allTabService
-                         .getStartUpdateForSpecificEvent(Mockito.any(),Mockito.any())).thenReturn(
-            startAllTabsUpdateDataContent);
-        CaseFlagsEvent caseFlagsEvent = new CaseFlagsEvent(CallbackRequest.builder()
-                                                               .caseDetails(CaseDetails.builder()
-                                                                                .id(123L).build())
-                                                               .build(), TEST_AUTH);
+            .id(12345L)
+            .reviewRaRequestWrapper(ReviewRaRequestWrapper.builder()
+                                        .isCaseFlagsTaskCreated(YesOrNo.Yes).build()).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(caseFlagsWaService.isCaseHasNoRequestedFlags(any())).thenReturn(true);
+
+        CaseFlagsEvent caseFlagsEvent = new CaseFlagsEvent(callbackRequest, TEST_AUTH);
+
         caseFlagsEventHandler.triggerDummyEventForCaseFlags(caseFlagsEvent);
 
-        Mockito.verify(allTabService,
-                       Mockito.times(0)).getStartUpdateForSpecificEvent(Mockito.any(),Mockito.any());
-        Mockito.verify(allTabService,Mockito.times(0)).submitAllTabsUpdate(
-            Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any(),Mockito.anyMap());
+        verifyNoInteractions(allTabService);
+
     }
+
+    @Test
+    public void testTriggerDummyEventForCaseFlagsWhenCaseFlagsTaskCreatedIsNoAndRequestedCaseFlag() {
+
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .reviewRaRequestWrapper(ReviewRaRequestWrapper.builder()
+                                        .isCaseFlagsTaskCreated(YesOrNo.No).build()).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(caseFlagsWaService.isCaseHasNoRequestedFlags(any())).thenReturn(true);
+
+        CaseFlagsEvent caseFlagsEvent = new CaseFlagsEvent(callbackRequest, TEST_AUTH);
+
+        caseFlagsEventHandler.triggerDummyEventForCaseFlags(caseFlagsEvent);
+
+        verifyNoInteractions(allTabService);
+
+    }
+
 }
