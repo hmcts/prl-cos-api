@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -64,6 +65,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -906,6 +908,48 @@ public class CaseUtils {
             }
         }
         return null;
+    }
+
+    public static String setTaskCompletion(
+        String clientContext,
+        ObjectMapper objectMapper,
+        CaseData caseData,
+        Predicate<CaseData> completeTask) {
+
+        return ofNullable(clientContext)
+            .map(value -> getWaMapper(clientContext))
+            .map(WaMapper::getClientContext)
+            .map(value ->
+                     value.toBuilder()
+                         .userTask(value.getUserTask().toBuilder()
+                                       .completeTask(completeTask.test(caseData))
+                                       .build())
+                         .build())
+            .map(
+                updatedClientContext ->
+                    base64Encode(WaMapper.builder()
+                                     .clientContext(updatedClientContext)
+                                     .build(),
+                                 objectMapper)
+            )
+            .orElse(null);
+    }
+
+    public static String base64Encode(WaMapper waMapper, ObjectMapper objectMapper) {
+        String base64EncodedClientContext = null;
+        if (waMapper != null) {
+            try {
+                String clientContextToEncode = objectMapper.writeValueAsString(waMapper);
+                //TODO REMOVE
+                log.info("Updated client context to prevent auto complete {}",
+                         objectMapper.writeValueAsString(waMapper));
+                base64EncodedClientContext =  Base64.getEncoder().encodeToString(clientContextToEncode.getBytes());
+            } catch (JsonProcessingException e) {
+                log.error("Exception while clientContext the Client-Context {}", e.getMessage());
+                throw new RuntimeException(e);
+            }
+        }
+        return base64EncodedClientContext;
     }
 
     public static String getDraftOrderId(WaMapper waMapper) {

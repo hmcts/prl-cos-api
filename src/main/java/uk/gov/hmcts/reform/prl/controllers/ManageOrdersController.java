@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -56,10 +57,12 @@ import java.util.Map;
 import java.util.UUID;
 import javax.ws.rs.core.HttpHeaders;
 
+import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -105,7 +108,7 @@ public class ManageOrdersController {
     public AboutToStartOrSubmitCallbackResponse populatePreviewOrderWhenOrderUploaded(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
+        @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -134,9 +137,10 @@ public class ManageOrdersController {
         @ApiResponse(responseCode = "200", description = "Order details are fetched"),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse prepopulateFL401CaseDetails(
+    public AboutToStartOrSubmitCallbackResponse prepopulateCaseDetails(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
@@ -156,7 +160,11 @@ public class ManageOrdersController {
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(manageOrderService.handleFetchOrderDetails(authorisation, callbackRequest, PrlAppsConstants.ENGLISH))
+                .data(manageOrderService.handleFetchOrderDetails(
+                    authorisation,
+                    callbackRequest,
+                    PrlAppsConstants.ENGLISH,
+                    clientContext))
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -261,9 +269,10 @@ public class ManageOrdersController {
             schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse saveOrderDetails(
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> saveOrderDetails(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             log.info("Inside about-to-submit callback --------->>>>>>");
@@ -293,7 +302,23 @@ public class ManageOrdersController {
 
             cleanUpSelectedManageOrderOptions(caseDataUpdated);
 
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+            String encodedClientContext = CaseUtils.setTaskCompletion(
+                clientContext,
+                objectMapper,
+                caseData,
+                (data) -> !manageOrderService.isSaveAsDraft(data)
+                    || !ManageOrdersUtils.isHearingPageNeeded(data.getCreateSelectOrderOptions(),
+                                                              data.getManageOrders().getC21OrderOptions()));
+
+            ResponseEntity.BodyBuilder responseBuilder = ofNullable(encodedClientContext)
+                .map(value -> ResponseEntity.ok()
+                    .header(CLIENT_CONTEXT_HEADER_PARAMETER, value))
+                .orElseGet(ResponseEntity::ok);
+
+            return responseBuilder
+                .body(AboutToStartOrSubmitCallbackResponse.builder()
+                         .data(caseDataUpdated)
+                         .build());
         } else {
             throw (new InvalidClientException(INVALID_CLIENT));
         }
@@ -451,9 +476,10 @@ public class ManageOrdersController {
             schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse whenToServeOrder(
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> whenToServeOrder(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -478,9 +504,23 @@ public class ManageOrdersController {
             } else {
                 caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, No);
             }
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseDataUpdated)
-                .build();
+            String encodedClientContext = CaseUtils.setTaskCompletion(
+                clientContext,
+                objectMapper,
+                caseData,
+                (data) -> !manageOrderService.isSaveAsDraft(data)
+                    || !ManageOrdersUtils.isHearingPageNeeded(data.getCreateSelectOrderOptions(),
+                                                              data.getManageOrders().getC21OrderOptions())
+            );
+
+            ResponseEntity.BodyBuilder responseBuilder = ofNullable(encodedClientContext)
+                .map(value -> ResponseEntity.ok()
+                    .header(CLIENT_CONTEXT_HEADER_PARAMETER, value))
+                .orElseGet(ResponseEntity::ok);
+
+            return responseBuilder.body(AboutToStartOrSubmitCallbackResponse.builder()
+                                            .data(caseDataUpdated)
+                                            .build());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

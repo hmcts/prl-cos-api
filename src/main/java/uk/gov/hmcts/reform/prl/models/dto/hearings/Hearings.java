@@ -10,7 +10,7 @@ import java.util.List;
 
 @Getter
 @Setter
-@Builder(builderMethodName = "hearingsWith")
+@Builder(builderMethodName = "hearingsWith", toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class Hearings {
