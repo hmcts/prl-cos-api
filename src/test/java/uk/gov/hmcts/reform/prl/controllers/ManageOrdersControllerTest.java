@@ -2172,7 +2172,6 @@ public class ManageOrdersControllerTest {
             .doesNotContainKey(CLIENT_CONTEXT_HEADER_PARAMETER);
     }
 
-    /*
     @Test
     public void testAddUploadOrderDoesntNeedServingWithClientContextAndDraft() throws Exception {
 
@@ -2234,7 +2233,7 @@ public class ManageOrdersControllerTest {
             .isEqualTo(responseResponseEntity.getBody().getData().get("doYouWantToServeOrder"));
         assertThat(responseResponseEntity.getHeaders())
             .containsKey(CLIENT_CONTEXT_HEADER_PARAMETER);
-    }*/
+    }
 
 
     @Test

@@ -504,23 +504,20 @@ public class ManageOrdersController {
             } else {
                 caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, No);
             }
-            /*
             String encodedClientContext = CaseUtils.setTaskCompletion(
                 clientContext,
                 objectMapper,
-                () -> !manageOrderService.isSaveAsDraft(updatedCaseData));
+                caseData,
+                (data) -> !manageOrderService.isSaveAsDraft(data));
 
             ResponseEntity.BodyBuilder responseBuilder = ofNullable(encodedClientContext)
                 .map(value -> ResponseEntity.ok()
                     .header(CLIENT_CONTEXT_HEADER_PARAMETER, value))
                 .orElseGet(ResponseEntity::ok);
-             */
 
-            return ResponseEntity
-                .ok()
-                .body(AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseDataUpdated)
-                .build());
+            return responseBuilder.body(AboutToStartOrSubmitCallbackResponse.builder()
+                                            .data(caseDataUpdated)
+                                            .build());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
