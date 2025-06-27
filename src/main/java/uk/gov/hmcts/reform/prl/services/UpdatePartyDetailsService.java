@@ -446,12 +446,6 @@ public class UpdatePartyDetailsService {
                                             ? partyDetails.getIsEmailAddressConfidential() : null)
             .refugeConfidentialityC8Form(YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
                                              ? partyDetails.getRefugeConfidentialityC8Form() : null)
-            .email(YesOrNo.Yes.equals(partyDetails.getCanYouProvideEmailAddress()) ? partyDetails.getEmail() : null)
-            .isEmailAddressConfidential(YesOrNo.Yes.equals(partyDetails.getCanYouProvideEmailAddress())
-                                            ? partyDetails.getIsEmailAddressConfidential() : null)
-            .phoneNumber(YesOrNo.Yes.equals(partyDetails.getCanYouProvidePhoneNumber()) ? partyDetails.getPhoneNumber() : null)
-            .isPhoneNumberConfidential(YesOrNo.Yes.equals(partyDetails.getCanYouProvidePhoneNumber())
-                                           ? partyDetails.getIsPhoneNumberConfidential() : null)
             .build();
 
         return partyDetails;
