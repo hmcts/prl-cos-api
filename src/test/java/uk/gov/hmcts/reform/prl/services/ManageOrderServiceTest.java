@@ -146,6 +146,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.Event.ADMIN_EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.MANAGE_ORDERS;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
+import static uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.prohibitedStepsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
@@ -5391,11 +5392,11 @@ public class ManageOrderServiceTest {
         DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
                                                                   .build()).build();
         HearingData hearingDataInitial = HearingData.builder()
-            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+            .hearingDateConfirmOptionEnum(dateConfirmedInHearingsTab)
             .build();
 
         HearingData hearingDataRevised = HearingData.builder()
-            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+            .hearingDateConfirmOptionEnum(dateConfirmedInHearingsTab)
             .hearingdataFromHearingTab(elementList).build();
 
         StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
@@ -6454,6 +6455,7 @@ public class ManageOrderServiceTest {
                           .confirmedHearingDates(prePopulatedDynamicLists.getRetrievedHearingDates())
                           .displayConfirmedHearing(Yes)
                           .transientConfirmedHearingDetail(label)
+                          .hearingDateConfirmOptionEnum(dateConfirmedInHearingsTab)
                           .build());
 
     }

@@ -172,6 +172,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROL
 import static uk.gov.hmcts.reform.prl.enums.Event.ADMIN_EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.MANAGE_ORDERS;
+import static uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum.noCheck;
@@ -3225,6 +3226,7 @@ public class ManageOrderService {
             caseData,
             hearingsSupplier
         );
+        hearingData.setDisplayConfirmedHearing(No);
         taskHearingId.ifPresent(id -> {
                 hearingData.setDisplayConfirmedHearing(Yes);
                 DynamicListElement confirmedHearingDates = hearingData.getConfirmedHearingDates()
@@ -3237,6 +3239,7 @@ public class ManageOrderService {
                     confirmedHearingDates
                         .getLabel()
                 );
+                hearingData.setHearingDateConfirmOptionEnum(dateConfirmedInHearingsTab);
             }
         );
         return hearingData;
