@@ -508,7 +508,10 @@ public class ManageOrdersController {
                 clientContext,
                 objectMapper,
                 caseData,
-                (data) -> !manageOrderService.isSaveAsDraft(data));
+                (data) -> !manageOrderService.isSaveAsDraft(data)
+                    || !ManageOrdersUtils.isHearingPageNeeded(data.getCreateSelectOrderOptions(),
+                                                              data.getManageOrders().getC21OrderOptions())
+            );
 
             ResponseEntity.BodyBuilder responseBuilder = ofNullable(encodedClientContext)
                 .map(value -> ResponseEntity.ok()
