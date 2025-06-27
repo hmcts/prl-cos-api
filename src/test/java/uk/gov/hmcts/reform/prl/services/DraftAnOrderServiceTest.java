@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Base64;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -84,7 +85,13 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.models.languagecontext.UserLanguage;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
+import uk.gov.hmcts.reform.prl.models.wa.AdditionalProperties;
+import uk.gov.hmcts.reform.prl.models.wa.ClientContext;
+import uk.gov.hmcts.reform.prl.models.wa.TaskData;
+import uk.gov.hmcts.reform.prl.models.wa.UserTask;
+import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
@@ -208,6 +215,8 @@ public class DraftAnOrderServiceTest {
     private List<Element<Child>> listOfChildren;
     private List<Element<MagistrateLastName>> magistrateElementList;
     private List<Element<DraftOrder>> draftOrderList;
+
+    private String clientContextCoded;
     @Mock
     private HearingDataService hearingDataService;
 
@@ -215,7 +224,7 @@ public class DraftAnOrderServiceTest {
     WelshCourtEmail welshCourtEmail;
 
     @Before
-    public void setup() {
+    public void setup() throws JsonProcessingException {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -372,6 +381,25 @@ public class DraftAnOrderServiceTest {
         when(manageOrderService.populateCustomOrderFields(Mockito.any(), Mockito.any(), any())).thenReturn(caseData);
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().forename("test")
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
+
+        WaMapper waMapper = WaMapper.builder()
+            .clientContext(ClientContext.builder()
+                               .userLanguage(UserLanguage.builder().language("en").build())
+                               .userTask(UserTask.builder()
+                                             .completeTask(true)
+                                             .taskData(TaskData.builder()
+                                                           .id("test")
+                                                           .name("test")
+                                                           .additionalProperties(AdditionalProperties.builder()
+                                                                                     .orderId(UUID.randomUUID().toString())
+                                                                                     .hearingId(null)
+                                                                                     .build())
+                                                           .build())
+                                             .build())
+                               .build())
+            .build();
+        String json = new ObjectMapper().writeValueAsString(waMapper);
+        clientContextCoded = Base64.getEncoder().encodeToString(json.getBytes());
     }
 
     @Test
@@ -399,7 +427,10 @@ public class DraftAnOrderServiceTest {
             .build();
         when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.COURT_ADMIN.name());
 
-        stringObjectMap = draftAnOrderService.getDraftOrderDynamicList(updatedCaseData, Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId(), authToken);
+        stringObjectMap = draftAnOrderService.getDraftOrderDynamicList(updatedCaseData,
+                                                                       Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId(),
+                                                                       clientContextCoded,
+                                                                       authToken);
 
         assertNotNull(stringObjectMap.get("draftOrdersDynamicList"));
         assertNotNull(stringObjectMap.get(CASE_TYPE_OF_APPLICATION));
@@ -429,7 +460,10 @@ public class DraftAnOrderServiceTest {
             .build();
         when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.COURT_ADMIN.name());
 
-        stringObjectMap = draftAnOrderService.getDraftOrderDynamicList(updatedCaseData, Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId(), authToken);
+        stringObjectMap = draftAnOrderService.getDraftOrderDynamicList(updatedCaseData,
+                                                                       Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId(),
+                                                                       clientContextCoded,
+                                                                       authToken);
 
         assertNotNull(stringObjectMap.get("draftOrdersDynamicList"));
         assertNotNull(stringObjectMap.get(CASE_TYPE_OF_APPLICATION));
@@ -583,6 +617,7 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> caseDataMap = draftAnOrderService.getDraftOrderDynamicList(
             updatedCaseData,
             EDIT_AND_APPROVE_ORDER.getId(),
+            clientContextCoded,
             authToken
         );
         assertEquals("C100", caseDataMap.get(CASE_TYPE_OF_APPLICATION));
@@ -614,6 +649,7 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> caseDataMap = draftAnOrderService.getDraftOrderDynamicList(
             updatedCaseData,
             EDIT_AND_APPROVE_ORDER.getId(),
+            clientContextCoded,
             authToken
         );
         assertEquals("C100", caseDataMap.get(CASE_TYPE_OF_APPLICATION));
@@ -4997,6 +5033,7 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> caseDataMap = draftAnOrderService.getDraftOrderDynamicList(
             updatedCaseData,
             EDIT_AND_APPROVE_ORDER.getId(),
+            clientContextCoded,
             authToken
         );
         assertEquals("C100", caseDataMap.get(CASE_TYPE_OF_APPLICATION));
