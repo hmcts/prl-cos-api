@@ -109,6 +109,7 @@ public class EditAndApproveDraftOrderController {
                     .data(draftAnOrderService.getDraftOrderDynamicList(
                         caseData,
                         callbackRequest.getEventId(),
+                        clientContext,
                         authorisation
                     )).build();
             } else {

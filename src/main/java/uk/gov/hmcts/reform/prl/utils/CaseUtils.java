@@ -970,6 +970,15 @@ public class CaseUtils {
         return null;
     }
 
+    public static String getHearingId(WaMapper waMapper) {
+        if (null != waMapper) {
+            if (null != waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties()) {
+                return waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties().getHearingId();
+            }
+        }
+        return null;
+    }
+
     public static DraftOrder getDraftOrderFromCollectionId(List<Element<DraftOrder>> draftOrderCollection, UUID draftOrderId) {
         if (CollectionUtils.isNotEmpty(draftOrderCollection)) {
             return draftOrderCollection.stream()

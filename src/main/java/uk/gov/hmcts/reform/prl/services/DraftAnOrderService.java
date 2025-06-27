@@ -267,8 +267,11 @@ public class DraftAnOrderService {
 
     public Map<String, Object> getDraftOrderDynamicList(CaseData caseData,
                                                         String eventId,
+                                                        String clientContext,
                                                         String authorisation) {
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+        WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
+        String hearingid = CaseUtils.getHearingId(waMapper);
         Map<String, Object> caseDataMap = new HashMap<>();
         List<Element<DraftOrder>> supportedDraftOrderList = new ArrayList<>();
         caseData.getDraftOrderCollection().forEach(
@@ -280,11 +283,30 @@ public class DraftAnOrderService {
                 }
             }
         );
-        caseDataMap.put(DRAFT_ORDERS_DYNAMIC_LIST, ElementUtils.asDynamicList(
-            supportedDraftOrderList,
-            null,
-            DraftOrder::getLabelForOrdersDynamicList
-        ));
+        // hearing filter if hearing present
+        if (hearingid != null) {
+            List<Element<DraftOrder>> filteredSupportedDraftOrderList = supportedDraftOrderList.stream()
+                .filter(Objects::nonNull)
+                .filter(orderList -> orderList.getValue() != null
+                    && CollectionUtils.isNotEmpty(orderList.getValue().getManageOrderHearingDetails())
+                    && orderList.getValue().getManageOrderHearingDetails().stream()
+                    .anyMatch(mo -> hearingid.equals(mo.getValue().getHearingId()))).toList();
+
+            caseDataMap.put(DRAFT_ORDERS_DYNAMIC_LIST, ElementUtils.asDynamicList(
+                filteredSupportedDraftOrderList,
+                null,
+                DraftOrder::getLabelForOrdersDynamicList
+            ));
+
+        } else {
+            caseDataMap.put(
+                DRAFT_ORDERS_DYNAMIC_LIST, ElementUtils.asDynamicList(
+                    supportedDraftOrderList,
+                    null,
+                    DraftOrder::getLabelForOrdersDynamicList
+                )
+            );
+        }
 
         String cafcassCymruEmailAddress = welshCourtEmail
             .populateCafcassCymruEmailInManageOrders(caseData);
