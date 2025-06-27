@@ -70,7 +70,7 @@ public class CaseFlagsWaServiceTest {
     }
 
     @Test
-    public void testSearchAndUpdateCaseLevelFlags() {
+    public void testSearchAndUpdateCaseFlagsForCaseLevelFlags() {
         Map<String, Object> caseDataMap = new HashMap<>();
         FlagDetail modifiedFlagDetail = FlagDetail.builder().status("Active").build();
         Flags flags = getCaseLevelFlags(REQUESTED);
@@ -85,10 +85,12 @@ public class CaseFlagsWaServiceTest {
         caseFlagsWaService.searchAndUpdateCaseFlags(caseData, caseDataMap, recentlyModifiedFlag);
 
         assertEquals(modifiedFlagDetail.getStatus(), caseData.getCaseFlags().getDetails().getFirst().getValue().getStatus());
+        assertEquals(modifiedFlagDetail.getStatus(),
+                     ((Flags) caseDataMap.get("caseFlags")).getDetails().getFirst().getValue().getStatus());
     }
 
     @Test
-    public void testSearchAndUpdatePartyLevelFlags() {
+    public void testSearchAndUpdateCaseFlagsForPartyLevelFlags() {
         Map<String, Object> caseDataMap = new HashMap<>();
         FlagDetail flagDetail1 = FlagDetail.builder().status("Requested").build();
         FlagDetail flagDetail2 = FlagDetail.builder().status("Requested").build();
@@ -115,6 +117,8 @@ public class CaseFlagsWaServiceTest {
 
         assertEquals(modifiedFlagDetail.getStatus(), caseData.getAllPartyFlags()
             .getCaApplicant1ExternalFlags().getDetails().getFirst().getValue().getStatus());
+        assertEquals(modifiedFlagDetail.getStatus(),
+                     ((Flags) caseDataMap.get("caApplicant1ExternalFlags")).getDetails().getFirst().getValue().getStatus());
     }
 
     @Test
@@ -148,6 +152,8 @@ public class CaseFlagsWaServiceTest {
 
         assertEquals(modifiedFlagDetail.getStatus(), caseData.getAllPartyFlags()
             .getCaApplicant2ExternalFlags().getDetails().getFirst().getValue().getStatus());
+        assertEquals(modifiedFlagDetail.getStatus(),
+                     ((Flags) caseDataMap.get("caApplicant2ExternalFlags")).getDetails().getFirst().getValue().getStatus());
     }
 
     @Test
