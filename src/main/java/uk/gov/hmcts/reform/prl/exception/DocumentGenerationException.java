@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.framework.exceptions;
+package uk.gov.hmcts.reform.prl.exception;
 
 public class DocumentGenerationException extends RuntimeException {
 
