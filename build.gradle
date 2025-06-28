@@ -23,7 +23,7 @@ plugins {
 }
 
 def versions = [
-  awaitility                   : '4.2.2',
+  awaitility                   : '4.3.0',
   bcpkixJdk18on                : '1.80',
   ccdClient                    : '4.9.2',
   commonsBeanUtils             : '1.11.0',
