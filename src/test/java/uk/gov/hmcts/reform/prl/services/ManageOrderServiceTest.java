@@ -240,6 +240,17 @@ public class ManageOrderServiceTest {
           }
         }
         """;
+
+    private static final String CLIENT_CONTEXT_WITH_LANGUAGE = """
+         {
+           "client_context": {
+             "user_language": {
+               "language": "en"
+             }
+           }
+         }
+        """;
+
     private static final String hearingPayload = """
         {
            "hmctsServiceCode": "ABA5",
@@ -6456,6 +6467,85 @@ public class ManageOrderServiceTest {
                           .displayConfirmedHearing(Yes)
                           .transientConfirmedHearingDetail(label)
                           .hearingDateConfirmOptionEnum(dateConfirmedInHearingsTab)
+                          .build());
+
+    }
+
+    @Test
+    public void testHandleFetchOrderDetailsWithClientContextWithoutUserTask() throws JsonProcessingException {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .isSdoSelected(Yes)
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.noticeOfProceedings)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .applicants(List.of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrders(manageOrders)
+            .build();
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.findAndRegisterModules();
+
+        Map<String, Object> caseDataMap = caseData.toMap(mapper);
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseDataMap)
+            .build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+
+        Hearings hearings = mapper.readValue(hearingPayload, Hearings.class);
+
+        String authorization = "testAuth";
+        String caseReference = "12345678";
+        when(hearingService.getHearings(authorization, caseReference))
+            .thenReturn(hearings);
+        String label = "Full/Final hearing - 26 June 2025";
+        HearingDataPrePopulatedDynamicLists prePopulatedDynamicLists = HearingDataPrePopulatedDynamicLists
+            .builder()
+            .retrievedHearingDates(DynamicList.builder()
+                                       .listItems(List.of(
+                                           DynamicListElement.builder()
+                                               .label(label)
+                                               .build()
+                                       ))
+                                       .build())
+            .build();
+        when(hearingDataService.populateHearingDynamicLists(authorization,
+                                                            caseReference,
+                                                            caseData,
+                                                            hearings))
+            .thenReturn(prePopulatedDynamicLists);
+
+        HearingData hearingData = HearingData.builder()
+            .confirmedHearingDates(prePopulatedDynamicLists.getRetrievedHearingDates())
+            .build();
+        when(hearingDataService.generateHearingData(any(), any()))
+            .thenReturn(hearingData);
+        byte[] encode = Base64.getEncoder().encode(CLIENT_CONTEXT_WITH_LANGUAGE.getBytes());
+        Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails(
+            authorization,
+            callbackRequest,
+            ENGLISH,
+            new String(encode));
+
+        List<Element<HearingData>> hearingDataElement = mapper.convertValue(
+            caseDataUpdated.get(ORDER_HEARING_DETAILS), new TypeReference<>() {
+            });
+
+        List<HearingData> responseHearingData = ElementUtils.unwrapElements(hearingDataElement);
+
+        assertThat(caseDataUpdated)
+            .extractingByKey("isSdoSelected")
+            .isEqualTo(No);
+        assertThat(responseHearingData)
+            .contains(HearingData.builder()
+                          .confirmedHearingDates(prePopulatedDynamicLists.getRetrievedHearingDates())
+                          .displayConfirmedHearing(No)
                           .build());
 
     }

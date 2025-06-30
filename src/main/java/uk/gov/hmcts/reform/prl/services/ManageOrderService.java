@@ -3162,9 +3162,11 @@ public class ManageOrderService {
 
         WaMapper waMapper = getWaMapper(clientContext);
         Optional<Long> taskHearingId = ofNullable(waMapper)
+            .map(value -> value
+                .getClientContext()
+                .getUserTask())
+            .filter(Objects::nonNull)
             .map(value -> Long.valueOf(value
-                                           .getClientContext()
-                                           .getUserTask()
                                            .getTaskData()
                                            .getAdditionalProperties()
                                            .getHearingId())
