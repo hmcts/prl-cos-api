@@ -334,7 +334,8 @@ public class DraftAnOrderService {
         if ((Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
             && !OrderStatusEnum.reviewedByJudge.getDisplayedValue().equals(orderStatus)
             && !OrderStatusEnum.rejectedByJudge.getDisplayedValue().equals(orderStatus))
-            || (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+            || ((Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+            || Event.HEARING_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId))
             && OrderStatusEnum.reviewedByJudge.getDisplayedValue().equals(orderStatus))) {
             supportedDraftOrderList.add(draftOrderElement);
         }
@@ -369,7 +370,8 @@ public class DraftAnOrderService {
     private static boolean isAdminEditAndApproveOrder(String loggedInUserType,
                                                       String eventId,
                                                       DraftOrder draftOrder) {
-        return Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+        return (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+            || Event.HEARING_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId))
             && UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
             && (AmendOrderCheckEnum.noCheck.equals(draftOrder.getOtherDetails().getReviewRequiredBy())
             || OrderStatusEnum.reviewedByManager.getDisplayedValue().equals(draftOrder.getOtherDetails().getStatus())
@@ -1175,7 +1177,8 @@ public class DraftAnOrderService {
                 //AHR - Judge/Manager approves an order or Admin edits an order & saves as draft
                 if (!UserRoles.SOLICITOR.name().equals(loggedInUserType)
                     && (Event.EDIT_AND_APPROVE_ORDER.getId().equals(eventId)
-                        || Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equals(eventId))
+                        || Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equals(eventId)
+                        || Event.HEARING_EDIT_AND_APPROVE_ORDER.getId().equals(eventId))
                     && manageOrderService.isEligibleForAutomatedHearing(
                         caseData.getManageOrders().getOrdersHearingDetails())) {
                     draftOrder = draftOrder.toBuilder().isAutoHearingReqPending(Yes).build();

@@ -191,7 +191,8 @@ public class EditAndApproveDraftOrderController {
             String language = CaseUtils.getLanguage(clientContext);
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
-                .equalsIgnoreCase(callbackRequest.getEventId())) {
+                .equalsIgnoreCase(callbackRequest.getEventId())
+                || Event.HEARING_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
                 caseDataUpdated.putAll(draftAnOrderService.adminEditAndServeAboutToSubmit(
                     authorisation,
                     callbackRequest,
