@@ -269,10 +269,9 @@ public class ManageOrdersController {
             schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     @SecurityRequirement(name = "Bearer Authentication")
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> saveOrderDetails(
+    public AboutToStartOrSubmitCallbackResponse saveOrderDetails(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             log.info("Inside about-to-submit callback --------->>>>>>");
@@ -302,23 +301,7 @@ public class ManageOrdersController {
 
             cleanUpSelectedManageOrderOptions(caseDataUpdated);
 
-            String encodedClientContext = CaseUtils.setTaskCompletion(
-                clientContext,
-                objectMapper,
-                caseData,
-                (data) -> !manageOrderService.isSaveAsDraft(data)
-                    || !ManageOrdersUtils.isHearingPageNeeded(data.getCreateSelectOrderOptions(),
-                                                              data.getManageOrders().getC21OrderOptions()));
-
-            ResponseEntity.BodyBuilder responseBuilder = ofNullable(encodedClientContext)
-                .map(value -> ResponseEntity.ok()
-                    .header(CLIENT_CONTEXT_HEADER_PARAMETER, value))
-                .orElseGet(ResponseEntity::ok);
-
-            return responseBuilder
-                .body(AboutToStartOrSubmitCallbackResponse.builder()
-                         .data(caseDataUpdated)
-                         .build());
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new InvalidClientException(INVALID_CLIENT));
         }
