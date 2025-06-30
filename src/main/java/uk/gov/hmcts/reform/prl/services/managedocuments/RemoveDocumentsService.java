@@ -133,7 +133,7 @@ public class RemoveDocumentsService {
             .toList();
     }
 
-    public Element<RemovableDocument> convertQuarantineDoc(Element<QuarantineLegalDoc> quarantineLegalDocElement) {
+    Element<RemovableDocument> convertQuarantineDoc(Element<QuarantineLegalDoc> quarantineLegalDocElement) {
         QuarantineLegalDoc quarantineLegalDoc = quarantineLegalDocElement.getValue();
 
         Map<String, Object> docObject = objectMapper.convertValue(quarantineLegalDoc, new TypeReference<>() {});
