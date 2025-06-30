@@ -239,7 +239,6 @@ public class SendAndReplyControllerTest {
         CaseData caseData = CaseData.builder().id(12345L)
             .sendOrReplyDto(SendOrReplyDto.builder().build())
             .chooseSendOrReply(SEND)
-            .caseTypeOfApplication("C100")
             .build();
         Message message = Message.builder().build();
 
@@ -251,7 +250,6 @@ public class SendAndReplyControllerTest {
         AboutToStartOrSubmitCallbackResponse response = sendAndReplyController.handleAboutToSubmit(auth, callbackRequest);
         verify(sendAndReplyService).buildNewSendMessage(caseData);
         verify(sendAndReplyService).addNewMessage(caseData, message);
-        Assert.assertEquals("C100", response.getData().get("CaseAccessCategory"));
     }
 
     @Test
@@ -487,6 +485,7 @@ public class SendAndReplyControllerTest {
     public void testSendOrReplyToMessagesSubmitForReply() {
 
         caseDataMap = new HashMap<>();
+        caseDataMap.put("caseTypeOfApplication", "C100");
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345L)
             .state(State.SUBMITTED_PAID.getValue())
@@ -496,12 +495,15 @@ public class SendAndReplyControllerTest {
 
         CaseData caseData = CaseData.builder().id(12345L)
             .chooseSendOrReply(REPLY)
+            .caseTypeOfApplication("C100")
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = sendAndReplyController
+            .sendOrReplyToMessagesSubmit(auth, callbackRequest);
         verify(sendAndReplyCommonService).replyMessages(auth, caseData, caseDataMap);
+        Assert.assertEquals("C100", response.getData().get("CaseAccessCategory"));
     }
 
     @Test
