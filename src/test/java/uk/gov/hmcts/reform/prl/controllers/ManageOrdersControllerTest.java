@@ -1423,7 +1423,7 @@ public class ManageOrdersControllerTest {
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.populateHeader(
-            callbackRequest, authToken, s2sToken, null
+            callbackRequest, authToken, s2sToken
         );
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseTypeOfApplication"));
     }
@@ -2334,7 +2334,7 @@ public class ManageOrdersControllerTest {
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
         assertExpectedException(() -> {
-            manageOrdersController.populateHeader(callbackRequest, authToken, s2sToken, null);
+            manageOrdersController.populateHeader(callbackRequest, authToken, s2sToken);
         }, RuntimeException.class, "Invalid Client");
     }
 
@@ -2371,8 +2371,7 @@ public class ManageOrdersControllerTest {
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController.populateHeader(
             callbackRequest,
             authToken,
-            s2sToken,
-            null
+            s2sToken
         );
         assertNull(callbackResponse.getData().get(PrlAppsConstants.CAFCASS_OR_CYMRU_NEED_TO_PROVIDE_REPORT));
         assertNotNull(callbackResponse);
@@ -2411,8 +2410,7 @@ public class ManageOrdersControllerTest {
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController.populateHeader(
             callbackRequest,
             authToken,
-            s2sToken,
-            null
+            s2sToken
         );
         assertEquals(Yes,callbackResponse.getData().get(PrlAppsConstants.CAFCASS_OR_CYMRU_NEED_TO_PROVIDE_REPORT));
         assertNotNull(callbackResponse);
