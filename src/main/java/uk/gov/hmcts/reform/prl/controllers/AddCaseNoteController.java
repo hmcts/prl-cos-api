@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.services.UserService;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ACCESS_CATEGORY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @Slf4j
@@ -59,6 +60,8 @@ public class AddCaseNoteController {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             caseDataUpdated.put("caseNotes", addCaseNoteService.addCaseNoteDetails(caseData, userDetails));
             addCaseNoteService.clearFields(caseDataUpdated);
+            caseDataUpdated.put(CASE_ACCESS_CATEGORY, caseData.getCaseTypeOfApplication());
+
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
