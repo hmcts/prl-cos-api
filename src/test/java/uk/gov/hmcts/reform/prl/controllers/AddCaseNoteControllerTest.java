@@ -9,7 +9,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
@@ -102,11 +101,10 @@ public class AddCaseNoteControllerTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        AboutToStartOrSubmitCallbackResponse submitCallbackResponse = addCaseNoteController
-            .submitCaseNote(authToken, s2sToken, callbackRequest);
+        addCaseNoteController.submitCaseNote(authToken, s2sToken, callbackRequest);
 
-        verify(addCaseNoteService, times(1)).addCaseNoteDetails(caseData,userDetails);
-        assertEquals("C100", submitCallbackResponse.getData().get("CaseAccessCategory"));
+        verify(addCaseNoteService, times(1))
+            .addCaseNoteDetails(caseData,userDetails);
 
     }
 

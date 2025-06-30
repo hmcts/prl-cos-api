@@ -238,7 +238,9 @@ public class SendAndReplyControllerTest {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         CaseData caseData = CaseData.builder().id(12345L)
             .sendOrReplyDto(SendOrReplyDto.builder().build())
-            .chooseSendOrReply(SEND).build();
+            .chooseSendOrReply(SEND)
+            .caseTypeOfApplication("C100")
+            .build();
         Message message = Message.builder().build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
@@ -246,9 +248,10 @@ public class SendAndReplyControllerTest {
         when(sendAndReplyService.addNewMessage(caseData, message)).thenReturn(Collections.singletonList(element(message)));
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        sendAndReplyController.handleAboutToSubmit(auth, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = sendAndReplyController.handleAboutToSubmit(auth, callbackRequest);
         verify(sendAndReplyService).buildNewSendMessage(caseData);
         verify(sendAndReplyService).addNewMessage(caseData, message);
+        Assert.assertEquals("C100", response.getData().get("CaseAccessCategory"));
     }
 
     @Test
