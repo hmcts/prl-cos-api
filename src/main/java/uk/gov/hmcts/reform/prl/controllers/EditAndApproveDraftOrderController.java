@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
@@ -105,13 +106,15 @@ public class EditAndApproveDraftOrderController {
                     .state(ObjectUtils.isEmpty(caseData.getState()) && ObjectUtils.isNotEmpty(callbackRequest.getCaseDetails())
                                ? State.fromValue(callbackRequest.getCaseDetails().getState()) : caseData.getState())
                     .build();
+                Map<String, Object> caseDataMap = draftAnOrderService.getDraftOrderDynamicList(
+                    caseData,
+                    callbackRequest.getEventId(),
+                    clientContext,
+                    authorisation
+                );
+
                 return AboutToStartOrSubmitCallbackResponse.builder()
-                    .data(draftAnOrderService.getDraftOrderDynamicList(
-                        caseData,
-                        callbackRequest.getEventId(),
-                        clientContext,
-                        authorisation
-                    )).build();
+                    .data(caseDataMap).build();
             } else {
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("There are no draft orders")).build();
             }
@@ -386,6 +389,12 @@ public class EditAndApproveDraftOrderController {
                 dynamicList,
                 clientContext, callbackRequest.getEventId()
             );
+
+            if (Event.HEARING_EDIT_AND_APPROVE_ORDER.getId().equals(callbackRequest.getEventId())) {
+                selectedOrder.getManageOrderHearingDetails().forEach(hearingDetail -> {
+                    hearingDetail.getValue().setHearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab);
+                });
+            }
 
             String language = CaseUtils.getLanguage(clientContext);
             Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(
