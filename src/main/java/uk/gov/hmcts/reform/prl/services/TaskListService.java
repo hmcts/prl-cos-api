@@ -348,21 +348,23 @@ public class TaskListService {
 
                 caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
                 CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
-                caseData = caseData.toBuilder()
-                    .c8ArchivedDocuments(updatedCaseData.getC8ArchivedDocuments())
-                    .c8Document(updatedCaseData.getC8Document())
-                    .c1ADocument(updatedCaseData.getC1ADocument())
-                    .c8WelshDocument(updatedCaseData.getC8WelshDocument())
-                    .finalDocument(!JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)
-                                       ? updatedCaseData.getFinalDocument() : caseData.getFinalDocument())
-                    .finalWelshDocument(!JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)
-                                            ? updatedCaseData.getFinalWelshDocument() : caseData.getFinalWelshDocument())
-                    .c1AWelshDocument(updatedCaseData.getC1AWelshDocument())
-                    .c1ADraftDocument(SUBMITTED_STATE.equalsIgnoreCase(state)
-                                          ? updatedCaseData.getC1ADraftDocument() : caseData.getC1ADraftDocument())
-                    .c1AWelshDraftDocument(SUBMITTED_STATE.equalsIgnoreCase(state)
-                                               ? updatedCaseData.getC1AWelshDraftDocument() : caseData.getC1AWelshDraftDocument())
-                    .build();
+                caseDataUpdated.put("c8Document", updatedCaseData.getC8Document());
+                caseDataUpdated.put("c1ADocument", updatedCaseData.getC1ADocument());
+                caseDataUpdated.put("c8WelshDocument", updatedCaseData.getC8WelshDocument());
+
+                caseDataUpdated.put("finalDocument", !JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)
+                    ? updatedCaseData.getFinalDocument() : caseData.getFinalDocument());
+
+                caseDataUpdated.put("finalWelshDocument", !JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)
+                    ? updatedCaseData.getFinalWelshDocument() : caseData.getFinalWelshDocument());
+
+                caseDataUpdated.put("c1AWelshDocument", updatedCaseData.getC1AWelshDocument());
+
+                caseDataUpdated.put("c1ADraftDocument", SUBMITTED_STATE.equalsIgnoreCase(state)
+                    ? updatedCaseData.getC1ADraftDocument() : caseData.getC1ADraftDocument());
+
+                caseDataUpdated.put("c1AWelshDraftDocument", SUBMITTED_STATE.equalsIgnoreCase(state)
+                    ? updatedCaseData.getC1AWelshDraftDocument() : caseData.getC1AWelshDraftDocument());
 
             } catch (Exception e) {
                 log.error("Error regenerating the document {}", e.getMessage());
@@ -370,13 +372,14 @@ public class TaskListService {
         }
 
 
-        tabService.mapAndSubmitAllTabsUpdate(
+        tabService.submitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),
             String.valueOf(callbackRequest.getCaseDetails().getId()),
             startAllTabsUpdateDataContent.startEventResponse(),
             startAllTabsUpdateDataContent.eventRequestData(),
-            caseData
+            caseDataUpdated
         );
+        caseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
 
         if (!isCourtStaff
             || (isCourtStaff && (AWAITING_SUBMISSION_TO_HMCTS.getValue().equalsIgnoreCase(state)
