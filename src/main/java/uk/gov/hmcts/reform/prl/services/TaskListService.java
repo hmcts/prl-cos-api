@@ -343,7 +343,7 @@ public class TaskListService {
                                                   .build());
 
                         // caseDataUpdated.put("c8ArchivedDocuments", archivedDocuments);
-                        caseDataUpdated.put("applicantC1Aapplication", caseData.getC1ADocument());
+                        caseDataUpdated.put("applicantC1AApplication", caseData.getC1ADocument());
                     }
                 }
 
