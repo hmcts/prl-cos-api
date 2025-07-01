@@ -26,6 +26,8 @@ import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationPostService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangeContentProvider;
+import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
+import uk.gov.hmcts.reform.prl.services.pin.FL401CaseInviteService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,6 +39,7 @@ import static org.apache.commons.lang3.RandomUtils.nextLong;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -75,6 +78,12 @@ public class NoticeOfChangeEventHandlerTest {
 
     @Mock
     private SystemUserService systemUserService;
+
+    @Mock
+    private C100CaseInviteService c100CaseInviteService;
+
+    @Mock
+    private FL401CaseInviteService fl401CaseInviteService;
 
     private NoticeOfChangeEvent noticeOfChangeEvent;
     private PartyDetails applicant1;
@@ -166,7 +175,7 @@ public class NoticeOfChangeEventHandlerTest {
     public void shouldNotifyWhenLegalRepresentativeRemoved() {
         noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);
 
-        verify(emailService,times(4)).send(Mockito.anyString(),
+        verify(emailService,times(5)).send(Mockito.anyString(),
                                            Mockito.any(),
                                            Mockito.any(), Mockito.any());
 
@@ -179,7 +188,7 @@ public class NoticeOfChangeEventHandlerTest {
 
         noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);
 
-        verify(emailService,times(4)).send(Mockito.anyString(),
+        verify(emailService,times(5)).send(Mockito.anyString(),
                                            Mockito.any(),
                                            Mockito.any(), Mockito.any());
 
@@ -317,8 +326,169 @@ public class NoticeOfChangeEventHandlerTest {
         noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);
 
         Assert.assertNotNull(bulkPrintService.send(anyString(), anyString(), anyString(), anyList(), anyString()));
-        verify(emailService,times(4)).send(Mockito.anyString(),
+        verify(emailService,times(5)).send(Mockito.anyString(),
                                            Mockito.any(),
                                            Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    public void shouldFallbackToPostWhenLiPPrefersEmailButNoAddress() {
+        // 1) LiP with no email, preferring email, but **with** a postal address
+        PartyDetails noEmailLip = applicant1.toBuilder()
+            .email(null)
+            .contactPreferences(ContactPreferences.email)
+            .address(Address.builder()
+                         .addressLine1("1 High Street")
+                         .postTown("London")
+                         .postCode("E1 1AA")
+                         .build())
+            .build();
+        Element<PartyDetails> lipElement = element(noEmailLip);
+
+        // 2) Match caseInvite by the same ID
+        CaseInvite invite = CaseInvite.builder()
+            .partyId(lipElement.getId())
+            .accessCode("FALLBACK123")
+            .build();
+        Element<CaseInvite> inviteElement = element(invite);
+
+        // 3) Rebuild CaseData
+        caseData = CaseData.builder()
+            .id(caseData.getId())
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(lipElement))
+            .respondents(List.of(element(respondent2)))
+            .caseInvites(List.of(inviteElement))
+            .othersToNotify(Collections.emptyList())
+            .build();
+
+        // 4) Rebuild event with non-null accessCode
+        noticeOfChangeEvent = noticeOfChangeEvent.toBuilder()
+            .caseData(caseData)
+            .representedPartyIndex(0)
+            .representing(CAAPPLICANT)
+            .accessCode("FALLBACK123")
+            .build();
+
+        // 5) Feature flag on
+        when(launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER))
+            .thenReturn(true);
+
+        // 6) Stub document providers
+        when(serviceOfApplicationPostService.getCoverSheets(
+            any(CaseData.class),
+            anyString(),
+            any(Address.class),
+            anyString(),
+            anyString()
+        )).thenReturn(Collections.emptyList());
+        // generateAccessCodeLetter already stubbed in @Before to return non-empty list
+
+        // Act
+        noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);
+
+        // Assert: fallback to bulk print
+        verify(bulkPrintService, times(1))
+            .send(anyString(), anyString(), anyString(), anyList(), anyString());
+
+        // And still notify at least one solicitor via email
+        verify(emailService, atLeastOnce()).send(anyString(), any(), any(), any());
+    }
+
+    @Test
+    public void testFetchOrCreateAccessCode_GeneratesAndPersistsInvite() {
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName("Test")
+            .partyId(UUID.randomUUID())
+            .build();
+        Element<PartyDetails> partyElement = element(partyDetails);
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .caseInvites(new ArrayList<>())
+            .build();
+
+        CaseInvite generatedInvite = CaseInvite.builder()
+            .partyId(partyElement.getId())
+            .accessCode("NEWCODE123")
+            .build();
+
+        // Mock the correct service
+        when(c100CaseInviteService.generateCaseInvite(any(), any()))
+            .thenReturn(generatedInvite);
+
+        String accessCode = noticeOfChangeEventHandler.fetchOrCreateAccessCode(
+            caseData,
+            partyElement,
+            CAAPPLICANT
+        );
+
+        // Assert
+        Assert.assertEquals("NEWCODE123", accessCode);
+        Assert.assertFalse(caseData.getCaseInvites().isEmpty());
+        Assert.assertEquals("NEWCODE123", caseData.getCaseInvites().get(0).getValue().getAccessCode());
+    }
+
+    @Test
+    public void testFetchOrCreateAccessCode_FL401_GeneratesAndPersistsInvite() {
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName("TestFL401")
+            .partyId(UUID.randomUUID())
+            .build();
+        Element<PartyDetails> partyElement = element(partyDetails);
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .caseInvites(new ArrayList<>())
+            .build();
+
+        CaseInvite generatedInvite = CaseInvite.builder()
+            .partyId(partyElement.getId())
+            .accessCode("FL401CODE")
+            .build();
+
+        // Mock the correct service
+        when(fl401CaseInviteService.generateCaseInvite(any(), any()))
+            .thenReturn(generatedInvite);
+
+        String accessCode = noticeOfChangeEventHandler.fetchOrCreateAccessCode(
+            caseData,
+            partyElement,
+            CAAPPLICANT
+        );
+
+        Assert.assertEquals("FL401CODE", accessCode);
+        Assert.assertFalse(caseData.getCaseInvites().isEmpty());
+        Assert.assertEquals("FL401CODE", caseData.getCaseInvites().get(0).getValue().getAccessCode());
+    }
+
+    @Test
+    public void testFetchOrCreateAccessCode_UsesExistingInvite_DoesNotRegenerate() {
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName("Existing")
+            .partyId(UUID.randomUUID())
+            .build();
+        Element<PartyDetails> partyElement = element(partyDetails);
+
+        CaseInvite existingInvite = CaseInvite.builder()
+            .partyId(partyElement.getId())
+            .accessCode("EXISTINGCODE")
+            .build();
+        Element<CaseInvite> inviteElement = element(existingInvite);
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .caseInvites(new ArrayList<>(List.of(inviteElement)))
+            .build();
+
+        // Act
+        String accessCode = noticeOfChangeEventHandler.fetchOrCreateAccessCode(
+            caseData,
+            partyElement,
+            CAAPPLICANT
+        );
+
+        // Assert
+        Assert.assertEquals("EXISTINGCODE", accessCode);
+        // Ensure generateCaseInvite is NOT called
+        verify(c100CaseInviteService, times(0)).generateCaseInvite(any(), any());
     }
 }
