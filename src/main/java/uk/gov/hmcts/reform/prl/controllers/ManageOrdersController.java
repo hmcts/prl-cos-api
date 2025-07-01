@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
@@ -48,6 +49,7 @@ import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.AutomatedHearingUtils;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
 import java.util.ArrayList;
@@ -487,13 +489,19 @@ public class ManageOrdersController {
             } else {
                 caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, No);
             }
+
             String encodedClientContext = CaseUtils.setTaskCompletion(
                 clientContext,
                 objectMapper,
                 caseData,
-                (data) -> !manageOrderService.isSaveAsDraft(data)
-                    || !ManageOrdersUtils.isHearingPageNeeded(data.getCreateSelectOrderOptions(),
-                                                              data.getManageOrders().getC21OrderOptions())
+                (data) ->
+                    !manageOrderService.isSaveAsDraft(data)
+                ||  ofNullable(data.getManageOrders().getOrdersHearingDetails())
+                        .map(ElementUtils::unwrapElements)
+                        .map(hearingData -> hearingData.getFirst().getHearingDateConfirmOptionEnum())
+                        .filter(hearingDateConfirmOptionEnum ->
+                                    HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.getId()
+                                        .equals(hearingDateConfirmOptionEnum.getId())).isPresent()
             );
 
             ResponseEntity.BodyBuilder responseBuilder = ofNullable(encodedClientContext)
