@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -2675,7 +2676,7 @@ public class ManageOrdersControllerTest {
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
         assertExpectedException(() -> {
-            manageOrdersController.prePopulateJudgeOrLegalAdviser(authToken, s2sToken, callbackRequest);
+            manageOrdersController.prePopulateJudgeOrLegalAdviser(authToken, s2sToken, null, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 
@@ -3221,7 +3222,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testPrePopulateJudgeOrLegalAdviser() {
+    public void testPrePopulateJudgeOrLegalAdviser() throws JsonProcessingException {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -3245,9 +3246,19 @@ public class ManageOrdersControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        Mockito.when(refDataUserService.getLegalAdvisorList()).thenReturn(List.of(DynamicListElement.builder().build()));
-        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
-        assertNotNull(manageOrdersController.prePopulateJudgeOrLegalAdviser(authToken, s2sToken, callbackRequest));
+        when(refDataUserService.getLegalAdvisorList()).thenReturn(List.of(DynamicListElement.builder().build()));
+        when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.writeValueAsString(any())).thenReturn("clientContext");
+        ResponseEntity<AboutToStartOrSubmitCallbackResponse> responseResponseEntity = manageOrdersController.prePopulateJudgeOrLegalAdviser(
+            authToken,
+            s2sToken,
+            ENCRYPTED_CLIENT_CONTEXT,
+            callbackRequest
+        );
+        assertThat(responseResponseEntity.getBody().getData().get("nameOfLaToReviewOrder")).isNotNull();
+        assertThat(responseResponseEntity.getHeaders())
+            .containsKey(CLIENT_CONTEXT_HEADER_PARAMETER);
     }
 
     @Test
@@ -3278,7 +3289,7 @@ public class ManageOrdersControllerTest {
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
         assertExpectedException(() -> {
-            manageOrdersController.prePopulateJudgeOrLegalAdviser(authToken, s2sToken, callbackRequest);
+            manageOrdersController.prePopulateJudgeOrLegalAdviser(authToken, s2sToken, null, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 
