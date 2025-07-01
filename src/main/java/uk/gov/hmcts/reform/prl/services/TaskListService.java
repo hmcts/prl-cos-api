@@ -333,17 +333,14 @@ public class TaskListService {
                         List<Element<Document>> archivedDocuments = new ArrayList<>();
 
                         if (caseData.getC8ArchivedDocuments() != null) {
-                            for (Document doc : caseData.getC8ArchivedDocuments()) {
-                                archivedDocuments.add(Element.<Document>builder()
-                                                          .value(doc)
-                                                          .build());
+                            for (Element<Document> element : caseData.getC8ArchivedDocuments()) {
+                                archivedDocuments.add(element);
                             }
                         }
 
                         archivedDocuments.add(Element.<Document>builder()
                                                   .value(archivedC8)
-                                                  .build()
-                        );
+                                                  .build());
 
                         caseDataUpdated.put("c8ArchivedDocuments", archivedDocuments);
                     }

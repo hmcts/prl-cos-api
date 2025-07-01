@@ -58,8 +58,8 @@ public class BaseCaseData {
     @JsonProperty("c1AWelshDraftDocument")
     private  Document c1AWelshDraftDocument;
 
-    @JsonProperty("c8ArchivedDocument")
-    private List<Document> c8ArchivedDocuments;
+    @JsonProperty("c8ArchivedDocuments")
+    private List<Element<Document>> c8ArchivedDocuments;
 
     /**
      * Case Type Of Application.
