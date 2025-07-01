@@ -333,7 +333,7 @@ public class TaskListService {
                         );
                         archivedDocuments.add(archivedC8);
 
-                        caseDataUpdated.put("c8ArchivedDocuments", archivedDocuments);
+                        // caseDataUpdated.put("c8ArchivedDocuments", archivedDocuments);
                     }
                 }
 
