@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -324,16 +325,28 @@ public class TaskListService {
                     Document c8ToArchive = caseData.getC8Document();
 
                     if (c8ToArchive != null) {
-                        Document archivedC8 = c8ToArchive.toBuilder()
+                        Document archivedC8 = Document.builder()
+                            .documentUrl(c8ToArchive.getDocumentUrl())
+                            .documentBinaryUrl(c8ToArchive.getDocumentBinaryUrl())
                             .documentFileName("C8ArchivedDocument.pdf")
                             .build();
 
-                        List<Document> archivedDocuments = new ArrayList<>(
-                            Optional.ofNullable(caseData.getC8ArchivedDocuments()).orElse(Collections.emptyList())
-                        );
-                        archivedDocuments.add(archivedC8);
+                        List<Element<Document>> archivedDocuments = new ArrayList<>();
 
-                        // caseDataUpdated.put("c8ArchivedDocuments", archivedDocuments);
+                        if (caseData.getC8ArchivedDocuments() != null) {
+                            for (Document doc : caseData.getC8ArchivedDocuments()) {
+                                archivedDocuments.add(Element.<Document>builder()
+                                                          .value(doc)
+                                                          .build());
+                            }
+                        }
+
+                        archivedDocuments.add(Element.<Document>builder()
+                                                  .value(archivedC8)
+                                                  .build()
+                        );
+
+                        caseDataUpdated.put("c8ArchivedDocuments", archivedDocuments);
                     }
                 }
 
