@@ -21,6 +21,8 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 public class AdditionalProperties {
     @JsonProperty("orderId")
     private String orderId;
+    @JsonProperty("caseNoteId")
+    private String caseNoteId;
     @JsonProperty("additionalApplicationId")
     private String additionalApplicationId;
     @JsonProperty("hearingId")
