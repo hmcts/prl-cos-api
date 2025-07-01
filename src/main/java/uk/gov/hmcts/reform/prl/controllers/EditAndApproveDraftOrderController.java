@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
-import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
@@ -390,11 +389,15 @@ public class EditAndApproveDraftOrderController {
                 clientContext, callbackRequest.getEventId()
             );
 
-            if (Event.HEARING_EDIT_AND_APPROVE_ORDER.getId().equals(callbackRequest.getEventId())) {
+            /* if (Event.HEARING_EDIT_AND_APPROVE_ORDER.getId().equals(callbackRequest.getEventId())) {
+                WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
+                String hearingId = CaseUtils.getDraftOrderId(waMapper);
                 selectedOrder.getManageOrderHearingDetails().forEach(hearingDetail -> {
-                    hearingDetail.getValue().setHearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab);
+                    if (hearingId != null && hearingId.equalsIgnoreCase(hearingDetail.getValue().getHearingId())) {
+                        hearingDetail.getValue().setHearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab);
+                    }
                 });
-            }
+            } */
 
             String language = CaseUtils.getLanguage(clientContext);
             Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(
