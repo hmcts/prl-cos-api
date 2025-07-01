@@ -270,8 +270,6 @@ public class DraftAnOrderService {
                                                         String clientContext,
                                                         String authorisation) {
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
-        WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
-        String hearingid = CaseUtils.getHearingId(waMapper);
         Map<String, Object> caseDataMap = new HashMap<>();
         List<Element<DraftOrder>> supportedDraftOrderList = new ArrayList<>();
         caseData.getDraftOrderCollection().forEach(
@@ -283,14 +281,17 @@ public class DraftAnOrderService {
                 }
             }
         );
+
         // hearing filter if hearing present
-        if (hearingid != null) {
+        if (Event.HEARING_EDIT_AND_APPROVE_ORDER.getId().equals(eventId)) {
+            WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
+            String hearingid = CaseUtils.getHearingId(waMapper);
             List<Element<DraftOrder>> filteredSupportedDraftOrderList = supportedDraftOrderList.stream()
                 .filter(Objects::nonNull)
                 .filter(orderList -> orderList.getValue() != null
                     && CollectionUtils.isNotEmpty(orderList.getValue().getManageOrderHearingDetails())
                     && orderList.getValue().getManageOrderHearingDetails().stream()
-                    .anyMatch(mo -> hearingid.equals(mo.getValue().getHearingId()))).toList();
+                    .anyMatch(mo -> mo.getValue().getHearingId().equals(hearingid))).toList();
 
             caseDataMap.put(DRAFT_ORDERS_DYNAMIC_LIST, ElementUtils.asDynamicList(
                 filteredSupportedDraftOrderList,
