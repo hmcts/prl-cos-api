@@ -183,8 +183,6 @@ public class ManageOrdersControllerTest {
     @Mock
     AllTabServiceImpl allTabService;
 
-
-
     @Before
     public void setUp() {
         List<String> roles = new ArrayList();

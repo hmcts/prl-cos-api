@@ -65,7 +65,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Supplier;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -913,7 +913,8 @@ public class CaseUtils {
     public static String setTaskCompletion(
         String clientContext,
         ObjectMapper objectMapper,
-        Supplier<Boolean> completeTask) {
+        CaseData caseData,
+        Predicate<CaseData> completeTask) {
 
         return ofNullable(clientContext)
             .map(value -> getWaMapper(clientContext))
@@ -921,7 +922,7 @@ public class CaseUtils {
             .map(value ->
                      value.toBuilder()
                          .userTask(value.getUserTask().toBuilder()
-                                       .completeTask(completeTask.get())
+                                       .completeTask(completeTask.test(caseData))
                                        .build())
                          .build())
             .map(
@@ -937,7 +938,6 @@ public class CaseUtils {
     public static String base64Encode(WaMapper waMapper, ObjectMapper objectMapper) {
         String base64EncodedClientContext = null;
         if (waMapper != null) {
-            log.info("clientContext is present");
             try {
                 String clientContextToEncode = objectMapper.writeValueAsString(waMapper);
                 //TODO REMOVE

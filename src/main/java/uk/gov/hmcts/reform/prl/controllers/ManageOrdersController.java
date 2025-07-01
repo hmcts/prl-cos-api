@@ -466,16 +466,16 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            final CaseData updatedCaseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
+            caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            if (updatedCaseData.getServeOrderData().getDoYouWantToServeOrder().equals(YesOrNo.Yes)) {
+            if (caseData.getServeOrderData().getDoYouWantToServeOrder().equals(YesOrNo.Yes)) {
                 caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, YesOrNo.Yes);
-                if (amendOrderUnderSlipRule.equals(updatedCaseData.getManageOrdersOptions())) {
-                    caseDataUpdated.putAll(amendOrderService.updateOrder(updatedCaseData, authorisation));
+                if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
+                    caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
                 } else {
                     caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
                         authorisation,
-                        updatedCaseData,
+                        caseData,
                         PrlAppsConstants.ENGLISH
                     ));
                 }
@@ -487,11 +487,14 @@ public class ManageOrdersController {
             } else {
                 caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, No);
             }
-
             String encodedClientContext = CaseUtils.setTaskCompletion(
                 clientContext,
                 objectMapper,
-                () -> !manageOrderService.isSaveAsDraft(updatedCaseData));
+                caseData,
+                (data) -> !manageOrderService.isSaveAsDraft(data)
+                    || !ManageOrdersUtils.isHearingPageNeeded(data.getCreateSelectOrderOptions(),
+                                                              data.getManageOrders().getC21OrderOptions())
+            );
 
             ResponseEntity.BodyBuilder responseBuilder = ofNullable(encodedClientContext)
                 .map(value -> ResponseEntity.ok()
@@ -499,8 +502,8 @@ public class ManageOrdersController {
                 .orElseGet(ResponseEntity::ok);
 
             return responseBuilder.body(AboutToStartOrSubmitCallbackResponse.builder()
-                                      .data(caseDataUpdated)
-                                      .build());
+                                            .data(caseDataUpdated)
+                                            .build());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

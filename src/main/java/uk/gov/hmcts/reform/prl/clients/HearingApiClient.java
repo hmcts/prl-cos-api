@@ -32,6 +32,42 @@ public interface HearingApiClient {
            "caseRef": "<caseRef>",
            "caseHearings": [
              {
+               "hearingID": "111111",
+               "hearingRequestDateTime": null,
+               "hearingType": "ABA5-FFH",
+               "hmcStatus": "LISTED",
+               "lastResponseReceivedDateTime": null,
+               "requestVersion": null,
+               "hearingListingStatus": null,
+               "listAssistCaseStatus": null,
+               "hearingDaySchedule": [
+                 {
+                   "hearingStartDateTime": "2025-07-28T18:23:45.123",
+                   "hearingEndDateTime": "2025-07-30T18:23:45.123",
+                   "listAssistSessionId": null,
+                   "hearingVenueId": "898213",
+                   "hearingVenueName": "EAST LONDON FAMILY COURT",
+                   "hearingVenueLocationCode": null,
+                   "hearingVenueAddress": "WESTFERRY CIRCUS (WESTFERRY HOUSE)",
+                   "hearingRoomId": "East London Family Bench Court Central Hub",
+                   "hearingJudgeId": null,
+                   "hearingJudgeName": null,
+                   "panelMemberIds": null,
+                   "attendees": [
+                     {
+                       "partyID": "7663081e-778d-4317-b278-7642b740d317",
+                       "hearingSubChannel": "VID"
+                     }
+                   ]
+                 }
+               ],
+               "hearingGroupRequestId": "280",
+               "hearingIsLinkedFlag": null,
+               "hearingTypeValue": null,
+               "nextHearingDate": "2025-07-30T18:23:45.123",
+               "urgentFlag": false
+             },
+             {
                "hearingID": "999999",
                "hearingRequestDateTime": null,
                "hearingType": "ABA5-FFH",
