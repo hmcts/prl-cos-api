@@ -942,9 +942,6 @@ public class CaseUtils {
         if (waMapper != null) {
             try {
                 String clientContextToEncode = objectMapper.writeValueAsString(waMapper);
-                //TODO REMOVE
-                log.info("Updated client context to prevent auto complete {}",
-                         objectMapper.writeValueAsString(waMapper));
                 base64EncodedClientContext =  Base64.getEncoder().encodeToString(clientContextToEncode.getBytes());
             } catch (JsonProcessingException e) {
                 log.error("Exception while clientContext the Client-Context {}", e.getMessage());
