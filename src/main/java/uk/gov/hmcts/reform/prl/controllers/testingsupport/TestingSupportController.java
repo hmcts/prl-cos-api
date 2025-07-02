@@ -248,18 +248,5 @@ public class TestingSupportController {
             ))
             .build();
     }
-
-    //TODO: DONT COMMIT THIS CHANGE
-    @PutMapping(path = "testing/hearing-management-state-update/{caseState}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "fis service call to update the state of case")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback processed.",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = CallbackResponse.class))),
-        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public void testingCaseStateUpdateByHearingManagement(@RequestBody HearingRequest hearingRequest,
-                                                          @PathVariable("caseState") State caseState) throws Exception {
-
-        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest,caseState);
-    }
 }
 
