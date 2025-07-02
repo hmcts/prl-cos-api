@@ -709,6 +709,7 @@ public class NoticeOfChangePartiesService {
         sendEmailAndUpdateCaseData(selectedPartyDetailsMap, String.valueOf(newCaseData.getId()));
     }
 
+
     private void sendEmailAndUpdateCaseData(
         Map<Optional<SolicitorRole>,
             Element<PartyDetails>> selectedPartyDetailsMap,
@@ -731,6 +732,7 @@ public class NoticeOfChangePartiesService {
             allTabsUpdateStartEventResponse,
             objectMapper
         );
+        Map<Optional<SolicitorRole>, Element<PartyDetails>> oldDetailsMap = new HashMap<>(selectedPartyDetailsMap);
         for (var entry : selectedPartyDetailsMap.entrySet()) {
             Optional<SolicitorRole> removeSolicitorRole = entry.getKey();
             Element<PartyDetails> newPartyDetailsElement = entry.getValue();
@@ -773,7 +775,7 @@ public class NoticeOfChangePartiesService {
             Optional<SolicitorRole> removeSolicitorRole = entry.getKey();
             Element<PartyDetails> newPartyDetailsElement = entry.getValue();
             sendEmailOnRemovalOfLegalRepresentation(
-                null,
+                oldDetailsMap.get(removeSolicitorRole),
                 newPartyDetailsElement,
                 removeSolicitorRole,
                 caseData
@@ -898,7 +900,7 @@ public class NoticeOfChangePartiesService {
         }
     }
 
-    private void sendEmailOnRemovalOfLegalRepresentation(Element<PartyDetails> oldPartyDetails,
+    void sendEmailOnRemovalOfLegalRepresentation(Element<PartyDetails> oldPartyDetails,
                                                          Element<PartyDetails> newPartyDetails,
                                                          Optional<SolicitorRole> solicitorRole,
                                                          CaseData caseData) {
