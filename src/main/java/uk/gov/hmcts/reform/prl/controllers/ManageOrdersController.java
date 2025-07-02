@@ -489,14 +489,6 @@ public class ManageOrdersController {
             } else {
                 caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, No);
             }
-            boolean saveAsDraft = manageOrderService.isSaveAsDraft(caseData);
-
-            boolean present = ofNullable(caseData.getManageOrders().getOrdersHearingDetails())
-                .map(ElementUtils::unwrapElements)
-                .map(hearingData -> hearingData.getFirst().getHearingDateConfirmOptionEnum())
-                .filter(hearingDateConfirmOptionEnum ->
-                            HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.getId()
-                                .equals(hearingDateConfirmOptionEnum.getId())).isPresent();
 
             String encodedClientContext = CaseUtils.setTaskCompletion(
                 clientContext,
