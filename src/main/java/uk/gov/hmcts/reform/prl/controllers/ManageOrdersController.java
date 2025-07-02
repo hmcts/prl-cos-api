@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
@@ -48,6 +49,7 @@ import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.AutomatedHearingUtils;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
 import java.util.ArrayList;
@@ -487,13 +489,27 @@ public class ManageOrdersController {
             } else {
                 caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, No);
             }
+            boolean saveAsDraft = manageOrderService.isSaveAsDraft(caseData);
+
+            boolean present = ofNullable(caseData.getManageOrders().getOrdersHearingDetails())
+                .map(ElementUtils::unwrapElements)
+                .map(hearingData -> hearingData.getFirst().getHearingDateConfirmOptionEnum())
+                .filter(hearingDateConfirmOptionEnum ->
+                            HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.getId()
+                                .equals(hearingDateConfirmOptionEnum.getId())).isPresent();
+
             String encodedClientContext = CaseUtils.setTaskCompletion(
                 clientContext,
                 objectMapper,
                 caseData,
-                (data) -> !manageOrderService.isSaveAsDraft(data)
-                    || !ManageOrdersUtils.isHearingPageNeeded(data.getCreateSelectOrderOptions(),
-                                                              data.getManageOrders().getC21OrderOptions())
+                (data) ->
+                    !manageOrderService.isSaveAsDraft(data)
+                     && ofNullable(data.getManageOrders().getOrdersHearingDetails())
+                        .map(ElementUtils::unwrapElements)
+                        .map(hearingData -> hearingData.getFirst().getHearingDateConfirmOptionEnum())
+                        .filter(hearingDateConfirmOptionEnum ->
+                                    HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.getId()
+                                        .equals(hearingDateConfirmOptionEnum.getId())).isPresent()
             );
 
             ResponseEntity.BodyBuilder responseBuilder = ofNullable(encodedClientContext)
@@ -553,9 +569,10 @@ public class ManageOrdersController {
     @PostMapping(path = "/manage-orders/pre-populate-judge-or-la/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to amend order mid-event")
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse prePopulateJudgeOrLegalAdviser(
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> prePopulateJudgeOrLegalAdviser(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -565,7 +582,28 @@ public class ManageOrdersController {
                 DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
                     .build()
             );
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            String encodedClientContext = CaseUtils.setTaskCompletion(
+                clientContext,
+                objectMapper,
+                caseData,
+                (data) -> ofNullable(data.getManageOrders().getOrdersHearingDetails())
+                        .map(ElementUtils::unwrapElements)
+                        .map(hearingData -> hearingData.getFirst().getHearingDateConfirmOptionEnum())
+                        .filter(hearingDateConfirmOptionEnum ->
+                                    HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.getId()
+                                        .equals(hearingDateConfirmOptionEnum.getId())).isPresent()
+            );
+
+            ResponseEntity.BodyBuilder responseBuilder = ofNullable(encodedClientContext)
+                .map(value -> ResponseEntity.ok()
+                    .header(CLIENT_CONTEXT_HEADER_PARAMETER, value))
+                .orElseGet(ResponseEntity::ok);
+
+            return responseBuilder.body(AboutToStartOrSubmitCallbackResponse.builder()
+                                            .data(caseDataUpdated)
+                                            .build());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

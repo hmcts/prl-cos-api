@@ -6465,7 +6465,6 @@ public class ManageOrderServiceTest {
             .contains(HearingData.builder()
                           .confirmedHearingDates(prePopulatedDynamicLists.getRetrievedHearingDates())
                           .displayConfirmedHearing(Yes)
-                          .transientConfirmedHearingDetail(label)
                           .hearingDateConfirmOptionEnum(dateConfirmedInHearingsTab)
                           .build());
 

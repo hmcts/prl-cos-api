@@ -3238,11 +3238,6 @@ public class ManageOrderService {
                     .getFirst();
                 hearingData.getConfirmedHearingDates()
                     .setValue(confirmedHearingDates);
-                //TODO reset this in about to submit
-                hearingData.setTransientConfirmedHearingDetail(
-                    confirmedHearingDates
-                        .getLabel()
-                );
                 hearingData.setHearingDateConfirmOptionEnum(dateConfirmedInHearingsTab);
             }
         );

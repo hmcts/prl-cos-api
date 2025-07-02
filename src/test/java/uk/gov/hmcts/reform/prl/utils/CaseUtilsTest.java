@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -30,6 +31,15 @@ public class CaseUtilsTest {
           }
         }
         """;
+    private static final String CLIENT_CONTEXT_WITH_LANGUAGE = """
+        {
+           "client_context": {
+             "user_language": {
+               "language": "en"
+             }
+           }
+        }
+        """;
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
@@ -51,11 +61,23 @@ public class CaseUtilsTest {
     }
 
     @Test
-    public void testWhenClientContextNotPresent() throws IOException {
+    public void testWhenClientContextNotPresent() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.findAndRegisterModules();
 
         assertThat(setTaskCompletion(null, mapper, CaseData.builder().build(), (data) -> false))
+            .isNull();
+    }
+
+    @Test
+    public void testWhenClientContextDoesnNotContainTask() throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.findAndRegisterModules();
+        WaMapper waMapper = mapper.readValue(CLIENT_CONTEXT_WITH_LANGUAGE, WaMapper.class);
+        String encodedString = base64Encode(waMapper, mapper);
+        assertThat(encodedString).isNotNull();
+
+        assertThat(setTaskCompletion(encodedString, mapper, CaseData.builder().build(), (data) -> false))
             .isNull();
     }
 }

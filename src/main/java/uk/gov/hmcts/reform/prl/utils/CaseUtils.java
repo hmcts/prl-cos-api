@@ -69,6 +69,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.springframework.util.CollectionUtils.isEmpty;
@@ -919,6 +920,7 @@ public class CaseUtils {
         return ofNullable(clientContext)
             .map(value -> getWaMapper(clientContext))
             .map(WaMapper::getClientContext)
+            .filter(value -> nonNull(value.getUserTask()))
             .map(value ->
                      value.toBuilder()
                          .userTask(value.getUserTask().toBuilder()

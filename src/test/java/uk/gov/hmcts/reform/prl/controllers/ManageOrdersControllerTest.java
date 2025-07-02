@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -21,7 +22,6 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -71,6 +71,7 @@ import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -95,6 +96,9 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
+import static uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum.dateConfirmedByListingTeam;
+import static uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab;
+import static uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum.dateReservedWithListAssit;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
@@ -132,6 +136,21 @@ public class ManageOrdersControllerTest {
                 }
               },
               "complete_task" : true
+            }
+          }
+        }
+        """;
+
+    private static final String CLIENT_CONTEXT_FALSE = """
+        {
+          "client_context": {
+            "user_task": {
+              "task_data": {
+                "additional_properties": {
+                  "hearingId": "12345"
+                }
+              },
+              "complete_task" : false
             }
           }
         }
@@ -2041,6 +2060,79 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
+    public void testAddUploadOrderDoesntNeedServingWithClientContextAndFinal() throws Exception {
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(Yes)
+            .build();
+
+        caseData = CaseData.builder()
+            .id(12345L)
+            .courtName("testcourt")
+            .manageOrders(manageOrders)
+            .previewOrderDoc(Document.builder()
+                                 .documentUrl(generatedDocumentInfo.getUrl())
+                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                 .documentHash(generatedDocumentInfo.getHashToken())
+                                 .documentFileName("PRL-ORDER-C21-COMMON.docx")
+                                 .build())
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .previewOrderDoc(Document.builder().build())
+            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(No).build())
+            .manageOrders(ManageOrders.builder()
+                              .ordersHearingDetails(ElementUtils.wrapElements(
+                                  HearingData.builder()
+                                      .hearingDateConfirmOptionEnum(dateConfirmedInHearingsTab)
+                                      .build()
+                              ))
+                              .build())
+            .build();
+
+        List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
+            OrderDetails.builder().build()).build());
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
+            .thenReturn(Map.of("orderCollection", orderDetailsList));
+        when(manageOrderService.populateHeader(caseData))
+            .thenReturn(stringObjectMap);
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
+            .thenReturn(caseData);
+        when(manageOrderService.isSaveAsDraft(caseData))
+            .thenReturn(false);
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(objectMapper.writeValueAsString(any())).thenReturn(CLIENT_CONTEXT);
+
+        ResponseEntity<AboutToStartOrSubmitCallbackResponse> responseResponseEntity = manageOrdersController.whenToServeOrder(
+            authToken,
+            s2sToken,
+            ENCRYPTED_CLIENT_CONTEXT,
+            callbackRequest
+        );
+
+        assertThat(responseResponseEntity.getBody().getData().get("doYouWantToServeOrder"))
+            .isEqualTo(No.getDisplayedValue());
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        assertThat(objectMapper.readTree(
+            new String(Base64.getDecoder().decode(responseResponseEntity
+                                                      .getHeaders()
+                                                      .getFirst(CLIENT_CONTEXT_HEADER_PARAMETER)))))
+            .isEqualTo(objectMapper.readTree(CLIENT_CONTEXT));
+    }
+
+    @Test
     public void testAddUploadOrderDoesntNeedServingWithClientContextAndDraft() throws Exception {
 
         ManageOrders manageOrders = ManageOrders.builder()
@@ -2063,6 +2155,13 @@ public class ManageOrdersControllerTest {
             .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(No).build())
+            .manageOrders(ManageOrders.builder()
+                              .ordersHearingDetails(ElementUtils.wrapElements(
+                                  HearingData.builder()
+                                      .hearingDateConfirmOptionEnum(dateConfirmedInHearingsTab)
+                                      .build()
+                              ))
+                              .build())
             .build();
 
         List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
@@ -2075,8 +2174,6 @@ public class ManageOrdersControllerTest {
             .thenReturn(stringObjectMap);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
             .thenReturn(caseData);
-        when(manageOrderService.isSaveAsDraft(any(CaseData.class)))
-            .thenReturn(false);
         when(manageOrderService.isSaveAsDraft(caseData))
             .thenReturn(true);
 
@@ -2088,7 +2185,7 @@ public class ManageOrdersControllerTest {
                              .build())
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(objectMapper.writeValueAsString(any())).thenReturn("clientContext");
+        when(objectMapper.writeValueAsString(any())).thenReturn(CLIENT_CONTEXT_FALSE);
 
         ResponseEntity<AboutToStartOrSubmitCallbackResponse> responseResponseEntity = manageOrdersController.whenToServeOrder(
             authToken,
@@ -2099,8 +2196,15 @@ public class ManageOrdersControllerTest {
 
         assertThat(No.getDisplayedValue())
             .isEqualTo(responseResponseEntity.getBody().getData().get("doYouWantToServeOrder"));
-        assertThat(responseResponseEntity.getHeaders())
-            .containsKey(CLIENT_CONTEXT_HEADER_PARAMETER);
+        assertThat(responseResponseEntity.getHeaders().getFirst(CLIENT_CONTEXT_HEADER_PARAMETER))
+            .isNotNull();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        assertThat(objectMapper.readTree(
+            new String(Base64.getDecoder().decode(responseResponseEntity
+                                                      .getHeaders()
+                                                      .getFirst(CLIENT_CONTEXT_HEADER_PARAMETER)))))
+            .isEqualTo(objectMapper.readTree(CLIENT_CONTEXT_FALSE));
     }
 
 
@@ -2675,7 +2779,7 @@ public class ManageOrdersControllerTest {
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
         assertExpectedException(() -> {
-            manageOrdersController.prePopulateJudgeOrLegalAdviser(authToken, s2sToken, callbackRequest);
+            manageOrdersController.prePopulateJudgeOrLegalAdviser(authToken, s2sToken, null, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 
@@ -2747,10 +2851,10 @@ public class ManageOrdersControllerTest {
     @Test
     public void testMoreThanOneHearingsSelectedValidation() throws Exception {
         HearingData hearingData1 = HearingData.builder()
-            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
+            .hearingDateConfirmOptionEnum(dateConfirmedByListingTeam)
             .build();
         HearingData hearingData2 = HearingData.builder()
-            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+            .hearingDateConfirmOptionEnum(dateConfirmedInHearingsTab)
             .build();
         CaseData caseData = CaseData.builder()
             .createSelectOrderOptions(noticeOfProceedingsParties)
@@ -2783,7 +2887,7 @@ public class ManageOrdersControllerTest {
     @Test
     public void testHearingTypeAndEstimatedTimingsValidations() throws Exception {
         HearingData hearingData = HearingData.builder()
-            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
+            .hearingDateConfirmOptionEnum(dateReservedWithListAssit)
             .hearingEstimatedDays("ABC")
             .hearingEstimatedHours("DEF")
             .hearingEstimatedMinutes("XYZ")
@@ -3100,7 +3204,7 @@ public class ManageOrdersControllerTest {
     @Test
     public void testHearingTypeAndEstimatedTimingsValidationsForSdo() throws Exception {
         HearingData hearingData = HearingData.builder()
-            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
+            .hearingDateConfirmOptionEnum(dateReservedWithListAssit)
             .hearingEstimatedDays("ABC")
             .hearingEstimatedHours("DEF")
             .hearingEstimatedMinutes("XYZ")
@@ -3221,7 +3325,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testPrePopulateJudgeOrLegalAdviser() {
+    public void testPrePopulateJudgeOrLegalAdviserWithConfirmedInHearingsTab() throws JsonProcessingException {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -3233,7 +3337,14 @@ public class ManageOrdersControllerTest {
             .children(List.of(element(Child.builder().firstName("ch").build())))
             .courtName("testcourt")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
-            .manageOrders(ManageOrders.builder().ordersHearingDetails(List.of(element(HearingData.builder().applicantName("asd").build()))).build())
+            .manageOrders(ManageOrders.builder()
+                              .ordersHearingDetails(List.of(element(HearingData.builder()
+                                                                        .applicantName("asd")
+                                                                        .hearingDateConfirmOptionEnum(
+                                                                            dateConfirmedInHearingsTab)
+                                                                        .build())))
+
+                              .build())
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -3245,9 +3356,80 @@ public class ManageOrdersControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        Mockito.when(refDataUserService.getLegalAdvisorList()).thenReturn(List.of(DynamicListElement.builder().build()));
-        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
-        assertNotNull(manageOrdersController.prePopulateJudgeOrLegalAdviser(authToken, s2sToken, callbackRequest));
+        when(refDataUserService.getLegalAdvisorList()).thenReturn(List.of(DynamicListElement.builder().build()));
+        when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.writeValueAsString(any())).thenReturn(CLIENT_CONTEXT);
+        ResponseEntity<AboutToStartOrSubmitCallbackResponse> responseResponseEntity = manageOrdersController.prePopulateJudgeOrLegalAdviser(
+            authToken,
+            s2sToken,
+            ENCRYPTED_CLIENT_CONTEXT,
+            callbackRequest
+        );
+        assertThat(responseResponseEntity.getBody().getData().get("nameOfLaToReviewOrder")).isNotNull();
+        assertThat(responseResponseEntity.getHeaders())
+            .containsKey(CLIENT_CONTEXT_HEADER_PARAMETER);
+
+        ObjectMapper mapper = new ObjectMapper();
+        assertThat(objectMapper.readTree(
+            new String(Base64.getDecoder().decode(responseResponseEntity
+                                                      .getHeaders()
+                                                      .getFirst(CLIENT_CONTEXT_HEADER_PARAMETER)))))
+            .isEqualTo(objectMapper.readTree(CLIENT_CONTEXT));
+    }
+
+    @Test
+    public void testPrePopulateJudgeOrLegalAdviserWithDateReservedWithListAssit() throws JsonProcessingException {
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .manageOrders(ManageOrders.builder().build())
+            .applicantCaseName("TestCaseName")
+            .applicantSolicitorEmailAddress("test@test.com")
+            .applicants(List.of(element(PartyDetails.builder().firstName("app").build())))
+            .respondents(List.of(element(PartyDetails.builder().firstName("resp").build())))
+            .children(List.of(element(Child.builder().firstName("ch").build())))
+            .courtName("testcourt")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
+            .manageOrders(ManageOrders.builder()
+                              .ordersHearingDetails(List.of(element(HearingData.builder()
+                                                                        .applicantName("asd")
+                                                                        .hearingDateConfirmOptionEnum(
+                                                                            dateReservedWithListAssit)
+                                                                        .build())))
+
+                              .build())
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(refDataUserService.getLegalAdvisorList()).thenReturn(List.of(DynamicListElement.builder().build()));
+        when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.writeValueAsString(any())).thenReturn(CLIENT_CONTEXT_FALSE);
+        ResponseEntity<AboutToStartOrSubmitCallbackResponse> responseResponseEntity = manageOrdersController.prePopulateJudgeOrLegalAdviser(
+            authToken,
+            s2sToken,
+            ENCRYPTED_CLIENT_CONTEXT,
+            callbackRequest
+        );
+        assertThat(responseResponseEntity.getBody().getData().get("nameOfLaToReviewOrder")).isNotNull();
+        assertThat(responseResponseEntity.getHeaders())
+            .containsKey(CLIENT_CONTEXT_HEADER_PARAMETER);
+
+        ObjectMapper mapper = new ObjectMapper();
+        assertThat(objectMapper.readTree(
+            new String(Base64.getDecoder().decode(responseResponseEntity
+                                                      .getHeaders()
+                                                      .getFirst(CLIENT_CONTEXT_HEADER_PARAMETER)))))
+            .isEqualTo(objectMapper.readTree(CLIENT_CONTEXT_FALSE));
     }
 
     @Test
@@ -3278,7 +3460,7 @@ public class ManageOrdersControllerTest {
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
         assertExpectedException(() -> {
-            manageOrdersController.prePopulateJudgeOrLegalAdviser(authToken, s2sToken, callbackRequest);
+            manageOrdersController.prePopulateJudgeOrLegalAdviser(authToken, s2sToken, null, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 
