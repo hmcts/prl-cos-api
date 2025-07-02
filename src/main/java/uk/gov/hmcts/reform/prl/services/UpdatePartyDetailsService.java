@@ -563,6 +563,8 @@ public class UpdatePartyDetailsService {
         caseData = caseData.toBuilder()
             .c8Document(updatedCaseData.getC8Document())
             .build();
+
+        caseDataUpdated.put("c8Document", caseData.getC8Document());
     }
 
     private KeepDetailsPrivate updateRespondentKeepYourDetailsPrivateInformation(PartyDetails respondent) {
