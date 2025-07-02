@@ -168,6 +168,7 @@ public class UpdatePartyDetailsService {
                                                   authorisation,
                                                   caseData,
                                                   List.of(ElementUtils.element(fl401respondent.getPartyId(), fl401respondent)));
+                // generateC8DocumentsForApplicants
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for Fl401 case {}", e.getMessage());
             }
@@ -210,6 +211,8 @@ public class UpdatePartyDetailsService {
                                                   authorisation,
                                                   caseData,
                                                   caseData.getRespondents());
+
+                generateC8DocumentsForApplicants(updatedCaseData, caseData);
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
             }
@@ -551,6 +554,14 @@ public class UpdatePartyDetailsService {
             );
             respondentIndex++;
         }
+    }
+
+    private void generateC8DocumentsForApplicants(Map<String, Object> caseDataUpdated, CaseData caseData) {
+        CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
+
+        caseData = caseData.toBuilder()
+            .c8Document(updatedCaseData.getC8Document())
+            .build();
     }
 
     private KeepDetailsPrivate updateRespondentKeepYourDetailsPrivateInformation(PartyDetails respondent) {
