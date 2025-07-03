@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -57,6 +58,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 import javax.ws.rs.core.HttpHeaders;
 
 import static java.util.Optional.ofNullable;
@@ -68,6 +70,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLIENT_CONTEXT_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM_TASK;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
@@ -185,7 +188,36 @@ public class ManageOrdersController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        return getAboutToStartOrSubmitCallbackResponse(callbackRequest,
+                                                       authorisation,
+                                                       s2sToken,
+                                                       updateCaseData -> updateCaseData.put(IS_INVOKED_FROM_TASK, No)
+        );
+    }
+
+
+    @PostMapping(path = "/populate-header-task", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to populate the header")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Populated Headers"),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public AboutToStartOrSubmitCallbackResponse populateHeaderTask(
+        @RequestBody CallbackRequest callbackRequest,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
+    ) {
+        return getAboutToStartOrSubmitCallbackResponse(callbackRequest,
+                                                       authorisation,
+                                                       s2sToken,
+                                                       updateCaseData -> updateCaseData.put(IS_INVOKED_FROM_TASK, Yes)
+        );
+    }
+
+    private AboutToStartOrSubmitCallbackResponse getAboutToStartOrSubmitCallbackResponse(CallbackRequest callbackRequest,
+                                                                                         String authorisation,
+                                                                                         String s2sToken,
+                                                                                         Consumer<Map<String, Object>> updateCaseData) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Map<String, Object> caseDataUpdated = new HashMap<>();
             caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
@@ -201,6 +233,7 @@ public class ManageOrdersController {
                     caseDataUpdated.put(PrlAppsConstants.CAFCASS_SERVED_OPTIONS, caseData.getManageOrders().getCafcassServedOptions());
                 }
             }
+            updateCaseData.accept(caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
                 .build();
@@ -495,7 +528,11 @@ public class ManageOrdersController {
                 objectMapper,
                 caseData,
                 (data) ->
-                    !manageOrderService.isSaveAsDraft(data)
+                    objectMapper.convertValue(
+                        caseDataUpdated.get(IS_INVOKED_FROM_TASK),
+                        new TypeReference<YesOrNo>() {})
+                        .equals(Yes)
+                    && !manageOrderService.isSaveAsDraft(data)
                      && ofNullable(data.getManageOrders().getOrdersHearingDetails())
                         .map(ElementUtils::unwrapElements)
                         .map(hearingData -> hearingData.getFirst().getHearingDateConfirmOptionEnum())
@@ -580,7 +617,12 @@ public class ManageOrdersController {
                 clientContext,
                 objectMapper,
                 caseData,
-                (data) -> ofNullable(data.getManageOrders().getOrdersHearingDetails())
+                (data) ->
+                    objectMapper.convertValue(
+                        caseDataUpdated.get(IS_INVOKED_FROM_TASK),
+                        new TypeReference<YesOrNo>() {})
+                        .equals(Yes)
+                    && ofNullable(data.getManageOrders().getOrdersHearingDetails())
                         .map(ElementUtils::unwrapElements)
                         .map(hearingData -> hearingData.getFirst().getHearingDateConfirmOptionEnum())
                         .filter(hearingDateConfirmOptionEnum ->
