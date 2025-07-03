@@ -39,6 +39,8 @@ public class HearingData {
 
     private DynamicList confirmedHearingDates;
 
+    private YesOrNo displayConfirmedHearing = YesOrNo.No;
+
     private DynamicList hearingChannels;
 
     private DynamicList hearingVideoChannels;
