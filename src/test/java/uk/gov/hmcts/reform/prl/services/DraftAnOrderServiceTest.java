@@ -392,7 +392,7 @@ public class DraftAnOrderServiceTest {
                                                            .name("test")
                                                            .additionalProperties(AdditionalProperties.builder()
                                                                                      .orderId(UUID.randomUUID().toString())
-                                                                                     .hearingId(null)
+                                                                                     .hearingId("999999")
                                                                                      .build())
                                                            .build())
                                              .build())
@@ -462,6 +462,55 @@ public class DraftAnOrderServiceTest {
 
         stringObjectMap = draftAnOrderService.getDraftOrderDynamicList(updatedCaseData,
                                                                        Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId(),
+                                                                       clientContextCoded,
+                                                                       authToken);
+
+        assertNotNull(stringObjectMap.get("draftOrdersDynamicList"));
+        assertNotNull(stringObjectMap.get(CASE_TYPE_OF_APPLICATION));
+    }
+
+    @Test
+    public void testToGetDraftOrderDynamicListFilterByHearingWhenWaHearingListed() {
+
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(ElementUtils.element(
+            caseData.getDraftOrderCollection().get(0).getId(),
+            caseData.getDraftOrderCollection().get(0).getValue().toBuilder().otherDetails(OtherDraftOrderDetails.builder()
+                                                                                              .dateCreated(LocalDateTime.now())
+                                                                                              .createdBy("test title")
+                                                                                              .reviewRequiredBy(
+                                                                                                  AmendOrderCheckEnum
+                                                                                                      .judgeOrLegalAdvisorCheck)
+                                                                                              .status(OrderStatusEnum.createdByCA
+                                                                                                          .getDisplayedValue())
+                                                                                              .isJudgeApprovalNeeded(No)
+                                                                                              .build())
+                .manageOrderHearingDetails(List.of(element(HearingData.builder().hearingId("999999").build()))).build()
+        ));
+
+        draftOrderCollection.add(ElementUtils.element(
+            caseData.getDraftOrderCollection().get(0).getId(),
+            caseData.getDraftOrderCollection().get(0).getValue().toBuilder().otherDetails(OtherDraftOrderDetails.builder()
+                                                                                              .dateCreated(LocalDateTime.now())
+                                                                                              .createdBy("test title")
+                                                                                              .reviewRequiredBy(
+                                                                                                  AmendOrderCheckEnum
+                                                                                                      .judgeOrLegalAdvisorCheck)
+                                                                                              .status(OrderStatusEnum.createdByCA
+                                                                                                          .getDisplayedValue())
+                                                                                              .isJudgeApprovalNeeded(No)
+                                                                                              .build())
+                .manageOrderHearingDetails(List.of(element(HearingData.builder().hearingId("888888").build()))).build()
+        ));
+
+        CaseData updatedCaseData = caseData.toBuilder()
+            .caseTypeOfApplication("C100")
+            .draftOrderCollection(draftOrderCollection)
+            .build();
+        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.COURT_ADMIN.name());
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        stringObjectMap = draftAnOrderService.getDraftOrderDynamicList(updatedCaseData,
+                                                                       Event.HEARING_EDIT_AND_APPROVE_ORDER.getId(),
                                                                        clientContextCoded,
                                                                        authToken);
 
