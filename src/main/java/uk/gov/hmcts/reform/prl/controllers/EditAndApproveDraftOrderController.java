@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
@@ -42,6 +43,7 @@ import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.AutomatedHearingUtils;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
 import java.util.ArrayList;
@@ -51,8 +53,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_APPROVED;
@@ -152,7 +157,7 @@ public class EditAndApproveDraftOrderController {
     @PostMapping(path = "/judge-or-admin-edit-approve/mid-event", consumes = APPLICATION_JSON,
         produces = APPLICATION_JSON)
     @Operation(description = "Callback to generate draft order collection")
-    public AboutToStartOrSubmitCallbackResponse prepareDraftOrderCollection(
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> prepareDraftOrderCollection(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
@@ -164,8 +169,38 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest,
                 language
             );
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseDataUpdated).build();
+
+            if (Event.HEARING_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
+                CaseData modifiedCaseData = objectMapper.convertValue(
+                    caseDataUpdated,
+                    CaseData.class
+                );
+                String encodedClientContext = CaseUtils.setTaskCompletion(
+                    clientContext,
+                    objectMapper,
+                    modifiedCaseData,
+                    (data) ->
+                        !manageOrderService.isSaveAsDraft(data)
+                            && ofNullable(data.getManageOrders().getOrdersHearingDetails())
+                            .map(ElementUtils::unwrapElements)
+                            .map(hearingData -> hearingData.getFirst().getHearingDateConfirmOptionEnum())
+                            .filter(hearingDateConfirmOptionEnum ->
+                                        HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.getId()
+                                            .equals(hearingDateConfirmOptionEnum.getId())).isPresent()
+                );
+
+                ResponseEntity.BodyBuilder responseBuilder = ofNullable(encodedClientContext)
+                    .map(value -> ResponseEntity.ok()
+                        .header(CLIENT_CONTEXT_HEADER_PARAMETER, value))
+                    .orElseGet(ResponseEntity::ok);
+                return responseBuilder.body(AboutToStartOrSubmitCallbackResponse.builder()
+                                                .data(caseDataUpdated)
+                                                .build());
+            }
+
+            return ok(AboutToStartOrSubmitCallbackResponse.builder()
+                                            .data(caseDataUpdated)
+                                            .build());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
