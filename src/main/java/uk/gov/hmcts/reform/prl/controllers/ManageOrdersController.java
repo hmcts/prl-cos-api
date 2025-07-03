@@ -197,7 +197,7 @@ public class ManageOrdersController {
 
 
     @PostMapping(path = "/populate-header-task", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to populate the header")
+    @Operation(description = "Callback to populate the header from WA task")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Populated Headers"),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
