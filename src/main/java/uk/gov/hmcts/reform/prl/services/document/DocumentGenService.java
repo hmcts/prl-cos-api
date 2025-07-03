@@ -403,7 +403,7 @@ public class DocumentGenService {
         if (isConfidentialInformationPresentForC100(caseData)) {
             if (State.CASE_ISSUED.equals(caseData.getState())
                 || State.JUDICIAL_REVIEW.equals(caseData.getState())
-                || State.PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(caseData.getState())){
+                || State.PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(caseData.getState())) {
                 updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, getDocument(authorisation, caseData, C8_HINT, true));
             } else {
                 updatedCaseData.put(
