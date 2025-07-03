@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -173,7 +172,6 @@ public class C100RespondentSolicitorService {
     private final ManageDocumentsService manageDocumentsService;
     private final UserService userService;
     private final DocumentLanguageService documentLanguageService;
-    private final AllTabServiceImpl allTabService;
     private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
 
     public static final String RESPONSE_SUBMITTED_LABEL = "# Ymateb wedi'i gyflwyno<br/>Response Submitted";
@@ -1074,15 +1072,6 @@ public class C100RespondentSolicitorService {
         }
 
         moveRespondentDocumentsToQuarantineTab(updatedCaseData, userDetails, quarantineLegalDocList);
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(String.valueOf(
-            callbackRequest.getCaseDetails().getId()));
-        allTabService.submitAllTabsUpdate(
-            authorisation,
-            String.valueOf(callbackRequest.getCaseDetails().getId()),
-            startAllTabsUpdateDataContent.startEventResponse(),
-            startAllTabsUpdateDataContent.eventRequestData(),
-            updatedCaseData
-        );
         return updatedCaseData;
     }
 

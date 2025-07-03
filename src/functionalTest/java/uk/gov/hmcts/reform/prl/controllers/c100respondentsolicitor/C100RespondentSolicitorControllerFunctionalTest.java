@@ -11,27 +11,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
-import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
-import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
-import java.util.Collections;
-import java.util.Map;
-
 import static org.hamcrest.Matchers.equalTo;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunctionalTest.VALID_CAFCASS_REQUEST_JSON;
 
 
@@ -65,9 +52,6 @@ public class C100RespondentSolicitorControllerFunctionalTest {
     private ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
     private static CaseDetails caseDetails;
-
-    @MockBean
-    AllTabServiceImpl allTabService;
 
     @Test
     @Order(1)
@@ -150,40 +134,6 @@ public class C100RespondentSolicitorControllerFunctionalTest {
     @Order(5)
     public void givenRequestBody_whenSubmit_c7_response_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-
-        StartEventResponse dummyStart = StartEventResponse.builder()
-            .eventId("DUMMY_EVENT")
-            .token("DUMMY_TOKEN")
-            .build();
-        EventRequestData dummyRequest = EventRequestData.builder().build();
-        Map<String, Object> dummyMap = Collections.emptyMap();
-        CaseData dummyCaseData = CaseData.builder().build();
-        UserDetails dummyUser = UserDetails.builder().build();
-
-        StartAllTabsUpdateDataContent dummyContent = new StartAllTabsUpdateDataContent(
-            /* authorisation:     */ "Bearer dummy-auth",
-            /* eventRequestData:  */ dummyRequest,
-            /* startEventResponse:*/ dummyStart,
-            /* caseDataMap:       */ dummyMap,
-            /* caseData:          */ dummyCaseData,
-            /* userDetails:       */ dummyUser
-        );
-
-        when(allTabService.getStartAllTabsUpdate(anyString()))
-            .thenReturn(dummyContent);
-
-        CaseDetails returnedCase = CaseDetails.builder()
-            .data(Map.of("solicitorName", "AAT Solicitor"))
-            .build();
-
-        when(allTabService.submitAllTabsUpdate(
-            anyString(),
-            anyString(),
-            any(StartEventResponse.class),
-            any(EventRequestData.class),
-            any(Map.class)))
-            .thenReturn(returnedCase);
-
         AboutToStartOrSubmitCallbackResponse responseData = request
             .header("Authorization",        idamTokenGenerator.generateIdamTokenForSolicitor())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
