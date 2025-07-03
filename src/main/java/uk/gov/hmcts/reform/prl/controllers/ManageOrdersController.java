@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -11,6 +12,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -21,6 +23,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
@@ -47,6 +50,7 @@ import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.AutomatedHearingUtils;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
 import java.util.ArrayList;
@@ -54,15 +58,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 import javax.ws.rs.core.HttpHeaders;
 
+import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM_TASK;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
@@ -105,7 +113,7 @@ public class ManageOrdersController {
     public AboutToStartOrSubmitCallbackResponse populatePreviewOrderWhenOrderUploaded(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
+        @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -134,9 +142,10 @@ public class ManageOrdersController {
         @ApiResponse(responseCode = "200", description = "Order details are fetched"),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse prepopulateFL401CaseDetails(
+    public AboutToStartOrSubmitCallbackResponse prepopulateCaseDetails(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
@@ -156,7 +165,11 @@ public class ManageOrdersController {
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(manageOrderService.handleFetchOrderDetails(authorisation, callbackRequest, PrlAppsConstants.ENGLISH))
+                .data(manageOrderService.handleFetchOrderDetails(
+                    authorisation,
+                    callbackRequest,
+                    PrlAppsConstants.ENGLISH,
+                    clientContext))
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -175,7 +188,36 @@ public class ManageOrdersController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        return getAboutToStartOrSubmitCallbackResponse(callbackRequest,
+                                                       authorisation,
+                                                       s2sToken,
+                                                       updateCaseData -> updateCaseData.put(IS_INVOKED_FROM_TASK, No)
+        );
+    }
+
+
+    @PostMapping(path = "/populate-header-task", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to populate the header from WA task")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Populated Headers"),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public AboutToStartOrSubmitCallbackResponse populateHeaderTask(
+        @RequestBody CallbackRequest callbackRequest,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
+    ) {
+        return getAboutToStartOrSubmitCallbackResponse(callbackRequest,
+                                                       authorisation,
+                                                       s2sToken,
+                                                       updateCaseData -> updateCaseData.put(IS_INVOKED_FROM_TASK, Yes)
+        );
+    }
+
+    private AboutToStartOrSubmitCallbackResponse getAboutToStartOrSubmitCallbackResponse(CallbackRequest callbackRequest,
+                                                                                         String authorisation,
+                                                                                         String s2sToken,
+                                                                                         Consumer<Map<String, Object>> updateCaseData) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Map<String, Object> caseDataUpdated = new HashMap<>();
             caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
@@ -191,6 +233,7 @@ public class ManageOrdersController {
                     caseDataUpdated.put(PrlAppsConstants.CAFCASS_SERVED_OPTIONS, caseData.getManageOrders().getCafcassServedOptions());
                 }
             }
+            updateCaseData.accept(caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
                 .build();
@@ -451,9 +494,10 @@ public class ManageOrdersController {
             schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse whenToServeOrder(
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> whenToServeOrder(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -478,9 +522,33 @@ public class ManageOrdersController {
             } else {
                 caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, No);
             }
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseDataUpdated)
-                .build();
+
+            String encodedClientContext = CaseUtils.setTaskCompletion(
+                clientContext,
+                objectMapper,
+                caseData,
+                (data) ->
+                    objectMapper.convertValue(
+                        caseDataUpdated.get(IS_INVOKED_FROM_TASK),
+                        new TypeReference<YesOrNo>() {})
+                        .equals(Yes)
+                    && !manageOrderService.isSaveAsDraft(data)
+                     && ofNullable(data.getManageOrders().getOrdersHearingDetails())
+                        .map(ElementUtils::unwrapElements)
+                        .map(hearingData -> hearingData.getFirst().getHearingDateConfirmOptionEnum())
+                        .filter(hearingDateConfirmOptionEnum ->
+                                    HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.getId()
+                                        .equals(hearingDateConfirmOptionEnum.getId())).isPresent()
+            );
+
+            ResponseEntity.BodyBuilder responseBuilder = ofNullable(encodedClientContext)
+                .map(value -> ResponseEntity.ok()
+                    .header(CLIENT_CONTEXT_HEADER_PARAMETER, value))
+                .orElseGet(ResponseEntity::ok);
+
+            return responseBuilder.body(AboutToStartOrSubmitCallbackResponse.builder()
+                                            .data(caseDataUpdated)
+                                            .build());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -530,9 +598,10 @@ public class ManageOrdersController {
     @PostMapping(path = "/manage-orders/pre-populate-judge-or-la/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to amend order mid-event")
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse prePopulateJudgeOrLegalAdviser(
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> prePopulateJudgeOrLegalAdviser(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -542,7 +611,33 @@ public class ManageOrdersController {
                 DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
                     .build()
             );
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            String encodedClientContext = CaseUtils.setTaskCompletion(
+                clientContext,
+                objectMapper,
+                caseData,
+                (data) ->
+                    objectMapper.convertValue(
+                        caseDataUpdated.get(IS_INVOKED_FROM_TASK),
+                        new TypeReference<YesOrNo>() {})
+                        .equals(Yes)
+                    && ofNullable(data.getManageOrders().getOrdersHearingDetails())
+                        .map(ElementUtils::unwrapElements)
+                        .map(hearingData -> hearingData.getFirst().getHearingDateConfirmOptionEnum())
+                        .filter(hearingDateConfirmOptionEnum ->
+                                    HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.getId()
+                                        .equals(hearingDateConfirmOptionEnum.getId())).isPresent()
+            );
+
+            ResponseEntity.BodyBuilder responseBuilder = ofNullable(encodedClientContext)
+                .map(value -> ResponseEntity.ok()
+                    .header(CLIENT_CONTEXT_HEADER_PARAMETER, value))
+                .orElseGet(ResponseEntity::ok);
+
+            return responseBuilder.body(AboutToStartOrSubmitCallbackResponse.builder()
+                                            .data(caseDataUpdated)
+                                            .build());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
