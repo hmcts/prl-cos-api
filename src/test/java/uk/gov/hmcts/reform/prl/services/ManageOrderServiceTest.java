@@ -128,12 +128,14 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENGLISH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM_TASK;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_ORDER_APPROVED;
@@ -6407,6 +6409,7 @@ public class ManageOrderServiceTest {
         mapper.findAndRegisterModules();
 
         Map<String, Object> caseDataMap = caseData.toMap(mapper);
+        caseDataMap.put(IS_INVOKED_FROM_TASK, Yes);
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
@@ -6446,6 +6449,10 @@ public class ManageOrderServiceTest {
         when(hearingDataService.generateHearingData(any(), any()))
             .thenReturn(hearingData);
         byte[] encode = Base64.getEncoder().encode(CLIENT_CONTEXT.getBytes());
+        when(objectMapper.convertValue(eq(caseDataMap.get(IS_INVOKED_FROM_TASK)),
+                                       any(TypeReference.class)))
+            .thenReturn(Yes);
+
         Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails(
             authorization,
             callbackRequest,
@@ -6487,6 +6494,7 @@ public class ManageOrderServiceTest {
         mapper.findAndRegisterModules();
 
         Map<String, Object> caseDataMap = caseData.toMap(mapper);
+        caseDataMap.put(IS_INVOKED_FROM_TASK, No);
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
@@ -6496,6 +6504,9 @@ public class ManageOrderServiceTest {
             .caseDetails(caseDetails)
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(eq(caseDataMap.get(IS_INVOKED_FROM_TASK)),
+                                       any(TypeReference.class)))
+            .thenReturn(No);
 
         Hearings hearings = mapper.readValue(hearingPayload, Hearings.class);
 

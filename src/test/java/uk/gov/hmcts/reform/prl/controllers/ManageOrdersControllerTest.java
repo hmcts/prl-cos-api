@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -90,11 +91,13 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM_TASK;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum.dateConfirmedByListingTeam;
 import static uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab;
@@ -2094,6 +2097,7 @@ public class ManageOrdersControllerTest {
         List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
             OrderDetails.builder().build()).build());
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap.put(IS_INVOKED_FROM_TASK, Yes);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
             .thenReturn(Map.of("orderCollection", orderDetailsList));
@@ -2113,6 +2117,9 @@ public class ManageOrdersControllerTest {
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.writeValueAsString(any())).thenReturn(CLIENT_CONTEXT);
+        when(objectMapper.convertValue(eq(stringObjectMap.get(IS_INVOKED_FROM_TASK)),
+                                       any(TypeReference.class)))
+            .thenReturn(Yes);
 
         ResponseEntity<AboutToStartOrSubmitCallbackResponse> responseResponseEntity = manageOrdersController.whenToServeOrder(
             authToken,
@@ -2167,6 +2174,7 @@ public class ManageOrdersControllerTest {
         List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
             OrderDetails.builder().build()).build());
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap.put(IS_INVOKED_FROM_TASK, No);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
             .thenReturn(Map.of("orderCollection", orderDetailsList));
@@ -2186,6 +2194,9 @@ public class ManageOrdersControllerTest {
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.writeValueAsString(any())).thenReturn(CLIENT_CONTEXT_FALSE);
+        when(objectMapper.convertValue(eq(stringObjectMap.get(IS_INVOKED_FROM_TASK)),
+                                       any(TypeReference.class)))
+            .thenReturn(No);
 
         ResponseEntity<AboutToStartOrSubmitCallbackResponse> responseResponseEntity = manageOrdersController.whenToServeOrder(
             authToken,
@@ -3348,7 +3359,7 @@ public class ManageOrdersControllerTest {
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
+        stringObjectMap.put(IS_INVOKED_FROM_TASK, Yes);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -3360,6 +3371,9 @@ public class ManageOrdersControllerTest {
         when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.writeValueAsString(any())).thenReturn(CLIENT_CONTEXT);
+        when(objectMapper.convertValue(eq(stringObjectMap.get(IS_INVOKED_FROM_TASK)),
+                                       any(TypeReference.class)))
+            .thenReturn(Yes);
         ResponseEntity<AboutToStartOrSubmitCallbackResponse> responseResponseEntity = manageOrdersController.prePopulateJudgeOrLegalAdviser(
             authToken,
             s2sToken,
@@ -3402,7 +3416,7 @@ public class ManageOrdersControllerTest {
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
+        stringObjectMap.put(IS_INVOKED_FROM_TASK, No);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -3414,6 +3428,10 @@ public class ManageOrdersControllerTest {
         when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.writeValueAsString(any())).thenReturn(CLIENT_CONTEXT_FALSE);
+        when(objectMapper.convertValue(eq(stringObjectMap.get(IS_INVOKED_FROM_TASK)),
+                                       any(TypeReference.class)))
+            .thenReturn(No);
+
         ResponseEntity<AboutToStartOrSubmitCallbackResponse> responseResponseEntity = manageOrdersController.prePopulateJudgeOrLegalAdviser(
             authToken,
             s2sToken,
