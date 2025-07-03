@@ -44,9 +44,9 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.refuge.RefugeConfidentialDocumentsRecord;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
-import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 
 import java.util.ArrayList;
