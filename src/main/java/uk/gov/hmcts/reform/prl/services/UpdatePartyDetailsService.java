@@ -168,8 +168,7 @@ public class UpdatePartyDetailsService {
                                                   authorisation,
                                                   caseData,
                                                   List.of(ElementUtils.element(fl401respondent.getPartyId(), fl401respondent)));
-                generateC8DocumentsForApplicants(updatedCaseData, authorisation, caseData);
-                // generateC8DocumentsForApplicants
+                generateC8DocumentsForApplicant(updatedCaseData, authorisation, caseData);
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for Fl401 case {}", e.getMessage());
             }
@@ -213,7 +212,7 @@ public class UpdatePartyDetailsService {
                                                   caseData,
                                                   caseData.getRespondents());
 
-                generateC8DocumentsForApplicants(updatedCaseData, authorisation, caseData);
+                generateC8DocumentsForApplicant(updatedCaseData, authorisation, caseData);
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
             }
@@ -557,7 +556,7 @@ public class UpdatePartyDetailsService {
         }
     }
 
-    private void generateC8DocumentsForApplicants(Map<String, Object> caseDataUpdated, String authorisation, CaseData caseData) throws Exception {
+    private void generateC8DocumentsForApplicant(Map<String, Object> caseDataUpdated, String authorisation, CaseData caseData) throws Exception {
         caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
         CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
 

@@ -44,6 +44,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.refuge.RefugeConfidentialDocumentsRecord;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
@@ -112,6 +113,7 @@ public class CitizenPartyDetailsMapper {
     private final CitizenRespondentAohElementsMapper citizenAllegationOfHarmMapper;
     private final ConfidentialityTabService confidentialityTabService;
     private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
+    private final DocumentGenService documentGenService;
 
     public CitizenUpdatePartyDataContent mapUpdatedPartyDetails(CaseData dbCaseData,
                                                                 CitizenUpdatedCaseData citizenUpdatedCaseData,
@@ -232,6 +234,7 @@ public class CitizenPartyDetailsMapper {
         if (PartyEnum.applicant.equals(citizenUpdatedCaseData.getPartyType())) {
             List<Element<ChildDetailsRevised>> childDetails = caseData.getNewChildDetails();// child details only
             List<Element<PartyDetails>> applicants = new ArrayList<>(caseData.getApplicants());
+            CaseData oldCaseData = caseData;
             applicants.stream()
                 .filter(party -> Objects.equals(
                     party.getValue().getUser().getIdamId(),
@@ -244,6 +247,14 @@ public class CitizenPartyDetailsMapper {
                                                                                           caseEvent, childDetails);
 
                     applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
+
+                    if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
+                        try {
+                            reGenerateApplicantC8Document(caseDataMapToBeUpdated, authorisation, oldCaseData);
+                        } catch (Exception e) {
+                            log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
+                        }
+                    }
                 });
             caseData = caseData.toBuilder().applicants(applicants).build();
             caseDataMapToBeUpdated.put(C100_APPLICANTS, caseData.getApplicants());
@@ -324,6 +335,18 @@ public class CitizenPartyDetailsMapper {
         }
     }
 
+    private void reGenerateApplicantC8Document(Map<String, Object> caseDataUpdated, String authorisation, CaseData caseData) throws Exception {
+        caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
+        CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
+
+        caseData = caseData.toBuilder()
+            .c8Document(updatedCaseData.getC8Document())
+            .build();
+
+        caseDataUpdated.put("c8Document", caseData.getC8Document());
+    }
+
+
     private CitizenUpdatePartyDataContent updatingPartyDetailsDa(CaseData caseData,
                                                                  CitizenUpdatedCaseData citizenUpdatedCaseData,
                                                                  CaseEvent caseEvent,
@@ -338,6 +361,13 @@ public class CitizenPartyDetailsMapper {
                     caseData.getApplicantsFL401(),
                     caseEvent, caseData.getNewChildDetails()
                 );
+                if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
+                    try {
+                        reGenerateApplicantC8Document(caseDataMapToBeUpdated, authorisation, caseData);
+                    } catch (Exception e) {
+                        log.error("Failed to generate C8 document for Fl401 case {}", e.getMessage());
+                    }
+                }
                 caseData = caseData.toBuilder().applicantsFL401(partyDetails).build();
                 if (partyDetails.getResponse() != null) {
                     String safeToCallOption = partyDetails.getResponse().getSafeToCallOption();
