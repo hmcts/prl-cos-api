@@ -91,7 +91,7 @@ public class Fm5ReminderService {
             //Iterate all cases to evaluate rules to trigger FM5 reminder
             Map<String, Fm5PendingParty> qualifiedCasesAndPartiesBeforeHearing =
                 getQualifiedCasesAndHearingsForNotifications(caseDetailsList, hearingAwayDays);
-            log.info("Final size of cases to process for FM5 notifications: {}",
+            log.info("Final count of cases to process for FM5 notifications: {}",
                      qualifiedCasesAndPartiesBeforeHearing.size());
             //Send FM5 reminders to cases meeting all system rules, else update not needed
             qualifiedCasesAndPartiesBeforeHearing.forEach(
