@@ -46,7 +46,7 @@ def versions = [
   junitPlatform                : '5.7.2',
   lombok                       : '1.18.38',
   pact                         : '4.1.11',
-  pitest                       : '1.20.0',
+  pitest                       : '1.16.3',
   puppyCrawl                   : '8.45.1',
   reformsJavaLogging           : '6.1.9',
   sendLetterClient             : '5.1.1',
