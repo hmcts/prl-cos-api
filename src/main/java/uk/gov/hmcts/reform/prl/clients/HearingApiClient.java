@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.clients;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.FeignClientProperties;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,7 @@ import java.util.Map;
     url = "${fis_hearing.api.url}",
     configuration = FeignClientProperties.FeignClientConfiguration.class
 )
+@ConditionalOnProperty(name = "hearing.hack.enabled", havingValue = "false", matchIfMissing = true)
 public interface HearingApiClient {
 
 
