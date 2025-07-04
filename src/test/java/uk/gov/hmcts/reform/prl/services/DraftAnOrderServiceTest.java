@@ -108,7 +108,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -925,17 +927,18 @@ public class DraftAnOrderServiceTest {
             Mockito.anyString()
         )).thenReturn(Hearings.hearingsWith().build());
         when(hearingDataService.populateHearingDynamicLists(
-            Mockito.anyString(),
-            Mockito.anyString(),
+            anyString(),
+            anyString(),
             any(),
-            any()
+            any(Supplier.class)
         ))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().retrievedHearingDates(DynamicList.builder().build()).build());
         Map<String, Object> caseDataMap = draftAnOrderService.populateCommonDraftOrderFields(
             authToken,
             caseData,
             draftOrder,
-            PrlAppsConstants.ENGLISH
+            PrlAppsConstants.ENGLISH,
+            Optional.empty()
         );
         assertNotNull(caseDataMap);
     }
@@ -1307,7 +1310,7 @@ public class DraftAnOrderServiceTest {
         when(manageOrderService.populateHearingsDropdown(authorisation, caseData)).thenReturn(dynamicList);
 
         Map<String, Object> caseDataMap = draftAnOrderService.populateCommonDraftOrderFields(authorisation,
-            caseData, draftOrder, PrlAppsConstants.ENGLISH);
+            caseData, draftOrder, PrlAppsConstants.ENGLISH, Optional.empty());
 
         assertEquals(CreateSelectOrderOptionsEnum.blankOrderOrDirections, caseDataMap.get("orderType"));
     }
@@ -1357,7 +1360,7 @@ public class DraftAnOrderServiceTest {
         when(manageOrderService.populateHearingsDropdown(authorisation, caseData)).thenReturn(dynamicList);
 
         Map<String, Object> caseDataMap = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData,
-            draftOrder, PrlAppsConstants.ENGLISH);
+            draftOrder, PrlAppsConstants.ENGLISH, Optional.empty());
 
         assertEquals(CreateSelectOrderOptionsEnum.blankOrderOrDirections, caseDataMap.get("orderType"));
     }
@@ -2217,7 +2220,7 @@ public class DraftAnOrderServiceTest {
             Mockito.anyString(),
             Mockito.anyString(),
             any(),
-            any()
+            any(Hearings.class)
         ))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder()
                             .hearingListedLinkedCases(DynamicList.builder()
@@ -2311,7 +2314,7 @@ public class DraftAnOrderServiceTest {
             Mockito.anyString(),
             Mockito.anyString(),
             any(),
-            any()
+            any(Hearings.class)
         ))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder()
                             .hearingListedLinkedCases(DynamicList.builder()
@@ -2471,7 +2474,7 @@ public class DraftAnOrderServiceTest {
             Mockito.anyString(),
             Mockito.anyString(),
             any(),
-            any()
+            any(Hearings.class)
         ))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
         when(hearingDataService.getHearingDataForSdo(any(), any(), any())).thenReturn(HearingData.builder().build());
@@ -2577,7 +2580,7 @@ public class DraftAnOrderServiceTest {
             Mockito.anyString(),
             Mockito.anyString(),
             any(),
-            any()
+            any(Hearings.class)
         ))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
         when(hearingDataService.getHearingDataForSdo(any(), any(), any())).thenReturn(HearingData.builder().build());
@@ -2683,7 +2686,7 @@ public class DraftAnOrderServiceTest {
             Mockito.anyString(),
             Mockito.anyString(),
             any(),
-            any()
+            any(Hearings.class)
         ))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
         when(hearingDataService.getHearingDataForSdo(any(), any(), any())).thenReturn(HearingData.builder().build());
@@ -3502,7 +3505,7 @@ public class DraftAnOrderServiceTest {
             Mockito.anyString(),
             Mockito.anyString(),
             any(),
-            any()
+            any(Hearings.class)
         ))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
         when(manageOrderService.populateCustomOrderFields(any(), Mockito.any(), Mockito.any())).thenReturn(caseData);
@@ -3564,7 +3567,7 @@ public class DraftAnOrderServiceTest {
             Mockito.anyString(),
             Mockito.anyString(),
             any(),
-            any()
+            any(Hearings.class)
         ))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
         when(manageOrderService.populateCustomOrderFields(any(), Mockito.any(), Mockito.any())).thenReturn(caseData);

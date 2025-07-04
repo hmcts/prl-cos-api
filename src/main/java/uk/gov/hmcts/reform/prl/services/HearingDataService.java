@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -140,6 +141,12 @@ public class HearingDataService {
             .retrievedCourtLocations(getCourtsDynamicList(locationRefDataService.getCourtLocations(authorisation), caseData))
             .hearingListedLinkedCases(getDynamicList(getLinkedCases(authorisation, caseData)))
             .build();
+    }
+
+    public HearingDataPrePopulatedDynamicLists populateHearingDynamicLists(String authorisation, String caseReferenceNumber,
+                                                                           CaseData caseData, Supplier<Hearings> hearingsSupplier) {
+        Hearings hearings = hearingsSupplier.get();
+        return populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
     }
 
     public List<DynamicListElement> prePopulateHearingType(String authorisation) {

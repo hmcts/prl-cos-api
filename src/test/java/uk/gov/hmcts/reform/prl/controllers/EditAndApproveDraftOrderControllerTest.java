@@ -205,7 +205,7 @@ public class EditAndApproveDraftOrderControllerTest {
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
-        when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),Mockito.anyString(),Mockito.any(),Mockito.any()))
+        when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),Mockito.anyString(),Mockito.any(),Mockito.any(Hearings.class)))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
 
         when(hearingDataService.getHearingDataForOtherOrders(Mockito.any(),Mockito.any(),Mockito.any()))
@@ -899,7 +899,7 @@ public class EditAndApproveDraftOrderControllerTest {
             .build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.populateCommonDraftOrderFields(any(), any(), any(), any())).thenReturn(caseDataMap);
+        when(draftAnOrderService.populateCommonDraftOrderFields(any(), any(), any(), any(), any())).thenReturn(caseDataMap);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
             .populateCommonFields(authToken, s2sToken,"clcx", callbackRequest);
@@ -964,7 +964,7 @@ public class EditAndApproveDraftOrderControllerTest {
                 .build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.populateCommonDraftOrderFields(any(), any(), any(), any())).thenReturn(caseDataMap);
+        when(draftAnOrderService.populateCommonDraftOrderFields(any(), any(), any(), any(), any())).thenReturn(caseDataMap);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
                 .populateCommonFields(authToken, s2sToken,"clcx", callbackRequest);
@@ -1028,7 +1028,7 @@ public class EditAndApproveDraftOrderControllerTest {
                              .build())
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.populateCommonDraftOrderFields(any(), any(), any(), any())).thenReturn(caseDataMap);
+        when(draftAnOrderService.populateCommonDraftOrderFields(any(), any(), any(), any(), any())).thenReturn(caseDataMap);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
             .populateCommonFields(authToken, s2sToken,"clcx", callbackRequest);
@@ -2143,7 +2143,7 @@ public class EditAndApproveDraftOrderControllerTest {
                                                               Mockito.anyString(),
                                                               Mockito.anyString()
         )).thenReturn(draftOrder);
-        when(draftAnOrderService.populateCommonDraftOrderFields(Mockito.any(), Mockito.any(), Mockito.any(), any())).thenReturn(caseDataMap);
+        when(draftAnOrderService.populateCommonDraftOrderFields(Mockito.any(), Mockito.any(), Mockito.any(), any(), any())).thenReturn(caseDataMap);
 
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
             .populateCommonFields(authToken,s2sToken,"clcx",callbackRequest);

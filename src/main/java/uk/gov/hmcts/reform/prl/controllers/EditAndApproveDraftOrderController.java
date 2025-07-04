@@ -425,7 +425,8 @@ public class EditAndApproveDraftOrderController {
                 authorisation,
                 caseData,
                 selectedOrder,
-                language
+                language,
+                Optional.of(clientContext)
             );
 
             if (ManageOrdersUtils.isOrderEdited(caseData, callbackRequest.getEventId())) {
