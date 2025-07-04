@@ -165,9 +165,9 @@ public class EditAndApproveDraftOrderController {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             String language = CaseUtils.getLanguage(clientContext);
+            String encodedClientContext = null;
             if (Event.HEARING_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
-
-                String encodedClientContext = CaseUtils.setTaskCompletion(
+                encodedClientContext = CaseUtils.setTaskCompletion(
                     clientContext,
                     objectMapper,
                     caseData,
@@ -182,20 +182,6 @@ public class EditAndApproveDraftOrderController {
                                         HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.getId()
                                             .equals(hearingDateConfirmOptionEnum.getId())).isPresent()
                 );
-
-                Map<String, Object> caseDataUpdated = draftAnOrderService.getEligibleServeOrderDetails(
-                    authorisation,
-                    callbackRequest,
-                    language
-                );
-
-                ResponseEntity.BodyBuilder responseBuilder = ofNullable(encodedClientContext)
-                    .map(value -> ResponseEntity.ok()
-                        .header(CLIENT_CONTEXT_HEADER_PARAMETER, value))
-                    .orElseGet(ResponseEntity::ok);
-                return responseBuilder.body(AboutToStartOrSubmitCallbackResponse.builder()
-                                                .data(caseDataUpdated)
-                                                .build());
             }
 
             Map<String, Object> caseDataUpdated = draftAnOrderService.getEligibleServeOrderDetails(
@@ -204,7 +190,11 @@ public class EditAndApproveDraftOrderController {
                 language
             );
 
-            return ok(AboutToStartOrSubmitCallbackResponse.builder()
+            ResponseEntity.BodyBuilder responseBuilder = ofNullable(encodedClientContext)
+                .map(value -> ResponseEntity.ok()
+                    .header(CLIENT_CONTEXT_HEADER_PARAMETER, value))
+                .orElseGet(ResponseEntity::ok);
+            return responseBuilder.body(AboutToStartOrSubmitCallbackResponse.builder()
                                             .data(caseDataUpdated)
                                             .build());
         } else {
@@ -429,16 +419,6 @@ public class EditAndApproveDraftOrderController {
                 dynamicList,
                 clientContext, callbackRequest.getEventId()
             );
-
-            /* if (Event.HEARING_EDIT_AND_APPROVE_ORDER.getId().equals(callbackRequest.getEventId())) {
-                WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
-                String hearingId = CaseUtils.getDraftOrderId(waMapper);
-                selectedOrder.getManageOrderHearingDetails().forEach(hearingDetail -> {
-                    if (hearingId != null && hearingId.equalsIgnoreCase(hearingDetail.getValue().getHearingId())) {
-                        hearingDetail.getValue().setHearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab);
-                    }
-                });
-            } */
 
             String language = CaseUtils.getLanguage(clientContext);
             Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(
