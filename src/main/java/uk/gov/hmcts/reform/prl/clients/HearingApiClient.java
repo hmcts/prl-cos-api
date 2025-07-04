@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.clients;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.FeignClientProperties;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import java.util.List;
 import java.util.Map;
 
+@Primary
 @FeignClient(
     name = "hearing-api",
     url = "${fis_hearing.api.url}",
