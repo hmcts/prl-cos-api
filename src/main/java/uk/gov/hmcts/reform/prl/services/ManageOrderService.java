@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
@@ -85,6 +86,7 @@ import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
+import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
@@ -110,6 +112,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -140,6 +143,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_T
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGS_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM_TASK;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
@@ -170,6 +174,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROL
 import static uk.gov.hmcts.reform.prl.enums.Event.ADMIN_EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.MANAGE_ORDERS;
+import static uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum.noCheck;
@@ -185,6 +190,7 @@ import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.app
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.respondentOrRespondentSolicitor;
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum.factFindingHearing;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getDynamicMultiSelectedValueLabels;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getWaMapper;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.isHearingPageNeeded;
 
@@ -623,6 +629,12 @@ public class ManageOrderService {
     private final AuthTokenGenerator authTokenGenerator;
     private final LaunchDarklyClient launchDarklyClient;
     private final DocumentSealingService documentSealingService;
+
+    public boolean isSaveAsDraft(CaseData caseData) {
+        return isNotEmpty(caseData.getServeOrderData()) && No.equals(
+            caseData.getServeOrderData().getDoYouWantToServeOrder())
+            && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder());
+    }
 
     public Map<String, Object> populateHeader(CaseData caseData) {
         Map<String, Object> headerMap = new HashMap<>();
@@ -1171,8 +1183,8 @@ public class ManageOrderService {
         throws DocumentGenerationException {
         String loggedInUserType = getLoggedInUserType(authorisation);
         UserDetails userDetails = userService.getUserDetails(authorisation);
-        boolean saveAsDraft = isNotEmpty(caseData.getServeOrderData()) && No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
-            && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder());
+        boolean saveAsDraft = isSaveAsDraft(caseData);
+
         if (UserRoles.JUDGE.name().equals(loggedInUserType)) {
             return setDraftOrderCollection(caseData, loggedInUserType,userDetails);
         } else if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)) {
@@ -3133,7 +3145,9 @@ public class ManageOrderService {
 
     public Map<String, Object> handleFetchOrderDetails(String authorisation,
                                                        CallbackRequest callbackRequest,
-                                                       String language) {
+                                                       String language,
+                                                       String clientContext) {
+
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
@@ -3148,18 +3162,38 @@ public class ManageOrderService {
         //common fields
         updateOrderDetails(authorisation, caseData, caseDataUpdated, language);
 
+        WaMapper waMapper = getWaMapper(clientContext);
+        Optional<Long> taskHearingId = ofNullable(waMapper)
+            .filter(value ->
+                objectMapper.convertValue(
+                    caseDataUpdated.get(IS_INVOKED_FROM_TASK),
+                    new TypeReference<YesOrNo>() {
+                    }).equals(Yes)
+            )
+            .map(value -> value
+                .getClientContext()
+                .getUserTask())
+            .filter(Objects::nonNull)
+            .map(value -> Long.valueOf(value
+                                           .getTaskData()
+                                           .getAdditionalProperties()
+                                           .getHearingId())
+            );
+
+
         //PRL-4212 - populate hearing details only orders where it's needed
-        populateHearingData(authorisation, caseData, caseDataUpdated);
+        populateHearingData(authorisation, caseData, caseDataUpdated, taskHearingId);
 
         return caseDataUpdated;
     }
 
     private void populateHearingData(String authorisation,
                                      CaseData caseData,
-                                     Map<String, Object> caseDataUpdated) {
+                                     Map<String, Object> caseDataUpdated,
+                                     Optional<Long> taskHearingId) {
         //Set only in case order needs hearing details
         if (isHearingPageNeeded(caseData.getCreateSelectOrderOptions(), caseData.getManageOrders().getC21OrderOptions())) {
-            HearingData hearingData = getHearingData(authorisation, caseData);
+            HearingData hearingData = getHearingData(authorisation, caseData, taskHearingId);
             caseDataUpdated.put(ORDER_HEARING_DETAILS, ElementUtils.wrapElements(hearingData));
             //add hearing screen field show params
             ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated, caseData);
@@ -3167,7 +3201,7 @@ public class ManageOrderService {
 
         //For DIO
         if (CreateSelectOrderOptionsEnum.directionOnIssue.equals(caseData.getCreateSelectOrderOptions())) {
-            HearingData hearingData = getHearingData(authorisation, caseData);
+            HearingData hearingData = getHearingData(authorisation, caseData, taskHearingId);
             //add hearing screen field show params
             ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated, caseData);
 
@@ -3181,16 +3215,65 @@ public class ManageOrderService {
         }
     }
 
+    private HearingData getHearingData(String authorization,
+                                       CaseData caseData,
+                                       Optional<Long> taskHearingId) {
+        String caseReferenceNumber = String.valueOf(caseData.getId());
+
+        Supplier<Hearings> hearingsSupplier = taskHearingId.<Supplier<Hearings>>map(hearingId -> () -> {
+            Hearings hearings = hearingService.getHearings(authorization, caseReferenceNumber);
+            List<CaseHearing> filteredHearing = hearings.getCaseHearings().stream()
+                .filter(caseHearing -> hearingId.equals(caseHearing.getHearingID()))
+                .toList();
+            return hearings.toBuilder()
+                .caseHearings(filteredHearing)
+                .build();
+        }).orElseGet(() -> () ->
+            hearingService.getHearings(authorization, caseReferenceNumber)
+        );
+        HearingData hearingData = getHearingData(
+            authorization,
+            caseData,
+            hearingsSupplier
+        );
+        hearingData.setDisplayConfirmedHearing(No);
+        taskHearingId.ifPresent(id -> {
+                hearingData.setDisplayConfirmedHearing(Yes);
+                DynamicListElement confirmedHearingDates = hearingData.getConfirmedHearingDates()
+                    .getListItems()
+                    .getFirst();
+                hearingData.getConfirmedHearingDates()
+                    .setValue(confirmedHearingDates);
+                hearingData.setHearingDateConfirmOptionEnum(dateConfirmedInHearingsTab);
+            }
+        );
+        return hearingData;
+    }
+
     public HearingData getHearingData(String authorization,
                                       CaseData caseData) {
-        String caseReferenceNumber = String.valueOf(caseData.getId());
-        log.info("Inside Prepopulate getHearingData for the case id {}", caseReferenceNumber);
-        Hearings hearings = hearingService.getHearings(authorization, caseReferenceNumber);
-        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-            hearingDataService.populateHearingDynamicLists(authorization, caseReferenceNumber, caseData, hearings);
+        return getHearingData(authorization,
+                              caseData,
+                              () -> {
+                                  String caseReferenceNumber = String.valueOf(caseData.getId());
+                                  return hearingService.getHearings(authorization, caseReferenceNumber);
+                              });
+    }
 
+    public HearingData getHearingData(String authorization,
+                                      CaseData caseData,
+                                      Supplier<Hearings> hearingsSupplier) {
+        log.info("Inside Prepopulate getHearingData for the case id {}", String.valueOf(caseData.getId()));
+        Hearings hearings = hearingsSupplier.get();
+        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+            hearingDataService.populateHearingDynamicLists(authorization,
+                                                           String.valueOf(caseData.getId()),
+                                                           caseData,
+                                                           hearings);
         return hearingDataService.generateHearingData(hearingDataPrePopulatedDynamicLists, caseData);
     }
+
+
 
     private void addC21OrderDetails(CaseData caseData,
                                     Map<String, Object> caseDataUpdated) {
