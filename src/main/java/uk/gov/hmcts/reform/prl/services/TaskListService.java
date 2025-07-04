@@ -106,26 +106,27 @@ public class TaskListService {
     private final LaunchDarklyClient launchDarklyClient;
     private final RoleAssignmentApi roleAssignmentApi;
     private final AuthTokenGenerator authTokenGenerator;
+    private final C8ArchiveService c8ArchiveService;
 
     private final MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
 
     public List<Task> getTasksForOpenCase(CaseData caseData) {
         return getEvents(caseData).stream()
-                .map(event -> Task.builder()
-                        .event(event)
-                        .state(getTaskState(caseData, event))
-                        .build())
-                .toList();
+            .map(event -> Task.builder()
+                .event(event)
+                .state(getTaskState(caseData, event))
+                .build())
+            .toList();
     }
 
     public List<RespondentTask> getRespondentSolicitorTasks(PartyDetails respondingParty, CaseData caseData) {
         boolean isC1aApplicable = caseData.getC1ADocument() != null;
         return getRespondentsEvents(caseData).stream()
-                .map(event -> RespondentTask.builder()
-                        .event(event)
-                        .state(getRespondentTaskState(event, respondingParty, isC1aApplicable))
-                        .build())
-                .toList();
+            .map(event -> RespondentTask.builder()
+                .event(event)
+                .state(getRespondentTaskState(event, respondingParty, isC1aApplicable))
+                .build())
+            .toList();
     }
 
     private TaskState getTaskState(CaseData caseData, Event event) {
@@ -153,7 +154,7 @@ public class TaskListService {
 
     private List<Event> getEvents(CaseData caseData) {
         return (PrlAppsConstants.FL401_CASE_TYPE).equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-                ? getFL401Events(caseData) : getC100Events(caseData);
+            ? getFL401Events(caseData) : getC100Events(caseData);
     }
 
     public List<Event> getC100Events(CaseData caseData) {
@@ -314,34 +315,43 @@ public class TaskListService {
                         startAllTabsUpdateDataContent.authorisation()
                     );
                 }
+
+                c8ArchiveService.archiveC8DocumentIfConfidentialChanged(callbackRequest,caseData,caseDataUpdated);
+
                 caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
                 CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
-                caseData = caseData.toBuilder()
-                    .c8Document(updatedCaseData.getC8Document())
-                    .c1ADocument(updatedCaseData.getC1ADocument())
-                    .c8WelshDocument(updatedCaseData.getC8WelshDocument())
-                    .finalDocument(!JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)
-                                       ? updatedCaseData.getFinalDocument() : caseData.getFinalDocument())
-                    .finalWelshDocument(!JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)
-                                            ? updatedCaseData.getFinalWelshDocument() : caseData.getFinalWelshDocument())
-                    .c1AWelshDocument(updatedCaseData.getC1AWelshDocument())
-                    .c1ADraftDocument(SUBMITTED_STATE.equalsIgnoreCase(state)
-                                          ? updatedCaseData.getC1ADraftDocument() : caseData.getC1ADraftDocument())
-                    .c1AWelshDraftDocument(SUBMITTED_STATE.equalsIgnoreCase(state)
-                                               ? updatedCaseData.getC1AWelshDraftDocument() : caseData.getC1AWelshDraftDocument())
-                    .build();
+                caseDataUpdated.put("c8Document", updatedCaseData.getC8Document());
+                caseDataUpdated.put("c1ADocument", updatedCaseData.getC1ADocument());
+                caseDataUpdated.put("c8WelshDocument", updatedCaseData.getC8WelshDocument());
+
+                caseDataUpdated.put("finalDocument", !JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)
+                    ? updatedCaseData.getFinalDocument() : caseData.getFinalDocument());
+
+                caseDataUpdated.put("finalWelshDocument", !JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)
+                    ? updatedCaseData.getFinalWelshDocument() : caseData.getFinalWelshDocument());
+
+                caseDataUpdated.put("c1AWelshDocument", updatedCaseData.getC1AWelshDocument());
+
+                caseDataUpdated.put("c1ADraftDocument", SUBMITTED_STATE.equalsIgnoreCase(state)
+                    ? updatedCaseData.getC1ADraftDocument() : caseData.getC1ADraftDocument());
+
+                caseDataUpdated.put("c1AWelshDraftDocument", SUBMITTED_STATE.equalsIgnoreCase(state)
+                    ? updatedCaseData.getC1AWelshDraftDocument() : caseData.getC1AWelshDraftDocument());
+
             } catch (Exception e) {
                 log.error("Error regenerating the document {}", e.getMessage());
             }
         }
 
-        tabService.mapAndSubmitAllTabsUpdate(
+
+        tabService.submitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),
             String.valueOf(callbackRequest.getCaseDetails().getId()),
             startAllTabsUpdateDataContent.startEventResponse(),
             startAllTabsUpdateDataContent.eventRequestData(),
-            caseData
+            caseDataUpdated
         );
+        caseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
 
         if (!isCourtStaff
             || (isCourtStaff && (AWAITING_SUBMISSION_TO_HMCTS.getValue().equalsIgnoreCase(state)
@@ -363,4 +373,6 @@ public class TaskListService {
         }
         return roles;
     }
+
+
 }
