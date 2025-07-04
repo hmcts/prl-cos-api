@@ -1137,4 +1137,6 @@ public class PrlAppsConstants {
     public static final String WA_ADDITIONAL_APPLICATION_COLLECTION_ID = "additionalApplicationsBundleId";
     public static final String REGION_WALES = "7";
 
+    public static final String IS_INVOKED_FROM_TASK = "isInvokedFromTask";
+
 }
