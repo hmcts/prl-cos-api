@@ -36,7 +36,7 @@ public class HearingSupportController {
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public void caseStateUpdateByHearingManagement(@RequestBody HearingRequest hearingRequest,
                                                           @PathVariable("caseState") State caseState) throws Exception {
-        log.info("Hack to trigger hearing event");
+        log.info("Hack to trigger hearing event with state {}", caseState.getValue());
         hearingManagementService.caseStateChangeForHearingManagement(hearingRequest,caseState);
     }
 
@@ -47,9 +47,8 @@ public class HearingSupportController {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = CallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public void valueCaseStateUpdateByHearingManagement(@RequestBody HearingRequest hearingRequest,
-                                                   @PathVariable("caseState") String caseState) throws Exception {
-        log.info("Hack to trigger hearing event with case state {}", caseState);
+    public void valueCaseStateUpdateByHearingManagement(@RequestBody HearingRequest hearingRequest) throws Exception {
+        log.info("Hack to trigger hearing event with state hardcoded to PREPARE_FOR_HEARING_CONDUCT_HEARING");
         hearingManagementService.caseStateChangeForHearingManagement(hearingRequest, State.PREPARE_FOR_HEARING_CONDUCT_HEARING);
     }
 }
