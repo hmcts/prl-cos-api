@@ -217,6 +217,8 @@ public class UpdatePartyDetailsService {
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
             }
+            cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
+            findAndListRefugeDocsForFL401(callbackRequest, caseData, updatedCaseData);
         }
         if (Objects.nonNull(callbackRequest.getCaseDetailsBefore())) {
             Map<String, Object> oldCaseDataMap = callbackRequest.getCaseDetailsBefore().getData();
@@ -561,7 +563,9 @@ public class UpdatePartyDetailsService {
                                                  String authorisation, CaseData caseData) throws Exception {
         String state = callbackRequest.getCaseDetails().getState();
         System.out.println("=====state: " + state);
+
         caseData.setState(State.valueOf(state));
+
         caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
         CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
 
