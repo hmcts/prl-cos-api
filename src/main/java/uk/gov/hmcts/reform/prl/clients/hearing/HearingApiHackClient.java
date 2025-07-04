@@ -37,7 +37,7 @@ public class HearingApiHackClient implements HearingApiClient {
 
         String hearingPayload = null;
         try {
-            Resource resource = new ClassPathResource("hearingHackResponse.json");
+            Resource resource = new ClassPathResource("/hearingHackResponse.json");
             hearingPayload = Files.readString(resource.getFile().toPath());;
         } catch (IOException e) {
             throw new RuntimeException(e);

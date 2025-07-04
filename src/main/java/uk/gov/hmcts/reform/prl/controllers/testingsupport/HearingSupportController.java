@@ -40,7 +40,8 @@ public class HearingSupportController {
         hearingManagementService.caseStateChangeForHearingManagement(hearingRequest,caseState);
     }
 
-    @PutMapping(path = "hearing-management-state-update/caseState/PREPARE_FOR_HEARING_CONDUCT_HEARING", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PutMapping(path = "hearing-management-state-update/caseState/PREPARE_FOR_HEARING_CONDUCT_HEARING",
+        consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Swagger invocation- ")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
