@@ -401,7 +401,9 @@ public class DocumentGenService {
     private void isConfidentialInformationPresentForC100Welsh(String authorisation, CaseData caseData,
                                                               Map<String, Object> updatedCaseData) throws Exception {
         if (isConfidentialInformationPresentForC100(caseData)) {
-            if (State.CASE_ISSUED.equals(caseData.getState()) || State.JUDICIAL_REVIEW.equals(caseData.getState())) {
+            if (State.CASE_ISSUED.equals(caseData.getState())
+                || State.JUDICIAL_REVIEW.equals(caseData.getState())
+                || State.PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(caseData.getState())) {
                 updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, getDocument(authorisation, caseData, C8_HINT, true));
             } else {
                 updatedCaseData.put(
@@ -453,7 +455,11 @@ public class DocumentGenService {
     private void isConfidentialInformationPresentForC100Eng(String authorisation, CaseData caseData,
                                                             Map<String, Object> updatedCaseData) throws Exception {
         if (isConfidentialInformationPresentForC100(caseData)) {
-            if (State.CASE_ISSUED.equals(caseData.getState()) || State.JUDICIAL_REVIEW.equals(caseData.getState())) {
+            State state = caseData.getState();
+            System.out.println("State: " + state);
+            if (State.CASE_ISSUED.equals(caseData.getState())
+                || State.JUDICIAL_REVIEW.equals(caseData.getState())
+                || State.PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(caseData.getState())) {
                 updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false));
             } else {
                 updatedCaseData.put(
