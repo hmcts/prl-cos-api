@@ -91,7 +91,8 @@ public class Fm5ReminderService {
             //Iterate all cases to evaluate rules to trigger FM5 reminder
             Map<String, Fm5PendingParty> qualifiedCasesAndPartiesBeforeHearing =
                 getQualifiedCasesAndHearingsForNotifications(caseDetailsList, hearingAwayDays);
-            log.info("Final list of cases to process for FM5 notifications: {}", qualifiedCasesAndPartiesBeforeHearing);
+            log.info("Final count of cases to process for FM5 notifications: {}",
+                     qualifiedCasesAndPartiesBeforeHearing.size());
             //Send FM5 reminders to cases meeting all system rules, else update not needed
             qualifiedCasesAndPartiesBeforeHearing.forEach(
                 (key, fm5PendingParty) -> {
@@ -171,8 +172,6 @@ public class Fm5ReminderService {
             if (isNotEmpty(hearingsForAllCaseIdsWithCourtVenue)) {
                 hearingsForAllCaseIdsWithCourtVenue.forEach(
                     hearing -> {
-                        log.info("Checking first listed hearing for case {}", hearing.getCaseRef());
-                        log.info("first listed hearing: {}", hearing.getCaseHearings().getFirst().getHearingID());
                         if (isFirstListedHearingAwayForDays(hearing,
                                                             null != hearingAwayDays ? hearingAwayDays : 18)) {
                             log.info("Putting qualified case before hearing for case {}", hearing.getCaseRef());
@@ -349,10 +348,7 @@ public class Fm5ReminderService {
                     Comparator.nullsLast(Comparator.naturalOrder())
                 ))
                 .toList();
-            log.info("sorted hearing day schedules: {}", sortedHearingDaySchedules.stream().toList());
             if (CollectionUtils.isNotEmpty(sortedHearingDaySchedules)) {
-                log.info("hearing day schedules found {}",
-                         sortedHearingDaySchedules.getFirst().getHearingStartDateTime());
                 log.info("checking if {} days is the same as {}", LocalDateTime.now().plusDays(days),
                          sortedHearingDaySchedules.getFirst().getHearingStartDateTime());
                 log.info("returning {}", LocalDate.from(LocalDateTime.now()).plusDays(days)
