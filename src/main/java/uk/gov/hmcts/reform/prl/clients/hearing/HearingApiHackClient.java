@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -16,13 +18,8 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedRequest;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
-
-import static java.lang.ClassLoader.getSystemResource;
-import static java.nio.file.Files.readString;
 
 @RequiredArgsConstructor
 @Component
@@ -39,8 +36,9 @@ public class HearingApiHackClient implements HearingApiClient {
 
         String hearingPayload = null;
         try {
-            hearingPayload = readString(Paths.get(getSystemResource("hearingHackResponse.json").toURI()));
-        } catch (IOException | URISyntaxException e) {
+            Resource resource = new ClassPathResource("/hearingHackResponse.json");
+            hearingPayload = new String(resource.getContentAsByteArray());
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
 

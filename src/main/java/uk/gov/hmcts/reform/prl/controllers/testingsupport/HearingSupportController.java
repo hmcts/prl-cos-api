@@ -29,7 +29,7 @@ public class HearingSupportController {
     private final HearingManagementService hearingManagementService;
 
     @PutMapping(path = "hearing-management-state-update/{caseState}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "fis service call to update the state of case")
+    @Operation(description = "Hearing listed task creation")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = CallbackResponse.class))),
