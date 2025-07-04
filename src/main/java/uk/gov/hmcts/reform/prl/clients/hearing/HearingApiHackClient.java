@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedRequest;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 
@@ -36,8 +37,8 @@ public class HearingApiHackClient implements HearingApiClient {
 
         String hearingPayload = null;
         try {
-            Resource resource = new ClassPathResource("/hearingHackResponse.json");
-            hearingPayload = new String(resource.getContentAsByteArray());
+            Resource resource = new ClassPathResource("hearingHackResponse.json");
+            hearingPayload = Files.readString(resource.getFile().toPath());;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
