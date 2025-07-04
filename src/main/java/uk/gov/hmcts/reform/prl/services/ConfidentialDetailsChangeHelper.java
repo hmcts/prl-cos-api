@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -33,7 +35,9 @@ public class ConfidentialDetailsChangeHelper {
                 return true;
             }
 
-            if (hasConfidentialityFlagChanged(curr, prev)) {
+            if (checkIfAddressConfidentialityHasChanged(curr, prev)
+                || checkIfEmailConfidentialityHasChanged(curr, prev)
+                || checkIfPhoneConfidentialityHasChanged(curr, prev)) {
                 return true;
             }
 
@@ -47,10 +51,22 @@ public class ConfidentialDetailsChangeHelper {
         return false;
     }
 
-    private boolean hasConfidentialityFlagChanged(PartyDetails current, PartyDetails previous) {
-        return !Objects.equals(current.getIsAddressConfidential(), previous.getIsAddressConfidential())
-            || !Objects.equals(current.getIsPhoneNumberConfidential(), previous.getIsPhoneNumberConfidential())
-            || !Objects.equals(current.getIsEmailAddressConfidential(), previous.getIsAddressConfidential());
+    public static boolean checkIfAddressConfidentialityHasChanged(PartyDetails current, PartyDetails previous) {
+        return isNotEmpty(current.getIsAddressConfidential())
+            && isNotEmpty(previous.getIsAddressConfidential())
+            && !previous.getIsAddressConfidential().equals(current.getIsAddressConfidential());
+    }
+
+    public static boolean checkIfEmailConfidentialityHasChanged(PartyDetails current, PartyDetails previous) {
+        return isNotEmpty(current.getIsEmailAddressConfidential())
+            && isNotEmpty(previous.getIsEmailAddressConfidential())
+            && !previous.getIsEmailAddressConfidential().equals(current.getIsEmailAddressConfidential());
+    }
+
+    public static boolean checkIfPhoneConfidentialityHasChanged(PartyDetails current, PartyDetails previous) {
+        return isNotEmpty(current.getIsPhoneNumberConfidential())
+            && isNotEmpty(previous.getIsPhoneNumberConfidential())
+            && !previous.getIsPhoneNumberConfidential().equals(current.getIsPhoneNumberConfidential());
     }
 
     private boolean hasDetailChanged(Object currentDetail, Object previousDetail) {

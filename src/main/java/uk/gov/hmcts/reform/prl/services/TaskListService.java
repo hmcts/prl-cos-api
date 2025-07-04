@@ -16,13 +16,10 @@ import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
-import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
-import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
@@ -109,7 +106,7 @@ public class TaskListService {
     private final LaunchDarklyClient launchDarklyClient;
     private final RoleAssignmentApi roleAssignmentApi;
     private final AuthTokenGenerator authTokenGenerator;
-    private final AllTabServiceImpl allTabService;
+    private final C8ArchiveService c8ArchiveService;
 
     private final MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
 
@@ -318,33 +315,8 @@ public class TaskListService {
                         startAllTabsUpdateDataContent.authorisation()
                     );
                 }
-                CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
-                boolean confidentialDetailsChanged = haveConfidentialDetailsChanged(caseData, caseDataBefore);
-                if (confidentialDetailsChanged) {
-                    Document c8ToArchive = caseData.getC8Document();
 
-                    if (c8ToArchive != null) {
-                        Document archivedC8 = Document.builder()
-                            .documentUrl(c8ToArchive.getDocumentUrl())
-                            .documentBinaryUrl(c8ToArchive.getDocumentBinaryUrl())
-                            .documentFileName("C8ArchivedDocument.pdf")
-                            .build();
-
-                        List<Element<Document>> archivedDocuments = new ArrayList<>();
-
-                        if (caseData.getC8ArchivedDocuments() != null) {
-                            for (Element<Document> element : caseData.getC8ArchivedDocuments()) {
-                                archivedDocuments.add(element);
-                            }
-                        }
-
-                        archivedDocuments.add(Element.<Document>builder()
-                                                  .value(archivedC8)
-                                                  .build());
-
-                        caseDataUpdated.put("c8ArchivedDocuments", archivedDocuments);
-                    }
-                }
+                c8ArchiveService.archiveC8DocumentIfConfidentialChanged(callbackRequest,caseData,caseDataUpdated);
 
                 caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
                 CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
@@ -402,20 +374,5 @@ public class TaskListService {
         return roles;
     }
 
-    private boolean haveConfidentialDetailsChanged(CaseData current, CaseData previous) {
-        boolean currentConfidential = YesOrNo.Yes.equals(getAddressConfidentialityFlag(current)) ? true : false;
-        boolean previousConfidential = YesOrNo.Yes.equals(getAddressConfidentialityFlag(previous)) ? true : false;
 
-        return currentConfidential != previousConfidential;
-    }
-
-    private YesOrNo getAddressConfidentialityFlag(CaseData caseData) {
-        if (caseData.getApplicants() != null && !caseData.getApplicants().isEmpty()) {
-            PartyDetails partyDetails = caseData.getApplicants().get(0).getValue();
-            if (partyDetails != null) {
-                return partyDetails.getIsAddressConfidential();
-            }
-        }
-        return null;
-    }
 }
