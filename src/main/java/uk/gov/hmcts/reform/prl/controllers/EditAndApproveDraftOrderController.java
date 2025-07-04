@@ -163,30 +163,30 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             String language = CaseUtils.getLanguage(clientContext);
-            Map<String, Object> caseDataUpdated = draftAnOrderService.getEligibleServeOrderDetails(
-                authorisation,
-                callbackRequest,
-                language
-            );
-
             if (Event.HEARING_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
-                CaseData modifiedCaseData = objectMapper.convertValue(
-                    caseDataUpdated,
-                    CaseData.class
-                );
+
                 String encodedClientContext = CaseUtils.setTaskCompletion(
                     clientContext,
                     objectMapper,
-                    modifiedCaseData,
+                    caseData,
                     (data) ->
                         !manageOrderService.isSaveAsDraft(data)
-                            && ofNullable(data.getManageOrders().getOrdersHearingDetails())
+                            && ofNullable(data.getDraftOrderCollection())
+                            .map(ElementUtils::unwrapElements)
+                            .map(draftOrder -> draftOrder.getFirst().getManageOrderHearingDetails())
                             .map(ElementUtils::unwrapElements)
                             .map(hearingData -> hearingData.getFirst().getHearingDateConfirmOptionEnum())
                             .filter(hearingDateConfirmOptionEnum ->
                                         HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.getId()
                                             .equals(hearingDateConfirmOptionEnum.getId())).isPresent()
+                );
+
+                Map<String, Object> caseDataUpdated = draftAnOrderService.getEligibleServeOrderDetails(
+                    authorisation,
+                    callbackRequest,
+                    language
                 );
 
                 ResponseEntity.BodyBuilder responseBuilder = ofNullable(encodedClientContext)
@@ -197,6 +197,12 @@ public class EditAndApproveDraftOrderController {
                                                 .data(caseDataUpdated)
                                                 .build());
             }
+
+            Map<String, Object> caseDataUpdated = draftAnOrderService.getEligibleServeOrderDetails(
+                authorisation,
+                callbackRequest,
+                language
+            );
 
             return ok(AboutToStartOrSubmitCallbackResponse.builder()
                                             .data(caseDataUpdated)
