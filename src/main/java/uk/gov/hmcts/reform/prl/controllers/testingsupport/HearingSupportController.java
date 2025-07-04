@@ -40,9 +40,9 @@ public class HearingSupportController {
         hearingManagementService.caseStateChangeForHearingManagement(hearingRequest,caseState);
     }
 
-    @PutMapping(path = "hearing-management-state-update/caseState/PREPARE_FOR_HEARING_CONDUCT_HEARING",
+    @PutMapping(path = "hearing-management-state-update/caseState",
         consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Swagger invocation- ")
+    @Operation(description = "Swagger invocation - PREPARE_FOR_HEARING_CONDUCT_HEARING")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = CallbackResponse.class))),
@@ -50,7 +50,6 @@ public class HearingSupportController {
     public void valueCaseStateUpdateByHearingManagement(@RequestBody HearingRequest hearingRequest,
                                                    @PathVariable("caseState") String caseState) throws Exception {
         log.info("Hack to trigger hearing event with case state {}", caseState);
-        State state = State.valueOf(caseState);
-        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest,state);
+        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest, State.PREPARE_FOR_HEARING_CONDUCT_HEARING);
     }
 }

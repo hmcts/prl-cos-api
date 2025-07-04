@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.clients.hearing;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -18,7 +17,8 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedRequest;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 
 import java.io.IOException;
-import java.nio.file.Files;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -36,18 +36,13 @@ public class HearingApiHackClient implements HearingApiClient {
         mapper.findAndRegisterModules();
 
         String hearingPayload = null;
-        try {
-            Resource resource = new ClassPathResource("/hearingHackResponse.json");
-            hearingPayload = Files.readString(resource.getFile().toPath());;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
 
-        String updatedHearingPayload = hearingPayload.replace("<caseRef>", caseReference);
-
-        try {
+        Resource resource = new ClassPathResource("/hearingHackResponse.json");
+        try (InputStream inputStream = resource.getInputStream()) {
+            hearingPayload = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+            String updatedHearingPayload = hearingPayload.replace("<caseRef>", caseReference);
             return mapper.readValue(updatedHearingPayload, Hearings.class);
-        } catch (JsonProcessingException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
