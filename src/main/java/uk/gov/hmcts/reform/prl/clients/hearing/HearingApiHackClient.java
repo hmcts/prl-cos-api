@@ -16,10 +16,15 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedRequest;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+
+import static java.lang.ClassLoader.getSystemResource;
+import static java.nio.file.Files.readString;
 
 @RequiredArgsConstructor
 @Component
@@ -36,8 +41,8 @@ public class HearingApiHackClient implements HearingApiClient {
 
         String hearingPayload = null;
         try {
-            hearingPayload = Files.readString(Path.of("hearingHackResponse.json"));
-        } catch (IOException e) {
+            hearingPayload = readString(Paths.get(getSystemResource("hearingHackResponse.json").toURI()));
+        } catch (IOException | URISyntaxException e) {
             throw new RuntimeException(e);
         }
 
