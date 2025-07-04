@@ -29,14 +29,27 @@ public class HearingSupportController {
     private final HearingManagementService hearingManagementService;
 
     @PutMapping(path = "hearing-management-state-update/{caseState}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Hearing listed task creation")
+    @Operation(description = "Hack to trigger hearing event")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = CallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public void caseStateUpdateByHearingManagement(@RequestBody HearingRequest hearingRequest,
                                                           @PathVariable("caseState") State caseState) throws Exception {
-        log.info("Hack to update hearing HMC response");
+        log.info("Hack to trigger hearing event");
         hearingManagementService.caseStateChangeForHearingManagement(hearingRequest,caseState);
+    }
+
+    @PutMapping(path = "hearing-management-state-update/caseState/PREPARE_FOR_HEARING_CONDUCT_HEARING", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Swagger invocation- ")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = CallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public void valueCaseStateUpdateByHearingManagement(@RequestBody HearingRequest hearingRequest,
+                                                   @PathVariable("caseState") String caseState) throws Exception {
+        log.info("Hack to trigger hearing event with case state {}", caseState);
+        State state = State.valueOf(caseState);
+        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest,state);
     }
 }
