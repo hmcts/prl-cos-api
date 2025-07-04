@@ -579,8 +579,8 @@ public class ManageOrdersUtils {
 
     public static boolean isOrderEdited(CaseData caseData, String eventId) {
         boolean isOrderEdited = false;
-        if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
-            .equalsIgnoreCase(eventId)) {
+        if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+            || Event.HEARING_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)) {
             if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder())
                 || (caseData.getManageOrders() != null
                 && Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder()))) {

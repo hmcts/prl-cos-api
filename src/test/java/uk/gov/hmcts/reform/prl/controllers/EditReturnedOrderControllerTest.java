@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
@@ -25,14 +26,22 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.languagecontext.UserLanguage;
+import uk.gov.hmcts.reform.prl.models.wa.AdditionalProperties;
+import uk.gov.hmcts.reform.prl.models.wa.ClientContext;
+import uk.gov.hmcts.reform.prl.models.wa.TaskData;
+import uk.gov.hmcts.reform.prl.models.wa.UserTask;
+import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.EditReturnedOrderService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -63,14 +72,35 @@ public class EditReturnedOrderControllerTest {
     @Mock
     private AuthorisationService authorisationService;
 
+    private String clientContextCoded;
+
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "s2s AuthToken";
 
     @Before
-    public void setUp() {
+    public void setUp() throws JsonProcessingException {
         when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(),
                                                               Mockito.any(), Mockito.anyString(),
                                                               Mockito.anyString())).thenReturn(DraftOrder.builder().build());
+
+        WaMapper waMapper = WaMapper.builder()
+            .clientContext(ClientContext.builder()
+                               .userLanguage(UserLanguage.builder().language("en").build())
+                               .userTask(UserTask.builder()
+                                             .completeTask(true)
+                                             .taskData(TaskData.builder()
+                                                           .id("test")
+                                                           .name("test")
+                                                           .additionalProperties(AdditionalProperties.builder()
+                                                                                     .orderId(UUID.randomUUID().toString())
+                                                                                     .hearingId(null)
+                                                                                     .build())
+                                                           .build())
+                                             .build())
+                               .build())
+            .build();
+        String json = new ObjectMapper().writeValueAsString(waMapper);
+        clientContextCoded = Base64.getEncoder().encodeToString(json.getBytes());
     }
 
     @Test
@@ -101,7 +131,11 @@ public class EditReturnedOrderControllerTest {
         Map<String, Object> caseDataMap = new HashMap<>();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId(), authToken)).thenReturn(caseDataMap);
+        when(draftAnOrderService.getDraftOrderDynamicList(caseData,
+                                                          Event.EDIT_AND_APPROVE_ORDER.getId(),
+                                                          clientContextCoded,
+                                                          authToken))
+            .thenReturn(caseDataMap);
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
@@ -138,7 +172,10 @@ public class EditReturnedOrderControllerTest {
         Map<String, Object> caseDataMap = new HashMap<>();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId(), authToken)).thenReturn(caseDataMap);
+        when(draftAnOrderService.getDraftOrderDynamicList(caseData,
+                                                          Event.EDIT_AND_APPROVE_ORDER.getId(),
+                                                          clientContextCoded,
+                                                          authToken)).thenReturn(caseDataMap);
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
@@ -160,7 +197,10 @@ public class EditReturnedOrderControllerTest {
         Map<String, Object> caseDataMap = new HashMap<>();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId(), authToken)).thenReturn(caseDataMap);
+        when(draftAnOrderService.getDraftOrderDynamicList(caseData,
+                                                          Event.EDIT_AND_APPROVE_ORDER.getId(),
+                                                          clientContextCoded,
+                                                          authToken)).thenReturn(caseDataMap);
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
@@ -193,7 +233,10 @@ public class EditReturnedOrderControllerTest {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
             EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDataMap, caseData, null);
         when(allTabsService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
-        when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId(), authToken)).thenReturn(caseDataMap);
+        when(draftAnOrderService.getDraftOrderDynamicList(caseData,
+                                                          Event.EDIT_AND_APPROVE_ORDER.getId(),
+                                                          clientContextCoded,
+                                                          authToken)).thenReturn(caseDataMap);
         ResponseEntity<SubmittedCallbackResponse> responseEntity = editReturnedOrderController
             .handleEditAndReturnedSubmitted(authToken, s2sToken, callbackRequest);
         assertNotNull(responseEntity.getBody());
