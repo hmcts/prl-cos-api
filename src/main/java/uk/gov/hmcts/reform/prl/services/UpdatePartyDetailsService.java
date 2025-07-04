@@ -212,7 +212,7 @@ public class UpdatePartyDetailsService {
                                                   caseData,
                                                   caseData.getRespondents());
 
-                generateC8DocumentsForApplicant(updatedCaseData, authorisation, caseData);
+                generateC8DocumentsForApplicant(updatedCaseData, callbackRequest, authorisation, caseData);
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
             }
@@ -556,7 +556,9 @@ public class UpdatePartyDetailsService {
         }
     }
 
-    private void generateC8DocumentsForApplicant(Map<String, Object> caseDataUpdated, String authorisation, CaseData caseData) throws Exception {
+    private void generateC8DocumentsForApplicant(Map<String, Object> caseDataUpdated, CallbackRequest callbackRequest, String authorisation, CaseData caseData) throws Exception {
+        String state = callbackRequest.getCaseDetails().getState();
+        System.out.println("=====state: " + state);
         caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
         CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
 
