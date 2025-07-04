@@ -489,12 +489,13 @@ dependencies {
   testRuntimeOnly "org.junit.platform:junit-platform-commons:1.10.3"
 
   contractTestRuntimeOnly(platform('org.junit:junit-bom:5.10.3'))
-  contractTestImplementation("org.junit.jupiter:junit-jupiter-api:5.10.3")
+  contractTestImplementation("org.junit.jupiter:junit-jupiter-api:5.13.2")
   contractTestRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
   testRuntimeOnly(platform('org.junit:junit-bom:5.10.3'))
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
   testImplementation 'org.apiguardian:apiguardian-api:1.1.2'
-  contractTestImplementation('org.junit.jupiter:junit-jupiter-api:5.10.3')
+  contractTestImplementation('org.junit.jupiter:junit-jupiter-api:5.13.2')
+  testImplementation group: 'org.pitest', name: 'pitest-junit5-plugin', version: '1.2.2'
 
   contractTestImplementation sourceSets.main.runtimeClasspath
   contractTestImplementation sourceSets.test.runtimeClasspath
