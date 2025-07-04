@@ -556,7 +556,8 @@ public class UpdatePartyDetailsService {
         }
     }
 
-    private void generateC8DocumentsForApplicant(Map<String, Object> caseDataUpdated, CallbackRequest callbackRequest, String authorisation, CaseData caseData) throws Exception {
+    private void generateC8DocumentsForApplicant(Map<String, Object> caseDataUpdated, CallbackRequest callbackRequest,
+                                                 String authorisation, CaseData caseData) throws Exception {
         String state = callbackRequest.getCaseDetails().getState();
         System.out.println("=====state: " + state);
         caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
