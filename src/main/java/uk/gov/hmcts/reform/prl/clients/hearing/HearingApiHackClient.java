@@ -26,7 +26,6 @@ import java.util.Map;
 @ConditionalOnProperty(name = "hearing.hack.enabled", havingValue = "true")
 public class HearingApiHackClient implements HearingApiClient {
 
-
     public Hearings getHearingDetails(
         @RequestHeader("Authorization") String authorisation,
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
