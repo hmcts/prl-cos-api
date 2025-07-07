@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.prl.clients.hearing;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -19,13 +21,17 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @RequiredArgsConstructor
 @Component
 @ConditionalOnProperty(name = "hearing.hack.enabled", havingValue = "true")
 public class HearingApiHackClient implements HearingApiClient {
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
     public Hearings getHearingDetails(
         @RequestHeader("Authorization") String authorisation,
@@ -34,13 +40,36 @@ public class HearingApiHackClient implements HearingApiClient {
     ) throws RuntimeException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.findAndRegisterModules();
+        LocalDateTime firstHearingDate = LocalDateTime.now().plusDays(1);
+        LocalDateTime secondHearingDate = LocalDateTime.now().plusDays(7);
 
         String hearingPayload = null;
 
         Resource resource = new ClassPathResource("/hearingHackResponse.json");
         try (InputStream inputStream = resource.getInputStream()) {
             hearingPayload = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-            String updatedHearingPayload = hearingPayload.replace("<caseRef>", caseReference);
+            String updatedHearingPayload = StringUtils.replaceEach(
+                hearingPayload,
+                new String[]{
+                    "<caseRef>",
+                    "<firstHearingStartDate>",
+                    "<firstHearingEndDate>",
+                    "<firstNextHearingDate>",
+                    "<secondHearingStartDate>",
+                    "<secondHearingEndDate>",
+                    "<secondNextHearingDate>"
+                },
+                new String[]{
+                    caseReference,
+                    dateTimeFormatter.format(firstHearingDate),
+                    dateTimeFormatter.format(firstHearingDate.plusDays(2)),
+                    dateTimeFormatter.format(firstHearingDate.plusDays(5)),
+                    dateTimeFormatter.format(secondHearingDate),
+                    dateTimeFormatter.format(secondHearingDate.plusDays(2)),
+                    dateTimeFormatter.format(secondHearingDate.plusDays(5))
+                }
+            );
+            log.info("Hearing hack response: {}", updatedHearingPayload);
             return mapper.readValue(updatedHearingPayload, Hearings.class);
         } catch (IOException e) {
             throw new RuntimeException(e);

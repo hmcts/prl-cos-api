@@ -13,8 +13,8 @@
       "listAssistCaseStatus": null,
       "hearingDaySchedule": [
         {
-          "hearingStartDateTime": "2025-07-28T18:23:45.123",
-          "hearingEndDateTime": "2025-07-30T18:23:45.123",
+          "hearingStartDateTime": "<firstHearingStartDate>",
+          "hearingEndDateTime": "<firstHearingEndDate>",
           "listAssistSessionId": null,
           "hearingVenueId": "898213",
           "hearingVenueName": "EAST LONDON FAMILY COURT",
@@ -35,7 +35,7 @@
       "hearingGroupRequestId": "280",
       "hearingIsLinkedFlag": null,
       "hearingTypeValue": null,
-      "nextHearingDate": "2025-07-30T18:23:45.123",
+      "nextHearingDate": "<firstNextHearingDate>",
       "urgentFlag": false
     },
     {
@@ -49,8 +49,8 @@
       "listAssistCaseStatus": null,
       "hearingDaySchedule": [
         {
-          "hearingStartDateTime": "2025-07-18T14:23:45.123",
-          "hearingEndDateTime": "2025-07-20T14:23:45.123",
+          "hearingStartDateTime": "<secondHearingStartDate>",
+          "hearingEndDateTime": "<secondHearingEndDate>",
           "listAssistSessionId": null,
           "hearingVenueId": "898213",
           "hearingVenueName": "EAST LONDON FAMILY COURT",
@@ -71,7 +71,7 @@
       "hearingGroupRequestId": "280",
       "hearingIsLinkedFlag": null,
       "hearingTypeValue": null,
-      "nextHearingDate": "2025-07-18T14:23:45.123",
+      "nextHearingDate": "<secondNextHearingDate>",
       "urgentFlag": false
     }
   ]
