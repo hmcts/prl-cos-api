@@ -25,7 +25,6 @@ public enum State {
     CASE_WITHDRAWN("CASE_WITHDRAWN", "Withdrawn"),
     JUDICIAL_REVIEW("JUDICIAL_REVIEW", "Gatekeeping"),
     ALL_FINAL_ORDERS_ISSUED("ALL_FINAL_ORDERS_ISSUED", "Closed"),
-    @Schema(description = "Hearing XXX")
     PREPARE_FOR_HEARING_CONDUCT_HEARING("PREPARE_FOR_HEARING_CONDUCT_HEARING","Hearing"),
     DELETED("DELETED", "Deleted"),
     REQUESTED_FOR_DELETION("REQUESTED_FOR_DELETION", "Requested for deletion"),
