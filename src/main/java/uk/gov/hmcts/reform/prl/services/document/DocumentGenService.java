@@ -400,7 +400,7 @@ public class DocumentGenService {
 
     private void isConfidentialInformationPresentForC100Welsh(String authorisation, CaseData caseData,
                                                               Map<String, Object> updatedCaseData) throws Exception {
-        if (isConfidentialInformationPresentForC100(caseData)) {
+        if (hasApplicantConfidentialInfoForC100(caseData)) {
             if (State.CASE_ISSUED.equals(caseData.getState())
                 || State.JUDICIAL_REVIEW.equals(caseData.getState())
                 || State.PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(caseData.getState())) {
@@ -454,9 +454,7 @@ public class DocumentGenService {
 
     private void isConfidentialInformationPresentForC100Eng(String authorisation, CaseData caseData,
                                                             Map<String, Object> updatedCaseData) throws Exception {
-        if (isConfidentialInformationPresentForC100(caseData)) {
-            State state = caseData.getState();
-            System.out.println("State: " + state);
+        if (hasApplicantConfidentialInfoForC100(caseData)) {
             if (State.CASE_ISSUED.equals(caseData.getState())
                 || State.JUDICIAL_REVIEW.equals(caseData.getState())
                 || State.PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(caseData.getState())) {
@@ -475,6 +473,18 @@ public class DocumentGenService {
         }
     }
 
+    private boolean hasApplicantConfidentialInfoForC100(CaseData caseData) {
+        if (!C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) || caseData.getApplicants() == null) {
+            return false;
+        }
+        return caseData.getApplicants().stream()
+            .map(Element::getValue)
+            .anyMatch(applicant ->
+                          YesOrNo.Yes.equals(applicant.getIsAddressConfidential()) ||
+                              YesOrNo.Yes.equals(applicant.getIsEmailAddressConfidential()) ||
+                              YesOrNo.Yes.equals(applicant.getIsPhoneNumberConfidential())
+            );
+    }
 
     private boolean isConfidentialInformationPresentForC100(CaseData caseData) {
         return C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
