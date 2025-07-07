@@ -5,8 +5,6 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.State;
 
-import java.util.Arrays;
-
 import static java.util.Arrays.stream;
 
 @Component
