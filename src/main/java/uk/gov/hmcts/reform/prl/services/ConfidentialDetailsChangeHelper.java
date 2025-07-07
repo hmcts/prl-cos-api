@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -11,8 +12,11 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 @Slf4j
 @Component
@@ -20,8 +24,8 @@ import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 public class ConfidentialDetailsChangeHelper {
 
     public boolean haveConfidentialDetailsChanged(CaseData current, CaseData previous) {
-        List<Element<PartyDetails>> currentApplicants = Optional.ofNullable(current.getApplicants()).orElse(List.of());
-        List<Element<PartyDetails>> previousApplicants = Optional.ofNullable(previous.getApplicants()).orElse(List.of());
+        List<Element<PartyDetails>> currentApplicants = getApplicantsByCaseType(current);
+        List<Element<PartyDetails>> previousApplicants = getApplicantsByCaseType(previous);
 
         if (currentApplicants.size() != previousApplicants.size()) {
             return true;
@@ -67,6 +71,30 @@ public class ConfidentialDetailsChangeHelper {
         return isNotEmpty(current.getIsPhoneNumberConfidential())
             && isNotEmpty(previous.getIsPhoneNumberConfidential())
             && !previous.getIsPhoneNumberConfidential().equals(current.getIsPhoneNumberConfidential());
+    }
+
+    private List<Element<PartyDetails>> getApplicantsByCaseType(CaseData caseData) {
+        String applicationType = caseData.getCaseTypeOfApplication();
+
+        if (C100_CASE_TYPE.equalsIgnoreCase(applicationType)) {
+            return Optional.ofNullable(caseData.getApplicants()).orElse(List.of());
+        }
+
+        if (FL401_CASE_TYPE.equalsIgnoreCase(applicationType)) {
+            PartyDetails applicant = caseData.getApplicantsFL401();
+            if (applicant == null) {
+                return List.of();
+            }
+
+            UUID id = applicant.getPartyId() != null ? applicant.getPartyId() : UUID.randomUUID();
+            Element<PartyDetails> applicantsFL401 = Element.<PartyDetails>builder()
+                .id(id)
+                .value(applicant)
+                .build();
+
+            return List.of(applicantsFL401);
+        }
+        return List.of();
     }
 
     private boolean hasDetailChanged(Object currentDetail, Object previousDetail) {
