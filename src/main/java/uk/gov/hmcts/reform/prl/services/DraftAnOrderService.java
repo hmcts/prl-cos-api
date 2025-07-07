@@ -1083,7 +1083,7 @@ public class DraftAnOrderService {
         );
 
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-            hearingDataService.populateHearingDynamicLists(authorization, caseReferenceNumber, caseData, hearingsSupplier);
+            hearingDataService.populateHearingDynamicLists(authorization, caseReferenceNumber, caseData, hearingsSupplier.get());
         if (CollectionUtils.isEmpty(manageOrderHearingDetail)) {
             HearingData hearingData = hearingDataService.generateHearingData(
                 hearingDataPrePopulatedDynamicLists, caseData);
