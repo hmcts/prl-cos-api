@@ -26,12 +26,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
+import static java.time.format.DateTimeFormatter.ofPattern;
+
 @Slf4j
 @RequiredArgsConstructor
 @Component
 @ConditionalOnProperty(name = "hearing.hack.enabled", havingValue = "true")
 public class HearingApiHackClient implements HearingApiClient {
-    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
+    private static final DateTimeFormatter dateTimeFormatter = ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
     public Hearings getHearingDetails(
         @RequestHeader("Authorization") String authorisation,
@@ -41,7 +43,7 @@ public class HearingApiHackClient implements HearingApiClient {
         ObjectMapper mapper = new ObjectMapper();
         mapper.findAndRegisterModules();
         LocalDateTime firstHearingDate = LocalDateTime.now().plusDays(1);
-        LocalDateTime secondHearingDate = LocalDateTime.now().plusDays(7);
+        LocalDateTime secondHearingDate = firstHearingDate.plusDays(7);
 
         String hearingPayload = null;
 
