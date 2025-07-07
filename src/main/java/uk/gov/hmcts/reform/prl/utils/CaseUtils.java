@@ -993,6 +993,7 @@ public class CaseUtils {
                 .getUserTask())
             .filter(Objects::nonNull)
             .filter(value -> value.getTaskData() != null
+                && value.getTaskData().getAdditionalProperties() != null
                 && value.getTaskData().getAdditionalProperties().getHearingId() != null)
             .map(value -> Long.valueOf(value
                                            .getTaskData()
