@@ -972,7 +972,7 @@ public class CaseUtils {
     }
 
     public static String getHearingId(WaMapper waMapper) {
-        if (null != waMapper) {
+        if (null != waMapper && null != waMapper.getClientContext().getUserTask()) {
             if (null != waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties()) {
                 return waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties().getHearingId();
             }

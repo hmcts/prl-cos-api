@@ -164,24 +164,22 @@ public class EditAndApproveDraftOrderController {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             String language = CaseUtils.getLanguage(clientContext);
-            String encodedClientContext = null;
-            if (Event.HEARING_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
-                encodedClientContext = CaseUtils.setTaskCompletion(
-                    clientContext,
-                    objectMapper,
-                    caseData,
-                    (data) ->
-                        !manageOrderService.isSaveAsDraft(data)
-                            && ofNullable(data.getDraftOrderCollection())
-                            .map(ElementUtils::unwrapElements)
-                            .map(draftOrder -> draftOrder.getFirst().getManageOrderHearingDetails())
-                            .map(ElementUtils::unwrapElements)
-                            .map(hearingData -> hearingData.getFirst().getHearingDateConfirmOptionEnum())
-                            .filter(hearingDateConfirmOptionEnum ->
-                                        HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.getId()
-                                            .equals(hearingDateConfirmOptionEnum.getId())).isPresent()
-                );
-            }
+            String encodedClientContext = CaseUtils.setTaskCompletion(
+                clientContext,
+                objectMapper,
+                caseData,
+                (data) ->
+                    Event.HEARING_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())
+                    && !manageOrderService.isSaveAsDraft(data)
+                        && ofNullable(data.getDraftOrderCollection())
+                        .map(ElementUtils::unwrapElements)
+                        .map(draftOrder -> draftOrder.getFirst().getManageOrderHearingDetails())
+                        .map(ElementUtils::unwrapElements)
+                        .map(hearingData -> hearingData.getFirst().getHearingDateConfirmOptionEnum())
+                        .filter(hearingDateConfirmOptionEnum ->
+                                    HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.getId()
+                                        .equals(hearingDateConfirmOptionEnum.getId())).isPresent()
+            );
 
             Map<String, Object> caseDataUpdated = draftAnOrderService.getEligibleServeOrderDetails(
                 authorisation,
