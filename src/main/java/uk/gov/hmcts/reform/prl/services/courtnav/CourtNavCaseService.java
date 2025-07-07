@@ -27,7 +27,6 @@ import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
-import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
@@ -44,7 +43,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -305,22 +303,6 @@ public class CourtNavCaseService {
             caseDataMap
         );
         log.info("Common component setup for NoC and case flags is completed");
-    }
-
-    public void validateCaseManagementLocation(CaseData caseData) {
-        CaseManagementLocation location = caseData.getCaseManagementLocation();
-
-        if (location == null
-            || isBlank(location.getRegion())
-            || isBlank(location.getBaseLocation())
-            || isBlank(location.getRegionName())
-            || isBlank(location.getBaseLocationName())) {
-
-            log.warn("Case management location is invalid: one or more required fields are missing or blank.");
-
-            //  applicant postcode or court name fields are missing or blank
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Case management location is invalid.");
-        }
     }
 }
 

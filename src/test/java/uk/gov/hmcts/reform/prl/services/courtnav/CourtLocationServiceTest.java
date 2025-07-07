@@ -1,32 +1,24 @@
 package uk.gov.hmcts.reform.prl.services.courtnav;
 
-import javassist.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.prl.models.court.Court;
-import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
+import uk.gov.hmcts.reform.prl.exception.CourtLocationUnprocessableException;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CourtLocationServiceTest {
-
-    @Mock
-    private CourtFinderService courtFinderService;
 
     @Mock
     private CourtSealFinderService courtSealFinderService;
@@ -41,8 +33,8 @@ class CourtLocationServiceTest {
     private static final String EPIMS_ID = "123456";
 
     @Test
-    void shouldPopulateLocationFromRefDataWhenCourtVenueExists() throws NotFoundException {
-        CaseData baseCaseData = CaseData.builder()
+    void shouldPopulateLocationWhenCourtVenueExists() {
+        CaseData caseData = CaseData.builder()
             .specialCourtName(EPIMS_ID)
             .build();
 
@@ -57,48 +49,52 @@ class CourtLocationServiceTest {
 
         when(courtSealFinderService.getCourtSeal("7")).thenReturn("sealImage");
 
-        CaseData result = courtLocationService.populateCourtLocation(AUTH, baseCaseData);
+        CaseData result = courtLocationService.populateCourtLocation(AUTH, caseData);
 
         assertEquals("Swansea Family Court", result.getCourtName());
-        assertEquals(EPIMS_ID, result.getCourtId());
         assertEquals("7", result.getCaseManagementLocation().getRegion());
-        assertEquals("sealImage", result.getCourtSeal());
+        assertEquals("Wales", result.getCaseManagementLocation().getRegionName());
+        assertEquals("123456", result.getCaseManagementLocation().getBaseLocation());
     }
 
     @Test
-    void shouldPopulateLocationFromFactApiWhenEpimsIdInvalid() throws Exception {
-        CaseData baseCaseData = CaseData.builder()
+    void shouldThrowWhenCourtVenueNotFound() {
+        CaseData caseData = CaseData.builder()
+            .specialCourtName("999999")
+            .build();
+
+        when(locationRefDataService.getCourtDetailsFromEpimmsId("999999", AUTH))
+            .thenReturn(Optional.empty());
+
+        assertThrows(CourtLocationUnprocessableException.class,
+                     () -> courtLocationService.populateCourtLocation(AUTH, caseData));
+    }
+
+    @Test
+    void shouldThrowWhenEpimsIdIsMissing() {
+        CaseData caseData = CaseData.builder()
+            .build();
+
+        assertThrows(CourtLocationUnprocessableException.class,
+                     () -> courtLocationService.populateCourtLocation(AUTH, caseData));
+    }
+
+    @Test
+    void shouldThrowWhenCourtVenueIsMissingRequiredFields() {
+        CaseData caseData = CaseData.builder()
             .specialCourtName(EPIMS_ID)
             .build();
 
-        when(locationRefDataService.getCourtDetailsFromEpimmsId(EPIMS_ID, AUTH))
-            .thenReturn(Optional.empty());
+        CourtVenue incompleteVenue = CourtVenue.builder()
+            .courtName("Some Court")
+            .region(null)
+            .regionId("7")
+            .build();
 
-        Court court = Court.builder().courtName("Fallback Court").build();
-        when(courtFinderService.getNearestFamilyCourt(baseCaseData)).thenReturn(court);
-        when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(
-            CourtEmailAddress.builder().address("court@example.com").build()));
+        when(locationRefDataService.getCourtDetailsFromEpimmsId("123456", AUTH))
+            .thenReturn(Optional.of(incompleteVenue));
 
-        CaseData result = courtLocationService.populateCourtLocation(AUTH, baseCaseData);
-
-        assertEquals("Fallback Court", result.getCourtName());
-        assertEquals("court@example.com", result.getCourtEmailAddress());
-    }
-
-    @Test
-    void shouldPopulateLocationFromPostcodeWhenEpimsIdIsMissing() throws Exception {
-        CaseData baseCaseData = CaseData.builder().build();
-        Court court = Court.builder().courtName("Postcode Court").build();
-
-        when(courtFinderService.getNearestFamilyCourt(baseCaseData)).thenReturn(court);
-        when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(
-            CourtEmailAddress.builder().address("postcodecourt@example.com").build()));
-
-        CaseData result = courtLocationService.populateCourtLocation(AUTH, baseCaseData);
-
-        assertEquals("Postcode Court", result.getCourtName());
-        assertEquals("postcodecourt@example.com", result.getCourtEmailAddress());
-
-        verify(locationRefDataService, never()).getCourtDetailsFromEpimmsId(any(), any());
+        assertThrows(CourtLocationUnprocessableException.class,
+                     () -> courtLocationService.populateCourtLocation(AUTH, caseData));
     }
 }

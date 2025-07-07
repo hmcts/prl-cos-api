@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.controllers.courtnav;
+package uk.gov.hmcts.reform.prl.controllers.    courtnav;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -73,7 +73,6 @@ public class CourtNavCaseController {
 
         CaseData caseData = fl401ApplicationMapper.mapCourtNavData(inputData);
         caseData = courtLocationService.populateCourtLocation(authorisation, caseData);
-        courtNavCaseService.validateCaseManagementLocation(caseData);
         CaseDetails caseDetails = courtNavCaseService.createCourtNavCase(authorisation, caseData);
 
         log.info("Case has been created {}", caseDetails.getId());
