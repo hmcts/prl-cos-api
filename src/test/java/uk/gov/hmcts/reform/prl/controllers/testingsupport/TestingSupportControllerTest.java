@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingRequest;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.TestingSupportService;
 import uk.gov.hmcts.reform.prl.services.hearingmanagement.HearingManagementService;
@@ -192,6 +193,13 @@ public class TestingSupportControllerTest {
     public void testConfirmDummyAwPPayment() {
         testingSupportController.confirmDummyAwPPayment(authToken, callbackRequest);
         verify(testingSupportService, times(1)).confirmDummyAwPPayment(Mockito.any(CallbackRequest.class), Mockito.anyString());
+    }
+
+    @Test
+    public void testingCaseStateUpdateByHearingManagement() throws Exception {
+        HearingRequest hearingRequest = HearingRequest.builder().build();
+        testingSupportController.testingCaseStateUpdateByHearingManagement(hearingRequest, State.PREPARE_FOR_HEARING_CONDUCT_HEARING);
+        verify(hearingManagementService,times(1)).caseStateChangeForHearingManagement(hearingRequest, State.PREPARE_FOR_HEARING_CONDUCT_HEARING);
     }
 
     protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
