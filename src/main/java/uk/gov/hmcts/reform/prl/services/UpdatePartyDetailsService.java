@@ -218,14 +218,12 @@ public class UpdatePartyDetailsService {
                 log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
             }
             cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
-            findAndListRefugeDocsForFL401(callbackRequest, caseData, updatedCaseData);
+            findAndListRefugeDocsForC100(callbackRequest, caseData, updatedCaseData);
         }
         if (Objects.nonNull(callbackRequest.getCaseDetailsBefore())) {
             Map<String, Object> oldCaseDataMap = callbackRequest.getCaseDetailsBefore().getData();
             partyLevelCaseFlagsService.amendCaseFlags(oldCaseDataMap, updatedCaseData, callbackRequest.getEventId());
         }
-        cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
-        findAndListRefugeDocsForC100(callbackRequest, caseData, updatedCaseData);
         return updatedCaseData;
     }
 
