@@ -795,5 +795,6 @@ closing_case:
   unallocated_roleName: allocated-admin-caseworker,allocated-ctsc-caseworker,allocated-legal-adviser,gatekeeping-judge,hearing-judge,allocated-judge,allocated-magistrate,hearing-centre-team-leader,ctsc-team-leader,ctsc,hearing-centre-admin,tribunal-caseworker,senior-tribunal-caseworker
 
 hearing:
-  hack:
-    enabled: ${HEARING_HACK_ENABLED:false}
+  preview:
+    bypass:
+      enabled: ${HEARING_PREVIEW_BYPASS_ENABLED:false}

@@ -8,7 +8,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,36 +20,39 @@ import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingRequest;
 import uk.gov.hmcts.reform.prl.services.hearingmanagement.HearingManagementService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.springframework.http.ResponseEntity.ok;
 
 @Slf4j
 @RestController
 @RequestMapping("/hearing-support/testing")
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = "hearing.hack.enabled", havingValue = "true")
+@ConditionalOnProperty(name = "hearing.preview.bypass.enabled", havingValue = "true")
 public class HearingSupportController {
     private final HearingManagementService hearingManagementService;
 
-    @PutMapping(path = "hearing-management-state-update/{caseState}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Hack to trigger hearing event")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback processed.",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = CallbackResponse.class))),
-        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public void caseStateUpdateByHearingManagement(@RequestBody HearingRequest hearingRequest,
-                                                          @PathVariable("caseState") State caseState) throws Exception {
-        log.info("Hack to trigger hearing event with state {}", caseState.getValue());
-        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest,caseState);
-    }
-
-    @PutMapping(path = "hearing-management-state-update/caseState",
+    @PutMapping(path = "prepare-for-hearing",
         consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Swagger invocation - PREPARE_FOR_HEARING_CONDUCT_HEARING")
+    @Operation(description = "Invocation for PREPARE_FOR_HEARING_CONDUCT_HEARING")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = CallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public void valueCaseStateUpdateByHearingManagement(@RequestBody HearingRequest hearingRequest) throws Exception {
-        log.info("Hack to trigger hearing event with state hardcoded to PREPARE_FOR_HEARING_CONDUCT_HEARING");
+    public void prepareForHearing(@RequestBody HearingRequest hearingRequest) {
+        log.info("Trigger hearing event with state of PREPARE_FOR_HEARING_CONDUCT_HEARING");
         hearingManagementService.caseStateChangeForHearingManagement(hearingRequest, State.PREPARE_FOR_HEARING_CONDUCT_HEARING);
     }
+
+    @GetMapping(path = "is-enabled")
+    @Operation(description = "To check whether end point is enabled")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = CallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public ResponseEntity<Object> isEnabled() {
+        log.info("Hearing support controller is enabled");
+        return ok().build();
+    }
+
+
+
 }

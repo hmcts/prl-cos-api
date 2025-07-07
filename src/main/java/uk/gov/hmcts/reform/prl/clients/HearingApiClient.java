@@ -25,7 +25,7 @@ import java.util.Map;
     url = "${fis_hearing.api.url}",
     configuration = FeignClientProperties.FeignClientConfiguration.class
 )
-@ConditionalOnProperty(name = "hearing.hack.enabled", havingValue = "false", matchIfMissing = true)
+@ConditionalOnProperty(name = "hearing.preview.bypass.enabled", havingValue = "false", matchIfMissing = true)
 public interface HearingApiClient {
 
 
