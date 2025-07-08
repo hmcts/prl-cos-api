@@ -473,7 +473,7 @@ public class DocumentGenService {
         }
     }
 
-    private boolean hasApplicantConfidentialInfoForC100(CaseData caseData) {
+    public boolean hasApplicantConfidentialInfoForC100(CaseData caseData) {
         if (!C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) || caseData.getApplicants() == null) {
             return false;
         }
