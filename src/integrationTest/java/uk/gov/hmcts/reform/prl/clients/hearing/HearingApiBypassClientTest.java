@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anyString;
 
 @SpringBootTest
 public class HearingApiBypassClientTest {
@@ -27,7 +26,11 @@ public class HearingApiBypassClientTest {
     void shouldReturnHearings() {
         assertThat(hearingApiClient)
             .isNotNull();
-        Hearings hearingDetails = hearingApiClient.getHearingDetails(anyString(), anyString(), anyString());
+        Hearings hearingDetails = hearingApiClient.getHearingDetails(
+            "auth",
+            "serviceAuth",
+            "12345"
+        );
         assertThat(hearingDetails)
             .isNotNull();
         assertThat(hearingDetails.getHmctsServiceCode())
@@ -40,8 +43,11 @@ public class HearingApiBypassClientTest {
     void shouldThrowException() {
         assertThat(hearingApiClient)
             .isNotNull();
-        assertThatThrownBy(() -> hearingApiClient.getFutureHearings(anyString(), anyString(), anyString()))
-            .isInstanceOf(UnsupportedOperationException.class)
+        assertThatThrownBy(() -> hearingApiClient.getFutureHearings(
+                "auth",
+                "serviceAuth",
+                "12345"
+            )).isInstanceOf(UnsupportedOperationException.class)
             .hasMessageContaining("Feign call not supported from bypass api");
     }
 }

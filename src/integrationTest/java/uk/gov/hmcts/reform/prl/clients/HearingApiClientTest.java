@@ -8,7 +8,6 @@ import org.springframework.test.context.DynamicPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anyString;
 
 @SpringBootTest
 public class HearingApiClientTest {
@@ -26,7 +25,10 @@ public class HearingApiClientTest {
         assertThat(hearingApiClient)
             .isNotNull();
 
-        assertThatThrownBy(() -> hearingApiClient.getHearingDetails(anyString(), anyString(), anyString()))
+        assertThatThrownBy(() -> hearingApiClient.getHearingDetails(
+            "auth",
+            "serviceAuth",
+            "12345"))
             .isInstanceOf(feign.FeignException.class);
     }
 }
