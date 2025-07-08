@@ -567,6 +567,11 @@ public class UpdatePartyDetailsService {
 
         caseData = caseData.toBuilder()
             .c8Document(updatedCaseData.getC8Document())
+            .c8WelshDocument(updatedCaseData.getC8WelshDocument())
+            .c1ADocument(updatedCaseData.getC1ADocument())
+            .c1AWelshDocument(updatedCaseData.getC1AWelshDocument())
+            .finalDocument(updatedCaseData.getFinalDocument())
+            .finalWelshDocument(updatedCaseData.getFinalWelshDocument())
             .build();
 
         caseDataUpdated.put("c8Document", caseData.getC8Document());
