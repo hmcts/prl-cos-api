@@ -983,10 +983,10 @@ public class CaseUtils {
     public static Optional<Long> getHearingId(WaMapper waMapper, Map<String, Object> caseDataUpdated) {
         Optional<Long> taskHearingId = ofNullable(waMapper)
             .filter(value ->
-                        new ObjectMapper().convertValue(
+                        Yes.equals(new ObjectMapper().convertValue(
                             caseDataUpdated.get(IS_INVOKED_FROM_TASK),
                             new TypeReference<YesOrNo>() {
-                            }).equals(Yes)
+                            }))
             )
             .map(value -> value
                 .getClientContext()

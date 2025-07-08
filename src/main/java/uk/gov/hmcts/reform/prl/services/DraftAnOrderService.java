@@ -1014,7 +1014,7 @@ public class DraftAnOrderService {
         caseDataMap.put(IS_INVOKED_FROM_TASK, Yes);
 
         Optional<Long> taskHearingId = Optional.empty();
-        if (clientContext.isPresent()) {
+        if (clientContext != null && clientContext.isPresent()) {
             WaMapper waMapper = getWaMapper(clientContext.get());
             taskHearingId = CaseUtils.getHearingId(waMapper, caseDataMap);
         }
