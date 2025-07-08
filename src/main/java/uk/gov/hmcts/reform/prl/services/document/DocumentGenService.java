@@ -480,9 +480,9 @@ public class DocumentGenService {
         return caseData.getApplicants().stream()
             .map(Element::getValue)
             .anyMatch(applicant ->
-                          YesOrNo.Yes.equals(applicant.getIsAddressConfidential()) ||
-                              YesOrNo.Yes.equals(applicant.getIsEmailAddressConfidential()) ||
-                              YesOrNo.Yes.equals(applicant.getIsPhoneNumberConfidential())
+                          YesOrNo.Yes.equals(applicant.getIsAddressConfidential())
+                              || YesOrNo.Yes.equals(applicant.getIsEmailAddressConfidential())
+                              || YesOrNo.Yes.equals(applicant.getIsPhoneNumberConfidential())
             );
     }
 
