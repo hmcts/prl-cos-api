@@ -113,4 +113,16 @@ public class CaseUtilsTest {
 
         assertThat(actualHearingId.orElse(null)).isEqualTo(12345L);
     }
+
+    @Test
+    public void testGetHearingIdWhenClientContextIsNotNullButIsInvokedFromTaskIsNull() throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        mapper.findAndRegisterModules();
+        WaMapper waMapper = mapper.readValue(CLIENT_CONTEXT, WaMapper.class);
+
+        Optional<Long> actualHearingId = getHearingId(waMapper, caseDataMap);
+
+        assertThat(actualHearingId).isNotPresent();
+    }
 }
