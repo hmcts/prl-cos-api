@@ -34,14 +34,13 @@ import static java.time.format.DateTimeFormatter.ofPattern;
 @ConditionalOnProperty(name = "hearing.preview.bypass.enabled", havingValue = "true")
 public class HearingApiBypassClient implements HearingApiClient {
     private static final DateTimeFormatter dateTimeFormatter = ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
+    private final ObjectMapper objectMapper;
 
     public Hearings getHearingDetails(
         @RequestHeader("Authorization") String authorisation,
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
         @RequestHeader("caseReference") String caseReference
     ) throws RuntimeException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.findAndRegisterModules();
         LocalDateTime firstHearingDate = LocalDateTime.now().plusDays(1);
         LocalDateTime secondHearingDate = firstHearingDate.plusDays(7);
 
@@ -72,7 +71,7 @@ public class HearingApiBypassClient implements HearingApiClient {
                 }
             );
             log.info("Hearing bypass response: {}", updatedHearingPayload);
-            return mapper.readValue(updatedHearingPayload, Hearings.class);
+            return objectMapper.readValue(updatedHearingPayload, Hearings.class);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

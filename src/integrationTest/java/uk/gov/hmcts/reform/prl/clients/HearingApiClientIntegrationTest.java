@@ -10,7 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
-public class HearingApiClientTest {
+public class HearingApiClientIntegrationTest {
 
     @Autowired
     private HearingApiClient hearingApiClient;
