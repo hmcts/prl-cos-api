@@ -110,6 +110,29 @@ public class RemoveDocumentsServiceTest {
     }
 
     @Test
+    void shouldPopulateRemovalListWithBulkScanDocuments() {
+        UUID elementId = UUID.randomUUID();
+        QuarantineLegalDoc doc = QuarantineLegalDoc.builder()
+            .url(TEST_DOCUMENT)
+            .categoryId("bulkScan")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(
+                ReviewDocuments.builder()
+                    .bulkScannedDocListDocTab(
+                        List.of(new Element<>(elementId, doc)))
+                    .build())
+            .build();
+
+        CaseData updatedCaseData = removeDocumentsService.populateRemovalList(caseData);
+
+        assertThat(updatedCaseData.getRemovableDocuments()).isEqualTo(
+            List.of(new Element<>(elementId, RemovableDocument.builder().document(TEST_DOCUMENT).build()))
+        );
+    }
+
+    @Test
     void shouldGetDocsBeingRemoved() {
         UUID documentId = UUID.randomUUID();
 

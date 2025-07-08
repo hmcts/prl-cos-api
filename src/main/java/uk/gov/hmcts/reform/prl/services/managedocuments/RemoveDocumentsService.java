@@ -25,6 +25,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
 
 @Slf4j
@@ -137,10 +138,18 @@ public class RemoveDocumentsService {
         QuarantineLegalDoc quarantineLegalDoc = quarantineLegalDocElement.getValue();
 
         Map<String, Object> docObject = objectMapper.convertValue(quarantineLegalDoc, new TypeReference<>() {});
-        String documentFieldName = DocumentUtils.populateAttributeNameFromCategoryId(
-            quarantineLegalDoc.getCategoryId(),
-            null
-        );
+
+        String documentFieldName;
+        if (isNotEmpty(quarantineLegalDoc.getUrl())) {
+            // bulk scan documents use a url field not an "attribute name" field
+            documentFieldName = "url";
+        } else {
+            documentFieldName = DocumentUtils.populateAttributeNameFromCategoryId(
+                quarantineLegalDoc.getCategoryId(),
+                null
+            );
+        }
+
         Document doc;
 
         try {
