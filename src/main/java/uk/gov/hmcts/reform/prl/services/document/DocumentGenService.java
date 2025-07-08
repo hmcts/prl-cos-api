@@ -369,10 +369,8 @@ public class DocumentGenService {
             updatedCaseData.put("isWelshDocGen", Yes.toString());
             isConfidentialInformationPresentForC100Welsh(authorisation, caseData, updatedCaseData);
             isC100CaseTypeWelsh(authorisation, caseData, updatedCaseData);
-            if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-                || State.CASE_ISSUED.equals(caseData.getState())
-                || State.JUDICIAL_REVIEW.equals(caseData.getState())
-                || State.PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(caseData.getState())) {
+            if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) || State.CASE_ISSUED.equals(caseData.getState())
+                || State.JUDICIAL_REVIEW.equals(caseData.getState())) {
                 updatedCaseData.put(
                     DOCUMENT_FIELD_FINAL_WELSH,
                     getDocument(authorisation, caseData, FINAL_HINT, true)
@@ -387,9 +385,7 @@ public class DocumentGenService {
             && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo()))
             || (caseData.getAllegationOfHarmRevised() != null
             && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo()))) {
-            if (State.CASE_ISSUED.equals(caseData.getState())
-                || State.JUDICIAL_REVIEW.equals(caseData.getState())
-                || State.PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(caseData.getState())) {
+            if (State.CASE_ISSUED.equals(caseData.getState()) || State.JUDICIAL_REVIEW.equals(caseData.getState())) {
                 updatedCaseData.put(DOCUMENT_FIELD_C1A_WELSH, getDocument(authorisation, caseData, C1A_HINT, true));
             } else {
                 updatedCaseData.put(
@@ -429,10 +425,8 @@ public class DocumentGenService {
             updatedCaseData.put(ENGDOCGEN, Yes.toString());
             isConfidentialInformationPresentForC100Eng(authorisation, caseData, updatedCaseData);
             isC100CaseTypeEng(authorisation, caseData, updatedCaseData);
-            if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-                || State.CASE_ISSUED.equals(caseData.getState())
-                || State.JUDICIAL_REVIEW.equals(caseData.getState())
-                || State.PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(caseData.getState())) {
+            if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) || State.CASE_ISSUED.equals(
+                caseData.getState()) || State.JUDICIAL_REVIEW.equals(caseData.getState())) {
                 updatedCaseData.put(DOCUMENT_FIELD_FINAL, getDocument(authorisation, caseData, FINAL_HINT, false));
             }
         }
@@ -444,9 +438,7 @@ public class DocumentGenService {
             && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo()))
             || (caseData.getAllegationOfHarmRevised() != null
             && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo()))) {
-            if (State.CASE_ISSUED.equals(caseData.getState())
-                || State.JUDICIAL_REVIEW.equals(caseData.getState())
-                || State.PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(caseData.getState())) {
+            if (State.CASE_ISSUED.equals(caseData.getState()) || State.JUDICIAL_REVIEW.equals(caseData.getState())) {
                 updatedCaseData.put(DOCUMENT_FIELD_C1A, getDocument(authorisation, caseData, C1A_HINT, false));
             } else {
                 updatedCaseData.put(
