@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
-import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
@@ -164,6 +163,8 @@ public class EditAndApproveDraftOrderController {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             String language = CaseUtils.getLanguage(clientContext);
+            WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
+            String hearingId = CaseUtils.getHearingId(waMapper);
             String encodedClientContext = CaseUtils.setTaskCompletion(
                 clientContext,
                 objectMapper,
@@ -175,10 +176,8 @@ public class EditAndApproveDraftOrderController {
                         .map(ElementUtils::unwrapElements)
                         .map(draftOrder -> draftOrder.getFirst().getManageOrderHearingDetails())
                         .map(ElementUtils::unwrapElements)
-                        .map(hearingData -> hearingData.getFirst().getHearingDateConfirmOptionEnum())
-                        .filter(hearingDateConfirmOptionEnum ->
-                                    HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.getId()
-                                        .equals(hearingDateConfirmOptionEnum.getId())).isPresent()
+                        .filter(mohd -> mohd.stream().anyMatch(mo -> mo.getHearingId().equals(hearingId)))
+                        .isPresent()
             );
 
             Map<String, Object> caseDataUpdated = draftAnOrderService.getEligibleServeOrderDetails(
