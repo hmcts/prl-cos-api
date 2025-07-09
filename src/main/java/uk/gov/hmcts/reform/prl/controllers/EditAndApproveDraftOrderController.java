@@ -42,7 +42,6 @@ import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.AutomatedHearingUtils;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
-import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
 import java.util.ArrayList;
@@ -163,22 +162,13 @@ public class EditAndApproveDraftOrderController {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             String language = CaseUtils.getLanguage(clientContext);
-            WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
-            String hearingId = CaseUtils.getHearingId(waMapper);
             String encodedClientContext = CaseUtils.setTaskCompletion(
                 clientContext,
                 objectMapper,
                 caseData,
                 (data) ->
                     Event.HEARING_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())
-                    && !manageOrderService.isSaveAsDraft(data)
-                        && ofNullable(data.getDraftOrderCollection())
-                        .map(ElementUtils::unwrapElements)
-                        .map(draftOrder -> draftOrder.getFirst().getManageOrderHearingDetails())
-                        .map(ElementUtils::unwrapElements)
-                        .filter(mohd -> mohd.stream().anyMatch(mo -> mo.getHearingId().equals(hearingId)))
-                        .isPresent()
-            );
+                    && !manageOrderService.isSaveAsDraft(data));
 
             Map<String, Object> caseDataUpdated = draftAnOrderService.getEligibleServeOrderDetails(
                 authorisation,
