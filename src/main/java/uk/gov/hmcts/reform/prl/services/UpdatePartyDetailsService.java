@@ -102,6 +102,7 @@ public class UpdatePartyDetailsService {
     private final DocumentLanguageService documentLanguageService;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     private final ManageOrderService manageOrderService;
+    private final C8ArchiveService c8ArchiveService;
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
@@ -172,6 +173,7 @@ public class UpdatePartyDetailsService {
                                                   authorisation,
                                                   caseData,
                                                   List.of(ElementUtils.element(fl401respondent.getPartyId(), fl401respondent)));
+            c8ArchiveService.archiveC8DocumentIfConfidentialChanged(callbackRequest,caseData,updatedCaseData);;
                 generateC8DocumentsForApplicant(updatedCaseData, callbackRequest, authorisation, caseData);
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for Fl401 case {}", e.getMessage());
@@ -215,7 +217,7 @@ public class UpdatePartyDetailsService {
                                                   authorisation,
                                                   caseData,
                                                   caseData.getRespondents());
-
+                c8ArchiveService.archiveC8DocumentIfConfidentialChanged(callbackRequest,caseData,updatedCaseData);
                 generateC8DocumentsForApplicant(updatedCaseData, callbackRequest, authorisation, caseData);
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
