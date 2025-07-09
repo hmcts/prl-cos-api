@@ -157,9 +157,6 @@ public class TaskListServiceTest {
     AllTabServiceImpl tabService;
 
     @Mock
-    ConfidentialDetailsChangeHelper confidentialDetailsChangeHelper;
-
-    @Mock
     C8ArchiveService c8ArchiveService;
 
     private RoleAssignmentServiceResponse setAndGetRoleAssignmentServiceResponse(String roleName) {
@@ -936,7 +933,6 @@ public class TaskListServiceTest {
             UserDetails.builder().roles(List.of("caseworker-privatelaw-courtadmin")).build()
         );
         doNothing().when(c8ArchiveService).archiveC8DocumentIfConfidentialChanged(any(), any(), any());
-        when(confidentialDetailsChangeHelper.haveConfidentialDetailsChanged(any(), any())).thenReturn(true);
 
         StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
             authToken,
