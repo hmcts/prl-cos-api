@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
@@ -171,6 +172,7 @@ public class UpdatePartyDetailsService {
                                                   authorisation,
                                                   caseData,
                                                   List.of(ElementUtils.element(fl401respondent.getPartyId(), fl401respondent)));
+                generateC8DocumentsForApplicant(updatedCaseData, callbackRequest, authorisation, caseData);
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for Fl401 case {}", e.getMessage());
             }
@@ -213,16 +215,18 @@ public class UpdatePartyDetailsService {
                                                   authorisation,
                                                   caseData,
                                                   caseData.getRespondents());
+
+                generateC8DocumentsForApplicant(updatedCaseData, callbackRequest, authorisation, caseData);
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
             }
+            cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
+            findAndListRefugeDocsForC100(callbackRequest, caseData, updatedCaseData);
         }
         if (Objects.nonNull(callbackRequest.getCaseDetailsBefore())) {
             Map<String, Object> oldCaseDataMap = callbackRequest.getCaseDetailsBefore().getData();
             partyLevelCaseFlagsService.amendCaseFlags(oldCaseDataMap, updatedCaseData, callbackRequest.getEventId());
         }
-        cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
-        findAndListRefugeDocsForC100(callbackRequest, caseData, updatedCaseData);
         return updatedCaseData;
     }
 
@@ -533,6 +537,20 @@ public class UpdatePartyDetailsService {
             );
             respondentIndex++;
         }
+    }
+
+    private void generateC8DocumentsForApplicant(Map<String, Object> caseDataUpdated, CallbackRequest callbackRequest,
+                                                 String authorisation, CaseData caseData) throws Exception {
+        String state = callbackRequest.getCaseDetails().getState();
+        caseData.setState(State.valueOf(state));
+
+        caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
+        CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
+
+        caseData = caseData.toBuilder()
+            .c8Document(updatedCaseData.getC8Document())
+            .c8WelshDocument(updatedCaseData.getC8WelshDocument())
+            .build();
     }
 
     private KeepDetailsPrivate updateRespondentKeepYourDetailsPrivateInformation(PartyDetails respondent) {

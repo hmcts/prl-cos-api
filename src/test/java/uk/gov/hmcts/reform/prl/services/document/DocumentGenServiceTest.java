@@ -71,6 +71,7 @@ import java.util.Map;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
@@ -3109,5 +3110,101 @@ public class DocumentGenServiceTest {
 
         assertNotNull(template);
         assertEquals("fl401_resp_c8_letter_wel", template);
+    }
+
+    @Test
+    public void testHasApplicantConfidentialInfoForC100_caseTypeNotC100_returnsFalse() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .applicants(Collections.singletonList(Element.<PartyDetails>builder().value(PartyDetails.builder().build()).build()))
+            .build();
+        assertFalse(documentGenService.hasApplicantConfidentialInfoForC100(caseData));
+    }
+
+    @Test
+    public void testHasApplicantConfidentialInfoForC100_applicantsNull_returnsFalse() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .applicants(null)
+            .build();
+        assertFalse(documentGenService.hasApplicantConfidentialInfoForC100(caseData));
+    }
+
+    @Test
+    public void testHasApplicantConfidentialInfoForC100_allNo_returnsFalse() {
+        PartyDetails applicant = PartyDetails.builder()
+            .isAddressConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .applicants(Collections.singletonList(Element.<PartyDetails>builder().value(applicant).build()))
+            .build();
+        assertFalse(documentGenService.hasApplicantConfidentialInfoForC100(caseData));
+    }
+
+    @Test
+    public void testHasApplicantConfidentialInfoForC100_addressYes_returnsTrue() {
+        PartyDetails applicant = PartyDetails.builder()
+            .isAddressConfidential(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .applicants(Collections.singletonList(Element.<PartyDetails>builder().value(applicant).build()))
+            .build();
+        assertTrue(documentGenService.hasApplicantConfidentialInfoForC100(caseData));
+    }
+
+    @Test
+    public void testHasApplicantConfidentialInfoForC100_emailYes_returnsTrue() {
+        PartyDetails applicant = PartyDetails.builder()
+            .isAddressConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .applicants(Collections.singletonList(Element.<PartyDetails>builder().value(applicant).build()))
+            .build();
+        assertTrue(documentGenService.hasApplicantConfidentialInfoForC100(caseData));
+    }
+
+    @Test
+    public void testHasApplicantConfidentialInfoForC100_phoneYes_returnsTrue() {
+        PartyDetails applicant = PartyDetails.builder()
+            .isAddressConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .applicants(Collections.singletonList(Element.<PartyDetails>builder().value(applicant).build()))
+            .build();
+        assertTrue(documentGenService.hasApplicantConfidentialInfoForC100(caseData));
+    }
+
+    @Test
+    public void testHasApplicantConfidentialInfoForC100_multipleApplicants_oneYes_returnsTrue() {
+        PartyDetails applicant1 = PartyDetails.builder()
+            .isAddressConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+        PartyDetails applicant2 = PartyDetails.builder()
+            .isAddressConfidential(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .applicants(java.util.Arrays.asList(
+                Element.<PartyDetails>builder().value(applicant1).build(),
+                Element.<PartyDetails>builder().value(applicant2).build()
+            ))
+            .build();
+        assertTrue(documentGenService.hasApplicantConfidentialInfoForC100(caseData));
     }
 }
