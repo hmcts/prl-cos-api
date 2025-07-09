@@ -50,9 +50,9 @@ public class ConfidentialDetailsChangeHelper {
                 return true;
             }
         }
-
         return false;
     }
+
 
     public static boolean checkIfAddressConfidentialityHasChanged(PartyDetails current, PartyDetails previous) {
         return isNotEmpty(current.getIsAddressConfidential())
