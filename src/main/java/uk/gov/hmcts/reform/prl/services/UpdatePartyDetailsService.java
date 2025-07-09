@@ -173,7 +173,7 @@ public class UpdatePartyDetailsService {
                                                   authorisation,
                                                   caseData,
                                                   List.of(ElementUtils.element(fl401respondent.getPartyId(), fl401respondent)));
-            c8ArchiveService.archiveC8DocumentIfConfidentialChanged(callbackRequest,caseData,updatedCaseData);;
+                c8ArchiveService.archiveC8DocumentIfConfidentialChanged(callbackRequest,caseData,updatedCaseData);;
                 generateC8DocumentsForApplicant(updatedCaseData, callbackRequest, authorisation, caseData);
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for Fl401 case {}", e.getMessage());
