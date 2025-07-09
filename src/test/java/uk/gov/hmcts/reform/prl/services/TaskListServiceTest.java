@@ -12,6 +12,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
@@ -49,6 +50,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -151,6 +154,9 @@ public class TaskListServiceTest {
 
     @Mock
     AllTabServiceImpl tabService;
+
+    @Mock
+    ConfidentialDetailsChangeHelper confidentialDetailsChangeHelper;
 
     private RoleAssignmentServiceResponse setAndGetRoleAssignmentServiceResponse(String roleName) {
         List<RoleAssignmentResponse> listOfRoleAssignmentResponses = new ArrayList<>();
@@ -720,8 +726,8 @@ public class TaskListServiceTest {
                 .build();
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = taskListService
                 .updateTaskList(callbackRequest, authToken);
-        Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse);
-        Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
+        assertNotNull(aboutToStartOrSubmitCallbackResponse);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
         Assert.assertEquals("SUBMITTED_PAID", aboutToStartOrSubmitCallbackResponse.getData().get("state"));
     }
 
@@ -761,8 +767,8 @@ public class TaskListServiceTest {
         when(tabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = taskListService
                 .updateTaskList(callbackRequest, authToken);
-        Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse);
-        Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
+        assertNotNull(aboutToStartOrSubmitCallbackResponse);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
         Assert.assertEquals("CASE_ISSUED", aboutToStartOrSubmitCallbackResponse.getData().get("state"));
     }
 
@@ -802,8 +808,8 @@ public class TaskListServiceTest {
         when(tabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = taskListService
                 .updateTaskList(callbackRequest, authToken);
-        Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse);
-        Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
+        assertNotNull(aboutToStartOrSubmitCallbackResponse);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
         Assert.assertEquals("SUBMITTED_PAID", aboutToStartOrSubmitCallbackResponse.getData().get("state"));
     }
 
@@ -844,8 +850,8 @@ public class TaskListServiceTest {
         when(tabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = taskListService
                 .updateTaskList(callbackRequest, authToken);
-        Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse);
-        Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
+        assertNotNull(aboutToStartOrSubmitCallbackResponse);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
         Assert.assertEquals("SUBMITTED_PAID", aboutToStartOrSubmitCallbackResponse.getData().get("state"));
     }
 
@@ -886,9 +892,69 @@ public class TaskListServiceTest {
         when(tabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = taskListService
             .updateTaskList(callbackRequest, authToken);
-        Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse);
-        Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
+        assertNotNull(aboutToStartOrSubmitCallbackResponse);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
         Assert.assertEquals("CASE_ISSUED", aboutToStartOrSubmitCallbackResponse.getData().get("state"));
+    }
+
+    @Test
+    public void updateTaskList_shouldUpdateDocumentFieldsWhenCourtStaffAndIssuedState() {
+        Document testDocument = Document.builder()
+            .documentUrl("http://doc.url")
+            .documentFileName("test.pdf")
+            .documentBinaryUrl("http://doc.bin")
+            .build();
+
+        CaseData initialCaseData = CaseData.builder()
+            .c8Document(testDocument)
+            .c1ADocument(testDocument)
+            .finalDocument(testDocument)
+            .c8WelshDocument(testDocument)
+            .finalWelshDocument(testDocument)
+            .c1AWelshDocument(testDocument)
+            .c1ADraftDocument(testDocument)
+            .c1AWelshDraftDocument(testDocument)
+            .build();
+
+        Map<String, Object> caseDataMap = initialCaseData.toMap(new ObjectMapper());
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .eventId("someEventId")
+            .caseDetails(CaseDetails.builder()
+                             .id(123L)
+                             .state("CASE_ISSUED")
+                             .data(caseDataMap)
+                             .build())
+            .build();
+
+        when(userService.getUserDetails(authToken)).thenReturn(
+            UserDetails.builder().roles(List.of("caseworker-privatelaw-courtadmin")).build()
+        );
+
+
+        StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            caseDataMap,
+            initialCaseData,
+            null
+        );
+
+        when(tabService.getStartAllTabsUpdate("123")).thenReturn(updateData);
+
+        AboutToStartOrSubmitCallbackResponse response =
+            taskListService.updateTaskList(callbackRequest, authToken);
+
+        assertNotNull(response);
+        Map<String, Object> updatedData = response.getData();
+        assertTrue(updatedData.containsKey("c8Document"));
+        assertTrue(updatedData.containsKey("c1ADocument"));
+        assertTrue(updatedData.containsKey("finalDocument"));
+        assertTrue(updatedData.containsKey("finalWelshDocument"));
+        assertTrue(updatedData.containsKey("c1AWelshDocument"));
+        assertTrue(updatedData.containsKey("c1ADraftDocument"));
+        assertTrue(updatedData.containsKey("c1AWelshDraftDocument"));
     }
 
     @Test
