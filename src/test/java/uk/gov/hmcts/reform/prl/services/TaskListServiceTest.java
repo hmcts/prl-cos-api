@@ -55,6 +55,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
@@ -157,6 +158,9 @@ public class TaskListServiceTest {
 
     @Mock
     ConfidentialDetailsChangeHelper confidentialDetailsChangeHelper;
+
+    @Mock
+    C8ArchiveService c8ArchiveService;
 
     private RoleAssignmentServiceResponse setAndGetRoleAssignmentServiceResponse(String roleName) {
         List<RoleAssignmentResponse> listOfRoleAssignmentResponses = new ArrayList<>();
@@ -875,6 +879,7 @@ public class TaskListServiceTest {
             roleAssignmentServiceResponse);
         when(userService.getUserDetails(authToken))
             .thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-courtadmin")).build());
+
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -930,7 +935,8 @@ public class TaskListServiceTest {
         when(userService.getUserDetails(authToken)).thenReturn(
             UserDetails.builder().roles(List.of("caseworker-privatelaw-courtadmin")).build()
         );
-
+        doNothing().when(c8ArchiveService).archiveC8DocumentIfConfidentialChanged(any(), any(), any());
+        when(confidentialDetailsChangeHelper.haveConfidentialDetailsChanged(any(), any())).thenReturn(true);
 
         StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
             authToken,
