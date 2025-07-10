@@ -15,8 +15,10 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
+
+import static java.util.UUID.randomUUID;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_ARCHIVED_DOCUMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_ARCHIVED_DOCUMENT_NAME;
 
 @Slf4j
 @Service
@@ -39,7 +41,7 @@ public class C8ArchiveService {
                 Document archivedC8 = Document.builder()
                     .documentUrl(c8ToArchive.getDocumentUrl())
                     .documentBinaryUrl(c8ToArchive.getDocumentBinaryUrl())
-                    .documentFileName("C8ArchivedDocument.pdf")
+                    .documentFileName(C8_ARCHIVED_DOCUMENT_NAME)
                     .build();
 
                 List<Element<Document>> archivedDocuments = new ArrayList<>();
@@ -49,11 +51,11 @@ public class C8ArchiveService {
                 }
 
                 archivedDocuments.add(Element.<Document>builder()
-                                          .id(UUID.randomUUID())
+                                          .id(randomUUID())
                                           .value(archivedC8)
                                           .build());
 
-                caseDataUpdated.put("c8ArchivedDocuments", archivedDocuments);
+                caseDataUpdated.put(C8_ARCHIVED_DOCUMENTS, archivedDocuments);
             }
         }
     }

@@ -173,8 +173,7 @@ public class UpdatePartyDetailsService {
                                                   authorisation,
                                                   caseData,
                                                   List.of(ElementUtils.element(fl401respondent.getPartyId(), fl401respondent)));
-                c8ArchiveService.archiveC8DocumentIfConfidentialChanged(callbackRequest,caseData,updatedCaseData);;
-                generateC8DocumentsForApplicant(updatedCaseData, callbackRequest, authorisation, caseData);
+                archiveAndGenerateC8DocumentsForApplicant(updatedCaseData, callbackRequest, authorisation, caseData);
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for Fl401 case {}", e.getMessage());
             }
@@ -217,8 +216,7 @@ public class UpdatePartyDetailsService {
                                                   authorisation,
                                                   caseData,
                                                   caseData.getRespondents());
-                c8ArchiveService.archiveC8DocumentIfConfidentialChanged(callbackRequest,caseData,updatedCaseData);
-                generateC8DocumentsForApplicant(updatedCaseData, callbackRequest, authorisation, caseData);
+                archiveAndGenerateC8DocumentsForApplicant(updatedCaseData, callbackRequest, authorisation, caseData);
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
             }
@@ -541,8 +539,11 @@ public class UpdatePartyDetailsService {
         }
     }
 
-    private void generateC8DocumentsForApplicant(Map<String, Object> caseDataUpdated, CallbackRequest callbackRequest,
-                                                 String authorisation, CaseData caseData) throws Exception {
+    private void archiveAndGenerateC8DocumentsForApplicant(Map<String, Object> caseDataUpdated, CallbackRequest callbackRequest,
+                                                           String authorisation, CaseData caseData) throws Exception {
+
+        c8ArchiveService.archiveC8DocumentIfConfidentialChanged(callbackRequest,caseData,caseDataUpdated);
+
         String state = callbackRequest.getCaseDetails().getState();
         caseData.setState(State.valueOf(state));
 
