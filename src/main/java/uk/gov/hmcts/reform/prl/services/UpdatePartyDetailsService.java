@@ -478,7 +478,7 @@ public class UpdatePartyDetailsService {
         return partyDetails;
     }
 
-    private void setApplicantOrganisationPolicyIfOrgEmpty(Map<String, Object> updatedCaseData, PartyDetails partyDetails) {
+    public void setApplicantOrganisationPolicyIfOrgEmpty(Map<String, Object> updatedCaseData, PartyDetails partyDetails) {
         CaseData caseDataUpdated = objectMapper.convertValue(updatedCaseData, CaseData.class);
         OrganisationPolicy applicantOrganisationPolicy = caseDataUpdated.getApplicantOrganisationPolicy();
         boolean organisationNotExists = false;
@@ -565,8 +565,10 @@ public class UpdatePartyDetailsService {
         }
     }
 
-    private void generateC8DocumentsForApplicant(Map<String, Object> caseDataUpdated, CallbackRequest callbackRequest,
+    public void generateC8DocumentsForApplicant(Map<String, Object> caseDataUpdated, CallbackRequest callbackRequest,
                                                  String authorisation, CaseData caseData) throws Exception {
+        log.info("Regenerating C8 documents for applicant in case: {}", callbackRequest.getCaseDetails().getId().toString());
+
         caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
         CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
 
