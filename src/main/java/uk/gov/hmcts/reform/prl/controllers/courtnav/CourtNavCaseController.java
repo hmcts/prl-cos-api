@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.controllers.courtnav;
+package uk.gov.hmcts.reform.prl.controllers.    courtnav;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.courtnav.mappers.FL401ApplicationMapper;
+import uk.gov.hmcts.reform.prl.mapper.courtnav.FL401ApplicationMapper;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseCreationResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ResponseMessage;
@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService;
+import uk.gov.hmcts.reform.prl.services.courtnav.CourtLocationService;
 import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -44,6 +45,7 @@ public class CourtNavCaseController {
     private static final String SERVICE_AUTH = "ServiceAuthorization";
 
     private final CourtNavCaseService courtNavCaseService;
+    private final CourtLocationService courtLocationService;
     private final AuthorisationService authorisationService;
     private final FL401ApplicationMapper fl401ApplicationMapper;
     private  final CafcassUploadDocService cafcassUploadDocService;
@@ -55,6 +57,7 @@ public class CourtNavCaseController {
         @ApiResponse(responseCode = "201", description = "Case is created"),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "403", description = "Forbidden"),
+        @ApiResponse(responseCode = "422", description = "Unprocessable entity"),
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Object> createCase(
@@ -63,20 +66,20 @@ public class CourtNavCaseController {
         @Valid @RequestBody CourtNavFl401 inputData
     ) throws Exception {
 
-        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
-            authorisationService.authoriseService(serviceAuthorization))) {
-            CaseData caseData = fl401ApplicationMapper.mapCourtNavData(inputData, authorisation);
-            CaseDetails caseDetails = courtNavCaseService.createCourtNavCase(
-                authorisation,
-                caseData
-            );
-            log.info("Case has been created {}", caseDetails.getId());
-            courtNavCaseService.refreshTabs(authorisation, String.valueOf(caseDetails.getId()));
-            return ResponseEntity.status(HttpStatus.CREATED).body(new CaseCreationResponse(
-                String.valueOf(caseDetails.getId())));
-        } else {
+        if (!authorisationService.authoriseUser(authorisation)
+            || !authorisationService.authoriseService(serviceAuthorization)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
+
+        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(inputData);
+        caseData = courtLocationService.populateCourtLocation(authorisation, caseData);
+        CaseDetails caseDetails = courtNavCaseService.createCourtNavCase(authorisation, caseData);
+
+        log.info("Case has been created {}", caseDetails.getId());
+        courtNavCaseService.refreshTabs(authorisation, String.valueOf(caseDetails.getId()));
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(new CaseCreationResponse(String.valueOf(caseDetails.getId())));
     }
 
 
