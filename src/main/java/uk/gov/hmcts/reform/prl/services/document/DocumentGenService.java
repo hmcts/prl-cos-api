@@ -403,7 +403,8 @@ public class DocumentGenService {
         if (hasApplicantConfidentialInfoForC100(caseData)) {
             if (State.CASE_ISSUED.equals(caseData.getState())
                 || State.JUDICIAL_REVIEW.equals(caseData.getState())
-                || State.PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(caseData.getState())) {
+                || State.PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(caseData.getState())
+                || State.DECISION_OUTCOME.equals(caseData.getState())) {
                 updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, getDocument(authorisation, caseData, C8_HINT, true));
             } else {
                 updatedCaseData.put(
@@ -457,7 +458,8 @@ public class DocumentGenService {
         if (hasApplicantConfidentialInfoForC100(caseData)) {
             if (State.CASE_ISSUED.equals(caseData.getState())
                 || State.JUDICIAL_REVIEW.equals(caseData.getState())
-                || State.PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(caseData.getState())) {
+                || State.PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(caseData.getState())
+                || State.DECISION_OUTCOME.equals(caseData.getState())) {
                 updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false));
             } else {
                 updatedCaseData.put(
@@ -470,6 +472,7 @@ public class DocumentGenService {
             updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false));
         } else {
             updatedCaseData.put(DOCUMENT_FIELD_C8, null);
+
         }
     }
 
