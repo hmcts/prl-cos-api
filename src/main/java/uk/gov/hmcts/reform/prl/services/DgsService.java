@@ -9,7 +9,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
+import uk.gov.hmcts.reform.prl.exception.DocumentGenerationException;
 import uk.gov.hmcts.reform.prl.mapper.AppObjectMapper;
 import uk.gov.hmcts.reform.prl.mapper.welshlang.WelshLangMapper;
 import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;

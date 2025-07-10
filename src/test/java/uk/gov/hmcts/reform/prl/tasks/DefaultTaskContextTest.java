@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.framework.context;
+package uk.gov.hmcts.reform.prl.tasks;
 
 import org.junit.Before;
 import org.junit.Test;

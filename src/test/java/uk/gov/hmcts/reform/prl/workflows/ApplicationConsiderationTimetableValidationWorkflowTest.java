@@ -10,7 +10,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
+import uk.gov.hmcts.reform.prl.exception.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.tasks.ApplicationTimetableEffortsValidationTask;
 import uk.gov.hmcts.reform.prl.tasks.ApplicationTimetableTimeValidationTask;
