@@ -117,5 +117,6 @@ withPipeline(type, product, component) {
   onPR() {
     env.ENV = 'preview'
     enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
+    enableMutationTest(150)
   }
 }
