@@ -21,7 +21,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-public class HearingSupportControllerDisabled {
+public class HearingSupportControllerPresentTest {
 
     private MockMvc mockMvc;
     @Autowired
@@ -35,14 +35,15 @@ public class HearingSupportControllerDisabled {
 
     @DynamicPropertySource
     static void overrideProps(DynamicPropertyRegistry registry) {
-        registry.add("hearing.preview.bypass.enabled", () -> "false");
+        registry.add("hearing.preview.bypass.enabled", () -> "true");
     }
 
     @Test
-    public void testHearingSupportEndPointIsDisabled() throws Exception {
+    public void testHearingSupportEndPointIsEnabled() throws Exception {
         String url = "/hearing-support/testing/is-enabled";
         mockMvc.perform(
                 get(url))
-            .andExpect(status().isNotFound());
+            .andExpect(status().isOk());
     }
+
 }
