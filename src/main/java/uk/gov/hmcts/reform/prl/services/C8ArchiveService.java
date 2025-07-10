@@ -15,6 +15,8 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -47,6 +49,7 @@ public class C8ArchiveService {
                 }
 
                 archivedDocuments.add(Element.<Document>builder()
+                                          .id(UUID.randomUUID())
                                           .value(archivedC8)
                                           .build());
 
