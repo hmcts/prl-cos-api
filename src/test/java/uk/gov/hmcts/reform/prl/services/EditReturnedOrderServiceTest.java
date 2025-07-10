@@ -294,7 +294,7 @@ public class EditReturnedOrderServiceTest {
         Map<String, Object> caseDataMap = new HashMap<>();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         caseDataMap.put("orderType", "test");
-        when(draftAnOrderService.populateCommonDraftOrderFields(Mockito.anyString(),Mockito.any(), Mockito.any(), Mockito.any()))
+        when(draftAnOrderService.populateCommonDraftOrderFields(Mockito.anyString(),Mockito.any(), Mockito.any(), Mockito.any(),  Mockito.any()))
             .thenReturn(caseDataMap);
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -331,7 +331,7 @@ public class EditReturnedOrderServiceTest {
             .build();
 
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.populateCommonDraftOrderFields(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any()))
+        when(draftAnOrderService.populateCommonDraftOrderFields(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
             .thenReturn(caseDataMap);
         AboutToStartOrSubmitCallbackResponse response = editReturnedOrderService
             .populateInstructionsAndFieldsForLegalRep(authToken,callbackRequest, null, PrlAppsConstants.ENGLISH);
