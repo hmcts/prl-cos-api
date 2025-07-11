@@ -13,7 +13,7 @@
     "locked_by_user_id": 0,
     "security_classification": "PRIVATE",
     "security_level": 0,
-    "state": "string"
+    "state": "SUBMITTED_PAID"
   },
   "case_details_before": {
     "callback_response_status": "string",
@@ -26,7 +26,7 @@
     "locked_by_user_id": 0,
     "security_classification": "PRIVATE",
     "security_level": 0,
-    "state": "string"
+    "state": "SUBMITTED_PAID"
   },
   "event_id": "string"
 }

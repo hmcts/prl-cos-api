@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
@@ -115,6 +116,15 @@ public class UpdatePartyDetailsService {
         updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
         updatedCaseData.putAll(confidentialityTabService.updateConfidentialityDetails(caseData));
 
+        String state = callbackRequest.getCaseDetails().getState();
+        if (state != null) {
+            try {
+                caseData.setState(State.valueOf(state));
+            } catch (IllegalArgumentException e) {
+                log.warn("Unknown state value: {}", state);
+            }
+        }
+
         //Added partyId for Hearings Api Spec, C100 applications
         //Applicants
         if (caseData.getApplicants() != null) {
@@ -168,6 +178,10 @@ public class UpdatePartyDetailsService {
                                                   authorisation,
                                                   caseData,
                                                   List.of(ElementUtils.element(fl401respondent.getPartyId(), fl401respondent)));
+                if (State.PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(caseData.getState())
+                    || State.DECISION_OUTCOME.equals(caseData.getState())) {
+                    generateC8DocumentsForApplicant(updatedCaseData, callbackRequest, authorisation, caseData);
+                }
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for Fl401 case {}", e.getMessage());
             }
@@ -210,16 +224,20 @@ public class UpdatePartyDetailsService {
                                                   authorisation,
                                                   caseData,
                                                   caseData.getRespondents());
+                if (State.PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(caseData.getState())
+                    || State.DECISION_OUTCOME.equals(caseData.getState())) {
+                    generateC8DocumentsForApplicant(updatedCaseData, callbackRequest, authorisation, caseData);
+                }
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
             }
+            cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
+            findAndListRefugeDocsForC100(callbackRequest, caseData, updatedCaseData);
         }
         if (Objects.nonNull(callbackRequest.getCaseDetailsBefore())) {
             Map<String, Object> oldCaseDataMap = callbackRequest.getCaseDetailsBefore().getData();
             partyLevelCaseFlagsService.amendCaseFlags(oldCaseDataMap, updatedCaseData, callbackRequest.getEventId());
         }
-        cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
-        findAndListRefugeDocsForC100(callbackRequest, caseData, updatedCaseData);
         return updatedCaseData;
     }
 
@@ -466,7 +484,7 @@ public class UpdatePartyDetailsService {
         return partyDetails;
     }
 
-    private void setApplicantOrganisationPolicyIfOrgEmpty(Map<String, Object> updatedCaseData, PartyDetails partyDetails) {
+    public void setApplicantOrganisationPolicyIfOrgEmpty(Map<String, Object> updatedCaseData, PartyDetails partyDetails) {
         CaseData caseDataUpdated = objectMapper.convertValue(updatedCaseData, CaseData.class);
         OrganisationPolicy applicantOrganisationPolicy = caseDataUpdated.getApplicantOrganisationPolicy();
         boolean organisationNotExists = false;
@@ -551,6 +569,19 @@ public class UpdatePartyDetailsService {
             );
             respondentIndex++;
         }
+    }
+
+    public void generateC8DocumentsForApplicant(Map<String, Object> caseDataUpdated, CallbackRequest callbackRequest,
+                                                 String authorisation, CaseData caseData) throws Exception {
+        log.info("Regenerating C8 documents for applicant in case: {}", callbackRequest.getCaseDetails().getId().toString());
+
+        caseDataUpdated.putAll(documentGenService.createUpdatedCaseDataWithDocuments(authorisation, caseData));
+        CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
+
+        caseData = caseData.toBuilder()
+            .c8Document(updatedCaseData.getC8Document())
+            .c8WelshDocument(updatedCaseData.getC8WelshDocument())
+            .build();
     }
 
     private KeepDetailsPrivate updateRespondentKeepYourDetailsPrivateInformation(PartyDetails respondent) {
