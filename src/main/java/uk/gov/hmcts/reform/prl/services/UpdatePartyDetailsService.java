@@ -117,7 +117,13 @@ public class UpdatePartyDetailsService {
         updatedCaseData.putAll(confidentialityTabService.updateConfidentialityDetails(caseData));
 
         String state = callbackRequest.getCaseDetails().getState();
-        caseData.setState(State.valueOf(state));
+        if (state != null) {
+            try {
+                caseData.setState(State.valueOf(state));
+            } catch (IllegalArgumentException e) {
+                log.warn("Unknown state value: {}", state);
+            }
+        }
 
         //Added partyId for Hearings Api Spec, C100 applications
         //Applicants
