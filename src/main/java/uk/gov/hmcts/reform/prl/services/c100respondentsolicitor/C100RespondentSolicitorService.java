@@ -1032,6 +1032,7 @@ public class C100RespondentSolicitorService {
                 .build();
 
             amended = updatedRefugeData(amended);
+            amended = updatedContactDetails(amended);
             caseData = updateRefugeDocumentList(caseData, amended);
 
             String party = representedRespondent.getValue().getLabelForDynamicList();
@@ -1071,6 +1072,9 @@ public class C100RespondentSolicitorService {
         }
 
         moveRespondentDocumentsToQuarantineTab(updatedCaseData, userDetails, quarantineLegalDocList);
+
+        updatedCaseData.put(C100_RESPONDENT_TABLE, applicationsTabService.getRespondentsTable(caseData));
+
         return updatedCaseData;
     }
 
@@ -1116,6 +1120,26 @@ public class C100RespondentSolicitorService {
                                                  .getResponse()
                                                  .getCitizenDetails()
                                                  .getRefugeConfidentialityC8Form())
+                .build();
+        }
+        return respondent;
+    }
+
+    private PartyDetails updatedContactDetails(PartyDetails respondent) {
+        if (null != respondent.getResponse()
+            && null != respondent.getResponse().getCitizenDetails()) {
+            respondent = respondent.toBuilder()
+                .firstName(respondent.getResponse().getCitizenDetails().getFirstName())
+                .lastName(respondent.getResponse().getCitizenDetails().getLastName())
+                .previousName(respondent.getResponse().getCitizenDetails().getPreviousName())
+                .dateOfBirth(respondent.getResponse().getCitizenDetails().getDateOfBirth())
+                .placeOfBirth(respondent.getResponse().getCitizenDetails().getPlaceOfBirth())
+                .liveInRefuge(respondent.getResponse().getCitizenDetails().getLiveInRefuge())
+                .address(respondent.getResponse().getCitizenDetails().getAddress())
+                .email(respondent.getResponse().getCitizenDetails().getContact() != null
+                        ? respondent.getResponse().getCitizenDetails().getContact().getEmail() : null)
+                .phoneNumber(respondent.getResponse().getCitizenDetails().getContact() != null
+                        ? respondent.getResponse().getCitizenDetails().getContact().getPhoneNumber() : null)
                 .build();
         }
         return respondent;

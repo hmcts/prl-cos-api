@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -40,7 +39,6 @@ import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.enums.respondentsolicitor.RespondentWelshNeedsListEnum;
 import uk.gov.hmcts.reform.prl.exception.RespondentSolicitorException;
-import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.ContactInformation;
@@ -119,7 +117,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
@@ -1165,31 +1162,44 @@ public class C100RespondentSolicitorServiceTest {
 
         String updatedEmail = "new@example.com";
 
-        PartyDetails updated = respondent.toBuilder().email(updatedEmail).build();
+        PartyDetails respondentWithResponse = PartyDetails.builder()
+            .email("old")
+            .user(
+                User.builder()
+                    .solicitorRepresented(Yes)
+                    .build())
+            .response(
+                Response.builder()
+                    .responseToAllegationsOfHarm(
+                        ResponseToAllegationsOfHarm.builder()
+                            .responseToAllegationsOfHarmYesOrNoResponse(No)
+                            .build())
+                    .citizenDetails(
+                        CitizenDetails.builder()
+                            .contact(
+                                Contact.builder()
+                                    .email(updatedEmail)
+                                    .build())
+                            .build())
+                    .build())
+            .build();
 
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("C100")
-            .respondents(new ArrayList<>(List.of(element(respondentId, respondent))))
+            .respondents(new ArrayList<>(List.of(element(respondentId, respondentWithResponse))))
             .build();
 
-        Map<String, Object> callbackData = Map.of(
-            "respondents", List.of(
-                Map.of(
-                    "id", respondentId.toString(),
-                    "value", Map.of("email", updatedEmail)
-                )
-            ),
-            "caseTypeOfApplication", "C100"
-        );
-        CallbackRequest cb = CallbackRequest.builder()
-            .eventId("c100ResSolConsentingToApplicationA")
-            .caseDetails(CaseDetails.builder().id(123L).data(callbackData).build())
-            .build();
+        ObjectMapper mapper = new ObjectMapper();
 
         when(objectMapper.convertValue(any(Map.class), eq(CaseData.class)))
             .thenReturn(caseData);
         when(userService.getUserDetails(any()))
             .thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-solicitor")).build());
+
+        CallbackRequest cb = CallbackRequest.builder()
+            .eventId("c100ResSolConsentingToApplicationA")
+            .caseDetails(CaseDetails.builder().id(123L).data(caseData.toMap(mapper)).build())
+            .build();
 
         Document dummyC7Final = Document.builder()
             .documentUrl("http://dm-store/doc-final.pdf")
@@ -1213,29 +1223,13 @@ public class C100RespondentSolicitorServiceTest {
             anyString(),
             anyBoolean()
         )).thenReturn(dummyC7Final);
-        try (MockedStatic<CitizenPartyDetailsMapper> mapperMock = mockStatic(CitizenPartyDetailsMapper.class)) {
-            mapperMock
-                .when(() -> CitizenPartyDetailsMapper.updateCitizenPersonalDetails(
-                    eq(respondent),
-                    any(PartyDetails.class)
-                ))
-                .thenReturn(updated);
-            when(allTabService.getStartAllTabsUpdate(Mockito.anyString()))
-                .thenReturn(startAllTabsUpdateDataContent);
-            Map<String, Object> result =
-                respondentSolicitorService.submitC7ResponseForActiveRespondent("auth", cb);
 
-            mapperMock.verify(() ->
-                                  CitizenPartyDetailsMapper.updateCitizenPersonalDetails(
-                                      eq(respondent),
-                                      any(PartyDetails.class)
-                                  )
-            );
+        Map<String, Object> result =
+            respondentSolicitorService.submitC7ResponseForActiveRespondent("auth", cb);
 
-            List<Element<PartyDetails>> respondents =
-                (List<Element<PartyDetails>>) result.get("respondents");
-            assertEquals(updatedEmail, respondents.get(0).getValue().getEmail());
-        }
+        List<Element<PartyDetails>> respondents =
+            (List<Element<PartyDetails>>) result.get("respondents");
+        assertEquals(updatedEmail, respondents.get(0).getValue().getEmail());
     }
 
     @Test
@@ -2965,7 +2959,8 @@ public class C100RespondentSolicitorServiceTest {
                                          .keepContactDetailsPrivate(KeepDetailsPrivate.builder()
                                                                         .confidentiality(Yes)
                                                                         .confidentialityList(confidentialityListEnums)
-                                                                        .otherPeopleKnowYourContactDetails(YesNoIDontKnow.no)
+                                                                        .otherPeopleKnowYourContactDetails(
+                                                                            YesNoIDontKnow.no)
                                                                         .build())
                                          .build())
             .build();
@@ -3003,7 +2998,8 @@ public class C100RespondentSolicitorServiceTest {
                                          .keepContactDetailsPrivate(KeepDetailsPrivate.builder()
                                                                         .confidentiality(Yes)
                                                                         .confidentialityList(confidentialityListEnums)
-                                                                        .otherPeopleKnowYourContactDetails(YesNoIDontKnow.no)
+                                                                        .otherPeopleKnowYourContactDetails(
+                                                                            YesNoIDontKnow.no)
                                                                         .build())
                                          .build())
             .build();
@@ -3012,7 +3008,11 @@ public class C100RespondentSolicitorServiceTest {
         PartyDetails partyDetails = PartyDetails.builder().build();
         Element<PartyDetails> respondent = Element.<PartyDetails>builder().value(partyDetails).build();
 
-        Response responseRefuge = C100RespondentSolicitorService.buildKeepDetailsPrivateForRefuge(caseData, response, respondent);
+        Response responseRefuge = C100RespondentSolicitorService.buildKeepDetailsPrivateForRefuge(
+            caseData,
+            response,
+            respondent
+        );
 
         assertNotNull(responseRefuge);
         assertEquals(Yes, responseRefuge.getKeepDetailsPrivate().getConfidentiality());
