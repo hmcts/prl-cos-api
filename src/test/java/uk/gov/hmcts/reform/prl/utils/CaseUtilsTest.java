@@ -5,14 +5,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 import static java.util.Base64.getDecoder;
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM_TASK;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.base64Encode;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getHearingId;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.setTaskCompletion;
 
 public class CaseUtilsTest {
@@ -79,5 +85,44 @@ public class CaseUtilsTest {
 
         assertThat(setTaskCompletion(encodedString, mapper, CaseData.builder().build(), (data) -> false))
             .isNull();
+    }
+
+    @Test
+    public void testGetHearingIdWhenClientContextIsNull() throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put(IS_INVOKED_FROM_TASK, YesOrNo.Yes);
+        mapper.findAndRegisterModules();
+        WaMapper waMapper = mapper.readValue(CLIENT_CONTEXT_WITH_LANGUAGE, WaMapper.class);
+
+        Optional<Long> actualHearingId = getHearingId(waMapper, caseDataMap);
+
+        assertThat(actualHearingId.isEmpty()).isTrue();
+
+    }
+
+    @Test
+    public void testGetHearingIdWhenClientContextIsNotNull() throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put(IS_INVOKED_FROM_TASK, YesOrNo.Yes);
+        mapper.findAndRegisterModules();
+        WaMapper waMapper = mapper.readValue(CLIENT_CONTEXT, WaMapper.class);
+
+        Optional<Long> actualHearingId = getHearingId(waMapper, caseDataMap);
+
+        assertThat(actualHearingId.orElse(null)).isEqualTo(12345L);
+    }
+
+    @Test
+    public void testGetHearingIdWhenClientContextIsNotNullButIsInvokedFromTaskIsNull() throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        mapper.findAndRegisterModules();
+        WaMapper waMapper = mapper.readValue(CLIENT_CONTEXT, WaMapper.class);
+
+        Optional<Long> actualHearingId = getHearingId(waMapper, caseDataMap);
+
+        assertThat(actualHearingId).isNotPresent();
     }
 }

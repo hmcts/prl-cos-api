@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.reopenclosedcases.ValidReopenClosedCasesStatusEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.RemovableDocument;
 import uk.gov.hmcts.reform.prl.models.complextypes.refuge.RefugeConfidentialDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.closingcases.ClosingCaseOptions;
@@ -140,4 +141,8 @@ public class BaseCaseData {
 
     @JsonProperty("daApplicantContactInstructions")
     private String daApplicantContactInstructions;
+
+    private List<Element<RemovableDocument>> removableDocuments;
+    private String documentsToBeRemoved;
+
 }

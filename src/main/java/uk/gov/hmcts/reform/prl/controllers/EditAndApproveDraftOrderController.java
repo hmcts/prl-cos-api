@@ -51,8 +51,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_APPROVED;
@@ -105,12 +107,15 @@ public class EditAndApproveDraftOrderController {
                     .state(ObjectUtils.isEmpty(caseData.getState()) && ObjectUtils.isNotEmpty(callbackRequest.getCaseDetails())
                                ? State.fromValue(callbackRequest.getCaseDetails().getState()) : caseData.getState())
                     .build();
+                Map<String, Object> caseDataMap = draftAnOrderService.getDraftOrderDynamicList(
+                    caseData,
+                    callbackRequest.getEventId(),
+                    clientContext,
+                    authorisation
+                );
+
                 return AboutToStartOrSubmitCallbackResponse.builder()
-                    .data(draftAnOrderService.getDraftOrderDynamicList(
-                        caseData,
-                        callbackRequest.getEventId(),
-                        authorisation
-                    )).build();
+                    .data(caseDataMap).build();
             } else {
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("There are no draft orders")).build();
             }
@@ -149,20 +154,35 @@ public class EditAndApproveDraftOrderController {
     @PostMapping(path = "/judge-or-admin-edit-approve/mid-event", consumes = APPLICATION_JSON,
         produces = APPLICATION_JSON)
     @Operation(description = "Callback to generate draft order collection")
-    public AboutToStartOrSubmitCallbackResponse prepareDraftOrderCollection(
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> prepareDraftOrderCollection(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             String language = CaseUtils.getLanguage(clientContext);
+            String encodedClientContext = CaseUtils.setTaskCompletion(
+                clientContext,
+                objectMapper,
+                caseData,
+                (data) ->
+                    Event.HEARING_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())
+                    && !manageOrderService.isSaveAsDraft(data));
+
             Map<String, Object> caseDataUpdated = draftAnOrderService.getEligibleServeOrderDetails(
                 authorisation,
                 callbackRequest,
                 language
             );
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseDataUpdated).build();
+
+            ResponseEntity.BodyBuilder responseBuilder = ofNullable(encodedClientContext)
+                .map(value -> ResponseEntity.ok()
+                    .header(CLIENT_CONTEXT_HEADER_PARAMETER, value))
+                .orElseGet(ResponseEntity::ok);
+            return responseBuilder.body(AboutToStartOrSubmitCallbackResponse.builder()
+                                            .data(caseDataUpdated)
+                                            .build());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -190,7 +210,8 @@ public class EditAndApproveDraftOrderController {
             String language = CaseUtils.getLanguage(clientContext);
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
-                .equalsIgnoreCase(callbackRequest.getEventId())) {
+                .equalsIgnoreCase(callbackRequest.getEventId())
+                || Event.HEARING_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
                 caseDataUpdated.putAll(draftAnOrderService.adminEditAndServeAboutToSubmit(
                     authorisation,
                     callbackRequest,
@@ -390,7 +411,8 @@ public class EditAndApproveDraftOrderController {
                 authorisation,
                 caseData,
                 selectedOrder,
-                language
+                language,
+                Optional.ofNullable(clientContext)
             );
 
             if (ManageOrdersUtils.isOrderEdited(caseData, callbackRequest.getEventId())) {

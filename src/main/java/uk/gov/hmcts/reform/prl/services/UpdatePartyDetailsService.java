@@ -120,6 +120,15 @@ public class UpdatePartyDetailsService {
         updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
         updatedCaseData.putAll(confidentialityTabService.updateConfidentialityDetails(caseData));
 
+        String state = callbackRequest.getCaseDetails().getState();
+        if (state != null) {
+            try {
+                caseData.setState(State.valueOf(state));
+            } catch (IllegalArgumentException e) {
+                log.warn("Unknown state value: {}", state);
+            }
+        }
+
         //Added partyId for Hearings Api Spec, C100 applications
         //Applicants
         if (caseData.getApplicants() != null) {
@@ -173,7 +182,10 @@ public class UpdatePartyDetailsService {
                                                   authorisation,
                                                   caseData,
                                                   List.of(ElementUtils.element(fl401respondent.getPartyId(), fl401respondent)));
-                archiveAndGenerateC8DocumentsForApplicant(updatedCaseData, callbackRequest, authorisation, caseData);
+                if (State.PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(caseData.getState())
+                    || State.DECISION_OUTCOME.equals(caseData.getState())) {
+                    archiveAndGenerateC8DocumentsForApplicant(updatedCaseData, callbackRequest, authorisation, caseData);
+                }
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for Fl401 case {}", e.getMessage());
             }
@@ -216,7 +228,10 @@ public class UpdatePartyDetailsService {
                                                   authorisation,
                                                   caseData,
                                                   caseData.getRespondents());
-                archiveAndGenerateC8DocumentsForApplicant(updatedCaseData, callbackRequest, authorisation, caseData);
+                if (State.PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(caseData.getState())
+                    || State.DECISION_OUTCOME.equals(caseData.getState())) {
+                    archiveAndGenerateC8DocumentsForApplicant(updatedCaseData, callbackRequest, authorisation, caseData);
+                }
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
             }
@@ -452,7 +467,7 @@ public class UpdatePartyDetailsService {
         return partyDetails;
     }
 
-    private void setApplicantOrganisationPolicyIfOrgEmpty(Map<String, Object> updatedCaseData, PartyDetails partyDetails) {
+    public void setApplicantOrganisationPolicyIfOrgEmpty(Map<String, Object> updatedCaseData, PartyDetails partyDetails) {
         CaseData caseDataUpdated = objectMapper.convertValue(updatedCaseData, CaseData.class);
         OrganisationPolicy applicantOrganisationPolicy = caseDataUpdated.getApplicantOrganisationPolicy();
         boolean organisationNotExists = false;
@@ -539,10 +554,10 @@ public class UpdatePartyDetailsService {
         }
     }
 
-    private void archiveAndGenerateC8DocumentsForApplicant(Map<String, Object> caseDataUpdated, CallbackRequest callbackRequest,
-                                                           String authorisation, CaseData caseData) throws Exception {
-
+    public void archiveAndGenerateC8DocumentsForApplicant(Map<String, Object> caseDataUpdated, CallbackRequest callbackRequest,
+                                                 String authorisation, CaseData caseData) throws Exception {
         c8ArchiveService.archiveC8DocumentIfConfidentialChanged(callbackRequest,caseData,caseDataUpdated);
+        log.info("Regenerating C8 documents for applicant in case: {}", callbackRequest.getCaseDetails().getId().toString());
 
         String state = callbackRequest.getCaseDetails().getState();
         caseData.setState(State.valueOf(state));
