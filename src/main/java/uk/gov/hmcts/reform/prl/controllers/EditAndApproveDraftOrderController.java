@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -162,13 +163,21 @@ public class EditAndApproveDraftOrderController {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             String language = CaseUtils.getLanguage(clientContext);
-            String encodedClientContext = CaseUtils.setTaskCompletion(
-                clientContext,
-                objectMapper,
-                caseData,
-                (data) ->
-                    Event.HEARING_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())
-                    && !manageOrderService.isSaveAsDraft(data));
+
+            ResponseEntity.BodyBuilder responseBuilder = ResponseEntity.status(HttpStatus.OK);
+            if (Event.HEARING_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
+                String encodedClientContext = CaseUtils.setTaskCompletion(
+                    clientContext,
+                    objectMapper,
+                    caseData,
+                    (data) -> !manageOrderService.isSaveAsDraft(data)
+                );
+
+                responseBuilder = ofNullable(encodedClientContext)
+                    .map(value -> ResponseEntity.ok()
+                        .header(CLIENT_CONTEXT_HEADER_PARAMETER, value))
+                    .orElseGet(ResponseEntity::ok);
+            }
 
             Map<String, Object> caseDataUpdated = draftAnOrderService.getEligibleServeOrderDetails(
                 authorisation,
@@ -176,10 +185,6 @@ public class EditAndApproveDraftOrderController {
                 language
             );
 
-            ResponseEntity.BodyBuilder responseBuilder = ofNullable(encodedClientContext)
-                .map(value -> ResponseEntity.ok()
-                    .header(CLIENT_CONTEXT_HEADER_PARAMETER, value))
-                .orElseGet(ResponseEntity::ok);
             return responseBuilder.body(AboutToStartOrSubmitCallbackResponse.builder()
                                             .data(caseDataUpdated)
                                             .build());
