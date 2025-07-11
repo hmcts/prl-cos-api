@@ -383,7 +383,7 @@ public class DocumentGenServiceTest {
             .respondentsFL401(partyDetailsWithOrganisations)
             .isEngDocGen("Yes")
             .isWelshDocGen("Yes")
-            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .state(State.CASE_ISSUED)
             .home(homefull)
             .build();
 
@@ -397,7 +397,7 @@ public class DocumentGenServiceTest {
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .isEngDocGen("Yes")
             .isWelshDocGen("Yes")
-            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .state(State.JUDICIAL_REVIEW)
             .home(homefull)
             .build();
 
@@ -816,7 +816,7 @@ public class DocumentGenServiceTest {
             .applicantsFL401(applicant)
             .respondentsFL401(applicant)
             .home(homefull)
-            .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
+            .state(State.SUBMITTED_PAID)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any()))
@@ -912,7 +912,7 @@ public class DocumentGenServiceTest {
             .applicantsFL401(applicant)
             .respondentsFL401(applicant)
             .home(homefull)
-            .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
+            .state(State.CASE_ISSUED)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any()))
@@ -990,7 +990,7 @@ public class DocumentGenServiceTest {
             .applicantsFL401(applicant)
             .respondentsFL401(applicant)
             .home(null)
-            .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
+            .state(State.JUDICIAL_REVIEW)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any()))
@@ -1054,7 +1054,7 @@ public class DocumentGenServiceTest {
             .applicantsFL401(applicant)
             .respondentsFL401(applicant)
             .home(null)
-            .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
+            .state(State.SUBMITTED_PAID)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any()))
@@ -1118,7 +1118,7 @@ public class DocumentGenServiceTest {
             .applicantsFL401(applicant)
             .respondentsFL401(applicant)
             .home(null)
-            .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
+            .state(State.JUDICIAL_REVIEW)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any()))
@@ -1177,7 +1177,7 @@ public class DocumentGenServiceTest {
             .applicantsFL401(applicant)
             .respondentsFL401(applicant)
             .home(null)
-            .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
+            .state(State.CASE_ISSUED)
             .build();
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(false).isGenWelsh(true).build();
