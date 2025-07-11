@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -90,6 +91,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENGLISH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM_TASK;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL;
@@ -967,6 +969,38 @@ public class CaseUtils {
             }
         }
         return null;
+    }
+
+    public static String getHearingId(WaMapper waMapper) {
+        if (null != waMapper && null != waMapper.getClientContext().getUserTask()) {
+            if (null != waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties()) {
+                return waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties().getHearingId();
+            }
+        }
+        return null;
+    }
+
+    public static Optional<Long> getHearingId(WaMapper waMapper, Map<String, Object> caseDataUpdated) {
+        Optional<Long> taskHearingId = ofNullable(waMapper)
+            .filter(value ->
+                        Yes.equals(new ObjectMapper().convertValue(
+                            caseDataUpdated.get(IS_INVOKED_FROM_TASK),
+                            new TypeReference<YesOrNo>() {
+                            }))
+            )
+            .map(value -> value
+                .getClientContext()
+                .getUserTask())
+            .filter(Objects::nonNull)
+            .filter(value -> value.getTaskData() != null
+                && value.getTaskData().getAdditionalProperties() != null
+                && value.getTaskData().getAdditionalProperties().getHearingId() != null)
+            .map(value -> Long.valueOf(value
+                                           .getTaskData()
+                                           .getAdditionalProperties()
+                                           .getHearingId())
+            );
+        return taskHearingId;
     }
 
     public static DraftOrder getDraftOrderFromCollectionId(List<Element<DraftOrder>> draftOrderCollection, UUID draftOrderId) {
