@@ -436,7 +436,8 @@ public class DocumentGenService {
         }
     }
 
-    private void addEnglishC1ADocumentToUpdatedCaseData(String authorisation, CaseData caseData, Map<String, Object> updatedCaseData) throws Exception {
+    private void addEnglishC1ADocumentToUpdatedCaseData(String authorisation, CaseData caseData,
+                                                        Map<String, Object> updatedCaseData) throws Exception {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
             && (caseData.getAllegationOfHarm() != null
             && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo()))

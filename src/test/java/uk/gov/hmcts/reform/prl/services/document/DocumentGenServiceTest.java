@@ -2340,7 +2340,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testCreateUpdatedCaseDataWithDocumentsForTestingSupportC8Formgenerationbasedconconfidentiality_withoutTypeofOrders() throws Exception {
+    public void testSupportC8ConfidentialityNoOrders() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
