@@ -400,7 +400,7 @@ public class DocumentGenService {
 
     private void isConfidentialInformationPresentForC100Welsh(String authorisation, CaseData caseData,
                                                               Map<String, Object> updatedCaseData) throws Exception {
-        log.info("===WEL=== Generating C8 (Welsh) for case: {}", caseData.getId(), " ===WEL===");
+        log.info("Generating C8 (Welsh) for case: {}", caseData.getId());
 
         if (hasApplicantConfidentialInfoForC100(caseData)) {
             if (State.CASE_ISSUED.equals(caseData.getState())
@@ -457,7 +457,7 @@ public class DocumentGenService {
 
     private void isConfidentialInformationPresentForC100Eng(String authorisation, CaseData caseData,
                                                             Map<String, Object> updatedCaseData) throws Exception {
-        log.info("===ENG=== Generating C8 (English) for case: {}", caseData.getId(), " ===ENG===");
+        log.info("Generating C8 (English) for case: {}", caseData.getId());
 
 
         if (hasApplicantConfidentialInfoForC100(caseData)) {
