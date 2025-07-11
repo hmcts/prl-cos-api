@@ -3,6 +3,7 @@
     "state": "AWAITING_SUBMISSION_TO_HMCTS",
     "id": "1708202935053756",
     "case_data": {
+      "isInvokedFromTask": "No",
       "isTheOrderAboutAllChildren": "Yes",
       "isCaseWithdrawn": "No",
       "doYouWantToServeOrder": "Yes",
