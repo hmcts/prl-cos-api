@@ -459,7 +459,7 @@ public class DocumentGenServiceTest {
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(
             c100CaseData);
-        Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, c100CaseData);
+        Map<String, Object> stringObjectMap = documentGenService.createUpdatedCaseDataWithDocuments(authToken, c100CaseData);
 
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
@@ -499,7 +499,7 @@ public class DocumentGenServiceTest {
         when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(
             c100CaseDataFinal);
 
-        Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, c100CaseDataFinal);
+        Map<String, Object> stringObjectMap = documentGenService.createUpdatedCaseDataWithDocuments(authToken, c100CaseDataFinal);
 
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
@@ -541,7 +541,7 @@ public class DocumentGenServiceTest {
         when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
             fl401CaseData);
 
-        Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, fl401CaseData);
+        Map<String, Object> stringObjectMap = documentGenService.createUpdatedCaseDataWithDocuments(authToken, fl401CaseData);
 
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
@@ -643,7 +643,7 @@ public class DocumentGenServiceTest {
             c100CaseDataC1A);
         when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(
             c100CaseDataC1A);
-        Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, c100CaseDataC1A);
+        Map<String, Object> stringObjectMap = documentGenService.createUpdatedCaseDataWithDocuments(authToken, c100CaseDataC1A);
 
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
@@ -684,7 +684,7 @@ public class DocumentGenServiceTest {
         when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
             fl401CaseData);
 
-        Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, fl401CaseData);
+        Map<String, Object> stringObjectMap = documentGenService.createUpdatedCaseDataWithDocuments(authToken, fl401CaseData);
 
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8));
@@ -721,7 +721,7 @@ public class DocumentGenServiceTest {
         when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
             fl401CaseData);
 
-        Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, fl401CaseData1);
+        Map<String, Object> stringObjectMap = documentGenService.createUpdatedCaseDataWithDocuments(authToken, fl401CaseData1);
 
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
@@ -828,7 +828,7 @@ public class DocumentGenServiceTest {
             .thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
-        documentGenService.generateDocuments(authToken, fl401CaseData);
+        documentGenService.createUpdatedCaseDataWithDocuments(authToken, fl401CaseData);
         verify(dgsService, times(2)).generateDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
@@ -924,7 +924,7 @@ public class DocumentGenServiceTest {
             .thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
-        documentGenService.generateDocuments(authToken, fl401CaseData);
+        documentGenService.createUpdatedCaseDataWithDocuments(authToken, fl401CaseData);
         verify(dgsService, times(2)).generateDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
@@ -1003,7 +1003,7 @@ public class DocumentGenServiceTest {
         when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
 
-        documentGenService.generateDocuments(authToken, fl401CaseData);
+        documentGenService.createUpdatedCaseDataWithDocuments(authToken, fl401CaseData);
         verify(dgsService, times(2)).generateDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
@@ -1067,7 +1067,7 @@ public class DocumentGenServiceTest {
         when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
 
-        documentGenService.generateDocuments(authToken, fl401CaseData);
+        documentGenService.createUpdatedCaseDataWithDocuments(authToken, fl401CaseData);
         verify(dgsService, times(1)).generateDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
@@ -1131,7 +1131,7 @@ public class DocumentGenServiceTest {
         when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
 
-        documentGenService.generateDocuments(authToken, fl401CaseData);
+        documentGenService.createUpdatedCaseDataWithDocuments(authToken, fl401CaseData);
         verify(dgsService, times(1)).generateDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
@@ -1187,7 +1187,7 @@ public class DocumentGenServiceTest {
         when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
 
-        documentGenService.generateDocuments(authToken, fl401CaseData);
+        documentGenService.createUpdatedCaseDataWithDocuments(authToken, fl401CaseData);
         verify(dgsService, times(1)).generateWelshDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
@@ -1311,7 +1311,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateDocumentsForCitizenSubmissionForEnglish() throws Exception {
+    public void testCreateUpdatedCaseDataWithDocumentsForCitizenSubmissionForEnglish() throws Exception {
 
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
@@ -1333,7 +1333,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateDocumentsForCitizenSubmissionForWelsh() throws Exception {
+    public void testCreateUpdatedCaseDataWithDocumentsForCitizenSubmissionForWelsh() throws Exception {
 
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
@@ -1355,7 +1355,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateDocumentsForCitizen() throws Exception {
+    public void testCreateUpdatedCaseDataWithDocumentsForCitizen() throws Exception {
         //Given
         when(documentLanguageService.docGenerateLang(c100CaseData)).thenReturn(DocumentLanguage
                                                                                    .builder().isGenEng(true).build());
@@ -1440,7 +1440,7 @@ public class DocumentGenServiceTest {
         when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(
             c100CaseDataNotIssued);
 
-        Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, c100CaseDataNotIssued);
+        Map<String, Object> stringObjectMap = documentGenService.createUpdatedCaseDataWithDocuments(authToken, c100CaseDataNotIssued);
 
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_DRAFT_WELSH));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A_DRAFT_WELSH));
@@ -1986,7 +1986,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void generateDocumentsForTestingSupportForC100Test() throws Exception {
+    public void createUpdatedCaseDataWithDocumentsForTestingSupportForC100Test() throws Exception {
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
@@ -2027,7 +2027,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void generateDocumentsForTestingSupportForC100TestFinalDoc() throws Exception {
+    public void createUpdatedCaseDataWithDocumentsForTestingSupportForC100TestFinalDoc() throws Exception {
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
@@ -2070,7 +2070,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void generateDocumentsForTestingSupportForFL401TestWithOrganisation() throws Exception {
+    public void createUpdatedCaseDataWithDocumentsForTestingSupportForFL401TestWithOrganisation() throws Exception {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
@@ -2112,7 +2112,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void generateDocumentsForTestingSupportForC100TestWithC1A() throws Exception {
+    public void createUpdatedCaseDataWithDocumentsForTestingSupportForC100TestWithC1A() throws Exception {
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
@@ -2157,7 +2157,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void generateDocumentsForTestingSupportForFL401Test() throws Exception {
+    public void createUpdatedCaseDataWithDocumentsForTestingSupportForFL401Test() throws Exception {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
@@ -2197,7 +2197,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void generateDocumentsForTestingSupportForFL401TestWithChildConfidentialInfo() throws Exception {
+    public void createUpdatedCaseDataWithDocumentsForTestingSupportForFL401TestWithChildConfidentialInfo() throws Exception {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
@@ -2241,7 +2241,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateDocumentsForTestingSupportC8Formgenerationbasedconconfidentiality2() throws Exception {
+    public void testCreateUpdatedCaseDataWithDocumentsForTestingSupportC8Formgenerationbasedconconfidentiality2() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -2340,7 +2340,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateDocumentsForTestingSupportC8Formgenerationbasedconconfidentiality_withoutTypeofOrders() throws Exception {
+    public void testCreateUpdatedCaseDataWithDocumentsForTestingSupportC8Formgenerationbasedconconfidentiality_withoutTypeofOrders() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -2435,7 +2435,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateDocumentsForTestingSupportC8FormGenerationBasedcOnConfidentiality_() throws Exception {
+    public void testCreateUpdatedCaseDataWithDocumentsForTestingSupportC8FormGenerationBasedcOnConfidentiality_() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -2513,7 +2513,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateDocumentsForTestingSupportDocsNullValueWhenAbsent() throws Exception {
+    public void testCreateUpdatedCaseDataWithDocumentsForTestingSupportDocsNullValueWhenAbsent() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -2577,7 +2577,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateDocumentsForTestingSupportDocsNullValueWhenEnglishNotWesh() throws Exception {
+    public void testCreateUpdatedCaseDataWithDocumentsForTestingSupportDocsNullValueWhenEnglishNotWesh() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -2637,7 +2637,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateDocumentsForTestingSupportDocsNullValueWhenWelshNotenglish() throws Exception {
+    public void testCreateUpdatedCaseDataWithDocumentsForTestingSupportDocsNullValueWhenWelshNotenglish() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -3113,25 +3113,25 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testHasApplicantConfidentialInfoForC100_caseTypeNotC100_returnsFalse() {
+    public void testIsAnyC100_caseTypeNotC100_ApplicantInfoConfidential_returnsFalse() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("FL401")
             .applicants(Collections.singletonList(Element.<PartyDetails>builder().value(PartyDetails.builder().build()).build()))
             .build();
-        assertFalse(documentGenService.hasApplicantConfidentialInfoForC100(caseData));
+        assertFalse(documentGenService.isAnyC100ApplicantInfoConfidential(caseData));
     }
 
     @Test
-    public void testHasApplicantConfidentialInfoForC100_applicantsNull_returnsFalse() {
+    public void testIsAnyC100_ApplicantInfoConfidential_applicantsNull_returnsFalse() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("C100")
             .applicants(null)
             .build();
-        assertFalse(documentGenService.hasApplicantConfidentialInfoForC100(caseData));
+        assertFalse(documentGenService.isAnyC100ApplicantInfoConfidential(caseData));
     }
 
     @Test
-    public void testHasApplicantConfidentialInfoForC100_allNo_returnsFalse() {
+    public void testIsAnyC100_ApplicantInfoConfidential_allNo_returnsFalse() {
         PartyDetails applicant = PartyDetails.builder()
             .isAddressConfidential(YesOrNo.No)
             .isEmailAddressConfidential(YesOrNo.No)
@@ -3141,11 +3141,11 @@ public class DocumentGenServiceTest {
             .caseTypeOfApplication("C100")
             .applicants(Collections.singletonList(Element.<PartyDetails>builder().value(applicant).build()))
             .build();
-        assertFalse(documentGenService.hasApplicantConfidentialInfoForC100(caseData));
+        assertFalse(documentGenService.isAnyC100ApplicantInfoConfidential(caseData));
     }
 
     @Test
-    public void testHasApplicantConfidentialInfoForC100_addressYes_returnsTrue() {
+    public void testIsAnyC100_ApplicantInfoConfidential_addressYes_returnsTrue() {
         PartyDetails applicant = PartyDetails.builder()
             .isAddressConfidential(YesOrNo.Yes)
             .isEmailAddressConfidential(YesOrNo.No)
@@ -3155,11 +3155,11 @@ public class DocumentGenServiceTest {
             .caseTypeOfApplication("C100")
             .applicants(Collections.singletonList(Element.<PartyDetails>builder().value(applicant).build()))
             .build();
-        assertTrue(documentGenService.hasApplicantConfidentialInfoForC100(caseData));
+        assertTrue(documentGenService.isAnyC100ApplicantInfoConfidential(caseData));
     }
 
     @Test
-    public void testHasApplicantConfidentialInfoForC100_emailYes_returnsTrue() {
+    public void testIsAnyC100_ApplicantInfoConfidential_emailYes_returnsTrue() {
         PartyDetails applicant = PartyDetails.builder()
             .isAddressConfidential(YesOrNo.No)
             .isEmailAddressConfidential(YesOrNo.Yes)
@@ -3169,11 +3169,11 @@ public class DocumentGenServiceTest {
             .caseTypeOfApplication("C100")
             .applicants(Collections.singletonList(Element.<PartyDetails>builder().value(applicant).build()))
             .build();
-        assertTrue(documentGenService.hasApplicantConfidentialInfoForC100(caseData));
+        assertTrue(documentGenService.isAnyC100ApplicantInfoConfidential(caseData));
     }
 
     @Test
-    public void testHasApplicantConfidentialInfoForC100_phoneYes_returnsTrue() {
+    public void testIsAnyC100_ApplicantInfoConfidential_phoneYes_returnsTrue() {
         PartyDetails applicant = PartyDetails.builder()
             .isAddressConfidential(YesOrNo.No)
             .isEmailAddressConfidential(YesOrNo.No)
@@ -3183,11 +3183,11 @@ public class DocumentGenServiceTest {
             .caseTypeOfApplication("C100")
             .applicants(Collections.singletonList(Element.<PartyDetails>builder().value(applicant).build()))
             .build();
-        assertTrue(documentGenService.hasApplicantConfidentialInfoForC100(caseData));
+        assertTrue(documentGenService.isAnyC100ApplicantInfoConfidential(caseData));
     }
 
     @Test
-    public void testHasApplicantConfidentialInfoForC100_multipleApplicants_oneYes_returnsTrue() {
+    public void testIsAnyC100_ApplicantInfoConfidential_multipleApplicants_oneYes_returnsTrue() {
         PartyDetails applicant1 = PartyDetails.builder()
             .isAddressConfidential(YesOrNo.No)
             .isEmailAddressConfidential(YesOrNo.No)
@@ -3205,6 +3205,6 @@ public class DocumentGenServiceTest {
                 Element.<PartyDetails>builder().value(applicant2).build()
             ))
             .build();
-        assertTrue(documentGenService.hasApplicantConfidentialInfoForC100(caseData));
+        assertTrue(documentGenService.isAnyC100ApplicantInfoConfidential(caseData));
     }
 }

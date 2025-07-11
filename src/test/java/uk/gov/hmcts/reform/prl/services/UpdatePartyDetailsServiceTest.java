@@ -2447,7 +2447,7 @@ public class UpdatePartyDetailsServiceTest {
             .updateApplicantRespondentAndChildData(callbackRequest, "test");
 
         assertNotNull(updatedCaseData);
-        verify(documentGenService, Mockito.times(times)).generateDocuments(anyString(), any(CaseData.class));
+        verify(documentGenService, Mockito.times(times)).createUpdatedCaseDataWithDocuments(anyString(), any(CaseData.class));
     }
 
 }

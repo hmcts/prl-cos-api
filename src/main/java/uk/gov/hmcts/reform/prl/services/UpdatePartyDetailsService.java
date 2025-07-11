@@ -575,7 +575,7 @@ public class UpdatePartyDetailsService {
                                                  String authorisation, CaseData caseData) throws Exception {
         log.info("Regenerating C8 documents for applicant in case: {}", callbackRequest.getCaseDetails().getId().toString());
 
-        caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
+        caseDataUpdated.putAll(documentGenService.createUpdatedCaseDataWithDocuments(authorisation, caseData));
         CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
 
         caseData = caseData.toBuilder()

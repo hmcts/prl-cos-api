@@ -338,7 +338,7 @@ public class CitizenPartyDetailsMapper {
     private void reGenerateApplicantC8Document(Map<String, Object> caseDataUpdated, String authorisation, CaseData caseData) throws Exception {
         log.info("======Regenerating C8 document at reGenerateApplicantC8Document for applicant in case: {}", caseData.getId());
 
-        caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
+        caseDataUpdated.putAll(documentGenService.createUpdatedCaseDataWithDocuments(authorisation, caseData));
         CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
 
         caseData = caseData.toBuilder()
