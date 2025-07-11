@@ -44,6 +44,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.AutomatedHearingUtils;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
+import uk.gov.hmcts.reform.prl.utils.TaskUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,6 +77,7 @@ public class EditAndApproveDraftOrderController {
     private final EditReturnedOrderService editReturnedOrderService;
     private final RoleAssignmentService roleAssignmentService;
     private final AllTabServiceImpl allTabService;
+    private final TaskUtils taskUtils;
 
     public static final String CONFIRMATION_HEADER = "# Order approved";
     public static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS = """
@@ -166,11 +168,10 @@ public class EditAndApproveDraftOrderController {
 
             ResponseEntity.BodyBuilder responseBuilder = ResponseEntity.status(HttpStatus.OK);
             if (Event.HEARING_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
-                String encodedClientContext = CaseUtils.setTaskCompletion(
+                String encodedClientContext = taskUtils.setTaskCompletion(
                     clientContext,
-                    objectMapper,
                     caseData,
-                    (data) -> !manageOrderService.isSaveAsDraft(data)
+                    data -> !manageOrderService.isSaveAsDraft(data)
                 );
 
                 responseBuilder = ofNullable(encodedClientContext)
