@@ -117,6 +117,15 @@ public class UpdatePartyDetailsService {
         updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
         updatedCaseData.putAll(confidentialityTabService.updateConfidentialityDetails(caseData));
 
+        String state = callbackRequest.getCaseDetails().getState();
+        if (state != null) {
+            try {
+                caseData.setState(State.valueOf(state));
+            } catch (IllegalArgumentException e) {
+                log.warn("Unknown state value: {}", state);
+            }
+        }
+
         Consumer<CaseData> generateC8 = caseDataParam -> {
             if (State.PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(State.valueOf(state))
                 || State.DECISION_OUTCOME.equals(State.valueOf(state))) {
@@ -127,15 +136,6 @@ public class UpdatePartyDetailsService {
                 }
             }
         };
-
-        String state = callbackRequest.getCaseDetails().getState();
-        if (state != null) {
-            try {
-                caseData.setState(State.valueOf(state));
-            } catch (IllegalArgumentException e) {
-                log.warn("Unknown state value: {}", state);
-            }
-        }
 
         //Added partyId for Hearings Api Spec, C100 applications
         //Applicants
