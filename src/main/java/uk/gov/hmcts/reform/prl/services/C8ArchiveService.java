@@ -34,6 +34,8 @@ public class C8ArchiveService {
         CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
         boolean confidentialDetailsChanged = confidentialDetailsChangeHelper.haveConfidentialDetailsChanged(caseData, caseDataBefore);
 
+        log.debug("Confidential details changed: {}", confidentialDetailsChanged);
+
         if (confidentialDetailsChanged) {
             Document c8ToArchive = caseData.getC8Document();
 
@@ -55,7 +57,11 @@ public class C8ArchiveService {
                                           .value(archivedC8)
                                           .build());
 
+                log.info("Archiving C8 Document - File Name: {}, URL: {}",archivedC8.getDocumentFileName(), archivedC8.getDocumentUrl());
+
                 caseDataUpdated.put(C8_ARCHIVED_DOCUMENTS, archivedDocuments);
+            } else {
+                log.warn("Confidential details changed, but no C8 document found to archive.");
             }
         }
     }

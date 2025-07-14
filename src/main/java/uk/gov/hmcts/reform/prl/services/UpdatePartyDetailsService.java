@@ -556,6 +556,7 @@ public class UpdatePartyDetailsService {
 
     public void archiveAndGenerateC8DocumentsForApplicant(Map<String, Object> caseDataUpdated, CallbackRequest callbackRequest,
                                                  String authorisation, CaseData caseData) throws Exception {
+        log.info("Archiving Applicant C8 document for case: {}", callbackRequest.getCaseDetails().getId().toString());
         c8ArchiveService.archiveC8DocumentIfConfidentialChanged(callbackRequest,caseData,caseDataUpdated);
         log.info("Regenerating C8 documents for applicant in case: {}", callbackRequest.getCaseDetails().getId().toString());
 
