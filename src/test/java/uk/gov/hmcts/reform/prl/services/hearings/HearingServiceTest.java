@@ -112,12 +112,7 @@ public class HearingServiceTest {
             .hmctsServiceCode("ABA5")
             .caseHearings(Collections.singletonList(caseHearing))
             .build();
-        Mockito.lenient().when(hearingApiClient.getHearingDetails(
-            any(),
-            any(),
-            any()
-        )).thenReturn(hearings);
-        when(hearingApiClient.getHearingDetailsHacked(
+        when(hearingApiClient.getHearingDetails(
             any(),
             any(),
             any()
@@ -188,7 +183,7 @@ public class HearingServiceTest {
     public void getHearingsTestNoHearingReturned() {
 
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
-        when(hearingApiClient.getHearingDetailsHacked(auth, serviceAuthToken, caseReferenceNumber)).thenReturn(null);
+        when(hearingApiClient.getHearingDetails(auth, serviceAuthToken, caseReferenceNumber)).thenReturn(null);
         Hearings hearingsResp = hearingService.getHearings(auth, caseReferenceNumber);
 
         assertEquals(null, hearingsResp);
@@ -198,7 +193,7 @@ public class HearingServiceTest {
     @Test
     @DisplayName("test case for HearingService getHearings exception.")
     public void getHearingsTestException() {
-        when(hearingApiClient.getHearingDetailsHacked(
+        when(hearingApiClient.getHearingDetails(
             Mockito.any(),
             Mockito.any(),
             Mockito.any()

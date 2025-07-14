@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.prl.clients;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.FeignClientProperties;
 import org.springframework.http.ResponseEntity;
@@ -26,50 +24,6 @@ import java.util.Map;
 )
 public interface HearingApiClient {
 
-    String hearingPayload = """
-        {
-           "hmctsServiceCode": "ABA5",
-           "caseRef": "<caseRef>",
-           "caseHearings": [
-             {
-               "hearingID": "999999",
-               "hearingRequestDateTime": null,
-               "hearingType": "ABA5-FFH",
-               "hmcStatus": "LISTED",
-               "lastResponseReceivedDateTime": null,
-               "requestVersion": null,
-               "hearingListingStatus": null,
-               "listAssistCaseStatus": null,
-               "hearingDaySchedule": [
-                 {
-                   "hearingStartDateTime": "2025-07-18T14:23:45.123",
-                   "hearingEndDateTime": "2025-07-20T14:23:45.123",
-                   "listAssistSessionId": null,
-                   "hearingVenueId": "898213",
-                   "hearingVenueName": "EAST LONDON FAMILY COURT",
-                   "hearingVenueLocationCode": null,
-                   "hearingVenueAddress": "WESTFERRY CIRCUS (WESTFERRY HOUSE)",
-                   "hearingRoomId": "East London Family Bench Court Central Hub",
-                   "hearingJudgeId": null,
-                   "hearingJudgeName": null,
-                   "panelMemberIds": null,
-                   "attendees": [
-                     {
-                       "partyID": "7663081e-778d-4317-b278-7642b740d317",
-                       "hearingSubChannel": "VID"
-                     }
-                   ]
-                 }
-               ],
-               "hearingGroupRequestId": "280",
-               "hearingIsLinkedFlag": null,
-               "hearingTypeValue": null,
-               "nextHearingDate": "2025-07-18T14:23:45.123",
-               "urgentFlag": false
-             }
-           ]
-         }
-        """;
 
     @GetMapping(path = "/hearings")
     Hearings getHearingDetails(
@@ -77,23 +31,6 @@ public interface HearingApiClient {
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
         @RequestHeader("caseReference") String caseReference
     );
-
-    //TODO: DO NOT COMMIT
-    default Hearings getHearingDetailsHacked(
-        @RequestHeader("Authorization") String authorisation,
-        @RequestHeader("ServiceAuthorization") String serviceAuthorization,
-        @RequestHeader("caseReference") String caseReference
-    ) throws RuntimeException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.findAndRegisterModules();
-        String updatedHearingPayload = hearingPayload.replace("<caseRef>", caseReference);
-
-        try {
-            return mapper.readValue(updatedHearingPayload, Hearings.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
 
     @PostMapping(value = "/serviceLinkedCases", consumes = "application/json")
