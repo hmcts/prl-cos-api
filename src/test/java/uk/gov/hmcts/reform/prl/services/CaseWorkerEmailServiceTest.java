@@ -927,5 +927,60 @@ public class CaseWorkerEmailServiceTest {
 
         assertEquals("testing@localcourt.com", caseData.getCourtEmailAddress());
     }
+
+    @Test
+    public void sendEmailShouldNotThrowWhenEmailIsNullOrBlank() {
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345L)
+            .data(new HashMap<>()) // No email address
+            .build();
+
+        // Should not throw any exception, just log a warning
+        caseWorkerEmailService.sendEmail(caseDetails);
+
+        Mockito.verify(emailService, Mockito.never()).send(
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        );
+    }
+
+    @Test
+    public void sendEmailShouldHandleExceptionFromEmailService() {
+        Map<String, Object> data = new HashMap<>();
+        data.put("caseworkerEmailAddress", "test@test.com");
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345L)
+            .data(data)
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicants(new ArrayList<>())
+            .respondents(new ArrayList<>())
+            .ordersApplyingFor(new ArrayList<>())
+            .isCaseUrgent(YesOrNo.No)
+            .doYouNeedAWithoutNoticeHearing(YesOrNo.No)
+            .doYouRequireAHearingWithReducedNotice(YesOrNo.No)
+            .build();
+        Mockito.when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        Mockito.doThrow(new RuntimeException("Email send failed"))
+            .when(emailService).send(
+                Mockito.anyString(),
+                Mockito.any(),
+                Mockito.any(),
+                Mockito.any()
+            );
+
+        // Should not throw, just log error
+        caseWorkerEmailService.sendEmail(caseDetails);
+
+        Mockito.verify(emailService, Mockito.times(1)).send(
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        );
+    }
 }
 
