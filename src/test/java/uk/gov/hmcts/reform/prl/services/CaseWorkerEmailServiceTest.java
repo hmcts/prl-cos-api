@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -357,6 +358,16 @@ public class CaseWorkerEmailServiceTest {
 
         caseWorkerEmailService.sendEmail(caseDetails);
         assertEquals("test@test.com", caseDetails.getData().get("caseworkerEmailAddress").toString());
+    }
+
+    @Test
+    public void shouldLogErrorAndSkipEmailIfNoCaseworkerEmailProvided() {
+        CaseDetails caseDetails = CaseDetails.builder()
+            .data(Collections.emptyMap())
+            .build();
+        caseWorkerEmailService.sendEmail(caseDetails);
+
+        verifyNoInteractions(emailService);
     }
 
     @Test

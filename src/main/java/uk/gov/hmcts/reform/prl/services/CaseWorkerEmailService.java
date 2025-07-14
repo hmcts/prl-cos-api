@@ -26,6 +26,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
@@ -135,7 +136,13 @@ public class CaseWorkerEmailService {
     }
 
     public void sendEmail(CaseDetails caseDetails) {
-        String caseworkerEmailAddress = caseDetails.getData().get("caseworkerEmailAddress").toString();
+        Optional<Object> caseworkerEmail = Optional.ofNullable(caseDetails.getData().get("caseworkerEmailAddress"));
+        if (caseworkerEmail.isEmpty()) {
+            log.error("Cannot send email on case {}, caseworker email is null/empty", caseDetails.getId());
+            return;
+        }
+
+        String caseworkerEmailAddress = caseworkerEmail.get().toString();
 
         emailService.send(
             caseworkerEmailAddress,
