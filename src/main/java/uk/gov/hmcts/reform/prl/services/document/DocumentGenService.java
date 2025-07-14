@@ -399,26 +399,45 @@ public class DocumentGenService {
         }
     }
 
-    private void addWelshC8DocumentToUpdatedCaseData(String authorisation, CaseData caseData,
+    private record C8DocumentDetails(String documentFieldName, String documentFieldDraftName, boolean isWelsh) {}
+
+    private void addWelshC8DocumentToUpdatedCaseData(String authorisation,
+                                                     CaseData caseData,
                                                      Map<String, Object> updatedCaseData) throws Exception {
         log.info("Generating C8 (Welsh) for case: {}", caseData.getId());
+        addC8DocumentToUpdatedCaseData(authorisation, caseData, updatedCaseData,
+                                       new C8DocumentDetails(DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_C8_DRAFT_WELSH, true));
+    }
+
+    private void addEnglishC8DocumentToUpdatedCaseData(String authorisation,
+                                                       CaseData caseData,
+                                                       Map<String, Object> updatedCaseData) throws Exception {
+        log.info("Generating C8 (English) for case: {}", caseData.getId());
+        addC8DocumentToUpdatedCaseData(authorisation, caseData, updatedCaseData,
+                                       new C8DocumentDetails(DOCUMENT_FIELD_C8, DOCUMENT_FIELD_DRAFT_C8, false));
+    }
+
+    private void addC8DocumentToUpdatedCaseData(String authorisation,
+                                                CaseData caseData,
+                                                Map<String, Object> updatedCaseData,
+                                                C8DocumentDetails documentDetails) throws Exception {
         if (isAnyC100ApplicantInfoConfidential(caseData)) {
             if (State.CASE_ISSUED.equals(caseData.getState())
                 || State.JUDICIAL_REVIEW.equals(caseData.getState())
                 || State.PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(caseData.getState())
                 || State.DECISION_OUTCOME.equals(caseData.getState())) {
-                updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, getDocument(authorisation, caseData, C8_HINT, true));
+                updatedCaseData.put(documentDetails.documentFieldName, getDocument(authorisation, caseData, C8_HINT, documentDetails.isWelsh));
             } else {
                 updatedCaseData.put(
-                    DOCUMENT_FIELD_C8_DRAFT_WELSH,
-                    getDocument(authorisation, caseData, C8_DRAFT_HINT, true)
+                    documentDetails.documentFieldDraftName,
+                    getDocument(authorisation, caseData, C8_DRAFT_HINT, documentDetails.isWelsh)
                 );
             }
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
             && isApplicantOrChildDetailsConfidential(caseData)) {
-            updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, getDocument(authorisation, caseData, C8_HINT, true));
+            updatedCaseData.put(documentDetails.documentFieldName, getDocument(authorisation, caseData, C8_HINT, documentDetails.isWelsh));
         } else {
-            updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, null);
+            updatedCaseData.put(documentDetails.documentFieldName, null);
         }
     }
 
@@ -454,30 +473,6 @@ public class DocumentGenService {
             }
         } else {
             updatedCaseData.put(DOCUMENT_FIELD_C1A, null);
-        }
-    }
-
-    private void addEnglishC8DocumentToUpdatedCaseData(String authorisation, CaseData caseData,
-                                                       Map<String, Object> updatedCaseData) throws Exception {
-        log.info("Generating C8 (English) for case: {}", caseData.getId());
-        if (isAnyC100ApplicantInfoConfidential(caseData)) {
-            if (State.CASE_ISSUED.equals(caseData.getState())
-                || State.JUDICIAL_REVIEW.equals(caseData.getState())
-                || State.PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(caseData.getState())
-                || State.DECISION_OUTCOME.equals(caseData.getState())) {
-                updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false));
-            } else {
-                updatedCaseData.put(
-                    DOCUMENT_FIELD_DRAFT_C8,
-                    getDocument(authorisation, caseData, C8_DRAFT_HINT, false)
-                );
-            }
-        } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-            && isApplicantOrChildDetailsConfidential(caseData)) {
-            updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false));
-        } else {
-            updatedCaseData.put(DOCUMENT_FIELD_C8, null);
-
         }
     }
 
