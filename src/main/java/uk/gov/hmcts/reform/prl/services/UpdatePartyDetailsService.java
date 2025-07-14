@@ -51,6 +51,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -116,6 +117,17 @@ public class UpdatePartyDetailsService {
         updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
         updatedCaseData.putAll(confidentialityTabService.updateConfidentialityDetails(caseData));
 
+        Consumer<CaseData> generateC8 = caseDataParam -> {
+            if (State.PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(State.valueOf(state))
+                || State.DECISION_OUTCOME.equals(State.valueOf(state))) {
+                try {
+                    generateC8DocumentsForApplicant(updatedCaseData, callbackRequest, authorisation, caseDataParam);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
+
         String state = callbackRequest.getCaseDetails().getState();
         if (state != null) {
             try {
@@ -178,10 +190,7 @@ public class UpdatePartyDetailsService {
                                                   authorisation,
                                                   caseData,
                                                   List.of(ElementUtils.element(fl401respondent.getPartyId(), fl401respondent)));
-                if (State.PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(caseData.getState())
-                    || State.DECISION_OUTCOME.equals(caseData.getState())) {
-                    generateC8DocumentsForApplicant(updatedCaseData, callbackRequest, authorisation, caseData);
-                }
+                generateC8.accept(caseData);
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for Fl401 case {}", e.getMessage());
             }
@@ -224,10 +233,7 @@ public class UpdatePartyDetailsService {
                                                   authorisation,
                                                   caseData,
                                                   caseData.getRespondents());
-                if (State.PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(caseData.getState())
-                    || State.DECISION_OUTCOME.equals(caseData.getState())) {
-                    generateC8DocumentsForApplicant(updatedCaseData, callbackRequest, authorisation, caseData);
-                }
+                generateC8.accept(caseData);
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
             }
