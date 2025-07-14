@@ -226,6 +226,9 @@ public class PrlAppsConstants {
     public static final String OTHER = "Other";
     public static final String ENGDOCGEN = "isEngDocGen";
 
+    public static final String C8_ARCHIVED_DOCUMENTS = "c8ArchivedDocuments";
+    public static final String C8_ARCHIVED_DOCUMENT_NAME = "C8ArchivedDocument.pdf";
+
     public static final String SERVICE_ID = "ABA5";
     public static final String FAMILY_COURT_TYPE_ID = "18";
     public static final String[] HEARING_PAGE_NEEDED_ORDER_IDS = {"noticeOfProceedings","childArrangementsSpecificProhibitedOrder",
