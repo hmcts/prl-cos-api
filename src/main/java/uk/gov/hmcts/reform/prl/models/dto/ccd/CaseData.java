@@ -352,6 +352,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
     @JsonProperty("c8WelshDraftDocument")
     private final Document c8WelshDraftDocument;
 
+
     @JsonProperty("isEngDocGen")
     private final String isEngDocGen;
     @JsonProperty("isWelshDocGen")

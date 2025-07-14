@@ -75,6 +75,9 @@ import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Represe
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
+import static uk.gov.hmcts.reform.prl.services.ConfidentialDetailsChangeHelper.checkIfAddressConfidentialityHasChanged;
+import static uk.gov.hmcts.reform.prl.services.ConfidentialDetailsChangeHelper.checkIfEmailConfidentialityHasChanged;
+import static uk.gov.hmcts.reform.prl.services.ConfidentialDetailsChangeHelper.checkIfPhoneConfidentialityHasChanged;
 import static uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService.IS_CONFIDENTIAL_DATA_PRESENT;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPartyResponse;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -297,27 +300,6 @@ public class UpdatePartyDetailsService {
 
     private static boolean indexExists(final List<?> list, final int index) {
         return list != null && index >= 0 && index < list.size();
-    }
-
-    private static boolean checkIfAddressConfidentialityHasChanged(PartyDetails partyDetails, PartyDetails partyDetailsBefore) {
-        return isNotEmpty(partyDetails.getIsAddressConfidential())
-            && isNotEmpty(partyDetailsBefore.getIsAddressConfidential())
-            && !partyDetailsBefore.getIsAddressConfidential()
-            .equals(partyDetails.getIsAddressConfidential());
-    }
-
-    private static boolean checkIfEmailConfidentialityHasChanged(PartyDetails partyDetails, PartyDetails partyDetailsBefore) {
-        return isNotEmpty(partyDetails.getIsEmailAddressConfidential())
-            && isNotEmpty(partyDetailsBefore.getIsEmailAddressConfidential())
-            && !partyDetailsBefore.getIsEmailAddressConfidential()
-            .equals(partyDetails.getIsEmailAddressConfidential());
-    }
-
-    private static boolean checkIfPhoneConfidentialityHasChanged(PartyDetails partyDetails, PartyDetails partyDetailsBefore) {
-        return isNotEmpty(partyDetails.getIsPhoneNumberConfidential())
-            && isNotEmpty(partyDetailsBefore.getIsPhoneNumberConfidential())
-            && !partyDetailsBefore.getIsPhoneNumberConfidential()
-            .equals(partyDetails.getIsPhoneNumberConfidential());
     }
 
     private static void setC100ApplicantPartyName(Optional<List<Element<PartyDetails>>> applicantsWrapped, Map<String, Object> updatedCaseData) {
