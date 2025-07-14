@@ -136,16 +136,15 @@ public class AwpProcessHwfPaymentService {
                     });
             }
             log.info("All Hwf AwP payments processed? " + allCitizenAwpWithHwfHasBeenProcessed);
-            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
-                = allTabService.getStartUpdateForSpecificEvent(
-                caseDetails.getId().toString(),
-                HWF_PROCESS_AWP_STATUS_UPDATE.getValue()
-            );
-
             caseDataUpdated.put(AWP_ADDTIONAL_APPLICATION_BUNDLE, caseData.getAdditionalApplicationsBundle());
             caseDataUpdated.put(
                 "hwfRequestedForAdditionalApplicationsFlag",
                 YesOrNo.Yes.equals(allCitizenAwpWithHwfHasBeenProcessed) ? YesOrNo.No : caseData.getHwfRequestedForAdditionalApplicationsFlag()
+            );
+            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+                = allTabService.getStartUpdateForSpecificEvent(
+                caseDetails.getId().toString(),
+                HWF_PROCESS_AWP_STATUS_UPDATE.getValue()
             );
 
             //Save case data

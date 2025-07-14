@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -33,6 +35,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetailsMeta;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.CoverLetterMap;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
@@ -63,9 +66,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.springframework.util.CollectionUtils.isEmpty;
@@ -86,6 +91,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENGLISH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM_TASK;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL;
@@ -907,6 +913,46 @@ public class CaseUtils {
         return null;
     }
 
+    public static String setTaskCompletion(
+        String clientContext,
+        ObjectMapper objectMapper,
+        CaseData caseData,
+        Predicate<CaseData> completeTask) {
+
+        return ofNullable(clientContext)
+            .map(value -> getWaMapper(clientContext))
+            .map(WaMapper::getClientContext)
+            .filter(value -> nonNull(value.getUserTask()))
+            .map(value ->
+                     value.toBuilder()
+                         .userTask(value.getUserTask().toBuilder()
+                                       .completeTask(completeTask.test(caseData))
+                                       .build())
+                         .build())
+            .map(
+                updatedClientContext ->
+                    base64Encode(WaMapper.builder()
+                                     .clientContext(updatedClientContext)
+                                     .build(),
+                                 objectMapper)
+            )
+            .orElse(null);
+    }
+
+    public static String base64Encode(WaMapper waMapper, ObjectMapper objectMapper) {
+        String base64EncodedClientContext = null;
+        if (waMapper != null) {
+            try {
+                String clientContextToEncode = objectMapper.writeValueAsString(waMapper);
+                base64EncodedClientContext =  Base64.getEncoder().encodeToString(clientContextToEncode.getBytes());
+            } catch (JsonProcessingException e) {
+                log.error("Exception while clientContext the Client-Context {}", e.getMessage());
+                throw new RuntimeException(e);
+            }
+        }
+        return base64EncodedClientContext;
+    }
+
     public static String getDraftOrderId(WaMapper waMapper) {
         if (null != waMapper) {
             if (null != waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties()) {
@@ -916,6 +962,47 @@ public class CaseUtils {
         return null;
     }
 
+    public static String getAdditionalApplicationId(WaMapper waMapper) {
+        if (null != waMapper) {
+            if (null != waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties()) {
+                return waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties().getAdditionalApplicationId();
+            }
+        }
+        return null;
+    }
+
+    public static String getHearingId(WaMapper waMapper) {
+        if (null != waMapper && null != waMapper.getClientContext().getUserTask()) {
+            if (null != waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties()) {
+                return waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties().getHearingId();
+            }
+        }
+        return null;
+    }
+
+    public static Optional<Long> getHearingId(WaMapper waMapper, Map<String, Object> caseDataUpdated) {
+        Optional<Long> taskHearingId = ofNullable(waMapper)
+            .filter(value ->
+                        Yes.equals(new ObjectMapper().convertValue(
+                            caseDataUpdated.get(IS_INVOKED_FROM_TASK),
+                            new TypeReference<YesOrNo>() {
+                            }))
+            )
+            .map(value -> value
+                .getClientContext()
+                .getUserTask())
+            .filter(Objects::nonNull)
+            .filter(value -> value.getTaskData() != null
+                && value.getTaskData().getAdditionalProperties() != null
+                && value.getTaskData().getAdditionalProperties().getHearingId() != null)
+            .map(value -> Long.valueOf(value
+                                           .getTaskData()
+                                           .getAdditionalProperties()
+                                           .getHearingId())
+            );
+        return taskHearingId;
+    }
+
     public static DraftOrder getDraftOrderFromCollectionId(List<Element<DraftOrder>> draftOrderCollection, UUID draftOrderId) {
         if (CollectionUtils.isNotEmpty(draftOrderCollection)) {
             return draftOrderCollection.stream()
@@ -923,6 +1010,19 @@ public class CaseUtils {
                 .map(Element::getValue)
                 .findFirst()
                 .orElseThrow(() -> new UnsupportedOperationException("Could not find order"));
+        }
+        return null;
+    }
+
+    public static AdditionalApplicationsBundle getAdditionalApplicationFromCollectionId(
+                                            List<Element<AdditionalApplicationsBundle>> additionalApplicationCollection,
+                                            UUID additionalApplicationId) {
+        if (CollectionUtils.isNotEmpty(additionalApplicationCollection)) {
+            return additionalApplicationCollection.stream()
+                .filter(element -> element.getId().equals(additionalApplicationId))
+                .map(Element::getValue)
+                .findFirst()
+                .orElseThrow(() -> new UnsupportedOperationException("Could not find additional application"));
         }
         return null;
     }

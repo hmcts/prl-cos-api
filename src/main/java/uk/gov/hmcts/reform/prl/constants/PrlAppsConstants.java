@@ -767,6 +767,8 @@ public class PrlAppsConstants {
     public static final String REASONS_SELECTED_FOR_LIST_ON_NOTICE = "List without notice";
 
     public static final String CASE_NOTES = "caseNotes";
+    public static final String WA_CASE_NOTE_ID = "caseNoteId";
+
     public static final String COLON_SEPERATOR = ":";
     public static final String DA_LIST_ON_NOTICE_FL404B_DOCUMENT = "DA_LIST_ON_NOTICE_FL404B_DOCUMENT";
     public static final String SDO_PERMISSION_HEARING_DETAILS = "sdoPermissionHearingDetails";
@@ -991,6 +993,9 @@ public class PrlAppsConstants {
     public static final String AWP_WA_TASK_TO_BE_CREATED = "awpWaTaskToBeCreated";
     public static final String AWP_HWF_REF_NUMBER = "awpHwfRefNo";
 
+    public static final String CASE_LEVEL_FLAGS = "caseFlags";
+    public static final String WA_IS_CASE_FLAG_TASK_CREATED = "isCaseFlagsTaskCreated";
+    public static final String WA_ALL_SELECTED_FLAGS = "selectedFlags";
     public static final String WA_ORDER_NAME_JUDGE_CREATED = "orderNameForJudgeCreatedOrder";
     public static final String WA_ORDER_NAME_SOLICITOR_CREATED = "orderNameForSolicitorCreatedOrder";
     public static final String WA_ORDER_COLLECTION_ID = "draftOrderCollectionId";
@@ -1128,6 +1133,9 @@ public class PrlAppsConstants {
     public static final String PLEASE_SELECT_ONE_OPTION = "Please select at least one options from below";
     public static final String PLEASE_SELECT_ONE_OPTION_WELSH = "Dewiswch o leiaf un opsiwn o’r opsiynau isod";
 
+    public static final String WA_ADDITIONAL_APPLICATION_COLLECTION_ID = "additionalApplicationsBundleId";
     public static final String REGION_WALES = "7";
+
+    public static final String IS_INVOKED_FROM_TASK = "isInvokedFromTask";
 
 }

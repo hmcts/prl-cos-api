@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.TestingSupportService;
+import uk.gov.hmcts.reform.prl.services.hearingmanagement.HearingManagementService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -35,6 +36,7 @@ public class TestingSupportController {
     private final TestingSupportService testingSupportService;
 
     private final AuthorisationService authorisationService;
+    private final HearingManagementService hearingManagementService;
 
     @PostMapping(path = "/about-to-submit-case-creation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Initiate the case creation for testing support")
