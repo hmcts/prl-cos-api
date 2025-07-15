@@ -66,11 +66,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.springframework.util.CollectionUtils.isEmpty;
@@ -911,32 +909,6 @@ public class CaseUtils {
             }
         }
         return null;
-    }
-
-    public static String setTaskCompletion(
-        String clientContext,
-        ObjectMapper objectMapper,
-        CaseData caseData,
-        Predicate<CaseData> completeTask) {
-
-        return ofNullable(clientContext)
-            .map(value -> getWaMapper(clientContext))
-            .map(WaMapper::getClientContext)
-            .filter(value -> nonNull(value.getUserTask()))
-            .map(value ->
-                     value.toBuilder()
-                         .userTask(value.getUserTask().toBuilder()
-                                       .completeTask(completeTask.test(caseData))
-                                       .build())
-                         .build())
-            .map(
-                updatedClientContext ->
-                    base64Encode(WaMapper.builder()
-                                     .clientContext(updatedClientContext)
-                                     .build(),
-                                 objectMapper)
-            )
-            .orElse(null);
     }
 
     public static String base64Encode(WaMapper waMapper, ObjectMapper objectMapper) {
