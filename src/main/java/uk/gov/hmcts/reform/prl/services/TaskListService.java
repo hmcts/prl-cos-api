@@ -112,21 +112,21 @@ public class TaskListService {
 
     public List<Task> getTasksForOpenCase(CaseData caseData) {
         return getEvents(caseData).stream()
-            .map(event -> Task.builder()
-                .event(event)
-                .state(getTaskState(caseData, event))
-                .build())
-            .toList();
+                .map(event -> Task.builder()
+                        .event(event)
+                        .state(getTaskState(caseData, event))
+                        .build())
+                .toList();
     }
 
     public List<RespondentTask> getRespondentSolicitorTasks(PartyDetails respondingParty, CaseData caseData) {
         boolean isC1aApplicable = caseData.getC1ADocument() != null;
         return getRespondentsEvents(caseData).stream()
-            .map(event -> RespondentTask.builder()
-                .event(event)
-                .state(getRespondentTaskState(event, respondingParty, isC1aApplicable))
-                .build())
-            .toList();
+                .map(event -> RespondentTask.builder()
+                        .event(event)
+                        .state(getRespondentTaskState(event, respondingParty, isC1aApplicable))
+                        .build())
+                .toList();
     }
 
     private TaskState getTaskState(CaseData caseData, Event event) {
@@ -154,7 +154,7 @@ public class TaskListService {
 
     private List<Event> getEvents(CaseData caseData) {
         return (PrlAppsConstants.FL401_CASE_TYPE).equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-            ? getFL401Events(caseData) : getC100Events(caseData);
+                ? getFL401Events(caseData) : getC100Events(caseData);
     }
 
     public List<Event> getC100Events(CaseData caseData) {
@@ -318,7 +318,7 @@ public class TaskListService {
 
                 c8ArchiveService.archiveC8DocumentIfConfidentialChanged(callbackRequest,caseData,caseDataUpdated);
 
-                caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
+                caseDataUpdated.putAll(dgsService.createUpdatedCaseDataWithDocuments(authorisation, caseData));
                 CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
                 caseDataUpdated.put("c8Document", updatedCaseData.getC8Document());
                 caseDataUpdated.put("c1ADocument", updatedCaseData.getC1ADocument());
@@ -342,7 +342,6 @@ public class TaskListService {
                 log.error("Error regenerating the document {}", e.getMessage());
             }
         }
-
 
         tabService.submitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),
@@ -373,6 +372,4 @@ public class TaskListService {
         }
         return roles;
     }
-
-
 }
