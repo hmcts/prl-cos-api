@@ -64,10 +64,9 @@ class C8ArchiveServiceTest {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
 
-        // Act
+
         c8ArchiveService.archiveC8DocumentIfConfidentialChanged(callbackRequest, caseData, caseDataUpdated);
 
-        // Assert
         List<Element<Document>> archivedDocs = (List<Element<Document>>) caseDataUpdated.get("c8ArchivedDocuments");
 
         assertThat(archivedDocs)
