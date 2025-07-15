@@ -37,6 +37,14 @@ import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_DRAFT_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_DRAFT_C1A;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIAL_REVIEW_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
@@ -320,22 +328,22 @@ public class TaskListService {
 
                 caseDataUpdated.putAll(dgsService.createUpdatedCaseDataWithDocuments(authorisation, caseData));
                 CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
-                caseDataUpdated.put("c8Document", updatedCaseData.getC8Document());
-                caseDataUpdated.put("c1ADocument", updatedCaseData.getC1ADocument());
-                caseDataUpdated.put("c8WelshDocument", updatedCaseData.getC8WelshDocument());
+                caseDataUpdated.put(DOCUMENT_FIELD_C8, updatedCaseData.getC8Document());
+                caseDataUpdated.put(DOCUMENT_FIELD_C1A, updatedCaseData.getC1ADocument());
+                caseDataUpdated.put(DOCUMENT_FIELD_C8_WELSH, updatedCaseData.getC8WelshDocument());
 
-                caseDataUpdated.put("finalDocument", !JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)
+                caseDataUpdated.put(DOCUMENT_FIELD_FINAL, !JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)
                     ? updatedCaseData.getFinalDocument() : caseData.getFinalDocument());
 
-                caseDataUpdated.put("finalWelshDocument", !JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)
+                caseDataUpdated.put(DRAFT_DOCUMENT_WELSH_FIELD, !JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)
                     ? updatedCaseData.getFinalWelshDocument() : caseData.getFinalWelshDocument());
 
-                caseDataUpdated.put("c1AWelshDocument", updatedCaseData.getC1AWelshDocument());
+                caseDataUpdated.put(DOCUMENT_FIELD_C1A_WELSH, updatedCaseData.getC1AWelshDocument());
 
-                caseDataUpdated.put("c1ADraftDocument", SUBMITTED_STATE.equalsIgnoreCase(state)
+                caseDataUpdated.put(DOCUMENT_FIELD_DRAFT_C1A, SUBMITTED_STATE.equalsIgnoreCase(state)
                     ? updatedCaseData.getC1ADraftDocument() : caseData.getC1ADraftDocument());
 
-                caseDataUpdated.put("c1AWelshDraftDocument", SUBMITTED_STATE.equalsIgnoreCase(state)
+                caseDataUpdated.put(DOCUMENT_FIELD_C1A_DRAFT_WELSH, SUBMITTED_STATE.equalsIgnoreCase(state)
                     ? updatedCaseData.getC1AWelshDraftDocument() : caseData.getC1AWelshDraftDocument());
 
             } catch (Exception e) {

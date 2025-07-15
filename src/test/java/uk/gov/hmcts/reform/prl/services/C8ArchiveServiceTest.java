@@ -52,7 +52,7 @@ class C8ArchiveServiceTest {
         Document c8Document = Document.builder()
             .documentUrl("http://doc-url")
             .documentBinaryUrl("http://doc-binary-url")
-            .documentFileName("original-c8.pdf")
+            .documentFileName("c8DocumentFileName")
             .build();
 
         CaseData caseData = CaseData.builder()
