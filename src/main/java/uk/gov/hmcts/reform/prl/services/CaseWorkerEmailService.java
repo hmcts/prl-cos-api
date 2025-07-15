@@ -42,6 +42,7 @@ public class CaseWorkerEmailService {
     private static final String YES = "Yes";
     private static final String NO = "No";
     private static final String DATE_FORMAT = "dd-MM-yyyy";
+    public static final String CASEWORKER_EMAIL_ADDRESS = "caseworkerEmailAddress";
     private final EmailService emailService;
 
     @Value("${uk.gov.notify.email.application.email-id}")
@@ -135,15 +136,28 @@ public class CaseWorkerEmailService {
     }
 
     public void sendEmail(CaseDetails caseDetails) {
-        String caseworkerEmailAddress = caseDetails.getData().get("caseworkerEmailAddress").toString();
+        Object emailObj = caseDetails.getData().get(CASEWORKER_EMAIL_ADDRESS);
 
-        emailService.send(
-            caseworkerEmailAddress,
-            EmailTemplateNames.CASEWORKER,
-            buildEmail(caseDetails),
-            LanguagePreference.english
-        );
+        if (emailObj == null || emailObj.toString().isBlank()) {
+            log.warn("No caseworker email address found for case ID: {}", caseDetails.getId());
+            return;
+        }
 
+        String email = emailObj.toString();
+
+        try {
+            emailService.send(
+                email,
+                EmailTemplateNames.CASEWORKER,
+                buildEmail(caseDetails),
+                LanguagePreference.english
+            );
+            log.info("Email sent to caseworker for case ID: {}", caseDetails.getId());
+
+        } catch (Exception e) {
+            log.error("Failed to send email to caseworker for case ID: {}. Error: {}",
+                      caseDetails.getId(), e.getMessage(), e);
+        }
     }
 
     private EmailTemplateVars buildReturnApplicationEmail(CaseDetails caseDetails) {
