@@ -70,9 +70,9 @@ pba:
       api:
         baseurl: ${PRD_API_BASEURL:http://localhost:8892}
 
-feature-toggle:
+feature:
   toggle:
-    example: ${FEATURE_EXAMPLE:false}
+    add_barrister: ${FEATURE_ADD_BARRISTER:false}
 
 xui:
   url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}
