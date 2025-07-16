@@ -39,7 +39,7 @@ public class C8ArchiveService {
 
         if (confidentialDetailsChanged) {
             Document c8ToArchiveEng = caseData.getC8Document();
-            Document c8ToArchivedWelsh = caseData.getC8Document();
+            Document c8ToArchivedWelsh = caseData.getC8WelshDocument();
 
             if (c8ToArchiveEng != null || c8ToArchivedWelsh != null) {
                 Document archivedC8Eng = Document.builder()
