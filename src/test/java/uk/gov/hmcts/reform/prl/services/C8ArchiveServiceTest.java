@@ -55,15 +55,21 @@ class C8ArchiveServiceTest {
             .documentFileName("c8DocumentFileName")
             .build();
 
+        Document c8DocumentWelsh = Document.builder()
+            .documentUrl("http://doc-url")
+            .documentBinaryUrl("http://doc-binary-url")
+            .documentFileName("c8DocumentFileNameWelsh")
+            .build();
+
         CaseData caseData = CaseData.builder()
             .id(5678L)
             .c8Document(c8Document)
+            .c8WelshDocument(c8DocumentWelsh)
             .build();
 
         when(confidentialDetailsChangeHelper.haveConfidentialDetailsChanged(caseData, caseDataBefore)).thenReturn(true);
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
-
 
         c8ArchiveService.archiveC8DocumentIfConfidentialChanged(callbackRequest, caseData, caseDataUpdated);
 
