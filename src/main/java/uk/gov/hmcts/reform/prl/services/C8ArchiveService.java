@@ -19,6 +19,7 @@ import java.util.Map;
 import static java.util.UUID.randomUUID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_ARCHIVED_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_ARCHIVED_DOCUMENT_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_ARCHIVED_WELSH_DOCUMENT_NAME;
 
 @Slf4j
 @Service
@@ -37,14 +38,22 @@ public class C8ArchiveService {
         log.debug("Confidential details changed: {}", confidentialDetailsChanged);
 
         if (confidentialDetailsChanged) {
-            Document c8ToArchive = caseData.getC8Document();
+            Document c8ToArchiveEng = caseData.getC8Document();
+            Document c8ToArchivedWelsh = caseData.getC8Document();
 
-            if (c8ToArchive != null) {
-                Document archivedC8 = Document.builder()
-                    .documentUrl(c8ToArchive.getDocumentUrl())
-                    .documentBinaryUrl(c8ToArchive.getDocumentBinaryUrl())
+            if (c8ToArchiveEng != null || c8ToArchivedWelsh != null) {
+                Document archivedC8Eng = Document.builder()
+                    .documentUrl(c8ToArchiveEng.getDocumentUrl())
+                    .documentBinaryUrl(c8ToArchiveEng.getDocumentBinaryUrl())
                     .documentFileName(C8_ARCHIVED_DOCUMENT_NAME)
                     .build();
+
+                Document archivedC8Welsh = Document.builder()
+                    .documentUrl(c8ToArchivedWelsh.getDocumentUrl())
+                    .documentBinaryUrl(c8ToArchivedWelsh.getDocumentBinaryUrl())
+                    .documentFileName(C8_ARCHIVED_WELSH_DOCUMENT_NAME)
+                    .build();
+
 
                 List<Element<Document>> archivedDocuments = new ArrayList<>();
 
@@ -52,17 +61,22 @@ public class C8ArchiveService {
                     archivedDocuments.addAll(caseData.getC8ArchivedDocuments());
                 }
 
-                archivedDocuments.add(Element.<Document>builder()
-                                          .id(randomUUID())
-                                          .value(archivedC8)
-                                          .build());
+                archivedDocuments.add(buildElement(archivedC8Eng));
+                archivedDocuments.add(buildElement(archivedC8Welsh));
 
-                log.info("Archiving C8 Document - File Name: {}, URL: {}",archivedC8.getDocumentFileName(), archivedC8.getDocumentUrl());
+                log.info("Archiving C8 Document - File Name: {}, URL: {}", archivedC8Eng.getDocumentFileName(), archivedC8Eng.getDocumentUrl());
 
                 caseDataUpdated.put(C8_ARCHIVED_DOCUMENTS, archivedDocuments);
             } else {
                 log.warn("Confidential details changed, but no C8 document found to archive.");
             }
         }
+    }
+
+    private Element<Document> buildElement(Document document) {
+        return Element.<Document>builder()
+            .id(randomUUID())
+            .value(document)
+            .build();
     }
 }
