@@ -425,7 +425,8 @@ public class DocumentGenService {
             if (State.CASE_ISSUED.equals(caseData.getState())
                 || State.JUDICIAL_REVIEW.equals(caseData.getState())
                 || State.PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(caseData.getState())
-                || State.DECISION_OUTCOME.equals(caseData.getState())) {
+                || State.DECISION_OUTCOME.equals(caseData.getState())
+                || State.SUBMITTED_PAID.equals(caseData.getState())) {
                 updatedCaseData.put(documentDetails.documentFieldName, getDocument(authorisation, caseData, C8_HINT, documentDetails.isWelsh));
             } else {
                 updatedCaseData.put(
