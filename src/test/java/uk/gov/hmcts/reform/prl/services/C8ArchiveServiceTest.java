@@ -71,7 +71,7 @@ class C8ArchiveServiceTest {
 
         assertThat(archivedDocs)
             .isNotNull()
-            .hasSize(1);
+            .hasSize(2);
 
         Document archivedDoc = archivedDocs.get(0).getValue();
         assertThat(archivedDoc.getDocumentFileName()).isEqualTo("C8ArchivedDocument.pdf");
