@@ -366,12 +366,12 @@ public class CitizenPartyDetailsMapper {
                 );
                 if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
                     try {
-                        updatedCaseData[0] = reGenerateApplicantC8Document(caseDataMapToBeUpdated, authorisation, oldCaseData);
+                        updatedCaseData[0] = reGenerateApplicantC8Document(caseDataMapToBeUpdated, authorisation, caseData);
                     } catch (Exception e) {
                         log.error("Failed to generate C8 document for Fl401 case {}", e.getMessage());
                     }
                 }
-                caseData = updatedCaseData[0].toBuilder().applicants(applicants).build();
+                caseData = updatedCaseData[0].toBuilder().applicantsFL401(partyDetails).build();
                 if (partyDetails.getResponse() != null) {
                     String safeToCallOption = partyDetails.getResponse().getSafeToCallOption();
                     if (safeToCallOption != null && !safeToCallOption.trim().isEmpty()) {
