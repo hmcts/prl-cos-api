@@ -16,6 +16,7 @@ import java.util.UUID;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
 @Component
@@ -44,12 +45,11 @@ public class ConfidentialDetailsChangeHelper {
                 return true;
             }
 
-            if (hasDetailChanged(curr.getAddress(), prev.getAddress())
-                || hasDetailChanged(curr.getEmail(), prev.getEmail())
-                || hasDetailChanged(curr.getPhoneNumber(), prev.getPhoneNumber())) {
+            if ((Yes.equals(curr.getIsAddressConfidential()) && hasDetailChanged(curr.getAddress(), prev.getAddress()))
+                || (Yes.equals(curr.getIsEmailAddressConfidential()) && hasDetailChanged(curr.getEmail(), prev.getEmail()))
+                || (Yes.equals(curr.getIsPhoneNumberConfidential()) && hasDetailChanged(curr.getPhoneNumber(), prev.getPhoneNumber()))) {
                 return true;
-            }
-        }
+            }        }
         return false;
     }
 
