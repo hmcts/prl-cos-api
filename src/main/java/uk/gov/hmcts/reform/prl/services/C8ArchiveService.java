@@ -35,41 +35,39 @@ public class C8ArchiveService {
         CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
         boolean confidentialDetailsChanged = confidentialDetailsChangeHelper.haveConfidentialDetailsChanged(caseData, caseDataBefore);
 
-        log.debug("Confidential details changed: {}", confidentialDetailsChanged);
+        log.info("Confidential details changed: {}", confidentialDetailsChanged);
 
         if (confidentialDetailsChanged) {
             Document c8ToArchiveEng = caseData.getC8Document();
             Document c8ToArchivedWelsh = caseData.getC8WelshDocument();
 
             if (c8ToArchiveEng != null || c8ToArchivedWelsh != null) {
-                Document archivedC8Eng = Document.builder()
-                    .documentUrl(c8ToArchiveEng.getDocumentUrl())
-                    .documentBinaryUrl(c8ToArchiveEng.getDocumentBinaryUrl())
-                    .documentFileName(C8_ARCHIVED_DOCUMENT_NAME)
-                    .build();
-
-                Document archivedC8Welsh = Document.builder()
-                    .documentUrl(c8ToArchivedWelsh.getDocumentUrl())
-                    .documentBinaryUrl(c8ToArchivedWelsh.getDocumentBinaryUrl())
-                    .documentFileName(C8_ARCHIVED_WELSH_DOCUMENT_NAME)
-                    .build();
-
-
                 List<Element<Document>> archivedDocuments = new ArrayList<>();
 
                 if (caseData.getC8ArchivedDocuments() != null) {
                     archivedDocuments.addAll(caseData.getC8ArchivedDocuments());
                 }
 
-                archivedDocuments.add(buildElement(archivedC8Eng));
-                archivedDocuments.add(buildElement(archivedC8Welsh));
-
-                log.info("Archiving C8 Document - File Name: {}, URL: {}", archivedC8Eng.getDocumentFileName(), archivedC8Eng.getDocumentUrl());
+                archiveDocumentIfNotNull(c8ToArchiveEng,C8_ARCHIVED_DOCUMENT_NAME, archivedDocuments);
+                archiveDocumentIfNotNull(c8ToArchivedWelsh,C8_ARCHIVED_WELSH_DOCUMENT_NAME, archivedDocuments);
 
                 caseDataUpdated.put(C8_ARCHIVED_DOCUMENTS, archivedDocuments);
             } else {
-                log.warn("Confidential details changed, but no C8 document found to archive.");
+                log.info("Confidential details changed, but no C8 document found to archive.");
             }
+        }
+    }
+
+    private void archiveDocumentIfNotNull(Document document, String fileName, List<Element<Document>> archivedDocuments) {
+        if (document != null) {
+            Document archivedocument = Document.builder()
+                .documentUrl(document.getDocumentUrl())
+                .documentBinaryUrl(document.getDocumentBinaryUrl())
+                .documentFileName(fileName)
+                .build();
+
+            archivedDocuments.add(buildElement(archivedocument));
+            log.info("Archiving C8 Document - File Name: {}, URL: {}", document.getDocumentFileName(), document.getDocumentUrl());
         }
     }
 
