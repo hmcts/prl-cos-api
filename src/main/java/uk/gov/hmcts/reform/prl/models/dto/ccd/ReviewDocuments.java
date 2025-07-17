@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,7 +11,11 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Data
 @Builder(toBuilder = true)
@@ -48,5 +53,22 @@ public class ReviewDocuments {
         return new String[]{
             "reviewDocsDynamicList", "docToBeReviewed", "reviewDoc", "tempQuarantineDocumentList"
         };
+    }
+
+    @JsonIgnore
+    public List<Element<QuarantineLegalDoc>> getRemovableDocuments() {
+        return Stream.of(
+                legalProfUploadDocListDocTab,
+                cafcassUploadDocListDocTab,
+                courtStaffUploadDocListDocTab,
+                bulkScannedDocListDocTab,
+                citizenUploadedDocListDocTab,
+                courtNavUploadedDocListDocTab,
+                restrictedDocuments,
+                confidentialDocuments
+            )
+            .filter(Objects::nonNull)
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
     }
 }

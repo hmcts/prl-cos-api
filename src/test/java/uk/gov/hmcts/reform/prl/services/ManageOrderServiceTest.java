@@ -3156,7 +3156,7 @@ public class ManageOrderServiceTest {
 
 
         when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
-        when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),Mockito.anyString(),Mockito.any(),Mockito.any()))
+        when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),Mockito.anyString(),Mockito.any(),Mockito.any(Hearings.class)))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
         when(hearingDataService.getHearingDataForOtherOrders(Mockito.any(),Mockito.any(),Mockito.any()))
             .thenReturn(List.of(Element.<HearingData>builder().build()));
@@ -5442,7 +5442,7 @@ public class ManageOrderServiceTest {
         when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),
                                                             Mockito.anyString(),
                                                             Mockito.any(),
-                                                            Mockito.any()))
+                                                            Mockito.any(Hearings.class)))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
         when(hearingDataService.getHearingDataForSelectedHearingForSdo(Mockito.any(), Mockito.any(), Mockito.any()))
             .thenReturn(hearingDataRevised);
@@ -6145,7 +6145,7 @@ public class ManageOrderServiceTest {
     @Test
     public void testGetHearingData() {
         when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
-        when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),Mockito.anyString(),Mockito.any(),Mockito.any()))
+        when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),Mockito.anyString(),Mockito.any(),Mockito.any(Hearings.class)))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
         when(hearingDataService.generateHearingData(Mockito.any(),Mockito.any()))
             .thenReturn(HearingData.builder().build());

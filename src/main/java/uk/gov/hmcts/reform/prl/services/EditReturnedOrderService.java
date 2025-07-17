@@ -23,6 +23,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_COLLECTION_ID;
@@ -213,7 +214,8 @@ public class EditReturnedOrderService {
                                                                                             .getRejectedOrdersDynamicList(),
                                                                                         clientContext, callbackRequest.getEventId());
             Map<String, Object> caseDataUpdated = populateInstructionsAndDocuments(caseData, selectedOrder, language);
-            caseDataUpdated.putAll(draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData, selectedOrder, language));
+            caseDataUpdated.putAll(draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData, selectedOrder,
+                                                                                      language, Optional.empty()));
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated).build();
         } else {

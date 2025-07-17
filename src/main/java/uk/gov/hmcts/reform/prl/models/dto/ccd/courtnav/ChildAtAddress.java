@@ -1,19 +1,17 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder(toBuilder = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ChildAtAddress {
-
-    private final String fullName;
-    private final Integer age;
-
-    @JsonCreator
-    public ChildAtAddress(String fullName, Integer age) {
-        this.fullName = fullName;
-        this.age = age;
-    }
+    private String fullName;
+    private Integer age;
 }
