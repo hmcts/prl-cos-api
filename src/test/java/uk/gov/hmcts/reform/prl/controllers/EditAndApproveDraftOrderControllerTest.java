@@ -71,6 +71,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.AutomatedHearingTransactionRequestMapper;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
+import uk.gov.hmcts.reform.prl.utils.TaskUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -82,6 +83,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -91,8 +93,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER;
@@ -140,6 +144,9 @@ public class EditAndApproveDraftOrderControllerTest {
 
     @Mock
     AllTabServiceImpl allTabService;
+
+    @Mock
+    TaskUtils taskUtils;
 
     public static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
 
@@ -429,6 +436,8 @@ public class EditAndApproveDraftOrderControllerTest {
         Assert.assertNotNull(responseResponseEntity.getBody().getData());
         assertThat(responseResponseEntity.getHeaders())
             .doesNotContainKey(CLIENT_CONTEXT_HEADER_PARAMETER);
+        verifyNoInteractions(manageOrderService);
+        verifyNoInteractions(taskUtils);
     }
 
     @Test
@@ -484,6 +493,8 @@ public class EditAndApproveDraftOrderControllerTest {
         ResponseEntity<AboutToStartOrSubmitCallbackResponse> responseResponseEntity = editAndApproveDraftOrderController
             .prepareDraftOrderCollection(authToken,s2sToken,PrlAppsConstants.ENGLISH,callbackRequest);
         Assert.assertNotNull(responseResponseEntity.getBody().getData());
+        verifyNoInteractions(manageOrderService);
+        verifyNoInteractions(taskUtils);
     }
 
     @Test
@@ -526,7 +537,7 @@ public class EditAndApproveDraftOrderControllerTest {
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
-            .eventId("adminEditAndApproveAnOrder")
+            .eventId(Event.HEARING_EDIT_AND_APPROVE_ORDER.getId())
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
@@ -539,13 +550,17 @@ public class EditAndApproveDraftOrderControllerTest {
         when(dynamicMultiSelectListService
                  .getOrdersAsDynamicMultiSelectList(caseData))
             .thenReturn(DynamicMultiSelectList.builder().build());
-        when(manageOrderService.isSaveAsDraft(caseData))
+        when(taskUtils.setTaskCompletion(anyString(), isA(CaseData.class), any(Predicate.class)))
+            .thenReturn(CLIENT_CONTEXT);
+        when(manageOrderService.isSaveAsDraft(isA(CaseData.class)))
             .thenReturn(false);
         when(objectMapper.writeValueAsString(any())).thenReturn(CLIENT_CONTEXT);
+        when(taskUtils.setTaskCompletion(any(), any(), any())).thenReturn(CLIENT_CONTEXT);
 
         ResponseEntity<AboutToStartOrSubmitCallbackResponse> responseResponseEntity = editAndApproveDraftOrderController
             .prepareDraftOrderCollection(authToken,s2sToken,ENCRYPTED_CLIENT_CONTEXT,callbackRequest);
         Assert.assertNotNull(responseResponseEntity.getBody().getData());
+        verify(taskUtils).setTaskCompletion(anyString(), isA(CaseData.class), any(Predicate.class));
     }
 
     @Test
