@@ -7,7 +7,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -17,9 +19,11 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.UUID.randomUUID;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_ARCHIVED_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_ARCHIVED_DOCUMENT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_ARCHIVED_WELSH_DOCUMENT_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 @Slf4j
 @Service
@@ -37,6 +41,40 @@ public class C8ArchiveService {
 
         log.info("Confidential details changed: {}", confidentialDetailsChanged);
 
+        archiveC8DocumentsIfPresent(caseData, caseDataUpdated, confidentialDetailsChanged);
+    }
+
+
+    public void archiveC8DocumentIfConfidentialChangedFromCitizen(CaseData caseData,
+                                                                  CitizenUpdatedCaseData citizenUpdatedCaseData,
+                                                                  Map<String, Object> caseDataMapTobeUpdated) {
+
+        if (caseData.getCaseTypeOfApplication().equals(C100_CASE_TYPE)) {
+            PartyDetails previousApplicantDetails = caseData.getApplicants().get(0).getValue();
+            PartyDetails currentApplicantDetails = citizenUpdatedCaseData.getPartyDetails();
+
+            boolean confidentialDetailsChanged = confidentialDetailsChangeHelper.haveContactDetailsChanged(
+                previousApplicantDetails,
+                currentApplicantDetails);
+            log.info("Confidential details changed: {}", confidentialDetailsChanged);
+            archiveC8DocumentsIfPresent(caseData, caseDataMapTobeUpdated, confidentialDetailsChanged);
+        }
+
+        if (caseData.getCaseTypeOfApplication().equals(FL401_CASE_TYPE)) {
+            PartyDetails previousApplicantDetails = caseData.getApplicantsFL401();
+            PartyDetails currentApplicantDetails = citizenUpdatedCaseData.getPartyDetails();
+
+            boolean confidentialDetailsChanged = confidentialDetailsChangeHelper.haveContactDetailsChanged(
+                previousApplicantDetails,
+                currentApplicantDetails);
+
+            log.info("Confidential details changed: {}", confidentialDetailsChanged);
+
+            archiveC8DocumentsIfPresent(caseData, caseDataMapTobeUpdated, confidentialDetailsChanged);
+        }
+    }
+
+    private void archiveC8DocumentsIfPresent(CaseData caseData, Map<String, Object> caseDataUpdated, boolean confidentialDetailsChanged) {
         if (confidentialDetailsChanged) {
             Document c8ToArchiveEng = caseData.getC8Document();
             Document c8ToArchivedWelsh = caseData.getC8WelshDocument();
@@ -58,6 +96,8 @@ public class C8ArchiveService {
         }
     }
 
+
+
     private void archiveDocumentIfNotNull(Document document, String fileName, List<Element<Document>> archivedDocuments) {
         if (document != null) {
             Document archivedocument = Document.builder()
@@ -77,4 +117,6 @@ public class C8ArchiveService {
             .value(document)
             .build();
     }
+
+
 }
