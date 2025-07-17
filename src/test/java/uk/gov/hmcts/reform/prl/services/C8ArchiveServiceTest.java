@@ -1,0 +1,161 @@
+package uk.gov.hmcts.reform.prl.services;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static java.util.UUID.randomUUID;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class C8ArchiveServiceTest {
+
+    @Mock
+    private ObjectMapper objectMapper;
+
+    @Mock
+    private ConfidentialDetailsChangeHelper confidentialDetailsChangeHelper;
+
+    @Mock
+    private CallbackRequest callbackRequest;
+
+    @Mock
+    private CaseDetails caseDetailsBefore;
+
+    @InjectMocks
+    private C8ArchiveService c8ArchiveService;
+
+
+    @Test
+    void shouldArchiveC8DocumentWhenConfidentialDetailsChanged() {
+
+        Map<String, Object> caseDataBeforeRaw = new HashMap<>();
+
+        when(callbackRequest.getCaseDetailsBefore()).thenReturn(caseDetailsBefore);
+        when(caseDetailsBefore.getData()).thenReturn(caseDataBeforeRaw);
+
+        CaseData caseDataBefore = CaseData.builder().id(1234L).build();
+        when(objectMapper.convertValue(caseDataBeforeRaw, CaseData.class)).thenReturn(caseDataBefore);
+
+        Document c8Document = Document.builder()
+            .documentUrl("url")
+            .documentBinaryUrl("binary-url")
+            .documentFileName("c8DocumentFileName")
+            .build();
+
+        Document c8DocumentWelsh = Document.builder()
+            .documentUrl("url")
+            .documentBinaryUrl("binary-url")
+            .documentFileName("c8DocumentFileNameWelsh")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(5678L)
+            .c8Document(c8Document)
+            .c8WelshDocument(c8DocumentWelsh)
+            .build();
+
+        when(confidentialDetailsChangeHelper.haveConfidentialDetailsChanged(caseData, caseDataBefore)).thenReturn(true);
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        c8ArchiveService.archiveC8DocumentIfConfidentialChanged(callbackRequest, caseData, caseDataUpdated);
+
+        List<Element<Document>> archivedDocs = (List<Element<Document>>) caseDataUpdated.get("c8ArchivedDocuments");
+
+        assertThat(archivedDocs)
+            .isNotNull()
+            .hasSize(2);
+
+        Document archivedDoc = archivedDocs.get(0).getValue();
+        assertThat(archivedDoc.getDocumentFileName()).isEqualTo("C8ArchivedDocument.pdf");
+        assertThat(archivedDoc.getDocumentUrl()).isEqualTo("url");
+        assertThat(archivedDoc.getDocumentBinaryUrl()).isEqualTo("binary-url");
+    }
+
+    @Test
+    void shouldAddToExistingArchivedDocumentsWhenPresent() {
+        Document existingArchivedDoc = Document.builder()
+            .documentUrl("existing-doc")
+            .documentBinaryUrl("existing-binary")
+            .documentFileName("existing.pdf")
+            .build();
+
+        List<Element<Document>> existingArchivedDocs = List.of(buildElement(existingArchivedDoc));
+
+        Map<String, Object> caseDataBeforeRaw = new HashMap<>();
+        when(callbackRequest.getCaseDetailsBefore()).thenReturn(caseDetailsBefore);
+        when(caseDetailsBefore.getData()).thenReturn(caseDataBeforeRaw);
+
+        CaseData caseDataBefore = CaseData.builder().id(1234L).build();
+        when(objectMapper.convertValue(caseDataBeforeRaw, CaseData.class)).thenReturn(caseDataBefore);
+
+        Document c8Document = Document.builder()
+            .documentUrl("url")
+            .documentBinaryUrl("binary-url")
+            .documentFileName("c8DocumentFileName")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(5678L)
+            .c8Document(c8Document)
+            .c8ArchivedDocuments(existingArchivedDocs)
+            .build();
+
+        when(confidentialDetailsChangeHelper.haveConfidentialDetailsChanged(caseData, caseDataBefore)).thenReturn(true);
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        c8ArchiveService.archiveC8DocumentIfConfidentialChanged(callbackRequest, caseData, caseDataUpdated);
+
+        List<Element<Document>> archivedDocs = (List<Element<Document>>) caseDataUpdated.get("c8ArchivedDocuments");
+
+        assertThat(archivedDocs)
+            .isNotNull()
+            .hasSize(2);
+
+        assertThat(archivedDocs.get(0).getValue().getDocumentFileName()).isEqualTo("existing.pdf");
+        assertThat(archivedDocs.get(1).getValue().getDocumentFileName()).isEqualTo("C8ArchivedDocument.pdf");
+    }
+
+    @Test
+    void shouldLogWhenNoC8DocumentsExistButConfidentialDetailsChanged() {
+        Map<String, Object> caseDataBeforeRaw = new HashMap<>();
+        when(callbackRequest.getCaseDetailsBefore()).thenReturn(caseDetailsBefore);
+        when(caseDetailsBefore.getData()).thenReturn(caseDataBeforeRaw);
+
+        CaseData caseDataBefore = CaseData.builder().id(1234L).build();
+        when(objectMapper.convertValue(caseDataBeforeRaw, CaseData.class)).thenReturn(caseDataBefore);
+
+        CaseData caseData = CaseData.builder().id(5678L).build();
+
+        when(confidentialDetailsChangeHelper.haveConfidentialDetailsChanged(caseData, caseDataBefore)).thenReturn(true);
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        c8ArchiveService.archiveC8DocumentIfConfidentialChanged(callbackRequest, caseData, caseDataUpdated);
+
+        assertThat(caseDataUpdated.containsKey("c8ArchivedDocuments")).isFalse();
+    }
+
+    private Element<Document> buildElement(Document document) {
+        return Element.<Document>builder()
+            .id(randomUUID())
+            .value(document)
+            .build();
+    }
+}
+
