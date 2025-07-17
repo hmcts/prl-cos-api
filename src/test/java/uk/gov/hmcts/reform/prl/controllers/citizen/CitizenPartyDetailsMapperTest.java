@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResponseToA
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
+import uk.gov.hmcts.reform.prl.services.C8ArchiveService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
@@ -82,6 +83,8 @@ public class CitizenPartyDetailsMapperTest {
     ConfidentialityTabService confidentialityTabService;
     @Mock
     DocumentGenService documentGenService;
+    @Mock
+    C8ArchiveService c8ArchiveService;
 
     @Mock
     ObjectMapper objectMapper;
