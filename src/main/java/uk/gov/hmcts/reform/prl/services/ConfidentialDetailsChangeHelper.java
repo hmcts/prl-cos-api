@@ -49,7 +49,8 @@ public class ConfidentialDetailsChangeHelper {
                 || (Yes.equals(curr.getIsEmailAddressConfidential()) && hasDetailChanged(curr.getEmail(), prev.getEmail()))
                 || (Yes.equals(curr.getIsPhoneNumberConfidential()) && hasDetailChanged(curr.getPhoneNumber(), prev.getPhoneNumber()))) {
                 return true;
-            }        }
+            }
+        }
         return false;
     }
 
