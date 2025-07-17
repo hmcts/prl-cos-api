@@ -235,6 +235,7 @@ public class CitizenPartyDetailsMapper {
             List<Element<ChildDetailsRevised>> childDetails = caseData.getNewChildDetails();// child details only
             List<Element<PartyDetails>> applicants = new ArrayList<>(caseData.getApplicants());
             CaseData oldCaseData = caseData;
+            final CaseData[] updatedCaseData = {caseData};
             applicants.stream()
                 .filter(party -> Objects.equals(
                     party.getValue().getUser().getIdamId(),
@@ -250,13 +251,13 @@ public class CitizenPartyDetailsMapper {
 
                     if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
                         try {
-                            reGenerateApplicantC8Document(caseDataMapToBeUpdated, authorisation, oldCaseData);
+                            updatedCaseData[0] = reGenerateApplicantC8Document(caseDataMapToBeUpdated, authorisation, oldCaseData);
                         } catch (Exception e) {
                             log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
                         }
                     }
                 });
-            caseData = caseData.toBuilder().applicants(applicants).build();
+            caseData = updatedCaseData[0].toBuilder().applicants(applicants).build();
             caseDataMapToBeUpdated.put(C100_APPLICANTS, caseData.getApplicants());
             return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
         } else if (PartyEnum.respondent.equals(citizenUpdatedCaseData.getPartyType())) {
@@ -335,16 +336,15 @@ public class CitizenPartyDetailsMapper {
         }
     }
 
-    private void reGenerateApplicantC8Document(Map<String, Object> caseDataUpdated, String authorisation, CaseData caseData) throws Exception {
+    private CaseData reGenerateApplicantC8Document(Map<String, Object> caseDataUpdated, String authorisation, CaseData caseData) throws Exception {
         log.info("Regenerating C8 document at reGenerateApplicantC8Document for applicant in case: {}", caseData.getId());
 
         caseDataUpdated.putAll(documentGenService.createUpdatedCaseDataWithDocuments(authorisation, caseData));
         CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
-        caseData = caseData.toBuilder()
+
+        return caseData.toBuilder()
             .c8Document(updatedCaseData.getC8Document())
             .build();
-
-        caseDataUpdated.put("c8Document", caseData.getC8Document());
     }
 
 
@@ -355,6 +355,8 @@ public class CitizenPartyDetailsMapper {
         PartyDetails partyDetails;
         Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
         if (PartyEnum.applicant.equals(citizenUpdatedCaseData.getPartyType())) {
+            final CaseData[] updatedCaseData = {caseData};
+
             if (citizenUpdatedCaseData.getPartyDetails().getUser().getIdamId()
                 .equalsIgnoreCase(caseData.getApplicantsFL401().getUser().getIdamId())) {
                 partyDetails = getUpdatedPartyDetailsBasedOnEvent(
@@ -364,12 +366,12 @@ public class CitizenPartyDetailsMapper {
                 );
                 if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
                     try {
-                        reGenerateApplicantC8Document(caseDataMapToBeUpdated, authorisation, caseData);
+                        updatedCaseData[0] = reGenerateApplicantC8Document(caseDataMapToBeUpdated, authorisation, oldCaseData);
                     } catch (Exception e) {
                         log.error("Failed to generate C8 document for Fl401 case {}", e.getMessage());
                     }
                 }
-                caseData = caseData.toBuilder().applicantsFL401(partyDetails).build();
+                caseData = updatedCaseData[0].toBuilder().applicants(applicants).build();
                 if (partyDetails.getResponse() != null) {
                     String safeToCallOption = partyDetails.getResponse().getSafeToCallOption();
                     if (safeToCallOption != null && !safeToCallOption.trim().isEmpty()) {
