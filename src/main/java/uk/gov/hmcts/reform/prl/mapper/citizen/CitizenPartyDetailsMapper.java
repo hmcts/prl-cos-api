@@ -232,10 +232,12 @@ public class CitizenPartyDetailsMapper {
                                                                  String authorisation) {
         Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
         if (PartyEnum.applicant.equals(citizenUpdatedCaseData.getPartyType())) {
-            List<Element<ChildDetailsRevised>> childDetails = caseData.getNewChildDetails();// child details only
+            List<Element<ChildDetailsRevised>> childDetails = caseData.getNewChildDetails();
             List<Element<PartyDetails>> applicants = new ArrayList<>(caseData.getApplicants());
             CaseData oldCaseData = caseData;
-            final CaseData[] updatedCaseData = {caseData};
+            final PartyDetails[] updatedPartyDetails = {null};
+            final CaseData[] updatedC8CaseData = {null};
+
             applicants.stream()
                 .filter(party -> Objects.equals(
                     party.getValue().getUser().getIdamId(),
@@ -243,21 +245,28 @@ public class CitizenPartyDetailsMapper {
                 ))
                 .findFirst()
                 .ifPresent(party -> {
-                    PartyDetails updatedPartyDetails = getUpdatedPartyDetailsBasedOnEvent(citizenUpdatedCaseData.getPartyDetails(),
-                                                                                          party.getValue(),
-                                                                                          caseEvent, childDetails);
-
-                    applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
+                    PartyDetails newDetails = getUpdatedPartyDetailsBasedOnEvent(
+                        citizenUpdatedCaseData.getPartyDetails(),
+                        party.getValue(),
+                        caseEvent, childDetails
+                    );
+                    applicants.set(applicants.indexOf(party), element(party.getId(), newDetails));
+                    updatedPartyDetails[0] = newDetails;
 
                     if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
                         try {
-                            updatedCaseData[0] = reGenerateApplicantC8Document(caseDataMapToBeUpdated, authorisation, oldCaseData);
+                            updatedC8CaseData[0] = reGenerateApplicantC8Document(caseDataMapToBeUpdated, authorisation, oldCaseData);
                         } catch (Exception e) {
                             log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
                         }
                     }
                 });
-            caseData = updatedCaseData[0].toBuilder().applicants(applicants).build();
+
+            CaseData.CaseDataBuilder<?, ?> builder = caseData.toBuilder().applicants(applicants);
+            if (updatedC8CaseData[0] != null && updatedC8CaseData[0].getC8Document() != null) {
+                builder.c8Document(updatedC8CaseData[0].getC8Document());
+            }
+            caseData = builder.build();
             caseDataMapToBeUpdated.put(C100_APPLICANTS, caseData.getApplicants());
             return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
         } else if (PartyEnum.respondent.equals(citizenUpdatedCaseData.getPartyType())) {
@@ -271,9 +280,11 @@ public class CitizenPartyDetailsMapper {
                 ))
                 .findFirst()
                 .ifPresent(party -> {
-                    PartyDetails updatedPartyDetails = getUpdatedPartyDetailsBasedOnEvent(citizenUpdatedCaseData.getPartyDetails(),
-                                                                                          party.getValue(),
-                                                                                          caseEvent, childDetails);
+                    PartyDetails updatedPartyDetails = getUpdatedPartyDetailsBasedOnEvent(
+                        citizenUpdatedCaseData.getPartyDetails(),
+                        party.getValue(),
+                        caseEvent, childDetails
+                    );
                     Element<PartyDetails> updatedPartyElement = element(party.getId(), updatedPartyDetails);
                     int updatedRespondentPartyIndex = respondents.indexOf(party);
                     respondents.set(updatedRespondentPartyIndex, updatedPartyElement);
@@ -355,8 +366,6 @@ public class CitizenPartyDetailsMapper {
         PartyDetails partyDetails;
         Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
         if (PartyEnum.applicant.equals(citizenUpdatedCaseData.getPartyType())) {
-            final CaseData[] updatedCaseData = {caseData};
-
             if (citizenUpdatedCaseData.getPartyDetails().getUser().getIdamId()
                 .equalsIgnoreCase(caseData.getApplicantsFL401().getUser().getIdamId())) {
                 partyDetails = getUpdatedPartyDetailsBasedOnEvent(
@@ -364,21 +373,23 @@ public class CitizenPartyDetailsMapper {
                     caseData.getApplicantsFL401(),
                     caseEvent, caseData.getNewChildDetails()
                 );
+                CaseData updatedC8CaseData = null;
                 if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
                     try {
-                        updatedCaseData[0] = reGenerateApplicantC8Document(caseDataMapToBeUpdated, authorisation, caseData);
+                        updatedC8CaseData = reGenerateApplicantC8Document(caseDataMapToBeUpdated, authorisation, caseData);
                     } catch (Exception e) {
                         log.error("Failed to generate C8 document for Fl401 case {}", e.getMessage());
                     }
                 }
-                caseData = updatedCaseData[0].toBuilder().applicantsFL401(partyDetails).build();
+                CaseData.CaseDataBuilder<?, ?> builder = caseData.toBuilder().applicantsFL401(partyDetails);
+                if (updatedC8CaseData != null && updatedC8CaseData.getC8Document() != null) {
+                    builder.c8Document(updatedC8CaseData.getC8Document());
+                }
+                caseData = builder.build();
                 if (partyDetails.getResponse() != null) {
                     String safeToCallOption = partyDetails.getResponse().getSafeToCallOption();
-                    if (safeToCallOption != null && !safeToCallOption.trim().isEmpty()) {
-                        caseDataMapToBeUpdated.put("daApplicantContactInstructions", safeToCallOption);
-                    } else {
-                        caseDataMapToBeUpdated.put("daApplicantContactInstructions",null);
-                    }
+                    caseDataMapToBeUpdated.put("daApplicantContactInstructions",
+                                               safeToCallOption != null && !safeToCallOption.trim().isEmpty() ? safeToCallOption : null);
                 }
                 caseDataMapToBeUpdated.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
                 return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
