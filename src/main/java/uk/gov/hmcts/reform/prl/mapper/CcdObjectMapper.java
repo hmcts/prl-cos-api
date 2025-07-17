@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.mapper;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -20,6 +21,7 @@ public class CcdObjectMapper {
         }
         om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         om.enable(SerializationFeature.WRITE_ENUM_KEYS_USING_INDEX);
+        om.disable(JsonGenerator.Feature.AUTO_CLOSE_JSON_CONTENT);
         return om;
     }
 }
