@@ -42,6 +42,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenFlags;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.Contact;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.refuge.RefugeConfidentialDocumentsRecord;
+import uk.gov.hmcts.reform.prl.services.C8ArchiveService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
@@ -112,6 +113,7 @@ public class CitizenPartyDetailsMapper {
     private final CitizenRespondentAohElementsMapper citizenAllegationOfHarmMapper;
     private final ConfidentialityTabService confidentialityTabService;
     private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
+    private final C8ArchiveService c8ArchiveService;
 
     public CitizenUpdatePartyDataContent mapUpdatedPartyDetails(CaseData dbCaseData,
                                                                 CitizenUpdatedCaseData citizenUpdatedCaseData,
@@ -245,6 +247,7 @@ public class CitizenPartyDetailsMapper {
 
                     applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
                 });
+            c8ArchiveService.archiveC8DocumentIfConfidentialChangedFromCitizen(caseData,citizenUpdatedCaseData,caseDataMapToBeUpdated);
             caseData = caseData.toBuilder().applicants(applicants).build();
             caseDataMapToBeUpdated.put(C100_APPLICANTS, caseData.getApplicants());
             return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
@@ -347,6 +350,7 @@ public class CitizenPartyDetailsMapper {
                         caseDataMapToBeUpdated.put("daApplicantContactInstructions",null);
                     }
                 }
+                c8ArchiveService.archiveC8DocumentIfConfidentialChangedFromCitizen(caseData,citizenUpdatedCaseData,caseDataMapToBeUpdated);
                 caseDataMapToBeUpdated.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
                 return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
             }

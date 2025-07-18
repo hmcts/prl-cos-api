@@ -86,7 +86,6 @@ public class CitizenPartyDetailsMapperTest {
     DocumentGenService documentGenService;
     @Mock
     C8ArchiveService c8ArchiveService;
-
     @Mock
     ObjectMapper objectMapper;
 
