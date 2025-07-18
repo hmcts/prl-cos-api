@@ -53,8 +53,6 @@ public class C100RespondentSolicitorControllerFunctionalTest {
 
     private static CaseDetails caseDetails;
 
-
-
     @Test
     @Order(1)
     public void createCcdTestCase() throws Exception {
@@ -137,13 +135,14 @@ public class C100RespondentSolicitorControllerFunctionalTest {
     public void givenRequestBody_whenSubmit_c7_response_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         AboutToStartOrSubmitCallbackResponse responseData = request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("Authorization",        idamTokenGenerator.generateIdamTokenForSolicitor())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType("application/json")
             .post("/respondent-solicitor/submit-c7-response")
             .then()
+            .statusCode(200)
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
         Assert.assertNotNull(responseData);
