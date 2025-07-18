@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.courtnav.mappers.FL401ApplicationMapper;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -28,6 +27,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnow;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
+import uk.gov.hmcts.reform.prl.mapper.courtnav.FL401ApplicationMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.ContactInformation;
 import uk.gov.hmcts.reform.prl.models.DxAddress;
@@ -294,7 +294,7 @@ public class TestingSupportServiceTest {
 
         courtNavFl401 = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
-                       .beforeStart(BeforeStart.builder().applicantHowOld(
+                       .beforeStart(BeforeStart.builder().applicantAge(
                            ApplicantAge.eighteenOrOlder).build()).build())
             .build();
 
@@ -731,7 +731,7 @@ public class TestingSupportServiceTest {
             .build();
         when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(courtNavFl401);
         when(systemUserService.getSysUserToken()).thenReturn(s2sAuth);
-        when(fl401ApplicationMapper.mapCourtNavData(any(),any()))
+        when(fl401ApplicationMapper.mapCourtNavData(any()))
             .thenReturn(caseData);
         when(courtNavCaseService.createCourtNavCase(any(),any()))
             .thenReturn(caseDetails);
@@ -772,7 +772,7 @@ public class TestingSupportServiceTest {
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(COURT_ADMIN_ROLE))
                                                                      .build());
-        when(fl401ApplicationMapper.mapCourtNavData(any(),any()))
+        when(fl401ApplicationMapper.mapCourtNavData(any()))
             .thenReturn(caseData);
         when(systemUserService.getSysUserToken()).thenReturn(auth);
         when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(caseDetails);

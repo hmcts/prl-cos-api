@@ -84,7 +84,13 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.models.languagecontext.UserLanguage;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
+import uk.gov.hmcts.reform.prl.models.wa.AdditionalProperties;
+import uk.gov.hmcts.reform.prl.models.wa.ClientContext;
+import uk.gov.hmcts.reform.prl.models.wa.TaskData;
+import uk.gov.hmcts.reform.prl.models.wa.UserTask;
+import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
@@ -96,11 +102,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
@@ -208,6 +216,8 @@ public class DraftAnOrderServiceTest {
     private List<Element<Child>> listOfChildren;
     private List<Element<MagistrateLastName>> magistrateElementList;
     private List<Element<DraftOrder>> draftOrderList;
+
+    private String clientContextCoded;
     @Mock
     private HearingDataService hearingDataService;
 
@@ -215,7 +225,7 @@ public class DraftAnOrderServiceTest {
     WelshCourtEmail welshCourtEmail;
 
     @Before
-    public void setup() {
+    public void setup() throws JsonProcessingException {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -372,6 +382,25 @@ public class DraftAnOrderServiceTest {
         when(manageOrderService.populateCustomOrderFields(Mockito.any(), Mockito.any(), any())).thenReturn(caseData);
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().forename("test")
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
+
+        WaMapper waMapper = WaMapper.builder()
+            .clientContext(ClientContext.builder()
+                               .userLanguage(UserLanguage.builder().language("en").build())
+                               .userTask(UserTask.builder()
+                                             .completeTask(true)
+                                             .taskData(TaskData.builder()
+                                                           .id("test")
+                                                           .name("test")
+                                                           .additionalProperties(AdditionalProperties.builder()
+                                                                                     .orderId(UUID.randomUUID().toString())
+                                                                                     .hearingId("999999")
+                                                                                     .build())
+                                                           .build())
+                                             .build())
+                               .build())
+            .build();
+        String json = new ObjectMapper().writeValueAsString(waMapper);
+        clientContextCoded = Base64.getEncoder().encodeToString(json.getBytes());
     }
 
     @Test
@@ -399,7 +428,10 @@ public class DraftAnOrderServiceTest {
             .build();
         when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.COURT_ADMIN.name());
 
-        stringObjectMap = draftAnOrderService.getDraftOrderDynamicList(updatedCaseData, Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId(), authToken);
+        stringObjectMap = draftAnOrderService.getDraftOrderDynamicList(updatedCaseData,
+                                                                       Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId(),
+                                                                       clientContextCoded,
+                                                                       authToken);
 
         assertNotNull(stringObjectMap.get("draftOrdersDynamicList"));
         assertNotNull(stringObjectMap.get(CASE_TYPE_OF_APPLICATION));
@@ -429,7 +461,59 @@ public class DraftAnOrderServiceTest {
             .build();
         when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.COURT_ADMIN.name());
 
-        stringObjectMap = draftAnOrderService.getDraftOrderDynamicList(updatedCaseData, Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId(), authToken);
+        stringObjectMap = draftAnOrderService.getDraftOrderDynamicList(updatedCaseData,
+                                                                       Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId(),
+                                                                       clientContextCoded,
+                                                                       authToken);
+
+        assertNotNull(stringObjectMap.get("draftOrdersDynamicList"));
+        assertNotNull(stringObjectMap.get(CASE_TYPE_OF_APPLICATION));
+    }
+
+    @Test
+    public void testToGetDraftOrderDynamicListFilterByHearingWhenWaHearingListed() {
+
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(ElementUtils.element(
+            caseData.getDraftOrderCollection().get(0).getId(),
+            caseData.getDraftOrderCollection().get(0).getValue().toBuilder().otherDetails(OtherDraftOrderDetails.builder()
+                                                                                              .dateCreated(LocalDateTime.now())
+                                                                                              .createdBy("test title")
+                                                                                              .reviewRequiredBy(
+                                                                                                  AmendOrderCheckEnum
+                                                                                                      .judgeOrLegalAdvisorCheck)
+                                                                                              .status(OrderStatusEnum.createdByCA
+                                                                                                          .getDisplayedValue())
+                                                                                              .isJudgeApprovalNeeded(No)
+                                                                                              .build())
+                .manageOrderHearingDetails(List.of(element(HearingData.builder().hearingId("999999").build()))).build()
+        ));
+
+        draftOrderCollection.add(ElementUtils.element(
+            caseData.getDraftOrderCollection().get(0).getId(),
+            caseData.getDraftOrderCollection().get(0).getValue().toBuilder().otherDetails(OtherDraftOrderDetails.builder()
+                                                                                              .dateCreated(LocalDateTime.now())
+                                                                                              .createdBy("test title")
+                                                                                              .reviewRequiredBy(
+                                                                                                  AmendOrderCheckEnum
+                                                                                                      .judgeOrLegalAdvisorCheck)
+                                                                                              .status(OrderStatusEnum.createdByCA
+                                                                                                          .getDisplayedValue())
+                                                                                              .isJudgeApprovalNeeded(No)
+                                                                                              .build())
+                .manageOrderHearingDetails(List.of(element(HearingData.builder().hearingId("888888").build()))).build()
+        ));
+
+        CaseData updatedCaseData = caseData.toBuilder()
+            .caseTypeOfApplication("C100")
+            .draftOrderCollection(draftOrderCollection)
+            .build();
+        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.COURT_ADMIN.name());
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        stringObjectMap = draftAnOrderService.getDraftOrderDynamicList(updatedCaseData,
+                                                                       Event.HEARING_EDIT_AND_APPROVE_ORDER.getId(),
+                                                                       clientContextCoded,
+                                                                       authToken);
 
         assertNotNull(stringObjectMap.get("draftOrdersDynamicList"));
         assertNotNull(stringObjectMap.get(CASE_TYPE_OF_APPLICATION));
@@ -583,6 +667,7 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> caseDataMap = draftAnOrderService.getDraftOrderDynamicList(
             updatedCaseData,
             EDIT_AND_APPROVE_ORDER.getId(),
+            clientContextCoded,
             authToken
         );
         assertEquals("C100", caseDataMap.get(CASE_TYPE_OF_APPLICATION));
@@ -614,6 +699,7 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> caseDataMap = draftAnOrderService.getDraftOrderDynamicList(
             updatedCaseData,
             EDIT_AND_APPROVE_ORDER.getId(),
+            clientContextCoded,
             authToken
         );
         assertEquals("C100", caseDataMap.get(CASE_TYPE_OF_APPLICATION));
@@ -840,8 +926,8 @@ public class DraftAnOrderServiceTest {
             Mockito.anyString()
         )).thenReturn(Hearings.hearingsWith().build());
         when(hearingDataService.populateHearingDynamicLists(
-            Mockito.anyString(),
-            Mockito.anyString(),
+            anyString(),
+            anyString(),
             any(),
             any()
         ))
@@ -850,7 +936,8 @@ public class DraftAnOrderServiceTest {
             authToken,
             caseData,
             draftOrder,
-            PrlAppsConstants.ENGLISH
+            PrlAppsConstants.ENGLISH,
+            Optional.empty()
         );
         assertNotNull(caseDataMap);
     }
@@ -1222,7 +1309,7 @@ public class DraftAnOrderServiceTest {
         when(manageOrderService.populateHearingsDropdown(authorisation, caseData)).thenReturn(dynamicList);
 
         Map<String, Object> caseDataMap = draftAnOrderService.populateCommonDraftOrderFields(authorisation,
-            caseData, draftOrder, PrlAppsConstants.ENGLISH);
+            caseData, draftOrder, PrlAppsConstants.ENGLISH, Optional.empty());
 
         assertEquals(CreateSelectOrderOptionsEnum.blankOrderOrDirections, caseDataMap.get("orderType"));
     }
@@ -1272,7 +1359,7 @@ public class DraftAnOrderServiceTest {
         when(manageOrderService.populateHearingsDropdown(authorisation, caseData)).thenReturn(dynamicList);
 
         Map<String, Object> caseDataMap = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData,
-            draftOrder, PrlAppsConstants.ENGLISH);
+            draftOrder, PrlAppsConstants.ENGLISH, Optional.empty());
 
         assertEquals(CreateSelectOrderOptionsEnum.blankOrderOrDirections, caseDataMap.get("orderType"));
     }
@@ -2132,7 +2219,7 @@ public class DraftAnOrderServiceTest {
             Mockito.anyString(),
             Mockito.anyString(),
             any(),
-            any()
+            any(Hearings.class)
         ))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder()
                             .hearingListedLinkedCases(DynamicList.builder()
@@ -2226,7 +2313,7 @@ public class DraftAnOrderServiceTest {
             Mockito.anyString(),
             Mockito.anyString(),
             any(),
-            any()
+            any(Hearings.class)
         ))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder()
                             .hearingListedLinkedCases(DynamicList.builder()
@@ -2386,7 +2473,7 @@ public class DraftAnOrderServiceTest {
             Mockito.anyString(),
             Mockito.anyString(),
             any(),
-            any()
+            any(Hearings.class)
         ))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
         when(hearingDataService.getHearingDataForSdo(any(), any(), any())).thenReturn(HearingData.builder().build());
@@ -2492,7 +2579,7 @@ public class DraftAnOrderServiceTest {
             Mockito.anyString(),
             Mockito.anyString(),
             any(),
-            any()
+            any(Hearings.class)
         ))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
         when(hearingDataService.getHearingDataForSdo(any(), any(), any())).thenReturn(HearingData.builder().build());
@@ -2598,7 +2685,7 @@ public class DraftAnOrderServiceTest {
             Mockito.anyString(),
             Mockito.anyString(),
             any(),
-            any()
+            any(Hearings.class)
         ))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
         when(hearingDataService.getHearingDataForSdo(any(), any(), any())).thenReturn(HearingData.builder().build());
@@ -3417,7 +3504,7 @@ public class DraftAnOrderServiceTest {
             Mockito.anyString(),
             Mockito.anyString(),
             any(),
-            any()
+            any(Hearings.class)
         ))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
         when(manageOrderService.populateCustomOrderFields(any(), Mockito.any(), Mockito.any())).thenReturn(caseData);
@@ -3479,7 +3566,7 @@ public class DraftAnOrderServiceTest {
             Mockito.anyString(),
             Mockito.anyString(),
             any(),
-            any()
+            any(Hearings.class)
         ))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
         when(manageOrderService.populateCustomOrderFields(any(), Mockito.any(), Mockito.any())).thenReturn(caseData);
@@ -4997,6 +5084,7 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> caseDataMap = draftAnOrderService.getDraftOrderDynamicList(
             updatedCaseData,
             EDIT_AND_APPROVE_ORDER.getId(),
+            clientContextCoded,
             authToken
         );
         assertEquals("C100", caseDataMap.get(CASE_TYPE_OF_APPLICATION));
