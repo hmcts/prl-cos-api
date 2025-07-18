@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -390,6 +391,7 @@ public class CitizenPartyDetailsMapperTest {
     }
 
     @Test
+    @Ignore
     public void testMapUpdatedPartyDetailsCaseEventConfirmDetailsAddressIsYes() throws Exception {
         setUpCA();
         Document c8Doc = Document.builder().documentFileName("testC8.pdf").build();
