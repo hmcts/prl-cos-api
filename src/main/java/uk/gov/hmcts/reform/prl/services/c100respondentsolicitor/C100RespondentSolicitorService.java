@@ -29,7 +29,6 @@ import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.enums.respondentsolicitor.RespondentWelshNeedsListEnum;
 import uk.gov.hmcts.reform.prl.exception.RespondentSolicitorException;
-import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.mapper.welshlang.WelshLangMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -1008,18 +1007,7 @@ public class C100RespondentSolicitorService {
             }
 
             updateListWithPreviousOrderDocuments(updatedUserDetails, quarantineLegalDocList, representedRespondent);
-
-            Element<PartyDetails> updatedRespondentFromCallback = caseData.getRespondents().stream()
-                .filter(r -> r.getId().equals(representedRespondent.getId()))
-                .findFirst()
-                .orElse(representedRespondent);
-
-            PartyDetails merged = CitizenPartyDetailsMapper.updateCitizenPersonalDetails(
-                representedRespondent.getValue(),
-                updatedRespondentFromCallback.getValue()
-            );
-
-            PartyDetails amended = merged.toBuilder()
+            PartyDetails amended = representedRespondent.getValue().toBuilder()
                     .response(representedRespondent.getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes)
                             .responseToAllegationsOfHarm(ResponseToAllegationsOfHarm.builder()
                                     .responseToAllegationsOfHarmYesOrNoResponse(
