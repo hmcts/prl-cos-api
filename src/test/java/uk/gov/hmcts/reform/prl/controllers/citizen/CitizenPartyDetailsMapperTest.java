@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.utils.TestUtil;
 
@@ -48,6 +49,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -78,6 +80,8 @@ public class CitizenPartyDetailsMapperTest {
     ConfidentialityC8RefugeService confidentialityC8RefugeService;
     @Mock
     ConfidentialityTabService confidentialityTabService;
+    @Mock
+    DocumentGenService documentGenService;
 
     @Mock
     ObjectMapper objectMapper;
@@ -113,7 +117,6 @@ public class CitizenPartyDetailsMapperTest {
             .id(1234567891234567L)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(Arrays.asList(element(applicant1)))
-
             .c100RebuildData(c100RebuildData)
             .build();
 
@@ -181,6 +184,10 @@ public class CitizenPartyDetailsMapperTest {
     @Test
     public void testMapUpdatedPartyDetailsEventConfirmDetails() throws IOException {
         setUpDa();
+        Document c8Doc = Document.builder().documentFileName("testC8.pdf").build();
+        CaseData caseDataWithC8 = CaseData.builder().c8Document(c8Doc).build();
+        when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseDataWithC8);
+
         CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, updateCaseData,
                                                                                                                        CaseEvent.CONFIRM_YOUR_DETAILS,
                                                                                                                        authToken);
@@ -286,6 +293,10 @@ public class CitizenPartyDetailsMapperTest {
     @Test
     public void testMapUpdatedPartyDetailsEventDetailPrivate() throws IOException {
         setUpDa();
+        Document c8Doc = Document.builder().documentFileName("testC8.pdf").build();
+        CaseData caseDataWithC8 = CaseData.builder().c8Document(c8Doc).build();
+        when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseDataWithC8);
+
         CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, updateCaseData,
                                                                                                                        CaseEvent.KEEP_DETAILS_PRIVATE,
                                                                                                                        authToken);
@@ -377,6 +388,10 @@ public class CitizenPartyDetailsMapperTest {
     @Test
     public void testMapUpdatedPartyDetailsCaseEventConfirmDetails() throws IOException {
         setUpCA();
+        Document c8Doc = Document.builder().documentFileName("testC8.pdf").build();
+        CaseData caseDataWithC8 = CaseData.builder().c8Document(c8Doc).build();
+        when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseDataWithC8);
+
         CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData,updateCaseData,
                                                                                                                        CaseEvent.CONFIRM_YOUR_DETAILS,
                                                                                                                        authToken);
@@ -384,36 +399,49 @@ public class CitizenPartyDetailsMapperTest {
     }
 
     @Test
-    public void testMapUpdatedPartyDetailsCaseEventConfirmDetailsAddressIsYes() throws IOException {
+    public void testMapUpdatedPartyDetailsCaseEventConfirmDetailsAddressIsYes() throws Exception {
         setUpCA();
+        Document c8Doc = Document.builder().documentFileName("testC8.pdf").build();
+        CaseData caseDataWithC8 = CaseData.builder().c8Document(c8Doc).build();
+        when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseDataWithC8);
+
         updateCaseData = CitizenUpdatedCaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .partyDetails(PartyDetails.builder()
-                .firstName("Test")
-                .lastName("User")
-                .isAtAddressLessThan5Years(YesOrNo.Yes)
-                .isAtAddressLessThan5YearsWithDontKnow(YesNoDontKnow.yes)
-                .response(Response.builder().build())
-                .user(User.builder()
-                    .email("test@gmail.com")
-                    .idamId("123")
-                    .solicitorRepresented(YesOrNo.Yes)
-                    .build())
-                .citizenSosObject(CitizenSos.builder()
-                    .partiesServed(List.of("123,234,1234"))
-                    .build())
-                .build())
+                              .firstName("Test")
+                              .lastName("User")
+                              .isAtAddressLessThan5Years(YesOrNo.Yes)
+                              .isAtAddressLessThan5YearsWithDontKnow(YesNoDontKnow.yes)
+                              .response(Response.builder().build())
+                              .user(User.builder()
+                                        .email("test@gmail.com")
+                                        .idamId("123")
+                                        .solicitorRepresented(YesOrNo.Yes)
+                                        .build())
+                              .citizenSosObject(CitizenSos.builder()
+                                                    .partiesServed(List.of("123,234,1234"))
+                                                    .build())
+                              .build())
             .partyType(PartyEnum.applicant)
+
             .build();
-        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData,updateCaseData,
+
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(
+            caseData,
+            updateCaseData,
             CaseEvent.CONFIRM_YOUR_DETAILS,
-            authToken);
+            authToken
+        );
         assertNotNull(citizenUpdatePartyDataContent);
     }
 
     @Test
     public void testMapUpdatedPartyDetailsCaseEventConfirmDetailsAddressIsNo() throws IOException {
         setUpCA();
+        Document c8Doc = Document.builder().documentFileName("testC8.pdf").build();
+        CaseData caseDataWithC8 = CaseData.builder().c8Document(c8Doc).build();
+        when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseDataWithC8);
+
         updateCaseData = CitizenUpdatedCaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .partyDetails(PartyDetails.builder()
@@ -717,6 +745,10 @@ public class CitizenPartyDetailsMapperTest {
     @Test
     public void testMapUpdatedPartyDetailsCaseEventConfirmDetailsWithSafeTimeToCall() throws IOException {
         setUpDa();
+        Document c8Doc = Document.builder().documentFileName("testC8.pdf").build();
+        CaseData caseDataWithC8 = CaseData.builder().c8Document(c8Doc).build();
+        when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseDataWithC8);
+
         updateCaseData = CitizenUpdatedCaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .partyDetails(PartyDetails.builder()
@@ -751,6 +783,10 @@ public class CitizenPartyDetailsMapperTest {
     @Test
     public void testMapUpdatedPartyDetailsWithSafeTimeToCallEmptyString() throws IOException {
         setUpDa();
+        Document c8Doc = Document.builder().documentFileName("testC8.pdf").build();
+        CaseData caseDataWithC8 = CaseData.builder().c8Document(c8Doc).build();
+        when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseDataWithC8);
+
         updateCaseData = CitizenUpdatedCaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .partyDetails(PartyDetails.builder()
