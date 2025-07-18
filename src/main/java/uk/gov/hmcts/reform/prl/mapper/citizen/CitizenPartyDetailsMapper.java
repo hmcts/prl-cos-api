@@ -40,6 +40,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenFlags;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.Contact;
+import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.refuge.RefugeConfidentialDocumentsRecord;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
@@ -235,8 +236,6 @@ public class CitizenPartyDetailsMapper {
             List<Element<ChildDetailsRevised>> childDetails = caseData.getNewChildDetails();
             List<Element<PartyDetails>> applicants = new ArrayList<>(caseData.getApplicants());
             CaseData oldCaseData = caseData;
-            CaseData.CaseDataBuilder<?, ?> builder = caseData.toBuilder().applicants(applicants);
-
             applicants.stream()
                 .filter(party -> Objects.equals(
                     party.getValue().getUser().getIdamId(),
@@ -252,16 +251,12 @@ public class CitizenPartyDetailsMapper {
                     applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
 
                     if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
-                        Map<String, Object> tempMap = new HashMap<>();
-                        reGenerateApplicantC8Document(tempMap, authorisation, oldCaseData);
-                        builder.c8Document(
-                            objectMapper.convertValue(tempMap, CaseData.class).getC8Document()
-                        );
+                        reGenerateApplicantC8Document(caseDataMapToBeUpdated, authorisation, oldCaseData, citizenUpdatedCaseData);
                     }
                 });
-            caseData = builder.build();
+            caseData = caseData.toBuilder().applicants(applicants).build();
             caseDataMapToBeUpdated.put(C100_APPLICANTS, caseData.getApplicants());
-            caseDataMapToBeUpdated.put("c8Document", caseData.getC8Document()); // Save the new C8 document URLs
+
             return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
         } else if (PartyEnum.respondent.equals(citizenUpdatedCaseData.getPartyType())) {
             List<Element<PartyDetails>> respondents = new ArrayList<>(caseData.getRespondents());
@@ -339,10 +334,33 @@ public class CitizenPartyDetailsMapper {
         }
     }
 
-    private void reGenerateApplicantC8Document(Map<String, Object> caseDataUpdated, String authorisation, CaseData caseData) {
+    private void reGenerateApplicantC8Document(Map<String, Object> caseDataUpdated, String authorisation,
+                                               CaseData caseData, CitizenUpdatedCaseData citizenUpdatedCaseData) {
         log.info("Regenerating C8 document at reGenerateApplicantC8Document for applicant in case: {}", caseData.getId());
+        PartyDetails partyDetails = citizenUpdatedCaseData.getPartyDetails();
+        uk.gov.hmcts.reform.prl.models.Address address = (YesOrNo.Yes).equals(partyDetails.getIsAddressConfidential())
+            ? citizenUpdatedCaseData.getPartyDetails().getAddress() : null;
+        String email = (YesOrNo.Yes).equals(partyDetails.getIsEmailAddressConfidential())
+            ? citizenUpdatedCaseData.getPartyDetails().getEmail() : null;
+        String phoneNumber = (YesOrNo.Yes).equals(partyDetails.getIsPhoneNumberConfidential())
+            ? citizenUpdatedCaseData.getPartyDetails().getPhoneNumber() : null;
+
+        ApplicantConfidentialityDetails confidentialityDetails = ApplicantConfidentialityDetails.builder()
+            .address(address)
+            .email(email)
+            .phoneNumber(phoneNumber)
+            .build();
+
+        CaseData caseDataWithConfidentialDetails = caseData.toBuilder().applicantsConfidentialDetails(
+            List.of(Element.<ApplicantConfidentialityDetails>builder()
+                .id(partyDetails.getPartyId())
+                .value(confidentialityDetails)
+                .build()))
+            .applicantsFL401(partyDetails)
+            .build();
+
         try {
-            caseDataUpdated.putAll(documentGenService.createUpdatedCaseDataWithDocuments(authorisation, caseData));
+            caseDataUpdated.putAll(documentGenService.createUpdatedCaseDataWithDocuments(authorisation, caseDataWithConfidentialDetails));
             CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
             caseData = caseData.toBuilder()
                 .c8Document(updatedCaseData.getC8Document())
@@ -368,14 +386,9 @@ public class CitizenPartyDetailsMapper {
                     caseData.getApplicantsFL401(),
                     caseEvent, caseData.getNewChildDetails()
                 );
-                CaseData.CaseDataBuilder<?, ?> builder = caseData.toBuilder().applicantsFL401(partyDetails);
-
+                caseData = caseData.toBuilder().applicantsFL401(partyDetails).build();
                 if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
-                    Map<String, Object> tempMap = new HashMap<>();
-                    reGenerateApplicantC8Document(caseDataMapToBeUpdated, authorisation, caseData);
-                    builder.c8Document(
-                        objectMapper.convertValue(tempMap, CaseData.class).getC8Document()
-                    );
+                    reGenerateApplicantC8Document(caseDataMapToBeUpdated, authorisation, caseData, citizenUpdatedCaseData);
                 }
                 if (partyDetails.getResponse() != null) {
                     String safeToCallOption = partyDetails.getResponse().getSafeToCallOption();
@@ -385,9 +398,7 @@ public class CitizenPartyDetailsMapper {
                         caseDataMapToBeUpdated.put("daApplicantContactInstructions",null);
                     }
                 }
-                caseData = builder.build();
                 caseDataMapToBeUpdated.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
-                caseDataMapToBeUpdated.put("c8Document", caseData.getC8Document()); // Save the new C8 document URLs
                 return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
             }
         } else {
