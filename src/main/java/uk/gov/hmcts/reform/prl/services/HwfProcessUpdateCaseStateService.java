@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -68,6 +67,7 @@ public class HwfProcessUpdateCaseStateService {
 
     private final ObjectMapper objectMapper;
 
+    private final int PAGE_SIZE = 10;
 
     public void checkHwfPaymentStatusAndUpdateCaseState() {
         long startTime = System.currentTimeMillis();
@@ -130,8 +130,7 @@ public class HwfProcessUpdateCaseStateService {
 
     public List<CaseDetails> retrieveCasesWithHelpWithFeesInPendingState() {
 
-        SearchResultResponse searchResultResponse = SearchResultResponse.builder()
-            .cases(new ArrayList<>()).build();
+        List<CaseDetails> caseDetailsList = new ArrayList<>();
 
         QueryParam ccdQueryParam = buildCcdQueryParam();
 
@@ -140,7 +139,7 @@ public class HwfProcessUpdateCaseStateService {
             objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
             objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
             String searchString = objectMapper.writeValueAsString(ccdQueryParam);
-            log.info("searchString " + searchString);
+            log.info("searchString {}", searchString);
             String sysUserToken = systemUserService.getSysUserToken();
             final String s2sToken = authTokenGenerator.generate();
             SearchResult searchCases = coreCaseDataApi.searchCases(
@@ -150,22 +149,52 @@ public class HwfProcessUpdateCaseStateService {
                 searchString
             );
 
-            searchResultResponse = objectMapper.convertValue(
+            int totalCases = searchCases.getTotal();
+            int pages = (int) Math.ceil((double) totalCases / PAGE_SIZE);
+            log.info("Search result size {}, split across {} pages", totalCases, pages);
+            SearchResultResponse searchResultResponse = objectMapper.convertValue(
                 searchCases,
                 SearchResultResponse.class
             );
+
+            if (searchResultResponse != null) {
+                // add the first page, as we got it from the initial search to find total numbers
+                caseDetailsList.addAll(searchResultResponse.getCases());
+
+                for (int i = 1; i < pages; i++) {
+                    log.info("Processing page {} of {}", i + 1, pages);
+                    QueryParam paginatedQueryParam = buildCcdQueryParam(i * PAGE_SIZE);
+                    String paginatedSearchString = objectMapper.writeValueAsString(paginatedQueryParam);
+                    log.info("Paginated searchString {}", paginatedSearchString);
+                    SearchResult paginatedSearchResult = coreCaseDataApi.searchCases(
+                        sysUserToken,
+                        s2sToken,
+                        CASE_TYPE,
+                        paginatedSearchString
+                    );
+                    SearchResultResponse paginatedSearchResultResponse = objectMapper.convertValue(
+                        paginatedSearchResult,
+                        SearchResultResponse.class
+                    );
+                    caseDetailsList.addAll(paginatedSearchResultResponse.getCases());
+                }
+            }
         } catch (JsonProcessingException e) {
             log.error("Exception happened in parsing query param {}", e.getMessage());
         }
 
-        if (null != searchResultResponse) {
-            log.info("Total no. of cases retrieved {}", searchResultResponse.getTotal());
-            return searchResultResponse.getCases();
+        if (!caseDetailsList.isEmpty()) {
+            log.info("Total no. of cases retrieved {}", caseDetailsList.size());
+            return caseDetailsList;
         }
         return Collections.emptyList();
     }
 
     private QueryParam buildCcdQueryParam() {
+        return buildCcdQueryParam(0);
+    }
+
+    private QueryParam buildCcdQueryParam(int from) {
         //C100 citizen cases with help with fess
         List<Should> shoulds = List.of(Should.builder()
                                            .match(Match.builder()
@@ -203,6 +232,7 @@ public class HwfProcessUpdateCaseStateService {
             .build();
 
         return QueryParam.builder()
+            .from(String.valueOf(from))
             .query(Query.builder().bool(finalFilter).build())
             .build();
     }
