@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.CitizenUpdatePartyDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
@@ -49,6 +50,7 @@ import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -115,6 +117,8 @@ public class CitizenPartyDetailsMapper {
     private final ConfidentialityTabService confidentialityTabService;
     private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
     private final DocumentGenService documentGenService;
+    @Qualifier("allTabsService")
+    private final AllTabServiceImpl tabService;
 
     public CitizenUpdatePartyDataContent mapUpdatedPartyDetails(CaseData dbCaseData,
                                                                 CitizenUpdatedCaseData citizenUpdatedCaseData,
@@ -360,8 +364,22 @@ public class CitizenPartyDetailsMapper {
             .build();
 
         try {
-            caseDataUpdated.putAll(documentGenService.createUpdatedCaseDataWithDocuments(authorisation, caseDataWithConfidentialDetails));
-            CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
+            uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+                = tabService.getStartAllTabsUpdate(String.valueOf(caseData.getId()));
+            Map<String, Object> appCaseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
+
+            appCaseDataUpdated.putAll(documentGenService.createUpdatedCaseDataWithDocuments(authorisation, caseDataWithConfidentialDetails));
+            CaseData updatedCaseData = objectMapper.convertValue(appCaseDataUpdated, CaseData.class);
+
+
+            caseData = caseData.toBuilder().c8Document(updatedCaseData.getC8Document()).build();
+
+            tabService.mapAndSubmitAllTabsUpdate(authorisation, String.valueOf(caseData.getId()),
+                                                        startAllTabsUpdateDataContent.startEventResponse(),
+                                                        startAllTabsUpdateDataContent.eventRequestData(),
+                                                        caseData
+            );
+
             caseData = caseData.toBuilder()
                 .c8Document(updatedCaseData.getC8Document())
                 .build();
