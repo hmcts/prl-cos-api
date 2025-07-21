@@ -183,4 +183,24 @@ public class NoticeOfChangeController extends AbstractCallbackController {
         return ok(noticeOfChangePartiesService.submittedAdminRemoveLegalRepresentative(callbackRequest));
     }
 
+    @PostMapping(path = "/aboutToSubmitAddBarrister", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "About to submit to add Barrister")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse submittedAddBarrister(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        List<String> errorList = new ArrayList<>();
+        return AboutToStartOrSubmitCallbackResponse
+            .builder()
+            .data(noticeOfChangePartiesService.addBarrister(
+                authorisation,
+                callbackRequest,
+                errorList
+            )).errors(errorList).build();
+    }
+
 }

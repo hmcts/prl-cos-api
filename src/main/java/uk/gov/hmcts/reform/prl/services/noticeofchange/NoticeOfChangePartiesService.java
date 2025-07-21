@@ -39,6 +39,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
+import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeParties;
@@ -655,7 +656,12 @@ public class NoticeOfChangePartiesService {
             selectedPartyDetailsMap,
             caseDataUpdated
         );
+        removeBarrister();
         return caseDataUpdated;
+    }
+
+    private void removeBarrister() {
+
     }
 
     private Map<String, Object> createChangeOrgReqAndRemoveRepresentative(String authorisation,
@@ -1025,6 +1031,38 @@ public class NoticeOfChangePartiesService {
         sendEmailAndUpdateCaseData(selectedPartyDetailsMap, String.valueOf(caseData.getId()));
 
         return prepareSubmittedCallbackResponse(selectedPartyDetailsMap);
+    }
+
+    public Map<String, Object> addBarrister(String authorisation,
+                                            CallbackRequest callbackRequest,
+                                            List<String> errorList) {
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
+        DynamicListElement roleItem = DynamicListElement.builder()
+            .code("[C100APPLICANTSOLICITOR5]")
+            .label("[C100APPLICANTSOLICITOR5]")
+            .build();
+
+        ChangeOrganisationRequest changeOrganisationRequest = ChangeOrganisationRequest.builder()
+            .organisationToAdd(allocatedBarrister.getBarristerOrg())
+            .createdBy("prl_ctscadmin24_stoke@justice.gov.uk")
+            .caseRoleId(DynamicList.builder()
+                            .value(roleItem)
+                            .listItems(List.of(roleItem))
+                            .build())
+            .approvalStatus(ChangeOrganisationApprovalStatus.APPROVED)
+            .requestTimestamp(time.now())
+            .build();
+        caseDetails.getData()
+            .put("changeOrganisationRequestField", changeOrganisationRequest);
+        String userToken = systemUserService.getSysUserToken();
+        AboutToStartOrSubmitCallbackResponse response = assignCaseAccessClient.applyDecision(
+            userToken,
+            tokenGenerator.generate(),
+            decisionRequest(caseDetails)
+        );
+        return response.getData();
     }
 
     private static SubmittedCallbackResponse prepareSubmittedCallbackResponse(Map<Optional<SolicitorRole>,
