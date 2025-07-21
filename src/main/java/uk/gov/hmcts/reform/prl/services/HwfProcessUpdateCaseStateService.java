@@ -67,7 +67,7 @@ public class HwfProcessUpdateCaseStateService {
 
     private final ObjectMapper objectMapper;
 
-    private final int PAGE_SIZE = 10;
+    private static final int PAGE_SIZE = 10;
 
     public void checkHwfPaymentStatusAndUpdateCaseState() {
         long startTime = System.currentTimeMillis();
