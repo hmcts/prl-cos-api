@@ -343,6 +343,9 @@ public class CitizenPartyDetailsMapper {
                     caseData.getApplicantsFL401(),
                     caseEvent, caseData.getNewChildDetails()
                 );
+                if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
+                    c8ArchiveService.archiveC8DocumentIfConfidentialChangedFromCitizen(caseData,citizenUpdatedCaseData,caseDataMapToBeUpdated);
+                }
                 caseData = caseData.toBuilder().applicantsFL401(partyDetails).build();
                 if (partyDetails.getResponse() != null) {
                     String safeToCallOption = partyDetails.getResponse().getSafeToCallOption();
@@ -352,9 +355,7 @@ public class CitizenPartyDetailsMapper {
                         caseDataMapToBeUpdated.put("daApplicantContactInstructions",null);
                     }
                 }
-                if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
-                    c8ArchiveService.archiveC8DocumentIfConfidentialChangedFromCitizen(caseData,citizenUpdatedCaseData,caseDataMapToBeUpdated);
-                }
+
                 caseDataMapToBeUpdated.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
                 return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
             }
