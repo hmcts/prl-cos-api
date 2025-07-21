@@ -202,11 +202,11 @@ public class HwfProcessUpdateCaseStateServiceTest {
 
         try {
             when(objectMapper.writeValueAsString(argThat(
-            (ArgumentMatcher<QueryParam>) argument -> isNotEmpty(argument) && argument.getFrom().equals(10))))
+            (ArgumentMatcher<QueryParam>) argument -> isNotEmpty(argument) && argument.getFrom().equals("10"))))
             .thenReturn("{\"from\" : \"10\"}");
 
             when(objectMapper.writeValueAsString(argThat(
-                (ArgumentMatcher<QueryParam>) argument -> isNotEmpty(argument) && argument.getFrom().equals(0))))
+                (ArgumentMatcher<QueryParam>) argument -> isNotEmpty(argument) && argument.getFrom().equals("0"))))
                 .thenReturn("{\"from\" : \"0\"}");
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
