@@ -47,6 +47,9 @@ spring:
   main:
     allow-circular-references: true
     allow-bean-definition-overriding: true
+  jackson:
+    generator:
+      auto-close-json-content: false
   test:
     context:
       cache:
