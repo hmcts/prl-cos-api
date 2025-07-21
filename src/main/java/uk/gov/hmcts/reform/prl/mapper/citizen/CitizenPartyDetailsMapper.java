@@ -1095,16 +1095,18 @@ public class CitizenPartyDetailsMapper {
 
     private CaseData addUpdatedApplicantConfidentialFieldsToCaseData(CaseData caseData, CitizenUpdatedCaseData citizenUpdatedCaseData) {
         PartyDetails partyDetails = citizenUpdatedCaseData.getPartyDetails();
-        ApplicantConfidentialityDetails.ApplicantConfidentialityDetailsBuilder builder = ApplicantConfidentialityDetails.builder();
+        ApplicantConfidentialityDetails.ApplicantConfidentialityDetailsBuilder appConfBuilder = ApplicantConfidentialityDetails.builder();
+        uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Applicant.ApplicantBuilder appBuilder = uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Applicant.builder();
 
-        builder.address(getConfidentialField(partyDetails.getIsAddressConfidential(), partyDetails.getAddress()));
-        builder.email(getConfidentialField(partyDetails.getIsEmailAddressConfidential(), partyDetails.getEmail()));
-        builder.phoneNumber(getConfidentialField(partyDetails.getIsPhoneNumberConfidential(), partyDetails.getPhoneNumber()));
+        appConfBuilder.address(getConfidentialField(partyDetails.getIsAddressConfidential(), partyDetails.getAddress()));
+        appConfBuilder.email(getConfidentialField(partyDetails.getIsEmailAddressConfidential(), partyDetails.getEmail()));
+        appConfBuilder.phoneNumber(getConfidentialField(partyDetails.getIsPhoneNumberConfidential(), partyDetails.getPhoneNumber()));
 
-        ApplicantConfidentialityDetails applicantConfidentialityDetails = builder.build();
+        ApplicantConfidentialityDetails applicantConfidentialityDetails = appConfBuilder.build();
 
         return CaseData.builder()
             .applicantsConfidentialDetails(List.of(element(null, applicantConfidentialityDetails)))
+            .applicants(List.of(element(null, partyDetails)))
             .build();
     }
 
