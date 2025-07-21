@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -238,10 +239,9 @@ public class RemoveDocumentsServiceTest {
                     .build())
             .build();
 
-        CaseData after = removeDocumentsService.removeDocuments(caseData, docsToRemove);
+        Map<String, Object> after = removeDocumentsService.removeDocuments(caseData, docsToRemove);
 
-        assertThat(after.getReviewDocuments().getCourtStaffUploadDocListDocTab())
-            .asInstanceOf(LIST).isEmpty();
+        assertThat(after.get("courtStaffUploadDocListDocTab")).asInstanceOf(LIST).isEmpty();
     }
 
     @Test
