@@ -37,12 +37,7 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class CaseWorkerEmailServiceTest {
 
-    private static final String manageCaseUrl = null;
-    public static final String EMAIL_TEMPLATE_ID_1 = "111";
-    public static final String EMAIL_TEMPLATE_ID_2 = "222";
-    private static final String URGENT_CASE = "Urgent Case";
-    private static final String WITHOUT_NOTICE = "Without Notice";
-    private static final String STANDARAD_HEARING = "Standard Hearing";
+    private static final String MANAGE_CASE_URL = null;
 
     public static final CaseWorkerEmail expectedEmailVars = CaseWorkerEmail.builder()
         .caseReference("123")
@@ -127,7 +122,7 @@ public class CaseWorkerEmailServiceTest {
             .typeOfHearing("Urgent ")
             .hearingDateRequested("  ")
             .ordersApplyingFor("Child Arrangements Order")
-            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .caseLink(MANAGE_CASE_URL + "/" + caseDetails.getId())
             .build();
 
 
@@ -153,8 +148,6 @@ public class CaseWorkerEmailServiceTest {
         PartyDetails respondent = PartyDetails.builder()
             .lastName("respondentLast")
             .build();
-
-        String respondentNames = "TestLast";
 
         Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
         List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
@@ -184,7 +177,7 @@ public class CaseWorkerEmailServiceTest {
             .typeOfHearing("Standard hearing")
             .hearingDateRequested("  ")
             .ordersApplyingFor("Prohibited Steps Order")
-            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .caseLink(MANAGE_CASE_URL + "/" + caseDetails.getId())
             .build();
 
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
@@ -210,8 +203,6 @@ public class CaseWorkerEmailServiceTest {
         PartyDetails respondent = PartyDetails.builder()
             .lastName("respondentLast")
             .build();
-
-        String respondentNames = "TestLast";
 
         Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
         List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
@@ -239,7 +230,7 @@ public class CaseWorkerEmailServiceTest {
             .typeOfHearing("Without notice")
             .hearingDateRequested("  ")
             .ordersApplyingFor("Specific Issue Order")
-            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .caseLink(MANAGE_CASE_URL + "/" + caseDetails.getId())
             .build();
 
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
@@ -264,8 +255,6 @@ public class CaseWorkerEmailServiceTest {
         PartyDetails respondent = PartyDetails.builder()
             .lastName("respondentLast")
             .build();
-
-        String respondentNames = "TestLast";
 
         Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
         List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
@@ -293,7 +282,7 @@ public class CaseWorkerEmailServiceTest {
             .typeOfHearing("Reduced notice")
             .hearingDateRequested("  ")
             .ordersApplyingFor("Specific Issue Order")
-            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .caseLink(MANAGE_CASE_URL + "/" + caseDetails.getId())
             .build();
 
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
@@ -318,7 +307,6 @@ public class CaseWorkerEmailServiceTest {
             .lastName("respondentLast")
             .build();
 
-        String respondentNames = "TestLast";
 
         Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
         List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
@@ -344,17 +332,6 @@ public class CaseWorkerEmailServiceTest {
             .build();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
 
-        EmailTemplateVars email = CaseWorkerEmail.builder()
-            .caseReference(String.valueOf(caseDetails.getId()))
-            .caseName(caseData.getApplicantCaseName())
-            .applicantName(applicantNames)
-            .respondentLastName("respondentLast")
-            .typeOfHearing("Reduced notice")
-            .hearingDateRequested("  ")
-            .ordersApplyingFor("Specific Issue Order")
-            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
-            .build();
-
         caseWorkerEmailService.sendEmail(caseDetails);
         assertEquals("test@test.com", caseDetails.getData().get("caseworkerEmailAddress").toString());
     }
@@ -368,16 +345,12 @@ public class CaseWorkerEmailServiceTest {
             .isPhoneNumberConfidential(YesOrNo.No)
             .build();
 
-        String applicantNames = "TestFirst TestLast";
-
         Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant1).build();
         List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
 
         Child child = Child.builder()
             .isChildAddressConfidential(YesOrNo.No)
             .build();
-
-        String childNames = "child1 child2";
 
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
@@ -409,7 +382,7 @@ public class CaseWorkerEmailServiceTest {
             .isCaseUrgent("No")
             .issueDate(issueDate.format(dateTimeFormatter))
             .isConfidential(isConfidential)
-            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .caseLink(MANAGE_CASE_URL + "/" + caseDetails.getId())
             .build();
 
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
@@ -434,8 +407,6 @@ public class CaseWorkerEmailServiceTest {
         Child child = Child.builder()
             .isChildAddressConfidential(YesOrNo.Yes)
             .build();
-
-        String childNames = "child1 child2";
 
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
@@ -467,7 +438,7 @@ public class CaseWorkerEmailServiceTest {
             .isCaseUrgent("Yes")
             .issueDate(issueDate.format(dateTimeFormatter))
             .isConfidential(isConfidential)
-            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .caseLink(MANAGE_CASE_URL + "/" + caseDetails.getId())
             .build();
 
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
@@ -499,15 +470,8 @@ public class CaseWorkerEmailServiceTest {
             .isChildAddressConfidential(YesOrNo.Yes)
             .build();
 
-        String childNames = "child1 child2";
-
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
-
-        String isConfidential = "No";
-        if (applicant1.hasConfidentialInfo() || child.hasConfidentialInfo()) {
-            isConfidential = "Yes";
-        }
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -541,8 +505,6 @@ public class CaseWorkerEmailServiceTest {
             .lastName("TestLast3")
             .build();
 
-        String applicantNames = "TestFirst TestLast";
-
         Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
         Element<PartyDetails> wrappedApplicant2 = Element.<PartyDetails>builder().value(applicant2).build();
         List<Element<PartyDetails>> listOfApplicants = new ArrayList<>();
@@ -568,12 +530,6 @@ public class CaseWorkerEmailServiceTest {
             .build();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
 
-        EmailTemplateVars email = CaseWorkerEmail.builder()
-            .caseName(caseData.getApplicantCaseName())
-            .contentFromDev(caseData.getReturnMessage())
-            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
-            .build();
-
         caseWorkerEmailService.sendReturnApplicationEmailToSolicitor(caseDetails);
         assertEquals("test@test.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
 
@@ -585,8 +541,6 @@ public class CaseWorkerEmailServiceTest {
             .firstName("TestFirst")
             .lastName("TestLast")
             .build();
-
-        String applicantNames = "TestFirst TestLast";
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -605,12 +559,6 @@ public class CaseWorkerEmailServiceTest {
             .data(data)
             .build();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-
-        EmailTemplateVars email = CaseWorkerEmail.builder()
-            .caseName(caseData.getApplicantCaseName())
-            .contentFromDev(caseData.getReturnMessage())
-            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
-            .build();
 
         caseWorkerEmailService.sendReturnApplicationEmailToSolicitor(caseDetails);
         assertEquals("test@test.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
@@ -639,7 +587,7 @@ public class CaseWorkerEmailServiceTest {
             .caseUrgency("")
             .isCaseUrgent("No")
             .issueDate(issueDate.format(dateTimeFormatter))
-            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .caseLink(MANAGE_CASE_URL + "/" + caseDetails.getId())
             .build();
 
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
@@ -670,7 +618,7 @@ public class CaseWorkerEmailServiceTest {
             .caseUrgency("Urgent ")
             .isCaseUrgent("Yes")
             .issueDate(issueDate.format(dateTimeFormatter))
-            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .caseLink(MANAGE_CASE_URL + "/" + caseDetails.getId())
             .build();
 
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
@@ -773,7 +721,7 @@ public class CaseWorkerEmailServiceTest {
             .caseName(caseData.getApplicantCaseName())
             .issueDate(issueDate.format(dateTimeFormatter))
             .isConfidential(isConfidential)
-            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .caseLink(MANAGE_CASE_URL + "/" + caseDetails.getId())
             .build();
 
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
@@ -820,7 +768,7 @@ public class CaseWorkerEmailServiceTest {
             .caseName(caseData.getApplicantCaseName())
             .issueDate(issueDate.format(dateTimeFormatter))
             .isConfidential(isConfidential)
-            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .caseLink(MANAGE_CASE_URL + "/" + caseDetails.getId())
             .build();
 
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
@@ -863,13 +811,6 @@ public class CaseWorkerEmailServiceTest {
             || (fl401Applicant.hasConfidentialInfo())) {
             isConfidential = "Yes";
         }
-        EmailTemplateVars email = CaseWorkerEmail.builder()
-            .caseReference(String.valueOf(caseDetails.getId()))
-            .caseName(caseData.getApplicantCaseName())
-            .issueDate(issueDate.format(dateTimeFormatter))
-            .isConfidential(isConfidential)
-            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
-            .build();
 
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
@@ -913,19 +854,86 @@ public class CaseWorkerEmailServiceTest {
             || (fl401Applicant.hasConfidentialInfo())) {
             isConfidential = "Yes";
         }
-        EmailTemplateVars email = CaseWorkerEmail.builder()
-            .caseReference(String.valueOf(caseDetails.getId()))
-            .caseName(caseData.getApplicantCaseName())
-            .issueDate(issueDate.format(dateTimeFormatter))
-            .isConfidential(isConfidential)
-            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
-            .build();
 
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
         caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(caseDetails, caseData.getCourtEmailAddress());
 
         assertEquals("testing@localcourt.com", caseData.getCourtEmailAddress());
+    }
+
+    @Test
+    public void sendEmailShouldNotThrowWhenEmailIsNullOrBlank() {
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345L)
+            .data(new HashMap<>()) // No email address
+            .build();
+
+        // Should not throw any exception, just log a warning
+        caseWorkerEmailService.sendEmail(caseDetails);
+
+        Mockito.verify(emailService, Mockito.never()).send(
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        );
+    }
+
+    @Test
+    public void sendEmailShouldHandleExceptionFromEmailService() {
+        Map<String, Object> data = new HashMap<>();
+        data.put("caseworkerEmailAddress", "test@test.com");
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345L)
+            .data(data)
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicants(new ArrayList<>())
+            .respondents(new ArrayList<>())
+            .ordersApplyingFor(new ArrayList<>())
+            .isCaseUrgent(YesOrNo.No)
+            .doYouNeedAWithoutNoticeHearing(YesOrNo.No)
+            .doYouRequireAHearingWithReducedNotice(YesOrNo.No)
+            .build();
+        Mockito.when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        Mockito.doThrow(new RuntimeException("Email send failed"))
+            .when(emailService).send(
+                Mockito.anyString(),
+                Mockito.any(),
+                Mockito.any(),
+                Mockito.any()
+            );
+
+        // Should not throw, just log error
+        caseWorkerEmailService.sendEmail(caseDetails);
+
+        Mockito.verify(emailService, Mockito.times(1)).send(
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        );
+    }
+
+    @Test
+    public void sendEmailShouldNotThrowWhenEmailIsBlank() {
+        Map<String, Object> data = new HashMap<>();
+        data.put("caseworkerEmailAddress", "   "); // blank string
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345L)
+            .data(data)
+            .build();
+
+        caseWorkerEmailService.sendEmail(caseDetails);
+
+        Mockito.verify(emailService, Mockito.never()).send(
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        );
     }
 }
 
