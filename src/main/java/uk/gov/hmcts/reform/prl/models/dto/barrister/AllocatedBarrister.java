@@ -24,4 +24,7 @@ public class AllocatedBarrister {
 
     @JsonProperty("barristerOrg")
     private final Organisation barristerOrg;
+
+    @JsonProperty("roleItem")
+    private final String roleItem;
 }

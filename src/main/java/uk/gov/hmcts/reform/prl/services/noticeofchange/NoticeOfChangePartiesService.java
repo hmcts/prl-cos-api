@@ -1040,8 +1040,8 @@ public class NoticeOfChangePartiesService {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
         DynamicListElement roleItem = DynamicListElement.builder()
-            .code("[C100APPLICANTSOLICITOR5]")
-            .label("[C100APPLICANTSOLICITOR5]")
+            .code(allocatedBarrister.getRoleItem())
+            .label(allocatedBarrister.getRoleItem())
             .build();
 
         ChangeOrganisationRequest changeOrganisationRequest = ChangeOrganisationRequest.builder()
