@@ -247,7 +247,9 @@ public class CitizenPartyDetailsMapper {
 
                     applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
                 });
-            c8ArchiveService.archiveC8DocumentIfConfidentialChangedFromCitizen(caseData,citizenUpdatedCaseData,caseDataMapToBeUpdated);
+            if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
+                c8ArchiveService.archiveC8DocumentIfConfidentialChangedFromCitizen(caseData,citizenUpdatedCaseData,caseDataMapToBeUpdated);
+            }
             caseData = caseData.toBuilder().applicants(applicants).build();
             caseDataMapToBeUpdated.put(C100_APPLICANTS, caseData.getApplicants());
             return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
@@ -349,6 +351,9 @@ public class CitizenPartyDetailsMapper {
                     } else {
                         caseDataMapToBeUpdated.put("daApplicantContactInstructions",null);
                     }
+                }
+                if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
+                    c8ArchiveService.archiveC8DocumentIfConfidentialChangedFromCitizen(caseData,citizenUpdatedCaseData,caseDataMapToBeUpdated);
                 }
                 caseDataMapToBeUpdated.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
                 return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
