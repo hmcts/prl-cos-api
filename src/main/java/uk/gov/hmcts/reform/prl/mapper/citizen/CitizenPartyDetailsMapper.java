@@ -236,7 +236,7 @@ public class CitizenPartyDetailsMapper {
         if (PartyEnum.applicant.equals(citizenUpdatedCaseData.getPartyType())) {
             List<Element<ChildDetailsRevised>> childDetails = caseData.getNewChildDetails();
             List<Element<PartyDetails>> applicants = new ArrayList<>(caseData.getApplicants());
-            CaseData updatedCaseData = addUpdatedApplicantConfidentialFieldsToCaseData(citizenUpdatedCaseData);
+            CaseData updatedCaseData = addUpdatedApplicantConfidentialFieldsToCaseData(caseData, citizenUpdatedCaseData);
             applicants.stream()
                 .filter(party -> Objects.equals(
                     party.getValue().getUser().getIdamId(),
@@ -355,7 +355,7 @@ public class CitizenPartyDetailsMapper {
                                                                  String authorisation) {
         PartyDetails partyDetails;
         Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
-        CaseData updatedCaseData = addUpdatedApplicantConfidentialFieldsToCaseData(citizenUpdatedCaseData);
+        CaseData updatedCaseData = addUpdatedApplicantConfidentialFieldsToCaseData(caseData, citizenUpdatedCaseData);
 
         if (PartyEnum.applicant.equals(citizenUpdatedCaseData.getPartyType())) {
             if (citizenUpdatedCaseData.getPartyDetails().getUser().getIdamId()
@@ -1094,7 +1094,7 @@ public class CitizenPartyDetailsMapper {
         return existingPartyDetails;
     }
 
-    private CaseData addUpdatedApplicantConfidentialFieldsToCaseData(CitizenUpdatedCaseData citizenUpdatedCaseData) {
+    private CaseData addUpdatedApplicantConfidentialFieldsToCaseData(CaseData caseData, CitizenUpdatedCaseData citizenUpdatedCaseData) {
         PartyDetails partyDetails = citizenUpdatedCaseData.getPartyDetails();
         ApplicantConfidentialityDetails.ApplicantConfidentialityDetailsBuilder appConfBuilder = ApplicantConfidentialityDetails.builder();
 
@@ -1111,6 +1111,7 @@ public class CitizenPartyDetailsMapper {
             .applicants(List.of(element(null, partyDetails)))
             .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
             .caseTypeOfApplication(citizenUpdatedCaseData.getCaseTypeOfApplication())
+            .manageOrders(caseData.getManageOrders())
             .build();
     }
 
