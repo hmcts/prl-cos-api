@@ -116,13 +116,22 @@ public class HwfProcessUpdateCaseStateServiceTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(s2sAuthToken,
-                                                                                                        EventRequestData.builder().build(),
-                                                                                                        StartEventResponse.builder().build(),
-                                                                                                        caseData.toMap(objectMapper),
-                                                                                                        caseData, null);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            s2sAuthToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            caseData.toMap(objectMapper),
+            caseData,
+            null
+        );
         when(allTabService.getStartUpdateForSpecificEvent(any(), any())).thenReturn(startAllTabsUpdateDataContent);
-        when(allTabService.submitAllTabsUpdate(anyString(), anyString(), any(), any(), caseDataUpdatedCaptor.capture())).thenReturn(caseDetails);
+        when(allTabService.submitAllTabsUpdate(
+            anyString(),
+            anyString(),
+            any(),
+            any(),
+            caseDataUpdatedCaptor.capture()
+        )).thenReturn(caseDetails);
         when(paymentRequestService.fetchServiceRequestReferenceStatus(anyString(), anyString())).thenReturn(
             ServiceRequestReferenceStatusResponse.builder().serviceRequestStatus("Paid").build());
     }
@@ -134,13 +143,22 @@ public class HwfProcessUpdateCaseStateServiceTest {
         verify(paymentRequestService, times(1))
             .fetchServiceRequestReferenceStatus(anyString(), anyString());
         verify(allTabService).getStartUpdateForSpecificEvent(any(), any());
-        verify(allTabService).submitAllTabsUpdate(anyString(), anyString(), any(), any(), caseDataUpdatedCaptor.capture());
+        verify(allTabService).submitAllTabsUpdate(
+            anyString(),
+            anyString(),
+            any(),
+            any(),
+            caseDataUpdatedCaptor.capture()
+        );
         Map<String, Object> caseUpdated = caseDataUpdatedCaptor.getValue();
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
         assertEquals(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime), caseUpdated.get(DATE_SUBMITTED_FIELD));
-        assertEquals(DateOfSubmission.builder().dateOfSubmission(CommonUtils.getIsoDateToSpecificFormat(
-            DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime),
-            CommonUtils.DATE_OF_SUBMISSION_FORMAT).replace("-", " ")).build(), caseUpdated.get(DATE_OF_SUBMISSION));
+        assertEquals(
+            DateOfSubmission.builder().dateOfSubmission(CommonUtils.getIsoDateToSpecificFormat(
+                DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime),
+                CommonUtils.DATE_OF_SUBMISSION_FORMAT
+            ).replace("-", " ")).build(), caseUpdated.get(DATE_OF_SUBMISSION)
+        );
 
     }
 
@@ -202,8 +220,8 @@ public class HwfProcessUpdateCaseStateServiceTest {
 
         try {
             when(objectMapper.writeValueAsString(argThat(
-            (ArgumentMatcher<QueryParam>) argument -> isNotEmpty(argument) && argument.getFrom().equals("10"))))
-            .thenReturn("{\"from\" : \"10\"}");
+                (ArgumentMatcher<QueryParam>) argument -> isNotEmpty(argument) && argument.getFrom().equals("10"))))
+                .thenReturn("{\"from\" : \"10\"}");
 
             when(objectMapper.writeValueAsString(argThat(
                 (ArgumentMatcher<QueryParam>) argument -> isNotEmpty(argument) && argument.getFrom().equals("0"))))
@@ -213,8 +231,18 @@ public class HwfProcessUpdateCaseStateServiceTest {
         }
 
 
-        when(coreCaseDataApi.searchCases(eq(authToken), eq(s2sAuthToken), eq(CASE_TYPE), contains("\"from\" : \"0\""))).thenReturn(page1);
-        when(coreCaseDataApi.searchCases(eq(authToken), eq(s2sAuthToken), eq(CASE_TYPE), contains("\"from\" : \"10\""))).thenReturn(page2);
+        when(coreCaseDataApi.searchCases(
+            eq(authToken),
+            eq(s2sAuthToken),
+            eq(CASE_TYPE),
+            contains("\"from\" : \"0\"")
+        )).thenReturn(page1);
+        when(coreCaseDataApi.searchCases(
+            eq(authToken),
+            eq(s2sAuthToken),
+            eq(CASE_TYPE),
+            contains("\"from\" : \"10\"")
+        )).thenReturn(page2);
         when(objectMapper.convertValue(page1, SearchResultResponse.class)).thenReturn(
             SearchResultResponse.builder()
                 .total(15)
