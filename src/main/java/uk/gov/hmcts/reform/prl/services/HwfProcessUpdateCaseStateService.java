@@ -40,7 +40,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -183,11 +182,8 @@ public class HwfProcessUpdateCaseStateService {
             log.error("Exception happened in parsing query param {}", e.getMessage());
         }
 
-        if (!caseDetailsList.isEmpty()) {
-            log.info("Total no. of cases retrieved {}", caseDetailsList.size());
-            return caseDetailsList;
-        }
-        return Collections.emptyList();
+        log.info("Total no. of cases retrieved {}", caseDetailsList.size());
+        return caseDetailsList;
     }
 
     private QueryParam buildCcdQueryParam() {
