@@ -235,7 +235,7 @@ public class CitizenPartyDetailsMapper {
         if (PartyEnum.applicant.equals(citizenUpdatedCaseData.getPartyType())) {
             List<Element<ChildDetailsRevised>> childDetails = caseData.getNewChildDetails();
             List<Element<PartyDetails>> applicants = new ArrayList<>(caseData.getApplicants());
-            CaseData updatedCaseData = addUpdatedApplicantConfidentialFieldsToCaseData(caseData, citizenUpdatedCaseData);
+            CaseData updatedCaseData = addUpdatedApplicantConfidentialFieldsToCaseData(citizenUpdatedCaseData);
             applicants.stream()
                 .filter(party -> Objects.equals(
                     party.getValue().getUser().getIdamId(),
@@ -354,7 +354,7 @@ public class CitizenPartyDetailsMapper {
                                                                  String authorisation) {
         PartyDetails partyDetails;
         Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
-        CaseData updatedCaseData = addUpdatedApplicantConfidentialFieldsToCaseData(caseData, citizenUpdatedCaseData);
+        CaseData updatedCaseData = addUpdatedApplicantConfidentialFieldsToCaseData(citizenUpdatedCaseData);
 
         if (PartyEnum.applicant.equals(citizenUpdatedCaseData.getPartyType())) {
             if (citizenUpdatedCaseData.getPartyDetails().getUser().getIdamId()
@@ -1093,10 +1093,9 @@ public class CitizenPartyDetailsMapper {
         return existingPartyDetails;
     }
 
-    private CaseData addUpdatedApplicantConfidentialFieldsToCaseData(CaseData caseData, CitizenUpdatedCaseData citizenUpdatedCaseData) {
+    private CaseData addUpdatedApplicantConfidentialFieldsToCaseData(CitizenUpdatedCaseData citizenUpdatedCaseData) {
         PartyDetails partyDetails = citizenUpdatedCaseData.getPartyDetails();
         ApplicantConfidentialityDetails.ApplicantConfidentialityDetailsBuilder appConfBuilder = ApplicantConfidentialityDetails.builder();
-        uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Applicant.ApplicantBuilder appBuilder = uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Applicant.builder();
 
         appConfBuilder.address(getConfidentialField(partyDetails.getIsAddressConfidential(), partyDetails.getAddress()));
         appConfBuilder.email(getConfidentialField(partyDetails.getIsEmailAddressConfidential(), partyDetails.getEmail()));
