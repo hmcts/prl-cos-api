@@ -1046,7 +1046,7 @@ public class NoticeOfChangePartiesService {
 
         ChangeOrganisationRequest changeOrganisationRequest = ChangeOrganisationRequest.builder()
             .organisationToAdd(allocatedBarrister.getBarristerOrg())
-            .createdBy("prl_ctscadmin24_stoke@justice.gov.uk")
+            .createdBy(allocatedBarrister.getBarristerEmail())
             .caseRoleId(DynamicList.builder()
                             .value(roleItem)
                             .listItems(List.of(roleItem))
