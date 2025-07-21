@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.CitizenUpdatePartyDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
@@ -1101,11 +1102,14 @@ public class CitizenPartyDetailsMapper {
         appConfBuilder.email(getConfidentialField(partyDetails.getIsEmailAddressConfidential(), partyDetails.getEmail()));
         appConfBuilder.phoneNumber(getConfidentialField(partyDetails.getIsPhoneNumberConfidential(), partyDetails.getPhoneNumber()));
 
+
+
         ApplicantConfidentialityDetails applicantConfidentialityDetails = appConfBuilder.build();
 
         return CaseData.builder()
             .applicantsConfidentialDetails(List.of(element(null, applicantConfidentialityDetails)))
             .applicants(List.of(element(null, partyDetails)))
+            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
             .build();
     }
 
