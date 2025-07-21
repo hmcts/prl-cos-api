@@ -257,7 +257,8 @@ public class CitizenPartyDetailsMapper {
                             );
                         } catch (Exception e) {
                             log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
-                        }                    }
+                        }
+                    }
                 });
             caseData = caseData.toBuilder().applicants(applicants).build();
             caseDataMapToBeUpdated.put(C100_APPLICANTS, caseData.getApplicants());
