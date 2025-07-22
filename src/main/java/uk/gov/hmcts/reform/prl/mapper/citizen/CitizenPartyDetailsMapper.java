@@ -376,7 +376,7 @@ public class CitizenPartyDetailsMapper {
                     }
                 }
                 caseData = caseData.toBuilder().applicantsFL401(partyDetails).build();
-                if (partyDetails.getResponse() != null) {
+                if (PartyEnum.respondent.equals(citizenUpdatedCaseData.getPartyType())) {
                     String safeToCallOption = partyDetails.getResponse().getSafeToCallOption();
                     if (safeToCallOption != null && !safeToCallOption.trim().isEmpty()) {
                         caseDataMapToBeUpdated.put("daApplicantContactInstructions", safeToCallOption);
