@@ -355,9 +355,8 @@ public class CitizenPartyDetailsMapper {
                                                                  String authorisation) {
         PartyDetails partyDetails;
         Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
-        CaseData updatedCaseData = addUpdatedApplicantConfidentialFieldsToCaseData(caseData, citizenUpdatedCaseData);
-
         if (PartyEnum.applicant.equals(citizenUpdatedCaseData.getPartyType())) {
+            CaseData updatedCaseData = addUpdatedApplicantConfidentialFieldsToCaseData(caseData, citizenUpdatedCaseData);
             if (citizenUpdatedCaseData.getPartyDetails().getUser().getIdamId()
                 .equalsIgnoreCase(caseData.getApplicantsFL401().getUser().getIdamId())) {
                 partyDetails = getUpdatedPartyDetailsBasedOnEvent(
@@ -372,11 +371,11 @@ public class CitizenPartyDetailsMapper {
                             documentGenService.createUpdatedCaseDataWithDocuments(authorisation, updatedCaseData)
                         );
                     } catch (Exception e) {
-                        log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
+                        log.error("Failed to generate C8 document for FL401 case {}", e.getMessage());
                     }
                 }
                 caseData = caseData.toBuilder().applicantsFL401(partyDetails).build();
-                if (PartyEnum.respondent.equals(citizenUpdatedCaseData.getPartyType())) {
+                if (partyDetails.getResponse() != null) {
                     String safeToCallOption = partyDetails.getResponse().getSafeToCallOption();
                     if (safeToCallOption != null && !safeToCallOption.trim().isEmpty()) {
                         caseDataMapToBeUpdated.put("daApplicantContactInstructions", safeToCallOption);
