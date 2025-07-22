@@ -1111,6 +1111,7 @@ public class CitizenPartyDetailsMapper {
             .applicants(List.of(element(null, partyDetails)))
             .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
             .caseTypeOfApplication(citizenUpdatedCaseData.getCaseTypeOfApplication())
+            .id(caseData.getId())
             .manageOrders(caseData.getManageOrders())
             .build();
     }
