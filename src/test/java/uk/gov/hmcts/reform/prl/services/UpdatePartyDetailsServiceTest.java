@@ -113,6 +113,9 @@ public class UpdatePartyDetailsServiceTest {
     @Mock
     ManageOrderService manageOrderService;
 
+    @Mock
+    C8ArchiveService c8ArchiveService;
+
     @Test
     public void updateApplicantAndChildNames() {
 

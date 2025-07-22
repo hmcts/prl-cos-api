@@ -37,6 +37,14 @@ import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_DRAFT_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_DRAFT_C1A;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIAL_REVIEW_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
@@ -106,6 +114,7 @@ public class TaskListService {
     private final LaunchDarklyClient launchDarklyClient;
     private final RoleAssignmentApi roleAssignmentApi;
     private final AuthTokenGenerator authTokenGenerator;
+    private final C8ArchiveService c8ArchiveService;
 
     private final MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
 
@@ -314,32 +323,40 @@ public class TaskListService {
                         startAllTabsUpdateDataContent.authorisation()
                     );
                 }
+
+                c8ArchiveService.archiveC8DocumentIfConfidentialChanged(callbackRequest,caseData,caseDataUpdated);
+
                 caseDataUpdated.putAll(dgsService.createUpdatedCaseDataWithDocuments(authorisation, caseData));
                 CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
-                caseData = caseData.toBuilder()
-                    .c8Document(updatedCaseData.getC8Document())
-                    .c1ADocument(updatedCaseData.getC1ADocument())
-                    .c8WelshDocument(updatedCaseData.getC8WelshDocument())
-                    .finalDocument(updatedCaseData.getFinalDocument())
-                    .finalWelshDocument(updatedCaseData.getFinalWelshDocument())
-                    .c1AWelshDocument(updatedCaseData.getC1AWelshDocument())
-                    .c1ADraftDocument(SUBMITTED_STATE.equalsIgnoreCase(state)
-                                          ? updatedCaseData.getC1ADraftDocument() : caseData.getC1ADraftDocument())
-                    .c1AWelshDraftDocument(SUBMITTED_STATE.equalsIgnoreCase(state)
-                                               ? updatedCaseData.getC1AWelshDraftDocument() : caseData.getC1AWelshDraftDocument())
-                    .build();
+                caseDataUpdated.put(DOCUMENT_FIELD_C8, updatedCaseData.getC8Document());
+                caseDataUpdated.put(DOCUMENT_FIELD_C1A, updatedCaseData.getC1ADocument());
+                caseDataUpdated.put(DOCUMENT_FIELD_C8_WELSH, updatedCaseData.getC8WelshDocument());
+
+                caseDataUpdated.put(DOCUMENT_FIELD_FINAL, updatedCaseData.getFinalDocument());
+
+                caseDataUpdated.put(DOCUMENT_FIELD_FINAL_WELSH, updatedCaseData.getFinalWelshDocument());
+
+                caseDataUpdated.put(DOCUMENT_FIELD_C1A_WELSH, updatedCaseData.getC1AWelshDocument());
+
+                caseDataUpdated.put(DOCUMENT_FIELD_DRAFT_C1A, SUBMITTED_STATE.equalsIgnoreCase(state)
+                    ? updatedCaseData.getC1ADraftDocument() : caseData.getC1ADraftDocument());
+
+                caseDataUpdated.put(DOCUMENT_FIELD_C1A_DRAFT_WELSH, SUBMITTED_STATE.equalsIgnoreCase(state)
+                    ? updatedCaseData.getC1AWelshDraftDocument() : caseData.getC1AWelshDraftDocument());
+
             } catch (Exception e) {
                 log.error("Error regenerating the document {}", e.getMessage());
             }
         }
 
-        tabService.mapAndSubmitAllTabsUpdate(
+        tabService.submitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),
             String.valueOf(callbackRequest.getCaseDetails().getId()),
             startAllTabsUpdateDataContent.startEventResponse(),
             startAllTabsUpdateDataContent.eventRequestData(),
-            caseData
+            caseDataUpdated
         );
+        caseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
 
         if (!isCourtStaff
             || (isCourtStaff && (AWAITING_SUBMISSION_TO_HMCTS.getValue().equalsIgnoreCase(state)
