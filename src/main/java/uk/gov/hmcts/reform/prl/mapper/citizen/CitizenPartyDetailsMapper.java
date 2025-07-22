@@ -1112,12 +1112,23 @@ public class CitizenPartyDetailsMapper {
             }
         }
 
-        return caseData.toBuilder()
+        CaseData.CaseDataBuilder<?, ?> builder = caseData.toBuilder()
             .applicants(updatedApplicants)
             .applicantsConfidentialDetails(applicantsConfidentialDetails)
             .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
-            .caseTypeOfApplication(citizenUpdatedCaseData.getCaseTypeOfApplication())
-            .build();
+            .caseTypeOfApplication(citizenUpdatedCaseData.getCaseTypeOfApplication());
+
+        if ("FL401".equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            builder.applicantsFL401(
+                caseData.getApplicantsFL401().toBuilder()
+                    .isAddressConfidential(partyDetails.getIsAddressConfidential())
+                    .isEmailAddressConfidential(partyDetails.getIsEmailAddressConfidential())
+                    .isPhoneNumberConfidential(partyDetails.getIsPhoneNumberConfidential())
+                    .build()
+            );
+        }
+
+        return builder.build();
     }
 
     private List<Element<ApplicantConfidentialityDetails>> createApplicantConfidentialDetailsForCaseData(PartyDetails partyDetails) {
