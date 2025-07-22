@@ -1096,24 +1096,37 @@ public class CitizenPartyDetailsMapper {
 
     private CaseData addUpdatedApplicantConfidentialFieldsToCaseData(CaseData caseData, CitizenUpdatedCaseData citizenUpdatedCaseData) {
         PartyDetails partyDetails = citizenUpdatedCaseData.getPartyDetails();
+        List<Element<PartyDetails>> applicants = caseData.getApplicants();
+        List<Element<PartyDetails>> updatedApplicants = new ArrayList<>();
+        List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails = new ArrayList<>();
+
+        if (applicants != null) {
+            for (Element<PartyDetails> applicantElement : applicants) {
+                PartyDetails applicant = applicantElement.getValue();
+                PartyDetails source = (applicant.getPartyId() != null && applicant.getPartyId().equals(partyDetails.getPartyId()))
+                    ? partyDetails
+                    : applicant;
+                updatedApplicants.add(element(applicantElement.getId(), source));
+                applicantsConfidentialDetails.addAll(createApplicantConfidentialDetailsForCaseData(source));
+            }
+        }
+
+        return caseData.toBuilder()
+            .applicants(updatedApplicants)
+            .applicantsConfidentialDetails(applicantsConfidentialDetails)
+            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
+            .caseTypeOfApplication(citizenUpdatedCaseData.getCaseTypeOfApplication())
+            .build();
+    }
+
+    private List<Element<ApplicantConfidentialityDetails>> createApplicantConfidentialDetailsForCaseData (PartyDetails partyDetails) {
         ApplicantConfidentialityDetails.ApplicantConfidentialityDetailsBuilder appConfBuilder = ApplicantConfidentialityDetails.builder();
 
         appConfBuilder.address(getConfidentialField(partyDetails.getIsAddressConfidential(), partyDetails.getAddress()));
         appConfBuilder.email(getConfidentialField(partyDetails.getIsEmailAddressConfidential(), partyDetails.getEmail()));
         appConfBuilder.phoneNumber(getConfidentialField(partyDetails.getIsPhoneNumberConfidential(), partyDetails.getPhoneNumber()));
 
-
-
-        ApplicantConfidentialityDetails applicantConfidentialityDetails = appConfBuilder.build();
-
-        return CaseData.builder()
-            .applicantsConfidentialDetails(List.of(element(null, applicantConfidentialityDetails)))
-            .applicants(List.of(element(null, partyDetails)))
-            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
-            .caseTypeOfApplication(citizenUpdatedCaseData.getCaseTypeOfApplication())
-            .id(caseData.getId())
-            .manageOrders(caseData.getManageOrders())
-            .build();
+        return List.of(element(null, appConfBuilder.build()));
     }
 
     private <T> T getConfidentialField(YesOrNo isConfidential, T value) {
