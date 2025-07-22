@@ -1095,7 +1095,9 @@ public class CitizenPartyDetailsMapper {
 
     private CaseData addUpdatedApplicantConfidentialFieldsToCaseData(CaseData caseData, CitizenUpdatedCaseData citizenUpdatedCaseData) {
         PartyDetails partyDetails = citizenUpdatedCaseData.getPartyDetails();
-        List<Element<PartyDetails>> applicants = caseData.getApplicants();
+        List<Element<PartyDetails>> applicants = "FL401".equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+            ? List.of(element(null, caseData.getApplicantsFL401()))
+            : caseData.getApplicants();
         List<Element<PartyDetails>> updatedApplicants = new ArrayList<>();
         List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails = new ArrayList<>();
 
