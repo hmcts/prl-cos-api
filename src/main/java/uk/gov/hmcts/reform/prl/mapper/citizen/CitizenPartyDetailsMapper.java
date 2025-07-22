@@ -1119,7 +1119,7 @@ public class CitizenPartyDetailsMapper {
             .build();
     }
 
-    private List<Element<ApplicantConfidentialityDetails>> createApplicantConfidentialDetailsForCaseData (PartyDetails partyDetails) {
+    private List<Element<ApplicantConfidentialityDetails>> createApplicantConfidentialDetailsForCaseData(PartyDetails partyDetails) {
         ApplicantConfidentialityDetails.ApplicantConfidentialityDetailsBuilder appConfBuilder = ApplicantConfidentialityDetails.builder();
 
         appConfBuilder.address(getConfidentialField(partyDetails.getIsAddressConfidential(), partyDetails.getAddress()));
