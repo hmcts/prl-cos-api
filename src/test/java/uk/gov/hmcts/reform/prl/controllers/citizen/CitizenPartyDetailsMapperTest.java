@@ -506,61 +506,15 @@ public class CitizenPartyDetailsMapperTest {
         assertNotNull(citizenUpdatePartyDataContent);
     }
 
-    @Test
-    public void testBuildUpdatedCaseDataOtherPersonLivesInRefuge() throws IOException {
-        c100RebuildData = C100RebuildData.builder()
-            .c100RebuildInternationalElements(TestUtil.readFileFrom("classpath:c100-rebuild/ie.json"))
-            .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn.json"))
-            .c100RebuildTypeOfOrder(TestUtil.readFileFrom("classpath:c100-rebuild/too.json"))
-            .c100RebuildOtherProceedings(TestUtil.readFileFrom("classpath:c100-rebuild/op.json"))
-            .c100RebuildMaim(TestUtil.readFileFrom("classpath:c100-rebuild/miam1.json"))
-            .c100RebuildHearingUrgency(TestUtil.readFileFrom("classpath:c100-rebuild/hu.json"))
-            .c100RebuildChildDetails(TestUtil.readFileFrom("classpath:c100-rebuild/cd.json"))
-            .c100RebuildApplicantDetails(TestUtil.readFileFrom("classpath:c100-rebuild/appl.json"))
-            .c100RebuildOtherChildrenDetails(TestUtil.readFileFrom("classpath:c100-rebuild/ocd.json"))
-            .c100RebuildReasonableAdjustments(TestUtil.readFileFrom("classpath:c100-rebuild/ra.json"))
-            .c100RebuildOtherPersonsDetails(TestUtil.readFileFrom("classpath:c100-rebuild/oprs1.json"))
-            .c100RebuildRespondentDetails(TestUtil.readFileFrom("classpath:c100-rebuild/resp1.json"))
-            .c100RebuildConsentOrderDetails(TestUtil.readFileFrom("classpath:c100-rebuild/co.json"))
-            .applicantPcqId("123")
-            .build();
-        caseData = CaseData.builder()
-            .id(1234567891234567L)
-            .caseTypeOfApplication(C100_CASE_TYPE)
-            .c100RebuildData(c100RebuildData)
-            .build();
-        Element<PartyDetails> otherPartyElement = element(PartyDetails.builder()
-            .firstName("c1")
-            .lastName("c1")
-            .liveInRefuge(YesOrNo.Yes)
-            .refugeConfidentialityC8Form(Document.builder()
-               .documentUrl("http://dm-store-aat.service.core-compute-aat.internal/documents/79e841a4-f232-4f2e-9e86-e4fc8f70fcac")
-               .documentBinaryUrl("http://dm-store-aat.service.core-compute-aat.internal/documents/79e841a4-f232-4f2e-9e86-e4fc8f70fcac/binary")
-               .documentFileName("Sample_doc_2.pdf")
-               .documentCreatedOn(
-                   Date.from(ZonedDateTime.parse("2024-05-14T14:13:44Z").toInstant()))
-               .build())
-            .address(Address.builder()
-                 .addressLine1("add1")
-                 .addressLine2("add2")
-                 .addressLine3("add3")
-                 .postTown("")
-                 .county("thames")
-                 .country("uk")
-                 .postCode("tw22tr8")
-                 .build())
-            .isAddressConfidential(YesOrNo.Yes)
-            .liveInRefuge(YesOrNo.Yes)
-            .build());
-        when(confidentialityTabService.updateOtherPeopleConfidentiality(any(), any())).thenReturn(Collections.singletonList(otherPartyElement));
-        CaseData caseDataResult = citizenPartyDetailsMapper.buildUpdatedCaseData(caseData,c100RebuildData);
-        assertNotNull(caseDataResult);
-        assertEquals(YesOrNo.Yes, caseDataResult.getOtherPartyInTheCaseRevised().get(0).getValue().getIsAddressConfidential());
-        assertEquals(YesOrNo.Yes, caseDataResult.getOtherPartyInTheCaseRevised().get(0).getValue().getLiveInRefuge());
-    }
+    @ParameterizedTest(name = "{index}: {2}")
+    @CsvSource({
+        "Yes,Yes,Other Person Lives In Refuge",
+        "No,No,Other Person Address Unknown"
+    })
+    void testBuildUpdatedCaseDataOtherPersonConfidentiality(String isAddressConfidentialStr, String liveInRefugeStr, String testName) throws IOException {
+        YesOrNo isAddressConfidential = YesOrNo.valueOf(isAddressConfidentialStr);
+        YesOrNo liveInRefuge = YesOrNo.valueOf(liveInRefugeStr);
 
-    @Test
-    public void testBuildUpdatedCaseDataOtherPersonAddressUnknown() throws IOException {
         c100RebuildData = C100RebuildData.builder()
             .c100RebuildInternationalElements(TestUtil.readFileFrom("classpath:c100-rebuild/ie.json"))
             .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn.json"))
@@ -572,44 +526,50 @@ public class CitizenPartyDetailsMapperTest {
             .c100RebuildApplicantDetails(TestUtil.readFileFrom("classpath:c100-rebuild/appl.json"))
             .c100RebuildOtherChildrenDetails(TestUtil.readFileFrom("classpath:c100-rebuild/ocd.json"))
             .c100RebuildReasonableAdjustments(TestUtil.readFileFrom("classpath:c100-rebuild/ra.json"))
-            .c100RebuildOtherPersonsDetails(TestUtil.readFileFrom("classpath:c100-rebuild/oprs2.json"))
+            .c100RebuildOtherPersonsDetails(
+                isAddressConfidential == YesOrNo.Yes ? TestUtil.readFileFrom("classpath:c100-rebuild/oprs1.json") : TestUtil.readFileFrom("classpath:c100-rebuild/oprs2.json")
+            )
             .c100RebuildRespondentDetails(TestUtil.readFileFrom("classpath:c100-rebuild/resp1.json"))
             .c100RebuildConsentOrderDetails(TestUtil.readFileFrom("classpath:c100-rebuild/co.json"))
             .applicantPcqId("123")
             .build();
+
         caseData = CaseData.builder()
             .id(1234567891234567L)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .c100RebuildData(c100RebuildData)
             .build();
+
         Element<PartyDetails> otherPartyElement = element(PartyDetails.builder()
-              .firstName("c1")
-              .lastName("c1")
-              .liveInRefuge(YesOrNo.Yes)
-              .refugeConfidentialityC8Form(Document.builder()
-                   .documentUrl("http://dm-store-aat.service.core-compute-aat.internal/documents/79e841a4-f232-4f2e-9e86-e4fc8f70fcac")
-                   .documentBinaryUrl("http://dm-store-aat.service.core-compute-aat.internal/documents/79e841a4-f232-4f2e-9e86-e4fc8f70fcac/binary")
-                   .documentFileName("Sample_doc_2.pdf")
-                   .documentCreatedOn(
-                       Date.from(ZonedDateTime.parse("2024-05-14T14:13:44Z").toInstant()))
-                   .build())
-              .address(Address.builder()
-                   .addressLine1("add1")
-                   .addressLine2("add2")
-                   .addressLine3("add3")
-                   .postTown("")
-                   .county("thames")
-                   .country("uk")
-                   .postCode("tw22tr8")
-                   .build())
-              .isAddressConfidential(YesOrNo.No)
-              .liveInRefuge(YesOrNo.No)
-              .build());
-        when(confidentialityTabService.updateOtherPeopleConfidentiality(any(), any())).thenReturn(Collections.singletonList(otherPartyElement));
-        CaseData caseDataResult = citizenPartyDetailsMapper.buildUpdatedCaseData(caseData,c100RebuildData);
+                                                              .firstName("c1")
+                                                              .lastName("c1")
+                                                              .liveInRefuge(liveInRefuge)
+                                                              .refugeConfidentialityC8Form(Document.builder()
+                                                                                               .documentUrl("http://dm-store-aat.service.core-compute-aat.internal/documents/79e841a4-f232-4f2e-9e86-e4fc8f70fcac")
+                                                                                               .documentBinaryUrl("http://dm-store-aat.service.core-compute-aat.internal/documents/79e841a4-f232-4f2e-9e86-e4fc8f70fcac/binary")
+                                                                                               .documentFileName("Sample_doc_2.pdf")
+                                                                                               .documentCreatedOn(Date.from(ZonedDateTime.parse("2024-05-14T14:13:44Z").toInstant()))
+                                                                                               .build())
+                                                              .address(Address.builder()
+                                                                           .addressLine1("add1")
+                                                                           .addressLine2("add2")
+                                                                           .addressLine3("add3")
+                                                                           .postTown("")
+                                                                           .county("thames")
+                                                                           .country("uk")
+                                                                           .postCode("tw22tr8")
+                                                                           .build())
+                                                              .isAddressConfidential(isAddressConfidential)
+                                                              .liveInRefuge(liveInRefuge)
+                                                              .build());
+
+        when(confidentialityTabService.updateOtherPeopleConfidentiality(any(), any()))
+            .thenReturn(Collections.singletonList(otherPartyElement));
+
+        CaseData caseDataResult = citizenPartyDetailsMapper.buildUpdatedCaseData(caseData, c100RebuildData);
         assertNotNull(caseDataResult);
-        assertEquals(YesOrNo.No, caseDataResult.getOtherPartyInTheCaseRevised().get(0).getValue().getIsAddressConfidential());
-        assertEquals(YesOrNo.No, caseDataResult.getOtherPartyInTheCaseRevised().get(0).getValue().getLiveInRefuge());
+        assertEquals(isAddressConfidential, caseDataResult.getOtherPartyInTheCaseRevised().get(0).getValue().getIsAddressConfidential());
+        assertEquals(liveInRefuge, caseDataResult.getOtherPartyInTheCaseRevised().get(0).getValue().getLiveInRefuge());
     }
 
     @Test
@@ -692,6 +652,18 @@ public class CitizenPartyDetailsMapperTest {
         assertNull(citizenUpdatePartyDataContent.updatedCaseDataMap().get("daApplicantContactInstructions"));
         assertEquals("", citizenUpdatePartyDataContent.updatedCaseData().getApplicantsFL401().getResponse().getSafeToCallOption());
     }
+
+    @Test
+    void testGetConfidentialFieldReturnsValueWhenConfidentialFields() {
+        assertEquals("test", citizenPartyDetailsMapper.getConfidentialField(YesOrNo.Yes, "test"));
+    }
+
+    @Test
+    void testGetConfidentialFieldReturnsNullWhenNotConfidentialFields() {
+        assertEquals(null, citizenPartyDetailsMapper.getConfidentialField(YesOrNo.No, "test"));
+    }
+
+
 }
 
 
