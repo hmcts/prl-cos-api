@@ -202,5 +202,4 @@ public class NoticeOfChangeController extends AbstractCallbackController {
                 errorList
             )).errors(errorList).build();
     }
-
 }

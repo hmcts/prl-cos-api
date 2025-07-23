@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.CcdCaseAssignmentService;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -115,6 +116,7 @@ public class NoticeOfChangePartiesService {
     private final CaseEventService caseEventService;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     private final ServiceOfApplicationService serviceOfApplicationService;
+    private final CcdCaseAssignmentService ccdCaseAssignmentService;
 
     public static final String REPRESENTATIVE_REMOVED_LABEL = "# Representative removed";
 
@@ -217,6 +219,7 @@ public class NoticeOfChangePartiesService {
             ? Optional.of(NoticeOfChangeParties.builder().build())
             : Optional.of(partiesConverter.generateDaForSubmission(partyDetails));
     }
+
 
     public enum NoticeOfChangeAnswersPopulationStrategy {
         POPULATE, BLANK

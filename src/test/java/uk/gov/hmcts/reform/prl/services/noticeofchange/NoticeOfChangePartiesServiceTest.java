@@ -1602,6 +1602,7 @@ public class NoticeOfChangePartiesServiceTest {
                               .organisationID("LM6OZX0")
                               .organisationName("Private law NOC solution")
                               .build())
+            .roleItem("[C100APPLICANTSOLICITOR5]")
             .build();
 
         ObjectMapper mapper = new ObjectMapper();
