@@ -51,7 +51,7 @@ public class BarristerController extends AbstractCallbackController {
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        caseDataUpdated.put(ALLOCATED_BARRISTER, barristerAllocationService.getSolicitorPartyDynamicList(caseData));
+        caseDataUpdated.put(ALLOCATED_BARRISTER, barristerAllocationService.getAllocatedBarrister(caseData));
 
         AboutToStartOrSubmitCallbackResponse.AboutToStartOrSubmitCallbackResponseBuilder
             builder = AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated);

@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
@@ -24,7 +25,7 @@ class BarristerAllocationServiceTest {
     BarristerAllocationService barristerAllocationService;
 
     @Test
-    void testSolicitorPartyDynamicList() {
+    void shouldGetAllocatedBarrister() {
         List<Element<PartyDetails>> allApplicants = new ArrayList<>();
         allApplicants.add(buildPartyDetails("1", "appFirstName1", "appLastName1", true, "appSolFN1", "appSolLN1", "appSolOrgName1"));
         allApplicants.add(buildPartyDetails("2", "appFirstName2", "appLastName2", true, "appSolFN2", "appSolLN2", "appSolOrgName2"));
@@ -40,7 +41,8 @@ class BarristerAllocationServiceTest {
             .respondents(allRespondents)
             .build();
 
-        DynamicList partiesDynamicList = barristerAllocationService.getSolicitorPartyDynamicList(caseData);
+        AllocatedBarrister allocatedBarrister = barristerAllocationService.getAllocatedBarrister(caseData);
+        DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
 
         assertEquals(partiesDynamicList.getValue(), null);
         assertEquals(partiesDynamicList.getListItems().size(), 4);

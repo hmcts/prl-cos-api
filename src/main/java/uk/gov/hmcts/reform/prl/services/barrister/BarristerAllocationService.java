@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
@@ -22,7 +23,12 @@ public class BarristerAllocationService {
     public static final String APPLICANT = "Applicant";
     public static final String RESPONDENT = "Respondent";
 
-    public DynamicList getSolicitorPartyDynamicList(CaseData caseData) {
+    public AllocatedBarrister getAllocatedBarrister(CaseData caseData) {
+        return AllocatedBarrister.builder().partyList(getSolicitorPartyDynamicList(caseData))
+            .build();
+    }
+
+    private DynamicList getSolicitorPartyDynamicList(CaseData caseData) {
         List<DynamicListElement> listItems = new ArrayList<>();
         List<Element<PartyDetails>> applicants = caseData.getApplicants();
         if (applicants != null) {
