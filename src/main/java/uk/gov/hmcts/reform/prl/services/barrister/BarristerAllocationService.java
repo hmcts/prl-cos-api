@@ -24,7 +24,12 @@ public class BarristerAllocationService {
     public static final String RESPONDENT = "Respondent";
 
     public AllocatedBarrister getAllocatedBarrister(CaseData caseData) {
-        return AllocatedBarrister.builder().partyList(getSolicitorPartyDynamicList(caseData))
+        return AllocatedBarrister.builder()
+            .partyList(getSolicitorPartyDynamicList(caseData))
+            .barristerName(null)
+            .barristerEmail(null)
+            .barristerOrg(null)
+            .roleItem(null)
             .build();
     }
 
