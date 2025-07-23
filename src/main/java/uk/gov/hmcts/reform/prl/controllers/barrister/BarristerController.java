@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers.barrister;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -14,13 +13,16 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.barrister.BarristerAllocationService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATED_BARRISTER;
 
 @Slf4j
 @RestController
@@ -43,10 +45,13 @@ public class BarristerController extends AbstractCallbackController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse handleMidEvent(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest) throws JsonProcessingException {
+        @RequestBody CallbackRequest callbackRequest) {
+
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        caseDataUpdated.put("allocatedBarrister", barristerAllocationService.getPartyListAsJson(caseDataUpdated));
+        caseDataUpdated.put(ALLOCATED_BARRISTER, barristerAllocationService.getSolicitorPartyDynamicList(caseData));
 
         AboutToStartOrSubmitCallbackResponse.AboutToStartOrSubmitCallbackResponseBuilder
             builder = AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated);
