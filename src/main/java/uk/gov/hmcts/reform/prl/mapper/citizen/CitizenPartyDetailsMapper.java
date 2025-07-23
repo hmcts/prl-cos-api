@@ -1156,7 +1156,7 @@ public class CitizenPartyDetailsMapper {
         return List.of(element(null, appConfBuilder.build()));
     }
 
-    private <T> T getConfidentialField(YesOrNo isConfidential, T value) {
+    public <T> T getConfidentialField(YesOrNo isConfidential, T value) {
         return YesOrNo.Yes.equals(isConfidential) ? value : null;
     }
 }
