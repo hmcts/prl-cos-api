@@ -890,7 +890,9 @@ public class ManageOrderEmailService {
                 PartyDetails partyData = partyDataOptional.get().getValue();
                 if (isSolicitorEmailExists(partyData)) {
                     //we want part of email to identify who this went to
-                    log.info("Sending email to solicitor {} for case {}", partyData.getSolicitorEmail().substring(0,4),
+                    log.info("Sending email to solicitor {} for case {}",
+                             partyData.getSolicitorEmail().substring(
+                                 0, Math.min(4, partyData.getSolicitorEmail().length())),
                              caseData.getId());
                     dynamicDataForEmail.put(NAME, partyData.getRepresentativeFullName());
                     sendEmailViaSendGrid(
