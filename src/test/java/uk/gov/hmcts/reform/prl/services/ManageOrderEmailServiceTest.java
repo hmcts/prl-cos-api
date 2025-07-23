@@ -3926,6 +3926,7 @@ public class ManageOrderEmailServiceTest {
         manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
         assertNotNull(caseDataMap.get("orderCollection"));
     }
+
     @Test
     public void testSomethingGetsSentToRespondentSolsWhenNotPersonalService() {
         PartyDetails respondent = PartyDetails.builder()
@@ -3986,5 +3987,5 @@ public class ManageOrderEmailServiceTest {
             .collect(Collectors.toList());
 
         assertTrue(capturedEmails.contains("respsol@law.com"));
-}
+    }
 }
