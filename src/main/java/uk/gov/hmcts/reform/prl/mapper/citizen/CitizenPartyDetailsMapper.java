@@ -1094,10 +1094,36 @@ public class CitizenPartyDetailsMapper {
     }
 
     private CaseData addUpdatedApplicantConfidentialFieldsToCaseData(CaseData caseData, CitizenUpdatedCaseData citizenUpdatedCaseData) {
+        if ("FL401".equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            return addUpdatedApplicantConfidentialFieldsToCaseDataFL401(caseData, citizenUpdatedCaseData);
+        }
+        return addUpdatedApplicantConfidentialFieldsToCaseDataC100(caseData, citizenUpdatedCaseData);
+    }
+
+    private CaseData addUpdatedApplicantConfidentialFieldsToCaseDataFL401(CaseData caseData, CitizenUpdatedCaseData citizenUpdatedCaseData) {
         PartyDetails partyDetails = citizenUpdatedCaseData.getPartyDetails();
-        List<Element<PartyDetails>> applicants = "FL401".equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-            ? List.of(element(null, caseData.getApplicantsFL401()))
-            : caseData.getApplicants();
+        PartyDetails updatedApplicant = caseData.getApplicantsFL401().toBuilder()
+            .isAddressConfidential(partyDetails.getIsAddressConfidential())
+            .isEmailAddressConfidential(partyDetails.getIsEmailAddressConfidential())
+            .isPhoneNumberConfidential(partyDetails.getIsPhoneNumberConfidential())
+            .build();
+
+        List<Element<PartyDetails>> updatedApplicants = List.of(element(null, updatedApplicant));
+        List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails =
+            createApplicantConfidentialDetailsForCaseData(updatedApplicant);
+
+        return caseData.toBuilder()
+            .applicants(updatedApplicants)
+            .applicantsFL401(updatedApplicant)
+            .applicantsConfidentialDetails(applicantsConfidentialDetails)
+            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
+            .caseTypeOfApplication(citizenUpdatedCaseData.getCaseTypeOfApplication())
+            .build();
+    }
+
+    private CaseData addUpdatedApplicantConfidentialFieldsToCaseDataC100(CaseData caseData, CitizenUpdatedCaseData citizenUpdatedCaseData) {
+        PartyDetails partyDetails = citizenUpdatedCaseData.getPartyDetails();
+        List<Element<PartyDetails>> applicants = caseData.getApplicants();
         List<Element<PartyDetails>> updatedApplicants = new ArrayList<>();
         List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails = new ArrayList<>();
 
@@ -1112,23 +1138,12 @@ public class CitizenPartyDetailsMapper {
             }
         }
 
-        CaseData.CaseDataBuilder<?, ?> builder = caseData.toBuilder()
+        return caseData.toBuilder()
             .applicants(updatedApplicants)
             .applicantsConfidentialDetails(applicantsConfidentialDetails)
             .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
-            .caseTypeOfApplication(citizenUpdatedCaseData.getCaseTypeOfApplication());
-
-        if ("FL401".equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            builder.applicantsFL401(
-                caseData.getApplicantsFL401().toBuilder()
-                    .isAddressConfidential(partyDetails.getIsAddressConfidential())
-                    .isEmailAddressConfidential(partyDetails.getIsEmailAddressConfidential())
-                    .isPhoneNumberConfidential(partyDetails.getIsPhoneNumberConfidential())
-                    .build()
-            );
-        }
-
-        return builder.build();
+            .caseTypeOfApplication(citizenUpdatedCaseData.getCaseTypeOfApplication())
+            .build();
     }
 
     private List<Element<ApplicantConfidentialityDetails>> createApplicantConfidentialDetailsForCaseData(PartyDetails partyDetails) {
