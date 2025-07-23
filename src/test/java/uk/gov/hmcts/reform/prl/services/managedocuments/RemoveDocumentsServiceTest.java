@@ -226,6 +226,13 @@ public class RemoveDocumentsServiceTest {
             new Element<>(elementId, RemovableDocument.builder().document(TEST_DOCUMENT).build())
         );
 
+        List<Element<QuarantineLegalDoc>> unchangedBulkScanDocs = List.of(
+            new Element<>(UUID.randomUUID(), QuarantineLegalDoc.builder()
+                .url(TEST_DOCUMENT)
+                .categoryId("bulkScan")
+                .build())
+        );
+
         CaseData caseData = CaseData.builder()
             .reviewDocuments(
                 ReviewDocuments.builder()
@@ -236,12 +243,14 @@ public class RemoveDocumentsServiceTest {
                             .categoryId("respondentStatements")
                             .build()
                         )))
+                    .bulkScannedDocListDocTab(unchangedBulkScanDocs)
                     .build())
             .build();
 
         Map<String, Object> after = removeDocumentsService.removeDocuments(caseData, docsToRemove);
 
         assertThat(after.get("courtStaffUploadDocListDocTab")).asInstanceOf(LIST).isEmpty();
+        assertThat(after.get("bulkScannedDocListDocTab")).asInstanceOf(LIST).isEqualTo(unchangedBulkScanDocs);
     }
 
     @Test
@@ -294,6 +303,5 @@ public class RemoveDocumentsServiceTest {
             eq(TEST_DOCUMENT_ID),
             eq(true)
         );
-
     }
 }
