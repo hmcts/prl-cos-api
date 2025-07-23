@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.RemoveDocumentsService;
 
 import java.util.List;
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -87,7 +89,7 @@ public class RemoveDocumentsController extends AbstractCallbackController {
     }
 
     @PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    public CallbackResponse aboutToSubmit(
+    public AboutToStartOrSubmitCallbackResponse aboutToSubmit(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
@@ -100,10 +102,11 @@ public class RemoveDocumentsController extends AbstractCallbackController {
         CaseData old = getCaseData(callbackRequest.getCaseDetailsBefore());
 
         List<Element<RemovableDocument>> docsToRemove = removeDocumentsService.getDocsBeingRemoved(caseData, old);
-        caseData = removeDocumentsService.removeDocuments(caseData, docsToRemove);
-        // add list of documents we've identified as being removed
-        return CallbackResponse.builder()
-            .data(caseData).build();
+        Map<String, Object> updatedCaseData = removeDocumentsService.removeDocuments(caseData, docsToRemove);
+
+        // update the lists of documents with documents that have been removed
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(updatedCaseData).build();
     }
 
     @PostMapping(path = "/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

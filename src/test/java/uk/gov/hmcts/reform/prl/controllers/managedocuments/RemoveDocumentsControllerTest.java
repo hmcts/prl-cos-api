@@ -184,9 +184,7 @@ public class RemoveDocumentsControllerTest {
         );
         when(removeDocumentsService.getDocsBeingRemoved(caseData, old)).thenReturn(removalList);
 
-        CaseData after = CaseData.builder()
-            .reviewDocuments(ReviewDocuments.builder().build())
-            .build();
+        Map<String, Object> after = Map.of("courtStaffUploadDocListDocTab", ReviewDocuments.builder().build());
 
         when(removeDocumentsService.removeDocuments(caseData, removalList)).thenReturn(after);
 
