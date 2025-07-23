@@ -571,7 +571,7 @@ public class CitizenPartyDetailsMapperTest {
                 .liveInRefuge(liveInRefuge)
                 .build()
         );
-        
+
         when(confidentialityTabService.updateOtherPeopleConfidentiality(any(), any()))
             .thenReturn(Collections.singletonList(otherPartyElement));
 

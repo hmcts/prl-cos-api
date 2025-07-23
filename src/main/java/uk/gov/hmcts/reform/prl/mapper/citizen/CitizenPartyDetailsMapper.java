@@ -1094,9 +1094,9 @@ public class CitizenPartyDetailsMapper {
     }
 
     private CaseData addUpdatedApplicantConfidentialFieldsToCaseData(CaseData caseData, CitizenUpdatedCaseData citizenUpdatedCaseData) {
-        return "FL401".equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ?
-            addUpdatedApplicantConfidentialFieldsToCaseDataFL401(caseData, citizenUpdatedCaseData) :
-            addUpdatedApplicantConfidentialFieldsToCaseDataC100(caseData, citizenUpdatedCaseData);
+        return "FL401".equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+            ? addUpdatedApplicantConfidentialFieldsToCaseDataFL401(caseData, citizenUpdatedCaseData)
+            : addUpdatedApplicantConfidentialFieldsToCaseDataC100(caseData, citizenUpdatedCaseData);
     }
 
     public CaseData addUpdatedApplicantConfidentialFieldsToCaseDataFL401(CaseData caseData, CitizenUpdatedCaseData citizenUpdatedCaseData) {
