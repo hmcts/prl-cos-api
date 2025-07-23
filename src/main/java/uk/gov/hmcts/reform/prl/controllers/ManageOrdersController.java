@@ -272,7 +272,7 @@ public class ManageOrdersController {
             }
             log.info("Notifications to be sent? - {}", caseData.getManageOrders().getMarkedToServeEmailNotification());
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
-                log.info("Preparing to send notifications to parties");
+                log.info("Preparing to send notifications to parties for case id {}", caseData.getId());
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
 

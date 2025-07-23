@@ -307,7 +307,7 @@ public class ManageOrderEmailService {
         final String caseTypeofApplication = CaseUtils.getCaseTypeOfApplication(caseData);
         List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails = new ArrayList<>();
         List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData);
-        log.info("inside SendEmailWhenOrderIsServed**");
+        log.info("in sendEmailWhenOrderIsServed on case id {}", caseData.getId());
         Map<String,Object> dynamicDataForEmail = getDynamicDataForEmail(caseData);
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
             if (YesNoNotApplicable.No.equals(manageOrders.getServeToRespondentOptions())) {
@@ -889,7 +889,11 @@ public class ManageOrderEmailService {
             if (partyDataOptional.isPresent()) {
                 PartyDetails partyData = partyDataOptional.get().getValue();
                 if (isSolicitorEmailExists(partyData)) {
-                    log.info("Sending email to sollicitor");
+                    //we want part of email to identify who this went to
+                    log.info("Sending email to solicitor {} for case {}",
+                             partyData.getSolicitorEmail().substring(
+                                 0, Math.min(4, partyData.getSolicitorEmail().length())),
+                             caseData.getId());
                     dynamicDataForEmail.put(NAME, partyData.getRepresentativeFullName());
                     sendEmailViaSendGrid(
                         authorisation,

@@ -1553,6 +1553,9 @@ public class ManageOrderService {
                 servedOrderDetails.put(SERVE_RECIPIENT_NAME, serveRecipientName + " (" + SoaSolicitorServingRespondentsEnum
                     .applicantLegalRepresentative.getDisplayedValue() + ")");
             }
+        } else {
+            log.info("case id {} has serveToRespondentOptions = {}", caseData.getId(), caseData.getManageOrders().getServeToRespondentOptions());
+
         }
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
         servedOrderDetails.put(WHO_IS_RESPONSIBLE_TO_SERVE, getWhoIsResponsibleToServeOrder(caseData.getManageOrders()));
@@ -1593,6 +1596,8 @@ public class ManageOrderService {
             servingRespondentsOptions = getServingRespondentsOptions(caseData);
         } else if (YesNoNotApplicable.No.equals(serveOnRespondent)) {
             recipients = getRecipients(caseData);
+        } else if (YesNoNotApplicable.NotApplicable.equals(serveOnRespondent)) {
+            log.info("case id {} has serveToRespondentOptions = {}", caseData.getId(), caseData.getManageOrders().getServeToRespondentOptions());
         }
 
         String otherParties;
