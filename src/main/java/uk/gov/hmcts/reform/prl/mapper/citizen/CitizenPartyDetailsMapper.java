@@ -342,13 +342,6 @@ public class CitizenPartyDetailsMapper {
         }
     }
 
-    private void reGenerateApplicantC8Document(Map<String, Object> caseDataMapToBeUpdated, String authorisation, CaseData caseData) throws Exception {
-        log.info("Regenerating C8 document for applicant in case: {}", caseData.getId());
-
-        caseDataMapToBeUpdated.putAll(documentGenService.createUpdatedCaseDataWithDocuments(authorisation, caseData));
-    }
-
-
     private CitizenUpdatePartyDataContent updatingPartyDetailsDa(CaseData caseData,
                                                                  CitizenUpdatedCaseData citizenUpdatedCaseData,
                                                                  CaseEvent caseEvent,
