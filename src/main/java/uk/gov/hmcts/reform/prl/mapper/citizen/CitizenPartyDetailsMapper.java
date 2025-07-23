@@ -1094,13 +1094,12 @@ public class CitizenPartyDetailsMapper {
     }
 
     private CaseData addUpdatedApplicantConfidentialFieldsToCaseData(CaseData caseData, CitizenUpdatedCaseData citizenUpdatedCaseData) {
-        if ("FL401".equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            return addUpdatedApplicantConfidentialFieldsToCaseDataFL401(caseData, citizenUpdatedCaseData);
-        }
-        return addUpdatedApplicantConfidentialFieldsToCaseDataC100(caseData, citizenUpdatedCaseData);
+        return "FL401".equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ?
+            addUpdatedApplicantConfidentialFieldsToCaseDataFL401(caseData, citizenUpdatedCaseData) :
+            addUpdatedApplicantConfidentialFieldsToCaseDataC100(caseData, citizenUpdatedCaseData);
     }
 
-    private CaseData addUpdatedApplicantConfidentialFieldsToCaseDataFL401(CaseData caseData, CitizenUpdatedCaseData citizenUpdatedCaseData) {
+    public CaseData addUpdatedApplicantConfidentialFieldsToCaseDataFL401(CaseData caseData, CitizenUpdatedCaseData citizenUpdatedCaseData) {
         PartyDetails partyDetails = citizenUpdatedCaseData.getPartyDetails();
         PartyDetails updatedApplicant = caseData.getApplicantsFL401().toBuilder()
             .isAddressConfidential(partyDetails.getIsAddressConfidential())
@@ -1121,7 +1120,7 @@ public class CitizenPartyDetailsMapper {
             .build();
     }
 
-    private CaseData addUpdatedApplicantConfidentialFieldsToCaseDataC100(CaseData caseData, CitizenUpdatedCaseData citizenUpdatedCaseData) {
+    public CaseData addUpdatedApplicantConfidentialFieldsToCaseDataC100(CaseData caseData, CitizenUpdatedCaseData citizenUpdatedCaseData) {
         PartyDetails partyDetails = citizenUpdatedCaseData.getPartyDetails();
         List<Element<PartyDetails>> applicants = caseData.getApplicants();
         List<Element<PartyDetails>> updatedApplicants = new ArrayList<>();
