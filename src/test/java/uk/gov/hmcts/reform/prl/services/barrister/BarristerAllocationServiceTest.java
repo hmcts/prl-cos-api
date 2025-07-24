@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 @ExtendWith(SpringExtension.class)
 class BarristerAllocationServiceTest {
@@ -34,7 +35,7 @@ class BarristerAllocationServiceTest {
         List<Element<PartyDetails>> allRespondents = new ArrayList<>();
         allRespondents.add(buildPartyDetails("4", "resFirstName1", "resLastName1", true, "resSolFN1", "resSolLN1", "resSolOrgName1"));
         allRespondents.add(buildPartyDetails("5", "resFirstName2", "resLastName2", true, "resSolFN2", "resSolLN2", "resSolOrgName2"));
-        allApplicants.add(buildPartyDetails("6", "resFirstName3", "resLastName3", false, null, null, null));
+        allRespondents.add(buildPartyDetails("6", "resFirstName3", "resLastName3", false, null, null, null));
 
         CaseData caseData = CaseData.builder()
             .applicants(allApplicants)
@@ -44,8 +45,10 @@ class BarristerAllocationServiceTest {
         AllocatedBarrister allocatedBarrister = barristerAllocationService.getAllocatedBarrister(caseData);
         DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
 
+        assertNotNull(allocatedBarrister.getBarristerOrg());
+
         assertEquals(partiesDynamicList.getValue(), null);
-        assertEquals(partiesDynamicList.getListItems().size(), 4);
+        assertEquals(4, partiesDynamicList.getListItems().size());
         DynamicListElement appParty1 = partiesDynamicList.getListItems().get(0);
         assertEquals("appFirstName1 appLastName1 (Applicant) appSolFN1 appSolLN1 appSolOrgName1", appParty1.getLabel());
         assertEquals("c0651c7d-0db9-47aa-9baa-933013f482f1", appParty1.getCode());
@@ -70,10 +73,11 @@ class BarristerAllocationServiceTest {
                        .partyId(UUID.fromString("c0651c7d-0db9-47aa-9baa-933013f482f" + id))
                        .firstName(appFirstName)
                        .lastName(appLastName)
-                       .doTheyHaveLegalRepresentation(rep ? YesNoDontKnow.yes : YesNoDontKnow.no)
+                       .doTheyHaveLegalRepresentation(rep ? YesNoDontKnow.yes : null)
+                       .solicitorPartyId(rep ? UUID.fromString("c0651c7d-0db9-47aa-9baa-933013f482a" + id) : null)
                        .representativeFirstName(rep ? repappFirstName : null)
                        .representativeLastName(rep ? repappLastName : null)
-                       .solicitorOrg(rep ? Organisation.builder().organisationName(orgName).build() : null)
+                       .solicitorOrg(Organisation.builder().organisationName(orgName).build())
                        .build())
             .build();
     }

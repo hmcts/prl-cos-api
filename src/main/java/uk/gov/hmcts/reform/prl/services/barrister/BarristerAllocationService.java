@@ -53,7 +53,7 @@ public class BarristerAllocationService {
         List<DynamicListElement> applicantsItemsList = new ArrayList<>();
         for (Element element : partyDetailsList) {
             PartyDetails partyDetails = (PartyDetails) element.getValue();
-            if (yes.equals(partyDetails.getDoTheyHaveLegalRepresentation())) {
+            if (isPartyApplicableToAdd(partyDetails, applicantOrRespondent)) {
                 String label = String.format("%s %s (%s) %s %s", partyDetails.getFirstName(),
                                              partyDetails.getLastName(),
                                              applicantOrRespondent ? APPLICANT : RESPONDENT,
@@ -67,6 +67,11 @@ public class BarristerAllocationService {
             }
         }
         return applicantsItemsList;
+    }
+
+    private static boolean isPartyApplicableToAdd(PartyDetails partyDetails, boolean applicantOrRespondent) {
+        return (applicantOrRespondent && partyDetails.getSolicitorPartyId() != null)
+            || (!applicantOrRespondent && yes.equals(partyDetails.getDoTheyHaveLegalRepresentation()));
     }
 
 }
