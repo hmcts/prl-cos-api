@@ -96,7 +96,8 @@ public class CafcassApiConsumerCcdSearchCaseApiTest {
                         .matchHeader(CAFCASS_AUTHORISATION_HEADER, CAFCASS_TEST_AUTH_TOKEN)
                         .matchHeader(CAFCASS_SERVICE_AUTHORISATION_HEADER, CAFCASS_TEST_SERVICE_AUTH_TOKEN)
                         .headers(getResponseHeaders())
-                        .method(HttpMethod.GET.toString())
+                        .method(HttpMethod.POST.name())
+                        .body("{ \"native_es_query\": { \"query\": { \"match_all\": {} } } }")
                         .willRespondWith()
                         .body(buildSearchCaseResponseDsl())
                         .status(HttpStatus.OK.value())
@@ -124,7 +125,8 @@ public class CafcassApiConsumerCcdSearchCaseApiTest {
                         .header(CAFCASS_AUTHORISATION_HEADER, CAFCASS_TEST_AUTH_TOKEN)
                         .header(CAFCASS_SERVICE_AUTHORISATION_HEADER, CAFCASS_TEST_SERVICE_AUTH_TOKEN)
                         .contentType(ContentType.JSON)
-                        .get(mockServer.getUrl() + CCD_STORE_SEARCH_CASE_ENDPOINT + "?" + CAFCASS_CCD_CASE_TYPE_ID_QUERY_PARAM)
+                        .body("{ \"native_es_query\": { \"query\": { \"match_all\": {} } } }")
+                        .post(mockServer.getUrl() + CCD_STORE_SEARCH_CASE_ENDPOINT + "?" + CAFCASS_CCD_CASE_TYPE_ID_QUERY_PARAM)
                         .then()
                         .log().all().extract().asString();
         JSONObject jsonResponse = new JSONObject(actualResponseBody);
