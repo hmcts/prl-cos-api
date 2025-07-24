@@ -104,9 +104,11 @@ public class BarristerAllocationService {
             );
 
             DynamicListElement applicantDynamicItem = DynamicListElement.builder()
-                .code(partyDetails.getPartyId()).label(label).build();
+                .code(partyDetails.getPartyId())
+                .label(label).build();
             return applicantDynamicItem;
         }
+
         return null;
     }
 
