@@ -54,7 +54,7 @@ public class BarristerAllocationService {
         for (Element element : partyDetailsList) {
             PartyDetails partyDetails = (PartyDetails) element.getValue();
             if (isPartyApplicableToAdd(partyDetails, applicantOrRespondent)) {
-                String label = String.format("%s %s (%s) %s %s", partyDetails.getFirstName(),
+                String label = String.format("%s %s (%s), %s, %s", partyDetails.getFirstName(),
                                              partyDetails.getLastName(),
                                              applicantOrRespondent ? APPLICANT : RESPONDENT,
                                              partyDetails.getRepresentativeFullName(),

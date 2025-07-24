@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.barrister.BarristerAllocationService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -28,15 +27,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATED_BARRI
 @RestController
 @RequestMapping("/barrister")
 public class BarristerController extends AbstractCallbackController {
-    private static final String BEARER = "Bearer ";
-    private final AuthorisationService authorisationService;
     private final BarristerAllocationService barristerAllocationService;
 
     public BarristerController(ObjectMapper objectMapper, EventService eventPublisher,
-                               AuthorisationService authorisationService,
                                BarristerAllocationService barristerAllocationService) {
         super(objectMapper, eventPublisher);
-        this.authorisationService = authorisationService;
         this.barristerAllocationService = barristerAllocationService;
     }
 

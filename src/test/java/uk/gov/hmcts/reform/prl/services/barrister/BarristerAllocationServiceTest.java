@@ -50,33 +50,33 @@ class BarristerAllocationServiceTest {
         assertEquals(partiesDynamicList.getValue(), null);
         assertEquals(4, partiesDynamicList.getListItems().size());
         DynamicListElement appParty1 = partiesDynamicList.getListItems().get(0);
-        assertEquals("appFirstName1 appLastName1 (Applicant) appSolFN1 appSolLN1 appSolOrgName1", appParty1.getLabel());
+        assertEquals("appFirstName1 appLastName1 (Applicant), appSolFN1 appSolLN1, appSolOrgName1", appParty1.getLabel());
         assertEquals("c0651c7d-0db9-47aa-9baa-933013f482f1", appParty1.getCode());
 
         DynamicListElement appParty2 = partiesDynamicList.getListItems().get(1);
-        assertEquals("appFirstName2 appLastName2 (Applicant) appSolFN2 appSolLN2 appSolOrgName2", appParty2.getLabel());
+        assertEquals("appFirstName2 appLastName2 (Applicant), appSolFN2 appSolLN2, appSolOrgName2", appParty2.getLabel());
         assertEquals("c0651c7d-0db9-47aa-9baa-933013f482f2", appParty2.getCode());
 
         DynamicListElement resParty1 = partiesDynamicList.getListItems().get(2);
-        assertEquals("resFirstName1 resLastName1 (Respondent) resSolFN1 resSolLN1 resSolOrgName1", resParty1.getLabel());
+        assertEquals("resFirstName1 resLastName1 (Respondent), resSolFN1 resSolLN1, resSolOrgName1", resParty1.getLabel());
         assertEquals("c0651c7d-0db9-47aa-9baa-933013f482f4", resParty1.getCode());
 
         DynamicListElement resParty2 = partiesDynamicList.getListItems().get(3);
-        assertEquals("resFirstName2 resLastName2 (Respondent) resSolFN2 resSolLN2 resSolOrgName2", resParty2.getLabel());
+        assertEquals("resFirstName2 resLastName2 (Respondent), resSolFN2 resSolLN2, resSolOrgName2", resParty2.getLabel());
         assertEquals("c0651c7d-0db9-47aa-9baa-933013f482f5", resParty2.getCode());
     }
 
-    private Element<PartyDetails> buildPartyDetails(String id, String appFirstName, String appLastName, boolean rep,
+    private Element<PartyDetails> buildPartyDetails(String id, String appFirstName, String appLastName, boolean hasRep,
                                                     String repappFirstName, String repappLastName, String orgName) {
         return Element.<PartyDetails>builder().id(UUID.fromString("c0651c7d-0db9-47aa-9baa-933013f482e" + id))
             .value(PartyDetails.builder()
                        .partyId(UUID.fromString("c0651c7d-0db9-47aa-9baa-933013f482f" + id))
                        .firstName(appFirstName)
                        .lastName(appLastName)
-                       .doTheyHaveLegalRepresentation(rep ? YesNoDontKnow.yes : null)
-                       .solicitorPartyId(rep ? UUID.fromString("c0651c7d-0db9-47aa-9baa-933013f482a" + id) : null)
-                       .representativeFirstName(rep ? repappFirstName : null)
-                       .representativeLastName(rep ? repappLastName : null)
+                       .doTheyHaveLegalRepresentation(hasRep ? YesNoDontKnow.yes : null)
+                       .solicitorPartyId(hasRep ? UUID.fromString("c0651c7d-0db9-47aa-9baa-933013f482a" + id) : null)
+                       .representativeFirstName(hasRep ? repappFirstName : null)
+                       .representativeLastName(hasRep ? repappLastName : null)
                        .solicitorOrg(Organisation.builder().organisationName(orgName).build())
                        .build())
             .build();
