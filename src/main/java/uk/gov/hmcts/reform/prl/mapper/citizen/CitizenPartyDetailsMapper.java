@@ -651,7 +651,8 @@ public class CitizenPartyDetailsMapper {
             .build();
     }
 
-    private PartyDetails updateCitizenPersonalDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+    public static PartyDetails updateCitizenPersonalDetails(PartyDetails existingPartyDetails,
+                                                            PartyDetails citizenProvidedPartyDetails) {
         boolean isAddressNeedsToUpdate = isNotEmpty(citizenProvidedPartyDetails.getAddress())
             && StringUtils.isNotEmpty(citizenProvidedPartyDetails.getAddress().getAddressLine1());
 
@@ -707,7 +708,7 @@ public class CitizenPartyDetailsMapper {
             .build();
     }
 
-    private PartyDetails forceConfidentiality(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+    private static PartyDetails forceConfidentiality(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
         if (Yes.equals(citizenProvidedPartyDetails.getLiveInRefuge())) {
             existingPartyDetails = existingPartyDetails.toBuilder()
                 .response(getPartyResponse(existingPartyDetails).toBuilder()
@@ -731,13 +732,13 @@ public class CitizenPartyDetailsMapper {
         return existingPartyDetails;
     }
 
-    private String fetchSafeToCallOption(PartyDetails citizenProvidedPartyDetails) {
+    private static String fetchSafeToCallOption(PartyDetails citizenProvidedPartyDetails) {
         return null != citizenProvidedPartyDetails.getResponse()
             ? citizenProvidedPartyDetails.getResponse().getSafeToCallOption()
             : null;
     }
 
-    private YesOrNo mapApplicantHaveYouLivedAtThisAddressForLessThanFiveYears(PartyDetails citizenProvidedPartyDetails) {
+    private static YesOrNo mapApplicantHaveYouLivedAtThisAddressForLessThanFiveYears(PartyDetails citizenProvidedPartyDetails) {
         if (Yes.equals(citizenProvidedPartyDetails.getIsAtAddressLessThan5Years())) {
             return Yes;
         } else {
@@ -745,7 +746,7 @@ public class CitizenPartyDetailsMapper {
         }
     }
 
-    private YesNoDontKnow mapRespondentHaveYouLivedAtThisAddressForLessThanFiveYears(PartyDetails citizenProvidedPartyDetails) {
+    private static YesNoDontKnow mapRespondentHaveYouLivedAtThisAddressForLessThanFiveYears(PartyDetails citizenProvidedPartyDetails) {
         if (Yes.equals(citizenProvidedPartyDetails.getIsAtAddressLessThan5Years())) {
             return YesNoDontKnow.yes;
         } else {
@@ -753,7 +754,7 @@ public class CitizenPartyDetailsMapper {
         }
     }
 
-    private CitizenDetails mapResponseCitizenDetails(PartyDetails citizenProvidedPartyDetails) {
+    private static CitizenDetails mapResponseCitizenDetails(PartyDetails citizenProvidedPartyDetails) {
         return CitizenDetails.builder()
             .firstName(citizenProvidedPartyDetails.getFirstName())
             .lastName(citizenProvidedPartyDetails.getLastName())
