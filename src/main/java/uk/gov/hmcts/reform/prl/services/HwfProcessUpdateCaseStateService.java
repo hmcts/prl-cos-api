@@ -177,6 +177,8 @@ public class HwfProcessUpdateCaseStateService {
                     );
                     caseDetailsList.addAll(paginatedSearchResultResponse.getCases());
                 }
+            } else {
+                log.info("HWF case search result was empty, no cases found");
             }
         } catch (JsonProcessingException e) {
             log.error("Exception happened in parsing query param {}", e.getMessage());
