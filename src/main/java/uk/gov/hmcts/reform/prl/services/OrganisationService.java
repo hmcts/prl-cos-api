@@ -189,6 +189,8 @@ public class OrganisationService {
 
         try {
             log.info("Finding user by email");
+            Object orgObject = organisationApi.findOrganisations(systemUserService.getSysUserToken(), authTokenGenerator.generate(), ACTIVE);
+
             OrganisationUser organisationUser = organisationApi.findUserByEmail(
                 systemUserService.getSysUserToken(),
                 authTokenGenerator.generate(),

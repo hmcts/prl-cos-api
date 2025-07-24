@@ -34,7 +34,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/cac")
+@RequestMapping("/case-assignment")
 public class CaseAssignmentController {
 
     private final CcdCaseAssignmentService ccdCaseAssignmentService;
