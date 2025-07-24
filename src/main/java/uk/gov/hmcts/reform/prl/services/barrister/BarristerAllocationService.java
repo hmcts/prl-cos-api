@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -28,7 +29,7 @@ public class BarristerAllocationService {
             .partyList(getSolicitorPartyDynamicList(caseData))
             .barristerName(null)
             .barristerEmail(null)
-            .barristerOrg(null)
+            .barristerOrg(Organisation.builder().build())
             .roleItem(null)
             .build();
     }
