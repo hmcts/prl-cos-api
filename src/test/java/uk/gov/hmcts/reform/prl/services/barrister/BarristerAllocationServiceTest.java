@@ -98,6 +98,49 @@ class BarristerAllocationServiceTest {
     }
 
     @Test
+    void shouldGetAllocatedBarristerFL401EmptyApplicant() {
+        setupRespondentFl401();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .respondentsFL401(respondentFL401)
+            .build();
+
+        AllocatedBarrister allocatedBarrister = barristerAllocationService.getAllocatedBarrister(caseData);
+        DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
+
+        assertNotNull(allocatedBarrister.getBarristerOrg());
+
+        assertEquals(partiesDynamicList.getValue(), null);
+        assertEquals(1, partiesDynamicList.getListItems().size());
+
+        DynamicListElement resParty1 = partiesDynamicList.getListItems().get(0);
+        assertEquals("resFirstName1 resLastName1 (Respondent), resSolFN1 resSolLN1, resSolOrgName1", resParty1.getLabel());
+        assertEquals(PARTY_ID_PREFIX + "4", resParty1.getCode());
+    }
+
+    @Test
+    void shouldGetAllocatedBarristerFL401EmptyRespondent() {
+        setupApplicantFL401();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .applicantsFL401(applicantFL401)
+            .build();
+
+        AllocatedBarrister allocatedBarrister = barristerAllocationService.getAllocatedBarrister(caseData);
+        DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
+
+        assertNotNull(allocatedBarrister.getBarristerOrg());
+
+        assertEquals(partiesDynamicList.getValue(), null);
+        assertEquals(1, partiesDynamicList.getListItems().size());
+        DynamicListElement appParty1 = partiesDynamicList.getListItems().get(0);
+        assertEquals("appFirstName1 appLastName1 (Applicant), appSolFN1 appSolLN1, appSolOrgName1", appParty1.getLabel());
+        assertEquals(PARTY_ID_PREFIX + "1", appParty1.getCode());
+    }
+
+    @Test
     void shouldGetAllocatedBarristerForNullApplicants() {
         setupRespondentsC100();
         CaseData caseData = CaseData.builder()
