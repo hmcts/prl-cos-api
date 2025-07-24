@@ -15,6 +15,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import java.util.ArrayList;
 import java.util.List;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
 
 @Slf4j
@@ -35,6 +37,16 @@ public class BarristerAllocationService {
     }
 
     private DynamicList getSolicitorPartyDynamicList(CaseData caseData) {
+        if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
+            return getSolicitorPartyDynamicListFL401(caseData);
+        } else if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            return getSolicitorPartyDynamicListC100(caseData);
+        } else {
+            throw new RuntimeException("Invalid case type detected for case " + caseData.getId());
+        }
+    }
+
+    private DynamicList getSolicitorPartyDynamicListC100(CaseData caseData) {
         List<DynamicListElement> listItems = new ArrayList<>();
         List<Element<PartyDetails>> applicants = caseData.getApplicants();
         if (applicants != null) {
@@ -49,24 +61,53 @@ public class BarristerAllocationService {
         return  DynamicList.builder().value(null).listItems(listItems).build();
     }
 
-    private static List<DynamicListElement> getPartyDynamicListElements(List<Element<PartyDetails>> partyDetailsList, boolean applicantOrRespondent) {
-        List<DynamicListElement> applicantsItemsList = new ArrayList<>();
-        for (Element element : partyDetailsList) {
-            PartyDetails partyDetails = (PartyDetails) element.getValue();
-            if (isPartyApplicableToAdd(partyDetails, applicantOrRespondent)) {
-                String label = String.format("%s %s (%s), %s, %s", partyDetails.getFirstName(),
-                                             partyDetails.getLastName(),
-                                             applicantOrRespondent ? APPLICANT : RESPONDENT,
-                                             partyDetails.getRepresentativeFullName(),
-                                             partyDetails.getSolicitorOrg().getOrganisationName()
-                );
-
-                DynamicListElement applicantDynamicItem = DynamicListElement.builder()
-                    .code(partyDetails.getPartyId()).label(label).build();
-                applicantsItemsList.add(applicantDynamicItem);
+    private DynamicList getSolicitorPartyDynamicListFL401(CaseData caseData) {
+        List<DynamicListElement> listItems = new ArrayList<>();
+        PartyDetails applicant = caseData.getApplicantsFL401();
+        if (applicant != null) {
+            DynamicListElement dynamicListElement = getPartyDynamicListElement(true, applicant);
+            if (dynamicListElement != null) {
+                listItems.add(dynamicListElement);
             }
         }
-        return applicantsItemsList;
+
+        PartyDetails respondent = caseData.getRespondentsFL401();
+        if (respondent != null) {
+            DynamicListElement dynamicListElement = getPartyDynamicListElement(false, respondent);
+            if (dynamicListElement != null) {
+                listItems.add(dynamicListElement);
+            }
+        }
+
+        return  DynamicList.builder().value(null).listItems(listItems).build();
+    }
+
+    private List<DynamicListElement> getPartyDynamicListElements(List<Element<PartyDetails>> partyDetailsList,
+                                                                 boolean applicantOrRespondent) {
+        List<DynamicListElement> itemsList = new ArrayList<>();
+        for (Element<PartyDetails> partyDetailsElement : partyDetailsList) {
+            DynamicListElement dynamicListElement = getPartyDynamicListElement(applicantOrRespondent, partyDetailsElement.getValue());
+            if (dynamicListElement != null) {
+                itemsList.add(dynamicListElement);
+            }
+        }
+        return itemsList;
+    }
+
+    private DynamicListElement getPartyDynamicListElement(boolean applicantOrRespondent, PartyDetails partyDetails) {
+        if (isPartyApplicableToAdd(partyDetails, applicantOrRespondent)) {
+            String label = String.format("%s %s (%s), %s, %s", partyDetails.getFirstName(),
+                                         partyDetails.getLastName(),
+                                         applicantOrRespondent ? APPLICANT : RESPONDENT,
+                                         partyDetails.getRepresentativeFullName(),
+                                         partyDetails.getSolicitorOrg().getOrganisationName()
+            );
+
+            DynamicListElement applicantDynamicItem = DynamicListElement.builder()
+                .code(partyDetails.getPartyId()).label(label).build();
+            return applicantDynamicItem;
+        }
+        return null;
     }
 
     private static boolean isPartyApplicableToAdd(PartyDetails partyDetails, boolean applicantOrRespondent) {
