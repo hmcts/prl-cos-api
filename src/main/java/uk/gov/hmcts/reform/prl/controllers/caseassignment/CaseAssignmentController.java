@@ -23,11 +23,13 @@ import uk.gov.hmcts.reform.prl.clients.ccd.CcdCaseAssignmentService;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -40,6 +42,7 @@ public class CaseAssignmentController {
     private final CcdCaseAssignmentService ccdCaseAssignmentService;
     private final ObjectMapper objectMapper;
     private final OrganisationService organisationService;
+    private final SystemUserService systemUserService;
 
     @PostMapping(path = "/aboutToSubmitAddBarrister", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "About to submit to add Barrister")
@@ -51,24 +54,15 @@ public class CaseAssignmentController {
     public AboutToStartOrSubmitCallbackResponse submittedAddBarrister(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-        List<String> errorList = new ArrayList<>();
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
-
-        Optional<String> userId = organisationService
-            .findUserByEmail(allocatedBarrister.getBarristerEmail());
-
-        userId.ifPresent(id -> ccdCaseAssignmentService.grantCaseAccess(
-            caseData,
-            id,
-            allocatedBarrister.getRoleItem()
-        ));
-
-        return AboutToStartOrSubmitCallbackResponse
-            .builder()
-            .data(caseData.toMap(objectMapper))
-            .errors(errorList).build();
+        //TODO derive barrister role to add from the case data
+        String roleItem = allocatedBarrister.getRoleItem();
+        return getAboutToStartOrSubmitCallbackResponse(caseData, userId ->
+            ccdCaseAssignmentService.grantCaseAccess(caseData,
+                                                     userId,
+                                                     roleItem));
     }
 
     @PostMapping(path = "/aboutToSubmitRemoveBarrister", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -81,19 +75,34 @@ public class CaseAssignmentController {
     public AboutToStartOrSubmitCallbackResponse submittedRemoveBarrister(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-        List<String> errorList = new ArrayList<>();
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
+        //TODO derive barrister role to remove from the case data
+        String roleItem = allocatedBarrister.getRoleItem();
+        return getAboutToStartOrSubmitCallbackResponse(caseData, userId ->
+            ccdCaseAssignmentService.removeBarrister(caseData,
+                                                     userId,
+                                                     roleItem));
+    }
+
+    private AboutToStartOrSubmitCallbackResponse getAboutToStartOrSubmitCallbackResponse(CaseData caseData,
+                                                                                         Consumer<String> ccdCaseAssignment) {
+        List<String> errorList = new ArrayList<>();
         AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
 
         Optional<String> userId = organisationService
             .findUserByEmail(allocatedBarrister.getBarristerEmail());
 
-        userId.ifPresent(id -> ccdCaseAssignmentService.removeBarrister(
-            caseData,
-            id,
-            allocatedBarrister.getRoleItem()
-        ));
+        if (userId.isPresent()) {
+            ccdCaseAssignmentService.validateBarristerOrgRelationship(allocatedBarrister, errorList);
+        } else {
+            errorList.add("Could not find barrister with provided email");
+        }
+
+        if (errorList.isEmpty()) {
+            userId.ifPresent(ccdCaseAssignment);
+        }
 
         return AboutToStartOrSubmitCallbackResponse
             .builder()

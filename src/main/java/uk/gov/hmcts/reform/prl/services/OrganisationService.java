@@ -198,7 +198,7 @@ public class OrganisationService {
             );
             return Optional.of(organisationUser.getUserIdentifier());
         } catch (FeignException.NotFound notFoundException) {
-            log.info("Could not find user by email");
+            log.info("Could not find user by email {}", maskEmail(email));
             return Optional.empty();
         } catch (FeignException exception) {
             throw new RuntimeException(email != null ? maskEmail(getStackTrace(exception), email) : "Email is not valid or null");

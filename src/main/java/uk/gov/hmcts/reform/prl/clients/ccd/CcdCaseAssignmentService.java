@@ -11,11 +11,13 @@ import uk.gov.hmcts.reform.ccd.client.CaseAssignmentApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRoleWithOrganisation;
 import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRolesRequest;
 import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
+import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
+import java.util.List;
 import java.util.Set;
 
 import static java.util.stream.Collectors.collectingAndThen;
@@ -108,5 +110,23 @@ public class CcdCaseAssignmentService {
             log.error(message, ex);
             throw new GrantCaseAccessException(message);
         }
+    }
+
+    public void validateBarristerOrgRelationship(AllocatedBarrister allocatedBarrister,
+                                                 List<String> errorList) {
+        OrgSolicitors organisationSolicitorDetails = organisationService.getOrganisationSolicitorDetails(
+            systemUserService.getSysUserToken(),
+            allocatedBarrister.getBarristerOrg().getOrganisationID()
+        );
+
+        organisationSolicitorDetails.getUsers().stream()
+            .filter(user -> user.getEmail().equals(allocatedBarrister.getBarristerEmail()))
+            .findAny()
+            .ifPresentOrElse(
+                user -> { },
+                () ->
+                    errorList.add(String.format("Barrister %s doesn't belong to selected organisation",
+                                                allocatedBarrister.getBarristerEmail())));
+
     }
 }
