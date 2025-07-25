@@ -12,8 +12,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.barrister.BarristerAllocationService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -22,17 +24,21 @@ import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATED_BARRISTER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @Slf4j
 @RestController
 @RequestMapping("/barrister")
 public class BarristerController extends AbstractCallbackController {
+    private final AuthorisationService authorisationService;
     private final BarristerAllocationService barristerAllocationService;
 
     public BarristerController(ObjectMapper objectMapper, EventService eventPublisher,
-                               BarristerAllocationService barristerAllocationService) {
+                               BarristerAllocationService barristerAllocationService,
+                               AuthorisationService authorisationService) {
         super(objectMapper, eventPublisher);
         this.barristerAllocationService = barristerAllocationService;
+        this.authorisationService = authorisationService;
     }
 
     @PostMapping(path = "/choose-barrister-to-add/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -40,16 +46,21 @@ public class BarristerController extends AbstractCallbackController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse handleMidEvent(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
 
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        caseDataUpdated.put(ALLOCATED_BARRISTER, barristerAllocationService.getAllocatedBarrister(caseData));
+            caseDataUpdated.put(ALLOCATED_BARRISTER, barristerAllocationService.getAllocatedBarrister(caseData));
 
-        AboutToStartOrSubmitCallbackResponse.AboutToStartOrSubmitCallbackResponseBuilder
-            builder = AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated);
-        return builder.build();
+            AboutToStartOrSubmitCallbackResponse.AboutToStartOrSubmitCallbackResponseBuilder
+                builder = AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated);
+            return builder.build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 }
