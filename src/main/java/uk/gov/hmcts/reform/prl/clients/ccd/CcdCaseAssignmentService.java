@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
-import java.util.List;
 import java.util.Set;
 
 import static java.util.stream.Collectors.collectingAndThen;
@@ -33,36 +32,36 @@ public class CcdCaseAssignmentService {
     private final OrganisationService organisationService;
     private final ObjectMapper objectMapper;
 
-    public void addBarrister(final CaseData caseData, String userId, List<String> errorList) {
-        AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
-        grantCaseAccess(caseData.getId(),
-                        Set.of(userId),
-                        allocatedBarrister.getRoleItem(),
-                        allocatedBarrister.getBarristerOrg().getOrganisationID());
-    }
-
-    private void grantCaseAccess(Long caseId, Set<String> userIds, String caseRole, String orgId) {
+    public void grantCaseAccess(final CaseData caseData,
+                                final String userId,
+                                final String caseRole) {
+        Set<String> userIds = Set.of(userId);
         try {
-            log.info("About to start granting case access for users {}", userIds);
+            log.info("About to start granting {} case access for users {}", caseRole, userIds);
+            AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
             CaseAssignmentUserRolesRequest addCaseAssignedUserRolesRequest = buildCaseAssignedUserRequest(
-                caseId,
+                caseData.getId(),
                 caseRole,
-                orgId,
-                userIds);
+                allocatedBarrister.getBarristerOrg().getOrganisationID(),
+                userIds
+            );
 
-            caseAssignmentApi.addCaseUserRoles(systemUserService.getSysUserToken(),
-                                               tokenGenerator.generate(),
-                                               addCaseAssignedUserRolesRequest);
+            caseAssignmentApi.addCaseUserRoles(
+                systemUserService.getSysUserToken(),
+                tokenGenerator.generate(),
+                addCaseAssignedUserRolesRequest
+            );
         } catch (FeignException ex) {
-            log.error("Could not assign the users to the case", ex);
-            throw new GrantCaseAccessException(caseId, userIds, caseRole);
+            String message = String.format("User(s) %s not granted %s to case %s", userIds, caseRole, caseData.getId());
+            log.error(message, ex);
+            throw new GrantCaseAccessException(message);
         }
     }
 
-    private CaseAssignmentUserRolesRequest  buildCaseAssignedUserRequest(Long caseId,
-                                                                         String caseRole,
-                                                                         String orgId,
-                                                                         Set<String> users) {
+    private CaseAssignmentUserRolesRequest buildCaseAssignedUserRequest(Long caseId,
+                                                                        String caseRole,
+                                                                        String orgId,
+                                                                        Set<String> users) {
         return users.stream()
             .map(user -> CaseAssignmentUserRoleWithOrganisation.builder()
                 .caseDataId(caseId.toString())
@@ -75,7 +74,39 @@ public class CcdCaseAssignmentService {
                 list ->
                     CaseAssignmentUserRolesRequest.builder()
                         .caseAssignmentUserRolesWithOrganisation(list)
-                        .build()));
+                        .build()
+            ));
 
+    }
+
+    public void removeBarrister(final CaseData caseData,
+                                final String userId,
+                                final String caseRole) {
+        Set<String> userIds = Set.of(userId);
+        try {
+            log.info("About to start remove case access {} for users {}", caseRole, userIds);
+            AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
+            CaseAssignmentUserRolesRequest addCaseAssignedUserRolesRequest = buildCaseAssignedUserRequest(
+                caseData.getId(),
+                caseRole,
+                allocatedBarrister.getBarristerOrg().getOrganisationID(),
+                userIds
+            );
+
+            caseAssignmentApi.removeCaseUserRoles(
+                systemUserService.getSysUserToken(),
+                tokenGenerator.generate(),
+                addCaseAssignedUserRolesRequest
+            );
+        } catch (FeignException ex) {
+            String message = String.format(
+                "Could not remove the user(s) %s role %s from the case %s",
+                userIds,
+                caseRole,
+                caseData.getId()
+            );
+            log.error(message, ex);
+            throw new GrantCaseAccessException(message);
+        }
     }
 }

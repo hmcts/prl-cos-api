@@ -48,7 +48,7 @@ public class CaseAssignmentController {
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse submittedAddBarristerV2(
+    public AboutToStartOrSubmitCallbackResponse submittedAddBarrister(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
         List<String> errorList = new ArrayList<>();
@@ -59,12 +59,41 @@ public class CaseAssignmentController {
         Optional<String> userId = organisationService
             .findUserByEmail(allocatedBarrister.getBarristerEmail());
 
-        userId.ifPresent(id -> ccdCaseAssignmentService.addBarrister(
+        userId.ifPresent(id -> ccdCaseAssignmentService.grantCaseAccess(
             caseData,
             id,
-            errorList
+            allocatedBarrister.getRoleItem()
         ));
 
+        return AboutToStartOrSubmitCallbackResponse
+            .builder()
+            .data(caseData.toMap(objectMapper))
+            .errors(errorList).build();
+    }
+
+    @PostMapping(path = "/aboutToSubmitRemoveBarrister", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "About to submit to remove Barrister")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse submittedRemoveBarrister(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        List<String> errorList = new ArrayList<>();
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
+
+        Optional<String> userId = organisationService
+            .findUserByEmail(allocatedBarrister.getBarristerEmail());
+
+        userId.ifPresent(id -> ccdCaseAssignmentService.removeBarrister(
+            caseData,
+            id,
+            allocatedBarrister.getRoleItem()
+        ));
 
         return AboutToStartOrSubmitCallbackResponse
             .builder()
