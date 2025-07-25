@@ -23,6 +23,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.prl.util.TestConstants.AUTHORISATION_HEADER;
 
 @Slf4j
@@ -42,6 +43,9 @@ public class BarristerControllerIntegrationTest {
     @MockBean
     AuthorisationService authorisationService;
 
+    private static final String AUTH_TOKEN = "auth-token";
+    private static final String SERVICE_TOKEN = "service-token";
+
     @Before
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
@@ -51,15 +55,15 @@ public class BarristerControllerIntegrationTest {
     @Test
     public void testBarristerControllerAboutToStart() throws Exception {
         objectMapper.registerModule(new ParameterNamesModule());
-        String url = "/barrister/choose-barrister-to-add/about-to-start";
+        String url = "/barrister/add/about-to-start";
         String jsonRequest = ResourceLoader.loadJson("controller/barristerAboutToStartCallBackRequest.json");
 
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
 
         mockMvc.perform(
                 post(url)
-                    .header(AUTHORISATION_HEADER, "testAuthToken")
-                    .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
+                    .header(AUTHORISATION_HEADER, AUTH_TOKEN)
+                    .header(SERVICE_AUTHORIZATION_HEADER, SERVICE_TOKEN)
                     .accept(APPLICATION_JSON)
                     .contentType(APPLICATION_JSON)
                     .content(jsonRequest))

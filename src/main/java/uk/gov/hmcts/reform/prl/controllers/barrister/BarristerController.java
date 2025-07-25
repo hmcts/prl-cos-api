@@ -41,7 +41,7 @@ public class BarristerController extends AbstractCallbackController {
         this.authorisationService = authorisationService;
     }
 
-    @PostMapping(path = "/choose-barrister-to-add/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/add/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to allocate a barrister on about-to-start")
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse handleMidEvent(

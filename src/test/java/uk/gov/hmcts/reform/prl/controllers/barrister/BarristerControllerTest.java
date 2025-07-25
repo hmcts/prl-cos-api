@@ -37,8 +37,8 @@ public class BarristerControllerTest {
     @Mock
     private ObjectMapper objectMapper;
 
-    public static final String AUTH_TOKEN = "auth-token";
-    public static final String SERVICE_TOKEN = "service-token";
+    private static final String AUTH_TOKEN = "auth-token";
+    private static final String SERVICE_TOKEN = "service-token";
 
     @Test
     public void shouldHandleMidEvent() {
