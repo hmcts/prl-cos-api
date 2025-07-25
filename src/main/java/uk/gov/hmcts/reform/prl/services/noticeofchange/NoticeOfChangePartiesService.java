@@ -659,12 +659,7 @@ public class NoticeOfChangePartiesService {
             selectedPartyDetailsMap,
             caseDataUpdated
         );
-        removeBarrister();
         return caseDataUpdated;
-    }
-
-    private void removeBarrister() {
-
     }
 
     private Map<String, Object> createChangeOrgReqAndRemoveRepresentative(String authorisation,
