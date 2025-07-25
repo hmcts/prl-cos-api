@@ -42,15 +42,15 @@ public class CsvWriter {
     };
 
     public static File writeCcdOrderDataToCsv(
-        CaseData CcdOrderData
+        CaseData ccdOrderData
     ) throws java.io.IOException {
         Path path = Files.createTempFile("AcroReport", ".csv", ATTRIBUTE);
         File file = path.toFile();
-        CSVFormat csvFileHeader = CSVFormat.DEFAULT.builder().setHeader(ACRO_REPORT_CSV_HEADERS).build();
+        CSVFormat csvFileHeader = CSVFormat.DEFAULT.withHeader(ACRO_REPORT_CSV_HEADERS);
 
         try (java.io.FileWriter fileWriter = new java.io.FileWriter(file);
              CSVPrinter printer = new CSVPrinter(fileWriter, csvFileHeader)) {
-
+            printer.printRecord();
         }
         return file;
     }
