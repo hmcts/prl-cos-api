@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.barrister.BarristerAllocationService;
 
 import java.util.HashMap;
@@ -19,6 +20,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,6 +37,8 @@ public class BarristerControllerTest {
     private ObjectMapper objectMapper;
 
     @Mock
+    private UserService userService;
+
     private UserDetails userDetails;
 
     private static final String authToken = "Bearer TestAuthToken";
@@ -60,7 +64,7 @@ public class BarristerControllerTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
 
         AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder().build();
-        when(barristerAllocationService.getAllocatedBarrister(any(), userDetails)).thenReturn(allocatedBarrister);
+        when(barristerAllocationService.getAllocatedBarrister(any(), eq(userDetails))).thenReturn(allocatedBarrister);
         AboutToStartOrSubmitCallbackResponse callbackResponse = barristerController.handleMidEvent(
             authToken,
             callbackRequest
@@ -68,7 +72,7 @@ public class BarristerControllerTest {
 
         assertEquals(allocatedBarrister, callbackResponse.getData().get("allocatedBarrister"));
 
-        verify(barristerAllocationService, times(1)).getAllocatedBarrister(any(), userDetails);
+        verify(barristerAllocationService, times(1)).getAllocatedBarrister(any(), eq(userDetails));
     }
 
 }
