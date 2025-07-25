@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -26,9 +28,9 @@ public class BarristerAllocationService {
     public static final String APPLICANT = "Applicant";
     public static final String RESPONDENT = "Respondent";
 
-    public AllocatedBarrister getAllocatedBarrister(CaseData caseData) {
+    public AllocatedBarrister getAllocatedBarrister(CaseData caseData, UserDetails userDetails) {
         return AllocatedBarrister.builder()
-            .partyList(getSolicitorPartyDynamicList(caseData))
+            .partyList(getSolicitorPartyDynamicList(caseData, userDetails))
             .barristerName(null)
             .barristerEmail(null)
             .barristerOrg(Organisation.builder().build())
@@ -36,21 +38,34 @@ public class BarristerAllocationService {
             .build();
     }
 
-    private DynamicList getSolicitorPartyDynamicList(CaseData caseData) {
+    private DynamicList getSolicitorPartyDynamicList(CaseData caseData, UserDetails userDetails) {
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
-            return getSolicitorPartyDynamicListFL401(caseData);
+            return getSolicitorPartyDynamicListFL401(caseData, userDetails);
         } else if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            return getSolicitorPartyDynamicListC100(caseData);
+            return getSolicitorPartyDynamicListC100(caseData, userDetails);
         } else {
             throw new RuntimeException("Invalid case type detected for case " + caseData.getId());
         }
     }
 
-    private DynamicList getSolicitorPartyDynamicListC100(CaseData caseData) {
+    private DynamicList getSolicitorPartyDynamicListC100(CaseData caseData, UserDetails userDetails) {
         List<DynamicListElement> listItems = new ArrayList<>();
         List<Element<PartyDetails>> applicants = caseData.getApplicants();
+        List<Element<PartyDetails>> relatedPeople = new ArrayList<>();
+
         if (applicants != null) {
-            listItems.addAll(getPartyDynamicListElements(applicants, true));
+            if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
+                String solicitorEmail = userDetails.getEmail();
+
+                for (Element<PartyDetails> applicant : applicants) {
+                    if (applicant.getValue().getSolicitorEmail().equals(solicitorEmail)) {
+                        relatedPeople.add(applicant);
+                    }
+                }
+                listItems.addAll(getPartyDynamicListElements(relatedPeople, true));
+            } else {
+                listItems.addAll(getPartyDynamicListElements(applicants, true));
+            }
         }
 
         List<Element<PartyDetails>> respondents = caseData.getRespondents();
@@ -61,7 +76,7 @@ public class BarristerAllocationService {
         return  DynamicList.builder().value(null).listItems(listItems).build();
     }
 
-    private DynamicList getSolicitorPartyDynamicListFL401(CaseData caseData) {
+    private DynamicList getSolicitorPartyDynamicListFL401(CaseData caseData, UserDetails userDetails) {
         List<DynamicListElement> listItems = new ArrayList<>();
         PartyDetails applicant = caseData.getApplicantsFL401();
         if (applicant != null) {

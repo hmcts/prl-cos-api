@@ -12,9 +12,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.EventService;
+import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.barrister.BarristerAllocationService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -28,11 +30,13 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATED_BARRI
 @RequestMapping("/barrister")
 public class BarristerController extends AbstractCallbackController {
     private final BarristerAllocationService barristerAllocationService;
+    private final UserService userService;
 
     public BarristerController(ObjectMapper objectMapper, EventService eventPublisher,
-                               BarristerAllocationService barristerAllocationService) {
+                               BarristerAllocationService barristerAllocationService, UserService userService) {
         super(objectMapper, eventPublisher);
         this.barristerAllocationService = barristerAllocationService;
+        this.userService = userService;
     }
 
     @PostMapping(path = "/choose-barrister-to-add/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -43,10 +47,11 @@ public class BarristerController extends AbstractCallbackController {
         @RequestBody CallbackRequest callbackRequest) {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        UserDetails userDetails = userService.getUserDetails(authorisation);
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        caseDataUpdated.put(ALLOCATED_BARRISTER, barristerAllocationService.getAllocatedBarrister(caseData));
+        caseDataUpdated.put(ALLOCATED_BARRISTER, barristerAllocationService.getAllocatedBarrister(caseData, userDetails));
 
         AboutToStartOrSubmitCallbackResponse.AboutToStartOrSubmitCallbackResponseBuilder
             builder = AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated);
