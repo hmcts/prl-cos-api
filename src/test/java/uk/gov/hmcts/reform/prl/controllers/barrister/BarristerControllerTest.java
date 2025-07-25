@@ -9,6 +9,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.barrister.BarristerAllocationService;
@@ -17,10 +18,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.any;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BarristerControllerTest {
@@ -32,6 +33,9 @@ public class BarristerControllerTest {
 
     @Mock
     private ObjectMapper objectMapper;
+
+    @Mock
+    private UserDetails userDetails;
 
     private static final String authToken = "Bearer TestAuthToken";
 
@@ -56,12 +60,15 @@ public class BarristerControllerTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
 
         AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder().build();
-        when(barristerAllocationService.getAllocatedBarrister(any())).thenReturn(allocatedBarrister);
-        AboutToStartOrSubmitCallbackResponse callbackResponse = barristerController.handleMidEvent(authToken, callbackRequest);
+        when(barristerAllocationService.getAllocatedBarrister(any(), userDetails)).thenReturn(allocatedBarrister);
+        AboutToStartOrSubmitCallbackResponse callbackResponse = barristerController.handleMidEvent(
+            authToken,
+            callbackRequest
+        );
 
         assertEquals(allocatedBarrister, callbackResponse.getData().get("allocatedBarrister"));
 
-        verify(barristerAllocationService, times(1)).getAllocatedBarrister(any());
+        verify(barristerAllocationService, times(1)).getAllocatedBarrister(any(), userDetails);
     }
 
 }
