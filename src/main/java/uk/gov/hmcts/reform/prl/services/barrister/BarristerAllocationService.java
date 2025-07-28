@@ -51,41 +51,23 @@ public class BarristerAllocationService {
     private DynamicList getSolicitorPartyDynamicListC100(CaseData caseData, UserDetails userDetails) {
         List<DynamicListElement> listItems = new ArrayList<>();
         List<Element<PartyDetails>> applicants = caseData.getApplicants();
-        List<Element<PartyDetails>> relatedPeople = new ArrayList<>();
-
         if (applicants != null) {
-            extracted(userDetails, applicants, relatedPeople, listItems);
+            listItems.addAll(getRelatedPeopleC100(userDetails, applicants, true));
         }
 
         List<Element<PartyDetails>> respondents = caseData.getRespondents();
         if (respondents != null) {
-            listItems.addAll(getPartyDynamicListElements(respondents, false));
+            listItems.addAll(getRelatedPeopleC100(userDetails, respondents, false));
         }
 
         return  DynamicList.builder().value(null).listItems(listItems).build();
-    }
-
-    private void extracted(UserDetails userDetails, List<Element<PartyDetails>> applicants, List<Element<PartyDetails>> relatedPeople,
-                           List<DynamicListElement> listItems) {
-        if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
-            String solicitorEmail = userDetails.getEmail();
-
-            for (Element<PartyDetails> applicant : applicants) {
-                if (applicant.getValue().getSolicitorEmail().equals(solicitorEmail)) {
-                    relatedPeople.add(applicant);
-                }
-            }
-            listItems.addAll(getPartyDynamicListElements(relatedPeople, true));
-        } else {
-            listItems.addAll(getPartyDynamicListElements(applicants, true));
-        }
     }
 
     private DynamicList getSolicitorPartyDynamicListFL401(CaseData caseData, UserDetails userDetails) {
         List<DynamicListElement> listItems = new ArrayList<>();
         PartyDetails applicant = caseData.getApplicantsFL401();
         if (applicant != null) {
-            DynamicListElement dynamicListElement = getPartyDynamicListElement(true, applicant);
+            DynamicListElement dynamicListElement = getRelatedPeopleFL401(userDetails, applicant, true);
             if (dynamicListElement != null) {
                 listItems.add(dynamicListElement);
             }
@@ -93,13 +75,44 @@ public class BarristerAllocationService {
 
         PartyDetails respondent = caseData.getRespondentsFL401();
         if (respondent != null) {
-            DynamicListElement dynamicListElement = getPartyDynamicListElement(false, respondent);
+            DynamicListElement dynamicListElement = getRelatedPeopleFL401(userDetails, respondent, false);
             if (dynamicListElement != null) {
                 listItems.add(dynamicListElement);
             }
         }
 
         return  DynamicList.builder().value(null).listItems(listItems).build();
+    }
+
+    private List<DynamicListElement> getRelatedPeopleC100(UserDetails userDetails, List<Element<PartyDetails>> people, Boolean isApplicant) {
+        if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
+            String solicitorEmail = userDetails.getEmail();
+            List<Element<PartyDetails>> relatedPeople = new ArrayList<>();
+
+            for (Element<PartyDetails> person : people) {
+                if (person.getValue().getSolicitorEmail().equals(solicitorEmail)) {
+                    relatedPeople.add(person);
+                }
+            }
+            return getPartyDynamicListElements(relatedPeople, isApplicant);
+        } else {
+            return getPartyDynamicListElements(people, isApplicant);
+        }
+    }
+
+    private DynamicListElement getRelatedPeopleFL401(UserDetails userDetails, PartyDetails person, Boolean isApplicant) {
+        if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
+            String solicitorEmail = userDetails.getEmail();
+            PartyDetails relatedPerson = null;
+
+            if (person.getSolicitorEmail().equals(solicitorEmail)) {
+                relatedPerson = person;
+            }
+
+            return getPartyDynamicListElement(isApplicant, relatedPerson);
+        } else {
+            return getPartyDynamicListElement(isApplicant, person);
+        }
     }
 
     private List<DynamicListElement> getPartyDynamicListElements(List<Element<PartyDetails>> partyDetailsList,
