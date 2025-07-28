@@ -44,7 +44,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_DRAFT_C1A;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIAL_REVIEW_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
@@ -332,11 +332,9 @@ public class TaskListService {
                 caseDataUpdated.put(DOCUMENT_FIELD_C1A, updatedCaseData.getC1ADocument());
                 caseDataUpdated.put(DOCUMENT_FIELD_C8_WELSH, updatedCaseData.getC8WelshDocument());
 
-                caseDataUpdated.put(DOCUMENT_FIELD_FINAL, !JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)
-                    ? updatedCaseData.getFinalDocument() : caseData.getFinalDocument());
+                caseDataUpdated.put(DOCUMENT_FIELD_FINAL, updatedCaseData.getFinalDocument());
 
-                caseDataUpdated.put(DRAFT_DOCUMENT_WELSH_FIELD, !JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)
-                    ? updatedCaseData.getFinalWelshDocument() : caseData.getFinalWelshDocument());
+                caseDataUpdated.put(DOCUMENT_FIELD_FINAL_WELSH, updatedCaseData.getFinalWelshDocument());
 
                 caseDataUpdated.put(DOCUMENT_FIELD_C1A_WELSH, updatedCaseData.getC1AWelshDocument());
 
