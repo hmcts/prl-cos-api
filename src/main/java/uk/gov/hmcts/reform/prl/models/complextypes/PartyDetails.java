@@ -94,6 +94,19 @@ public class PartyDetails {
 
     private YesOrNo isRemoveLegalRepresentativeRequested;
 
+    private UUID partyId;
+    private UUID solicitorOrgUuid;
+    private UUID solicitorPartyId;
+    private UUID barristerPartyId;
+    private final String barristerFirstName;
+    private final String barristerLastName;
+
+    @JsonIgnore
+    private CitizenSos citizenSosObject;
+
+    private YesOrNo liveInRefuge;
+    private Document refugeConfidentialityC8Form;
+
     public boolean hasConfidentialInfo() {
         return this.isAddressConfidential.equals(YesOrNo.Yes)
             || this.isPhoneNumberConfidential.equals(YesOrNo.Yes);
@@ -130,6 +143,15 @@ public class PartyDetails {
     }
 
     @JsonIgnore
+    public String getBarristerFullName() {
+        return String.format(
+            FULL_NAME_FORMAT,
+            this.barristerFirstName,
+            this.barristerLastName
+        );
+    }
+
+    @JsonIgnore
     public String getRepresentativeFullNameForCaseFlags() {
         if (!StringUtils.isEmpty(this.representativeFirstName)
             && !StringUtils.isEmpty(this.representativeLastName)) {
@@ -155,15 +177,4 @@ public class PartyDetails {
         }
     }
 
-    private UUID partyId;
-
-    private UUID solicitorOrgUuid;
-
-    private UUID solicitorPartyId;
-
-    @JsonIgnore
-    private CitizenSos citizenSosObject;
-
-    private YesOrNo liveInRefuge;
-    private Document refugeConfidentialityC8Form;
 }
