@@ -12,13 +12,18 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRole;
 import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRoleWithOrganisation;
 import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRolesRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRolesResource;
+import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
 import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.QueryAttributes;
+import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentQueryRequest;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -36,6 +41,7 @@ public class CcdCaseAssignmentService {
     private final SystemUserService systemUserService;
     private final AuthTokenGenerator tokenGenerator;
     private final OrganisationService organisationService;
+    private final RoleAssignmentApi roleAssignmentApi;
     private final ObjectMapper objectMapper;
 
     public void grantCaseAccess(final CaseData caseData,
@@ -167,8 +173,22 @@ public class CcdCaseAssignmentService {
     public void validateCaseRoles(CaseData caseData,
                                   String userRole,
                                   List<String> errorList) {
-
         String authToken = systemUserService.getSysUserToken();
+        RoleAssignmentQueryRequest roleAssignmentQueryRequest = RoleAssignmentQueryRequest.builder()
+            .attributes(QueryAttributes.builder()
+                            .caseId(List.of(String.valueOf(caseData.getId())))
+                            .build())
+            .validAt(LocalDateTime.now())
+            .build();
+        String systemAuthorisation = systemUserService.getSysUserToken();
+
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.queryRoleAssignments(
+            systemAuthorisation,
+            authToken,
+            null,
+            roleAssignmentQueryRequest
+        );
+
         CaseAssignmentUserRolesResource userRoles = caseAssignmentApi.getUserRoles(
             authToken,
             tokenGenerator.generate(),
@@ -180,12 +200,13 @@ public class CcdCaseAssignmentService {
             .map(CaseAssignmentUserRole::getCaseRole)
             .filter(caseRole -> caseRole.equals(userRole))
             .findAny()
-            .ifPresentOrElse(caseRole -> { },
-                             () -> {
-                    log.error("Case role {} is already associated with the case {}",
-                                          userRole,
-                                          caseData.getId());
-                    errorList.add("A barrister is already associated with the case");
-                });
+            .ifPresent(caseRole -> {
+                log.error(
+                    "Case role {} is already associated with the case {}",
+                    caseRole,
+                    caseData.getId()
+                );
+                errorList.add("A barrister is already associated with the case");
+            });
     }
 }
