@@ -86,11 +86,13 @@ public class BarristerAllocationService {
 
     private List<DynamicListElement> getRelatedPeopleC100(UserDetails userDetails, List<Element<PartyDetails>> people, Boolean isApplicant) {
         if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
-            String solicitorEmail = userDetails.getEmail();
+            String solicitorEmail = userDetails.getId();
             List<Element<PartyDetails>> relatedPeople = new ArrayList<>();
-
+            log.info("*** This is UserDetails Id: {} ", userDetails.getId());
             for (Element<PartyDetails> person : people) {
-                if (person.getValue().getSolicitorEmail().equals(solicitorEmail)) {
+                log.info("*** This is Solicitor Party Id: {} ", person.getValue().getPartyId());
+                log.info("*** This is Solicitor Org Id: {} ", person.getValue().getSolicitorOrgUuid());
+                if (person.getValue().getPartyId().toString().equals(userDetails.getId())) {
                     relatedPeople.add(person);
                 }
             }
