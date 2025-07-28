@@ -8,26 +8,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CaseAssignmentApi;
-import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRole;
 import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRoleWithOrganisation;
 import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRolesRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRolesResource;
-import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
 import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.QueryAttributes;
-import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentQueryRequest;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
-import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.prl.utils.EmailUtils.maskEmail;
@@ -41,7 +36,7 @@ public class CcdCaseAssignmentService {
     private final SystemUserService systemUserService;
     private final AuthTokenGenerator tokenGenerator;
     private final OrganisationService organisationService;
-    private final RoleAssignmentApi roleAssignmentApi;
+    private final RoleAssignmentService roleAssignmentService;
     private final ObjectMapper objectMapper;
 
     public void grantCaseAccess(final CaseData caseData,
@@ -122,8 +117,9 @@ public class CcdCaseAssignmentService {
         }
     }
 
-    public void validateBarristerOrgRelationship(AllocatedBarrister allocatedBarrister,
+    public void validateBarristerOrgRelationship(CaseData caseData,
                                                  List<String> errorList) {
+        AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
         OrgSolicitors organisationSolicitorDetails = organisationService.getOrganisationSolicitorDetails(
             systemUserService.getSysUserToken(),
             allocatedBarrister.getBarristerOrg().getOrganisationID()
@@ -135,7 +131,8 @@ public class CcdCaseAssignmentService {
             .ifPresentOrElse(
                 user -> { },
                 () -> {
-                    log.error("Barrister {} is not associated with the organisation {}",
+                    log.error("Case id {}: Barrister {} is not associated with the organisation {}",
+                              caseData.getId(),
                               maskEmail(allocatedBarrister.getBarristerEmail()),
                               allocatedBarrister.getBarristerOrg().getOrganisationID());
 
@@ -148,56 +145,31 @@ public class CcdCaseAssignmentService {
                                  String userRole,
                                  List<String> errorList) {
 
-        CaseAssignmentUserRolesResource userRoles = caseAssignmentApi.getUserRoles(
-            systemUserService.getSysUserToken(),
-            tokenGenerator.generate(),
-            String.valueOf(caseData.getId()),
-            userId
-        );
+        List<RoleAssignmentResponse> roleAssignmentResponses = roleAssignmentService
+            .getRoleAssignmentForActorId(userId);
 
-        userRoles.getCaseAssignmentUserRoles().stream()
-            .map(CaseAssignmentUserRole::getCaseRole)
-            .filter(not(caseRole -> caseRole.equals(userRole)))
+        roleAssignmentResponses.stream()
+            .map(RoleAssignmentResponse::getRoleName)
+            .filter(userRole::equals)
             .findAny()
-            .ifPresentOrElse(caseRole -> { },
+            .ifPresentOrElse(roleName -> { },
                              () -> {
                                  log.error("Barrister {} is not associated with the case {}",
                                            maskEmail(caseData.getAllocatedBarrister().getBarristerEmail()),
                                            caseData.getId());
-                                 errorList.add(String.format("Barrister %s is not associated with the case",
-                                                             caseData.getAllocatedBarrister().getBarristerEmail()));
-
+                                 errorList.add("Barrister is not associated with the case");
                              });
     }
 
     public void validateCaseRoles(CaseData caseData,
                                   String userRole,
                                   List<String> errorList) {
-        RoleAssignmentQueryRequest roleAssignmentQueryRequest = RoleAssignmentQueryRequest.builder()
-            .attributes(QueryAttributes.builder()
-                            .caseId(List.of(String.valueOf(caseData.getId())))
-                            .build())
-            .validAt(LocalDateTime.now())
-            .build();
-        String systemAuthorisation = systemUserService.getSysUserToken();
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentService
+            .getRoleAssignmentForCase(String.valueOf(caseData.getId()));
 
-        RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.queryRoleAssignments(
-            systemAuthorisation,
-            tokenGenerator.generate(),
-            null,
-            roleAssignmentQueryRequest
-        );
-
-        CaseAssignmentUserRolesResource userRoles = caseAssignmentApi.getUserRoles(
-            systemAuthorisation,
-            tokenGenerator.generate(),
-            String.valueOf(caseData.getId()),
-            systemUserService.getUserId(systemAuthorisation)
-        );
-
-        userRoles.getCaseAssignmentUserRoles().stream()
-            .map(CaseAssignmentUserRole::getCaseRole)
-            .filter(caseRole -> caseRole.equals(userRole))
+        roleAssignmentServiceResponse.getRoleAssignmentResponse().stream()
+            .map(RoleAssignmentResponse::getRoleName)
+            .filter(userRole::equals)
             .findAny()
             .ifPresent(caseRole -> {
                 log.error(

@@ -63,7 +63,7 @@ public class CaseAssignmentController {
 
         return getAboutToStartOrSubmitCallbackResponse(caseData,
                                                        (userId,errorList) -> {
-                ccdCaseAssignmentService.validateBarristerOrgRelationship(allocatedBarrister,
+                ccdCaseAssignmentService.validateBarristerOrgRelationship(caseData,
                                                                           errorList);
                 ccdCaseAssignmentService.validateCaseRoles(caseData,
                                                            roleItem,
