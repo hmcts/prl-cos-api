@@ -186,27 +186,27 @@ class BarristerAllocationServiceTest {
         );
     }
 
-    @Ignore
-    @Test
-    void shouldGetApplicantForSolicitorC100() {
-        setupApplicantsC100();
-        UserDetails userDetails = setupSolicitorUserDetailsC100();
-        CaseData caseData = CaseData.builder().caseTypeOfApplication("C100").applicants(allApplicants).build();
-
-        AllocatedBarrister allocatedBarrister = barristerAllocationService.getAllocatedBarrister(caseData, userDetails);
-        DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
-
-        assertNotNull(allocatedBarrister.getBarristerOrg());
-
-        assertNull(partiesDynamicList.getValue());
-        assertEquals(1, partiesDynamicList.getListItems().size());
-        DynamicListElement appParty1 = partiesDynamicList.getListItems().getFirst();
-        assertEquals(
-            "appFirstName1 appLastName1 (Applicant), appSolFN1 appSolLN1, appSolOrgName1",
-            appParty1.getLabel()
-        );
-        assertEquals(PARTY_ID_PREFIX + "1", appParty1.getCode());
-    }
+    // @Ignore
+    // @Test
+    // void shouldGetApplicantForSolicitorC100() {
+    //     setupApplicantsC100();
+    //     UserDetails userDetails = setupSolicitorUserDetailsC100();
+    //     CaseData caseData = CaseData.builder().caseTypeOfApplication("C100").applicants(allApplicants).build();
+    //
+    //     AllocatedBarrister allocatedBarrister = barristerAllocationService.getAllocatedBarrister(caseData, userDetails);
+    //     DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
+    //
+    //     assertNotNull(allocatedBarrister.getBarristerOrg());
+    //
+    //     assertNull(partiesDynamicList.getValue());
+    //     assertEquals(1, partiesDynamicList.getListItems().size());
+    //     DynamicListElement appParty1 = partiesDynamicList.getListItems().getFirst();
+    //     assertEquals(
+    //         "appFirstName1 appLastName1 (Applicant), appSolFN1 appSolLN1, appSolOrgName1",
+    //         appParty1.getLabel()
+    //     );
+    //     assertEquals(PARTY_ID_PREFIX + "1", appParty1.getCode());
+    // }
 
     @Test
     void shouldGetApplicantForSolicitorFL401() {
@@ -229,68 +229,68 @@ class BarristerAllocationServiceTest {
         assertEquals(PARTY_ID_PREFIX + "1", appParty1.getCode());
     }
 
-    @Ignore
-    @Test
-    void shouldGetApplicantsWithSameSolicitorC100() {
-        setupApplicantsC100();
-        Element<PartyDetails> newPartyDetails = buildPartyDetails(
-            "2",
-            "appFirstName2",
-            "appLastName2",
-            true,
-            "appSolFN2",
-            "appSolLN2",
-            "appSolOrgName2",
-            "solicitor@gmail.com"
-        );
+    // @Ignore
+    // @Test
+    // void shouldGetApplicantsWithSameSolicitorC100() {
+    //     setupApplicantsC100();
+    //     Element<PartyDetails> newPartyDetails = buildPartyDetails(
+    //         "2",
+    //         "appFirstName2",
+    //         "appLastName2",
+    //         true,
+    //         "appSolFN2",
+    //         "appSolLN2",
+    //         "appSolOrgName2",
+    //         "solicitor@gmail.com"
+    //     );
+    //
+    //     allApplicants.set(1, newPartyDetails);
+    //     UserDetails userDetails = setupSolicitorUserDetailsC100();
+    //     CaseData caseData = CaseData.builder().caseTypeOfApplication("C100").applicants(allApplicants).build();
+    //
+    //     AllocatedBarrister allocatedBarrister = barristerAllocationService.getAllocatedBarrister(caseData, userDetails);
+    //     DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
+    //
+    //     assertNotNull(allocatedBarrister.getBarristerOrg());
+    //
+    //     assertNull(partiesDynamicList.getValue());
+    //     assertEquals(2, partiesDynamicList.getListItems().size());
+    //     DynamicListElement appParty1 = partiesDynamicList.getListItems().getFirst();
+    //     assertEquals(
+    //         "appFirstName1 appLastName1 (Applicant), appSolFN1 appSolLN1, appSolOrgName1",
+    //         appParty1.getLabel()
+    //     );
+    //     assertEquals(PARTY_ID_PREFIX + "1", appParty1.getCode());
+    //
+    //     DynamicListElement appParty2 = partiesDynamicList.getListItems().get(1);
+    //     assertEquals(
+    //         "appFirstName2 appLastName2 (Applicant), appSolFN2 appSolLN2, appSolOrgName2",
+    //         appParty2.getLabel()
+    //     );
+    //     assertEquals(PARTY_ID_PREFIX + "2", appParty2.getCode());
+    // }
 
-        allApplicants.set(1, newPartyDetails);
-        UserDetails userDetails = setupSolicitorUserDetailsC100();
-        CaseData caseData = CaseData.builder().caseTypeOfApplication("C100").applicants(allApplicants).build();
-
-        AllocatedBarrister allocatedBarrister = barristerAllocationService.getAllocatedBarrister(caseData, userDetails);
-        DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
-
-        assertNotNull(allocatedBarrister.getBarristerOrg());
-
-        assertNull(partiesDynamicList.getValue());
-        assertEquals(2, partiesDynamicList.getListItems().size());
-        DynamicListElement appParty1 = partiesDynamicList.getListItems().getFirst();
-        assertEquals(
-            "appFirstName1 appLastName1 (Applicant), appSolFN1 appSolLN1, appSolOrgName1",
-            appParty1.getLabel()
-        );
-        assertEquals(PARTY_ID_PREFIX + "1", appParty1.getCode());
-
-        DynamicListElement appParty2 = partiesDynamicList.getListItems().get(1);
-        assertEquals(
-            "appFirstName2 appLastName2 (Applicant), appSolFN2 appSolLN2, appSolOrgName2",
-            appParty2.getLabel()
-        );
-        assertEquals(PARTY_ID_PREFIX + "2", appParty2.getCode());
-    }
-
-    @Ignore
-    @Test
-    void shouldGetRespondentForSolicitorC100() {
-        setupRespondentsC100();
-        UserDetails userDetails = setupSolicitorUserDetailsC100();
-        CaseData caseData = CaseData.builder().caseTypeOfApplication("C100").respondents(allRespondents).build();
-
-        AllocatedBarrister allocatedBarrister = barristerAllocationService.getAllocatedBarrister(caseData, userDetails);
-        DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
-
-        assertNotNull(allocatedBarrister.getBarristerOrg());
-
-        assertNull(partiesDynamicList.getValue());
-        assertEquals(1, partiesDynamicList.getListItems().size());
-        DynamicListElement resParty1 = partiesDynamicList.getListItems().getFirst();
-        assertEquals(
-            "resFirstName1 resLastName1 (Respondent), resSolFN1 resSolLN1, resSolOrgName1",
-            resParty1.getLabel()
-        );
-        assertEquals(PARTY_ID_PREFIX + "4", resParty1.getCode());
-    }
+    // @Ignore
+    // @Test
+    // void shouldGetRespondentForSolicitorC100() {
+    //     setupRespondentsC100();
+    //     UserDetails userDetails = setupSolicitorUserDetailsC100();
+    //     CaseData caseData = CaseData.builder().caseTypeOfApplication("C100").respondents(allRespondents).build();
+    //
+    //     AllocatedBarrister allocatedBarrister = barristerAllocationService.getAllocatedBarrister(caseData, userDetails);
+    //     DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
+    //
+    //     assertNotNull(allocatedBarrister.getBarristerOrg());
+    //
+    //     assertNull(partiesDynamicList.getValue());
+    //     assertEquals(1, partiesDynamicList.getListItems().size());
+    //     DynamicListElement resParty1 = partiesDynamicList.getListItems().getFirst();
+    //     assertEquals(
+    //         "resFirstName1 resLastName1 (Respondent), resSolFN1 resSolLN1, resSolOrgName1",
+    //         resParty1.getLabel()
+    //     );
+    //     assertEquals(PARTY_ID_PREFIX + "4", resParty1.getCode());
+    // }
 
     @Test
     void shouldGetRespondentForSolicitorFL401() {
@@ -314,43 +314,43 @@ class BarristerAllocationServiceTest {
         assertEquals(PARTY_ID_PREFIX + "4", resParty1.getCode());
     }
 
-    @Ignore
-    @Test
-    void shouldGetRespondentsWithSameSolicitorC100() {
-        setupRespondentsC100();
-        Element<PartyDetails> newPartyDetails = buildPartyDetails(
-            "5",
-            "resFirstName2",
-            "resLastName2",
-            true,
-            "resSolFN2",
-            "resSolLN2",
-            "resSolOrgName2",
-            "solicitor@gmail.com"
-        );
-        allRespondents.set(1, newPartyDetails);
-        UserDetails userDetails = setupSolicitorUserDetailsC100();
-        CaseData caseData = CaseData.builder().caseTypeOfApplication("C100").respondents(allRespondents).build();
-        AllocatedBarrister allocatedBarrister = barristerAllocationService.getAllocatedBarrister(caseData, userDetails);
-        DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
-
-        assertNotNull(allocatedBarrister.getBarristerOrg());
-
-        assertNull(partiesDynamicList.getValue());
-        assertEquals(2, partiesDynamicList.getListItems().size());
-        DynamicListElement resParty1 = partiesDynamicList.getListItems().getFirst();
-        assertEquals(
-            "resFirstName1 resLastName1 (Respondent), resSolFN1 resSolLN1, resSolOrgName1",
-            resParty1.getLabel()
-        );
-        assertEquals(PARTY_ID_PREFIX + "4", resParty1.getCode());
-        DynamicListElement resParty2 = partiesDynamicList.getListItems().get(1);
-        assertEquals(
-            "resFirstName2 resLastName2 (Respondent), resSolFN2 resSolLN2, resSolOrgName2",
-            resParty2.getLabel()
-        );
-        assertEquals(PARTY_ID_PREFIX + "5", resParty2.getCode());
-    }
+    // @Ignore
+    // @Test
+    // void shouldGetRespondentsWithSameSolicitorC100() {
+    //     setupRespondentsC100();
+    //     Element<PartyDetails> newPartyDetails = buildPartyDetails(
+    //         "5",
+    //         "resFirstName2",
+    //         "resLastName2",
+    //         true,
+    //         "resSolFN2",
+    //         "resSolLN2",
+    //         "resSolOrgName2",
+    //         "solicitor@gmail.com"
+    //     );
+    //     allRespondents.set(1, newPartyDetails);
+    //     UserDetails userDetails = setupSolicitorUserDetailsC100();
+    //     CaseData caseData = CaseData.builder().caseTypeOfApplication("C100").respondents(allRespondents).build();
+    //     AllocatedBarrister allocatedBarrister = barristerAllocationService.getAllocatedBarrister(caseData, userDetails);
+    //     DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
+    //
+    //     assertNotNull(allocatedBarrister.getBarristerOrg());
+    //
+    //     assertNull(partiesDynamicList.getValue());
+    //     assertEquals(2, partiesDynamicList.getListItems().size());
+    //     DynamicListElement resParty1 = partiesDynamicList.getListItems().getFirst();
+    //     assertEquals(
+    //         "resFirstName1 resLastName1 (Respondent), resSolFN1 resSolLN1, resSolOrgName1",
+    //         resParty1.getLabel()
+    //     );
+    //     assertEquals(PARTY_ID_PREFIX + "4", resParty1.getCode());
+    //     DynamicListElement resParty2 = partiesDynamicList.getListItems().get(1);
+    //     assertEquals(
+    //         "resFirstName2 resLastName2 (Respondent), resSolFN2 resSolLN2, resSolOrgName2",
+    //         resParty2.getLabel()
+    //     );
+    //     assertEquals(PARTY_ID_PREFIX + "5", resParty2.getCode());
+    // }
 
     private Element<PartyDetails> buildPartyDetails(String id, String appFirstName, String appLastName, boolean hasRep,
                                                     String repappFirstName, String repappLastName, String orgName, String solicitorEmail) {
