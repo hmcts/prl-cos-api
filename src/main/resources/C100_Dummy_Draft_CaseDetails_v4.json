@@ -3456,7 +3456,7 @@
           "isEmailAddressConfidential": "Yes",
           "applicantContactInstructions": null,
           "respondentLivedWithApplicant": null,
-          "doTheyHaveLegalRepresentation": "yes",
+          "doTheyHaveLegalRepresentation": "Yes",
           "addressLivedLessThan5YearsDetails": null,
           "otherPersonRelationshipToChildren": [
 
@@ -3950,7 +3950,7 @@
           "isEmailAddressConfidential": "Yes",
           "applicantContactInstructions": null,
           "respondentLivedWithApplicant": null,
-          "doTheyHaveLegalRepresentation": "yes",
+          "doTheyHaveLegalRepresentation": "Yes",
           "addressLivedLessThan5YearsDetails": null,
           "otherPersonRelationshipToChildren": [
 
