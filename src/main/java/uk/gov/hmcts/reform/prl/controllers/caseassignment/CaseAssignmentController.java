@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -59,7 +60,17 @@ public class CaseAssignmentController {
         AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
         //TODO derive barrister role to add from the case data
         String roleItem = allocatedBarrister.getRoleItem();
-        return getAboutToStartOrSubmitCallbackResponse(caseData, userId ->
+
+        return getAboutToStartOrSubmitCallbackResponse(caseData,
+                                                       (userId,errorList) -> {
+                ccdCaseAssignmentService.validateBarristerOrgRelationship(allocatedBarrister,
+                                                                          errorList);
+                ccdCaseAssignmentService.validateCaseRoles(caseData,
+                                                           roleItem,
+                                                           errorList);
+            },
+
+                                                       userId ->
             ccdCaseAssignmentService.grantCaseAccess(caseData,
                                                      userId,
                                                      roleItem));
@@ -80,13 +91,19 @@ public class CaseAssignmentController {
         AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
         //TODO derive barrister role to remove from the case data
         String roleItem = allocatedBarrister.getRoleItem();
-        return getAboutToStartOrSubmitCallbackResponse(caseData, userId ->
+        return getAboutToStartOrSubmitCallbackResponse(caseData,
+                                                       (userId,errorList) -> ccdCaseAssignmentService.validateUserRole(caseData,
+                                                                                                              userId,
+                                                                                                              roleItem,
+                                                                                                              errorList),
+                                                       userId ->
             ccdCaseAssignmentService.removeBarrister(caseData,
                                                      userId,
                                                      roleItem));
     }
 
     private AboutToStartOrSubmitCallbackResponse getAboutToStartOrSubmitCallbackResponse(CaseData caseData,
+                                                                                         BiConsumer<String, List<String>> validator,
                                                                                          Consumer<String> ccdCaseAssignment) {
         List<String> errorList = new ArrayList<>();
         AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
@@ -95,7 +112,7 @@ public class CaseAssignmentController {
             .findUserByEmail(allocatedBarrister.getBarristerEmail());
 
         if (userId.isPresent()) {
-            ccdCaseAssignmentService.validateBarristerOrgRelationship(allocatedBarrister, errorList);
+            validator.accept(userId.get(), errorList);
         } else {
             errorList.add("Could not find barrister with provided email");
         }

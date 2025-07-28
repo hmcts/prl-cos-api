@@ -8,8 +8,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CaseAssignmentApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRole;
 import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRoleWithOrganisation;
 import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRolesRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRolesResource;
 import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
 import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
@@ -20,8 +22,10 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import java.util.List;
 import java.util.Set;
 
+import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.prl.utils.EmailUtils.maskEmail;
 
 @Slf4j
 @Builder
@@ -124,9 +128,62 @@ public class CcdCaseAssignmentService {
             .findAny()
             .ifPresentOrElse(
                 user -> { },
-                () ->
-                    errorList.add(String.format("Barrister %s doesn't belong to selected organisation",
-                                                allocatedBarrister.getBarristerEmail())));
+                () -> {
+                    log.error("Barrister {} is not associated with the organisation {}",
+                              maskEmail(allocatedBarrister.getBarristerEmail()),
+                              allocatedBarrister.getBarristerOrg().getOrganisationID());
 
+                    errorList.add("Barrister doesn't belong to selected organisation");
+                });
+    }
+
+    public void validateUserRole(CaseData caseData,
+                                 String userId,
+                                 String userRole,
+                                 List<String> errorList) {
+
+        CaseAssignmentUserRolesResource userRoles = caseAssignmentApi.getUserRoles(
+            systemUserService.getSysUserToken(),
+            tokenGenerator.generate(),
+            String.valueOf(caseData.getId()),
+            userId
+        );
+
+        userRoles.getCaseAssignmentUserRoles().stream()
+            .map(CaseAssignmentUserRole::getCaseRole)
+            .filter(not(caseRole -> caseRole.equals(userRole)))
+            .findAny()
+            .ifPresentOrElse(caseRole -> { },
+                             () -> {
+                                 log.error("Barrister {} is not associated with the case {}",
+                                           maskEmail(caseData.getAllocatedBarrister().getBarristerEmail()),
+                                           caseData.getId());
+                                 errorList.add(String.format("Barrister %s is not associated with the case",
+                                                             caseData.getAllocatedBarrister().getBarristerEmail()));
+
+                             });
+    }
+
+    public void validateCaseRoles(CaseData caseData,
+                                  String userRole,
+                                  List<String> errorList) {
+
+        CaseAssignmentUserRolesResource userRoles = caseAssignmentApi.getUserRoles(
+            systemUserService.getSysUserToken(),
+            tokenGenerator.generate(),
+            List.of(String.valueOf(caseData.getId()))
+        );
+
+        userRoles.getCaseAssignmentUserRoles().stream()
+            .map(CaseAssignmentUserRole::getCaseRole)
+            .filter(caseRole -> caseRole.equals(userRole))
+            .findAny()
+            .ifPresentOrElse(caseRole -> { },
+                             () -> {
+                    log.error("Case role {} is already associated with the case {}",
+                                          userRole,
+                                          caseData.getId());
+                    errorList.add("A barrister is already associated with the case");
+                });
     }
 }
