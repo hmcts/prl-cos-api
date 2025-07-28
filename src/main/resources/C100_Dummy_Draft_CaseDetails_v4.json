@@ -2061,7 +2061,7 @@
           "canYouProvideEmailAddress": "Yes",
           "isPhoneNumberConfidential": null,
           "isEmailAddressConfidential": null,
-          "doTheyHaveLegalRepresentation": "No",
+          "doTheyHaveLegalRepresentation": "no",
           "addressLivedLessThan5YearsDetails": null,
           "isAtAddressLessThan5YearsWithDontKnow": "No"
         }
@@ -2102,7 +2102,7 @@
           "canYouProvideEmailAddress": "Yes",
           "isPhoneNumberConfidential": null,
           "isEmailAddressConfidential": null,
-          "doTheyHaveLegalRepresentation": "No",
+          "doTheyHaveLegalRepresentation": "no",
           "addressLivedLessThan5YearsDetails": null,
           "isAtAddressLessThan5YearsWithDontKnow": "No"
         }
@@ -2143,7 +2143,7 @@
           "canYouProvideEmailAddress": "Yes",
           "isPhoneNumberConfidential": null,
           "isEmailAddressConfidential": null,
-          "doTheyHaveLegalRepresentation": "No",
+          "doTheyHaveLegalRepresentation": "no",
           "addressLivedLessThan5YearsDetails": null,
           "isAtAddressLessThan5YearsWithDontKnow": "No"
         }
@@ -3456,7 +3456,7 @@
           "isEmailAddressConfidential": "Yes",
           "applicantContactInstructions": null,
           "respondentLivedWithApplicant": null,
-          "doTheyHaveLegalRepresentation": "Yes",
+          "doTheyHaveLegalRepresentation": "yes",
           "addressLivedLessThan5YearsDetails": null,
           "otherPersonRelationshipToChildren": [
 
@@ -3950,7 +3950,7 @@
           "isEmailAddressConfidential": "Yes",
           "applicantContactInstructions": null,
           "respondentLivedWithApplicant": null,
-          "doTheyHaveLegalRepresentation": "Yes",
+          "doTheyHaveLegalRepresentation": "yes",
           "addressLivedLessThan5YearsDetails": null,
           "otherPersonRelationshipToChildren": [
 
@@ -5039,7 +5039,7 @@
           "isEmailAddressConfidential": null,
           "applicantContactInstructions": null,
           "respondentLivedWithApplicant": null,
-          "doTheyHaveLegalRepresentation": "Yes",
+          "doTheyHaveLegalRepresentation": "yes",
           "addressLivedLessThan5YearsDetails": null,
           "otherPersonRelationshipToChildren": [
 
@@ -6023,7 +6023,7 @@
           "isEmailAddressConfidential": null,
           "applicantContactInstructions": null,
           "respondentLivedWithApplicant": null,
-          "doTheyHaveLegalRepresentation": "Yes",
+          "doTheyHaveLegalRepresentation": "yes",
           "addressLivedLessThan5YearsDetails": null,
           "otherPersonRelationshipToChildren": [
 
