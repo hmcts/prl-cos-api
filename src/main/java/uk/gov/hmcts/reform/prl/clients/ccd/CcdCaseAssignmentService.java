@@ -173,7 +173,6 @@ public class CcdCaseAssignmentService {
     public void validateCaseRoles(CaseData caseData,
                                   String userRole,
                                   List<String> errorList) {
-        String authToken = systemUserService.getSysUserToken();
         RoleAssignmentQueryRequest roleAssignmentQueryRequest = RoleAssignmentQueryRequest.builder()
             .attributes(QueryAttributes.builder()
                             .caseId(List.of(String.valueOf(caseData.getId())))
@@ -184,16 +183,16 @@ public class CcdCaseAssignmentService {
 
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.queryRoleAssignments(
             systemAuthorisation,
-            authToken,
+            tokenGenerator.generate(),
             null,
             roleAssignmentQueryRequest
         );
 
         CaseAssignmentUserRolesResource userRoles = caseAssignmentApi.getUserRoles(
-            authToken,
+            systemAuthorisation,
             tokenGenerator.generate(),
             String.valueOf(caseData.getId()),
-            systemUserService.getUserId(authToken)
+            systemUserService.getUserId(systemAuthorisation)
         );
 
         userRoles.getCaseAssignmentUserRoles().stream()
