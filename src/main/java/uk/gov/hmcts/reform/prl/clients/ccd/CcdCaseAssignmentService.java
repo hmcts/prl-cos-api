@@ -168,10 +168,12 @@ public class CcdCaseAssignmentService {
                                   String userRole,
                                   List<String> errorList) {
 
+        String authToken = systemUserService.getSysUserToken();
         CaseAssignmentUserRolesResource userRoles = caseAssignmentApi.getUserRoles(
-            systemUserService.getSysUserToken(),
+            authToken,
             tokenGenerator.generate(),
-            List.of(String.valueOf(caseData.getId()))
+            String.valueOf(caseData.getId()),
+            systemUserService.getUserId(authToken)
         );
 
         userRoles.getCaseAssignmentUserRoles().stream()
