@@ -108,7 +108,7 @@ public class TestingSupportService {
 
     private static final String VALID_FL401_GATEKEEPING_INPUT_JSON = "FL401_Dummy_Gatekeeping_CaseDetails.json";
 
-    private static final String VALID_C100_DRAFT_V3_INPUT_JSON = "C100_Dummy_Draft_CaseDetails_v3.json";
+    private static final String VALID_C100_DRAFT_V3_INPUT_JSON = "C100_Dummy_Draft_CaseDetails_v4.json";
 
     private static final String VALID_C100_GATEKEEPING_V3_INPUT_JSON = "C100_Dummy_Gatekeeping_CaseDetails_v3.json";
 
