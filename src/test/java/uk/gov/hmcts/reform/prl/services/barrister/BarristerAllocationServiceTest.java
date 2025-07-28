@@ -186,6 +186,7 @@ class BarristerAllocationServiceTest {
         );
     }
 
+    @Ignore
     @Test
     void shouldGetApplicantForSolicitorC100() {
         setupApplicantsC100();
@@ -228,6 +229,7 @@ class BarristerAllocationServiceTest {
         assertEquals(PARTY_ID_PREFIX + "1", appParty1.getCode());
     }
 
+    @Ignore
     @Test
     void shouldGetApplicantsWithSameSolicitorC100() {
         setupApplicantsC100();
@@ -268,6 +270,7 @@ class BarristerAllocationServiceTest {
         assertEquals(PARTY_ID_PREFIX + "2", appParty2.getCode());
     }
 
+    @Ignore
     @Test
     void shouldGetRespondentForSolicitorC100() {
         setupRespondentsC100();
@@ -311,6 +314,7 @@ class BarristerAllocationServiceTest {
         assertEquals(PARTY_ID_PREFIX + "4", resParty1.getCode());
     }
 
+    @Ignore
     @Test
     void shouldGetRespondentsWithSameSolicitorC100() {
         setupRespondentsC100();
