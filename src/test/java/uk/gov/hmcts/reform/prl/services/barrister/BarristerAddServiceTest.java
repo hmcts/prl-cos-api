@@ -186,9 +186,9 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
             .build();
     }
 
-    protected void assertPartyToAdd(DynamicList listOfBarristersToRemove, boolean appOrResp, String prefix, int itemIndex, int partyIndex) {
+    protected void assertPartyToAdd(DynamicList listOfBarristers, boolean appOrResp, String prefix, int itemIndex, int partyIndex) {
         String appRepPrefix = appOrResp ? "App" : "Resp";
-        DynamicListElement appParty = listOfBarristersToRemove.getListItems().get(itemIndex);
+        DynamicListElement appParty = listOfBarristers.getListItems().get(itemIndex);
         String label = appRepPrefix + "FN" + partyIndex + " " + appRepPrefix + "LN" + partyIndex + " "
             + (appOrResp ? "(Applicant)" : "(Respondent)") + ", "
             + appRepPrefix + "FN" + partyIndex + " " + appRepPrefix + "LN" + partyIndex + ", "

@@ -17,7 +17,7 @@ import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
-import uk.gov.hmcts.reform.prl.services.barrister.BarristerAllocationService;
+import uk.gov.hmcts.reform.prl.services.barrister.BarristerAddService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.Map;
@@ -31,13 +31,13 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @RequestMapping("/barrister")
 public class BarristerController extends AbstractCallbackController {
     private final AuthorisationService authorisationService;
-    private final BarristerAllocationService barristerAllocationService;
+    private final BarristerAddService barristerAddService;
 
     public BarristerController(ObjectMapper objectMapper, EventService eventPublisher,
-                               BarristerAllocationService barristerAllocationService,
+                               BarristerAddService barristerAddService,
                                AuthorisationService authorisationService) {
         super(objectMapper, eventPublisher);
-        this.barristerAllocationService = barristerAllocationService;
+        this.barristerAddService = barristerAddService;
         this.authorisationService = authorisationService;
     }
 
@@ -54,7 +54,7 @@ public class BarristerController extends AbstractCallbackController {
 
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-            caseDataUpdated.put(ALLOCATED_BARRISTER, barristerAllocationService.getAllocatedBarrister(caseData));
+            caseDataUpdated.put(ALLOCATED_BARRISTER, barristerAddService.getAllocatedBarrister(caseData));
 
             AboutToStartOrSubmitCallbackResponse.AboutToStartOrSubmitCallbackResponseBuilder
                 builder = AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated);

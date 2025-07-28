@@ -48,22 +48,21 @@ public abstract class AbstractBarristerService {
     protected DynamicList getSolicitorPartyDynamicListFL401(CaseData caseData) {
         List<DynamicListElement> listItems = new ArrayList<>();
         PartyDetails applicant = caseData.getApplicantsFL401();
-        if (applicant != null) {
-            DynamicListElement dynamicListElement = getPartyDynamicListElement(true, applicant);
-            if (dynamicListElement != null) {
-                listItems.add(dynamicListElement);
-            }
-        }
+        checkAndAddPartyToList(listItems, applicant, true);
 
         PartyDetails respondent = caseData.getRespondentsFL401();
-        if (respondent != null) {
-            DynamicListElement dynamicListElement = getPartyDynamicListElement(false, respondent);
-            if (dynamicListElement != null) {
-                listItems.add(dynamicListElement);
-            }
-        }
+        checkAndAddPartyToList(listItems, respondent, false);
 
         return  DynamicList.builder().value(null).listItems(listItems).build();
+    }
+
+    private void checkAndAddPartyToList(List<DynamicListElement> listToAddTo, PartyDetails party, boolean appOrResp) {
+        if (party != null) {
+            DynamicListElement dynamicListElement = getPartyDynamicListElement(appOrResp, party);
+            if (dynamicListElement != null) {
+                listToAddTo.add(dynamicListElement);
+            }
+        }
     }
 
     protected List<DynamicListElement> getPartyDynamicListElements(List<Element<PartyDetails>> partyDetailsList,

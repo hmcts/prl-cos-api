@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.barrister.BarristerAllocationService;
+import uk.gov.hmcts.reform.prl.services.barrister.BarristerAddService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,7 +30,7 @@ public class BarristerControllerTest {
     private BarristerController barristerController;
 
     @Mock
-    private BarristerAllocationService barristerAllocationService;
+    private BarristerAddService barristerAddService;
     @Mock
     private AuthorisationService authorisationService;
 
@@ -62,13 +62,13 @@ public class BarristerControllerTest {
         when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
 
         AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder().build();
-        when(barristerAllocationService.getAllocatedBarrister(any())).thenReturn(allocatedBarrister);
+        when(barristerAddService.getAllocatedBarrister(any())).thenReturn(allocatedBarrister);
         AboutToStartOrSubmitCallbackResponse callbackResponse = barristerController
             .handleMidEvent(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
 
         assertEquals(allocatedBarrister, callbackResponse.getData().get("allocatedBarrister"));
 
-        verify(barristerAllocationService, times(1)).getAllocatedBarrister(any());
+        verify(barristerAddService, times(1)).getAllocatedBarrister(any());
     }
 
     @Test
