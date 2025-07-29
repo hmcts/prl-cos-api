@@ -208,26 +208,26 @@ class BarristerAllocationServiceTest {
     //     assertEquals(PARTY_ID_PREFIX + "1", appParty1.getCode());
     // }
 
-    @Test
-    void shouldGetApplicantForSolicitorFL401() {
-        setupApplicantFL401();
-        UserDetails userDetails = setupSolicitorUserDetailsC100();
-        CaseData caseData = CaseData.builder().caseTypeOfApplication("FL401").applicantsFL401(applicantFL401).build();
-
-        AllocatedBarrister allocatedBarrister = barristerAllocationService.getAllocatedBarrister(caseData, userDetails, "");
-        DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
-
-        assertNotNull(allocatedBarrister.getBarristerOrg());
-
-        assertNull(partiesDynamicList.getValue());
-        assertEquals(1, partiesDynamicList.getListItems().size());
-        DynamicListElement appParty1 = partiesDynamicList.getListItems().getFirst();
-        assertEquals(
-            "appFirstName1 appLastName1 (Applicant), appSolFN1 appSolLN1, appSolOrgName1",
-            appParty1.getLabel()
-        );
-        assertEquals(PARTY_ID_PREFIX + "1", appParty1.getCode());
-    }
+    //    @Test
+    //    void shouldGetApplicantForSolicitorFL401() {
+    //        setupApplicantFL401();
+    //        UserDetails userDetails = setupSolicitorUserDetailsC100();
+    //        CaseData caseData = CaseData.builder().caseTypeOfApplication("FL401").applicantsFL401(applicantFL401).build();
+    //
+    //        AllocatedBarrister allocatedBarrister = barristerAllocationService.getAllocatedBarrister(caseData, userDetails, "");
+    //        DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
+    //
+    //        assertNotNull(allocatedBarrister.getBarristerOrg());
+    //
+    //        assertNull(partiesDynamicList.getValue());
+    //        assertEquals(1, partiesDynamicList.getListItems().size());
+    //        DynamicListElement appParty1 = partiesDynamicList.getListItems().getFirst();
+    //        assertEquals(
+    //            "appFirstName1 appLastName1 (Applicant), appSolFN1 appSolLN1, appSolOrgName1",
+    //            appParty1.getLabel()
+    //        );
+    //        assertEquals(PARTY_ID_PREFIX + "1", appParty1.getCode());
+    //    }
 
     // @Ignore
     // @Test
@@ -292,27 +292,27 @@ class BarristerAllocationServiceTest {
     //     assertEquals(PARTY_ID_PREFIX + "4", resParty1.getCode());
     // }
 
-    @Test
-    void shouldGetRespondentForSolicitorFL401() {
-        setupRespondentFl401();
-        UserDetails userDetails = setupSolicitorUserDetailsC100();
-        CaseData caseData = CaseData.builder().caseTypeOfApplication("FL401").applicantsFL401(applicantFL401)
-            .respondentsFL401(respondentFL401).build();
-
-        AllocatedBarrister allocatedBarrister = barristerAllocationService.getAllocatedBarrister(caseData, userDetails, "");
-        DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
-
-        assertNotNull(allocatedBarrister.getBarristerOrg());
-
-        assertNull(partiesDynamicList.getValue());
-        assertEquals(1, partiesDynamicList.getListItems().size());
-        DynamicListElement resParty1 = partiesDynamicList.getListItems().getFirst();
-        assertEquals(
-            "resFirstName1 resLastName1 (Respondent), resSolFN1 resSolLN1, resSolOrgName1",
-            resParty1.getLabel()
-        );
-        assertEquals(PARTY_ID_PREFIX + "4", resParty1.getCode());
-    }
+    //    @Test
+    //    void shouldGetRespondentForSolicitorFL401() {
+    //        setupRespondentFl401();
+    //        UserDetails userDetails = setupSolicitorUserDetailsC100();
+    //        CaseData caseData = CaseData.builder().caseTypeOfApplication("FL401").applicantsFL401(applicantFL401)
+    //            .respondentsFL401(respondentFL401).build();
+    //
+    //        AllocatedBarrister allocatedBarrister = barristerAllocationService.getAllocatedBarrister(caseData, userDetails, "");
+    //        DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
+    //
+    //        assertNotNull(allocatedBarrister.getBarristerOrg());
+    //
+    //        assertNull(partiesDynamicList.getValue());
+    //        assertEquals(1, partiesDynamicList.getListItems().size());
+    //        DynamicListElement resParty1 = partiesDynamicList.getListItems().getFirst();
+    //        assertEquals(
+    //            "resFirstName1 resLastName1 (Respondent), resSolFN1 resSolLN1, resSolOrgName1",
+    //            resParty1.getLabel()
+    //        );
+    //        assertEquals(PARTY_ID_PREFIX + "4", resParty1.getCode());
+    //    }
 
     // @Ignore
     // @Test

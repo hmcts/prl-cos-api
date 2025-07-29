@@ -56,11 +56,13 @@ public class BarristerAllocationService {
         List<DynamicListElement> listItems = new ArrayList<>();
         List<Element<PartyDetails>> applicants = caseData.getApplicants();
         if (applicants != null) {
+            log.info("*** Applicants found, getting related people for {}", applicants);
             listItems.addAll(getRelatedPeopleC100(userDetails, applicants, true, authorisation));
         }
 
         List<Element<PartyDetails>> respondents = caseData.getRespondents();
         if (respondents != null) {
+            log.info("*** Respondents found, getting related people for {}", respondents);
             listItems.addAll(getRelatedPeopleC100(userDetails, respondents, false, authorisation));
         }
 
@@ -71,6 +73,7 @@ public class BarristerAllocationService {
         List<DynamicListElement> listItems = new ArrayList<>();
         PartyDetails applicant = caseData.getApplicantsFL401();
         if (applicant != null) {
+            log.info("*** Applicant found, getting related people for {}", applicant);
             DynamicListElement dynamicListElement = getRelatedPeopleFL401(userDetails, applicant, true, authorisation);
             if (dynamicListElement != null) {
                 listItems.add(dynamicListElement);
@@ -79,6 +82,7 @@ public class BarristerAllocationService {
 
         PartyDetails respondent = caseData.getRespondentsFL401();
         if (respondent != null) {
+            log.info("*** Respondent found, getting related people for {}", respondent);
             DynamicListElement dynamicListElement = getRelatedPeopleFL401(userDetails, respondent, false, authorisation);
             if (dynamicListElement != null) {
                 listItems.add(dynamicListElement);
@@ -93,37 +97,39 @@ public class BarristerAllocationService {
         if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
             Optional<Organisations> usersOrganisation = organisationService.findUserOrganisation(usersAuthorisation);
             List<Element<PartyDetails>> relatedPeople = new ArrayList<>();
-            if (usersOrganisation.isPresent()) {
-                for (Element<PartyDetails> person : people) {
-                    log.info("*** This is the user Org: {} ", usersOrganisation.get());
-                    log.info("*** This is the user Org ID: {} ", usersOrganisation.get().getOrganisationIdentifier());
-                    log.info("*** This is the solicitor Org ID: {} ", person.getValue().getSolicitorOrg().getOrganisationID());
-                    if (usersOrganisation.get().getOrganisationIdentifier().equals(
-                        person.getValue().getSolicitorOrg().getOrganisationID())
-                    ) {
-                        relatedPeople.add(person);
-                    }
+
+            for (Element<PartyDetails> person : people) {
+                if (isSameOrganisation(person.getValue(), usersOrganisation)) {
+                    relatedPeople.add(person);
                 }
             }
+            log.info("*** Found these related people {}", relatedPeople);
             return getPartyDynamicListElements(relatedPeople, isApplicant);
         } else {
+            log.info("*** Returning all people for caseworker");
             return getPartyDynamicListElements(people, isApplicant);
         }
     }
 
     private DynamicListElement getRelatedPeopleFL401(UserDetails userDetails, PartyDetails person, Boolean isApplicant, String usersAuthorisation) {
         if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
-            String solicitorEmail = userDetails.getEmail();
+            Optional<Organisations> usersOrganisation = organisationService.findUserOrganisation(usersAuthorisation);
             PartyDetails relatedPerson = null;
 
-            if (person.getSolicitorEmail().equals(solicitorEmail)) {
+            if (isSameOrganisation(person, usersOrganisation)) {
                 relatedPerson = person;
             }
-
+            log.info("*** Found this related person {}", person);
             return getPartyDynamicListElement(isApplicant, relatedPerson);
         } else {
+            log.info("*** Returning all for caseworker");
             return getPartyDynamicListElement(isApplicant, person);
         }
+    }
+
+    private boolean isSameOrganisation(PartyDetails person, Optional<Organisations> usersOrganisation) {
+        return usersOrganisation.isPresent()
+            && usersOrganisation.get().getOrganisationIdentifier().equals(person.getSolicitorOrg().getOrganisationID());
     }
 
     private List<DynamicListElement> getPartyDynamicListElements(List<Element<PartyDetails>> partyDetailsList,
