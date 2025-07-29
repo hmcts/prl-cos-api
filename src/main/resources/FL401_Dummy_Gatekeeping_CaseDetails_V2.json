@@ -556,6 +556,8 @@
       "placeOfBirth": null,
       "previousName": null,
       "solicitorOrg": {
+        "OrganisationID": "QO4A1Q8",
+        "OrganisationName": "FPRL-test-organisation"
       },
       "partyLevelFlag": {
         "details": [
