@@ -911,7 +911,7 @@
           "isEmailAddressConfidential": "Yes",
           "applicantContactInstructions": null,
           "respondentLivedWithApplicant": null,
-          "doTheyHaveLegalRepresentation": null,
+          "doTheyHaveLegalRepresentation": "yes",
           "addressLivedLessThan5YearsDetails": null,
           "otherPersonRelationshipToChildren": [],
           "isRemoveLegalRepresentativeRequested": null,
@@ -1355,7 +1355,7 @@
           "isEmailAddressConfidential": "Yes",
           "applicantContactInstructions": null,
           "respondentLivedWithApplicant": null,
-          "doTheyHaveLegalRepresentation": null,
+          "doTheyHaveLegalRepresentation": "no",
           "addressLivedLessThan5YearsDetails": null,
           "otherPersonRelationshipToChildren": [],
           "isRemoveLegalRepresentativeRequested": null,
@@ -3063,7 +3063,7 @@
           "canYouProvideEmailAddress": "Yes",
           "isPhoneNumberConfidential": null,
           "isEmailAddressConfidential": null,
-          "doTheyHaveLegalRepresentation": "no",
+          "doTheyHaveLegalRepresentation": "yes",
           "addressLivedLessThan5YearsDetails": null,
           "isAtAddressLessThan5YearsWithDontKnow": "no"
         }
