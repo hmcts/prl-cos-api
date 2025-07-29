@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.prl.clients.ccd.CcdCaseAssignmentService;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
-import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
@@ -43,7 +42,6 @@ public class CaseAssignmentController {
     private final CcdCaseAssignmentService ccdCaseAssignmentService;
     private final ObjectMapper objectMapper;
     private final OrganisationService organisationService;
-    private final SystemUserService systemUserService;
 
     @PostMapping(path = "/aboutToSubmitAddBarrister", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "About to submit to add Barrister")
@@ -62,14 +60,10 @@ public class CaseAssignmentController {
         String roleItem = allocatedBarrister.getRoleItem();
 
         return getAboutToStartOrSubmitCallbackResponse(caseData,
-                                                       (userId,errorList) -> {
-                ccdCaseAssignmentService.validateBarristerOrgRelationship(caseData,
-                                                                          errorList);
-                ccdCaseAssignmentService.validateCaseRoles(caseData,
-                                                           roleItem,
-                                                           errorList);
-            },
-
+                                                       (userId,errorList) ->
+                ccdCaseAssignmentService.validateAddRequest(caseData,
+                                                            roleItem,
+                                                            errorList),
                                                        userId ->
             ccdCaseAssignmentService.grantCaseAccess(caseData,
                                                      userId,
@@ -91,15 +85,19 @@ public class CaseAssignmentController {
         AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
         //TODO derive barrister role to remove from the case data
         String roleItem = allocatedBarrister.getRoleItem();
+        //TODO retrieve org id from the case data
+        String organisationId = allocatedBarrister.getBarristerOrg().getOrganisationID();
         return getAboutToStartOrSubmitCallbackResponse(caseData,
-                                                       (userId,errorList) -> ccdCaseAssignmentService.validateUserRole(caseData,
-                                                                                                              userId,
-                                                                                                              roleItem,
-                                                                                                              errorList),
+                                                       (userId,errorList) ->
+                                                           ccdCaseAssignmentService.validateRemoveRequest(caseData,
+                                                                                                          userId,
+                                                                                                          roleItem,
+                                                                                                          errorList),
                                                        userId ->
             ccdCaseAssignmentService.removeBarrister(caseData,
                                                      userId,
-                                                     roleItem));
+                                                     roleItem,
+                                                     organisationId));
     }
 
     private AboutToStartOrSubmitCallbackResponse getAboutToStartOrSubmitCallbackResponse(CaseData caseData,

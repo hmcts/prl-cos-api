@@ -88,7 +88,8 @@ public class CcdCaseAssignmentService {
 
     public void removeBarrister(final CaseData caseData,
                                 final String userId,
-                                final String caseRole) {
+                                final String caseRole,
+                                final String organisationID) {
         Set<String> userIds = Set.of(userId);
         try {
             log.info("About to start remove case access {} for users {}", caseRole, userIds);
@@ -96,7 +97,7 @@ public class CcdCaseAssignmentService {
             CaseAssignmentUserRolesRequest addCaseAssignedUserRolesRequest = buildCaseAssignedUserRequest(
                 caseData.getId(),
                 caseRole,
-                allocatedBarrister.getBarristerOrg().getOrganisationID(),
+                organisationID,
                 userIds
             );
 
@@ -145,12 +146,13 @@ public class CcdCaseAssignmentService {
                                  String userRole,
                                  List<String> errorList) {
 
-        List<RoleAssignmentResponse> roleAssignmentResponses = roleAssignmentService
-            .getRoleAssignmentForActorId(userId);
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentService
+            .getRoleAssignmentForCase(String.valueOf(caseData.getId()));
 
-        roleAssignmentResponses.stream()
-            .map(RoleAssignmentResponse::getRoleName)
-            .filter(userRole::equals)
+        roleAssignmentServiceResponse.getRoleAssignmentResponse().stream()
+            .filter(roleAssignmentResponse ->
+                roleAssignmentResponse.getRoleType().equals(userRole)
+                    && roleAssignmentResponse.getActorId().equals(userId))
             .findAny()
             .ifPresentOrElse(roleName -> { },
                              () -> {
@@ -179,5 +181,14 @@ public class CcdCaseAssignmentService {
                 );
                 errorList.add("A barrister is already associated with the case");
             });
+    }
+
+    public void validateAddRequest(CaseData caseData, String roleItem, List<String> errorList) {
+        validateBarristerOrgRelationship(caseData,errorList);
+        validateCaseRoles(caseData,roleItem,errorList);
+    }
+
+    public void validateRemoveRequest(CaseData caseData, String userId, String roleItem, List<String> errorList) {
+        validateUserRole(caseData, userId, roleItem, errorList);
     }
 }
