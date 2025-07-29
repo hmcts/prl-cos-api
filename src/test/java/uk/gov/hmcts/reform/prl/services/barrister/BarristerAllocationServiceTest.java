@@ -52,7 +52,7 @@ class BarristerAllocationServiceTest {
         CaseData caseData = CaseData.builder().caseTypeOfApplication("C100").applicants(allApplicants).respondents(
             allRespondents).build();
 
-        AllocatedBarrister allocatedBarrister = barristerAllocationService.getAllocatedBarrister(caseData, userDetails);
+        AllocatedBarrister allocatedBarrister = barristerAllocationService.getAllocatedBarrister(caseData, userDetails, "");
         DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
 
         assertNotNull(allocatedBarrister.getBarristerOrg());
@@ -96,7 +96,7 @@ class BarristerAllocationServiceTest {
         CaseData caseData = CaseData.builder().caseTypeOfApplication("FL401").applicantsFL401(applicantFL401).respondentsFL401(
             respondentFL401).build();
 
-        AllocatedBarrister allocatedBarrister = barristerAllocationService.getAllocatedBarrister(caseData, userDetails);
+        AllocatedBarrister allocatedBarrister = barristerAllocationService.getAllocatedBarrister(caseData, userDetails, "");
         DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
 
         assertNotNull(allocatedBarrister.getBarristerOrg());
@@ -123,7 +123,7 @@ class BarristerAllocationServiceTest {
         setupRespondentsC100();
         CaseData caseData = CaseData.builder().caseTypeOfApplication("C100").respondents(allRespondents).build();
 
-        AllocatedBarrister allocatedBarrister = barristerAllocationService.getAllocatedBarrister(caseData, userDetails);
+        AllocatedBarrister allocatedBarrister = barristerAllocationService.getAllocatedBarrister(caseData, userDetails, "");
         DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
 
         assertNotNull(allocatedBarrister.getBarristerOrg());
@@ -152,7 +152,7 @@ class BarristerAllocationServiceTest {
 
         CaseData caseData = CaseData.builder().caseTypeOfApplication("C100").applicants(allApplicants).build();
 
-        AllocatedBarrister allocatedBarrister = barristerAllocationService.getAllocatedBarrister(caseData, userDetails);
+        AllocatedBarrister allocatedBarrister = barristerAllocationService.getAllocatedBarrister(caseData, userDetails, "");
         DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
 
         assertNotNull(allocatedBarrister.getBarristerOrg());
@@ -182,7 +182,7 @@ class BarristerAllocationServiceTest {
 
         assertThrows(
             RuntimeException.class,
-            () -> barristerAllocationService.getAllocatedBarrister(caseData, userDetails)
+            () -> barristerAllocationService.getAllocatedBarrister(caseData, userDetails, "")
         );
     }
 
@@ -214,7 +214,7 @@ class BarristerAllocationServiceTest {
         UserDetails userDetails = setupSolicitorUserDetailsC100();
         CaseData caseData = CaseData.builder().caseTypeOfApplication("FL401").applicantsFL401(applicantFL401).build();
 
-        AllocatedBarrister allocatedBarrister = barristerAllocationService.getAllocatedBarrister(caseData, userDetails);
+        AllocatedBarrister allocatedBarrister = barristerAllocationService.getAllocatedBarrister(caseData, userDetails, "");
         DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
 
         assertNotNull(allocatedBarrister.getBarristerOrg());
@@ -299,7 +299,7 @@ class BarristerAllocationServiceTest {
         CaseData caseData = CaseData.builder().caseTypeOfApplication("FL401").applicantsFL401(applicantFL401)
             .respondentsFL401(respondentFL401).build();
 
-        AllocatedBarrister allocatedBarrister = barristerAllocationService.getAllocatedBarrister(caseData, userDetails);
+        AllocatedBarrister allocatedBarrister = barristerAllocationService.getAllocatedBarrister(caseData, userDetails, "");
         DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
 
         assertNotNull(allocatedBarrister.getBarristerOrg());

@@ -64,7 +64,7 @@ public class BarristerControllerTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
 
         AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder().build();
-        when(barristerAllocationService.getAllocatedBarrister(any(), eq(userDetails))).thenReturn(allocatedBarrister);
+        when(barristerAllocationService.getAllocatedBarrister(any(), eq(userDetails), any())).thenReturn(allocatedBarrister);
         AboutToStartOrSubmitCallbackResponse callbackResponse = barristerController.handleMidEvent(
             authToken,
             callbackRequest
@@ -72,7 +72,7 @@ public class BarristerControllerTest {
 
         assertEquals(allocatedBarrister, callbackResponse.getData().get("allocatedBarrister"));
 
-        verify(barristerAllocationService, times(1)).getAllocatedBarrister(any(), eq(userDetails));
+        verify(barristerAllocationService, times(1)).getAllocatedBarrister(any(), eq(userDetails), any());
     }
 
 }
