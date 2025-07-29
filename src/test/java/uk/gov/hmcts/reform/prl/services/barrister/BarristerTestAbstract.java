@@ -4,6 +4,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.Barrister;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +19,7 @@ public class BarristerTestAbstract {
     protected static final String PARTY_ID_PREFIX = "c0651c7d-0db9-47aa-9baa-933013f482f";
     protected static final String SOL_PARTY_ID_PREFIX = "c0651c7d-0db9-47aa-9baa-933013f482e";
     protected static final String BARRISTER_PARTY_ID_PREFIX = "c0651c7d-0db9-47aa-9bbb-933013f482e";
+    protected static final String BARRISTER_ORG_ID_PREFIX = "d0651c7d-0db9-47aa-9bbb-933013f482e";
 
     protected void setupApplicantsC100() {
         allApplicants.add(buildPartyDetailsElement(1, true, true, true));
@@ -77,6 +79,12 @@ public class BarristerTestAbstract {
     protected PartyDetails getPartyDetails(int id, String appFirstName, String appLastName, String repFirstName,
                                            String repLastName, String barFirstName, String barLastName, String orgName,
                                            boolean hasRep, boolean hasBar) {
+        Barrister barrister = Barrister.builder()
+            .barristerPartyId(UUID.fromString(BARRISTER_PARTY_ID_PREFIX + id))
+            .barristerFirstName(barFirstName + id)
+            .barristerLastName(barLastName + id)
+            .barristerOrgUuid(UUID.fromString(BARRISTER_ORG_ID_PREFIX + id))
+            .build();
         return PartyDetails.builder()
             .partyId(UUID.fromString(PARTY_ID_PREFIX + id))
             .firstName(appFirstName + id)
@@ -86,9 +94,7 @@ public class BarristerTestAbstract {
             .representativeFirstName(hasRep ? repFirstName + id : null)
             .representativeLastName(hasRep ? repLastName + id : null)
             .solicitorOrg(Organisation.builder().organisationName(orgName + id).build())
-            .barristerPartyId(hasBar ? UUID.fromString(BARRISTER_PARTY_ID_PREFIX + id) : null)
-            .barristerFirstName(hasBar ? barFirstName + id : null)
-            .barristerLastName(hasBar ? barLastName + id : null)
+            .barrister(hasBar ? barrister : null)
             .build();
     }
 

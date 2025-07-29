@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.Barrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnum;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 
@@ -97,9 +99,9 @@ public class PartyDetails {
     private UUID partyId;
     private UUID solicitorOrgUuid;
     private UUID solicitorPartyId;
-    private UUID barristerPartyId;
-    private final String barristerFirstName;
-    private final String barristerLastName;
+
+    @JsonUnwrapped
+    private Barrister barrister;
 
     @JsonIgnore
     private CitizenSos citizenSosObject;
@@ -139,15 +141,6 @@ public class PartyDetails {
             FULL_NAME_FORMAT,
             this.representativeFirstName,
             this.representativeLastName
-        );
-    }
-
-    @JsonIgnore
-    public String getBarristerFullName() {
-        return String.format(
-            FULL_NAME_FORMAT,
-            this.barristerFirstName,
-            this.barristerLastName
         );
     }
 

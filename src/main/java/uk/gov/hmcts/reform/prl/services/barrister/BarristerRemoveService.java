@@ -21,7 +21,7 @@ public class BarristerRemoveService extends  AbstractBarristerService {
 
     @Override
     protected boolean isPartyApplicable(boolean applicantOrRespondent, PartyDetails partyDetails) {
-        return partyDetails.getBarristerPartyId() != null;
+        return partyDetails.getBarrister() != null && partyDetails.getBarrister().getBarristerPartyId() != null;
     }
 
     @Override
@@ -29,12 +29,12 @@ public class BarristerRemoveService extends  AbstractBarristerService {
         return String.format("%s (%s), %s, %s", partyDetails.getLabelForDynamicList(),
                              applicantOrRespondent ? APPLICANT : RESPONDENT,
                              partyDetails.getRepresentativeFullName(),
-                             partyDetails.getBarristerFullName()
+                             partyDetails.getBarrister().getBarristerFullName()
         );
     }
 
     @Override
     protected UUID getCodeForAction(PartyDetails partyDetails) {
-        return partyDetails.getBarristerPartyId();
+        return partyDetails.getBarrister().getBarristerPartyId();
     }
 }
