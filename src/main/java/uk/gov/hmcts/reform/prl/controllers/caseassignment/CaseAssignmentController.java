@@ -65,9 +65,9 @@ public class CaseAssignmentController {
                                                             roleItem,
                                                             errorList),
                                                        userId ->
-            ccdCaseAssignmentService.grantCaseAccess(caseData,
-                                                     userId,
-                                                     roleItem));
+            ccdCaseAssignmentService.grantBarristerCaseAccess(caseData,
+                                                              userId,
+                                                              roleItem));
     }
 
     @PostMapping(path = "/aboutToSubmitRemoveBarrister", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -94,10 +94,10 @@ public class CaseAssignmentController {
                                                                                                           roleItem,
                                                                                                           errorList),
                                                        userId ->
-            ccdCaseAssignmentService.removeBarrister(caseData,
-                                                     userId,
-                                                     roleItem,
-                                                     organisationId));
+            ccdCaseAssignmentService.removeCaseAccess(caseData,
+                                                      userId,
+                                                      roleItem,
+                                                      organisationId));
     }
 
     private AboutToStartOrSubmitCallbackResponse getAboutToStartOrSubmitCallbackResponse(CaseData caseData,

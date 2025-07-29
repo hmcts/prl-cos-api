@@ -39,9 +39,9 @@ public class CcdCaseAssignmentService {
     private final RoleAssignmentService roleAssignmentService;
     private final ObjectMapper objectMapper;
 
-    public void grantCaseAccess(final CaseData caseData,
-                                final String userId,
-                                final String caseRole) {
+    public void grantBarristerCaseAccess(final CaseData caseData,
+                                         final String userId,
+                                         final String caseRole) {
         Set<String> userIds = Set.of(userId);
         try {
             log.info("About to start granting {} case access for users {}", caseRole, userIds);
@@ -86,14 +86,13 @@ public class CcdCaseAssignmentService {
 
     }
 
-    public void removeBarrister(final CaseData caseData,
-                                final String userId,
-                                final String caseRole,
-                                final String organisationID) {
+    public void removeCaseAccess(final CaseData caseData,
+                                 final String userId,
+                                 final String caseRole,
+                                 final String organisationID) {
         Set<String> userIds = Set.of(userId);
         try {
             log.info("About to start remove case access {} for users {}", caseRole, userIds);
-            AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
             CaseAssignmentUserRolesRequest addCaseAssignedUserRolesRequest = buildCaseAssignedUserRequest(
                 caseData.getId(),
                 caseRole,
