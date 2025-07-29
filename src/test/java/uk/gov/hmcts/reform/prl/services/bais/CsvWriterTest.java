@@ -204,9 +204,9 @@ class CsvWriterTest {
             return Stream.of(
                 arguments("respondents.lastName", "Doe"),
                 arguments("respondents.firstName", "John"),
-                arguments("respondents.dateOfBirth", "-"),
+                arguments("respondents.dateOfBirth", ""),
                 arguments("respondents.address.addressLine1", "70 Petty France"),
-                arguments("respondents.address.addressLine2", "-"),
+                arguments("respondents.address.addressLine2", ""),
                 arguments("respondents.address.postCode", "SW1H 9EX")
             );
         }

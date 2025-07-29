@@ -25,52 +25,59 @@ public class CsvWriter {
     private static final FileAttribute<Set<PosixFilePermission>> ATTRIBUTE = PosixFilePermissions
         .asFileAttribute(PosixFilePermissions.fromString("rwx------"));
 
-    private static final String[] ACRO_REPORT_CSV_HEADERS = {
-        "Case Number",
-        "Court Name/Location",
-        "Court ID",
-        "Court Date DD/MM/YYYY",
-        "Order Expiry Date DD/MM/YYYY",
-        "Respondent Surname",
-        "Respondent Forename(s)",
-        "Respondent First Line of Address",
-        "Respondent Second Line of Address",
-        "Respondent Postcode",
-        "Applicant Surname",
-        "Applicant Forename(s)",
-        "Applicant First Line of Address",
-        "Applicant Second Line of Address",
-        "Applicant Postcode",
-        "PDF Identifier",
-        "Is Confidential",
-        "Force Code"
+    public enum CsvColumn {
+        CASE_NUMBER("Case Number", "CaseId"),
+        COURT_NAME("Court Name/Location", "CourtName"),
+        COURT_ID("Court ID", "CourtId"),
+        COURT_DATE("Court Date DD/MM/YYYY", "CourtDate"),
+        ORDER_EXPIRY_DATE("Order Expiry Date DD/MM/YYYY", "OrderExpiryDate"),
+        RESPONDENT_SURNAME("Respondent Surname", "Respondent.Surname"),
+        RESPONDENT_FORENAMES("Respondent Forename(s)", "Respondent.FirstName"),
+        RESPONDENT_ADDRESS1("Respondent First Line of Address", "Respondent.Address1"),
+        RESPONDENT_ADDRESS2("Respondent Second Line of Address", "Respondent.Address2"),
+        RESPONDENT_POSTCODE("Respondent Postcode", "Respondent.Postcode"),
+        APPLICANT_SURNAME("Applicant Surname", "Applicant.Surname"),
+        APPLICANT_FORENAMES("Applicant Forename(s)", "Applicant.FirstName"),
+        APPLICANT_ADDRESS1("Applicant First Line of Address", "Applicant.Address1"),
+        APPLICANT_ADDRESS2("Applicant Second Line of Address", "Applicant.Address2"),
+        APPLICANT_POSTCODE("Applicant Postcode", "Applicant.Postcode"),
+        PDF_IDENTIFIER("PDF Identifier", "PdfIdentifier"),
+        IS_CONFIDENTIAL("Is Confidential", "IsConfidential"),
+        FORCE_CODE("Force Code", "ForceCode");
 
+        private final String header;
+        private final String property;
 
-    };
+        CsvColumn(String header, String property) {
+            this.header = header;
+            this.property = property;
+        }
 
-    private static final List<String> propertyNames = Arrays.asList(
-        "CaseId", "CourtName", "CourtId", "CourtDate",
-        "OrderExpiryDate", "Respondent.Surname", "Respondent.FirstName", "Respondent.Address1",
-        "Respondent.Address2", "Respondent.Postcode", "Applicant.Surname", "Applicant.FirstName",
-        "Applicant.Address1", "Applicant.Address2", "Applicant.Postcode",
-        "PdfIdentifier", "IsConfidential", "ForceCode"
-    );
+        public String getHeader() {
+            return header;
+        }
 
+        public String getProperty() {
+            return property;
+        }
+    }
 
-    public static File writeCcdOrderDataToCsv(
-        CaseData ccdOrderData
-    ) throws java.io.IOException {
+    private static final CsvColumn[] COLUMNS = CsvColumn.values();
+
+    public static File writeCcdOrderDataToCsv(CaseData ccdOrderData) throws java.io.IOException {
         Path path = Files.createTempFile("AcroReport", ".csv", ATTRIBUTE);
         File file = path.toFile();
-        CSVFormat csvFileHeader = CSVFormat.DEFAULT.withHeader(ACRO_REPORT_CSV_HEADERS);
+        String[] headers = Arrays.stream(COLUMNS).map(CsvColumn::getHeader).toArray(String[]::new);
+        CSVFormat csvFileHeader = CSVFormat.DEFAULT.withHeader(headers);
 
         try (java.io.FileWriter fileWriter = new java.io.FileWriter(file);
              CSVPrinter printer = new CSVPrinter(fileWriter, csvFileHeader)) {
             List<String> record = new java.util.ArrayList<>();
-            for (String pathName : propertyNames) {
-                Object value = extractPropertyValues(ccdOrderData, pathName);
+            for (CsvColumn column : COLUMNS) {
+                Object value = extractPropertyValues(ccdOrderData, column.getProperty());
                 record.add(value != null ? value.toString() : "");
             }
+            printer.printRecord(record);
         }
         return file;
     }
@@ -86,7 +93,7 @@ public class CsvWriter {
         for (String property : properties) {
             currentValue = getPropertyValue(currentValue, property);
             if (isEmpty(currentValue)) {
-                return "-";
+                return "";
             }
         }
 
