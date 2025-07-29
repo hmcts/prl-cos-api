@@ -20,8 +20,6 @@ import java.util.Set;
 public class CsvWriter {
     private static final Logger logger = LoggerFactory.getLogger(CsvWriter.class);
 
-    // enum field name to combine ACRO_REPORT_CSV_HEADERS and propertyNames
-
     private static final FileAttribute<Set<PosixFilePermission>> ATTRIBUTE = PosixFilePermissions
         .asFileAttribute(PosixFilePermissions.fromString("rwx------"));
 
@@ -75,6 +73,9 @@ public class CsvWriter {
             List<String> record = new java.util.ArrayList<>();
             for (CsvColumn column : COLUMNS) {
                 Object value = extractPropertyValues(ccdOrderData, column.getProperty());
+                if (value == null || value.toString().isEmpty()) {
+                    logger.warn("Missing value for CSV column '{}' (property '{}')", column.getHeader(), column.getProperty());
+                }
                 record.add(value != null ? value.toString() : "");
             }
             printer.printRecord(record);
