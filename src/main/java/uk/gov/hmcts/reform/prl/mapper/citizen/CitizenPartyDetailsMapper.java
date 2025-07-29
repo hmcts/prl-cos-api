@@ -1142,9 +1142,12 @@ public class CitizenPartyDetailsMapper {
     public List<Element<ApplicantConfidentialityDetails>> createApplicantConfidentialDetailsForCaseData(PartyDetails partyDetails) {
         ApplicantConfidentialityDetails.ApplicantConfidentialityDetailsBuilder appConfBuilder = ApplicantConfidentialityDetails.builder();
 
-        appConfBuilder.address(getConfidentialField(partyDetails.getIsAddressConfidential(), partyDetails.getAddress()));
-        appConfBuilder.email(getConfidentialField(partyDetails.getIsEmailAddressConfidential(), partyDetails.getEmail()));
-        appConfBuilder.phoneNumber(getConfidentialField(partyDetails.getIsPhoneNumberConfidential(), partyDetails.getPhoneNumber()));
+        appConfBuilder.address(YesOrNo.Yes.equals(partyDetails.getIsAddressConfidential())
+                                   ? partyDetails.getAddress() : null);
+        appConfBuilder.email(YesOrNo.Yes.equals(partyDetails.getIsEmailAddressConfidential())
+                                 ? partyDetails.getEmail() : null);
+        appConfBuilder.phoneNumber(YesOrNo.Yes.equals(partyDetails.getIsPhoneNumberConfidential())
+                                       ? partyDetails.getPhoneNumber() : null);
 
         return List.of(element(null, appConfBuilder.build()));
     }
