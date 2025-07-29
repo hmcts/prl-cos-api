@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.clients.ccd.CcdCaseAssignmentService;
+import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
@@ -39,7 +39,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @RequestMapping("/case-assignment")
 public class CaseAssignmentController {
 
-    private final CcdCaseAssignmentService ccdCaseAssignmentService;
+    private final CaseAssignmentService ccdCaseAssignmentService;
     private final ObjectMapper objectMapper;
     private final OrganisationService organisationService;
 

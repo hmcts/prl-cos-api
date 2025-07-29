@@ -31,7 +31,7 @@ import static uk.gov.hmcts.reform.prl.utils.EmailUtils.maskEmail;
 @Builder
 @RequiredArgsConstructor
 @Service
-public class CcdCaseAssignmentService {
+public class CaseAssignmentService {
     private final CaseAssignmentApi caseAssignmentApi;
     private final SystemUserService systemUserService;
     private final AuthTokenGenerator tokenGenerator;
