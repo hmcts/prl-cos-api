@@ -1765,7 +1765,10 @@
           "phoneNumber": null,
           "placeOfBirth": "London",
           "previousName": null,
-          "solicitorOrg": {},
+          "solicitorOrg": {
+            "OrganisationID": "QO4A1Q8",
+            "OrganisationName": "FPRL-test-organisation"
+          },
           "partyLevelFlag": {
             "details": [],
             "partyName": "Mary Richards",
@@ -1795,8 +1798,8 @@
           "isAddressConfidential": null,
           "isCurrentAddressKnown": "No",
           "relationshipToChildren": null,
-          "representativeLastName": null,
-          "representativeFirstName": null,
+          "representativeLastName": "RespondentSolicitorLN",
+          "representativeFirstName": "RespondentSolicitorFN",
           "canYouProvidePhoneNumber": "No",
           "applicantPreferredContact": [],
           "canYouProvideEmailAddress": "Yes",
