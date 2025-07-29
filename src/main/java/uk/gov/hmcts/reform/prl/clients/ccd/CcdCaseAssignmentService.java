@@ -151,7 +151,7 @@ public class CcdCaseAssignmentService {
 
         roleAssignmentServiceResponse.getRoleAssignmentResponse().stream()
             .filter(roleAssignmentResponse ->
-                roleAssignmentResponse.getRoleType().equals(userRole)
+                roleAssignmentResponse.getRoleName().equals(userRole)
                     && roleAssignmentResponse.getActorId().equals(userId))
             .findAny()
             .ifPresentOrElse(roleName -> { },
