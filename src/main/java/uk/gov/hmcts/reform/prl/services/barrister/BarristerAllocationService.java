@@ -92,7 +92,6 @@ public class BarristerAllocationService {
             for (Element<PartyDetails> person : people) {
                 log.info("*** This is person's Solicitor Org ID: {} ", person.getValue().getSolicitorOrgUuid());
                 log.info("*** This is the Organisation for person: {} ", person.getValue().getOrganisations());
-                log.info("*** This is the Organisation ID: {} ", person.getValue().getOrganisations().getOrganisationIdentifier());
                 log.info("*** This is the Org ID: {} ", person.getValue().getSolicitorOrg().getOrganisationID());
                 if (person.getValue().getPartyId().toString().equals(userDetails.getId())) {
                     relatedPeople.add(person);
