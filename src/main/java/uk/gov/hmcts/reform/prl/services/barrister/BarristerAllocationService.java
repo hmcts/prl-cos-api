@@ -95,8 +95,11 @@ public class BarristerAllocationService {
             List<Element<PartyDetails>> relatedPeople = new ArrayList<>();
             if (usersOrganisation.isPresent()) {
                 for (Element<PartyDetails> person : people) {
+                    log.info("*** This is the user Org: {} ", usersOrganisation.get());
+                    log.info("*** This is the user Org ID: {} ", usersOrganisation.get().getOrganisationIdentifier());
+                    log.info("*** This is the solicitor Org ID: {} ", person.getValue().getSolicitorOrg().getOrganisationID());
                     if (usersOrganisation.get().getOrganisationIdentifier().equals(
-                        person.getValue().getOrganisations().getOrganisationIdentifier())
+                        person.getValue().getSolicitorOrg().getOrganisationID())
                     ) {
                         relatedPeople.add(person);
                     }
