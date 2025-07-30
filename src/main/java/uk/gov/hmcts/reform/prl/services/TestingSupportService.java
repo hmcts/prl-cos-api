@@ -108,9 +108,13 @@ public class TestingSupportService {
 
     private static final String VALID_FL401_GATEKEEPING_INPUT_JSON = "FL401_Dummy_Gatekeeping_CaseDetails.json";
 
+    private static final String VALID_FL401_GATEKEEPING_V2_INPUT_JSON = "FL401_Dummy_Gatekeeping_CaseDetails_V2.json";
+
     private static final String VALID_C100_DRAFT_V3_INPUT_JSON = "C100_Dummy_Draft_CaseDetails_v3.json";
 
     private static final String VALID_C100_GATEKEEPING_V3_INPUT_JSON = "C100_Dummy_Gatekeeping_CaseDetails_v3.json";
+
+    private static final String VALID_C100_GATEKEEPING_V4_INPUT_JSON = "C100_Dummy_Gatekeeping_CaseDetails_v4.json";
 
     private static final String VALID_C100_DRAFT_V3_INPUT_COURT_ADMIN_JSON = "C100_Dummy_Draft_admin_CaseDetails_v3.json";
 
@@ -266,9 +270,9 @@ public class TestingSupportService {
     private static String loadCaseDetailsInGateKeepingStage(CaseData initialCaseData) throws Exception {
         String requestBody;
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
-            requestBody = ResourceLoader.loadJson(VALID_C100_GATEKEEPING_V3_INPUT_JSON);
+            requestBody = ResourceLoader.loadJson(VALID_C100_GATEKEEPING_V4_INPUT_JSON);
         } else {
-            requestBody = ResourceLoader.loadJson(VALID_FL401_GATEKEEPING_INPUT_JSON);
+            requestBody = ResourceLoader.loadJson(VALID_FL401_GATEKEEPING_V2_INPUT_JSON);
         }
         return requestBody;
     }

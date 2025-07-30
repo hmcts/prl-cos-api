@@ -12,15 +12,17 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
-import uk.gov.hmcts.reform.prl.services.barrister.BarristerAllocationService;
+import uk.gov.hmcts.reform.prl.services.barrister.BarristerAddService;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,20 +33,24 @@ public class BarristerControllerTest {
     private BarristerController barristerController;
 
     @Mock
-    private BarristerAllocationService barristerAllocationService;
+    private BarristerAddService barristerAddService;
+    @Mock
+    private AuthorisationService authorisationService;
 
     @Mock
     private ObjectMapper objectMapper;
 
     @Mock
-    private UserService userService;
-
     private UserDetails userDetails;
 
-    private static final String authToken = "Bearer TestAuthToken";
+    @Mock
+    private UserService userService;
+
+    private static final String AUTH_TOKEN = "auth-token";
+    private static final String SERVICE_TOKEN = "service-token";
 
     @Test
-    public void shouldReturnAllocatedBarristerDetails() {
+    public void shouldHandleMidEvent() {
         Map caseData = new HashMap<>();
         caseData.put("id", 12345L);
         caseData.put("caseTypeOfApplication", "C100");
@@ -62,17 +68,32 @@ public class BarristerControllerTest {
             .build();
 
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
+        when(userService.getUserDetails(AUTH_TOKEN)).thenReturn(userDetails);
 
         AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder().build();
-        when(barristerAllocationService.getAllocatedBarrister(any(), eq(userDetails), any())).thenReturn(allocatedBarrister);
-        AboutToStartOrSubmitCallbackResponse callbackResponse = barristerController.handleMidEvent(
-            authToken,
-            callbackRequest
-        );
+        when(barristerAddService.getAllocatedBarrister(any(), eq(userDetails), any())).thenReturn(allocatedBarrister);
+        AboutToStartOrSubmitCallbackResponse callbackResponse = barristerController
+            .handleMidEvent(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
 
         assertEquals(allocatedBarrister, callbackResponse.getData().get("allocatedBarrister"));
 
-        verify(barristerAllocationService, times(1)).getAllocatedBarrister(any(), eq(userDetails), any());
+        verify(barristerAddService, times(1)).getAllocatedBarrister(any(), eq(userDetails), any());
     }
 
+    @Test
+    public void shouldNotHandleMidEventWhenNotAuthorised() {
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .build())
+            .build();
+
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(false);
+
+        assertThrows(
+            RuntimeException.class,
+            () -> barristerController
+                .handleMidEvent(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest));
+    }
 }
