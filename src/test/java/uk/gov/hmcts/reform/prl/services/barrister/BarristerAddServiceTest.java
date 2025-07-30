@@ -45,8 +45,8 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
 
         assertPartyToAdd(partiesDynamicList, true, PARTY_ID_PREFIX, 0, 1);
         assertPartyToAdd(partiesDynamicList, true, PARTY_ID_PREFIX, 1, 2);
-        assertPartyToAdd(partiesDynamicList, false, PARTY_ID_PREFIX, 2, 4);
-        assertPartyToAdd(partiesDynamicList, false, PARTY_ID_PREFIX, 3, 5);
+        assertPartyToAdd(partiesDynamicList, false, PARTY_ID_PREFIX, 2, 5);
+        assertPartyToAdd(partiesDynamicList, false, PARTY_ID_PREFIX, 3, 6);
     }
 
     @Test
@@ -128,8 +128,8 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
         assertEquals(partiesDynamicList.getValue(), null);
         assertEquals(2, partiesDynamicList.getListItems().size());
 
-        assertPartyToAdd(partiesDynamicList, false, PARTY_ID_PREFIX, 0, 4);
-        assertPartyToAdd(partiesDynamicList, false, PARTY_ID_PREFIX, 1, 5);
+        assertPartyToAdd(partiesDynamicList, false, PARTY_ID_PREFIX, 0, 5);
+        assertPartyToAdd(partiesDynamicList, false, PARTY_ID_PREFIX, 1, 6);
     }
 
     @Test

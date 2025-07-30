@@ -43,8 +43,8 @@ public class BarristerAddService extends AbstractBarristerService {
 
     @Override
     protected boolean isPartyApplicable(boolean applicantOrRespondent, PartyDetails partyDetails) {
-        return (applicantOrRespondent && partyDetails.getSolicitorPartyId() != null)
-            || (!applicantOrRespondent && yes.equals(partyDetails.getDoTheyHaveLegalRepresentation()));
+        return (partyDetails.getBarrister() == null) && ((applicantOrRespondent && partyDetails.getSolicitorPartyId() != null)
+            || (!applicantOrRespondent && yes.equals(partyDetails.getDoTheyHaveLegalRepresentation())));
     }
 
 }
