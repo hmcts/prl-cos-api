@@ -926,7 +926,7 @@ public class CitizenPartyDetailsMapper {
     public CaseData buildUpdatedCaseData(CaseData caseData, C100RebuildData c100RebuildData) throws JsonProcessingException {
         C100RebuildChildDetailsElements c100RebuildChildDetailsElements = null;
         ObjectMapper mapper = new ObjectMapper();
-        CaseData.CaseDataBuilder<?,?> caseDataBuilder = caseData.toBuilder();
+        CaseData.CaseDataBuilder<?,?> caseDataBuilder = caseData.toBuilder().caseAccessCategory(caseData.getCaseTypeOfApplication());
 
         if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildInternationalElements())) {
             C100RebuildInternationalElements c100RebuildInternationalElements = mapper
