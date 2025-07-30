@@ -1025,7 +1025,6 @@ public class CitizenPartyDetailsMapper {
         updateHelpWithFeesDetailsForCaseData(caseDataBuilder, c100RebuildData);
 
         caseDataBuilder.applicantCaseName(buildApplicantAndRespondentForCaseName(c100RebuildData));
-        caseDataBuilder.caseAccessCategory(caseData.getCaseTypeOfApplication());
         //Set case type, applicant name & respondent names for case list table
         caseDataBuilder.selectedCaseTypeID(caseData.getCaseTypeOfApplication());
         caseDataBuilder.applicantName(getPartyName(caseDataBuilder.build().getApplicants()));
@@ -1124,20 +1123,18 @@ public class CitizenPartyDetailsMapper {
         if (applicants != null) {
             for (Element<PartyDetails> applicantElement : applicants) {
                 PartyDetails applicant = applicantElement.getValue();
-                PartyDetails source;
+                PartyDetails source = (applicant.getPartyId() != null && applicant.getPartyId().equals(partyDetails.getPartyId()))
+                    ? partyDetails
+                    : applicant;
 
-                if (applicant.getPartyId() != null && applicant.getPartyId().equals(partyDetails.getPartyId())) {
-                    source = partyDetails;
-                } else {
-                    source = applicant.toBuilder()
-                        .isAddressConfidential(applicant.getIsAddressConfidential())
-                        .isEmailAddressConfidential(applicant.getIsEmailAddressConfidential())
-                        .isPhoneNumberConfidential(applicant.getIsPhoneNumberConfidential())
-                        .build();
-                }
+                PartyDetails updatedApplicant = source.toBuilder()
+                    .isAddressConfidential(source.getIsAddressConfidential())
+                    .isEmailAddressConfidential(source.getIsEmailAddressConfidential())
+                    .isPhoneNumberConfidential(source.getIsPhoneNumberConfidential())
+                    .build();
 
-                updatedApplicants.add(element(applicantElement.getId(), source));
-                applicantsConfidentialDetails.addAll(createApplicantConfidentialDetailsForCaseData(source));
+                updatedApplicants.add(element(applicantElement.getId(), updatedApplicant));
+                applicantsConfidentialDetails.addAll(createApplicantConfidentialDetailsForCaseData(updatedApplicant));
             }
         }
 
