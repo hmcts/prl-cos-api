@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -13,8 +14,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.UserService;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -42,6 +45,12 @@ public class BarristerControllerIntegrationTest {
     @MockBean
     AuthorisationService authorisationService;
 
+    @MockBean
+    private UserService userService;
+
+    @Mock
+    private UserDetails userDetails;
+
     private static final String AUTH_TOKEN = "auth-token";
     private static final String SERVICE_TOKEN = "service-token";
 
@@ -58,6 +67,7 @@ public class BarristerControllerIntegrationTest {
         String jsonRequest = ResourceLoader.loadJson("controller/barristerAboutToStartCallBackRequest.json");
 
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(userService.getUserDetails(AUTH_TOKEN)).thenReturn(userDetails);
 
         mockMvc.perform(
                 post(url)
