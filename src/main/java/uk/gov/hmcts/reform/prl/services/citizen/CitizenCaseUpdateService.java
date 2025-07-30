@@ -111,7 +111,7 @@ public class CitizenCaseUpdateService {
         if (citizenUpdatePartyDataContent.isPresent()) {
             Map<String, Object> caseDataMapToBeUpdated = citizenUpdatePartyDataContent.get().updatedCaseDataMap();
 
-            removeNullObjects(caseDataMapToBeUpdated, DA_APPLICANT_CONTACT_INSTRUCTIONS);
+            removeNullObjects(caseDataMapToBeUpdated, DA_APPLICANT_CONTACT_INSTRUCTIONS, "c8Document", "c8DraftDocument");
             caseDetails = allTabService.submitUpdateForSpecificUserEvent(
                 startAllTabsUpdateDataContent.authorisation(),
                 caseId,
@@ -390,10 +390,9 @@ public class CitizenCaseUpdateService {
         );
     }
 
-    private void removeNullObjects(Map<String, Object> caseDataMapToBeUpdated, String elementToNotBeDeleted) {
+    private void removeNullObjects(Map<String, Object> caseDataMapToBeUpdated, String... elementsToNotBeDeleted) {
+        List<String> preserveFields = Arrays.asList(elementsToNotBeDeleted);
         caseDataMapToBeUpdated.entrySet()
-            .removeIf(entry -> entry
-                .getValue() == null && !elementToNotBeDeleted.equals(entry.getKey())
-            );
+            .removeIf(entry -> entry.getValue() == null && !preserveFields.contains(entry.getKey()));
     }
 }
