@@ -1111,6 +1111,9 @@ public class CitizenPartyDetailsMapper {
             .applicantsConfidentialDetails(applicantsConfidentialDetails)
             .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
             .caseTypeOfApplication(citizenUpdatedCaseData.getCaseTypeOfApplication())
+            .isAddressConfidential(partyDetails.getIsAddressConfidential())
+            .isEmailAddressConfidential(partyDetails.getIsEmailAddressConfidential())
+            .isPhoneNumberConfidential(partyDetails.getIsPhoneNumberConfidential())
             .build();
     }
 
@@ -1120,12 +1123,23 @@ public class CitizenPartyDetailsMapper {
         List<Element<PartyDetails>> updatedApplicants = new ArrayList<>();
         List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails = new ArrayList<>();
 
+        YesOrNo isAddressConfidential = null;
+        YesOrNo isEmailAddressConfidential = null;
+        YesOrNo isPhoneNumberConfidential = null;
+
         if (applicants != null) {
             for (Element<PartyDetails> applicantElement : applicants) {
                 PartyDetails applicant = applicantElement.getValue();
                 PartyDetails source = (applicant.getPartyId() != null && applicant.getPartyId().equals(partyDetails.getPartyId()))
                     ? partyDetails
                     : applicant;
+
+                if (applicant.getPartyId() != null && applicant.getPartyId().equals(partyDetails.getPartyId())) {
+                    isAddressConfidential = partyDetails.getIsAddressConfidential();
+                    isEmailAddressConfidential = partyDetails.getIsEmailAddressConfidential();
+                    isPhoneNumberConfidential = partyDetails.getIsPhoneNumberConfidential();
+                }
+
                 updatedApplicants.add(element(applicantElement.getId(), source));
                 applicantsConfidentialDetails.addAll(createApplicantConfidentialDetailsForCaseData(source));
             }
@@ -1136,6 +1150,9 @@ public class CitizenPartyDetailsMapper {
             .applicantsConfidentialDetails(applicantsConfidentialDetails)
             .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
             .caseTypeOfApplication(citizenUpdatedCaseData.getCaseTypeOfApplication())
+            .isAddressConfidential(isAddressConfidential)
+            .isEmailAddressConfidential(isEmailAddressConfidential)
+            .isPhoneNumberConfidential(isPhoneNumberConfidential)
             .build();
     }
 
