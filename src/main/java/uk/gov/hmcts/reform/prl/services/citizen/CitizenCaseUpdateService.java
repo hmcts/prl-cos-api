@@ -111,9 +111,7 @@ public class CitizenCaseUpdateService {
         if (citizenUpdatePartyDataContent.isPresent()) {
             Map<String, Object> caseDataMapToBeUpdated = citizenUpdatePartyDataContent.get().updatedCaseDataMap();
 
-            removeNullObjects(caseDataMapToBeUpdated, DA_APPLICANT_CONTACT_INSTRUCTIONS, "c8Document", "c8DraftDocument");
-            log.info("After removeNullObjects: c8Document = {}", caseDataMapToBeUpdated.get("c8Document"));
-            log.info("After removeNullObjects: c8DraftDocument = {}", caseDataMapToBeUpdated.get("c8DraftDocument"));
+            removeNullObjects(caseDataMapToBeUpdated, DA_APPLICANT_CONTACT_INSTRUCTIONS, "c8Document", "c8WelshDocument");
             caseDetails = allTabService.submitUpdateForSpecificUserEvent(
                 startAllTabsUpdateDataContent.authorisation(),
                 caseId,
