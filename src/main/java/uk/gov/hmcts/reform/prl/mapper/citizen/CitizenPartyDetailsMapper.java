@@ -239,6 +239,7 @@ public class CitizenPartyDetailsMapper {
             List<Element<ChildDetailsRevised>> childDetails = caseData.getNewChildDetails();
             List<Element<PartyDetails>> applicants = new ArrayList<>(caseData.getApplicants());
             CaseData updatedCaseData = addUpdatedApplicantConfidentialFieldsToCaseData(caseData, citizenUpdatedCaseData);
+            CaseData finalCaseData = caseData;
             applicants.stream()
                 .filter(party -> Objects.equals(
                     party.getValue().getUser().getIdamId(),
@@ -254,6 +255,7 @@ public class CitizenPartyDetailsMapper {
                     applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
 
                     if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
+                        c8ArchiveService.archiveC8DocumentIfConfidentialChangedFromCitizen(finalCaseData, citizenUpdatedCaseData, caseDataMapToBeUpdated);
                         log.info("Regenerating C8 document for applicant in case: {}", updatedCaseData.getId());
                         try {
                             caseDataMapToBeUpdated.putAll(
@@ -264,9 +266,6 @@ public class CitizenPartyDetailsMapper {
                         }
                     }
                 });
-            if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
-                c8ArchiveService.archiveC8DocumentIfConfidentialChangedFromCitizen(caseData,citizenUpdatedCaseData,caseDataMapToBeUpdated);
-            }
             caseData = caseData.toBuilder().applicants(applicants).build();
             caseDataMapToBeUpdated.put(C100_APPLICANTS, caseData.getApplicants());
 
@@ -364,8 +363,6 @@ public class CitizenPartyDetailsMapper {
                 );
                 if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
                     c8ArchiveService.archiveC8DocumentIfConfidentialChangedFromCitizen(caseData,citizenUpdatedCaseData,caseDataMapToBeUpdated);
-                }
-                if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
                     log.info("Regenerating C8 document for applicant in case: {}", updatedCaseData.getId());
                     try {
                         caseDataMapToBeUpdated.putAll(
