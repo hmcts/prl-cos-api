@@ -17,6 +17,7 @@ import java.util.List;
 public class QueryParam {
     private Query query;
     private String size;
+    private String from;
     @JsonProperty("_source")
     private List<String> dataToReturn;
 }
