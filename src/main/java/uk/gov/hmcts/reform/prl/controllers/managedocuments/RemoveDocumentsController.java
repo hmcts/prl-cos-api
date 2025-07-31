@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -23,6 +24,7 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.RemoveDocumentsService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.List;
 import java.util.Map;
@@ -35,19 +37,24 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @RequestMapping("/remove-documents")
 @SecurityRequirement(name = "Bearer Authentication")
 public class RemoveDocumentsController extends AbstractCallbackController {
+
     private final RemoveDocumentsService removeDocumentsService;
     private final AuthorisationService authorisationService;
     private final UserService userService;
+    private final AllTabServiceImpl tabService;
 
     @Autowired
-    protected RemoveDocumentsController(ObjectMapper objectMapper, EventService eventPublisher,
+    protected RemoveDocumentsController(ObjectMapper objectMapper,
+                                        EventService eventPublisher,
                                         RemoveDocumentsService removeDocumentsService,
                                         UserService userService,
-                                        AuthorisationService authorisationService) {
+                                        AuthorisationService authorisationService,
+                                        AllTabServiceImpl tabService) {
         super(objectMapper, eventPublisher);
         this.removeDocumentsService = removeDocumentsService;
         this.userService = userService;
         this.authorisationService = authorisationService;
+        this.tabService = tabService;
     }
 
     @PostMapping("/about-to-start")
@@ -55,76 +62,101 @@ public class RemoveDocumentsController extends AbstractCallbackController {
         @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
+
         if (!authorisationService.isAuthorized(authorisation, s2sToken)) {
-            throw (new RuntimeException(INVALID_CLIENT));
+            throw new RuntimeException(INVALID_CLIENT);
         }
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
-
         caseData = removeDocumentsService.populateRemovalList(caseData);
         return CallbackResponse.builder()
             .data(caseData)
             .build();
     }
 
-    @PostMapping(path = "/confirm-removals", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/confirm-removals",
+        consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     public CallbackResponse confirmRemovals(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest
-    ) {
-        if (!authorisationService.isAuthorized(authorisation, s2sToken)) {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
+        @RequestBody CallbackRequest callbackRequest) {
 
+        if (!authorisationService.isAuthorized(authorisation, s2sToken)) {
+            throw new RuntimeException(INVALID_CLIENT);
+        }
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         CaseData old = getCaseData(callbackRequest.getCaseDetailsBefore());
 
-        // add list of documents we've identified as being removed
         caseData = caseData.toBuilder()
-            .documentsToBeRemoved(removeDocumentsService.getConfirmationTextForDocsBeingRemoved(caseData, old))
+            .documentsToBeRemoved(
+                removeDocumentsService.getConfirmationTextForDocsBeingRemoved(caseData, old)
+            )
             .build();
 
         return CallbackResponse.builder()
-            .data(caseData).build();
+            .data(caseData)
+            .build();
     }
 
-    @PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/about-to-submit",
+        consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     public AboutToStartOrSubmitCallbackResponse aboutToSubmit(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest
-    ) {
-        if (!authorisationService.isAuthorized(authorisation, s2sToken)) {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
+        @RequestBody CallbackRequest callbackRequest) {
 
+        if (!authorisationService.isAuthorized(authorisation, s2sToken)) {
+            throw new RuntimeException(INVALID_CLIENT);
+        }
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         CaseData old = getCaseData(callbackRequest.getCaseDetailsBefore());
 
-        List<Element<RemovableDocument>> docsToRemove = removeDocumentsService.getDocsBeingRemoved(caseData, old);
-        Map<String, Object> updatedCaseData = removeDocumentsService.removeDocuments(caseData, docsToRemove);
+        List<Element<RemovableDocument>> docsToRemove =
+            removeDocumentsService.getDocsBeingRemoved(caseData, old);
+        Map<String, Object> updatedCaseData =
+            removeDocumentsService.removeDocuments(caseData, docsToRemove);
 
-        // update the lists of documents with documents that have been removed
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(updatedCaseData).build();
+            .data(updatedCaseData)
+            .build();
     }
 
-    @PostMapping(path = "/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/submitted",
+        consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     public CallbackResponse submitted(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest
-    ) {
+        @RequestBody CallbackRequest callbackRequest) {
+
         if (!authorisationService.isAuthorized(authorisation, s2sToken)) {
-            throw (new RuntimeException(INVALID_CLIENT));
+            throw new RuntimeException(INVALID_CLIENT);
         }
 
+        String caseId = callbackRequest.getCaseDetails().getId().toString();
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         CaseData old = getCaseData(callbackRequest.getCaseDetailsBefore());
 
         removeDocumentsService.deleteDocumentsInCdam(caseData, old);
 
+        StartAllTabsUpdateDataContent startData =
+            tabService.getStartAllTabsUpdate(caseId);
+        Map<String, Object> caseDataUpdated = startData.caseDataMap();
+
+        // apply document-removal delta
+        List<Element<RemovableDocument>> docsToRemove =
+            removeDocumentsService.getDocsBeingRemoved(caseData, old);
+        Map<String, Object> delta =
+            removeDocumentsService.removeDocuments(caseData, docsToRemove);
+        caseDataUpdated.putAll(delta);
+
+        // submit full update (also refreshes all tabs)
+        tabService.submitAllTabsUpdate(
+            startData.authorisation(),
+            caseId,
+            startData.startEventResponse(),
+            startData.eventRequestData(),
+            caseDataUpdated
+        );
+
         return CallbackResponse.builder().build();
     }
-
 }
