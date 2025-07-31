@@ -62,8 +62,10 @@ public class RemoveDocumentsService {
     }
 
     public List<Element<RemovableDocument>> getDocsBeingRemoved(CaseData caseData, CaseData old) {
-        List<Element<RemovableDocument>> current = caseData.getRemovableDocuments();
-        List<Element<RemovableDocument>> previous = getRemovableDocuments(old);
+        List<Element<RemovableDocument>> current =
+            Optional.ofNullable(caseData.getRemovableDocuments()).orElse(List.of());
+        List<Element<RemovableDocument>> previous =
+            Optional.ofNullable(getRemovableDocuments(old)).orElse(List.of());
         return previous.stream()
             .filter(prevDoc -> current.stream()
                 .noneMatch(currDoc -> currDoc.getId().equals(prevDoc.getId())))
