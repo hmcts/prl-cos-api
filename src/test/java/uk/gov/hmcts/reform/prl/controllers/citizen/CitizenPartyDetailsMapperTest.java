@@ -907,7 +907,7 @@ public class CitizenPartyDetailsMapperTest {
                 APPLICANT_1_UUID,
                 YesOrNo.Yes, YesOrNo.No, YesOrNo.Yes,
                 List.of(element(ELEMENT_1_UUID, createPartyDetailsWithConfidentiality(
-                    APPLICANT_1_UUID, "John", "Doe", YesOrNo.No, YesOrNo.Yes, YesOrNo.No))),
+                    APPLICANT_1_UUID, "John", "Doe", YesOrNo.Yes, YesOrNo.No, YesOrNo.Yes))),
                 1
             ),
             Arguments.of(
@@ -918,7 +918,7 @@ public class CitizenPartyDetailsMapperTest {
                     element(ELEMENT_1_UUID, createPartyDetailsWithConfidentiality(
                         APPLICANT_1_UUID, "John", "Doe", YesOrNo.No, YesOrNo.No, YesOrNo.No)),
                     element(ELEMENT_2_UUID, createPartyDetailsWithConfidentiality(
-                        APPLICANT_2_UUID, "Jane", "Smith", YesOrNo.No, YesOrNo.No, YesOrNo.Yes))
+                        APPLICANT_2_UUID, "Jane", "Smith", YesOrNo.Yes, YesOrNo.Yes, YesOrNo.No))
                 ),
                 2
             ),

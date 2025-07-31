@@ -1124,13 +1124,14 @@ public class CitizenPartyDetailsMapper {
         if (applicants != null) {
             for (Element<PartyDetails> applicantElement : applicants) {
                 PartyDetails applicant = applicantElement.getValue();
-                PartyDetails source = (applicant.getPartyId() != null && applicant.getPartyId().equals(updatedPartyDetails.getPartyId()))
+                PartyDetails source = (applicant.getPartyId() != null
+                    && applicantElement.getId().toString().equals(updatedPartyDetails.getPartyId().toString()))
                     ? updatedPartyDetails : applicant;
 
                 PartyDetails updatedApplicant = source.toBuilder()
-                    .isAddressConfidential(updatedPartyDetails.getIsAddressConfidential())
-                    .isEmailAddressConfidential(updatedPartyDetails.getIsEmailAddressConfidential())
-                    .isPhoneNumberConfidential(updatedPartyDetails.getIsPhoneNumberConfidential())
+                    .isAddressConfidential(source.getIsAddressConfidential())
+                    .isEmailAddressConfidential(source.getIsEmailAddressConfidential())
+                    .isPhoneNumberConfidential(source.getIsPhoneNumberConfidential())
                     .build();
 
                 updatedApplicants.add(element(applicantElement.getId(), updatedApplicant));
