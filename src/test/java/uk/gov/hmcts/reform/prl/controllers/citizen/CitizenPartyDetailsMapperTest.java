@@ -46,10 +46,15 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.params.provider.MethodSource;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
@@ -816,6 +821,116 @@ public class CitizenPartyDetailsMapperTest {
         assertEquals(updatedPartyDetails.getAddress(), details.getAddress());
         assertNull(details.getEmail());
         assertEquals(updatedPartyDetails.getPhoneNumber(), details.getPhoneNumber());
+    }
+
+    private static final UUID APPLICANT_1_UUID = UUID.fromString("11111111-1111-1111-1111-111111111111");
+    private static final UUID APPLICANT_2_UUID = UUID.fromString("22222222-2222-2222-2222-222222222222");
+    private static final UUID ELEMENT_1_UUID = UUID.fromString("aaaaaaaa-1111-1111-1111-111111111111");
+    private static final UUID ELEMENT_2_UUID = UUID.fromString("bbbbbbbb-2222-2222-2222-222222222222");
+
+    public static PartyDetails createPartyDetailsWithConfidentiality(UUID partyId,
+                                                                         String firstName,
+                                                                         String lastName,
+                                                                         YesOrNo addressConfidential,
+                                                                         YesOrNo emailConfidential,
+                                                                         YesOrNo phoneConfidential) {
+        return PartyDetails.builder()
+            .partyId(partyId)
+            .firstName(firstName)
+            .lastName(lastName)
+            .isAddressConfidential(addressConfidential)
+            .isEmailAddressConfidential(emailConfidential)
+            .isPhoneNumberConfidential(phoneConfidential)
+            .build();
+    }
+
+    public static CitizenUpdatedCaseData createCitizenUpdatedCaseData(PartyDetails partyDetails) {
+        return CitizenUpdatedCaseData.builder()
+            .partyDetails(partyDetails)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .build();
+    }
+
+    public static CaseData createCaseDataWithApplicants(List<Element<PartyDetails>> applicants) {
+        return CaseData.builder()
+            .id(1234567891234567L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(applicants)
+            .build();
+    }
+
+
+    @ParameterizedTest
+    @MethodSource("confidentialityTestScenarios")
+    @DisplayName("Update applicant confidentiality fields for C100 cases")
+    void testAddUpdatedApplicantConfidentialFieldsToCaseDataC100(String testName,
+                                                                 UUID targetPartyId,
+                                                                 YesOrNo updatedAddressConf,
+                                                                 YesOrNo updatedEmailConf,
+                                                                 YesOrNo updatedPhoneConf,
+                                                                 List<Element<PartyDetails>> existingApplicants,
+                                                                 int expectedApplicantCount) throws IOException {
+        setUpCA();
+
+        PartyDetails updatedPartyDetails = createPartyDetailsWithConfidentiality(
+            targetPartyId, "Updated", "User", updatedAddressConf, updatedEmailConf, updatedPhoneConf);
+
+        CitizenUpdatedCaseData citizenUpdatedCaseData = createCitizenUpdatedCaseData(updatedPartyDetails);
+        CaseData caseData = createCaseDataWithApplicants(existingApplicants);
+
+        CaseData result = citizenPartyDetailsMapper.addUpdatedApplicantConfidentialFieldsToCaseDataC100(
+            caseData, citizenUpdatedCaseData);
+
+        assertNotNull(result);
+        if (existingApplicants != null) {
+            assertNotNull(result.getApplicants());
+            assertEquals(expectedApplicantCount, result.getApplicants().size());
+
+            PartyDetails updatedApplicant = result.getApplicants().stream()
+                .map(Element::getValue)
+                .filter(p -> targetPartyId.equals(p.getPartyId()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Updated applicant not found"));
+
+            assertEquals(updatedAddressConf, updatedApplicant.getIsAddressConfidential());
+            assertEquals(updatedEmailConf, updatedApplicant.getIsEmailAddressConfidential());
+            assertEquals(updatedPhoneConf, updatedApplicant.getIsPhoneNumberConfidential());
+        } else {
+            assertNotNull(result.getApplicantsConfidentialDetails());
+            assertEquals(0, result.getApplicantsConfidentialDetails().size());
+        }
+    }
+
+    static Stream<Arguments> confidentialityTestScenarios() {
+        return Stream.of(
+            Arguments.of(
+                "Single applicant - update confidentiality",
+                APPLICANT_1_UUID,
+                YesOrNo.Yes, YesOrNo.No, YesOrNo.Yes,
+                List.of(element(ELEMENT_1_UUID, createPartyDetailsWithConfidentiality(
+                    APPLICANT_1_UUID, "John", "Doe", YesOrNo.No, YesOrNo.Yes, YesOrNo.No))),
+                1
+            ),
+            Arguments.of(
+                "Multiple applicants - update second applicant",
+                APPLICANT_2_UUID,
+                YesOrNo.Yes, YesOrNo.Yes, YesOrNo.No,
+                Arrays.asList(
+                    element(ELEMENT_1_UUID, createPartyDetailsWithConfidentiality(
+                        APPLICANT_1_UUID, "John", "Doe", YesOrNo.No, YesOrNo.No, YesOrNo.No)),
+                    element(ELEMENT_2_UUID, createPartyDetailsWithConfidentiality(
+                        APPLICANT_2_UUID, "Jane", "Smith", YesOrNo.No, YesOrNo.No, YesOrNo.Yes))
+                ),
+                2
+            ),
+            Arguments.of(
+                "Null applicants list",
+                APPLICANT_1_UUID,
+                YesOrNo.Yes, YesOrNo.No, YesOrNo.Yes,
+                null,
+                0
+            )
+        );
     }
 }
 
