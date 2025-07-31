@@ -86,6 +86,7 @@ public class RemoveDocumentsController extends AbstractCallbackController {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         CaseData old = getCaseData(callbackRequest.getCaseDetailsBefore());
 
+        // add list of documents we've identified as being removed
         caseData = caseData.toBuilder()
             .documentsToBeRemoved(
                 removeDocumentsService.getConfirmationTextForDocsBeingRemoved(caseData, old)
