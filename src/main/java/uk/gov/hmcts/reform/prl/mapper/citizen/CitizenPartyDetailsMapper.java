@@ -1032,6 +1032,7 @@ public class CitizenPartyDetailsMapper {
         updateHelpWithFeesDetailsForCaseData(caseDataBuilder, c100RebuildData);
 
         caseDataBuilder.applicantCaseName(buildApplicantAndRespondentForCaseName(c100RebuildData));
+        caseDataBuilder.caseAccessCategory(caseData.getCaseTypeOfApplication());
         //Set case type, applicant name & respondent names for case list table
         caseDataBuilder.selectedCaseTypeID(caseData.getCaseTypeOfApplication());
         caseDataBuilder.applicantName(getPartyName(caseDataBuilder.build().getApplicants()));
@@ -1122,7 +1123,7 @@ public class CitizenPartyDetailsMapper {
     }
 
     public CaseData addUpdatedApplicantConfidentialFieldsToCaseDataC100(CaseData caseData, CitizenUpdatedCaseData citizenUpdatedCaseData) {
-        PartyDetails partyDetails = citizenUpdatedCaseData.getPartyDetails();
+        PartyDetails updatedPartyDetails = citizenUpdatedCaseData.getPartyDetails();
         List<Element<PartyDetails>> applicants = caseData.getApplicants();
         List<Element<PartyDetails>> updatedApplicants = new ArrayList<>();
         List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails = new ArrayList<>();
@@ -1130,11 +1131,18 @@ public class CitizenPartyDetailsMapper {
         if (applicants != null) {
             for (Element<PartyDetails> applicantElement : applicants) {
                 PartyDetails applicant = applicantElement.getValue();
-                PartyDetails source = (applicant.getPartyId() != null && applicant.getPartyId().equals(partyDetails.getPartyId()))
-                    ? partyDetails
-                    : applicant;
-                updatedApplicants.add(element(applicantElement.getId(), source));
-                applicantsConfidentialDetails.addAll(createApplicantConfidentialDetailsForCaseData(source));
+                PartyDetails source = (applicantElement.getId() != null
+                    && applicantElement.getId().toString().equals(updatedPartyDetails.getPartyId().toString()))
+                    ? updatedPartyDetails : applicant;
+
+                PartyDetails updatedApplicant = source.toBuilder()
+                    .isAddressConfidential(source.getIsAddressConfidential())
+                    .isEmailAddressConfidential(source.getIsEmailAddressConfidential())
+                    .isPhoneNumberConfidential(source.getIsPhoneNumberConfidential())
+                    .build();
+
+                updatedApplicants.add(element(applicantElement.getId(), updatedApplicant));
+                applicantsConfidentialDetails.addAll(createApplicantConfidentialDetailsForCaseData(updatedApplicant));
             }
         }
 
@@ -1149,9 +1157,12 @@ public class CitizenPartyDetailsMapper {
     public List<Element<ApplicantConfidentialityDetails>> createApplicantConfidentialDetailsForCaseData(PartyDetails partyDetails) {
         ApplicantConfidentialityDetails.ApplicantConfidentialityDetailsBuilder appConfBuilder = ApplicantConfidentialityDetails.builder();
 
-        appConfBuilder.address(getConfidentialField(partyDetails.getIsAddressConfidential(), partyDetails.getAddress()));
-        appConfBuilder.email(getConfidentialField(partyDetails.getIsEmailAddressConfidential(), partyDetails.getEmail()));
-        appConfBuilder.phoneNumber(getConfidentialField(partyDetails.getIsPhoneNumberConfidential(), partyDetails.getPhoneNumber()));
+        appConfBuilder.address(YesOrNo.Yes.equals(partyDetails.getIsAddressConfidential())
+                                   ? partyDetails.getAddress() : null);
+        appConfBuilder.email(YesOrNo.Yes.equals(partyDetails.getIsEmailAddressConfidential())
+                                 ? partyDetails.getEmail() : null);
+        appConfBuilder.phoneNumber(YesOrNo.Yes.equals(partyDetails.getIsPhoneNumberConfidential())
+                                       ? partyDetails.getPhoneNumber() : null);
 
         return List.of(element(null, appConfBuilder.build()));
     }
