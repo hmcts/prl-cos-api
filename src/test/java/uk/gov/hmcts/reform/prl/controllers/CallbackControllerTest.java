@@ -1054,6 +1054,32 @@ public class CallbackControllerTest {
     }
 
     @Test
+    public void testCaseAccessCategorySetEqualsCaseTypeOfApplication() {
+
+        Map<String, Object> caseDetails = new HashMap<>();
+        caseDetails.put(CASE_TYPE_OF_APPLICATION, C100_CASE_TYPE);
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        CaseData caseData = CaseData.builder()
+            .id(123L).applicantCaseName("abcd")
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .build();
+        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(1L)
+                             .caseTypeId(C100_CASE_TYPE)
+                             .data(caseDetails).build()).build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
+            .aboutToSubmitCaseCreation(authToken,s2sToken, callbackRequest);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("CaseAccessCategory"));
+        assertEquals(aboutToStartOrSubmitCallbackResponse.getData().get("caseTypeOfApplication"),
+                     aboutToStartOrSubmitCallbackResponse.getData().get("CaseAccessCategory"));
+    }
+
+
+    @Test
     public void testC100CaseCreationWhenOrPolicyNotPresentInCaseData() throws Exception {
 
         Map<String, Object> caseDetails = new HashMap<>();

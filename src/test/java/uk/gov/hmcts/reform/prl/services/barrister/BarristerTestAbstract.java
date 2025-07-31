@@ -22,15 +22,17 @@ public class BarristerTestAbstract {
     protected static final String BARRISTER_ORG_ID_PREFIX = "d0651c7d-0db9-47aa-9bbb-933013f482e";
 
     protected void setupApplicantsC100() {
-        allApplicants.add(buildPartyDetailsElement(1, true, true, true));
-        allApplicants.add(buildPartyDetailsElement(2, true, true, true));
-        allApplicants.add(buildPartyDetailsElement(3, true, false, false));
+        allApplicants.add(buildPartyDetailsElement(1, true, true, false));
+        allApplicants.add(buildPartyDetailsElement(2, true, true, false));
+        allApplicants.add(buildPartyDetailsElement(3, true, true, true));
+        allApplicants.add(buildPartyDetailsElement(4, true, false, false));
     }
 
     protected void setupRespondentsC100() {
-        allRespondents.add(buildPartyDetailsElement(4, false, true, true));
-        allRespondents.add(buildPartyDetailsElement(5, false, true, true));
-        allRespondents.add(buildPartyDetailsElement(6, false, false, false));
+        allRespondents.add(buildPartyDetailsElement(5, false, true, false));
+        allRespondents.add(buildPartyDetailsElement(6, false, true, false));
+        allRespondents.add(buildPartyDetailsElement(7, false, true, true));
+        allRespondents.add(buildPartyDetailsElement(8, false, false, false));
     }
 
     void setupApplicantFL401() {

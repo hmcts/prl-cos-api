@@ -18,6 +18,7 @@ public class Barrister {
     private UUID barristerPartyId;
     private final String barristerFirstName;
     private final String barristerLastName;
+    private final String barristerRole;
 
     public static final String FULL_NAME_FORMAT = "%s %s";
 
