@@ -305,7 +305,7 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
         setupRespondentsC100();
         when(userDetails.getRoles()).thenReturn(List.of(Roles.SOLICITOR.getValue()));
         CaseData caseData = CaseData.builder().caseTypeOfApplication("C100").respondents(allRespondents).build();
-        Optional<Organisations> mockOrg = Optional.of(Organisations.builder().organisationIdentifier("Org4").build());
+        Optional<Organisations> mockOrg = Optional.of(Organisations.builder().organisationIdentifier("Org5").build());
         when(organisationService.findUserOrganisation(AUTH_TOKEN)).thenReturn(mockOrg);
 
         AllocatedBarrister allocatedBarrister = barristerAddService.getAllocatedBarrister(
@@ -321,10 +321,10 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
         assertEquals(1, partiesDynamicList.getListItems().size());
         DynamicListElement resParty1 = partiesDynamicList.getListItems().getFirst();
         assertEquals(
-            "RespFN4 RespLN4 (Respondent), RespFN4 RespLN4, Org4",
+            "RespFN5 RespLN5 (Respondent), RespFN5 RespLN5, Org5",
             resParty1.getLabel()
         );
-        assertEquals(PARTY_ID_PREFIX + "4", resParty1.getCode());
+        assertEquals(PARTY_ID_PREFIX + "5", resParty1.getCode());
     }
 
     @Test
@@ -359,10 +359,10 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
     void shouldGetRespondentsWithSameSolicitorC100() {
         setupRespondentsC100();
         when(userDetails.getRoles()).thenReturn(List.of(Roles.SOLICITOR.getValue()));
-        allRespondents.get(1).getValue().getSolicitorOrg().setOrganisationID("Org4");
-        allRespondents.get(1).getValue().getSolicitorOrg().setOrganisationName("Org4");
+        allRespondents.get(1).getValue().getSolicitorOrg().setOrganisationID("Org5");
+        allRespondents.get(1).getValue().getSolicitorOrg().setOrganisationName("Org5");
         CaseData caseData = CaseData.builder().caseTypeOfApplication("C100").respondents(allRespondents).build();
-        Optional<Organisations> mockOrg = Optional.of(Organisations.builder().organisationIdentifier("Org4").build());
+        Optional<Organisations> mockOrg = Optional.of(Organisations.builder().organisationIdentifier("Org5").build());
         when(organisationService.findUserOrganisation(AUTH_TOKEN)).thenReturn(mockOrg);
 
         AllocatedBarrister allocatedBarrister = barristerAddService.getAllocatedBarrister(
@@ -378,16 +378,16 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
         assertEquals(2, partiesDynamicList.getListItems().size());
         DynamicListElement resParty1 = partiesDynamicList.getListItems().getFirst();
         assertEquals(
-            "RespFN4 RespLN4 (Respondent), RespFN4 RespLN4, Org4",
+            "RespFN5 RespLN5 (Respondent), RespFN5 RespLN5, Org5",
             resParty1.getLabel()
         );
-        assertEquals(PARTY_ID_PREFIX + "4", resParty1.getCode());
+        assertEquals(PARTY_ID_PREFIX + "5", resParty1.getCode());
         DynamicListElement resParty2 = partiesDynamicList.getListItems().get(1);
         assertEquals(
-            "RespFN5 RespLN5 (Respondent), RespFN5 RespLN5, Org4",
+            "RespFN6 RespLN6 (Respondent), RespFN6 RespLN6, Org5",
             resParty2.getLabel()
         );
-        assertEquals(PARTY_ID_PREFIX + "5", resParty2.getCode());
+        assertEquals(PARTY_ID_PREFIX + "6", resParty2.getCode());
     }
 
     private Element<PartyDetails> buildPartyDetails(String id, String appFirstName, String appLastName, boolean hasRep,
