@@ -1141,6 +1141,8 @@ public class CitizenPartyDetailsMapper {
         return caseData.toBuilder()
             .applicants(updatedApplicants)
             .applicantsConfidentialDetails(applicantsConfidentialDetails)
+            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
+            .caseTypeOfApplication(citizenUpdatedCaseData.getCaseTypeOfApplication())
             .build();
     }
 
