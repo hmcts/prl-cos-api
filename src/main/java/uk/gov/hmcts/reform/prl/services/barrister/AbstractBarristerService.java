@@ -21,7 +21,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 public abstract class AbstractBarristerService {
     protected static final String APPLICANT = "Applicant";
     protected static final String RESPONDENT = "Respondent";
-    protected OrganisationService organisationService;
+    protected final OrganisationService organisationService;
+
+    protected AbstractBarristerService(OrganisationService organisationService) {
+        this.organisationService = organisationService;
+    }
 
     protected DynamicListElement getPartyDynamicListElement(boolean applicantOrRespondent, PartyDetails partyDetails) {
         if (isPartyApplicable(applicantOrRespondent, partyDetails)) {
@@ -53,24 +57,17 @@ public abstract class AbstractBarristerService {
 
     private List<DynamicListElement> getRelatedPeopleC100(UserDetails userDetails, List<Element<PartyDetails>> people,
                                                           Boolean isApplicant, String usersAuthorisation) {
-        System.out.println("user details -" + userDetails);
-        System.out.println("user roles -" + userDetails.getRoles());
         if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
-            System.out.println("here!");
             Optional<Organisations> usersOrganisation = organisationService.findUserOrganisation(usersAuthorisation);
-            System.out.println("organisation -" + usersOrganisation);
             List<Element<PartyDetails>> relatedPeople = new ArrayList<>();
 
             for (Element<PartyDetails> person : people) {
-                System.out.println("this is " + person);
                 if (isSameOrganisation(person.getValue(), usersOrganisation)) {
                     relatedPeople.add(person);
                 }
             }
-            System.out.println("we found -" + relatedPeople);
             return getPartyDynamicListElements(relatedPeople, isApplicant);
         } else {
-            System.out.println("returned all!");
             return getPartyDynamicListElements(people, isApplicant);
         }
     }
@@ -101,8 +98,6 @@ public abstract class AbstractBarristerService {
     }
 
     private boolean isSameOrganisation(PartyDetails person, Optional<Organisations> usersOrganisation) {
-        System.out.println("org id " + usersOrganisation.get().getOrganisationIdentifier());
-        System.out.println("sol org id " + person.getSolicitorOrg().getOrganisationID());
         return usersOrganisation.isPresent()
             && usersOrganisation.get().getOrganisationIdentifier().equals(person.getSolicitorOrg().getOrganisationID());
     }

@@ -1,20 +1,22 @@
 package uk.gov.hmcts.reform.prl.services.barrister;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.OrganisationService;
 
 import java.util.UUID;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class BarristerRemoveService extends  AbstractBarristerService {
+
+    protected BarristerRemoveService(OrganisationService organisationService) {
+        super(organisationService);
+    }
 
     public DynamicList getBarristerListToRemove(CaseData caseData, UserDetails userDetails, String authorisation) {
         return getSolicitorPartyDynamicList(caseData, userDetails, authorisation);
