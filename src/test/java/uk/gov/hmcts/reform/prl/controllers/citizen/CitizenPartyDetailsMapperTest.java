@@ -2,10 +2,13 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -46,15 +49,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.params.provider.MethodSource;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
@@ -823,43 +823,6 @@ public class CitizenPartyDetailsMapperTest {
         assertEquals(updatedPartyDetails.getPhoneNumber(), details.getPhoneNumber());
     }
 
-    private static final UUID APPLICANT_1_UUID = UUID.fromString("11111111-1111-1111-1111-111111111111");
-    private static final UUID APPLICANT_2_UUID = UUID.fromString("22222222-2222-2222-2222-222222222222");
-    private static final UUID ELEMENT_1_UUID = UUID.fromString("aaaaaaaa-1111-1111-1111-111111111111");
-    private static final UUID ELEMENT_2_UUID = UUID.fromString("bbbbbbbb-2222-2222-2222-222222222222");
-
-    public static PartyDetails createPartyDetailsWithConfidentiality(UUID partyId,
-                                                                         String firstName,
-                                                                         String lastName,
-                                                                         YesOrNo addressConfidential,
-                                                                         YesOrNo emailConfidential,
-                                                                         YesOrNo phoneConfidential) {
-        return PartyDetails.builder()
-            .partyId(partyId)
-            .firstName(firstName)
-            .lastName(lastName)
-            .isAddressConfidential(addressConfidential)
-            .isEmailAddressConfidential(emailConfidential)
-            .isPhoneNumberConfidential(phoneConfidential)
-            .build();
-    }
-
-    public static CitizenUpdatedCaseData createCitizenUpdatedCaseData(PartyDetails partyDetails) {
-        return CitizenUpdatedCaseData.builder()
-            .partyDetails(partyDetails)
-            .caseTypeOfApplication(C100_CASE_TYPE)
-            .build();
-    }
-
-    public static CaseData createCaseDataWithApplicants(List<Element<PartyDetails>> applicants) {
-        return CaseData.builder()
-            .id(1234567891234567L)
-            .caseTypeOfApplication(C100_CASE_TYPE)
-            .applicants(applicants)
-            .build();
-    }
-
-
     @ParameterizedTest
     @MethodSource("confidentialityTestScenarios")
     @DisplayName("Update applicant confidentiality fields for C100 cases")
@@ -899,6 +862,42 @@ public class CitizenPartyDetailsMapperTest {
             assertNotNull(result.getApplicantsConfidentialDetails());
             assertEquals(0, result.getApplicantsConfidentialDetails().size());
         }
+    }
+
+    private static final UUID APPLICANT_1_UUID = UUID.fromString("11111111-1111-1111-1111-111111111111");
+    private static final UUID APPLICANT_2_UUID = UUID.fromString("22222222-2222-2222-2222-222222222222");
+    private static final UUID ELEMENT_1_UUID = UUID.fromString("aaaaaaaa-1111-1111-1111-111111111111");
+    private static final UUID ELEMENT_2_UUID = UUID.fromString("bbbbbbbb-2222-2222-2222-222222222222");
+
+    public static PartyDetails createPartyDetailsWithConfidentiality(UUID partyId,
+                                                                         String firstName,
+                                                                         String lastName,
+                                                                         YesOrNo addressConfidential,
+                                                                         YesOrNo emailConfidential,
+                                                                         YesOrNo phoneConfidential) {
+        return PartyDetails.builder()
+            .partyId(partyId)
+            .firstName(firstName)
+            .lastName(lastName)
+            .isAddressConfidential(addressConfidential)
+            .isEmailAddressConfidential(emailConfidential)
+            .isPhoneNumberConfidential(phoneConfidential)
+            .build();
+    }
+
+    public static CitizenUpdatedCaseData createCitizenUpdatedCaseData(PartyDetails partyDetails) {
+        return CitizenUpdatedCaseData.builder()
+            .partyDetails(partyDetails)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .build();
+    }
+
+    public static CaseData createCaseDataWithApplicants(List<Element<PartyDetails>> applicants) {
+        return CaseData.builder()
+            .id(1234567891234567L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(applicants)
+            .build();
     }
 
     static Stream<Arguments> confidentialityTestScenarios() {
