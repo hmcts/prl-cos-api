@@ -1116,7 +1116,7 @@ public class CitizenPartyDetailsMapper {
     }
 
     public CaseData addUpdatedApplicantConfidentialFieldsToCaseDataC100(CaseData caseData, CitizenUpdatedCaseData citizenUpdatedCaseData) {
-        PartyDetails partyDetails = citizenUpdatedCaseData.getPartyDetails();
+        PartyDetails updatedPartyDetails = citizenUpdatedCaseData.getPartyDetails();
         List<Element<PartyDetails>> applicants = caseData.getApplicants();
         List<Element<PartyDetails>> updatedApplicants = new ArrayList<>();
         List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails = new ArrayList<>();
@@ -1124,14 +1124,13 @@ public class CitizenPartyDetailsMapper {
         if (applicants != null) {
             for (Element<PartyDetails> applicantElement : applicants) {
                 PartyDetails applicant = applicantElement.getValue();
-                PartyDetails source = (applicant.getPartyId() != null && applicant.getPartyId().equals(partyDetails.getPartyId()))
-                    ? partyDetails
-                    : applicant;
+                PartyDetails source = (applicant.getPartyId() != null && applicant.getPartyId().equals(updatedPartyDetails.getPartyId()))
+                    ? updatedPartyDetails : applicant;
 
                 PartyDetails updatedApplicant = source.toBuilder()
-                    .isAddressConfidential(source.getIsAddressConfidential())
-                    .isEmailAddressConfidential(source.getIsEmailAddressConfidential())
-                    .isPhoneNumberConfidential(source.getIsPhoneNumberConfidential())
+                    .isAddressConfidential(updatedPartyDetails.getIsAddressConfidential())
+                    .isEmailAddressConfidential(updatedPartyDetails.getIsEmailAddressConfidential())
+                    .isPhoneNumberConfidential(updatedPartyDetails.getIsPhoneNumberConfidential())
                     .build();
 
                 updatedApplicants.add(element(applicantElement.getId(), updatedApplicant));
@@ -1142,8 +1141,6 @@ public class CitizenPartyDetailsMapper {
         return caseData.toBuilder()
             .applicants(updatedApplicants)
             .applicantsConfidentialDetails(applicantsConfidentialDetails)
-            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
-            .caseTypeOfApplication(citizenUpdatedCaseData.getCaseTypeOfApplication())
             .build();
     }
 
