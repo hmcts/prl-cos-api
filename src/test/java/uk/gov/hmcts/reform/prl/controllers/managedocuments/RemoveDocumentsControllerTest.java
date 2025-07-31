@@ -244,6 +244,18 @@ class RemoveDocumentsControllerTest {
         Map<String, Object> oldCaseDataMap = old.toMap(new ObjectMapper());
         when(objectMapper.convertValue(oldCaseDataMap, CaseData.class)).thenReturn(old);
 
+        // stub full-start for id "123"
+        EventRequestData rd = EventRequestData.builder().build();
+        StartEventResponse sr = StartEventResponse.builder().build();
+        StartAllTabsUpdateDataContent startData = new StartAllTabsUpdateDataContent(
+            auth, rd, sr, new HashMap<>(caseDataMap), caseData, null
+        );
+        when(tabService.getStartAllTabsUpdate("123")).thenReturn(startData);
+        when(removeDocumentsService.getDocsBeingRemoved(caseData, old))
+            .thenReturn(Collections.emptyList());
+        when(removeDocumentsService.removeDocuments(caseData, Collections.emptyList()))
+            .thenReturn(Map.of());
+
         CallbackRequest cb = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder().id(123L).data(caseDataMap).build())
             .caseDetailsBefore(CaseDetails.builder().id(123L).data(oldCaseDataMap).build())
