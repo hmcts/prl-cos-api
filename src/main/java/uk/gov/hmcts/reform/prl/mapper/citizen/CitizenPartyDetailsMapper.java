@@ -1124,7 +1124,7 @@ public class CitizenPartyDetailsMapper {
         if (applicants != null) {
             for (Element<PartyDetails> applicantElement : applicants) {
                 PartyDetails applicant = applicantElement.getValue();
-                PartyDetails source = (applicant.getPartyId() != null
+                PartyDetails source = (applicantElement.getId() != null
                     && applicantElement.getId().toString().equals(updatedPartyDetails.getPartyId().toString()))
                     ? updatedPartyDetails : applicant;
 
