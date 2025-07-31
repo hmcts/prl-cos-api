@@ -255,7 +255,8 @@ public class CitizenPartyDetailsMapper {
                     applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
 
                     if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
-                        c8ArchiveService.archiveC8DocumentIfConfidentialChangedFromCitizen(finalCaseData, citizenUpdatedCaseData, caseDataMapToBeUpdated);
+                        c8ArchiveService.archiveC8DocumentIfConfidentialChangedFromCitizen(
+                            finalCaseData, citizenUpdatedCaseData, caseDataMapToBeUpdated);
                         log.info("Regenerating C8 document for applicant in case: {}", updatedCaseData.getId());
                         try {
                             caseDataMapToBeUpdated.putAll(
