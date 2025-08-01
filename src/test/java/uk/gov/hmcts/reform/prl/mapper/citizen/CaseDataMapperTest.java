@@ -11,7 +11,9 @@ import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.skyscreamer.jsonassert.JSONAssert;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.utils.TestUtil;
@@ -19,6 +21,7 @@ import uk.gov.hmcts.reform.prl.utils.TestUtil;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -479,4 +482,31 @@ class CaseDataMapperTest {
 
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {""})
+    public void testCaseWithApplicants(String a) throws IOException {
+
+        UUID id = UUID.randomUUID();
+        UUID eid = UUID.randomUUID();
+        //Given
+        List<Element<PartyDetails>> applicants = List.of(Element.<PartyDetails>builder()
+                                                             .value(PartyDetails.builder()
+                                                                        .partyId(id)
+                                                                        .build())
+                                                             .id(eid)
+                                                             .build());
+        CaseData caseData1 = caseData.toBuilder()
+            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+                                 .c100RebuildChildDetails(TestUtil.readFileFrom("classpath:c100-rebuild/cd.json"))
+                                 .build())
+            .applicants(applicants)
+            .build();
+
+        //When
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+        //Then
+        assertNotNull(updatedCaseData);
+        assertEquals(id.toString(), updatedCaseData.getApplicants().get(0).getValue().getPartyId().toString());
+
+    }
 }

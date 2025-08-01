@@ -20,10 +20,7 @@ public class BarristerAddService extends AbstractBarristerService {
     public AllocatedBarrister getAllocatedBarrister(CaseData caseData) {
         return AllocatedBarrister.builder()
             .partyList(getSolicitorPartyDynamicList(caseData))
-            .barristerName(null)
-            .barristerEmail(null)
             .barristerOrg(Organisation.builder().build())
-            .roleItem(null)
             .build();
     }
 

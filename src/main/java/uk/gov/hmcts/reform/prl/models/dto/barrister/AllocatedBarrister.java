@@ -17,7 +17,10 @@ public class AllocatedBarrister {
     private final DynamicList partyList;
 
     @JsonProperty("barristerName")
-    private final String barristerName;
+    private final String barristerFirstName;
+
+    @JsonProperty("barristerName")
+    private final String barristerLastName;
 
     @JsonProperty("barristerEmail")
     private final String barristerEmail;
