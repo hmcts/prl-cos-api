@@ -28,8 +28,6 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -55,29 +53,28 @@ public class CaseAssignmentController {
         @RequestBody CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        Optional<String> barristerRole = ccdCaseAssignmentService.deriveBarristerRole(caseData);
 
-        if (barristerRole.isPresent()) {
-            return getAboutToStartOrSubmitCallbackResponse(caseData,
-                                                           (userId,errorList) ->
-                                                               ccdCaseAssignmentService.validateAddRequest(caseData,
-                                                                                                           barristerRole.get(),
-                                                                                                           errorList),
-                                                           userId -> {
-                                                               ccdCaseAssignmentService.grantBarristerCaseAccess(caseData,
-                                                                                                                 userId,
-                                                                                                                 barristerRole.get());
-                                                               ccdCaseAssignmentService.updatedPartyWithBarristerDetails(caseData,
-                                                                                                                         barristerRole.get(),
-                                                                                                                         userId);
+        List<String> errorList = new ArrayList<>();
+        AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
 
-                                                           });
+        Optional<String> userId = organisationService
+            .findUserByEmail(allocatedBarrister.getBarristerEmail());
+        Optional<String> barristerRole  = ccdCaseAssignmentService.deriveBarristerRole(caseData);
+        ccdCaseAssignmentService.validateAddRequest(
+                userId,
+                caseData,
+                barristerRole,
+                errorList);
 
+        if (errorList.isEmpty()) {
+            ccdCaseAssignmentService.addBarrister(caseData,
+                                                  userId.get(),
+                                                  barristerRole.get());
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseData.toMap(objectMapper))
-            .errors(List.of("Request could not be mapped to any barrister role")).build();
+            .errors(errorList).build();
     }
 
     @PostMapping(path = "/aboutToSubmitRemoveBarrister", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -92,42 +89,9 @@ public class CaseAssignmentController {
         @RequestBody CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
-        //TODO derive barrister role to remove from the case data
-        String roleItem = allocatedBarrister.getRoleItem();
-        //TODO retrieve org id from the case data
-        String organisationId = allocatedBarrister.getBarristerOrg().getOrganisationID();
-        return getAboutToStartOrSubmitCallbackResponse(caseData,
-                                                       (userId,errorList) ->
-                                                           ccdCaseAssignmentService.validateRemoveRequest(caseData,
-                                                                                                          userId,
-                                                                                                          roleItem,
-                                                                                                          errorList),
-                                                       userId ->
-            ccdCaseAssignmentService.removeCaseAccess(caseData,
-                                                      userId,
-                                                      roleItem,
-                                                      organisationId));
-    }
-
-    private AboutToStartOrSubmitCallbackResponse getAboutToStartOrSubmitCallbackResponse(CaseData caseData,
-                                                                                         BiConsumer<String, List<String>> validator,
-                                                                                         Consumer<String> ccdCaseAssignment) {
         List<String> errorList = new ArrayList<>();
-        AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
-
-        Optional<String> userId = organisationService
-            .findUserByEmail(allocatedBarrister.getBarristerEmail());
-
-        if (userId.isPresent()) {
-            validator.accept(userId.get(), errorList);
-        } else {
-            errorList.add("Could not find barrister with provided email");
-        }
-
-        if (errorList.isEmpty()) {
-            userId.ifPresent(ccdCaseAssignment);
-        }
+        ccdCaseAssignmentService.validateRemoveRequest(caseData, errorList);
+        ccdCaseAssignmentService.removeBarrister(caseData);
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseData.toMap(objectMapper))

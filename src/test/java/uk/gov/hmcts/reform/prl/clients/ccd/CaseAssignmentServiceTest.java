@@ -1,6 +1,9 @@
 package uk.gov.hmcts.reform.prl.clients.ccd;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -51,6 +54,7 @@ class CaseAssignmentServiceTest {
     private CaseData fl401CaseData;
     private Map<String, UUID> partyIds;
     private Map<String, UUID> fl401PartyIds;
+    private Barrister barrister;
 
     @BeforeEach
     void setUp() {
@@ -171,6 +175,35 @@ class CaseAssignmentServiceTest {
                                   .build())
             .build();
 
+        barrister = Barrister.builder()
+            .barristerEmail("barristerEmail@gmail.com")
+            .barristerName("barristerName")
+            .barristerOrg(Organisation.builder()
+                              .organisationID("barristerOrgId")
+                              .organisationName("barristerOrgName")
+                              .build())
+            .build();
+    }
+
+    @Test
+    void c100CaseDataCreation() {
+        CaseData caseData = c100CaseData.toBuilder()
+            .allocatedBarrister(AllocatedBarrister.builder()
+                                    .partyList(DynamicList.builder()
+                                                   .value(DynamicListElement.builder()
+                                                              .code("partyIds")
+                                                              .build())
+                                                   .build())
+                                    .build())
+            .build();
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.findAndRegisterModules();
+        try {
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(caseData));
+        } catch (JsonProcessingException e) {
+
+            e.printStackTrace();
+        }
     }
 
     @ParameterizedTest
@@ -241,11 +274,6 @@ class CaseAssignmentServiceTest {
                                                 int index,
                                                 String barristerRole,
                                                 Function<CaseData, List<Element<PartyDetails>>> parties) {
-        Barrister barrister = Barrister.builder()
-            .barristerEmail("barristerEmail@gmail.com")
-            .barristerName("barristerName")
-            .barristerOrgId("barristerOrgId")
-            .build();
         CaseData caseData = c100CaseData.toBuilder()
             .allocatedBarrister(AllocatedBarrister.builder()
                                     .partyList(DynamicList.builder()
@@ -256,7 +284,10 @@ class CaseAssignmentServiceTest {
                                     .barristerEmail(barrister.getBarristerEmail())
                                     .barristerName(barrister.getBarristerName())
                                     .barristerOrg(Organisation.builder()
-                                                      .organisationID(barrister.getBarristerOrgId())
+                                                      .organisationID(barrister.getBarristerOrg()
+                                                                          .getOrganisationID())
+                                                      .organisationName(barrister.getBarristerOrg()
+                                                                            .getOrganisationName())
                                                       .build())
                                     .build())
             .build();
@@ -291,11 +322,6 @@ class CaseAssignmentServiceTest {
     void updatedFl401PartyWithBarristerDetails(String party,
                                                String barristerRole,
                                                Function<CaseData, PartyDetails> parties) {
-        Barrister barrister = Barrister.builder()
-            .barristerEmail("barristerEmail@gmail.com")
-            .barristerName("barristerName")
-            .barristerOrgId("barristerOrgId")
-            .build();
         CaseData caseData = fl401CaseData.toBuilder()
             .allocatedBarrister(AllocatedBarrister.builder()
                                     .partyList(DynamicList.builder()
@@ -306,7 +332,10 @@ class CaseAssignmentServiceTest {
                                     .barristerEmail(barrister.getBarristerEmail())
                                     .barristerName(barrister.getBarristerName())
                                     .barristerOrg(Organisation.builder()
-                                                      .organisationID(barrister.getBarristerOrgId())
+                                                      .organisationID(barrister.getBarristerOrg()
+                                                                          .getOrganisationID())
+                                                      .organisationName(barrister.getBarristerOrg()
+                                                                            .getOrganisationName())
                                                       .build())
                                     .build())
             .build();
