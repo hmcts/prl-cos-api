@@ -101,6 +101,7 @@ public class PartyDetails {
     private UUID solicitorPartyId;
 
     @JsonUnwrapped
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Barrister barrister;
 
     @JsonIgnore

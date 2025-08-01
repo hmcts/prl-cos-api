@@ -9,8 +9,6 @@ import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 
-import java.util.UUID;
-
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
 
 @Slf4j
@@ -23,10 +21,7 @@ public class BarristerAddService extends AbstractBarristerService {
     public AllocatedBarrister getAllocatedBarrister(CaseData caseData, UserDetails userDetails, String authorisation) {
         return AllocatedBarrister.builder()
             .partyList(getSolicitorPartyDynamicList(caseData, userDetails, authorisation))
-            .barristerName(null)
-            .barristerEmail(null)
             .barristerOrg(Organisation.builder().build())
-            .roleItem(null)
             .build();
     }
 
@@ -40,8 +35,8 @@ public class BarristerAddService extends AbstractBarristerService {
         );
     }
 
-    protected UUID getCodeForAction(PartyDetails partyDetails) {
-        return partyDetails.getPartyId();
+    protected String getCodeForAction(PartyDetails partyDetails) {
+        return partyDetails.getPartyId().toString();
     }
 
     @Override

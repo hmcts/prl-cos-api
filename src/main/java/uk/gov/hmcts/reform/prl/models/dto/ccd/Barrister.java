@@ -2,22 +2,23 @@ package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-
-import java.util.UUID;
 
 @Data
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Barrister {
 
-    private UUID barristerOrgUuid;
-    private UUID barristerPartyId;
+    private String barristerOrgId;
+    private String barristerId;
     private final String barristerFirstName;
     private final String barristerLastName;
+    private final String barristerEmail;
     private final String barristerRole;
 
     public static final String FULL_NAME_FORMAT = "%s %s";

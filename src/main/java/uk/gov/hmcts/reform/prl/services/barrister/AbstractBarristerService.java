@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -138,5 +137,5 @@ public abstract class AbstractBarristerService {
 
     protected abstract String getLabelForAction(boolean applicantOrRespondent, PartyDetails partyDetails);
 
-    protected abstract UUID getCodeForAction(PartyDetails partyDetails);
+    protected abstract String getCodeForAction(PartyDetails partyDetails);
 }
