@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers.managedocuments;
 
+import javax.ws.rs.core.MediaType;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -26,6 +28,7 @@ import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.RemoveDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -115,14 +118,14 @@ public class RemoveDocumentsController extends AbstractCallbackController {
             removeDocumentsService.getDocsBeingRemoved(caseData, old);
         Map<String, Object> updatedCaseData =
             removeDocumentsService.removeDocuments(caseData, docsToRemove);
-
+        Map<String, Object> allData = new HashMap<>(callbackRequest.getCaseDetails().getData());
+        allData.putAll(updatedCaseData);
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(updatedCaseData)
+            .data(allData)
             .build();
     }
 
-    @PostMapping(path = "/submitted",
-        consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/submitted", consumes = MediaType.APPLICATION_JSON, produces = MediaType.APPLICATION_JSON)
     public CallbackResponse submitted(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
@@ -132,31 +135,10 @@ public class RemoveDocumentsController extends AbstractCallbackController {
             throw new RuntimeException(INVALID_CLIENT);
         }
 
-        String caseId = callbackRequest.getCaseDetails().getId().toString();
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         CaseData old = getCaseData(callbackRequest.getCaseDetailsBefore());
 
         removeDocumentsService.deleteDocumentsInCdam(caseData, old);
-
-        StartAllTabsUpdateDataContent startData =
-            tabService.getStartAllTabsUpdate(caseId);
-        Map<String, Object> caseDataUpdated = startData.caseDataMap();
-
-        // apply document-removal delta
-        List<Element<RemovableDocument>> docsToRemove =
-            removeDocumentsService.getDocsBeingRemoved(caseData, old);
-        Map<String, Object> delta =
-            removeDocumentsService.removeDocuments(caseData, docsToRemove);
-        caseDataUpdated.putAll(delta);
-
-        // submit full update (also refreshes all tabs)
-        tabService.submitAllTabsUpdate(
-            startData.authorisation(),
-            caseId,
-            startData.startEventResponse(),
-            startData.eventRequestData(),
-            caseDataUpdated
-        );
 
         return CallbackResponse.builder().build();
     }
