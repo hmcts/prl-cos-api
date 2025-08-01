@@ -1139,5 +1139,6 @@ public class PrlAppsConstants {
 
     public static final String IS_INVOKED_FROM_TASK = "isInvokedFromTask";
     public static final String ALLOCATED_BARRISTER = "allocatedBarrister";
+    public static final String REMOVE_BARRISTER_AND_PARTIES_LIST = "removeBarristerAndPartiesList";
 
 }
