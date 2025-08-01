@@ -26,12 +26,12 @@ public abstract class AbstractBarristerService {
         this.organisationService = organisationService;
     }
 
-    protected DynamicListElement getPartyDynamicListElement(boolean applicantOrRespondent, PartyDetails partyDetails) {
-        if (isPartyApplicable(applicantOrRespondent, partyDetails)) {
-            String label = getLabelForAction(applicantOrRespondent, partyDetails);
+    protected DynamicListElement getPartyDynamicListElement(boolean applicantOrRespondent, Element<PartyDetails> partyDetailsElement) {
+        if (isPartyApplicable(applicantOrRespondent, partyDetailsElement.getValue())) {
+            String label = getLabelForAction(applicantOrRespondent, partyDetailsElement.getValue());
 
             DynamicListElement applicantDynamicItem = DynamicListElement.builder()
-                .code(getCodeForAction(partyDetails))
+                .code(getCodeForAction(partyDetailsElement))
                 .label(label).build();
             return applicantDynamicItem;
         } else {
@@ -74,10 +74,10 @@ public abstract class AbstractBarristerService {
     protected DynamicList getSolicitorPartyDynamicListFL401(CaseData caseData, UserDetails userDetails, String authorisation) {
         List<DynamicListElement> listItems = new ArrayList<>();
         PartyDetails applicant = caseData.getApplicantsFL401();
-        checkAndAddPartyToList(listItems, applicant, true, userDetails, authorisation);
+        checkAndAddPartyToListFL401(listItems, applicant, true, userDetails, authorisation);
 
         PartyDetails respondent = caseData.getRespondentsFL401();
-        checkAndAddPartyToList(listItems, respondent, false, userDetails, authorisation);
+        checkAndAddPartyToListFL401(listItems, respondent, false, userDetails, authorisation);
 
         return  DynamicList.builder().value(null).listItems(listItems).build();
     }
@@ -90,18 +90,25 @@ public abstract class AbstractBarristerService {
             if (isSameOrganisation(person, usersOrganisation)) {
                 relatedPerson = person;
             }
-            return getPartyDynamicListElement(isApplicant, relatedPerson);
+            //because the partyId on the PartyDetails is not actually being filled!
+            if (relatedPerson != null) {
+                Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder()
+                    .id(relatedPerson.getPartyId())
+                    .value(relatedPerson)
+                    .build();
+                return getPartyDynamicListElement(isApplicant, partyDetailsElement);
+            }
+            return null;
         } else {
-            return getPartyDynamicListElement(isApplicant, person);
+            Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder()
+                .id(person.getPartyId())
+                .value(person)
+                .build();
+            return getPartyDynamicListElement(isApplicant, partyDetailsElement);
         }
     }
 
-    private boolean isSameOrganisation(PartyDetails person, Optional<Organisations> usersOrganisation) {
-        return usersOrganisation.isPresent()
-            && usersOrganisation.get().getOrganisationIdentifier().equals(person.getSolicitorOrg().getOrganisationID());
-    }
-
-    private void checkAndAddPartyToList(List<DynamicListElement> listToAddTo, PartyDetails party, boolean appOrResp,
+    private void checkAndAddPartyToListFL401(List<DynamicListElement> listToAddTo, PartyDetails party, boolean appOrResp,
                                         UserDetails userDetails, String authorisation) {
         if (party != null) {
             DynamicListElement dynamicListElement = getRelatedPeopleFL401(userDetails, party, appOrResp, authorisation);
@@ -111,11 +118,16 @@ public abstract class AbstractBarristerService {
         }
     }
 
+    private boolean isSameOrganisation(PartyDetails person, Optional<Organisations> usersOrganisation) {
+        return usersOrganisation.isPresent()
+            && usersOrganisation.get().getOrganisationIdentifier().equals(person.getSolicitorOrg().getOrganisationID());
+    }
+
     protected List<DynamicListElement> getPartyDynamicListElements(List<Element<PartyDetails>> partyDetailsList,
                                                                  boolean applicantOrRespondent) {
         List<DynamicListElement> itemsList = new ArrayList<>();
         for (Element<PartyDetails> partyDetailsElement : partyDetailsList) {
-            DynamicListElement dynamicListElement = getPartyDynamicListElement(applicantOrRespondent, partyDetailsElement.getValue());
+            DynamicListElement dynamicListElement = getPartyDynamicListElement(applicantOrRespondent, partyDetailsElement);
             if (dynamicListElement != null) {
                 itemsList.add(dynamicListElement);
             }
@@ -137,5 +149,5 @@ public abstract class AbstractBarristerService {
 
     protected abstract String getLabelForAction(boolean applicantOrRespondent, PartyDetails partyDetails);
 
-    protected abstract String getCodeForAction(PartyDetails partyDetails);
+    protected abstract String getCodeForAction(Element<PartyDetails> partyDetailsElement);
 }

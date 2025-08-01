@@ -86,7 +86,9 @@ public class BarristerTestAbstract {
             .barristerFirstName(barFirstName + id)
             .barristerLastName(barLastName + id)
             .barristerEmail(barLastName + "@gmail.com")
-            .barristerOrgId(BARRISTER_ORG_ID_PREFIX + id)
+            .barristerOrg(Organisation.builder()
+                              .organisationID(BARRISTER_ORG_ID_PREFIX + id)
+                              .build())
             .build();
         return PartyDetails.builder()
             .partyId(UUID.fromString(PARTY_ID_PREFIX + id))

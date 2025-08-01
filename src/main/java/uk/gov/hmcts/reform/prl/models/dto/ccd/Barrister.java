@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.models.Organisation;
 
 @Data
 @Builder(toBuilder = true)
@@ -14,7 +15,7 @@ import lombok.Data;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Barrister {
 
-    private String barristerOrgId;
+    private Organisation barristerOrg;
     private String barristerId;
     private final String barristerFirstName;
     private final String barristerLastName;
