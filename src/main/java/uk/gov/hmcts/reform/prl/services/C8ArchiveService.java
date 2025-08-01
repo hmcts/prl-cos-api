@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -104,6 +105,7 @@ public class C8ArchiveService {
                 .documentUrl(document.getDocumentUrl())
                 .documentBinaryUrl(document.getDocumentBinaryUrl())
                 .documentFileName(fileName)
+                .uploadTimeStamp(LocalDateTime.now())
                 .build();
 
             archivedDocuments.add(buildElement(archivedocument));
