@@ -26,22 +26,27 @@ public class CsvWriter {
     public enum CsvColumn {
         CASE_NUMBER("Case Number", "CaseId"),
         COURT_NAME("Court Name/Location", "CourtName"),
-        COURT_ID("Court ID", "CourtId"),
-        COURT_DATE("Court Date DD/MM/YYYY", "CourtDate"),
-        ORDER_EXPIRY_DATE("Order Expiry Date DD/MM/YYYY", "OrderExpiryDate"),
+        COURT_ID("Court Code", "CourtId"),
+        ORDER_NAME("Order Name", "caseTypeOfApplication"),
+        COURT_DATE("Court Date DD/MM/YYYY", "dateOrderMade"),
         RESPONDENT_SURNAME("Respondent Surname", "Respondent.Surname"),
         RESPONDENT_FORENAMES("Respondent Forename(s)", "Respondent.FirstName"),
-        RESPONDENT_ADDRESS1("Respondent First Line of Address", "Respondent.Address1"),
-        RESPONDENT_ADDRESS2("Respondent Second Line of Address", "Respondent.Address2"),
+        RESPONDENT_DOB("Respondent DOB", "Respondent.DateOfBirth"),
+        RESPONDENT_ADDRESS1("Respondent 1st Line of Address", "Respondent.Address1"),
+        RESPONDENT_ADDRESS2("Respondent 2nd Line of Address", "Respondent.Address2"),
         RESPONDENT_POSTCODE("Respondent Postcode", "Respondent.Postcode"),
         APPLICANT_SURNAME("Applicant Surname", "Applicant.Surname"),
         APPLICANT_FORENAMES("Applicant Forename(s)", "Applicant.FirstName"),
+        APPLICANT_DOB("Applicant DOB", "Applicant.DateOfBirth"),
         APPLICANT_ADDRESS1("Applicant First Line of Address", "Applicant.Address1"),
         APPLICANT_ADDRESS2("Applicant Second Line of Address", "Applicant.Address2"),
         APPLICANT_POSTCODE("Applicant Postcode", "Applicant.Postcode"),
-        PDF_IDENTIFIER("PDF Identifier", "PdfIdentifier"),
-        IS_CONFIDENTIAL("Is Confidential", "IsConfidential"),
-        FORCE_CODE("Force Code", "ForceCode");
+        APPLICANT_PHONE("Applicant Phone", "Applicant.Phone"),
+        APPLICANT_EMAIL("Applicant Email", "Applicant.Email"),
+        APPLICANT_ADDRESS_CONFIDENTIAL("Is Applicant Address Confidential,", "Applicant.isAddressConfidential"),
+        APPLICANT_EMAIL_CONFIDENTIAL("Is Applicant Email Confidential,", "Applicant.isEmailAddressConfidential"),
+        APPLICANT_PHONE_CONFIDENTIAL("Is Applicant Phone Confidential,", "Applicant.isPhoneNumberConfidential"),
+        PDF_IDENTIFIER("Order File Name", "PdfIdentifier");
 
         private final String header;
         private final String property;
@@ -149,4 +154,6 @@ public class CsvWriter {
     private static boolean isEmpty(Object value) {
         return value == null || "".equals(value);
     }
+
+    // count total number of records in the CSV file. Add in a footer row with the total count. Needs to work with a crawler that can read the CSV file.
 }
