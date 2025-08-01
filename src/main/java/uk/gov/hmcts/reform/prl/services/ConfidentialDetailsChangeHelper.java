@@ -39,21 +39,27 @@ public class ConfidentialDetailsChangeHelper {
                 return true;
             }
 
-            if (checkIfAddressConfidentialityHasChanged(curr, prev)
-                || checkIfEmailConfidentialityHasChanged(curr, prev)
-                || checkIfPhoneConfidentialityHasChanged(curr, prev)) {
-                return true;
-            }
-
-            if ((Yes.equals(curr.getIsAddressConfidential()) && hasDetailChanged(curr.getAddress(), prev.getAddress()))
-                || (Yes.equals(curr.getIsEmailAddressConfidential()) && hasDetailChanged(curr.getEmail(), prev.getEmail()))
-                || (Yes.equals(curr.getIsPhoneNumberConfidential()) && hasDetailChanged(curr.getPhoneNumber(), prev.getPhoneNumber()))) {
+            if (haveContactDetailsChanged(curr, prev)) {
                 return true;
             }
         }
         return false;
     }
 
+    public boolean haveContactDetailsChanged(PartyDetails curr, PartyDetails prev) {
+        if (checkIfAddressConfidentialityHasChanged(curr, prev)
+            || checkIfEmailConfidentialityHasChanged(curr, prev)
+            || checkIfPhoneConfidentialityHasChanged(curr, prev)) {
+            return true;
+        }
+
+        if ((Yes.equals(curr.getIsAddressConfidential()) && hasDetailChanged(curr.getAddress(), prev.getAddress()))
+            || (Yes.equals(curr.getIsEmailAddressConfidential()) && hasDetailChanged(curr.getEmail(), prev.getEmail()))
+            || (Yes.equals(curr.getIsPhoneNumberConfidential()) && hasDetailChanged(curr.getPhoneNumber(), prev.getPhoneNumber()))) {
+            return true;
+        }
+        return false;
+    }
 
     public static boolean checkIfAddressConfidentialityHasChanged(PartyDetails current, PartyDetails previous) {
         return isNotEmpty(current.getIsAddressConfidential())
@@ -103,6 +109,8 @@ public class ConfidentialDetailsChangeHelper {
             String.valueOf(previousDetail).trim().toLowerCase()
         );
     }
+
+
 }
 
 
