@@ -4,15 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
-import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
-import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.RemovableDocument;
@@ -23,17 +20,13 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.RemoveDocumentsService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -53,9 +46,6 @@ class RemoveDocumentsControllerTest {
 
     @Mock
     private AuthorisationService authorisationService;
-
-    @Mock
-    private AllTabServiceImpl tabService;
 
     @InjectMocks
     private RemoveDocumentsController removeDocumentsController;
@@ -78,38 +68,33 @@ class RemoveDocumentsControllerTest {
     void testHandleAboutToStart() {
         UUID elementId = UUID.randomUUID();
         List<Element<RemovableDocument>> removalList = List.of(
-            element(
-                elementId, RemovableDocument.builder()
-                    .document(TEST_DOCUMENT)
-                    .build()
-            )
+            element(elementId,
+                RemovableDocument.builder().document(TEST_DOCUMENT).build())
         );
 
         CaseData caseData = CaseData.builder()
-            .reviewDocuments(
-                ReviewDocuments.builder()
-                    .bulkScannedDocListDocTab(List.of(
-                        element(
-                            elementId,
-                            QuarantineLegalDoc.builder()
-                                .categoryId("caseSummary")
-                                .caseSummaryDocument(TEST_DOCUMENT)
-                                .build()
-                        )))
-                    .build())
+            .reviewDocuments(ReviewDocuments.builder()
+                .bulkScannedDocListDocTab(List.of(
+                    element(elementId,
+                        QuarantineLegalDoc.builder()
+                            .categoryId("caseSummary")
+                            .caseSummaryDocument(TEST_DOCUMENT)
+                            .build()
+                    )
+                ))
+                .build())
             .build();
 
         CaseData caseDataUpdated = caseData.toBuilder()
             .removableDocuments(removalList)
             .build();
 
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         when(removeDocumentsService.populateRemovalList(caseData)).thenReturn(caseDataUpdated);
 
         CallbackRequest cb = CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder().id(123L).data(stringObjectMap).build())
+            .caseDetails(CaseDetails.builder().id(123L).data(caseDataMap).build())
             .build();
 
         CallbackResponse response = removeDocumentsController.handleAboutToStart(auth, serviceAuthToken, cb);
@@ -125,7 +110,7 @@ class RemoveDocumentsControllerTest {
 
         CaseData old = CaseData.builder().build();
         CaseData caseData = CaseData.builder().build();
-        CaseData caseDataUpdated = CaseData.builder()
+        CaseData caseDataUpdated = caseData.toBuilder()
             .documentsToBeRemoved(expectedText)
             .build();
 
@@ -134,19 +119,12 @@ class RemoveDocumentsControllerTest {
 
         Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-
         Map<String, Object> oldCaseDataMap = old.toMap(new ObjectMapper());
         when(objectMapper.convertValue(oldCaseDataMap, CaseData.class)).thenReturn(old);
 
         CallbackRequest cb = CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder()
-                             .id(123L)
-                             .data(caseDataMap)
-                             .build())
-            .caseDetailsBefore(CaseDetails.builder()
-                                   .id(123L)
-                                   .data(oldCaseDataMap)
-                                   .build())
+            .caseDetails(CaseDetails.builder().id(123L).data(caseDataMap).build())
+            .caseDetailsBefore(CaseDetails.builder().id(123L).data(oldCaseDataMap).build())
             .build();
 
         CallbackResponse response = removeDocumentsController.confirmRemovals(auth, serviceAuthToken, cb);
@@ -155,226 +133,64 @@ class RemoveDocumentsControllerTest {
         assertThat(response.getData()).isEqualTo(caseDataUpdated);
     }
 
-
     @Test
-    void testAboutToSubmit() {
-        UUID elementId = UUID.randomUUID();
-        CaseData old = CaseData.builder()
-            .reviewDocuments(ReviewDocuments.builder()
-                                 .courtStaffUploadDocListDocTab(List.of(
-                                     element(
-                                         elementId, QuarantineLegalDoc.builder()
-                                             .categoryId("caseSummary")
-                                             .caseSummaryDocument(TEST_DOCUMENT)
-                                             .build()
-                                     )))
-                                 .build())
-            .build();
-        CaseData caseData = CaseData.builder()
-            .removableDocuments(List.of(
-                element(
-                    elementId, RemovableDocument.builder()
-                        .document(TEST_DOCUMENT)
-                        .build()
-                )))
-            .build();
+    void testAboutToSubmit_RemovesDocsAndPreservesData() {
+        Map<String, Object> originalData = new HashMap<>();
+        originalData.put("existingField", "keepMe");
 
-        List<Element<RemovableDocument>> removalList = List.of(
-            element(
-                elementId, RemovableDocument.builder()
-                    .document(TEST_DOCUMENT)
-                    .build()
-            )
-        );
-        when(removeDocumentsService.getDocsBeingRemoved(caseData, old)).thenReturn(removalList);
+        CaseData caseData = CaseData.builder().build();
+        CaseData oldData = CaseData.builder().build();
 
-        Map<String, Object> after = Map.of("courtStaffUploadDocListDocTab", ReviewDocuments.builder().build());
+        when(objectMapper.convertValue(originalData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(originalData, CaseData.class)).thenReturn(oldData);
 
-        when(removeDocumentsService.removeDocuments(caseData, removalList)).thenReturn(after);
+        List<Element<RemovableDocument>> removalList = List.of();
+        when(removeDocumentsService.getDocsBeingRemoved(caseData, oldData)).thenReturn(removalList);
 
-        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
-        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-
-        Map<String, Object> oldCaseDataMap = old.toMap(new ObjectMapper());
-        when(objectMapper.convertValue(oldCaseDataMap, CaseData.class)).thenReturn(old);
+        Map<String, Object> delta = Map.of("newKey", "newValue");
+        when(removeDocumentsService.removeDocuments(caseData, removalList)).thenReturn(delta);
 
         CallbackRequest cb = CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder()
-                             .id(123L)
-                             .data(caseDataMap)
-                             .build())
-            .caseDetailsBefore(CaseDetails.builder()
-                                   .id(123L)
-                                   .data(oldCaseDataMap)
-                                   .build())
+            .caseDetails(CaseDetails.builder().id(1L).data(originalData).build())
+            .caseDetailsBefore(CaseDetails.builder().id(1L).data(originalData).build())
             .build();
 
-        removeDocumentsController.aboutToSubmit(auth, serviceAuthToken, cb);
+        AboutToStartOrSubmitCallbackResponse response =
+            removeDocumentsController.aboutToSubmit(auth, serviceAuthToken, cb);
 
-        verify(removeDocumentsService).getDocsBeingRemoved(caseData, old);
+        Map<String, Object> merged = response.getData();
+        assertThat(merged.get("existingField")).isEqualTo("keepMe");
+        assertThat(merged.get("newKey")).isEqualTo("newValue");
+
+        verify(removeDocumentsService).getDocsBeingRemoved(caseData, oldData);
         verify(removeDocumentsService).removeDocuments(caseData, removalList);
     }
 
     @Test
     void testSubmitted() {
         UUID elementId = UUID.randomUUID();
-        CaseData old = CaseData.builder()
-            .reviewDocuments(ReviewDocuments.builder()
-                                 .courtStaffUploadDocListDocTab(List.of(
-                                     element(
-                                         elementId, QuarantineLegalDoc.builder()
-                                             .categoryId("caseSummary")
-                                             .caseSummaryDocument(TEST_DOCUMENT)
-                                             .build()
-                                     )))
-                                 .build())
-            .build();
+        CaseData old = CaseData.builder().build();
         CaseData caseData = CaseData.builder()
             .removableDocuments(List.of(
-                element(
-                    elementId, RemovableDocument.builder()
-                        .document(TEST_DOCUMENT)
-                        .build()
-                )))
+                element(elementId,
+                    RemovableDocument.builder().document(TEST_DOCUMENT).build()
+                )
+            ))
             .build();
 
         Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-
         Map<String, Object> oldCaseDataMap = old.toMap(new ObjectMapper());
         when(objectMapper.convertValue(oldCaseDataMap, CaseData.class)).thenReturn(old);
-
-        // stub full-start for id "123"
-        EventRequestData rd = EventRequestData.builder().build();
-        StartEventResponse sr = StartEventResponse.builder().build();
-        StartAllTabsUpdateDataContent startData = new StartAllTabsUpdateDataContent(
-            auth, rd, sr, new HashMap<>(caseDataMap), caseData, null
-        );
-        when(tabService.getStartAllTabsUpdate("123")).thenReturn(startData);
-        when(removeDocumentsService.getDocsBeingRemoved(caseData, old))
-            .thenReturn(Collections.emptyList());
-        when(removeDocumentsService.removeDocuments(caseData, Collections.emptyList()))
-            .thenReturn(Map.of());
 
         CallbackRequest cb = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder().id(123L).data(caseDataMap).build())
             .caseDetailsBefore(CaseDetails.builder().id(123L).data(oldCaseDataMap).build())
             .build();
 
-        removeDocumentsController.submitted(auth, serviceAuthToken, cb);
+        CallbackResponse response = removeDocumentsController.submitted(auth, serviceAuthToken, cb);
 
         verify(removeDocumentsService).deleteDocumentsInCdam(caseData, old);
+        assertThat(response.getData()).isNull();
     }
-
-    @Test
-    void testSubmitted_fullSubmitFlow() {
-        Map<String, Object> originalMap = new HashMap<>();
-        originalMap.put("foo", "bar");
-
-        CaseData newData = CaseData.builder().build();
-        CaseData oldData = CaseData.builder().build();
-        when(objectMapper.convertValue(originalMap, CaseData.class)).thenReturn(newData);
-        when(objectMapper.convertValue(oldData.toMap(new ObjectMapper()), CaseData.class))
-            .thenReturn(oldData);
-
-        EventRequestData requestData = EventRequestData.builder().build();
-        StartEventResponse startEventResponse = StartEventResponse.builder().build();
-        StartAllTabsUpdateDataContent startData = new StartAllTabsUpdateDataContent(
-            auth,
-            requestData,
-            startEventResponse,
-            new HashMap<>(originalMap),
-            newData,
-            null
-        );
-        when(tabService.getStartAllTabsUpdate("3")).thenReturn(startData);
-
-        when(removeDocumentsService.getDocsBeingRemoved(newData, oldData))
-            .thenReturn(Collections.emptyList());
-        Map<String, Object> delta = Map.of("baz", "qux");
-        when(removeDocumentsService.removeDocuments(newData, Collections.emptyList()))
-            .thenReturn(delta);
-
-        CallbackRequest cb = CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder().id(3L).data(originalMap).build())
-            .caseDetailsBefore(CaseDetails.builder()
-                                   .id(3L)
-                                   .data(oldData.toMap(new ObjectMapper()))
-                                   .build())
-            .build();
-
-        CallbackResponse resp = removeDocumentsController.submitted(auth, serviceAuthToken, cb);
-
-        assertThat(resp.getData()).isNull();
-        verify(removeDocumentsService).deleteDocumentsInCdam(newData, oldData);
-        verify(tabService).getStartAllTabsUpdate("3");
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<Map<String, Object>> captor = ArgumentCaptor.forClass(Map.class);
-        verify(tabService).submitAllTabsUpdate(
-            eq(auth),
-            eq("3"),
-            eq(startEventResponse),
-            eq(requestData),
-            captor.capture()
-        );
-
-        Map<String, Object> submittedMap = captor.getValue();
-        assertThat(submittedMap.get("foo")).isEqualTo("bar");
-        assertThat(submittedMap.get("baz")).isEqualTo("qux");
-    }
-
-    @Test
-    void testOriginalFieldsArePreservedWhenRemovingDocs() {
-        Map<String, Object> incoming = new HashMap<>();
-        incoming.put("someExistingField", "keep me");
-
-        CaseData newData = CaseData.builder().build();
-        CaseData oldData = CaseData.builder().build();
-        when(objectMapper.convertValue(incoming, CaseData.class)).thenReturn(newData);
-        when(objectMapper.convertValue(oldData.toMap(new ObjectMapper()), CaseData.class)).thenReturn(oldData);
-
-        EventRequestData requestData = EventRequestData.builder().build();
-        StartEventResponse startEventResponse = StartEventResponse.builder().build();
-        StartAllTabsUpdateDataContent startData = new StartAllTabsUpdateDataContent(
-            auth,
-            requestData,
-            startEventResponse,
-            new HashMap<>(incoming),
-            newData,
-            null
-        );
-        when(tabService.getStartAllTabsUpdate("42")).thenReturn(startData);
-
-        when(removeDocumentsService.getDocsBeingRemoved(newData, oldData))
-            .thenReturn(Collections.emptyList());
-        when(removeDocumentsService.removeDocuments(newData, Collections.emptyList()))
-            .thenReturn(Map.of("removedCount", 0));
-
-        CallbackRequest cb = CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder().id(42L).data(incoming).build())
-            .caseDetailsBefore(CaseDetails.builder()
-                                   .id(42L)
-                                   .data(oldData.toMap(new ObjectMapper()))
-                                   .build())
-            .build();
-
-        removeDocumentsController.submitted(auth, serviceAuthToken, cb);
-
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<Map<String,Object>> captor = ArgumentCaptor.forClass(Map.class);
-        verify(tabService).submitAllTabsUpdate(
-            eq(auth),
-            eq("42"),
-            eq(startEventResponse),
-            eq(requestData),
-            captor.capture()
-        );
-
-        Map<String,Object> finalPayload = captor.getValue();
-        // verify original field still there
-        assertEquals("keep me", finalPayload.get("someExistingField"));
-        // verify delta was applied
-        assertEquals(0, finalPayload.get("removedCount"));
-    }
-
 }
