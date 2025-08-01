@@ -16,12 +16,12 @@ public abstract class AbstractBarristerService {
     protected static final String APPLICANT = "Applicant";
     protected static final String RESPONDENT = "Respondent";
 
-    protected DynamicListElement getPartyDynamicListElement(boolean applicantOrRespondent, PartyDetails partyDetails) {
-        if (isPartyApplicable(applicantOrRespondent, partyDetails)) {
-            String label = getLabelForAction(applicantOrRespondent, partyDetails);
+    protected DynamicListElement getPartyDynamicListElement(boolean applicantOrRespondent, Element<PartyDetails> partyDetailsElement) {
+        if (isPartyApplicable(applicantOrRespondent, partyDetailsElement.getValue())) {
+            String label = getLabelForAction(applicantOrRespondent, partyDetailsElement.getValue());
 
             DynamicListElement applicantDynamicItem = DynamicListElement.builder()
-                .code(getCodeForAction(partyDetails))
+                .code(getCodeForAction(partyDetailsElement))
                 .label(label).build();
             return applicantDynamicItem;
         } else {
@@ -47,17 +47,22 @@ public abstract class AbstractBarristerService {
     protected DynamicList getSolicitorPartyDynamicListFL401(CaseData caseData) {
         List<DynamicListElement> listItems = new ArrayList<>();
         PartyDetails applicant = caseData.getApplicantsFL401();
-        checkAndAddPartyToList(listItems, applicant, true);
+        checkAndAddPartyToListFL401(listItems, applicant, true);
 
         PartyDetails respondent = caseData.getRespondentsFL401();
-        checkAndAddPartyToList(listItems, respondent, false);
+        checkAndAddPartyToListFL401(listItems, respondent, false);
 
         return  DynamicList.builder().value(null).listItems(listItems).build();
     }
 
-    private void checkAndAddPartyToList(List<DynamicListElement> listToAddTo, PartyDetails party, boolean appOrResp) {
+    private void checkAndAddPartyToListFL401(List<DynamicListElement> listToAddTo, PartyDetails party, boolean appOrResp) {
         if (party != null) {
-            DynamicListElement dynamicListElement = getPartyDynamicListElement(appOrResp, party);
+            //because the partyId on the PartyDetails is not actually being filled!
+            Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder()
+                .id(party.getPartyId())
+                .value(party)
+                .build();
+            DynamicListElement dynamicListElement = getPartyDynamicListElement(appOrResp, partyDetailsElement);
             if (dynamicListElement != null) {
                 listToAddTo.add(dynamicListElement);
             }
@@ -68,7 +73,7 @@ public abstract class AbstractBarristerService {
                                                                  boolean applicantOrRespondent) {
         List<DynamicListElement> itemsList = new ArrayList<>();
         for (Element<PartyDetails> partyDetailsElement : partyDetailsList) {
-            DynamicListElement dynamicListElement = getPartyDynamicListElement(applicantOrRespondent, partyDetailsElement.getValue());
+            DynamicListElement dynamicListElement = getPartyDynamicListElement(applicantOrRespondent, partyDetailsElement);
             if (dynamicListElement != null) {
                 itemsList.add(dynamicListElement);
             }
@@ -90,5 +95,5 @@ public abstract class AbstractBarristerService {
 
     protected abstract String getLabelForAction(boolean applicantOrRespondent, PartyDetails partyDetails);
 
-    protected abstract String getCodeForAction(PartyDetails partyDetails);
+    protected abstract String getCodeForAction(Element<PartyDetails> partyDetailsElement);
 }

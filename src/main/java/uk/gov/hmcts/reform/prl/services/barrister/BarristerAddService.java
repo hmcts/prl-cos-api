@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
@@ -32,8 +33,8 @@ public class BarristerAddService extends AbstractBarristerService {
         );
     }
 
-    protected String getCodeForAction(PartyDetails partyDetails) {
-        return partyDetails.getPartyId().toString();
+    protected String getCodeForAction(Element<PartyDetails> partyDetailsElement) {
+        return partyDetailsElement.getId().toString();
     }
 
     @Override
