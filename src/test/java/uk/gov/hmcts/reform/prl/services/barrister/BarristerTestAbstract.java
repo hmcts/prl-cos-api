@@ -82,10 +82,10 @@ public class BarristerTestAbstract {
                                            String repLastName, String barFirstName, String barLastName, String orgName,
                                            boolean hasRep, boolean hasBar) {
         Barrister barrister = Barrister.builder()
-            .barristerPartyId(UUID.fromString(BARRISTER_PARTY_ID_PREFIX + id))
+            .barristerPartyId(BARRISTER_PARTY_ID_PREFIX + id)
             .barristerFirstName(barFirstName + id)
             .barristerLastName(barLastName + id)
-            .barristerOrgUuid(UUID.fromString(BARRISTER_ORG_ID_PREFIX + id))
+            .barristerOrgId(BARRISTER_ORG_ID_PREFIX + id)
             .build();
         return PartyDetails.builder()
             .partyId(UUID.fromString(PARTY_ID_PREFIX + id))

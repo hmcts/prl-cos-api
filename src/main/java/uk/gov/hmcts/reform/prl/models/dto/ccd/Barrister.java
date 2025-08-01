@@ -14,10 +14,11 @@ import java.util.UUID;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Barrister {
 
-    private UUID barristerOrgUuid;
-    private UUID barristerPartyId;
+    private String barristerOrgId;
+    private String barristerId;
     private final String barristerFirstName;
     private final String barristerLastName;
+    private final String barristerEmail;
     private final String barristerRole;
 
     public static final String FULL_NAME_FORMAT = "%s %s";

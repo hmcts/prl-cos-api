@@ -8,8 +8,6 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
-import java.util.UUID;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
@@ -21,7 +19,7 @@ public class BarristerRemoveService extends  AbstractBarristerService {
 
     @Override
     protected boolean isPartyApplicable(boolean applicantOrRespondent, PartyDetails partyDetails) {
-        return partyDetails.getBarrister() != null && partyDetails.getBarrister().getBarristerPartyId() != null;
+        return partyDetails.getBarrister() != null && partyDetails.getBarrister().getBarristerId() != null;
     }
 
     @Override
@@ -34,7 +32,7 @@ public class BarristerRemoveService extends  AbstractBarristerService {
     }
 
     @Override
-    protected UUID getCodeForAction(PartyDetails partyDetails) {
-        return partyDetails.getBarrister().getBarristerPartyId();
+    protected String getCodeForAction(PartyDetails partyDetails) {
+        return partyDetails.getBarrister().getBarristerId();
     }
 }

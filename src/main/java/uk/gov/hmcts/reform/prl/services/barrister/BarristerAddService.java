@@ -9,8 +9,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
-import java.util.UUID;
-
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
 
 @Slf4j
@@ -34,8 +32,8 @@ public class BarristerAddService extends AbstractBarristerService {
         );
     }
 
-    protected UUID getCodeForAction(PartyDetails partyDetails) {
-        return partyDetails.getPartyId();
+    protected String getCodeForAction(PartyDetails partyDetails) {
+        return partyDetails.getPartyId().toString();
     }
 
     @Override
