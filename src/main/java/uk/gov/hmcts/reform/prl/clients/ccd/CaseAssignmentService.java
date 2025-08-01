@@ -10,21 +10,40 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CaseAssignmentApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRoleWithOrganisation;
 import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRolesRequest;
+import uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole;
+import uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole.Representing;
 import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.Barrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.IntStream;
 
+import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole.Representing.CAAPPLICANT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole.Representing.CARESPONDENT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole.Representing.DAAPPLICANT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole.Representing.DARESPONDENT;
 import static uk.gov.hmcts.reform.prl.utils.EmailUtils.maskEmail;
 
 @Slf4j
@@ -189,5 +208,127 @@ public class CaseAssignmentService {
 
     public void validateRemoveRequest(CaseData caseData, String userId, String roleItem, List<String> errorList) {
         validateUserRole(caseData, userId, roleItem, errorList);
+    }
+
+    public Optional<String> deriveBarristerRole(CaseData caseData) {
+        String selectedPartyId = caseData.getAllocatedBarrister().getPartyList().getValueCode();
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            return getC100BarristerRole(caseData, selectedPartyId);
+        } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            return getC401BarristerRole(caseData, selectedPartyId);
+        }
+        return Optional.empty();
+    }
+
+    private Optional<String> getC401BarristerRole(CaseData caseData, String selectedPartyId) {
+        String barristerRole = getBarristerCaseRole(
+            () -> ElementUtils.wrapElements(caseData.getApplicantsFL401()),
+            selectedPartyId,
+            DAAPPLICANT,
+            partyDetailsElement -> partyDetailsElement.getValue().getPartyId()
+        ).orElseGet(() -> getBarristerCaseRole(
+            () -> ElementUtils.wrapElements(caseData.getRespondentsFL401()),
+            selectedPartyId,
+            DARESPONDENT,
+            partyDetailsElement -> partyDetailsElement.getValue().getPartyId()
+        ).orElse(null));
+        return Optional.ofNullable(barristerRole);
+    }
+
+    private Optional<String> getC100BarristerRole(CaseData caseData, String selectedPartyId) {
+        String barristerRole = getBarristerCaseRole(
+            caseData::getApplicants,
+            selectedPartyId,
+            CAAPPLICANT,
+            Element::getId
+        ).orElseGet(() -> getBarristerCaseRole(
+            caseData::getRespondents,
+            selectedPartyId,
+            CARESPONDENT,
+            Element::getId
+            ).orElse(null));
+
+        return Optional.ofNullable(barristerRole);
+    }
+
+    private Optional<String> getBarristerCaseRole(Supplier<List<Element<PartyDetails>>> partySupplier,
+                                                  String selectedPartyId,
+                                                  Representing  representing,
+                                                   Function<Element<PartyDetails>, UUID> partyId) {
+        List<Element<PartyDetails>> parties = partySupplier.get();
+
+        return IntStream.range(0, parties.size())
+            .filter(i -> partyId.apply(parties.get(i)).equals(fromString(selectedPartyId)))
+            .findFirst()
+            .stream()
+            .mapToObj(i -> {
+                BarristerRole[] values = Arrays.stream(BarristerRole.values())
+                    .filter(barristerRole -> barristerRole.getRepresenting().equals(representing))
+                    .toArray(BarristerRole[]::new);
+                return Optional.of(values[i].getCaseRoleLabel());
+            })
+            .findFirst()
+            .orElse(Optional.empty());
+    }
+
+    public void updatedPartyWithBarristerDetails(CaseData caseData, String barristerRole) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            updatedPartyWithBarristerDetails(
+                caseData,
+                barristerRole,
+                caseData::getApplicants
+            ).orElseGet(() -> updatedPartyWithBarristerDetails(
+                caseData,
+                barristerRole,
+                caseData::getRespondents
+            ).orElse(null));
+        } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            updatedPartyWithBarristerDetails(caseData,
+                                             barristerRole,
+                                             caseData.getApplicantsFL401())
+                .orElseGet(() -> updatedPartyWithBarristerDetails(caseData,
+                                                                  barristerRole,
+                                                                  caseData.getRespondentsFL401())
+                    .orElse(null));
+        }
+    }
+
+    private Optional<Boolean> updatedPartyWithBarristerDetails(CaseData caseData,
+                                                               String barristerRole,
+                                                               Supplier<List<Element<PartyDetails>>> parties) {
+        AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
+        Optional<Element<PartyDetails>> partyDetailsElement = parties.get().stream()
+            .filter(element -> element.getId()
+                .equals(fromString(allocatedBarrister.getPartyList().getValueCode())))
+            .findFirst();
+
+        if (partyDetailsElement.isPresent()) {
+            updateBarrister(barristerRole, partyDetailsElement.get().getValue(), allocatedBarrister);
+            return Optional.of(true);
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    private Optional<Boolean> updatedPartyWithBarristerDetails(CaseData caseData, String barristerRole, PartyDetails party) {
+        AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
+
+        if (party.getPartyId().equals(fromString(allocatedBarrister.getPartyList().getValueCode()))) {
+            updateBarrister(barristerRole, party, allocatedBarrister);
+            return Optional.of(true);
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    private static void updateBarrister(String barristerRole, PartyDetails partyDetails, AllocatedBarrister allocatedBarrister) {
+        partyDetails.setBarrister(
+            Barrister.builder()
+                .barristerName(allocatedBarrister.getBarristerName())
+                .barristerEmail(allocatedBarrister.getBarristerEmail())
+                .barristerRole(barristerRole)
+                .barristerOrgId(allocatedBarrister.getBarristerOrg().getOrganisationID())
+                .build()
+        );
     }
 }

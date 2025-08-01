@@ -55,19 +55,28 @@ public class CaseAssignmentController {
         @RequestBody CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
-        //TODO derive barrister role to add from the case data
-        String roleItem = allocatedBarrister.getRoleItem();
+        Optional<String> barristerRole = ccdCaseAssignmentService.deriveBarristerRole(caseData);
 
-        return getAboutToStartOrSubmitCallbackResponse(caseData,
-                                                       (userId,errorList) ->
-                ccdCaseAssignmentService.validateAddRequest(caseData,
-                                                            roleItem,
-                                                            errorList),
-                                                       userId ->
-            ccdCaseAssignmentService.grantBarristerCaseAccess(caseData,
-                                                              userId,
-                                                              roleItem));
+        if (barristerRole.isPresent()) {
+            return getAboutToStartOrSubmitCallbackResponse(caseData,
+                                                           (userId,errorList) ->
+                                                               ccdCaseAssignmentService.validateAddRequest(caseData,
+                                                                                                           barristerRole.get(),
+                                                                                                           errorList),
+                                                           userId -> {
+                                                               ccdCaseAssignmentService.grantBarristerCaseAccess(caseData,
+                                                                                                                 userId,
+                                                                                                                 barristerRole.get());
+                                                               ccdCaseAssignmentService.updatedPartyWithBarristerDetails(caseData,
+                                                                                                                         barristerRole.get());
+
+                                                           });
+
+        }
+
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseData.toMap(objectMapper))
+            .errors(List.of("Request could not be mapped to any barrister role")).build();
     }
 
     @PostMapping(path = "/aboutToSubmitRemoveBarrister", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -119,8 +128,7 @@ public class CaseAssignmentController {
             userId.ifPresent(ccdCaseAssignment);
         }
 
-        return AboutToStartOrSubmitCallbackResponse
-            .builder()
+        return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseData.toMap(objectMapper))
             .errors(errorList).build();
     }
