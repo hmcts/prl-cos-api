@@ -1,24 +1,30 @@
 package uk.gov.hmcts.reform.prl.services.barrister;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.OrganisationService;
 
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class BarristerAddService extends AbstractBarristerService {
-    public AllocatedBarrister getAllocatedBarrister(CaseData caseData) {
+    public BarristerAddService(OrganisationService organisationService) {
+        super(organisationService);
+    }
+
+    public AllocatedBarrister getAllocatedBarrister(CaseData caseData, UserDetails userDetails, String authorisation) {
         return AllocatedBarrister.builder()
-            .partyList(getSolicitorPartyDynamicList(caseData))
+            .partyList(getSolicitorPartyDynamicList(caseData, userDetails, authorisation))
+            .barristerFirstName(null)
+            .barristerLastName(null)
+            .barristerEmail(null)
             .barristerOrg(Organisation.builder().build())
             .build();
     }

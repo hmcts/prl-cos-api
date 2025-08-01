@@ -3,7 +3,9 @@ package uk.gov.hmcts.reform.prl.services.barrister;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -14,6 +16,9 @@ import static org.junit.Assert.assertEquals;
 class BarristerRemoveServiceTest extends BarristerTestAbstract {
     @InjectMocks
     BarristerRemoveService barristerRemoveService;
+
+    @Mock
+    private UserDetails userDetails;
 
     @Test
     void shouldGetCaseworkerRemovalBarristersC100() {
@@ -26,7 +31,7 @@ class BarristerRemoveServiceTest extends BarristerTestAbstract {
             .respondents(allRespondents)
             .build();
 
-        DynamicList listOfBarristersToRemove = barristerRemoveService.getBarristerListToRemove(caseData);
+        DynamicList listOfBarristersToRemove = barristerRemoveService.getBarristerListToRemove(caseData, userDetails, "");
 
         assertEquals(listOfBarristersToRemove.getValue(), null);
         assertEquals(2, listOfBarristersToRemove.getListItems().size());
