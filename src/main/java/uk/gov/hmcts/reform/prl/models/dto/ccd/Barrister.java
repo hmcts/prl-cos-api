@@ -10,7 +10,8 @@ import lombok.Data;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Barrister {
-    private String barristerOrgId;
+    private final String barristerOrgId;
+    private final String barristerId;
     private final String barristerName;
     private final String barristerRole;
     private final String barristerEmail;

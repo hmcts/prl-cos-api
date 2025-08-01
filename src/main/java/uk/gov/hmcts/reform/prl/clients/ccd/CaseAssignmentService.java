@@ -271,31 +271,36 @@ public class CaseAssignmentService {
             .orElse(Optional.empty());
     }
 
-    public void updatedPartyWithBarristerDetails(CaseData caseData, String barristerRole) {
+    public void updatedPartyWithBarristerDetails(CaseData caseData, String barristerRole, String userId) {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             updatedPartyWithBarristerDetails(
                 caseData,
                 barristerRole,
-                caseData::getApplicants
+                caseData::getApplicants,
+                userId
             ).orElseGet(() -> updatedPartyWithBarristerDetails(
                 caseData,
                 barristerRole,
-                caseData::getRespondents
+                caseData::getRespondents,
+                userId
             ).orElse(null));
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             updatedPartyWithBarristerDetails(caseData,
                                              barristerRole,
-                                             caseData.getApplicantsFL401())
+                                             caseData.getApplicantsFL401(),
+                                             userId)
                 .orElseGet(() -> updatedPartyWithBarristerDetails(caseData,
                                                                   barristerRole,
-                                                                  caseData.getRespondentsFL401())
+                                                                  caseData.getRespondentsFL401(),
+                                                                  userId)
                     .orElse(null));
         }
     }
 
     private Optional<Boolean> updatedPartyWithBarristerDetails(CaseData caseData,
                                                                String barristerRole,
-                                                               Supplier<List<Element<PartyDetails>>> parties) {
+                                                               Supplier<List<Element<PartyDetails>>> parties,
+                                                               String userId) {
         AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
         Optional<Element<PartyDetails>> partyDetailsElement = parties.get().stream()
             .filter(element -> element.getId()
@@ -303,31 +308,32 @@ public class CaseAssignmentService {
             .findFirst();
 
         if (partyDetailsElement.isPresent()) {
-            updateBarrister(barristerRole, partyDetailsElement.get().getValue(), allocatedBarrister);
+            updateBarrister(barristerRole, partyDetailsElement.get().getValue(), allocatedBarrister, userId);
             return Optional.of(true);
         } else {
             return Optional.empty();
         }
     }
 
-    private Optional<Boolean> updatedPartyWithBarristerDetails(CaseData caseData, String barristerRole, PartyDetails party) {
+    private Optional<Boolean> updatedPartyWithBarristerDetails(CaseData caseData, String barristerRole, PartyDetails party, String userId) {
         AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
 
         if (party.getPartyId().equals(fromString(allocatedBarrister.getPartyList().getValueCode()))) {
-            updateBarrister(barristerRole, party, allocatedBarrister);
+            updateBarrister(barristerRole, party, allocatedBarrister, userId);
             return Optional.of(true);
         } else {
             return Optional.empty();
         }
     }
 
-    private static void updateBarrister(String barristerRole, PartyDetails partyDetails, AllocatedBarrister allocatedBarrister) {
+    private static void updateBarrister(String barristerRole, PartyDetails partyDetails, AllocatedBarrister allocatedBarrister, String userId) {
         partyDetails.setBarrister(
             Barrister.builder()
                 .barristerName(allocatedBarrister.getBarristerName())
                 .barristerEmail(allocatedBarrister.getBarristerEmail())
                 .barristerRole(barristerRole)
                 .barristerOrgId(allocatedBarrister.getBarristerOrg().getOrganisationID())
+                .barristerId(userId)
                 .build()
         );
     }

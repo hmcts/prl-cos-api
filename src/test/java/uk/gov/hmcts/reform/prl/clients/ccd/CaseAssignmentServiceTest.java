@@ -260,14 +260,17 @@ class CaseAssignmentServiceTest {
                                                       .build())
                                     .build())
             .build();
+        String userId = UUID.randomUUID().toString();
         caseAssignmentService.updatedPartyWithBarristerDetails(caseData,
-                                                              barristerRole);
+                                                              barristerRole,
+                                                               userId);
         List<PartyDetails> partyDetails = ElementUtils.unwrapElements(parties.apply(caseData));
 
         assertThat(partyDetails.get(index))
             .extracting(PartyDetails::getBarrister)
             .isEqualTo(barrister.toBuilder()
                            .barristerRole(barristerRole)
+                           .barristerId(userId)
                            .build());
     }
 
@@ -307,13 +310,16 @@ class CaseAssignmentServiceTest {
                                                       .build())
                                     .build())
             .build();
+        String userId = UUID.randomUUID().toString();
         caseAssignmentService.updatedPartyWithBarristerDetails(caseData,
-                                                               barristerRole);
+                                                               barristerRole,
+                                                               userId);
 
         assertThat(parties.apply(caseData))
             .extracting(PartyDetails::getBarrister)
             .isEqualTo(barrister.toBuilder()
                            .barristerRole(barristerRole)
+                           .barristerId(userId)
                            .build());
     }
 }

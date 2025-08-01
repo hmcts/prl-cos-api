@@ -68,7 +68,8 @@ public class CaseAssignmentController {
                                                                                                                  userId,
                                                                                                                  barristerRole.get());
                                                                ccdCaseAssignmentService.updatedPartyWithBarristerDetails(caseData,
-                                                                                                                         barristerRole.get());
+                                                                                                                         barristerRole.get(),
+                                                                                                                         userId);
 
                                                            });
 
