@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.barrister;
 
+import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -17,6 +18,7 @@ import java.util.Optional;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
+@Slf4j
 public abstract class AbstractBarristerService {
     protected static final String APPLICANT = "Applicant";
     protected static final String RESPONDENT = "Respondent";
@@ -58,13 +60,16 @@ public abstract class AbstractBarristerService {
                                                           Boolean isApplicant, String usersAuthorisation) {
         if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
             Optional<Organisations> usersOrganisation = organisationService.findUserOrganisation(usersAuthorisation);
+            log.info("User organisation (c100): {}", usersOrganisation);
             List<Element<PartyDetails>> relatedPeople = new ArrayList<>();
 
             for (Element<PartyDetails> person : people) {
+                log.info("Party ID for person (c100): {}", person.getValue().getPartyId());
                 if (isSameOrganisation(person.getValue(), usersOrganisation)) {
                     relatedPeople.add(person);
                 }
             }
+            log.info("Related people found: {}", relatedPeople);
             return getPartyDynamicListElements(relatedPeople, isApplicant);
         } else {
             return getPartyDynamicListElements(people, isApplicant);
@@ -85,11 +90,15 @@ public abstract class AbstractBarristerService {
     private DynamicListElement getRelatedPeopleFL401(UserDetails userDetails, PartyDetails person, Boolean isApplicant, String usersAuthorisation) {
         if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
             Optional<Organisations> usersOrganisation = organisationService.findUserOrganisation(usersAuthorisation);
+            log.info("User organisation: {}", usersOrganisation);
+            log.info("Party ID for person: {}", person.getPartyId());
+
             PartyDetails relatedPerson = null;
 
             if (isSameOrganisation(person, usersOrganisation)) {
                 relatedPerson = person;
             }
+            log.info("Related person found: {}", relatedPerson);
             //because the partyId on the PartyDetails is not actually being filled!
             if (relatedPerson != null) {
                 Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder()
@@ -119,6 +128,8 @@ public abstract class AbstractBarristerService {
     }
 
     private boolean isSameOrganisation(PartyDetails person, Optional<Organisations> usersOrganisation) {
+        log.info("Party solicitor organisation ID: {}", person.getSolicitorOrg().getOrganisationID());
+
         return usersOrganisation.isPresent()
             && usersOrganisation.get().getOrganisationIdentifier().equals(person.getSolicitorOrg().getOrganisationID());
     }
