@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -50,8 +51,21 @@ public class C8ArchiveService {
                                                                   Map<String, Object> caseDataMapTobeUpdated) {
 
         if (caseData.getCaseTypeOfApplication().equals(C100_CASE_TYPE)) {
-            PartyDetails previousApplicantDetails = caseData.getApplicants().get(0).getValue();
             PartyDetails currentApplicantDetails = citizenUpdatedCaseData.getPartyDetails();
+            PartyDetails previousApplicantDetails = null;
+            List<Element<PartyDetails>> listOfPreviousApplicant = caseData.getApplicants();
+
+            for (Element<PartyDetails> previousApplicant : listOfPreviousApplicant) {
+                if (currentApplicantDetails.getPartyId().equals(previousApplicant.getId())) {
+                    previousApplicantDetails = previousApplicant.getValue();
+                    break;
+                }
+            }
+
+            if (previousApplicantDetails == null) {
+                log.info("No matching previous applicant found for partyId: {}", currentApplicantDetails.getPartyId());
+                return;
+            }
 
             boolean confidentialDetailsChanged = confidentialDetailsChangeHelper.haveContactDetailsChanged(
                 previousApplicantDetails,
@@ -104,6 +118,7 @@ public class C8ArchiveService {
                 .documentUrl(document.getDocumentUrl())
                 .documentBinaryUrl(document.getDocumentBinaryUrl())
                 .documentFileName(fileName)
+                .uploadTimeStamp(LocalDateTime.now())
                 .build();
 
             archivedDocuments.add(buildElement(archivedocument));

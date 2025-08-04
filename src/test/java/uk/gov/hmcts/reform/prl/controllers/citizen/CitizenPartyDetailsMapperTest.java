@@ -464,6 +464,7 @@ public class CitizenPartyDetailsMapperTest {
         assertEquals(caseData.getCaseTypeOfApplication(), caseDataResult.getCaseAccessCategory());
     }
 
+
     @Test
     public void testBuildUpdatedCaseDataWhereAddressIsDontKnow() throws IOException {
         c100RebuildData = C100RebuildData.builder()
