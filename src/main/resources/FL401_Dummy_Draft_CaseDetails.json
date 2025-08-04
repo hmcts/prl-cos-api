@@ -580,7 +580,7 @@
       "isEmailAddressConfidential": null,
       "applicantContactInstructions": null,
       "respondentLivedWithApplicant": "No",
-      "doTheyHaveLegalRepresentation": null,
+      "doTheyHaveLegalRepresentation": "No",
       "addressLivedLessThan5YearsDetails": null,
       "otherPersonRelationshipToChildren": [
 
