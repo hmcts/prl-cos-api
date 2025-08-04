@@ -69,6 +69,9 @@ public class BaseCaseData {
      */
     @JsonProperty("caseTypeOfApplication")
     private String caseTypeOfApplication;
+
+    @JsonProperty("CaseAccessCategory")
+    private String caseAccessCategory;
     /**
      * Case name.
      */
