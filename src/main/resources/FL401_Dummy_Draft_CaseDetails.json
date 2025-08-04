@@ -547,15 +547,7 @@
       "sendSignUpLink": null,
       "solicitorEmail": null,
       "isAddressUnknown": null,
-      "solicitorAddress": {
-        "County": null,
-        "Country": null,
-        "PostCode": null,
-        "PostTown": null,
-        "AddressLine1": null,
-        "AddressLine2": null,
-        "AddressLine3": null
-      },
+      "solicitorAddress": {},
       "solicitorOrgUuid": null,
       "solicitorPartyId": null,
       "currentRespondent": null,
@@ -580,7 +572,7 @@
       "isEmailAddressConfidential": null,
       "applicantContactInstructions": null,
       "respondentLivedWithApplicant": "No",
-      "doTheyHaveLegalRepresentation": "No",
+      "doTheyHaveLegalRepresentation": "no",
       "addressLivedLessThan5YearsDetails": null,
       "otherPersonRelationshipToChildren": [
 
