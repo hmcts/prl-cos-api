@@ -349,12 +349,12 @@ public class TaskListService {
             }
         }
 
-        tabService.submitAllTabsUpdate(
+        tabService.mapAndSubmitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),
             String.valueOf(callbackRequest.getCaseDetails().getId()),
             startAllTabsUpdateDataContent.startEventResponse(),
             startAllTabsUpdateDataContent.eventRequestData(),
-            caseDataUpdated
+            objectMapper.convertValue(caseDataUpdated, CaseData.class)
         );
         caseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
 
