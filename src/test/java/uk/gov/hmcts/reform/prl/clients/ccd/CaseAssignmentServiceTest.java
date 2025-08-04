@@ -1,7 +1,10 @@
 package uk.gov.hmcts.reform.prl.clients.ccd;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
+import feign.Request;
+import feign.Request.HttpMethod;
+import feign.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,10 +13,15 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.CaseAssignmentApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRolesRequest;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
@@ -23,8 +31,13 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Barrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
+import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +49,12 @@ import java.util.stream.Stream;
 import static java.util.Arrays.asList;
 import static java.util.random.RandomGenerator.getDefault;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.params.provider.Arguments.of;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole.C100APPLICANTBARRISTER3;
@@ -47,6 +65,15 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
 class CaseAssignmentServiceTest {
+
+    @Mock
+    private RoleAssignmentService roleAssignmentService;
+    @Mock
+    private CaseAssignmentApi caseAssignmentApi;
+    @Mock
+    private SystemUserService systemUserService;
+    @Mock
+    private AuthTokenGenerator tokenGenerator;
 
     @InjectMocks
     private CaseAssignmentService caseAssignmentService;
@@ -185,26 +212,7 @@ class CaseAssignmentServiceTest {
             .build();
     }
 
-    @Test
-    void c100CaseDataCreation() {
-        CaseData caseData = c100CaseData.toBuilder()
-            .allocatedBarrister(AllocatedBarrister.builder()
-                                    .partyList(DynamicList.builder()
-                                                   .value(DynamicListElement.builder()
-                                                              .code("partyIds")
-                                                              .build())
-                                                   .build())
-                                    .build())
-            .build();
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.findAndRegisterModules();
-        try {
-            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(caseData));
-        } catch (JsonProcessingException e) {
 
-            e.printStackTrace();
-        }
-    }
 
     @ParameterizedTest
     @CsvSource({
@@ -350,6 +358,189 @@ class CaseAssignmentServiceTest {
                            .barristerRole(barristerRole)
                            .barristerId(userId)
                            .build());
+    }
+
+    @Test
+    void validC100RemoveBarristerRequest() throws JsonProcessingException {
+        Barrister updatedBarrister = barrister.toBuilder()
+            .barristerRole("[C100APPLICANTBARRISTER3]")
+            .barristerId(UUID.randomUUID().toString())
+            .build();
+
+        CaseData caseData = c100CaseData.toBuilder()
+            .allocatedBarrister(AllocatedBarrister.builder()
+                                    .partyList(DynamicList.builder()
+                                                   .value(DynamicListElement.builder()
+                                                              .code(partyIds.get("applicant3"))
+                                                              .build())
+                                                   .build())
+
+                                    .build())
+            .build();
+
+        caseData.getApplicants().get(2).getValue()
+            .setBarrister(updatedBarrister);
+
+        when(roleAssignmentService.getRoleAssignmentForCase(String.valueOf(caseData.getId())))
+            .thenReturn(RoleAssignmentServiceResponse.builder()
+                            .roleAssignmentResponse(List.of(
+                              getRoleAssignmentResponse(UUID.randomUUID().toString(), "[C100APPLICANTBARRISTER2]"),
+                              getRoleAssignmentResponse(updatedBarrister.getBarristerId(), updatedBarrister.getBarristerRole())
+                            ))
+                            .build());
+        List<String> errors = new ArrayList<>();
+        caseAssignmentService.validateRemoveRequest(caseData, errors);
+        assertThat(errors)
+            .isEmpty();
+    }
+
+    @Test
+    void testC100RemoveBarristerWhenSuccessful() throws JsonProcessingException {
+        Barrister updatedBarrister = barrister.toBuilder()
+            .barristerRole("[C100APPLICANTBARRISTER3]")
+            .barristerId(UUID.randomUUID().toString())
+            .build();
+
+        CaseData caseData = c100CaseData.toBuilder()
+            .allocatedBarrister(AllocatedBarrister.builder()
+                                    .partyList(DynamicList.builder()
+                                                   .value(DynamicListElement.builder()
+                                                              .code(partyIds.get("applicant3"))
+                                                              .build())
+                                                   .build())
+
+                                    .build())
+            .build();
+
+        caseData.getApplicants().get(2).getValue()
+            .setBarrister(updatedBarrister);
+
+        when(systemUserService.getSysUserToken())
+            .thenReturn("sysUserToken");
+        when(tokenGenerator.generate())
+            .thenReturn("token");
+
+        caseAssignmentService.removeBarrister(caseData);
+        verify(caseAssignmentApi).removeCaseUserRoles(anyString(),
+                                                     anyString(),
+                                                     isA(CaseAssignmentUserRolesRequest.class));
+    }
+
+    @Test
+    void testC100RemoveBarristerWhenFailure() throws JsonProcessingException {
+        Barrister updatedBarrister = barrister.toBuilder()
+            .barristerRole("[C100APPLICANTBARRISTER3]")
+            .barristerId(UUID.randomUUID().toString())
+            .build();
+
+        CaseData caseData = c100CaseData.toBuilder()
+            .allocatedBarrister(AllocatedBarrister.builder()
+                                    .partyList(DynamicList.builder()
+                                                   .value(DynamicListElement.builder()
+                                                              .code(partyIds.get("applicant3"))
+                                                              .build())
+                                                   .build())
+
+                                    .build())
+            .build();
+
+        caseData.getApplicants().get(2).getValue()
+            .setBarrister(updatedBarrister);
+
+        when(systemUserService.getSysUserToken())
+            .thenReturn("sysUserToken");
+        when(tokenGenerator.generate())
+            .thenReturn("token");
+        when(caseAssignmentApi.removeCaseUserRoles(anyString(),
+                                                      anyString(),
+                                                      isA(CaseAssignmentUserRolesRequest.class)))
+            .thenThrow(FeignException.errorStatus("removeCaseUserRoles", Response.builder()
+                .status(500)
+                .reason("Internal Server Error")
+                .request(Request.create(HttpMethod.DELETE, "/case-users", Map.of(), null, null, null))
+                .build()));
+
+        assertThatThrownBy(() -> caseAssignmentService.removeBarrister(caseData))
+            .isInstanceOf(GrantCaseAccessException.class)
+            .hasMessageContaining("Could not remove the user");
+    }
+
+
+    @Test
+    void testRemoveBarristerWhenRoleNotAssociated() {
+        Barrister updatedBarrister = barrister.toBuilder()
+            .barristerRole("[C100APPLICANTBARRISTER3]")
+            .barristerId(UUID.randomUUID().toString())
+            .barristerEmail("barristerEmail@gamil.com")
+            .build();
+
+        CaseData caseData = c100CaseData.toBuilder()
+            .allocatedBarrister(AllocatedBarrister.builder()
+                                    .partyList(DynamicList.builder()
+                                                   .value(DynamicListElement.builder()
+                                                              .code(partyIds.get("applicant3"))
+                                                              .build())
+                                                   .build())
+                                    .barristerEmail(updatedBarrister.getBarristerEmail())
+                                    .build())
+            .build();
+
+        caseData.getApplicants().get(2).getValue()
+            .setBarrister(updatedBarrister);
+
+        when(roleAssignmentService.getRoleAssignmentForCase(String.valueOf(caseData.getId())))
+            .thenReturn(RoleAssignmentServiceResponse.builder()
+                            .roleAssignmentResponse(List.of(
+                              getRoleAssignmentResponse(UUID.randomUUID().toString(), "[C100APPLICANTBARRISTER2]"),
+                              getRoleAssignmentResponse(updatedBarrister.getBarristerId(), "[C100APPLICANTBARRISTER4]")
+                            ))
+                            .build());
+        List<String> errors = new ArrayList<>();
+        caseAssignmentService.validateRemoveRequest(caseData, errors);
+        assertThat(errors)
+            .contains("Barrister is not associated with the case");
+    }
+
+    @Test
+    void testRemoveBarristerWhenNotPresentInRoleAssignment() {
+        Barrister updatedBarrister = barrister.toBuilder()
+            .barristerRole("[C100APPLICANTBARRISTER3]")
+            .barristerId(UUID.randomUUID().toString())
+            .barristerEmail("barristerEmail@gamil.com")
+            .build();
+
+        CaseData caseData = c100CaseData.toBuilder()
+            .allocatedBarrister(AllocatedBarrister.builder()
+                                    .partyList(DynamicList.builder()
+                                                   .value(DynamicListElement.builder()
+                                                              .code(partyIds.get("applicant3"))
+                                                              .build())
+                                                   .build())
+                                    .barristerEmail(updatedBarrister.getBarristerEmail())
+                                    .build())
+            .build();
+
+        caseData.getApplicants().get(2).getValue()
+            .setBarrister(updatedBarrister);
+
+        when(roleAssignmentService.getRoleAssignmentForCase(String.valueOf(caseData.getId())))
+            .thenReturn(RoleAssignmentServiceResponse.builder()
+                            .roleAssignmentResponse(List.of(
+                              getRoleAssignmentResponse(UUID.randomUUID().toString(), "[C100APPLICANTBARRISTER2]"),
+                              getRoleAssignmentResponse(UUID.randomUUID().toString(), updatedBarrister.getBarristerRole())
+                            ))
+                            .build());
+        List<String> errors = new ArrayList<>();
+        caseAssignmentService.validateRemoveRequest(caseData, errors);
+        assertThat(errors)
+            .contains("Barrister is not associated with the case");
+    }
+
+    private RoleAssignmentResponse getRoleAssignmentResponse(String actorId, String roleName) {
+        RoleAssignmentResponse roleAssignmentResponse = new RoleAssignmentResponse();
+        roleAssignmentResponse.setRoleName(roleName);
+        roleAssignmentResponse.setActorId(actorId);
+        return roleAssignmentResponse;
     }
 }
 

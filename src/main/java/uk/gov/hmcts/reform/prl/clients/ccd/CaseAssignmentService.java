@@ -158,7 +158,7 @@ public class CaseAssignmentService {
                 barrister.getBarristerRole(),
                 userIds
             );
-            CaseAssignmentUserRolesRequest addCaseAssignedUserRolesRequest = buildCaseAssignedUserRequest(
+            CaseAssignmentUserRolesRequest removeCaseAssignedUserRolesRequest = buildCaseAssignedUserRequest(
                 caseData.getId(),
                 barrister.getBarristerRole(),
                 barrister.getBarristerOrg().getOrganisationID(),
@@ -168,7 +168,7 @@ public class CaseAssignmentService {
             caseAssignmentApi.removeCaseUserRoles(
                 systemUserService.getSysUserToken(),
                 tokenGenerator.generate(),
-                addCaseAssignedUserRolesRequest
+                removeCaseAssignedUserRolesRequest
             );
         } catch (FeignException ex) {
             String message = String.format(

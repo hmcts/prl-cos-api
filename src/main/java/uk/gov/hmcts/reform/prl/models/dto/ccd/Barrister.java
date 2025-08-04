@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.models.Organisation;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Barrister {
     private final Organisation barristerOrg;
     private final String barristerId;
