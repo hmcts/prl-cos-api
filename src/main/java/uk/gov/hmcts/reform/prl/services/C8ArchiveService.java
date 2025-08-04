@@ -56,7 +56,7 @@ public class C8ArchiveService {
             List<Element<PartyDetails>> listOfPreviousApplicant = caseData.getApplicants();
 
             for (Element<PartyDetails> previousApplicant : listOfPreviousApplicant) {
-                if (currentApplicantDetails.getPartyId().equals(previousApplicant.getValue().getPartyId())) {
+                if (currentApplicantDetails.getPartyId().equals(previousApplicant.getId())) {
                     previousApplicantDetails = previousApplicant.getValue();
                     break;
                 }

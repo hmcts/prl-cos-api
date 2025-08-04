@@ -207,7 +207,7 @@ class C8ArchiveServiceTest {
 
         List<Element<PartyDetails>> listPartyDetails = List.of(
             Element.<PartyDetails>builder()
-                .id(UUID.randomUUID())
+                .id(previousCurrentPartyId)
                 .value(previousApplicant)
                 .build()
         );
