@@ -15,4 +15,7 @@ import lombok.NoArgsConstructor;
 public class Range {
     @JsonProperty("last_modified")
     private LastModified lastModified;
+
+    @JsonProperty("data.orderCollection.value.dateCreated")
+    private LastModified dateCreated;
 }
