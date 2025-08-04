@@ -1119,7 +1119,9 @@ public class CitizenPartyDetailsMapper {
             .applicantsConfidentialDetails(applicantsConfidentialDetails)
             .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
             .caseTypeOfApplication(citizenUpdatedCaseData.getCaseTypeOfApplication())
-            .daApplicantContactInstructions(partyDetails.getResponse().getSafeToCallOption())
+            .daApplicantContactInstructions(partyDetails.getResponse() != null
+                                                ? partyDetails.getResponse().getSafeToCallOption()
+                                                : null)
             .build();
     }
 
