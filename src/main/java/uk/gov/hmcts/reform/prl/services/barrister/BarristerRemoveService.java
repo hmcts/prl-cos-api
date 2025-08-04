@@ -20,7 +20,7 @@ public class BarristerRemoveService extends  AbstractBarristerService {
 
     @Override
     protected boolean isPartyApplicable(boolean applicantOrRespondent, PartyDetails partyDetails) {
-        return partyDetails.getBarrister() != null && partyDetails.getBarrister().getBarristerId() != null;
+        return hasBarrister(partyDetails) && partyDetails.getBarrister().getBarristerId() != null;
     }
 
     @Override
