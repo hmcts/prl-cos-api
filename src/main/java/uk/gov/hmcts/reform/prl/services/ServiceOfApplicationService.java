@@ -1157,7 +1157,9 @@ public class ServiceOfApplicationService {
             if (CaseUtils.hasLegalRepresentation(respondent.getValue())) {
                 sendEmailToRespondentSolicitorNonPersonal(caseData, authorization, emailNotificationDetails, packSdocs, respondent);
             } else if (!CaseUtils.hasLegalRepresentation(respondent.getValue())) {
-                if (respondent.getValue().getAddress() != null && StringUtils.isNotEmpty(respondent.getValue().getAddress().getAddressLine1())) {
+                if(ContactPreferences.email.equals(respondent.getValue().getContactPreferences())) {
+                    sendEmailToRespondent(caseData, authorization, emailNotificationDetails, packSdocs, respondent);
+                } else if (respondent.getValue().getAddress() != null && StringUtils.isNotEmpty(respondent.getValue().getAddress().getAddressLine1())) {
                     log.info(
                         "Sending the notification in post to respondent for C100 Application for caseId {}",
                         caseData.getId()
@@ -1185,7 +1187,9 @@ public class ServiceOfApplicationService {
             if (party.isPresent() && CaseUtils.hasLegalRepresentation(party.get().getValue())) {
                 sendEmailToRespondentSolicitorNonPersonal(caseData, authorization, emailNotificationDetails, packSdocs, party.get());
             } else if (party.isPresent() && (!CaseUtils.hasLegalRepresentation(party.get().getValue()))) {
-                if (party.get().getValue().getAddress() != null && StringUtils.isNotEmpty(party.get().getValue().getAddress().getAddressLine1())) {
+                if(ContactPreferences.email.equals(party.get().getValue().getContactPreferences())) {
+                    sendEmailToRespondent(caseData, authorization, emailNotificationDetails, packSdocs, party.get());
+                } else if (party.get().getValue().getAddress() != null && StringUtils.isNotEmpty(party.get().getValue().getAddress().getAddressLine1())) {
                     log.info(
                         "Sending the notification in post to respondent for C100 Application for caseId {}",
                         caseData.getId()
@@ -1203,6 +1207,37 @@ public class ServiceOfApplicationService {
                 }
             }
         });
+    }
+
+    private void sendEmailToRespondent(CaseData caseData, String authorization,
+                                       List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                       List<Document> packSdocs, Element<PartyDetails> party) {
+        if(party.getValue().getEmail() != null){
+            try {
+                log.info("Sending email to respondent for C100 Application for caseId {}", caseData.getId());
+                Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+                dynamicData.put("name", party.getValue().getRepresentativeFullName());
+                dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
+                dynamicData.put("respondent", true);
+                populateLanguageMap(caseData, dynamicData);
+                List<Document> finalDocs = removeCoverLettersFromThePacks(packSdocs);
+                EmailNotificationDetails emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
+                    authorization,
+                    party.getValue().getSolicitorEmail(),
+                    finalDocs,
+                    SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
+                    dynamicData,
+                    PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR
+                );
+                if (null != emailNotification) {
+                    emailNotificationDetails.add(element(emailNotification));
+                }
+            } catch (Exception ex){
+                log.error("Error in sending email to respondent for C100 Application for caseId {} with exception {}", caseData.getId(), ex.getMessage());
+            }
+        } else {
+            log.info("Unable to send email to respondent for C100 Application for caseId {}", caseData.getId());
+        }
     }
 
     private void sendEmailToRespondentSolicitorNonPersonal(CaseData caseData, String authorization,
