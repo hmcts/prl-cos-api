@@ -91,7 +91,10 @@ public class CaseAssignmentController {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<String> errorList = new ArrayList<>();
         ccdCaseAssignmentService.validateRemoveRequest(caseData, errorList);
-        ccdCaseAssignmentService.removeBarrister(caseData);
+
+        if (errorList.isEmpty()) {
+            ccdCaseAssignmentService.removeBarrister(caseData);
+        }
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseData.toMap(objectMapper))
