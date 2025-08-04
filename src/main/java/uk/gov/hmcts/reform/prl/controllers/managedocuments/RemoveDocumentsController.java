@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.RemoveDocumentsService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.HashMap;
 import java.util.List;
@@ -41,20 +40,17 @@ public class RemoveDocumentsController extends AbstractCallbackController {
     private final RemoveDocumentsService removeDocumentsService;
     private final AuthorisationService authorisationService;
     private final UserService userService;
-    private final AllTabServiceImpl tabService;
 
     @Autowired
     protected RemoveDocumentsController(ObjectMapper objectMapper,
                                         EventService eventPublisher,
                                         RemoveDocumentsService removeDocumentsService,
                                         UserService userService,
-                                        AuthorisationService authorisationService,
-                                        AllTabServiceImpl tabService) {
+                                        AuthorisationService authorisationService) {
         super(objectMapper, eventPublisher);
         this.removeDocumentsService = removeDocumentsService;
         this.userService = userService;
         this.authorisationService = authorisationService;
-        this.tabService = tabService;
     }
 
     @PostMapping("/about-to-start")
