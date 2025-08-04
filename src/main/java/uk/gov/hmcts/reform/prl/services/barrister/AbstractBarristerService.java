@@ -99,22 +99,21 @@ public abstract class AbstractBarristerService {
                 relatedPerson = person;
             }
             log.info("Related person found: {}", relatedPerson);
-            //because the partyId on the PartyDetails is not actually being filled!
             if (relatedPerson != null) {
-                Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder()
-                    .id(relatedPerson.getPartyId())
-                    .value(relatedPerson)
-                    .build();
-                return getPartyDynamicListElement(isApplicant, partyDetailsElement);
+                return getPartyDynamicListElement(isApplicant, buildPartyDetailsElement(relatedPerson));
+            } else {
+                return null;
             }
-            return null;
         } else {
-            Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder()
-                .id(person.getPartyId())
-                .value(person)
-                .build();
-            return getPartyDynamicListElement(isApplicant, partyDetailsElement);
+            return getPartyDynamicListElement(isApplicant, buildPartyDetailsElement(person));
         }
+    }
+
+    private Element<PartyDetails> buildPartyDetailsElement(PartyDetails person) {
+        return Element.<PartyDetails>builder()
+            .id(person.getPartyId())
+            .value(person)
+            .build();
     }
 
     private void checkAndAddPartyToListFL401(List<DynamicListElement> listToAddTo, PartyDetails party, boolean appOrResp,
@@ -128,7 +127,11 @@ public abstract class AbstractBarristerService {
     }
 
     private boolean isSameOrganisation(PartyDetails person, Optional<Organisations> usersOrganisation) {
-        log.info("Party solicitor organisation ID: {}", person.getSolicitorOrg().getOrganisationID());
+        if (person.getSolicitorOrg() != null) {
+            log.info("Party solicitor organisation ID: {}", person.getSolicitorOrg().getOrganisationID());
+        } else {
+            log.info("Party solicitor organisation ID was NULL");
+        }
 
         return usersOrganisation.isPresent()
             && usersOrganisation.get().getOrganisationIdentifier().equals(person.getSolicitorOrg().getOrganisationID());
