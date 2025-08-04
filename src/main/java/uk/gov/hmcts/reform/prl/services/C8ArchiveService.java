@@ -51,8 +51,21 @@ public class C8ArchiveService {
                                                                   Map<String, Object> caseDataMapTobeUpdated) {
 
         if (caseData.getCaseTypeOfApplication().equals(C100_CASE_TYPE)) {
-            PartyDetails previousApplicantDetails = caseData.getApplicants().get(0).getValue();
             PartyDetails currentApplicantDetails = citizenUpdatedCaseData.getPartyDetails();
+            PartyDetails previousApplicantDetails = null;
+            List<Element<PartyDetails>> listOfPreviousApplicant = caseData.getApplicants();
+
+            for (Element<PartyDetails> previousApplicant : listOfPreviousApplicant) {
+                if (currentApplicantDetails.getPartyId().equals(previousApplicant.getValue().getPartyId())) {
+                    previousApplicantDetails = previousApplicant.getValue();
+                    break;
+                }
+            }
+
+            if (previousApplicantDetails == null) {
+                log.info("No matching previous applicant found for partyId: {}", currentApplicantDetails.getPartyId());
+                return;
+            }
 
             boolean confidentialDetailsChanged = confidentialDetailsChangeHelper.haveContactDetailsChanged(
                 previousApplicantDetails,

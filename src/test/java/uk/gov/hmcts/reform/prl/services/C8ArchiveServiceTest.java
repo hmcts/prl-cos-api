@@ -8,17 +8,25 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 
 @ExtendWith(MockitoExtension.class)
 class C8ArchiveServiceTest {
@@ -149,6 +157,83 @@ class C8ArchiveServiceTest {
         c8ArchiveService.archiveC8DocumentIfConfidentialChanged(callbackRequest, caseData, caseDataUpdated);
 
         assertThat(caseDataUpdated.containsKey("c8ArchivedDocuments")).isFalse();
+    }
+
+    @Test
+    void shouldFailArchiveC8DocumentsWhenPreviousAndCurrentPartyIdAreDifferent() {
+        PartyDetails previousApplicant = PartyDetails.builder()
+            .partyId(UUID.randomUUID())
+            .firstName("previous")
+            .build();
+
+        List<Element<PartyDetails>> listPartyDetails = List.of(
+            Element.<PartyDetails>builder()
+                .id(UUID.randomUUID())
+                .value(previousApplicant)
+                .build()
+        );
+
+        PartyDetails currentApplicant = PartyDetails.builder()
+            .partyId(UUID.randomUUID())
+            .firstName("New")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(1234L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(listPartyDetails)
+            .build();
+
+        CitizenUpdatedCaseData citizenUpdatedCaseData = CitizenUpdatedCaseData.builder()
+            .partyDetails(currentApplicant)
+            .build();
+
+        Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
+
+        c8ArchiveService.archiveC8DocumentIfConfidentialChangedFromCitizen(
+            caseData, citizenUpdatedCaseData, caseDataMapToBeUpdated
+        );
+
+        verify(confidentialDetailsChangeHelper, never()).haveContactDetailsChanged(any(), any());
+    }
+
+    @Test
+    void shouldArchiveC8DocumentsWhenPreviousAndCurrentPartyIDsAreTheSame() {
+        UUID previousCurrentPartyId = UUID.randomUUID();
+        PartyDetails previousApplicant = PartyDetails.builder()
+            .partyId(previousCurrentPartyId)
+            .firstName("previous")
+            .build();
+
+        List<Element<PartyDetails>> listPartyDetails = List.of(
+            Element.<PartyDetails>builder()
+                .id(UUID.randomUUID())
+                .value(previousApplicant)
+                .build()
+        );
+
+        PartyDetails currentApplicant = PartyDetails.builder()
+            .partyId(previousCurrentPartyId)
+            .firstName("New")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(1234L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(listPartyDetails)
+            .build();
+
+        CitizenUpdatedCaseData citizenUpdatedCaseData = CitizenUpdatedCaseData.builder()
+            .partyDetails(currentApplicant)
+            .build();
+
+        Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
+
+        c8ArchiveService.archiveC8DocumentIfConfidentialChangedFromCitizen(
+            caseData, citizenUpdatedCaseData, caseDataMapToBeUpdated
+        );
+
+        verify(confidentialDetailsChangeHelper, times(1)).haveContactDetailsChanged(any(), any());
     }
 
     private Element<Document> buildElement(Document document) {
