@@ -91,6 +91,10 @@ public abstract class AbstractBarristerService {
         }
     }
 
+    protected boolean hasBarrister(PartyDetails partyDetails) {
+        return  (partyDetails.getBarrister() != null && partyDetails.getBarrister().getBarristerId() != null);
+    }
+
     protected abstract boolean isPartyApplicable(boolean applicantOrRespondent, PartyDetails partyDetails);
 
     protected abstract String getLabelForAction(boolean applicantOrRespondent, PartyDetails partyDetails);
