@@ -36,9 +36,9 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 class CsvWriterTest {
 
     private static final String[] EXPECTED_CSV_HEADERS = {
-        "Case Number",
+        "Case No.",
         "Court Name/Location",
-        "Court ID",
+        "Court Code",
         "Court Date DD/MM/YYYY",
         "Order Expiry Date DD/MM/YYYY",
         "Respondent Surname",
@@ -51,6 +51,11 @@ class CsvWriterTest {
         "Applicant First Line of Address",
         "Applicant Second Line of Address",
         "Applicant Postcode",
+        "Applicant Phone",
+        "Applicant Email",
+        "Is Applicant Address Confidential",
+        "Is Applicant Email Confidential",
+        "Is Applicant Phone Confidential",
         "PDF Identifier",
         "Is Confidential",
         "Force Code"
@@ -196,7 +201,17 @@ class CsvWriterTest {
                 arguments("applicants.dateOfBirth", LocalDate.parse("1990-12-11")),
                 arguments("applicants.address.addressLine1", "123 Example Street"),
                 arguments("applicants.address.addressLine2", "London"),
-                arguments("applicants.address.postCode", "E1 6AN")
+                arguments("applicants.address.postCode", "E1 6AN"),
+                arguments("applicants.phoneNumber", "1234567890"),
+                arguments("applicants.email", "test@test.com")
+            );
+        }
+
+        private static Stream<Arguments> applicantConfidentialPropertyTestCases() {
+            return Stream.of(
+                arguments("applicants.isAddressConfidential", false),
+                arguments("applicants.isEmailAddressConfidential", true),
+                arguments("applicants.isPhoneNumberConfidential", true)
             );
         }
 
@@ -214,7 +229,8 @@ class CsvWriterTest {
 
     private static PartyDetails createPartyDetails(String firstName, String lastName,
                                                    String dateOfBirth, String addressLine1,
-                                                   String addressLine2, String postCode) {
+                                                   String addressLine2, String postCode,
+                                                   String phoneNumber, String email) {
         Address address = Address.builder()
             .addressLine1(addressLine1)
             .addressLine2(addressLine2)
@@ -226,18 +242,22 @@ class CsvWriterTest {
             .lastName(lastName)
             .dateOfBirth(dateOfBirth != null ? LocalDate.parse(dateOfBirth) : null)
             .address(address)
+            .phoneNumber(phoneNumber)
+            .email(email)
             .build();
     }
 
     private static CaseData createCaseDataWithParties() {
         PartyDetails respondent = createPartyDetails(
             "John", "Doe", "1994-07-05",
-            "70 Petty France", "London", "SW1H 9EX"
+            "70 Petty France", "London", "SW1H 9EX",
+            "", ""
         );
 
         PartyDetails applicant = createPartyDetails(
             "Jane", "Smith", "1990-12-11",
-            "123 Example Street", "London", "E1 6AN"
+            "123 Example Street", "London", "E1 6AN",
+            "1234567890", "test@test.com"
         );
 
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder()
@@ -257,7 +277,8 @@ class CsvWriterTest {
     private static CaseData createCaseDataWithPartiesNullValues() {
         PartyDetails respondent = createPartyDetails(
             "John", "Doe", null,
-            "70 Petty France", null, "SW1H 9EX"
+            "70 Petty France", null, "SW1H 9EX",
+            "", ""
         );
 
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder()

@@ -24,12 +24,13 @@ public class CsvWriter {
         .asFileAttribute(PosixFilePermissions.fromString("rwx------"));
 
     public enum CsvColumn {
-        CASE_NUMBER("Case Number", "CaseId"),
+        CASE_NUMBER("Case No.", "id"),
         COURT_NAME("Court Name/Location", "CourtName"),
         COURT_ID("Court Code", "CourtId"),
         ORDER_NAME("Order Name", "caseTypeOfApplication"),
         COURT_DATE("Court Date DD/MM/YYYY", "dateOrderMade"),
         RESPONDENT_SURNAME("Respondent Surname", "Respondent.Surname"),
+        // Order Expiry Date
         RESPONDENT_FORENAMES("Respondent Forename(s)", "Respondent.FirstName"),
         RESPONDENT_DOB("Respondent DOB", "Respondent.DateOfBirth"),
         RESPONDENT_ADDRESS1("Respondent 1st Line of Address", "Respondent.Address1"),
