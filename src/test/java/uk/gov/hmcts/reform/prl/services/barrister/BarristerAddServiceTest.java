@@ -7,20 +7,15 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.Roles;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -388,27 +383,6 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
             resParty2.getLabel()
         );
         assertEquals(PARTY_ID_PREFIX + "6", resParty2.getCode());
-    }
-
-    private Element<PartyDetails> buildPartyDetails(String id, String appFirstName, String appLastName, boolean hasRep,
-                                                    String repappFirstName, String repappLastName, String orgName) {
-        return Element.<PartyDetails>builder().id(UUID.fromString(PARTY_ID_PREFIX + id))
-            .value(getPartyDetails(id, appFirstName, appLastName, hasRep, repappFirstName, repappLastName, orgName))
-            .build();
-    }
-
-    private PartyDetails getPartyDetails(String id, String appFirstName, String appLastName, boolean hasRep,
-                                         String repappFirstName, String repappLastName, String orgName) {
-        return PartyDetails.builder()
-            .partyId(UUID.fromString(PARTY_ID_PREFIX + id))
-            .firstName(appFirstName)
-            .lastName(appLastName)
-            .doTheyHaveLegalRepresentation(hasRep ? YesNoDontKnow.yes : null)
-            .solicitorPartyId(hasRep ? UUID.fromString(SOL_PARTY_ID_PREFIX + id) : null)
-            .representativeFirstName(hasRep ? repappFirstName : null)
-            .representativeLastName(hasRep ? repappLastName : null)
-            .solicitorOrg(Organisation.builder().organisationName(orgName).build())
-            .build();
     }
 
     protected void assertPartyToAdd(DynamicList listOfBarristers, boolean appOrResp, String prefix, int itemIndex, int partyIndex) {

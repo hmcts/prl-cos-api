@@ -52,7 +52,7 @@ public abstract class AbstractBarristerService {
         if (respondents != null) {
             listItems.addAll(getRelatedPeopleC100(userDetails, respondents, false, authorisation));
         }
-
+        log.info("Returning these dynamic list items (c100): {}", listItems);
         return  DynamicList.builder().value(null).listItems(listItems).build();
     }
 
