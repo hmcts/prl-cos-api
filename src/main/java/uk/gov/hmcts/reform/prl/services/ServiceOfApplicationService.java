@@ -1240,7 +1240,8 @@ public class ServiceOfApplicationService {
                           caseData.getId(), ex.getMessage());
             }
         } else {
-            log.info("Unable to send email to respondent for C100 Application for caseId {}", caseData.getId());
+            log.info("Unable to send email to respondent for C100 Application for caseId {} because email address is null",
+                     caseData.getId());
         }
     }
 
