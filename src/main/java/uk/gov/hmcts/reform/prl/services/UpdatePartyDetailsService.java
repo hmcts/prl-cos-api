@@ -538,7 +538,10 @@ public class UpdatePartyDetailsService {
         int respondentIndex = 0;
         Map<String, Object> casDataMap = callbackRequest.getCaseDetailsBefore().getData();
         CaseData caseDataBefore = objectMapper.convertValue(casDataMap, CaseData.class);
+        log.info("Current Respondents:");
+        log.info(currentRespondents);
         for (Element<PartyDetails> respondent: currentRespondents) {
+            log.info("Respondent " + respondent.getValue().getPartyId());
             PartyDetails updatedPartyDetails = respondent.getValue().toBuilder().response(getPartyResponse(respondent.getValue()).toBuilder()
                                                                                               .keepDetailsPrivate(
                                                                                                   updateRespondentKeepYourDetailsPrivateInformation(
@@ -552,12 +555,14 @@ public class UpdatePartyDetailsService {
             );
             //PRL-6790 - Add updated respondent details to dataMap for C8 document generation
             dataMap.put(RESPONDENT, respondent.getValue());
+            log.info("Ready to populate c8 document");
             populateC8Documents(authorisation,
                                 updatedCaseData,
                                 caseData,
                                 dataMap, checkIfConfidentialityDetailsChangedRespondent(caseDataBefore, respondent),
                                 respondentIndex, respondent
             );
+            log.info("Populated C8 documents");
             respondentIndex++;
         }
     }
