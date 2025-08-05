@@ -3026,7 +3026,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendEmailForSOARespondent() {
+    public void testSendEmailForSoaRespondent() {
         PartyDetails applicantDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -3113,16 +3113,16 @@ public class ServiceOfApplicationServiceTest {
             new HashMap<>()
         );
 
-            assertEquals(
-                "By email",
-                servedApplicationDetails.getModeOfService()
-            );
+        assertEquals(
+            "By email",
+            servedApplicationDetails.getModeOfService()
+        );
 
         assertNotNull(servedApplicationDetails);
     }
 
     @Test
-    public void testPostalForSOARespondent() {
+    public void testPostalForSoaRespondent() {
         PartyDetails applicantDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -3207,7 +3207,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendEmailForSOARespondentSolicitor() {
+    public void testSendEmailForSoaRespondentSolicitor() {
         PartyDetails applicantDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -3309,7 +3309,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendEmailForSOARespondentWithNullEmail() {
+    public void testSendEmailForSoaRespondentWithNullEmail() {
         PartyDetails applicantDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -3401,7 +3401,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendPostalForSOACitizen() {
+    public void testSendPostalForSoaCitizen() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
