@@ -1,22 +1,49 @@
 package uk.gov.hmcts.reform.prl.services.barrister;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.UserService;
+
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 
 @ExtendWith(SpringExtension.class)
 class BarristerAddServiceTest extends BarristerTestAbstract {
     @InjectMocks
     BarristerAddService barristerAddService;
+    @Mock
+    protected UserService userService;
+    @Mock
+    protected OrganisationService organisationService;
+
+    @BeforeEach
+    public void setup() {
+        barristerAddService = new BarristerAddService(userService, organisationService);
+        UserDetails userDetails = UserDetails.builder()
+            .id("1")
+            .roles(List.of(COURT_ADMIN))
+            .build();
+        Optional<Organisations> org = Optional.of(Organisations.builder().build());
+        when(userService.getUserDetails(AUTHORISATION)).thenReturn(userDetails);
+        when(organisationService.findUserOrganisation(AUTHORISATION)).thenReturn(org);
+    }
 
     @Test
     void shouldGetAllocatedBarristerC100() {
@@ -29,7 +56,7 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
             .respondents(allRespondents)
             .build();
 
-        AllocatedBarrister allocatedBarrister = barristerAddService.getAllocatedBarrister(caseData);
+        AllocatedBarrister allocatedBarrister = barristerAddService.getAllocatedBarrister(caseData, AUTHORISATION);
         DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
 
         assertNotNull(allocatedBarrister.getBarristerOrg());
@@ -54,7 +81,7 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
             .respondentsFL401(respondentFL401)
             .build();
 
-        AllocatedBarrister allocatedBarrister = barristerAddService.getAllocatedBarrister(caseData);
+        AllocatedBarrister allocatedBarrister = barristerAddService.getAllocatedBarrister(caseData, AUTHORISATION);
         DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
 
         assertNotNull(allocatedBarrister.getBarristerOrg());
@@ -74,7 +101,7 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
             .respondentsFL401(respondentFL401)
             .build();
 
-        AllocatedBarrister allocatedBarrister = barristerAddService.getAllocatedBarrister(caseData);
+        AllocatedBarrister allocatedBarrister = barristerAddService.getAllocatedBarrister(caseData, AUTHORISATION);
         DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
 
         assertNotNull(allocatedBarrister.getBarristerOrg());
@@ -94,7 +121,7 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
             .applicantsFL401(applicantFL401)
             .build();
 
-        AllocatedBarrister allocatedBarrister = barristerAddService.getAllocatedBarrister(caseData);
+        AllocatedBarrister allocatedBarrister = barristerAddService.getAllocatedBarrister(caseData, AUTHORISATION);
         DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
 
         assertNotNull(allocatedBarrister.getBarristerOrg());
@@ -114,7 +141,7 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
             .respondents(allRespondents)
             .build();
 
-        AllocatedBarrister allocatedBarrister = barristerAddService.getAllocatedBarrister(caseData);
+        AllocatedBarrister allocatedBarrister = barristerAddService.getAllocatedBarrister(caseData, AUTHORISATION);
         DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
 
         assertNotNull(allocatedBarrister.getBarristerOrg());
@@ -135,7 +162,7 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
             .applicants(allApplicants)
             .build();
 
-        AllocatedBarrister allocatedBarrister = barristerAddService.getAllocatedBarrister(caseData);
+        AllocatedBarrister allocatedBarrister = barristerAddService.getAllocatedBarrister(caseData, AUTHORISATION);
         DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
 
         assertNotNull(allocatedBarrister.getBarristerOrg());
@@ -155,7 +182,7 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
 
         assertThrows(
             RuntimeException.class,
-            () -> barristerAddService.getAllocatedBarrister(caseData)
+            () -> barristerAddService.getAllocatedBarrister(caseData, AUTHORISATION)
         );
     }
 
