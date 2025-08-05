@@ -286,9 +286,9 @@ class CaseAssignmentServiceTest {
     @ParameterizedTest
     @MethodSource("parameterC100Parties")
     void testC100AddBarrister(String party,
-                                                int index,
-                                                String barristerRole,
-                                                Function<CaseData, List<Element<PartyDetails>>> parties) {
+                              int index,
+                              String barristerRole,
+                              Function<CaseData, List<Element<PartyDetails>>> parties) {
         AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder()
             .partyList(DynamicList.builder()
                            .value(DynamicListElement.builder()
@@ -342,41 +342,52 @@ class CaseAssignmentServiceTest {
 
     }
 
-    @ParameterizedTest
-    @MethodSource("parameterC100Parties")
-    void updatedC100PartiesWithBarristerDetails(String party,
-                                                int index,
-                                                String barristerRole,
-                                                Function<CaseData, List<Element<PartyDetails>>> parties) {
+    @Test
+    void testAddBarristerWhenFailure() {
         AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder()
             .partyList(DynamicList.builder()
                            .value(DynamicListElement.builder()
-                                      .code(partyIds.get(party))
+                                      .code(partyIds.get("applicant3"))
                                       .build())
                            .build())
-            .barristerEmail(barrister.getBarristerEmail())
-            .barristerName(barrister.getBarristerName())
             .barristerOrg(Organisation.builder()
                               .organisationID(barrister.getBarristerOrg()
                                                   .getOrganisationID())
                               .organisationName(barrister.getBarristerOrg()
                                                     .getOrganisationName())
                               .build())
+            .barristerEmail(barrister.getBarristerEmail())
+            .barristerName(barrister.getBarristerName())
             .build();
 
-        String userId = UUID.randomUUID().toString();
-        caseAssignmentService.updatedPartyWithBarristerDetails(c100CaseData,
-                                                               userId,
-                                                               barristerRole,
-                                                               allocatedBarrister);
-        List<PartyDetails> partyDetails = ElementUtils.unwrapElements(parties.apply(c100CaseData));
+        String userId = "ac357f74-9389-4331-aaa9-a5f8bc3cbe67";
+        Barrister updatedBarrister = barrister.toBuilder()
+            .barristerRole("[C100APPLICANTBARRISTER3]")
+            .barristerId(UUID.randomUUID().toString())
+            .build();
 
-        assertThat(partyDetails.get(index))
-            .extracting(PartyDetails::getBarrister)
-            .isEqualTo(barrister.toBuilder()
-                           .barristerRole(barristerRole)
-                           .barristerId(userId)
-                           .build());
+        c100CaseData.getApplicants().get(2).getValue()
+            .setBarrister(updatedBarrister);
+
+        when(systemUserService.getSysUserToken())
+            .thenReturn("sysUserToken");
+        when(tokenGenerator.generate())
+            .thenReturn("token");
+        when(caseAssignmentApi.addCaseUserRoles(anyString(),
+                                                   anyString(),
+                                                   isA(CaseAssignmentUserRolesRequest.class)))
+            .thenThrow(FeignException.errorStatus("addCaseUserRoles", Response.builder()
+                .status(500)
+                .reason("Internal Server Error")
+                .request(Request.create(HttpMethod.POST, "/case-users", Map.of(), null, null, null))
+                .build()));
+
+        assertThatThrownBy(() -> caseAssignmentService.addBarrister(c100CaseData,
+                                                                    userId,
+                                                                    C100APPLICANTBARRISTER3.getCaseRoleLabel(),
+                                                                    allocatedBarrister))
+            .isInstanceOf(GrantCaseAccessException.class)
+            .hasMessageContaining("User(s) [ac357f74-9389-4331-aaa9-a5f8bc3cbe67] not granted [C100APPLICANTBARRISTER3] to case");
     }
 
 
@@ -441,42 +452,6 @@ class CaseAssignmentServiceTest {
             .contains(expectedCaseAssignmentUserRolesRequest.getCaseAssignmentUserRolesWithOrganisation().getFirst());
 
         assertThat(partyDetails.getBarrister())
-            .isEqualTo(barrister.toBuilder()
-                           .barristerRole(barristerRole)
-                           .barristerId(userId)
-                           .build());
-    }
-
-
-    @ParameterizedTest
-    @MethodSource("parameterFl401Parties")
-    void updatedFl401PartyWithBarristerDetails(String party,
-                                               String barristerRole,
-                                               Function<CaseData, PartyDetails> parties) {
-        AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder()
-            .partyList(DynamicList.builder()
-                           .value(DynamicListElement.builder()
-                                      .code(fl401PartyIds.get(party))
-                                      .build())
-                           .build())
-            .barristerEmail(barrister.getBarristerEmail())
-            .barristerName(barrister.getBarristerName())
-            .barristerOrg(Organisation.builder()
-                              .organisationID(barrister.getBarristerOrg()
-                                                  .getOrganisationID())
-                              .organisationName(barrister.getBarristerOrg()
-                                                    .getOrganisationName())
-                              .build())
-            .build();
-
-        String userId = UUID.randomUUID().toString();
-        caseAssignmentService.updatedPartyWithBarristerDetails(fl401CaseData,
-                                                               userId,
-                                                               barristerRole,
-                                                               allocatedBarrister);
-
-        assertThat(parties.apply(fl401CaseData))
-            .extracting(PartyDetails::getBarrister)
             .isEqualTo(barrister.toBuilder()
                            .barristerRole(barristerRole)
                            .barristerId(userId)

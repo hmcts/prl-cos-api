@@ -390,7 +390,7 @@ public class CaseAssignmentService {
             .orElse(Optional.empty());
     }
 
-    public void updatedPartyWithBarristerDetails(CaseData caseData,
+    private void updatedPartyWithBarristerDetails(CaseData caseData,
                                                  String userId,
                                                  String barristerRole,
                                                  AllocatedBarrister allocatedBarrister) {
