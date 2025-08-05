@@ -1214,7 +1214,7 @@ public class ServiceOfApplicationService {
 
     private void sendEmailToRespondent(CaseData caseData, String authorization,
                                        List<Element<EmailNotificationDetails>> emailNotificationDetails,
-                                       List<Document> packSdocs, Element<PartyDetails> party) {
+                                       List<Document> packRdocs, Element<PartyDetails> party) {
         if (party.getValue().getEmail() != null) {
             try {
                 log.info("Sending email to respondent for C100 Application for caseId {}", caseData.getId());
@@ -1223,7 +1223,7 @@ public class ServiceOfApplicationService {
                 dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
                 dynamicData.put("respondent", true);
                 populateLanguageMap(caseData, dynamicData);
-                List<Document> finalDocs = removeCoverLettersFromThePacks(packSdocs);
+                List<Document> finalDocs = removeCoverLettersFromThePacks(packRdocs);
                 EmailNotificationDetails emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
                     authorization,
                     party.getValue().getEmail(),
