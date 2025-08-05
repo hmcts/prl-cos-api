@@ -56,23 +56,23 @@ public abstract class AbstractBarristerService {
         return  DynamicList.builder().value(null).listItems(listItems).build();
     }
 
-    private List<DynamicListElement> getPartiesWithSameOrganisation(UserDetails userDetails, List<Element<PartyDetails>> party,
+    private List<DynamicListElement> getPartiesWithSameOrganisation(UserDetails userDetails, List<Element<PartyDetails>> partyDetailsList,
                                                           Boolean isApplicant, String usersAuthorisation) {
         if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
             Optional<Organisations> usersOrganisation = organisationService.findUserOrganisation(usersAuthorisation);
             log.info("User organisation (c100): {}", usersOrganisation);
-            List<Element<PartyDetails>> partiesListWithSameOrganisation = new ArrayList<>();
+            List<Element<PartyDetails>> partyDetailsListWithSameOrg = new ArrayList<>();
 
-            for (Element<PartyDetails> person : party) {
-                log.info("Party ID for person (c100): {}", person.getValue().getPartyId());
-                if (isSameOrganisation(person.getValue(), usersOrganisation)) {
-                    partiesListWithSameOrganisation.add(person);
+            for (Element<PartyDetails> partyDetailsElement : partyDetailsList) {
+                log.info("Party ID for partyDetailsElement (c100): {}", partyDetailsElement.getValue().getPartyId());
+                if (isSameOrganisation(partyDetailsElement.getValue(), usersOrganisation)) {
+                    partyDetailsListWithSameOrg.add(partyDetailsElement);
                 }
             }
-            log.info(" people found: {}", partiesListWithSameOrganisation);
-            return getPartyDynamicListElements(partiesListWithSameOrganisation, isApplicant);
+            log.info("Parties with the same org: {}", partyDetailsListWithSameOrg);
+            return getPartyDynamicListElements(partyDetailsListWithSameOrg, isApplicant);
         } else {
-            return getPartyDynamicListElements(party, isApplicant);
+            return getPartyDynamicListElements(partyDetailsList, isApplicant);
         }
     }
 
@@ -87,48 +87,49 @@ public abstract class AbstractBarristerService {
         return  DynamicList.builder().value(null).listItems(listItems).build();
     }
 
-    private DynamicListElement getRelatedPeopleFL401(UserDetails userDetails, PartyDetails person, Boolean isApplicant, String usersAuthorisation) {
+    private DynamicListElement getPartiesWithTheSameOrganisationFL401(UserDetails userDetails, PartyDetails partyDetails,
+                                                                      Boolean isApplicant, String usersAuthorisation) {
         if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
             Optional<Organisations> usersOrganisation = organisationService.findUserOrganisation(usersAuthorisation);
             log.info("User organisation: {}", usersOrganisation);
-            log.info("Party ID for person: {}", person.getPartyId());
+            log.info("Party ID for party details: {}", partyDetails.getPartyId());
 
-            PartyDetails relatedPerson = null;
+            PartyDetails partyDetailsWithSameOrg = null;
 
-            if (isSameOrganisation(person, usersOrganisation)) {
-                relatedPerson = person;
+            if (isSameOrganisation(partyDetails, usersOrganisation)) {
+                partyDetailsWithSameOrg = partyDetails;
             }
-            log.info("Related person found: {}", relatedPerson);
-            if (relatedPerson != null) {
-                return getPartyDynamicListElement(isApplicant, buildPartyDetailsElement(relatedPerson));
+            log.info("Party Details with the same org: {}", partyDetailsWithSameOrg);
+            if (partyDetailsWithSameOrg != null) {
+                return getPartyDynamicListElement(isApplicant, buildPartyDetailsElement(partyDetailsWithSameOrg));
             } else {
                 return null;
             }
         } else {
-            return getPartyDynamicListElement(isApplicant, buildPartyDetailsElement(person));
+            return getPartyDynamicListElement(isApplicant, buildPartyDetailsElement(partyDetails));
         }
     }
 
-    private Element<PartyDetails> buildPartyDetailsElement(PartyDetails person) {
+    private Element<PartyDetails> buildPartyDetailsElement(PartyDetails partyDetails) {
         return Element.<PartyDetails>builder()
-            .id(person.getPartyId())
-            .value(person)
+            .id(partyDetails.getPartyId())
+            .value(partyDetails)
             .build();
     }
 
-    private void checkAndAddPartyToListFL401(List<DynamicListElement> listToAddTo, PartyDetails party, boolean appOrResp,
+    private void checkAndAddPartyToListFL401(List<DynamicListElement> listToAddTo, PartyDetails partyDetails, boolean appOrResp,
                                         UserDetails userDetails, String authorisation) {
-        if (party != null) {
-            DynamicListElement dynamicListElement = getRelatedPeopleFL401(userDetails, party, appOrResp, authorisation);
+        if (partyDetails != null) {
+            DynamicListElement dynamicListElement = getPartiesWithTheSameOrganisationFL401(userDetails, partyDetails, appOrResp, authorisation);
             if (dynamicListElement != null) {
                 listToAddTo.add(dynamicListElement);
             }
         }
     }
 
-    private boolean isSameOrganisation(PartyDetails person, Optional<Organisations> usersOrganisation) {
-        return usersOrganisation.isPresent() && person.getSolicitorOrg() != null
-            && usersOrganisation.get().getOrganisationIdentifier().equals(person.getSolicitorOrg().getOrganisationID());
+    private boolean isSameOrganisation(PartyDetails partyDetails, Optional<Organisations> usersOrganisation) {
+        return usersOrganisation.isPresent() && partyDetails.getSolicitorOrg() != null
+            && usersOrganisation.get().getOrganisationIdentifier().equals(partyDetails.getSolicitorOrg().getOrganisationID());
     }
 
     protected List<DynamicListElement> getPartyDynamicListElements(List<Element<PartyDetails>> partyDetailsList,
