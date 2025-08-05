@@ -1189,7 +1189,7 @@ public class ServiceOfApplicationService {
                 sendEmailToRespondentSolicitorNonPersonal(caseData, authorization, emailNotificationDetails, packSdocs, party.get());
             } else if (party.isPresent() && (!CaseUtils.hasLegalRepresentation(party.get().getValue()))) {
                 if (ContactPreferences.email.equals(party.get().getValue().getContactPreferences())) {
-                    sendEmailToRespondent(caseData, authorization, emailNotificationDetails, packSdocs, party.get());
+                    sendEmailToRespondent(caseData, authorization, emailNotificationDetails, packRdocs, party.get());
                 } else if (party.get().getValue().getAddress() != null
                     && StringUtils.isNotEmpty(party.get().getValue().getAddress().getAddressLine1())) {
                     log.info(
@@ -1228,7 +1228,7 @@ public class ServiceOfApplicationService {
                     authorization,
                     party.getValue().getEmail(),
                     finalDocs,
-                    SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP,
+                    SendgridEmailTemplateNames.SERVE_ORDER_APPLICANT_RESPONDENT,
                     dynamicData,
                     PrlAppsConstants.SERVED_PARTY_RESPONDENT
                 );
