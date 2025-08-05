@@ -391,18 +391,16 @@ public class CaseAssignmentService {
     }
 
     public void updatedPartyWithBarristerDetails(CaseData caseData,
-                                                 String barristerRole,
                                                  String userId,
+                                                 String barristerRole,
                                                  AllocatedBarrister allocatedBarrister) {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             updatedPartyWithBarristerDetails(
-                caseData,
                 barristerRole,
                 caseData::getApplicants,
                 userId,
                 allocatedBarrister
             ).orElseGet(() -> updatedPartyWithBarristerDetails(
-                caseData,
                 barristerRole,
                 caseData::getRespondents,
                 userId,
@@ -410,14 +408,12 @@ public class CaseAssignmentService {
             ).orElse(null));
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             updatedPartyWithBarristerDetails(
-                caseData,
                 barristerRole,
                 caseData.getApplicantsFL401(),
                 userId,
                 allocatedBarrister
             )
                 .orElseGet(() -> updatedPartyWithBarristerDetails(
-                    caseData,
                     barristerRole,
                     caseData.getRespondentsFL401(),
                     userId,
@@ -427,8 +423,7 @@ public class CaseAssignmentService {
         }
     }
 
-    private Optional<Boolean> updatedPartyWithBarristerDetails(CaseData caseData,
-                                                               String barristerRole,
+    private Optional<Boolean> updatedPartyWithBarristerDetails(String barristerRole,
                                                                Supplier<List<Element<PartyDetails>>> parties,
                                                                String userId,
                                                                AllocatedBarrister allocatedBarrister) {
@@ -445,8 +440,7 @@ public class CaseAssignmentService {
         }
     }
 
-    private Optional<Boolean> updatedPartyWithBarristerDetails(CaseData caseData,
-                                                               String barristerRole,
+    private Optional<Boolean> updatedPartyWithBarristerDetails(String barristerRole,
                                                                PartyDetails party,
                                                                String userId,
                                                                AllocatedBarrister allocatedBarrister) {

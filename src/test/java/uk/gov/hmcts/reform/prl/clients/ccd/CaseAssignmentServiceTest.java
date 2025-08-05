@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CaseAssignmentApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRoleWithOrganisation;
 import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRolesRequest;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -53,6 +54,7 @@ import static java.util.random.RandomGenerator.getDefault;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.params.provider.Arguments.of;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
@@ -281,10 +283,9 @@ class CaseAssignmentServiceTest {
         );
     }
 
-
-    /*@ParameterizedTest
+    @ParameterizedTest
     @MethodSource("parameterC100Parties")
-    void testAddBarrister(String party,
+    void testC100AddBarrister(String party,
                                                 int index,
                                                 String barristerRole,
                                                 Function<CaseData, List<Element<PartyDetails>>> parties) {
@@ -300,6 +301,8 @@ class CaseAssignmentServiceTest {
                               .organisationName(barrister.getBarristerOrg()
                                                     .getOrganisationName())
                               .build())
+            .barristerEmail(barrister.getBarristerEmail())
+            .barristerName(barrister.getBarristerName())
             .build();
 
         String userId = UUID.randomUUID().toString();
@@ -337,7 +340,7 @@ class CaseAssignmentServiceTest {
                 .barristerId(userId)
                 .build());
 
-    }*/
+    }
 
     @ParameterizedTest
     @MethodSource("parameterC100Parties")
@@ -363,8 +366,8 @@ class CaseAssignmentServiceTest {
 
         String userId = UUID.randomUUID().toString();
         caseAssignmentService.updatedPartyWithBarristerDetails(c100CaseData,
-                                                               barristerRole,
                                                                userId,
+                                                               barristerRole,
                                                                allocatedBarrister);
         List<PartyDetails> partyDetails = ElementUtils.unwrapElements(parties.apply(c100CaseData));
 
@@ -390,6 +393,63 @@ class CaseAssignmentServiceTest {
 
     @ParameterizedTest
     @MethodSource("parameterFl401Parties")
+    void testFl401AddBarrister(String party,
+                               String barristerRole,
+                               Function<CaseData, PartyDetails> parties) {
+        AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder()
+            .partyList(DynamicList.builder()
+                           .value(DynamicListElement.builder()
+                                      .code(fl401PartyIds.get(party))
+                                      .build())
+                           .build())
+            .barristerEmail(barrister.getBarristerEmail())
+            .barristerName(barrister.getBarristerName())
+            .barristerOrg(Organisation.builder()
+                              .organisationID(barrister.getBarristerOrg()
+                                                  .getOrganisationID())
+                              .organisationName(barrister.getBarristerOrg()
+                                                    .getOrganisationName())
+                              .build())
+            .build();
+
+        String userId = UUID.randomUUID().toString();
+
+        caseAssignmentService.addBarrister(fl401CaseData,
+                                           userId,
+                                           barristerRole,
+                                           allocatedBarrister);
+
+        PartyDetails partyDetails = parties.apply(fl401CaseData);
+
+        verify(caseAssignmentApi).addCaseUserRoles(
+            any(),
+            any(),
+            caseAssignmentUserRolesRequestArgumentCaptor.capture());
+
+
+        CaseAssignmentUserRolesRequest expectedCaseAssignmentUserRolesRequest = CaseAssignmentUserRolesRequest.builder()
+            .caseAssignmentUserRolesWithOrganisation(List.of(CaseAssignmentUserRoleWithOrganisation.builder()
+                                                                 .caseDataId(String.valueOf(fl401CaseData.getId()))
+                                                                 .organisationId(barrister.getBarristerOrg().getOrganisationID())
+                                                                 .userId(userId)
+                                                                 .caseRole(barristerRole)
+                                                                 .build()))
+            .build();
+
+        CaseAssignmentUserRolesRequest caseAssignmentUserRolesRequest = caseAssignmentUserRolesRequestArgumentCaptor.getValue();
+        assertThat(caseAssignmentUserRolesRequest.getCaseAssignmentUserRolesWithOrganisation())
+            .contains(expectedCaseAssignmentUserRolesRequest.getCaseAssignmentUserRolesWithOrganisation().getFirst());
+
+        assertThat(partyDetails.getBarrister())
+            .isEqualTo(barrister.toBuilder()
+                           .barristerRole(barristerRole)
+                           .barristerId(userId)
+                           .build());
+    }
+
+
+    @ParameterizedTest
+    @MethodSource("parameterFl401Parties")
     void updatedFl401PartyWithBarristerDetails(String party,
                                                String barristerRole,
                                                Function<CaseData, PartyDetails> parties) {
@@ -411,8 +471,8 @@ class CaseAssignmentServiceTest {
 
         String userId = UUID.randomUUID().toString();
         caseAssignmentService.updatedPartyWithBarristerDetails(fl401CaseData,
-                                                               barristerRole,
                                                                userId,
+                                                               barristerRole,
                                                                allocatedBarrister);
 
         assertThat(parties.apply(fl401CaseData))
