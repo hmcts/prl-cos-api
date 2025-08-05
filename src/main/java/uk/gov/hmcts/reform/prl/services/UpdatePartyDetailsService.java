@@ -106,6 +106,7 @@ public class UpdatePartyDetailsService {
 
     public Map<String, Object> updateApplicantRespondentAndChildData(CallbackRequest callbackRequest,
                                                                      String authorisation) {
+        log.info("Called updateApplicantRespondentAndChildData");
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetailsBefore().getData();
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
@@ -114,6 +115,7 @@ public class UpdatePartyDetailsService {
         CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
         updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
         updatedCaseData.putAll(confidentialityTabService.updateConfidentialityDetails(caseData));
+        log.info("Updated CaseData");
 
         //Added partyId for Hearings Api Spec, C100 applications
         //Applicants
@@ -129,9 +131,12 @@ public class UpdatePartyDetailsService {
             }
         }
 
+        log.info("dded partyId for Hearings Api Spec");
+
         updatedCaseData.putAll(caseSummaryTabService.updateTab(caseData));
 
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
+            log.info("entered FL401_CASE_TYPE clause");
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, DARESPONDENT));
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, DAAPPLICANT));
 
@@ -142,6 +147,9 @@ public class UpdatePartyDetailsService {
 
             setFl401PartyNames(fl401Applicant, caseData, updatedCaseData, fl401respondent);
             setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData, caseData.getApplicantsFL401());
+
+            log.info("Updated case party info");
+
             confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
                 ofNullable(caseData.getApplicantsFL401()),
                 updatedCaseData,
@@ -173,6 +181,7 @@ public class UpdatePartyDetailsService {
             }
             cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
             findAndListRefugeDocsForFL401(callbackRequest, caseData, updatedCaseData);
+            log.info("Completed update");
         } else if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CARESPONDENT));
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CAAPPLICANT));
