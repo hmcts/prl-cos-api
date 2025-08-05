@@ -547,7 +547,15 @@
       "sendSignUpLink": null,
       "solicitorEmail": null,
       "isAddressUnknown": null,
-      "solicitorAddress": {},
+      "solicitorAddress": {
+        "County": null,
+        "Country": null,
+        "PostCode": null,
+        "PostTown": null,
+        "AddressLine1": null,
+        "AddressLine2": null,
+        "AddressLine3": null
+      },
       "solicitorOrgUuid": null,
       "solicitorPartyId": null,
       "currentRespondent": null,
