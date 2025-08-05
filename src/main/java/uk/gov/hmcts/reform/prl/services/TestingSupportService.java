@@ -96,6 +96,7 @@ public class TestingSupportService {
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     private final CaseInitiationService caseInitiationService;
     private final TaskListService taskListService;
+    private final UpdatePartyDetailsService updatePartyDetailsService;
 
     private static final String VALID_RESPONDENT_TASKLIST_INPUT_JSON = "Dummy_Respondent_Tasklist_Data.json";
 
@@ -373,6 +374,7 @@ public class TestingSupportService {
         if (isAuthorized(authorisation)) {
             try {
                 caseInitiationService.handleCaseInitiation(authorisation, callbackRequest);
+                updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, authorisation);
             } catch (Exception e) {
                 log.error("Access grant failed", e);
             }
