@@ -74,7 +74,8 @@ public class CaseAssignmentService {
     private static void updateBarrister(String barristerRole, PartyDetails partyDetails, AllocatedBarrister allocatedBarrister, String userId) {
         partyDetails.setBarrister(
             Barrister.builder()
-                .barristerName(allocatedBarrister.getBarristerName())
+                .barristerFirstName(allocatedBarrister.getBarristerFirstName())
+                .barristerLastName(allocatedBarrister.getBarristerLastName())
                 .barristerEmail(allocatedBarrister.getBarristerEmail())
                 .barristerRole(barristerRole)
                 .barristerOrg(allocatedBarrister.getBarristerOrg())
@@ -300,24 +301,40 @@ public class CaseAssignmentService {
                                    Optional<String> barristerRole,
                                    AllocatedBarrister allocatedBarrister,
                                    List<String> errorList) {
-        userId.ifPresentOrElse(
-            id ->
-                barristerRole.ifPresentOrElse(
-                    role -> {
-                        validateBarristerOrgRelationship(caseData, allocatedBarrister, errorList);
-                        validateCaseRoles(caseData, role, errorList);
-                    },
-                    () -> {
-                        errorList.add("Could not map to barrister case role");
-                        log.error(
-                            "Case id {}, could not map to barrister case role for selected party {}",
-                            caseData.getId(),
-                            allocatedBarrister.getPartyList().getValueCode()
-                        );
-                    }
-                ),
-            () -> errorList.add("Could not find barrister with provided email")
-        );
+        if (userId != null && barristerRole != null && allocatedBarrister != null) {
+            userId.ifPresentOrElse(
+                id ->
+                    barristerRole.ifPresentOrElse(
+                        role -> {
+                            validateBarristerOrgRelationship(caseData, allocatedBarrister, errorList);
+                            validateCaseRoles(caseData, role, errorList);
+                        },
+                        () -> {
+                            errorList.add("Could not map to barrister case role");
+                            log.error(
+                                "Case id {}, could not map to barrister case role for selected party {}",
+                                caseData.getId(),
+                                allocatedBarrister.getPartyList().getValueCode()
+                            );
+                        }
+                    ),
+                () -> errorList.add("Could not find barrister with provided email")
+            );
+        } else {
+            String message = String.format(
+                """
+                    For case id %s invalid arguments are user id: %s, barrister role: %s
+                    and allocated barrister: %s,
+                """,
+                caseData.getId(),
+                userId,
+                barristerRole,
+                allocatedBarrister
+            );
+            log.error(message);
+            throw new IllegalArgumentException(message);
+        }
+
     }
 
     public void validateRemoveRequest(CaseData caseData,

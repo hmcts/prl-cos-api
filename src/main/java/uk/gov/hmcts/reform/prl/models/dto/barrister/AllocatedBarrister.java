@@ -16,8 +16,11 @@ public class AllocatedBarrister {
     @JsonProperty("partyList")
     private final DynamicList partyList;
 
-    @JsonProperty("barristerName")
-    private final String barristerName;
+    @JsonProperty("barristerFirstName")
+    private final String barristerFirstName;
+
+    @JsonProperty("barristerLastName")
+    private final String barristerLastName;
 
     @JsonProperty("barristerEmail")
     private final String barristerEmail;
@@ -25,6 +28,11 @@ public class AllocatedBarrister {
     @JsonProperty("barristerOrg")
     private final Organisation barristerOrg;
 
-    @JsonProperty("roleItem")
-    private final String roleItem;
+    @Override
+    public String toString() {
+        return "AllocatedBarrister{"
+            + "barristerFirstName='" + barristerFirstName + '\''
+            + ", barristerLastName='" + barristerLastName + '\''
+            + '}';
+    }
 }

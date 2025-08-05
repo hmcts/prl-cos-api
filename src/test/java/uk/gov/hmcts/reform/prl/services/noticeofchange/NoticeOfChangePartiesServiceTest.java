@@ -46,7 +46,6 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListEleme
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
-import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.DecisionRequest;
@@ -1573,42 +1572,5 @@ public class NoticeOfChangePartiesServiceTest {
             eq(role),
             eq(caseData)
         );
-    }
-
-    @Test
-    public void generateJson() throws JsonProcessingException {
-        AllocatedBarrister barristerName = AllocatedBarrister.builder()
-            .barristerEmail("prl_aat_noc_solicitor_3@mailinator.com")
-            .barristerName("prl noc")
-            .partyList(DynamicList.builder()
-                           .value(DynamicListElement.builder()
-                                      .code("7e9028ba-534c-42bb-bb04-e67b6551b4bd")
-                                      .label("Martina Graham")
-                                      .build())
-                           .listItems(List.of(DynamicListElement.builder()
-                                                  .code("7663081e-778d-4317-b278-7642b740d317")
-                                                  .label("John Doe")
-                                                  .build(),
-                                              DynamicListElement.builder()
-                                                  .code("0016cff5-17f0-42af-bea4-0b04ca74c9ec")
-                                                  .label("Jeremy Anderson")
-                                                  .build(),
-                                              DynamicListElement.builder()
-                                                  .code("7e9028ba-534c-42bb-bb04-e67b6551b4bd")
-                                                  .label("Martina Graham")
-                                                  .build()))
-                           .build())
-            .barristerOrg(Organisation.builder()
-                              .organisationID("LM6OZX0")
-                              .organisationName("Private law NOC solution")
-                              .build())
-            .roleItem("[C100APPLICANTSOLICITOR5]")
-            .build();
-
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.findAndRegisterModules();
-        String s = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(barristerName);
-        System.out.println(s);
-
     }
 }

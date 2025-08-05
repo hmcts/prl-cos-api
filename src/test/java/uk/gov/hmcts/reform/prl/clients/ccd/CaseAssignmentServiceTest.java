@@ -47,6 +47,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
@@ -210,7 +211,8 @@ class CaseAssignmentServiceTest {
 
         barrister = Barrister.builder()
             .barristerEmail("barristerEmail@gmail.com")
-            .barristerName("barristerName")
+            .barristerFirstName("barristerName")
+            .barristerLastName("barristerLastName")
             .barristerOrg(Organisation.builder()
                               .organisationID("barristerOrgId")
                               .organisationName("barristerOrgName")
@@ -302,7 +304,8 @@ class CaseAssignmentServiceTest {
                                                     .getOrganisationName())
                               .build())
             .barristerEmail(barrister.getBarristerEmail())
-            .barristerName(barrister.getBarristerName())
+            .barristerFirstName(barrister.getBarristerFirstName())
+            .barristerLastName(barrister.getBarristerLastName())
             .build();
 
         String userId = UUID.randomUUID().toString();
@@ -357,7 +360,8 @@ class CaseAssignmentServiceTest {
                                                     .getOrganisationName())
                               .build())
             .barristerEmail(barrister.getBarristerEmail())
-            .barristerName(barrister.getBarristerName())
+            .barristerFirstName(barrister.getBarristerFirstName())
+            .barristerLastName(barrister.getBarristerLastName())
             .build();
 
         String userId = "ac357f74-9389-4331-aaa9-a5f8bc3cbe67";
@@ -414,7 +418,8 @@ class CaseAssignmentServiceTest {
                                       .build())
                            .build())
             .barristerEmail(barrister.getBarristerEmail())
-            .barristerName(barrister.getBarristerName())
+            .barristerFirstName(barrister.getBarristerFirstName())
+            .barristerLastName(barrister.getBarristerLastName())
             .barristerOrg(Organisation.builder()
                               .organisationID(barrister.getBarristerOrg()
                                                   .getOrganisationID())
@@ -456,6 +461,79 @@ class CaseAssignmentServiceTest {
                            .barristerRole(barristerRole)
                            .barristerId(userId)
                            .build());
+    }
+
+    static Stream<Arguments> validateAddRequest() {
+        return Stream.of(
+            of(
+                (Supplier<Optional<String>>)() -> null,
+                (Supplier<Optional<String>>)() -> Optional.empty(),
+                AllocatedBarrister.builder().build(),
+                "For case id 1234 invalid arguments are user id: null, barrister role: Optional.empty\n"
+                    + "    and allocated barrister: AllocatedBarrister{barristerFirstName='null', barristerLastName='null'}"
+            ),
+            of(
+                (Supplier<Optional<String>>)() -> Optional.empty(),
+                (Supplier<Optional<String>>)() -> null,
+                AllocatedBarrister.builder().build(),
+                "For case id 1234 invalid arguments are user id: Optional.empty, barrister role: null\n"
+                    + "    and allocated barrister: AllocatedBarrister{barristerFirstName='null', barristerLastName='null'}"
+            ),
+            of(
+                (Supplier<Optional<String>>)() -> Optional.empty(),
+                (Supplier<Optional<String>>)() -> Optional.empty(),
+                null,
+                "For case id 1234 invalid arguments are user id: Optional.empty, barrister role: Optional.empty\n"
+                    + "    and allocated barrister: null"
+            )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("validateAddRequest")
+    void testValidateAddRequestWhenParametersAreNullOrEmpty(Supplier<Optional<String>> userId,
+                                                           Supplier<Optional<String>> barristerRole,
+                                                           AllocatedBarrister allocatedBarrister,
+                                                           String message) {
+        List<String> errorList = new ArrayList<>();
+        assertThatThrownBy(() -> caseAssignmentService.validateAddRequest(userId.get(),
+                                                 CaseData.builder().id(1234L).build(),
+                                                 barristerRole.get(),
+                                                 allocatedBarrister,
+                                                 errorList
+                                                 ))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining(message);
+    }
+
+    @Test
+    void testValidateUserIdIsEmpty() {
+        List<String> errorList = new ArrayList<>();
+        caseAssignmentService.validateAddRequest(Optional.empty(),
+                                                 CaseData.builder().id(1234L).build(),
+                                                 Optional.of(C100APPLICANTBARRISTER3.getCaseRoleLabel()),
+                                                 AllocatedBarrister.builder().build(),
+                                                 errorList);
+        assertThat(errorList)
+            .contains("Could not find barrister with provided email");
+    }
+
+    @Test
+    void testValidateBarristerRoleIsEmpty() {
+        List<String> errorList = new ArrayList<>();
+        caseAssignmentService.validateAddRequest(Optional.of("5678"),
+                                                 CaseData.builder().id(1234L).build(),
+                                                 Optional.empty(),
+                                                 AllocatedBarrister.builder()
+                                                     .partyList(DynamicList.builder()
+                                                                    .value(DynamicListElement.builder()
+                                                                               .code("3333")
+                                                                               .build())
+                                                                    .build())
+                                                         .build(),
+                                                 errorList);
+        assertThat(errorList)
+            .contains("Could not map to barrister case role");
     }
 
     @ParameterizedTest
