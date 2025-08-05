@@ -10,6 +10,8 @@ import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 
+import static uk.gov.hmcts.reform.prl.enums.PartyEnum.applicant;
+import static uk.gov.hmcts.reform.prl.enums.PartyEnum.respondent;
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
 
 @Slf4j
@@ -30,10 +32,10 @@ public class BarristerAddService extends AbstractBarristerService {
     }
 
     @Override
-    protected String getLabelForAction(boolean applicantOrRespondent, PartyDetails partyDetails) {
+    protected String getLabelForAction(boolean isApplicant, PartyDetails partyDetails) {
         return String.format("%s %s (%s), %s, %s", partyDetails.getFirstName(),
                                      partyDetails.getLastName(),
-                                     applicantOrRespondent ? APPLICANT : RESPONDENT,
+                                     isApplicant ? applicant : respondent,
                                      partyDetails.getRepresentativeFullName(),
                                      partyDetails.getSolicitorOrg().getOrganisationName()
         );
@@ -44,9 +46,9 @@ public class BarristerAddService extends AbstractBarristerService {
     }
 
     @Override
-    protected boolean isPartyApplicable(boolean applicantOrRespondent, PartyDetails partyDetails) {
-        return (!hasBarrister(partyDetails)) && ((applicantOrRespondent && partyDetails.getSolicitorPartyId() != null)
-            || (!applicantOrRespondent && yes.equals(partyDetails.getDoTheyHaveLegalRepresentation())));
+    protected boolean isPartyApplicable(boolean isApplicant, PartyDetails partyDetails) {
+        return (!hasBarrister(partyDetails)) && ((isApplicant && partyDetails.getSolicitorPartyId() != null)
+            || (!isApplicant && yes.equals(partyDetails.getDoTheyHaveLegalRepresentation())));
     }
 
 }
