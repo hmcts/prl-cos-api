@@ -535,11 +535,10 @@ public class UpdatePartyDetailsService {
     private void generateC8DocumentsForRespondents(Map<String, Object> updatedCaseData, CallbackRequest callbackRequest, String authorisation,
                                                        CaseData caseData, List<Element<PartyDetails>> currentRespondents)
         throws Exception {
+        log.info("Generating C8 docs");
         int respondentIndex = 0;
         Map<String, Object> casDataMap = callbackRequest.getCaseDetailsBefore().getData();
         CaseData caseDataBefore = objectMapper.convertValue(casDataMap, CaseData.class);
-        log.info("Current Respondents:");
-        log.info(currentRespondents);
         for (Element<PartyDetails> respondent: currentRespondents) {
             log.info("Respondent " + respondent.getValue().getPartyId());
             PartyDetails updatedPartyDetails = respondent.getValue().toBuilder().response(getPartyResponse(respondent.getValue()).toBuilder()
