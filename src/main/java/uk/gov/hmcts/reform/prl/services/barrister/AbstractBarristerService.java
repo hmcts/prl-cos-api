@@ -45,34 +45,34 @@ public abstract class AbstractBarristerService {
         List<DynamicListElement> listItems = new ArrayList<>();
         List<Element<PartyDetails>> applicants = caseData.getApplicants();
         if (applicants != null) {
-            listItems.addAll(getRelatedPeopleC100(userDetails, applicants, true, authorisation));
+            listItems.addAll(getPartiesWithSameOrganisation(userDetails, applicants, true, authorisation));
         }
 
         List<Element<PartyDetails>> respondents = caseData.getRespondents();
         if (respondents != null) {
-            listItems.addAll(getRelatedPeopleC100(userDetails, respondents, false, authorisation));
+            listItems.addAll(getPartiesWithSameOrganisation(userDetails, respondents, false, authorisation));
         }
         log.info("Returning these dynamic list items (c100): {}", listItems);
         return  DynamicList.builder().value(null).listItems(listItems).build();
     }
 
-    private List<DynamicListElement> getRelatedPeopleC100(UserDetails userDetails, List<Element<PartyDetails>> people,
+    private List<DynamicListElement> getPartiesWithSameOrganisation(UserDetails userDetails, List<Element<PartyDetails>> party,
                                                           Boolean isApplicant, String usersAuthorisation) {
         if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
             Optional<Organisations> usersOrganisation = organisationService.findUserOrganisation(usersAuthorisation);
             log.info("User organisation (c100): {}", usersOrganisation);
-            List<Element<PartyDetails>> relatedPeople = new ArrayList<>();
+            List<Element<PartyDetails>> partiesListWithSameOrganisation = new ArrayList<>();
 
-            for (Element<PartyDetails> person : people) {
+            for (Element<PartyDetails> person : party) {
                 log.info("Party ID for person (c100): {}", person.getValue().getPartyId());
                 if (isSameOrganisation(person.getValue(), usersOrganisation)) {
-                    relatedPeople.add(person);
+                    partiesListWithSameOrganisation.add(person);
                 }
             }
-            log.info("Related people found: {}", relatedPeople);
-            return getPartyDynamicListElements(relatedPeople, isApplicant);
+            log.info(" people found: {}", partiesListWithSameOrganisation);
+            return getPartyDynamicListElements(partiesListWithSameOrganisation, isApplicant);
         } else {
-            return getPartyDynamicListElements(people, isApplicant);
+            return getPartyDynamicListElements(party, isApplicant);
         }
     }
 
