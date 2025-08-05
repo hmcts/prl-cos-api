@@ -572,7 +572,7 @@
       "isEmailAddressConfidential": null,
       "applicantContactInstructions": null,
       "respondentLivedWithApplicant": "No",
-      "doTheyHaveLegalRepresentation": "no",
+      "doTheyHaveLegalRepresentation": null,
       "addressLivedLessThan5YearsDetails": null,
       "otherPersonRelationshipToChildren": [
 
