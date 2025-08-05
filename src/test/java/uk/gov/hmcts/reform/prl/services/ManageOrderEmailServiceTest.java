@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -62,6 +63,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -69,6 +71,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -3922,5 +3925,67 @@ public class ManageOrderEmailServiceTest {
         Map<String, Object> caseDataMap = new HashMap<>();
         manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
         assertNotNull(caseDataMap.get("orderCollection"));
+    }
+
+    @Test
+    public void testSomethingGetsSentToRespondentSolsWhenNotPersonalService() {
+        PartyDetails respondent = PartyDetails.builder()
+            .partyId(uuid)
+            .firstName("Foo")
+            .lastName("Bar")
+            .email("foo@bar.com")
+            .solicitorEmail("respsol@law.com")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .build();
+        Element<PartyDetails> wrappedResp = element(uuid, respondent);
+
+        PartyDetails dummyApplicant = PartyDetails.builder()
+            .partyId(uuid)
+            .firstName("Dummy")
+            .lastName("Applicant")
+            .email("app@tests.com")
+            .solicitorEmail("app-sol@law.com")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .build();
+        Element<PartyDetails> appElem = element(uuid, dummyApplicant);
+
+        DynamicMultiselectListElement select = DynamicMultiselectListElement
+            .builder()
+            .code(uuid.toString())
+            .build();
+        DynamicMultiSelectList recipientsList = DynamicMultiSelectList.builder()
+            .value(List.of(select))
+            .build();
+
+        ManageOrders mo = ManageOrders.builder()
+            .serveToRespondentOptions(YesNoNotApplicable.No)   // non‐personal path
+            .recipientsOptions(recipientsList)
+            .serveOrderDynamicList(recipientsList)
+            .build();
+
+        CaseData cd = CaseData.builder()
+            .id(999L)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicants(List.of(appElem))
+            .respondents(List.of(wrappedResp))
+            .manageOrders(mo)
+            .orderCollection(List.of(element(uuid, OrderDetails.builder().build())))
+            .build();
+
+        when(emailService.getCaseData(any(CaseDetails.class))).thenReturn(cd);
+        when(documentLanguageService.docGenerateLang(any(CaseData.class)))
+            .thenReturn(DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build());
+
+        manageOrderEmailService.sendEmailWhenOrderIsServed("Bearer token", cd, new HashMap<>());
+
+        ArgumentCaptor<SendgridEmailConfig> configCaptor = ArgumentCaptor.forClass(SendgridEmailConfig.class);
+        verify(sendgridService, atLeastOnce())
+            .sendEmailUsingTemplateWithAttachments(any(), any(), configCaptor.capture());
+
+        List<String> capturedEmails = configCaptor.getAllValues().stream()
+            .map(SendgridEmailConfig::getToEmailAddress)
+            .collect(Collectors.toList());
+
+        assertTrue(capturedEmails.contains("respsol@law.com"));
     }
 }
