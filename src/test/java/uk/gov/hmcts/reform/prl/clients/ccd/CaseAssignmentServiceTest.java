@@ -47,7 +47,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
@@ -461,49 +460,6 @@ class CaseAssignmentServiceTest {
                            .barristerRole(barristerRole)
                            .barristerId(userId)
                            .build());
-    }
-
-    static Stream<Arguments> validateAddRequest() {
-        return Stream.of(
-            of(
-                (Supplier<Optional<String>>)() -> null,
-                (Supplier<Optional<String>>)() -> Optional.empty(),
-                AllocatedBarrister.builder().build(),
-                "For case id 1234 invalid arguments are user id: null, barrister role: Optional.empty\n"
-                    + "    and allocated barrister: AllocatedBarrister{barristerFirstName='null', barristerLastName='null'}"
-            ),
-            of(
-                (Supplier<Optional<String>>)() -> Optional.empty(),
-                (Supplier<Optional<String>>)() -> null,
-                AllocatedBarrister.builder().build(),
-                "For case id 1234 invalid arguments are user id: Optional.empty, barrister role: null\n"
-                    + "    and allocated barrister: AllocatedBarrister{barristerFirstName='null', barristerLastName='null'}"
-            ),
-            of(
-                (Supplier<Optional<String>>)() -> Optional.empty(),
-                (Supplier<Optional<String>>)() -> Optional.empty(),
-                null,
-                "For case id 1234 invalid arguments are user id: Optional.empty, barrister role: Optional.empty\n"
-                    + "    and allocated barrister: null"
-            )
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("validateAddRequest")
-    void testValidateAddRequestWhenParametersAreNullOrEmpty(Supplier<Optional<String>> userId,
-                                                           Supplier<Optional<String>> barristerRole,
-                                                           AllocatedBarrister allocatedBarrister,
-                                                           String message) {
-        List<String> errorList = new ArrayList<>();
-        assertThatThrownBy(() -> caseAssignmentService.validateAddRequest(userId.get(),
-                                                 CaseData.builder().id(1234L).build(),
-                                                 barristerRole.get(),
-                                                 allocatedBarrister,
-                                                 errorList
-                                                 ))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining(message);
     }
 
     @Test
