@@ -1208,6 +1208,7 @@ public class ServiceOfApplicationService {
                                  + "as no address available", caseData.getId());
                 }
             }
+            log.info("Error: Either a party is not present or cannot determine legal representation for caseId {} ", caseData.getId());
         });
     }
 
@@ -1225,13 +1226,13 @@ public class ServiceOfApplicationService {
                 List<Document> finalDocs = removeCoverLettersFromThePacks(packSdocs);
                 EmailNotificationDetails emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
                     authorization,
-                    party.getValue().getSolicitorEmail(),
+                    party.getValue().getEmail(),
                     finalDocs,
-                    SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
+                    SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP,
                     dynamicData,
-                    PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR
+                    PrlAppsConstants.SERVED_PARTY_RESPONDENT
                 );
-                if (null != emailNotification) {
+                if (emailNotification != null) {
                     emailNotificationDetails.add(element(emailNotification));
                 }
             } catch (Exception ex) {
