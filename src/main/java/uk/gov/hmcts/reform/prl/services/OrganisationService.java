@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.clients.OrganisationApi;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
+import uk.gov.hmcts.reform.prl.models.OrganisationUser;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -20,6 +21,8 @@ import java.util.Optional;
 import javax.ws.rs.NotFoundException;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace;
+import static uk.gov.hmcts.reform.prl.utils.EmailUtils.maskEmail;
 
 @Service
 @Slf4j
@@ -180,6 +183,24 @@ public class OrganisationService {
         log.trace("Fetching all active organisation details");
         Object orgObject = organisationApi.findOrganisations(userToken, authTokenGenerator.generate(), ACTIVE);
         return (List<Organisations>) orgObject;
+    }
+
+    public Optional<String> findUserByEmail(String email) {
+
+        try {
+            log.info("Finding user by email");
+            OrganisationUser organisationUser = organisationApi.findUserByEmail(
+                systemUserService.getSysUserToken(),
+                authTokenGenerator.generate(),
+                email
+            );
+            return Optional.of(organisationUser.getUserIdentifier());
+        } catch (FeignException.NotFound notFoundException) {
+            log.error("Could not find user by email {}", maskEmail(email));
+            return Optional.empty();
+        } catch (FeignException exception) {
+            throw new RuntimeException(email != null ? maskEmail(getStackTrace(exception), email) : "Email is not valid or null");
+        }
     }
 
 }

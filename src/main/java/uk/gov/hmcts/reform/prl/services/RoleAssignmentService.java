@@ -22,13 +22,16 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.roleassignment.RoleAssignmentDto;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.Attributes;
+import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.QueryAttributes;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RequestedRoles;
+import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentQueryRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -217,6 +220,22 @@ public class RoleAssignmentService {
             authTokenGenerator.generate(),
             null,
             roleAssignmentId
+        );
+    }
+
+    public RoleAssignmentServiceResponse getRoleAssignmentForCase(String caseId) {
+        RoleAssignmentQueryRequest roleAssignmentQueryRequest = RoleAssignmentQueryRequest.builder()
+            .attributes(QueryAttributes.builder()
+                            .caseId(List.of(caseId))
+                            .build())
+            .validAt(LocalDateTime.now())
+            .build();
+
+        return roleAssignmentApi.queryRoleAssignments(
+            systemUserService.getSysUserToken(),
+            authTokenGenerator.generate(),
+            null,
+            roleAssignmentQueryRequest
         );
     }
 }

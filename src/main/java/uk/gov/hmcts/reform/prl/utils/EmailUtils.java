@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
@@ -55,5 +56,28 @@ public class EmailUtils {
         dynamicTemplateData.put("caseReference", String.valueOf(caseData.getId()));
 
         return dynamicTemplateData;
+    }
+
+    public static String maskEmail(String text, String email) {
+        return Optional.ofNullable(text)
+            .map(t -> t.replaceAll(email, maskEmail(email)))
+            .orElse(null);
+    }
+
+    public static String maskEmail(String email) {
+        return Optional.ofNullable(email)
+            .map(e -> {
+                int at = e.indexOf('@');
+                if (at < 1 || at == e.length() - 1 || e.indexOf('@', at + 1) != -1) {
+                    return e; // invalid shape
+                }
+                String user = e.substring(0, at);
+                String domain = e.substring(at + 1);
+                String maskedUser = user.length() <= 2
+                    ? "*".repeat(user.length())
+                    : user.charAt(0) + "*".repeat(user.length() - 2) + user.charAt(user.length() - 1);
+                return maskedUser + "@" + domain;
+            })
+            .orElse("");
     }
 }
