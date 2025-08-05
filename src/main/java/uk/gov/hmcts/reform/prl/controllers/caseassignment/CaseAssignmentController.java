@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.caseassignment;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -30,6 +31,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATED_BARRISTER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SELECTED_PARTY_ID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -55,21 +58,26 @@ public class CaseAssignmentController {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
         List<String> errorList = new ArrayList<>();
-        AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
+        AllocatedBarrister allocatedBarrister = objectMapper.convertValue(
+            caseDetails.getData().get(ALLOCATED_BARRISTER),
+            new TypeReference<>() { }
+        );
 
         Optional<String> userId = organisationService
             .findUserByEmail(allocatedBarrister.getBarristerEmail());
-        Optional<String> barristerRole  = ccdCaseAssignmentService.deriveBarristerRole(caseData);
+        Optional<String> barristerRole  = ccdCaseAssignmentService.deriveBarristerRole(caseData, allocatedBarrister);
         ccdCaseAssignmentService.validateAddRequest(
                 userId,
                 caseData,
                 barristerRole,
+                allocatedBarrister,
                 errorList);
 
         if (errorList.isEmpty()) {
             ccdCaseAssignmentService.addBarrister(caseData,
                                                   userId.get(),
-                                                  barristerRole.get());
+                                                  barristerRole.get(),
+                                                  allocatedBarrister);
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder()
@@ -90,10 +98,12 @@ public class CaseAssignmentController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<String> errorList = new ArrayList<>();
-        ccdCaseAssignmentService.validateRemoveRequest(caseData, errorList);
+        String selectedPartyId = objectMapper.convertValue(caseDetails.getData().get(SELECTED_PARTY_ID),
+                                                           String.class);
+        ccdCaseAssignmentService.validateRemoveRequest(caseData, selectedPartyId, errorList);
 
         if (errorList.isEmpty()) {
-            ccdCaseAssignmentService.removeBarrister(caseData);
+            ccdCaseAssignmentService.removeBarrister(caseData, selectedPartyId);
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder()
