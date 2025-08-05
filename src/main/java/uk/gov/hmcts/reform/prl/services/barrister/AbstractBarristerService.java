@@ -127,13 +127,7 @@ public abstract class AbstractBarristerService {
     }
 
     private boolean isSameOrganisation(PartyDetails person, Optional<Organisations> usersOrganisation) {
-        if (person.getSolicitorOrg() != null) {
-            log.info("Party solicitor organisation ID: {}", person.getSolicitorOrg().getOrganisationID());
-        } else {
-            log.info("Party solicitor organisation ID was NULL");
-        }
-
-        return usersOrganisation.isPresent()
+        return usersOrganisation.isPresent() && person.getSolicitorOrg() != null
             && usersOrganisation.get().getOrganisationIdentifier().equals(person.getSolicitorOrg().getOrganisationID());
     }
 
