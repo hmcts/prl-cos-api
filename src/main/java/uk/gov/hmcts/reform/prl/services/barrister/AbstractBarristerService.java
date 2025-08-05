@@ -64,7 +64,6 @@ public abstract class AbstractBarristerService {
             List<Element<PartyDetails>> relatedPeople = new ArrayList<>();
 
             for (Element<PartyDetails> person : people) {
-                log.info("Party ID for person (c100): {}", person.getValue().getPartyId());
                 if (isSameOrganisation(person.getValue(), usersOrganisation)) {
                     relatedPeople.add(person);
                 }
@@ -127,13 +126,7 @@ public abstract class AbstractBarristerService {
     }
 
     private boolean isSameOrganisation(PartyDetails person, Optional<Organisations> usersOrganisation) {
-        if (person.getSolicitorOrg() != null) {
-            log.info("Party solicitor organisation ID: {}", person.getSolicitorOrg().getOrganisationID());
-        } else {
-            log.info("Party solicitor organisation ID was NULL");
-        }
-
-        return usersOrganisation.isPresent()
+        return usersOrganisation.isPresent() && person.getSolicitorOrg() != null
             && usersOrganisation.get().getOrganisationIdentifier().equals(person.getSolicitorOrg().getOrganisationID());
     }
 
