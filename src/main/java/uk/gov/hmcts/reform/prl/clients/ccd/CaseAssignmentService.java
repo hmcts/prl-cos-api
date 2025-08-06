@@ -324,7 +324,7 @@ public class CaseAssignmentService {
     }
 
     private Optional<String> getC401BarristerRole(CaseData caseData) {
-        String selectedPartyId = caseData.getAllocatedBarrister().getPartyList().getValueCode();
+        String selectedPartyId = caseData.getRemoveBarristerAndPartiesList().getValueCode();
         String barristerRole = getBarristerCaseRole(
             () -> ElementUtils.wrapElements(caseData.getApplicantsFL401()),
             selectedPartyId,
@@ -340,7 +340,7 @@ public class CaseAssignmentService {
     }
 
     private Optional<String> getC100BarristerRole(CaseData caseData) {
-        String selectedPartyId = caseData.getAllocatedBarrister().getPartyList().getValueCode();
+        String selectedPartyId = caseData.getRemoveBarristerAndPartiesList().getValueCode();
 
         String barristerRole = getBarristerCaseRole(
             caseData::getApplicants,
