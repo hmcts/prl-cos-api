@@ -8,3 +8,4 @@
   "schedule": ["after 6pm"],
   "rebaseWhen": "behind-base-branch"
 }
+
