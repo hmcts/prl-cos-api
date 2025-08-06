@@ -1,151 +1,151 @@
-package uk.gov.hmcts.reform.prl.services;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
-import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
-import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.Gender;
-import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
-import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnow;
-import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
-import uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum;
-import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
-import uk.gov.hmcts.reform.prl.mapper.courtnav.FL401ApplicationMapper;
-import uk.gov.hmcts.reform.prl.models.Address;
-import uk.gov.hmcts.reform.prl.models.ContactInformation;
-import uk.gov.hmcts.reform.prl.models.DxAddress;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.Organisation;
-import uk.gov.hmcts.reform.prl.models.Organisations;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.StatementOfTruth;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.supportyouneed.ReasonableAdjustmentsSupport;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
-import uk.gov.hmcts.reform.prl.models.documents.Document;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.BeforeStart;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavCaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
-import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
-import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
-import uk.gov.hmcts.reform.prl.services.caseinitiation.CaseInitiationService;
-import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
-import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
-import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATA_ID;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TESTING_SUPPORT_LD_FLAG_ENABLED;
-import static uk.gov.hmcts.reform.prl.enums.Event.TS_ADMIN_APPLICATION_NOC;
-import static uk.gov.hmcts.reform.prl.enums.Event.TS_CA_URGENT_CASE;
-import static uk.gov.hmcts.reform.prl.enums.Event.TS_SOLICITOR_APPLICATION;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-
-@RunWith(MockitoJUnitRunner.Silent.class)
-public class TestingSupportServiceTest {
-
-    @InjectMocks
-    TestingSupportService testingSupportService;
-
-    @Mock
-    private ObjectMapper objectMapper;
-
-    private final String authorization = "authToken";
-
-    @Mock
-    C100RespondentSolicitorService respondentSolicitorService;
-    @Mock
-    private EventService eventPublisher;
-    @Mock
-    private AllTabServiceImpl tabService;
-    @Mock
-    private UserService userService;
-    @Mock
-    private DocumentGenService dgsService;
-
-    @Mock
-    private EventService eventService;
-
-    @Mock
-    private CaseUtils caseUtils;
-    @Mock
-    private CaseWorkerEmailService caseWorkerEmailService;
-    @Mock
-    private LaunchDarklyClient launchDarklyClient;
-    @Mock
-    private AuthorisationService authorisationService;
-    @Mock
-    private RequestUpdateCallbackService requestUpdateCallbackService;
-    @Mock
-    private CoreCaseDataApi coreCaseDataApi;
-    @Mock
-    private AuthTokenGenerator authTokenGenerator;
-    @Mock
-    private CaseService caseService;
-    @Mock
-    private PartyLevelCaseFlagsService partyLevelCaseFlagsService;
-    @Mock
-    private CaseInitiationService caseInitiationService;
-
-    @Mock
-    private SystemUserService systemUserService;
-
-    @Mock
-    private FL401ApplicationMapper fl401ApplicationMapper;
-    @Mock
-    private CourtNavCaseService courtNavCaseService;
-
-    @Mock
-    private TaskListService taskListService;
-
-    private CourtNavFl401 courtNavFl401;
-
-    Map<String, Object> caseDataMap;
-    CaseDetails caseDetails;
-    CaseData caseData;
-    CallbackRequest callbackRequest;
-    PartyDetails partyDetails;
-    String auth = "authorisation";
-    String s2sAuth = "s2sAuth";
-
+//package uk.gov.hmcts.reform.prl.services;
+//
+//import com.fasterxml.jackson.databind.ObjectMapper;
+//import org.junit.Assert;
+//import org.junit.Before;
+//import org.junit.Test;
+//import org.junit.runner.RunWith;
+//import org.mockito.InjectMocks;
+//import org.mockito.Mock;
+//import org.mockito.Mockito;
+//import org.mockito.junit.MockitoJUnitRunner;
+//import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+//import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+//import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+//import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+//import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+//import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+//import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+//import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+//import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+//import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+//import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+//import uk.gov.hmcts.reform.prl.enums.Gender;
+//import uk.gov.hmcts.reform.prl.enums.State;
+//import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+//import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnow;
+//import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
+//import uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum;
+//import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
+//import uk.gov.hmcts.reform.prl.mapper.courtnav.FL401ApplicationMapper;
+//import uk.gov.hmcts.reform.prl.models.Address;
+//import uk.gov.hmcts.reform.prl.models.ContactInformation;
+//import uk.gov.hmcts.reform.prl.models.DxAddress;
+//import uk.gov.hmcts.reform.prl.models.Element;
+//import uk.gov.hmcts.reform.prl.models.Organisation;
+//import uk.gov.hmcts.reform.prl.models.Organisations;
+//import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+//import uk.gov.hmcts.reform.prl.models.complextypes.StatementOfTruth;
+//import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
+//import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
+//import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
+//import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
+//import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
+//import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
+//import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
+//import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.supportyouneed.ReasonableAdjustmentsSupport;
+//import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
+//import uk.gov.hmcts.reform.prl.models.documents.Document;
+//import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+//import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.BeforeStart;
+//import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavCaseData;
+//import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
+//import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
+//import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
+//import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
+//import uk.gov.hmcts.reform.prl.services.caseinitiation.CaseInitiationService;
+//import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
+//import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
+//import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+//import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+//import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+//
+//import java.util.ArrayList;
+//import java.util.Collections;
+//import java.util.List;
+//import java.util.Map;
+//
+//import static org.junit.Assert.assertEquals;
+//import static org.mockito.ArgumentMatchers.any;
+//import static org.mockito.ArgumentMatchers.anyString;
+//import static org.mockito.Mockito.verify;
+//import static org.mockito.Mockito.when;
+//import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATA_ID;
+//import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
+//import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TESTING_SUPPORT_LD_FLAG_ENABLED;
+//import static uk.gov.hmcts.reform.prl.enums.Event.TS_ADMIN_APPLICATION_NOC;
+//import static uk.gov.hmcts.reform.prl.enums.Event.TS_CA_URGENT_CASE;
+//import static uk.gov.hmcts.reform.prl.enums.Event.TS_SOLICITOR_APPLICATION;
+//import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+//import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+//
+//@RunWith(MockitoJUnitRunner.Silent.class)
+//public class TestingSupportServiceTest {
+//
+//    @InjectMocks
+//    TestingSupportService testingSupportService;
+//
+//    @Mock
+//    private ObjectMapper objectMapper;
+//
+//    private final String authorization = "authToken";
+//
+//    @Mock
+//    C100RespondentSolicitorService respondentSolicitorService;
+//    @Mock
+//    private EventService eventPublisher;
+//    @Mock
+//    private AllTabServiceImpl tabService;
+//    @Mock
+//    private UserService userService;
+//    @Mock
+//    private DocumentGenService dgsService;
+//
+//    @Mock
+//    private EventService eventService;
+//
+//    @Mock
+//    private CaseUtils caseUtils;
+//    @Mock
+//    private CaseWorkerEmailService caseWorkerEmailService;
+//    @Mock
+//    private LaunchDarklyClient launchDarklyClient;
+//    @Mock
+//    private AuthorisationService authorisationService;
+//    @Mock
+//    private RequestUpdateCallbackService requestUpdateCallbackService;
+//    @Mock
+//    private CoreCaseDataApi coreCaseDataApi;
+//    @Mock
+//    private AuthTokenGenerator authTokenGenerator;
+//    @Mock
+//    private CaseService caseService;
+//    @Mock
+//    private PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+//    @Mock
+//    private CaseInitiationService caseInitiationService;
+//
+//    @Mock
+//    private SystemUserService systemUserService;
+//
+//    @Mock
+//    private FL401ApplicationMapper fl401ApplicationMapper;
+//    @Mock
+//    private CourtNavCaseService courtNavCaseService;
+//
+//    @Mock
+//    private TaskListService taskListService;
+//
+//    private CourtNavFl401 courtNavFl401;
+//
+//    Map<String, Object> caseDataMap;
+//    CaseDetails caseDetails;
+//    CaseData caseData;
+//    CallbackRequest callbackRequest;
+//    PartyDetails partyDetails;
+//    String auth = "authorisation";
+//    String s2sAuth = "s2sAuth";
+//
 //    @Before
 //    public void setUp() throws Exception {
 //        List<ContactInformation> contactInformation = new ArrayList<>();
@@ -822,4 +822,4 @@ public class TestingSupportServiceTest {
 //        when(authorisationService.authoriseUser(anyString())).thenReturn(false);
 //        testingSupportService.initiateCaseCreationForCourtNav(auth, callbackRequest);
 //    }
-}
+//}
