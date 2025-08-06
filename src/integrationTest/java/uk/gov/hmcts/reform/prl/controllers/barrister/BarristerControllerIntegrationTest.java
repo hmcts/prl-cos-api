@@ -13,8 +13,15 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.UserService;
+
+import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -22,6 +29,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASEWORKER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.prl.util.TestConstants.AUTHORISATION_HEADER;
 
@@ -41,6 +49,10 @@ public class BarristerControllerIntegrationTest {
 
     @MockBean
     AuthorisationService authorisationService;
+    @MockBean
+    UserService userService;
+    @MockBean
+    OrganisationService organisationService;
 
     private static final String AUTH_TOKEN = "auth-token";
     private static final String SERVICE_TOKEN = "service-token";
@@ -58,6 +70,10 @@ public class BarristerControllerIntegrationTest {
         String jsonRequest = ResourceLoader.loadJson("controller/barristerAboutToStartCallBackRequest.json");
 
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(organisationService.findUserOrganisation(any())).thenReturn(Optional.of(Organisations.builder()
+                                                                                         .organisationIdentifier("orgId")
+                                                                                         .build()));
+        when(userService.getUserDetails(any())).thenReturn(UserDetails.builder().roles(List.of(CASEWORKER)).build());
 
         mockMvc.perform(
                 post(url)

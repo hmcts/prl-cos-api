@@ -19,7 +19,6 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -62,13 +61,13 @@ public class BarristerControllerTest {
         when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
 
         AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder().build();
-        when(barristerAddService.getAllocatedBarrister(any())).thenReturn(allocatedBarrister);
+        when(barristerAddService.getAllocatedBarrister(caseData1, AUTH_TOKEN)).thenReturn(allocatedBarrister);
         AboutToStartOrSubmitCallbackResponse callbackResponse = barristerController
             .handleMidEvent(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
 
         assertEquals(allocatedBarrister, callbackResponse.getData().get("allocatedBarrister"));
 
-        verify(barristerAddService, times(1)).getAllocatedBarrister(any());
+        verify(barristerAddService, times(1)).getAllocatedBarrister(caseData1, AUTH_TOKEN);
     }
 
     @Test

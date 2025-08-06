@@ -36,7 +36,7 @@ public class BarristerControllerFunctionalTest {
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
     @Test
-    public void givenBodyWithCaseFlags_whenAboutToStartCallback() throws Exception {
+    public void testBarristerAddAboutToStartCallback() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
