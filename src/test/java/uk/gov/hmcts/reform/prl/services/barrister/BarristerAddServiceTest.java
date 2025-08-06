@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.barrister;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -8,15 +9,14 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
-import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Barrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.UserService;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +26,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.enums.PartyEnum.applicant;
 import static uk.gov.hmcts.reform.prl.enums.PartyEnum.respondent;
 
@@ -33,14 +34,24 @@ import static uk.gov.hmcts.reform.prl.enums.PartyEnum.respondent;
 class BarristerAddServiceTest extends BarristerTestAbstract {
     @InjectMocks
     BarristerAddService barristerAddService;
-
+    @Mock
+    protected UserService userService;
+    @Mock
+    protected OrganisationService organisationService;
     @Mock
     private UserDetails userDetails;
 
-    @Mock
-    private OrganisationService organisationService;
-
-    private static final String AUTH_TOKEN = "auth-token";
+    @BeforeEach
+    public void setup() {
+        barristerAddService = new BarristerAddService(userService, organisationService);
+        UserDetails userDetails = UserDetails.builder()
+            .id("1")
+            .roles(List.of(COURT_ADMIN))
+            .build();
+        Optional<Organisations> org = Optional.of(Organisations.builder().build());
+        when(userService.getUserDetails(AUTHORISATION)).thenReturn(userDetails);
+        when(organisationService.findUserOrganisation(AUTHORISATION)).thenReturn(org);
+    }
 
     @Test
     void shouldGetAllocatedBarristerC100() {
@@ -55,8 +66,7 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
 
         AllocatedBarrister allocatedBarrister = barristerAddService.getAllocatedBarrister(
             caseData,
-            userDetails,
-            AUTH_TOKEN
+            AUTHORISATION
         );
         DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
 
@@ -84,8 +94,7 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
 
         AllocatedBarrister allocatedBarrister = barristerAddService.getAllocatedBarrister(
             caseData,
-            userDetails,
-            AUTH_TOKEN
+            AUTHORISATION
         );
         DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
 
@@ -108,8 +117,7 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
 
         AllocatedBarrister allocatedBarrister = barristerAddService.getAllocatedBarrister(
             caseData,
-            userDetails,
-            AUTH_TOKEN
+            AUTHORISATION
         );
         DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
 
@@ -132,8 +140,7 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
 
         AllocatedBarrister allocatedBarrister = barristerAddService.getAllocatedBarrister(
             caseData,
-            userDetails,
-            AUTH_TOKEN
+            AUTHORISATION
         );
         DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
 
@@ -141,7 +148,6 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
 
         assertEquals(partiesDynamicList.getValue(), null);
         assertEquals(1, partiesDynamicList.getListItems().size());
-        DynamicListElement appParty1 = partiesDynamicList.getListItems().get(0);
 
         assertPartyToAdd(partiesDynamicList, applicant, PARTY_ID_PREFIX, 0, 1, 1);
     }
@@ -156,8 +162,7 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
 
         AllocatedBarrister allocatedBarrister = barristerAddService.getAllocatedBarrister(
             caseData,
-            userDetails,
-            AUTH_TOKEN
+            AUTHORISATION
         );
         DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
 
@@ -181,8 +186,7 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
 
         AllocatedBarrister allocatedBarrister = barristerAddService.getAllocatedBarrister(
             caseData,
-            userDetails,
-            AUTH_TOKEN
+            AUTHORISATION
         );
         DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
 
@@ -203,22 +207,22 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
 
         assertThrows(
             RuntimeException.class,
-            () -> barristerAddService.getAllocatedBarrister(caseData, userDetails, AUTH_TOKEN)
+            () -> barristerAddService.getAllocatedBarrister(caseData, AUTHORISATION)
         );
     }
 
     @Test
     void shouldGetApplicantForSolicitorC100() {
         setupApplicantsC100();
-        when(userDetails.getRoles()).thenReturn(List.of(Roles.SOLICITOR.getValue()));
         CaseData caseData = CaseData.builder().caseTypeOfApplication("C100").applicants(allApplicants).build();
 
         Optional<Organisations> mockOrg = Optional.of(Organisations.builder().organisationIdentifier("Org1").build());
-        when(organisationService.findUserOrganisation(AUTH_TOKEN)).thenReturn(mockOrg);
+        when(userService.getUserDetails(AUTHORISATION)).thenReturn(userDetails);
+        when(userDetails.getRoles()).thenReturn(List.of(Roles.SOLICITOR.getValue()));
+        when(organisationService.findUserOrganisation(AUTHORISATION)).thenReturn(mockOrg);
         AllocatedBarrister allocatedBarrister = barristerAddService.getAllocatedBarrister(
             caseData,
-            userDetails,
-            AUTH_TOKEN
+            AUTHORISATION
         );
         DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
 
@@ -238,11 +242,10 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
             .applicantsFL401(applicantFL401)
             .build();
         Optional<Organisations> mockOrg = Optional.of(Organisations.builder().organisationIdentifier("Org1").build());
-        when(organisationService.findUserOrganisation(AUTH_TOKEN)).thenReturn(mockOrg);
+        when(organisationService.findUserOrganisation(AUTHORISATION)).thenReturn(mockOrg);
         AllocatedBarrister allocatedBarrister = barristerAddService.getAllocatedBarrister(
             caseData,
-            userDetails,
-            AUTH_TOKEN
+            AUTHORISATION
         );
         DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
 
@@ -262,12 +265,11 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
 
         CaseData caseData = CaseData.builder().caseTypeOfApplication("C100").applicants(allApplicants).build();
         Optional<Organisations> mockOrg = Optional.of(Organisations.builder().organisationIdentifier("Org1").build());
-        when(organisationService.findUserOrganisation(AUTH_TOKEN)).thenReturn(mockOrg);
+        when(organisationService.findUserOrganisation(AUTHORISATION)).thenReturn(mockOrg);
 
         AllocatedBarrister allocatedBarrister = barristerAddService.getAllocatedBarrister(
             caseData,
-            userDetails,
-            AUTH_TOKEN
+            AUTHORISATION
         );
         DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
 
@@ -282,15 +284,15 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
     @Test
     void shouldGetRespondentForSolicitorC100() {
         setupRespondentsC100();
-        when(userDetails.getRoles()).thenReturn(List.of(Roles.SOLICITOR.getValue()));
         CaseData caseData = CaseData.builder().caseTypeOfApplication("C100").respondents(allRespondents).build();
         Optional<Organisations> mockOrg = Optional.of(Organisations.builder().organisationIdentifier("Org5").build());
-        when(organisationService.findUserOrganisation(AUTH_TOKEN)).thenReturn(mockOrg);
+        when(userService.getUserDetails(AUTHORISATION)).thenReturn(userDetails);
+        when(userDetails.getRoles()).thenReturn(List.of(Roles.SOLICITOR.getValue()));
+        when(organisationService.findUserOrganisation(AUTHORISATION)).thenReturn(mockOrg);
 
         AllocatedBarrister allocatedBarrister = barristerAddService.getAllocatedBarrister(
             caseData,
-            userDetails,
-            AUTH_TOKEN
+            AUTHORISATION
         );
         DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
 
@@ -308,12 +310,11 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
         CaseData caseData = CaseData.builder().caseTypeOfApplication("FL401").applicantsFL401(applicantFL401)
             .respondentsFL401(respondentFL401).build();
         Optional<Organisations> mockOrg = Optional.of(Organisations.builder().organisationIdentifier("Org1").build());
-        when(organisationService.findUserOrganisation(AUTH_TOKEN)).thenReturn(mockOrg);
+        when(organisationService.findUserOrganisation(AUTHORISATION)).thenReturn(mockOrg);
 
         AllocatedBarrister allocatedBarrister = barristerAddService.getAllocatedBarrister(
             caseData,
-            userDetails,
-            AUTH_TOKEN
+            AUTHORISATION
         );
         DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
 
@@ -332,12 +333,11 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
         allRespondents.get(1).getValue().getSolicitorOrg().setOrganisationName("Org5");
         CaseData caseData = CaseData.builder().caseTypeOfApplication("C100").respondents(allRespondents).build();
         Optional<Organisations> mockOrg = Optional.of(Organisations.builder().organisationIdentifier("Org5").build());
-        when(organisationService.findUserOrganisation(AUTH_TOKEN)).thenReturn(mockOrg);
+        when(organisationService.findUserOrganisation(AUTHORISATION)).thenReturn(mockOrg);
 
         AllocatedBarrister allocatedBarrister = barristerAddService.getAllocatedBarrister(
             caseData,
-            userDetails,
-            AUTH_TOKEN
+            AUTHORISATION
         );
         DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
 
@@ -363,36 +363,7 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
         when(userDetails.getRoles()).thenReturn(List.of("court-admin"));
 
         AllocatedBarrister allocatedBarrister = barristerAddService.getAllocatedBarrister(
-            caseData, userDetails, AUTH_TOKEN
-        );
-
-        DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
-
-        assertNotNull(allocatedBarrister.getBarristerOrg());
-
-        assertNull(partiesDynamicList.getValue());
-        assertEquals(4, partiesDynamicList.getListItems().size());
-        assertPartyToAdd(partiesDynamicList, applicant, PARTY_ID_PREFIX, 0, 1, 1);
-        assertPartyToAdd(partiesDynamicList, applicant, PARTY_ID_PREFIX, 1, 2, 2);
-        assertPartyToAdd(partiesDynamicList, respondent, PARTY_ID_PREFIX, 2, 5, 5);
-        assertPartyToAdd(partiesDynamicList, respondent, PARTY_ID_PREFIX, 3, 6, 6);
-    }
-
-    @Test
-    void shouldReturnAllPartiesIfUserRolesAreEmpty() {
-        setupApplicantsC100();
-        setupRespondentsC100();
-
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication("C100")
-            .applicants(allApplicants)
-            .respondents(allRespondents)
-            .build();
-
-        when(userDetails.getRoles()).thenReturn(List.of());
-
-        AllocatedBarrister allocatedBarrister = barristerAddService.getAllocatedBarrister(
-            caseData, userDetails, AUTH_TOKEN
+            caseData, AUTHORISATION
         );
 
         DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
@@ -418,18 +389,19 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
             .respondents(allRespondents)
             .build();
 
+        when(userService.getUserDetails(AUTHORISATION)).thenReturn(userDetails);
         when(userDetails.getRoles()).thenReturn(List.of(Roles.SOLICITOR.getValue()));
-        when(organisationService.findUserOrganisation(AUTH_TOKEN)).thenReturn(Optional.empty());
+        when(organisationService.findUserOrganisation(AUTHORISATION)).thenReturn(Optional.empty());
 
         AllocatedBarrister allocatedBarrister = barristerAddService.getAllocatedBarrister(
-            caseData, userDetails, AUTH_TOKEN
+            caseData, AUTHORISATION
         );
 
         assertEquals(0, allocatedBarrister.getPartyList().getListItems().size());
     }
 
     @Test
-    void shouldReturnNoPartiesIfSolicitorHasWrongOrganisation() {
+    void shouldReturnEmptyIfSolicitorHasDifferentOrganisationToParties() {
         setupApplicantsC100();
         setupRespondentsC100();
 
@@ -439,50 +411,16 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
             .respondents(allRespondents)
             .build();
 
+        when(userService.getUserDetails(AUTHORISATION)).thenReturn(userDetails);
         when(userDetails.getRoles()).thenReturn(List.of(Roles.SOLICITOR.getValue()));
         Optional<Organisations> mockOrg = Optional.of(Organisations.builder().organisationIdentifier("some org").build());
-        when(organisationService.findUserOrganisation(AUTH_TOKEN)).thenReturn(mockOrg);
+        when(organisationService.findUserOrganisation(AUTHORISATION)).thenReturn(mockOrg);
 
         AllocatedBarrister allocatedBarrister = barristerAddService.getAllocatedBarrister(
-            caseData, userDetails, AUTH_TOKEN
+            caseData, AUTHORISATION
         );
 
         assertEquals(0, allocatedBarrister.getPartyList().getListItems().size());
-    }
-
-    @Test
-    void shouldExcludePartiesWithoutSolicitorOrgForSolicitorUser() {
-        setupApplicantsC100();
-
-        PartyDetails original = allApplicants.getFirst().getValue();
-        PartyDetails updated = original.toBuilder().solicitorOrg(null).build();
-
-        allApplicants.set(0, Element.<PartyDetails>builder()
-            .id(original.getPartyId())
-            .value(updated)
-            .build()
-        );
-
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication("C100")
-            .applicants(allApplicants)
-            .build();
-
-        when(userDetails.getRoles()).thenReturn(List.of(Roles.SOLICITOR.getValue()));
-        Optional<Organisations> mockOrg = Optional.of(Organisations.builder().organisationIdentifier("Org2").build());
-        when(organisationService.findUserOrganisation(AUTH_TOKEN)).thenReturn(mockOrg);
-
-        AllocatedBarrister allocatedBarrister = barristerAddService.getAllocatedBarrister(
-            caseData, userDetails, AUTH_TOKEN
-        );
-
-        DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
-
-        assertNotNull(allocatedBarrister.getBarristerOrg());
-
-        assertNull(partiesDynamicList.getValue());
-        assertEquals(1, partiesDynamicList.getListItems().size());
-        assertPartyToAdd(partiesDynamicList, applicant, PARTY_ID_PREFIX, 0, 2, 2);
     }
 
     @Test
@@ -497,12 +435,13 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
             .applicants(allApplicants)
             .build();
 
+        when(userService.getUserDetails(AUTHORISATION)).thenReturn(userDetails);
         when(userDetails.getRoles()).thenReturn(List.of(Roles.SOLICITOR.getValue()));
         Optional<Organisations> mockOrg = Optional.of(Organisations.builder().organisationIdentifier("Org1").build());
-        when(organisationService.findUserOrganisation(AUTH_TOKEN)).thenReturn(mockOrg);
+        when(organisationService.findUserOrganisation(AUTHORISATION)).thenReturn(mockOrg);
 
         AllocatedBarrister allocatedBarrister = barristerAddService.getAllocatedBarrister(
-            caseData, userDetails, AUTH_TOKEN
+            caseData, AUTHORISATION
         );
 
         DynamicList partiesDynamicList = allocatedBarrister.getPartyList();

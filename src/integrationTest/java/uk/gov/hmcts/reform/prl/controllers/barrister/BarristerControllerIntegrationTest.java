@@ -16,8 +16,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+
+import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -25,6 +30,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASEWORKER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.prl.util.TestConstants.AUTHORISATION_HEADER;
 
@@ -44,10 +50,10 @@ public class BarristerControllerIntegrationTest {
 
     @MockBean
     AuthorisationService authorisationService;
-
     @MockBean
-    private UserService userService;
-
+    UserService userService;
+    @MockBean
+    OrganisationService organisationService;
     @Mock
     private UserDetails userDetails;
 
@@ -67,7 +73,10 @@ public class BarristerControllerIntegrationTest {
         String jsonRequest = ResourceLoader.loadJson("controller/barristerAboutToStartCallBackRequest.json");
 
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(userService.getUserDetails(AUTH_TOKEN)).thenReturn(userDetails);
+        when(organisationService.findUserOrganisation(any())).thenReturn(Optional.of(Organisations.builder()
+                                                                                         .organisationIdentifier("orgId")
+                                                                                         .build()));
+        when(userService.getUserDetails(AUTH_TOKEN)).thenReturn(UserDetails.builder().roles(List.of(CASEWORKER)).build());
 
         mockMvc.perform(
                 post(url)

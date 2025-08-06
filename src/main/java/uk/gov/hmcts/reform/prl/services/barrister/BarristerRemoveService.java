@@ -2,12 +2,12 @@ package uk.gov.hmcts.reform.prl.services.barrister;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.UserService;
 
 import static uk.gov.hmcts.reform.prl.enums.PartyEnum.applicant;
 import static uk.gov.hmcts.reform.prl.enums.PartyEnum.respondent;
@@ -15,23 +15,24 @@ import static uk.gov.hmcts.reform.prl.enums.PartyEnum.respondent;
 @Slf4j
 @Service
 public class BarristerRemoveService extends  AbstractBarristerService {
-    protected BarristerRemoveService(OrganisationService organisationService) {
-        super(organisationService);
+
+    public BarristerRemoveService(UserService userService, OrganisationService organisationService) {
+        super(userService, organisationService);
     }
 
-    public DynamicList getBarristerListToRemove(CaseData caseData, UserDetails userDetails, String authorisation) {
-        return getSolicitorPartyDynamicList(caseData, userDetails, authorisation);
+    public DynamicList getBarristerListToRemove(CaseData caseData, String authorisation) {
+        return getPartiesToList(caseData, authorisation);
     }
 
     @Override
-    protected boolean isPartyApplicable(boolean isApplicant, PartyDetails partyDetails) {
+    protected boolean isPartyApplicableForFiltering(boolean applicantOrRespondent, BarristerFilter barristerFilter, PartyDetails partyDetails) {
         return hasBarrister(partyDetails) && partyDetails.getBarrister().getBarristerId() != null;
     }
 
     @Override
-    protected String getLabelForAction(boolean isApplicant, PartyDetails partyDetails) {
+    protected String getLabelForAction(boolean applicantOrRespondent, BarristerFilter barristerFilter, PartyDetails partyDetails) {
         return String.format("%s (%s), %s, %s", partyDetails.getLabelForDynamicList(),
-                             isApplicant ? applicant.getDisplayedValue() : respondent.getDisplayedValue(),
+                             applicantOrRespondent ? applicant.getDisplayedValue() : respondent.getDisplayedValue(),
                              partyDetails.getRepresentativeFullName(),
                              partyDetails.getBarrister().getBarristerFullName()
         );

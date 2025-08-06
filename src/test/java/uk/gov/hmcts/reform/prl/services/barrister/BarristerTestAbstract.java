@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class BarristerTestAbstract {
+
     protected List<Element<PartyDetails>> allApplicants = new ArrayList<>();
     protected List<Element<PartyDetails>> allRespondents = new ArrayList<>();
     protected PartyDetails applicantFL401;
@@ -20,6 +21,7 @@ public class BarristerTestAbstract {
     protected static final String SOL_PARTY_ID_PREFIX = "c0651c7d-0db9-47aa-9baa-933013f482e";
     protected static final String BARRISTER_PARTY_ID_PREFIX = "c0651c7d-0db9-47aa-9bbb-933013f482e";
     protected static final String BARRISTER_ORG_ID_PREFIX = "d0651c7d-0db9-47aa-9bbb-933013f482e";
+    protected static String AUTHORISATION = "auth";
 
     protected void setupApplicantsC100() {
         allApplicants.add(buildPartyDetailsElement(1, true, true, false));

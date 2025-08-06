@@ -9,7 +9,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -21,8 +20,6 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,15 +33,11 @@ public class BarristerControllerTest {
     private BarristerAddService barristerAddService;
     @Mock
     private AuthorisationService authorisationService;
+    @Mock
+    private UserService userService;
 
     @Mock
     private ObjectMapper objectMapper;
-
-    @Mock
-    private UserDetails userDetails;
-
-    @Mock
-    private UserService userService;
 
     private static final String AUTH_TOKEN = "auth-token";
     private static final String SERVICE_TOKEN = "service-token";
@@ -69,16 +62,15 @@ public class BarristerControllerTest {
 
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
         when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
-        when(userService.getUserDetails(AUTH_TOKEN)).thenReturn(userDetails);
 
         AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder().build();
-        when(barristerAddService.getAllocatedBarrister(any(), eq(userDetails), any())).thenReturn(allocatedBarrister);
+        when(barristerAddService.getAllocatedBarrister(caseData1, AUTH_TOKEN)).thenReturn(allocatedBarrister);
         AboutToStartOrSubmitCallbackResponse callbackResponse = barristerController
             .handleMidEvent(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
 
         assertEquals(allocatedBarrister, callbackResponse.getData().get("allocatedBarrister"));
 
-        verify(barristerAddService, times(1)).getAllocatedBarrister(any(), eq(userDetails), any());
+        verify(barristerAddService, times(1)).getAllocatedBarrister(caseData1, AUTH_TOKEN);
     }
 
     @Test
