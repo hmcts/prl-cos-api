@@ -399,7 +399,7 @@ public class Fm5ReminderServiceTest {
     }
 
     @Test
-    public void testSendFm5ReminderNotificationsWithEmptyHearingList(){
+    public void testSendFm5ReminderNotificationsWithEmptyHearingList() {
         List<Hearings> hearings = new ArrayList<>();
         hearings.add(
             Hearings.hearingsWith()
