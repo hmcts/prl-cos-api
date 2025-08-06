@@ -254,7 +254,7 @@ public class FL401SubmitApplicationServiceTest {
                              .build())
             .build();
 
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
+        when(documentGenService.createUpdatedCaseDataWithDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
             fl401DocsMap);
 
         List<DynamicListElement> workAllocationEnabledCourtList = List.of(DynamicListElement.builder()
@@ -322,7 +322,7 @@ public class FL401SubmitApplicationServiceTest {
                              .build())
             .build();
 
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
+        when(documentGenService.createUpdatedCaseDataWithDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
             fl401DocsMap);
 
         Map<String, Object> response = fl401SubmitApplicationService
@@ -408,7 +408,7 @@ public class FL401SubmitApplicationServiceTest {
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
-        when(documentGenService.generateDocuments(Mockito.anyString(), any(CaseData.class)))
+        when(documentGenService.createUpdatedCaseDataWithDocuments(Mockito.anyString(), any(CaseData.class)))
             .thenReturn(stringObjectMap);
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -437,7 +437,7 @@ public class FL401SubmitApplicationServiceTest {
         fl401SubmitApplicationService
             .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest, caseData);
 
-        verify(documentGenService, times(1)).generateDocuments(
+        verify(documentGenService, times(1)).createUpdatedCaseDataWithDocuments(
             Mockito.anyString(),
             any(CaseData.class)
         );
@@ -503,7 +503,7 @@ public class FL401SubmitApplicationServiceTest {
             .livingSituation(List.of(LivingSituationEnum.awayFromHome))
             .build();
 
-        when(documentGenService.generateDocuments(Mockito.anyString(), any(CaseData.class)))
+        when(documentGenService.createUpdatedCaseDataWithDocuments(Mockito.anyString(), any(CaseData.class)))
             .thenReturn(stringObjectMap);
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -547,7 +547,7 @@ public class FL401SubmitApplicationServiceTest {
         fl401SubmitApplicationService
             .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest, caseData);
 
-        verify(documentGenService, times(1)).generateDocuments(
+        verify(documentGenService, times(1)).createUpdatedCaseDataWithDocuments(
             Mockito.anyString(),
             any(CaseData.class)
         );
@@ -651,7 +651,7 @@ public class FL401SubmitApplicationServiceTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         fl401SubmitApplicationService
             .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest, caseData);
-        verify(documentGenService, times(1)).generateDocuments(
+        verify(documentGenService, times(1)).createUpdatedCaseDataWithDocuments(
             Mockito.anyString(),
             any(CaseData.class)
         );
@@ -731,7 +731,7 @@ public class FL401SubmitApplicationServiceTest {
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
-        when(documentGenService.generateDocuments(Mockito.anyString(), any(CaseData.class)))
+        when(documentGenService.createUpdatedCaseDataWithDocuments(Mockito.anyString(), any(CaseData.class)))
             .thenReturn(stringObjectMap);
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -749,7 +749,7 @@ public class FL401SubmitApplicationServiceTest {
         fl401SubmitApplicationService
             .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest, caseData);
 
-        verify(documentGenService, times(1)).generateDocuments(
+        verify(documentGenService, times(1)).createUpdatedCaseDataWithDocuments(
             Mockito.anyString(),
             any(CaseData.class)
         );
@@ -817,7 +817,7 @@ public class FL401SubmitApplicationServiceTest {
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
-        when(documentGenService.generateDocuments(Mockito.anyString(), any(CaseData.class)))
+        when(documentGenService.createUpdatedCaseDataWithDocuments(Mockito.anyString(), any(CaseData.class)))
             .thenReturn(stringObjectMap);
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -841,7 +841,7 @@ public class FL401SubmitApplicationServiceTest {
         fl401SubmitApplicationService
             .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest, caseData);
 
-        verify(documentGenService, times(1)).generateDocuments(
+        verify(documentGenService, times(1)).createUpdatedCaseDataWithDocuments(
             Mockito.anyString(),
             any(CaseData.class)
         );
@@ -917,7 +917,7 @@ public class FL401SubmitApplicationServiceTest {
         )))
             .thenReturn(court);
 
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
+        when(documentGenService.createUpdatedCaseDataWithDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
             fl401DocsMap);
         Map<String, Object> response = fl401SubmitApplicationService
             .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest, caseData);
@@ -980,7 +980,7 @@ public class FL401SubmitApplicationServiceTest {
             .submitCountyCourtSelection(dynamicList)
             .build();
 
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
+        when(documentGenService.createUpdatedCaseDataWithDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
             fl401DocsMap);
 
 
@@ -1107,7 +1107,7 @@ public class FL401SubmitApplicationServiceTest {
                              .build())
             .build();
 
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
+        when(documentGenService.createUpdatedCaseDataWithDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
             fl401DocsMap);
 
         List<DynamicListElement> workAllocationEnabledCourtList = List.of(DynamicListElement.builder()
