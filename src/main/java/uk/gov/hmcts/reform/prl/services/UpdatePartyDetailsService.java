@@ -77,6 +77,9 @@ import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Represe
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
+import static uk.gov.hmcts.reform.prl.services.ConfidentialDetailsChangeHelper.checkIfAddressConfidentialityHasChanged;
+import static uk.gov.hmcts.reform.prl.services.ConfidentialDetailsChangeHelper.checkIfEmailConfidentialityHasChanged;
+import static uk.gov.hmcts.reform.prl.services.ConfidentialDetailsChangeHelper.checkIfPhoneConfidentialityHasChanged;
 import static uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService.IS_CONFIDENTIAL_DATA_PRESENT;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPartyResponse;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -100,6 +103,7 @@ public class UpdatePartyDetailsService {
     private final DocumentLanguageService documentLanguageService;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     private final ManageOrderService manageOrderService;
+    private final C8ArchiveService c8ArchiveService;
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
@@ -130,7 +134,7 @@ public class UpdatePartyDetailsService {
             if (State.PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(State.valueOf(state))
                 || State.DECISION_OUTCOME.equals(State.valueOf(state))) {
                 try {
-                    generateC8DocumentsForApplicant(updatedCaseData, callbackRequest, authorisation, caseDataParam);
+                    archiveAndGenerateC8DocumentsForApplicant(updatedCaseData, callbackRequest, authorisation, caseDataParam);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -321,27 +325,6 @@ public class UpdatePartyDetailsService {
 
     private static boolean indexExists(final List<?> list, final int index) {
         return list != null && index >= 0 && index < list.size();
-    }
-
-    private static boolean checkIfAddressConfidentialityHasChanged(PartyDetails partyDetails, PartyDetails partyDetailsBefore) {
-        return isNotEmpty(partyDetails.getIsAddressConfidential())
-            && isNotEmpty(partyDetailsBefore.getIsAddressConfidential())
-            && !partyDetailsBefore.getIsAddressConfidential()
-            .equals(partyDetails.getIsAddressConfidential());
-    }
-
-    private static boolean checkIfEmailConfidentialityHasChanged(PartyDetails partyDetails, PartyDetails partyDetailsBefore) {
-        return isNotEmpty(partyDetails.getIsEmailAddressConfidential())
-            && isNotEmpty(partyDetailsBefore.getIsEmailAddressConfidential())
-            && !partyDetailsBefore.getIsEmailAddressConfidential()
-            .equals(partyDetails.getIsEmailAddressConfidential());
-    }
-
-    private static boolean checkIfPhoneConfidentialityHasChanged(PartyDetails partyDetails, PartyDetails partyDetailsBefore) {
-        return isNotEmpty(partyDetails.getIsPhoneNumberConfidential())
-            && isNotEmpty(partyDetailsBefore.getIsPhoneNumberConfidential())
-            && !partyDetailsBefore.getIsPhoneNumberConfidential()
-            .equals(partyDetails.getIsPhoneNumberConfidential());
     }
 
     private static void setC100ApplicantPartyName(Optional<List<Element<PartyDetails>>> applicantsWrapped, Map<String, Object> updatedCaseData) {
@@ -577,8 +560,10 @@ public class UpdatePartyDetailsService {
         }
     }
 
-    public void generateC8DocumentsForApplicant(Map<String, Object> caseDataUpdated, CallbackRequest callbackRequest,
+    public void archiveAndGenerateC8DocumentsForApplicant(Map<String, Object> caseDataUpdated, CallbackRequest callbackRequest,
                                                  String authorisation, CaseData caseData) throws Exception {
+        log.info("Archiving Applicant C8 document for case: {}", callbackRequest.getCaseDetails().getId().toString());
+        c8ArchiveService.archiveC8DocumentIfConfidentialChanged(callbackRequest,caseData,caseDataUpdated);
         log.info("Regenerating C8 documents for applicant in case: {}", callbackRequest.getCaseDetails().getId().toString());
 
         caseDataUpdated.putAll(documentGenService.createUpdatedCaseDataWithDocuments(authorisation, caseData));
