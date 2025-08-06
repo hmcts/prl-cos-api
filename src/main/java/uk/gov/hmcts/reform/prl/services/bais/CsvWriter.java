@@ -29,8 +29,8 @@ public class CsvWriter {
         COURT_ID("Court Code", "CourtId"),
         ORDER_NAME("Order Name", "caseTypeOfApplication"),
         COURT_DATE("Court Date DD/MM/YYYY", "dateOrderMade"),
+        ORDER_EXPIRY_DATE("Order Expiry Date", "orderExpiryDate"), // Assuming this is a date field
         RESPONDENT_SURNAME("Respondent Surname", "Respondent.Surname"),
-        // Order Expiry Date
         RESPONDENT_FORENAMES("Respondent Forename(s)", "Respondent.FirstName"),
         RESPONDENT_DOB("Respondent DOB", "Respondent.DateOfBirth"),
         RESPONDENT_ADDRESS1("Respondent 1st Line of Address", "Respondent.Address1"),
@@ -44,9 +44,9 @@ public class CsvWriter {
         APPLICANT_POSTCODE("Applicant Postcode", "Applicant.Postcode"),
         APPLICANT_PHONE("Applicant Phone", "Applicant.Phone"),
         APPLICANT_EMAIL("Applicant Email", "Applicant.Email"),
-        APPLICANT_ADDRESS_CONFIDENTIAL("Is Applicant Address Confidential,", "Applicant.isAddressConfidential"),
-        APPLICANT_EMAIL_CONFIDENTIAL("Is Applicant Email Confidential,", "Applicant.isEmailAddressConfidential"),
-        APPLICANT_PHONE_CONFIDENTIAL("Is Applicant Phone Confidential,", "Applicant.isPhoneNumberConfidential"),
+        APPLICANT_ADDRESS_CONFIDENTIAL("Is Applicant Address Confidential", "Applicant.isAddressConfidential"),
+        APPLICANT_EMAIL_CONFIDENTIAL("Is Applicant Email Confidential", "Applicant.isEmailAddressConfidential"),
+        APPLICANT_PHONE_CONFIDENTIAL("Is Applicant Phone Confidential", "Applicant.isPhoneNumberConfidential"),
         PDF_IDENTIFIER("Order File Name", "PdfIdentifier");
 
         private final String header;
