@@ -357,6 +357,25 @@ class CaseAssignmentServiceTest {
             .hasValue(barristerRole);
     }
 
+    @Test
+    void testDeriveBarristerRoleThrowErrorWhenCaseTypeIsInvalid() {
+        CaseData caseData = c100CaseData.toBuilder()
+            .caseTypeOfApplication("invalid")
+            .build();
+        AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder()
+            .partyList(DynamicList.builder()
+                           .value(DynamicListElement.builder()
+                                      .code(UUID.randomUUID().toString())
+                                      .build())
+                           .build())
+            .build();
+        assertThatThrownBy(() -> caseAssignmentService.deriveBarristerRole(Collections.EMPTY_MAP,
+                                                                           caseData,
+                                                                           allocatedBarrister))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Invalid case type");
+    }
+
     static Stream<Arguments> parameterC100Parties() {
         return Stream.of(
             of("applicant3",

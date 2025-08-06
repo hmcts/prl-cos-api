@@ -248,7 +248,9 @@ public class CaseAssignmentService {
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             return getC401Party(caseData, selectedPartyId);
         }
-        throw new IllegalArgumentException("Invalid case type");
+        throw new  IllegalArgumentException(String.join(":",
+                                                        "Invalid case type",
+                                                        String.valueOf(caseData.getId())));
     }
 
     private PartyDetails getC401Party(CaseData caseData, String selectedPartyId) {
@@ -332,7 +334,9 @@ public class CaseAssignmentService {
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             return getC401BarristerRole(caseData, selectedPartyId);
         }
-        return Optional.empty();
+        throw new  IllegalArgumentException(String.join(":",
+                                                   "Invalid case type",
+                                                   String.valueOf(caseData.getId())));
     }
 
     private Optional<String> getC401BarristerRole(CaseData caseData,
@@ -381,7 +385,11 @@ public class CaseAssignmentService {
                     );
                     return partyKey.equals(nameKey);
                 } catch (JsonProcessingException e) {
-                    throw new IllegalArgumentException(e);
+                    throw new IllegalArgumentException(String.join(
+                        ":", "Error processing role for case data",
+                        String.valueOf(caseData.getId()), " and selected party id ",
+                        selectedPartyId)
+                    );
                 }
             })
             .findFirst()
@@ -419,11 +427,7 @@ public class CaseAssignmentService {
                                                       String userId,
                                                       AllocatedBarrister allocatedBarrister) {
         PartyDetails c100Party = getC100Party(caseData, allocatedBarrister.getPartyList().getValueCode());
-        if (c100Party != null) {
-            updateBarrister(barristerRole, c100Party, allocatedBarrister, userId);
-        } else {
-            partyNotFound(caseData, allocatedBarrister);
-        }
+        updateBarrister(barristerRole, c100Party, allocatedBarrister, userId);
     }
 
     private void updatedFl401PartyWithBarristerDetails(String barristerRole,
@@ -431,17 +435,6 @@ public class CaseAssignmentService {
                                                                    String userId,
                                                                    AllocatedBarrister allocatedBarrister) {
         PartyDetails c401Party = getC401Party(caseData, allocatedBarrister.getPartyList().getValueCode());
-        if (c401Party != null) {
-            updateBarrister(barristerRole, c401Party, allocatedBarrister, userId);
-        } else {
-            partyNotFound(caseData, allocatedBarrister);
-        }
-    }
-
-    private static void partyNotFound(CaseData caseData, AllocatedBarrister allocatedBarrister) {
-        log.error("On case {}, party not found {}",
-                  caseData.getId(),
-                  allocatedBarrister.getPartyList().getValueCode());
-        throw new IllegalArgumentException("Could not find party to update");
+        updateBarrister(barristerRole, c401Party, allocatedBarrister, userId);
     }
 }
