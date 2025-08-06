@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.services.bais;
+package uk.gov.hmcts.reform.prl.services.acro;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -29,24 +29,24 @@ public class CsvWriter {
         COURT_ID("Court Code", "CourtId"),
         ORDER_NAME("Order Name", "caseTypeOfApplication"),
         COURT_DATE("Court Date DD/MM/YYYY", "dateOrderMade"),
-        ORDER_EXPIRY_DATE("Order Expiry Date", "orderExpiryDate"), // Assuming this is a date field
-        RESPONDENT_SURNAME("Respondent Surname", "Respondent.Surname"),
-        RESPONDENT_FORENAMES("Respondent Forename(s)", "Respondent.FirstName"),
-        RESPONDENT_DOB("Respondent DOB", "Respondent.DateOfBirth"),
-        RESPONDENT_ADDRESS1("Respondent 1st Line of Address", "Respondent.Address1"),
-        RESPONDENT_ADDRESS2("Respondent 2nd Line of Address", "Respondent.Address2"),
-        RESPONDENT_POSTCODE("Respondent Postcode", "Respondent.Postcode"),
-        APPLICANT_SURNAME("Applicant Surname", "Applicant.Surname"),
-        APPLICANT_FORENAMES("Applicant Forename(s)", "Applicant.FirstName"),
-        APPLICANT_DOB("Applicant DOB", "Applicant.DateOfBirth"),
-        APPLICANT_ADDRESS1("Applicant First Line of Address", "Applicant.Address1"),
-        APPLICANT_ADDRESS2("Applicant Second Line of Address", "Applicant.Address2"),
-        APPLICANT_POSTCODE("Applicant Postcode", "Applicant.Postcode"),
-        APPLICANT_PHONE("Applicant Phone", "Applicant.Phone"),
-        APPLICANT_EMAIL("Applicant Email", "Applicant.Email"),
-        APPLICANT_ADDRESS_CONFIDENTIAL("Is Applicant Address Confidential", "Applicant.isAddressConfidential"),
-        APPLICANT_EMAIL_CONFIDENTIAL("Is Applicant Email Confidential", "Applicant.isEmailAddressConfidential"),
-        APPLICANT_PHONE_CONFIDENTIAL("Is Applicant Phone Confidential", "Applicant.isPhoneNumberConfidential"),
+        ORDER_EXPIRY_DATE("Order Expiry Date", "finalCaseClosedDate"), // Assuming this is a date field
+        RESPONDENT_SURNAME("Respondent Surname", "respondents.lastName"),
+        RESPONDENT_FORENAMES("Respondent Forename(s)", "respondents.firstName"),
+        RESPONDENT_DOB("Respondent DOB", "respondents.dateOfBirth"),
+        RESPONDENT_ADDRESS1("Respondent 1st Line of Address", "respondents.address.addressLine1"),
+        RESPONDENT_ADDRESS2("Respondent 2nd Line of Address", "respondents.address.addressLine2"),
+        RESPONDENT_POSTCODE("Respondent Postcode", "respondents.address.postCode"),
+        APPLICANT_SURNAME("Applicant Surname", "applicants.lastName"),
+        APPLICANT_FORENAMES("Applicant Forename(s)", "applicants .firstName"),
+        APPLICANT_DOB("Applicant DOB", "applicants.dateOfBirth"),
+        APPLICANT_ADDRESS1("Applicant First Line of Address", "applicants.address.addressLine1"),
+        APPLICANT_ADDRESS2("Applicant Second Line of Address", "Applicants.address.addressLine2"),
+        APPLICANT_POSTCODE("Applicant Postcode", "applicants.address.postCode"),
+        APPLICANT_PHONE("Applicant Phone", "applicants.phoneNumber"),
+        APPLICANT_EMAIL("Applicant Email", "applicants.email"),
+        APPLICANT_ADDRESS_CONFIDENTIAL("Is Applicant Address Confidential", "applicants.isAddressConfidential"),
+        APPLICANT_EMAIL_CONFIDENTIAL("Is Applicant Email Confidential", "applicants.isEmailAddressConfidential"),
+        APPLICANT_PHONE_CONFIDENTIAL("Is Applicant Phone Confidential", "applicants.isPhoneNumberConfidential"),
         PDF_IDENTIFIER("Order File Name", "PdfIdentifier");
 
         private final String header;

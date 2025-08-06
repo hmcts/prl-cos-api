@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.services.bais;
+package uk.gov.hmcts.reform.prl.services.acro;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("CSV Writer Tests")
@@ -66,7 +67,7 @@ class CsvWriterTest {
             .courtId("Manchester")
             .caseTypeOfApplication("FL401")
             .dateOrderMade(LocalDate.now())
-            //.orderExpiryDate(LocalDate.now().plusYears(1))
+            .finalCaseClosedDate("02-10-2026") //orderExpiryDate(LocalDate.now().plusYears(1))
             .respondents(List.of(wrappedRespondent))
             .applicants(List.of(wrappedApplicant))
             .build();
@@ -249,5 +250,25 @@ class CsvWriterTest {
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             return reader.readLine();
         }
+    }
+
+    @Test
+    @DisplayName("Should create a valid CSV file with saved output")
+    void shouldCreateValidCsvFile() throws Exception {
+        CaseData caseData = createCaseData();
+        File csvFile = CsvWriter.writeCcdOrderDataToCsv(caseData);
+
+        // Quick save for colleague review
+        File savedCsv = new File("test-output.csv");
+        Files.copy(csvFile.toPath(), savedCsv.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+
+        System.out.println("CSV saved to: " + savedCsv.getAbsolutePath());
+        System.out.println("\nCSV Content:");
+        Files.lines(savedCsv.toPath()).forEach(System.out::println);
+
+        // Your existing assertions
+        assertNotNull(csvFile);
+        assertTrue(csvFile.exists());
+        assertTrue(csvFile.getName().endsWith(".csv"));
     }
 }
