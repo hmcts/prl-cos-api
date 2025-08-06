@@ -226,6 +226,10 @@ public class PrlAppsConstants {
     public static final String OTHER = "Other";
     public static final String ENGDOCGEN = "isEngDocGen";
 
+    public static final String C8_ARCHIVED_DOCUMENTS = "c8ArchivedDocuments";
+    public static final String C8_ARCHIVED_DOCUMENT_NAME = "C8ArchivedDocument.pdf";
+    public static final String C8_ARCHIVED_WELSH_DOCUMENT_NAME = "C8ArchivedDocumentWelsh.pdf";
+
     public static final String SERVICE_ID = "ABA5";
     public static final String FAMILY_COURT_TYPE_ID = "18";
     public static final String[] HEARING_PAGE_NEEDED_ORDER_IDS = {"noticeOfProceedings","childArrangementsSpecificProhibitedOrder",
@@ -685,6 +689,7 @@ public class PrlAppsConstants {
     public static final String DIO_URGENT_HEARING_DETAILS = "dioUrgentHearingDetails";
     public static final String DIO_WITHOUT_NOTICE_HEARING_DETAILS = "dioWithoutNoticeHearingDetails";
     public static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
+    public static final String CASE_ACCESS_CATEGORY = "CaseAccessCategory";
     public static final String DA_ORDER_FOR_CA_CASE = "daOrderForCaCase";
     public static final String CHILD_AND_CAFCASS_OFFICER_DETAILS = "childAndCafcassOfficers";
     public static final String CHILD_NAME = "Child name: ";
