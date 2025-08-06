@@ -384,13 +384,38 @@ public class Fm5ReminderServiceTest {
     }
 
     @Test
-    public void testSendFm5ReminderNotificationsWithEmptyList() {
+    public void testSendFm5ReminderNotificationsWithNullSearchResult() {
         SearchResult searchResult = SearchResult.builder()
             .total(0)
             .build();
         when(coreCaseDataApi.searchCases(authToken, s2sAuthToken, CASE_TYPE, null)).thenReturn(searchResult);
         when(objectMapper.convertValue(searchResult, SearchResultResponse.class)).thenReturn(null);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        fm5ReminderService.sendFm5ReminderNotifications(null);
+
+        //verify
+        verifyNoInteractions(fm5NotificationService);
+    }
+
+    @Test
+    public void testSendFm5ReminderNotificationsWithEmptyHearingList() {
+        List<Hearings> hearings = new ArrayList<>();
+        hearings.add(
+            Hearings.hearingsWith()
+                .caseRef("123")
+                .caseHearings(new ArrayList<>())
+                .build()
+        );
+        when(hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(any(), any(), anyList())).thenReturn(hearings);
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(s2sAuthToken,
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        caseData.toMap(objectMapper),
+                                                                                                        caseData, null);
+        when(allTabService.getStartUpdateForSpecificEvent(any(), any())).thenReturn(startAllTabsUpdateDataContent);
+        when(allTabService.submitAllTabsUpdate(anyString(), anyString(), any(), any(), any())).thenReturn(CaseDetails.builder().build());
 
         fm5ReminderService.sendFm5ReminderNotifications(null);
 
