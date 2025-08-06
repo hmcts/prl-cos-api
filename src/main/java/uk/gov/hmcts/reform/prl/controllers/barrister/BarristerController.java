@@ -84,7 +84,7 @@ public class BarristerController extends AbstractCallbackController {
 
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-            caseDataUpdated.put(REMOVE_BARRISTER_AND_PARTIES_LIST, barristerRemoveService.getBarristerListToRemove(caseData));
+            caseDataUpdated.put(REMOVE_BARRISTER_AND_PARTIES_LIST, barristerRemoveService.getBarristerListToRemove(caseData, authorisation));
 
             AboutToStartOrSubmitCallbackResponse.AboutToStartOrSubmitCallbackResponseBuilder
                 builder = AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated);
