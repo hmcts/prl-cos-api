@@ -1219,7 +1219,7 @@ public class ServiceOfApplicationService {
             try {
                 log.info("Sending email to respondent for C100 Application for caseId {}", caseData.getId());
                 Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
-                dynamicData.put("name", party.getValue().getRepresentativeFullName());
+                dynamicData.put("name", party.getValue().getFirstName() + " " + party.getValue().getLastName());
                 dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
                 dynamicData.put("respondent", true);
                 populateLanguageMap(caseData, dynamicData);
@@ -1228,7 +1228,7 @@ public class ServiceOfApplicationService {
                     authorization,
                     party.getValue().getEmail(),
                     finalDocs,
-                    SendgridEmailTemplateNames.SERVE_ORDER_APPLICANT_RESPONDENT,
+                    SendgridEmailTemplateNames.SOD_NON_PERSONAL_SERVICE_APPLICANT_RESPONDENT_LIP,
                     dynamicData,
                     PrlAppsConstants.SERVED_PARTY_RESPONDENT
                 );
@@ -1239,9 +1239,6 @@ public class ServiceOfApplicationService {
                 log.error("Error in sending email to respondent for C100 Application for caseId {} with exception {}",
                           caseData.getId(), ex.getMessage());
             }
-        } else {
-            log.info("Unable to send email to respondent for C100 Application for caseId {} because email address is null",
-                     caseData.getId());
         }
     }
 
