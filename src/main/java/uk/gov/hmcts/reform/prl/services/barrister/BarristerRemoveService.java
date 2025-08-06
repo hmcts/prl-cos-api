@@ -31,7 +31,7 @@ public class BarristerRemoveService extends  AbstractBarristerService {
     @Override
     protected String getLabelForAction(boolean isApplicant, PartyDetails partyDetails) {
         return String.format("%s (%s), %s, %s", partyDetails.getLabelForDynamicList(),
-                             isApplicant ? applicant : respondent,
+                             isApplicant ? applicant.getDisplayedValue() : respondent.getDisplayedValue(),
                              partyDetails.getRepresentativeFullName(),
                              partyDetails.getBarrister().getBarristerFullName()
         );

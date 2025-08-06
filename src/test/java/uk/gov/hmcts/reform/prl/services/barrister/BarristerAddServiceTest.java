@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisations;
@@ -25,6 +26,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.enums.PartyEnum.applicant;
+import static uk.gov.hmcts.reform.prl.enums.PartyEnum.respondent;
 
 @ExtendWith(SpringExtension.class)
 class BarristerAddServiceTest extends BarristerTestAbstract {
@@ -62,10 +65,10 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
         assertEquals(partiesDynamicList.getValue(), null);
         assertEquals(4, partiesDynamicList.getListItems().size());
 
-        assertPartyToAdd(partiesDynamicList, true, PARTY_ID_PREFIX, 0, 1);
-        assertPartyToAdd(partiesDynamicList, true, PARTY_ID_PREFIX, 1, 2);
-        assertPartyToAdd(partiesDynamicList, false, PARTY_ID_PREFIX, 2, 5);
-        assertPartyToAdd(partiesDynamicList, false, PARTY_ID_PREFIX, 3, 6);
+        assertPartyToAdd(partiesDynamicList, applicant, PARTY_ID_PREFIX, 0, 1, 1);
+        assertPartyToAdd(partiesDynamicList, applicant, PARTY_ID_PREFIX, 1, 2, 2);
+        assertPartyToAdd(partiesDynamicList, respondent, PARTY_ID_PREFIX, 2, 5, 5);
+        assertPartyToAdd(partiesDynamicList, respondent, PARTY_ID_PREFIX, 3, 6, 6);
     }
 
     @Test
@@ -90,8 +93,8 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
         assertEquals(partiesDynamicList.getValue(), null);
         assertEquals(2, partiesDynamicList.getListItems().size());
 
-        assertPartyToAdd(partiesDynamicList, true, PARTY_ID_PREFIX, 0, 1);
-        assertPartyToAdd(partiesDynamicList, false, PARTY_ID_PREFIX, 1, 1);
+        assertPartyToAdd(partiesDynamicList, applicant, PARTY_ID_PREFIX, 0, 1, 1);
+        assertPartyToAdd(partiesDynamicList, respondent, PARTY_ID_PREFIX, 1, 1, 1);
     }
 
     @Test
@@ -115,7 +118,7 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
         assertEquals(partiesDynamicList.getValue(), null);
         assertEquals(1, partiesDynamicList.getListItems().size());
 
-        assertPartyToAdd(partiesDynamicList, false, PARTY_ID_PREFIX, 0, 1);
+        assertPartyToAdd(partiesDynamicList, respondent, PARTY_ID_PREFIX, 0, 1, 1);
     }
 
     @Test
@@ -140,7 +143,7 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
         assertEquals(1, partiesDynamicList.getListItems().size());
         DynamicListElement appParty1 = partiesDynamicList.getListItems().get(0);
 
-        assertPartyToAdd(partiesDynamicList, true, PARTY_ID_PREFIX, 0, 1);
+        assertPartyToAdd(partiesDynamicList, applicant, PARTY_ID_PREFIX, 0, 1, 1);
     }
 
     @Test
@@ -163,8 +166,8 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
         assertEquals(partiesDynamicList.getValue(), null);
         assertEquals(2, partiesDynamicList.getListItems().size());
 
-        assertPartyToAdd(partiesDynamicList, false, PARTY_ID_PREFIX, 0, 5);
-        assertPartyToAdd(partiesDynamicList, false, PARTY_ID_PREFIX, 1, 6);
+        assertPartyToAdd(partiesDynamicList, respondent, PARTY_ID_PREFIX, 0, 5, 5);
+        assertPartyToAdd(partiesDynamicList, respondent, PARTY_ID_PREFIX, 1, 6, 6);
     }
 
     @Test
@@ -187,8 +190,8 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
 
         assertEquals(partiesDynamicList.getValue(), null);
         assertEquals(2, partiesDynamicList.getListItems().size());
-        assertPartyToAdd(partiesDynamicList, true, PARTY_ID_PREFIX, 0, 1);
-        assertPartyToAdd(partiesDynamicList, true, PARTY_ID_PREFIX, 1, 2);
+        assertPartyToAdd(partiesDynamicList, applicant, PARTY_ID_PREFIX, 0, 1, 1);
+        assertPartyToAdd(partiesDynamicList, applicant, PARTY_ID_PREFIX, 1, 2, 2);
     }
 
     @Test
@@ -222,14 +225,8 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
         assertNotNull(allocatedBarrister.getBarristerOrg());
 
         assertNull(partiesDynamicList.getValue());
-        System.out.println(partiesDynamicList.getListItems());
         assertEquals(1, partiesDynamicList.getListItems().size());
-        DynamicListElement appParty1 = partiesDynamicList.getListItems().getFirst();
-        assertEquals(
-            "AppFN1 AppLN1 (Applicant), AppFN1 AppLN1, Org1",
-            appParty1.getLabel()
-        );
-        assertEquals(PARTY_ID_PREFIX + "1", appParty1.getCode());
+        assertPartyToAdd(partiesDynamicList, applicant, PARTY_ID_PREFIX, 0, 1, 1);
     }
 
     @Test
@@ -253,12 +250,7 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
 
         assertNull(partiesDynamicList.getValue());
         assertEquals(1, partiesDynamicList.getListItems().size());
-        DynamicListElement appParty1 = partiesDynamicList.getListItems().getFirst();
-        assertEquals(
-            "AppFN1 AppLN1 (Applicant), AppFN1 AppLN1, Org1",
-            appParty1.getLabel()
-        );
-        assertEquals(PARTY_ID_PREFIX + "1", appParty1.getCode());
+        assertPartyToAdd(partiesDynamicList, applicant, PARTY_ID_PREFIX, 0, 1, 1);
     }
 
     @Test
@@ -283,19 +275,8 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
 
         assertNull(partiesDynamicList.getValue());
         assertEquals(2, partiesDynamicList.getListItems().size());
-        DynamicListElement appParty1 = partiesDynamicList.getListItems().getFirst();
-        assertEquals(
-            "AppFN1 AppLN1 (Applicant), AppFN1 AppLN1, Org1",
-            appParty1.getLabel()
-        );
-        assertEquals(PARTY_ID_PREFIX + "1", appParty1.getCode());
-
-        DynamicListElement appParty2 = partiesDynamicList.getListItems().get(1);
-        assertEquals(
-            "AppFN2 AppLN2 (Applicant), AppFN2 AppLN2, Org1",
-            appParty2.getLabel()
-        );
-        assertEquals(PARTY_ID_PREFIX + "2", appParty2.getCode());
+        assertPartyToAdd(partiesDynamicList, applicant, PARTY_ID_PREFIX, 0, 1, 1);
+        assertPartyToAdd(partiesDynamicList, applicant, PARTY_ID_PREFIX, 1, 2, 1);
     }
 
     @Test
@@ -317,12 +298,7 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
 
         assertNull(partiesDynamicList.getValue());
         assertEquals(1, partiesDynamicList.getListItems().size());
-        DynamicListElement resParty1 = partiesDynamicList.getListItems().getFirst();
-        assertEquals(
-            "RespFN5 RespLN5 (Respondent), RespFN5 RespLN5, Org5",
-            resParty1.getLabel()
-        );
-        assertEquals(PARTY_ID_PREFIX + "5", resParty1.getCode());
+        assertPartyToAdd(partiesDynamicList, respondent, PARTY_ID_PREFIX, 0, 5, 5);
     }
 
     @Test
@@ -345,12 +321,7 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
 
         assertNull(partiesDynamicList.getValue());
         assertEquals(1, partiesDynamicList.getListItems().size());
-        DynamicListElement resParty1 = partiesDynamicList.getListItems().getFirst();
-        assertEquals(
-            "RespFN1 RespLN1 (Respondent), RespFN1 RespLN1, Org1",
-            resParty1.getLabel()
-        );
-        assertEquals(PARTY_ID_PREFIX + "1", resParty1.getCode());
+        assertPartyToAdd(partiesDynamicList, respondent, PARTY_ID_PREFIX, 0, 1, 1);
     }
 
     @Test
@@ -374,18 +345,8 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
 
         assertNull(partiesDynamicList.getValue());
         assertEquals(2, partiesDynamicList.getListItems().size());
-        DynamicListElement resParty1 = partiesDynamicList.getListItems().getFirst();
-        assertEquals(
-            "RespFN5 RespLN5 (Respondent), RespFN5 RespLN5, Org5",
-            resParty1.getLabel()
-        );
-        assertEquals(PARTY_ID_PREFIX + "5", resParty1.getCode());
-        DynamicListElement resParty2 = partiesDynamicList.getListItems().get(1);
-        assertEquals(
-            "RespFN6 RespLN6 (Respondent), RespFN6 RespLN6, Org5",
-            resParty2.getLabel()
-        );
-        assertEquals(PARTY_ID_PREFIX + "6", resParty2.getCode());
+        assertPartyToAdd(partiesDynamicList, respondent, PARTY_ID_PREFIX, 0, 5, 5);
+        assertPartyToAdd(partiesDynamicList, respondent, PARTY_ID_PREFIX, 1, 6, 5);
     }
 
     @Test
@@ -411,30 +372,10 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
 
         assertNull(partiesDynamicList.getValue());
         assertEquals(4, partiesDynamicList.getListItems().size());
-        DynamicListElement resParty1 = partiesDynamicList.getListItems().getFirst();
-        assertEquals(
-            "AppFN1 AppLN1 (Applicant), AppFN1 AppLN1, Org1",
-            resParty1.getLabel()
-        );
-        assertEquals(PARTY_ID_PREFIX + "1", resParty1.getCode());
-        DynamicListElement resParty2 = partiesDynamicList.getListItems().get(1);
-        assertEquals(
-            "AppFN2 AppLN2 (Applicant), AppFN2 AppLN2, Org2",
-            resParty2.getLabel()
-        );
-        assertEquals(PARTY_ID_PREFIX + "2", resParty2.getCode());
-        DynamicListElement resParty3 = partiesDynamicList.getListItems().get(2);
-        assertEquals(
-            "RespFN5 RespLN5 (Respondent), RespFN5 RespLN5, Org5",
-            resParty3.getLabel()
-        );
-        assertEquals(PARTY_ID_PREFIX + "5", resParty3.getCode());
-        DynamicListElement resParty4 = partiesDynamicList.getListItems().get(3);
-        assertEquals(
-            "RespFN6 RespLN6 (Respondent), RespFN6 RespLN6, Org6",
-            resParty4.getLabel()
-        );
-        assertEquals(PARTY_ID_PREFIX + "6", resParty4.getCode());
+        assertPartyToAdd(partiesDynamicList, applicant, PARTY_ID_PREFIX, 0, 1, 1);
+        assertPartyToAdd(partiesDynamicList, applicant, PARTY_ID_PREFIX, 1, 2, 2);
+        assertPartyToAdd(partiesDynamicList, respondent, PARTY_ID_PREFIX, 2, 5, 5);
+        assertPartyToAdd(partiesDynamicList, respondent, PARTY_ID_PREFIX, 3, 6, 6);
     }
 
     @Test
@@ -460,30 +401,10 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
 
         assertNull(partiesDynamicList.getValue());
         assertEquals(4, partiesDynamicList.getListItems().size());
-        DynamicListElement resParty1 = partiesDynamicList.getListItems().getFirst();
-        assertEquals(
-            "AppFN1 AppLN1 (Applicant), AppFN1 AppLN1, Org1",
-            resParty1.getLabel()
-        );
-        assertEquals(PARTY_ID_PREFIX + "1", resParty1.getCode());
-        DynamicListElement resParty2 = partiesDynamicList.getListItems().get(1);
-        assertEquals(
-            "AppFN2 AppLN2 (Applicant), AppFN2 AppLN2, Org2",
-            resParty2.getLabel()
-        );
-        assertEquals(PARTY_ID_PREFIX + "2", resParty2.getCode());
-        DynamicListElement resParty3 = partiesDynamicList.getListItems().get(2);
-        assertEquals(
-            "RespFN5 RespLN5 (Respondent), RespFN5 RespLN5, Org5",
-            resParty3.getLabel()
-        );
-        assertEquals(PARTY_ID_PREFIX + "5", resParty3.getCode());
-        DynamicListElement resParty4 = partiesDynamicList.getListItems().get(3);
-        assertEquals(
-            "RespFN6 RespLN6 (Respondent), RespFN6 RespLN6, Org6",
-            resParty4.getLabel()
-        );
-        assertEquals(PARTY_ID_PREFIX + "6", resParty4.getCode());
+        assertPartyToAdd(partiesDynamicList, applicant, PARTY_ID_PREFIX, 0, 1, 1);
+        assertPartyToAdd(partiesDynamicList, applicant, PARTY_ID_PREFIX, 1, 2, 2);
+        assertPartyToAdd(partiesDynamicList, respondent, PARTY_ID_PREFIX, 2, 5, 5);
+        assertPartyToAdd(partiesDynamicList, respondent, PARTY_ID_PREFIX, 3, 6, 6);
     }
 
     @Test
@@ -561,12 +482,7 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
 
         assertNull(partiesDynamicList.getValue());
         assertEquals(1, partiesDynamicList.getListItems().size());
-        DynamicListElement resParty1 = partiesDynamicList.getListItems().getFirst();
-        assertEquals(
-            "AppFN2 AppLN2 (Applicant), AppFN2 AppLN2, Org2",
-            resParty1.getLabel()
-        );
-        assertEquals(PARTY_ID_PREFIX + "2", resParty1.getCode());
+        assertPartyToAdd(partiesDynamicList, applicant, PARTY_ID_PREFIX, 0, 2, 2);
     }
 
     @Test
@@ -595,21 +511,16 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
 
         assertNull(partiesDynamicList.getValue());
         assertEquals(1, partiesDynamicList.getListItems().size());
-        DynamicListElement resParty1 = partiesDynamicList.getListItems().getFirst();
-        assertEquals(
-            "AppFN2 AppLN2 (Applicant), AppFN2 AppLN2, Org1",
-            resParty1.getLabel()
-        );
-        assertEquals(PARTY_ID_PREFIX + "2", resParty1.getCode());
+        assertPartyToAdd(partiesDynamicList, applicant, PARTY_ID_PREFIX, 0, 2, 1);
     }
 
-    protected void assertPartyToAdd(DynamicList listOfBarristers, boolean appOrResp, String prefix, int itemIndex, int partyIndex) {
-        String appRepPrefix = appOrResp ? "App" : "Resp";
+    protected void assertPartyToAdd(DynamicList listOfBarristers, PartyEnum partyEnum, String prefix, int itemIndex, int partyIndex, int orgIndex) {
+        String appRepPrefix = partyEnum == applicant ? "App" : "Resp";
         DynamicListElement appParty = listOfBarristers.getListItems().get(itemIndex);
         String label = appRepPrefix + "FN" + partyIndex + " " + appRepPrefix + "LN" + partyIndex + " "
-            + (appOrResp ? "(Applicant)" : "(Respondent)") + ", "
+            + (partyEnum == applicant ? "(Applicant)" : "(Respondent)") + ", "
             + appRepPrefix + "FN" + partyIndex + " " + appRepPrefix + "LN" + partyIndex + ", "
-            + "Org" + partyIndex;
+            + "Org" + orgIndex;
         assertEquals(label, appParty.getLabel());
         assertEquals(prefix + partyIndex, appParty.getCode());
     }

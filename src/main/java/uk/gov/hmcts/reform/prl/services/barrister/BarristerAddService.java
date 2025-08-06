@@ -35,7 +35,7 @@ public class BarristerAddService extends AbstractBarristerService {
     protected String getLabelForAction(boolean isApplicant, PartyDetails partyDetails) {
         return String.format("%s %s (%s), %s, %s", partyDetails.getFirstName(),
                                      partyDetails.getLastName(),
-                                     isApplicant ? applicant : respondent,
+                                     isApplicant ? applicant.getDisplayedValue() : respondent.getDisplayedValue(),
                                      partyDetails.getRepresentativeFullName(),
                                      partyDetails.getSolicitorOrg().getOrganisationName()
         );
