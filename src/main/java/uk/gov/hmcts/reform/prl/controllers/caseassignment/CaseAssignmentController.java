@@ -66,7 +66,9 @@ public class CaseAssignmentController {
 
         Optional<String> userId = organisationService
             .findUserByEmail(allocatedBarrister.getBarristerEmail());
-        Optional<String> barristerRole  = ccdCaseAssignmentService.deriveBarristerRole(caseData, allocatedBarrister);
+        Optional<String> barristerRole  = ccdCaseAssignmentService.deriveBarristerRole(caseDetails.getData(),
+                                                                                       caseData,
+                                                                                       allocatedBarrister);
         ccdCaseAssignmentService.validateAddRequest(
                 userId,
                 caseData,
