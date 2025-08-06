@@ -131,13 +131,15 @@ public class TestingSupportService {
                 adminCreateApplication = true;
             }
             CaseDetails dummyCaseDetails = objectMapper.readValue(requestBody, CaseDetails.class);
-            return updateCaseDetails(
+            Map<String, Object> updatedCaseDetails = updateCaseDetails(
                 authorisation,
                 initialCaseDetails,
                 initialCaseData,
                 adminCreateApplication,
                 dummyCaseDetails
             );
+            updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, authorisation);
+            return updatedCaseDetails;
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -374,7 +376,6 @@ public class TestingSupportService {
         if (isAuthorized(authorisation)) {
             try {
                 caseInitiationService.handleCaseInitiation(authorisation, callbackRequest);
-                updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, authorisation);
             } catch (Exception e) {
                 log.error("Access grant failed", e);
             }
