@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -52,6 +53,7 @@ import uk.gov.hmcts.reform.prl.utils.AutomatedHearingUtils;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
+import uk.gov.hmcts.reform.prl.utils.TaskUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -104,6 +106,7 @@ public class ManageOrdersController {
     private final AllTabServiceImpl allTabService;
     private final RoleAssignmentService roleAssignmentService;
     private final HearingService hearingService;
+    private final TaskUtils taskUtils;
 
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
 
@@ -269,7 +272,7 @@ public class ManageOrdersController {
             }
             log.info("Notifications to be sent? - {}", caseData.getManageOrders().getMarkedToServeEmailNotification());
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
-                log.info("Preparing to send notifications to parties");
+                log.info("Preparing to send notifications to parties for case id {}", caseData.getId());
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
 
@@ -503,8 +506,8 @@ public class ManageOrdersController {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            if (caseData.getServeOrderData().getDoYouWantToServeOrder().equals(YesOrNo.Yes)) {
-                caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, YesOrNo.Yes);
+            if (caseData.getServeOrderData().getDoYouWantToServeOrder().equals(Yes)) {
+                caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, Yes);
                 if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
                     caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
                 } else {
@@ -523,28 +526,31 @@ public class ManageOrdersController {
                 caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, No);
             }
 
-            String encodedClientContext = CaseUtils.setTaskCompletion(
-                clientContext,
-                objectMapper,
-                caseData,
-                (data) ->
-                    objectMapper.convertValue(
-                        caseDataUpdated.get(IS_INVOKED_FROM_TASK),
-                        new TypeReference<YesOrNo>() {})
-                        .equals(Yes)
-                    && !manageOrderService.isSaveAsDraft(data)
-                     && ofNullable(data.getManageOrders().getOrdersHearingDetails())
-                        .map(ElementUtils::unwrapElements)
-                        .map(hearingData -> hearingData.getFirst().getHearingDateConfirmOptionEnum())
-                        .filter(hearingDateConfirmOptionEnum ->
-                                    HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.getId()
-                                        .equals(hearingDateConfirmOptionEnum.getId())).isPresent()
-            );
+            ResponseEntity.BodyBuilder responseBuilder =  ResponseEntity.status(HttpStatus.OK);
+            if (objectMapper.convertValue(
+                    caseDataUpdated.get(IS_INVOKED_FROM_TASK),
+                    new TypeReference<YesOrNo>() {
+                    }
+                )
+                .equals(Yes)) {
+                String encodedClientContext = taskUtils.setTaskCompletion(
+                    clientContext,
+                    caseData,
+                    data ->
+                        !manageOrderService.isSaveAsDraft(data)
+                            && ofNullable(data.getManageOrders().getOrdersHearingDetails())
+                            .map(ElementUtils::unwrapElements)
+                            .map(hearingData -> hearingData.getFirst().getHearingDateConfirmOptionEnum())
+                            .filter(hearingDateConfirmOptionEnum ->
+                                        HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.getId()
+                                            .equals(hearingDateConfirmOptionEnum.getId())).isPresent()
+                );
 
-            ResponseEntity.BodyBuilder responseBuilder = ofNullable(encodedClientContext)
-                .map(value -> ResponseEntity.ok()
-                    .header(CLIENT_CONTEXT_HEADER_PARAMETER, value))
-                .orElseGet(ResponseEntity::ok);
+                responseBuilder = ofNullable(encodedClientContext)
+                    .map(value -> ResponseEntity.ok()
+                        .header(CLIENT_CONTEXT_HEADER_PARAMETER, value))
+                    .orElseGet(ResponseEntity::ok);
+            }
 
             return responseBuilder.body(AboutToStartOrSubmitCallbackResponse.builder()
                                             .data(caseDataUpdated)
@@ -569,7 +575,7 @@ public class ManageOrdersController {
             }
             Map<String, Object> caseDataUpdated = new HashMap<>();
             if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
-                caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, YesOrNo.Yes);
+                caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, Yes);
             }
             //PRL-4212 - populate fields only when it's needed
             caseDataUpdated.putAll(manageOrderService.populateHeader(caseData));
@@ -613,28 +619,30 @@ public class ManageOrdersController {
             );
 
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            String encodedClientContext = CaseUtils.setTaskCompletion(
-                clientContext,
-                objectMapper,
-                caseData,
-                (data) ->
-                    objectMapper.convertValue(
-                        caseDataUpdated.get(IS_INVOKED_FROM_TASK),
-                        new TypeReference<YesOrNo>() {})
-                        .equals(Yes)
-                    && ofNullable(data.getManageOrders().getOrdersHearingDetails())
-                        .map(ElementUtils::unwrapElements)
-                        .map(hearingData -> hearingData.getFirst().getHearingDateConfirmOptionEnum())
-                        .filter(hearingDateConfirmOptionEnum ->
-                                    HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.getId()
-                                        .equals(hearingDateConfirmOptionEnum.getId())).isPresent()
-            );
+            ResponseEntity.BodyBuilder responseBuilder = ResponseEntity.status(HttpStatus.OK);
+            if (objectMapper.convertValue(
+                    caseDataUpdated.get(IS_INVOKED_FROM_TASK),
+                    new TypeReference<YesOrNo>() {
+                    }
+                )
+                .equals(Yes)) {
+                String encodedClientContext = taskUtils.setTaskCompletion(
+                    clientContext,
+                    caseData,
+                    data ->
+                        ofNullable(data.getManageOrders().getOrdersHearingDetails())
+                            .map(ElementUtils::unwrapElements)
+                            .map(hearingData -> hearingData.getFirst().getHearingDateConfirmOptionEnum())
+                            .filter(hearingDateConfirmOptionEnum ->
+                                        HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.getId()
+                                            .equals(hearingDateConfirmOptionEnum.getId())).isPresent()
+                );
 
-            ResponseEntity.BodyBuilder responseBuilder = ofNullable(encodedClientContext)
-                .map(value -> ResponseEntity.ok()
-                    .header(CLIENT_CONTEXT_HEADER_PARAMETER, value))
-                .orElseGet(ResponseEntity::ok);
-
+                responseBuilder = ofNullable(encodedClientContext)
+                    .map(value -> ResponseEntity.ok()
+                        .header(CLIENT_CONTEXT_HEADER_PARAMETER, value))
+                    .orElseGet(ResponseEntity::ok);
+            }
             return responseBuilder.body(AboutToStartOrSubmitCallbackResponse.builder()
                                             .data(caseDataUpdated)
                                             .build());

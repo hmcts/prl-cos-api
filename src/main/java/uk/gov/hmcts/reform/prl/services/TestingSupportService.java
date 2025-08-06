@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +14,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.courtnav.mappers.FL401ApplicationMapper;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
+import uk.gov.hmcts.reform.prl.mapper.courtnav.FL401ApplicationMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.StatementOfTruth;
@@ -52,6 +51,7 @@ import java.util.Optional;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_OR_RESPONDENT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ACCESS_CATEGORY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATA_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NAME_HMCTS_INTERNAL;
@@ -227,6 +227,7 @@ public class TestingSupportService {
             caseDataUpdated.put(CASE_DATA_ID, initialCaseDetails.getId());
             caseDataUpdated.put(APPLICANT_CASE_NAME, initialCaseData.getApplicantCaseName());
             caseDataUpdated.put(CASE_NAME_HMCTS_INTERNAL, initialCaseData.getApplicantCaseName());
+            caseDataUpdated.put(CASE_ACCESS_CATEGORY,initialCaseData.getCaseTypeOfApplication());
             if (FL401_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
                 caseDataUpdated.put(APPLICANT_OR_RESPONDENT_CASE_NAME, initialCaseData.getApplicantCaseName());
             }
@@ -247,11 +248,11 @@ public class TestingSupportService {
     }
 
     private Map<String, Object> updateCaseDetailsForCourtNav(CaseDetails initialCaseDetails,
-                                                             CourtNavFl401 dummyCaseDetails) throws NotFoundException {
+                                                             CourtNavFl401 dummyCaseDetails) {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         if (dummyCaseDetails != null) {
             String systemAuthorisation = systemUserService.getSysUserToken();
-            CaseData fl401CourtNav = fl401ApplicationMapper.mapCourtNavData(dummyCaseDetails, systemAuthorisation);
+            CaseData fl401CourtNav = fl401ApplicationMapper.mapCourtNavData(dummyCaseDetails);
             CaseDetails caseDetails = courtNavCaseService.createCourtNavCase(
                 systemAuthorisation,
                 fl401CourtNav

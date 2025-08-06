@@ -51,6 +51,9 @@ spring:
   main:
     allow-circular-references: true
     allow-bean-definition-overriding: true
+  jackson:
+    generator:
+      auto-close-json-content: false
 
 azure:
   application-insights:
@@ -546,7 +549,7 @@ document:
       fl401_final_welsh_filename: FL401FinalDocumentWelsh.pdf
       fl401_draft_welsh_template: FL-PRL-APP-WEL-FL401-draft.docx
       fl401_draft_welsh_filename: Draft_DA_Welsh_application.pdf
-      fl401_c8_welsh_template: FL401-c8-welsh.docx
+      fl401_c8_welsh_template: FL-PRL-APP-WEL-FL401-C8-Final.docx
       fl401_c8_welsh_filename: C8_Document_Welsh.pdf
       fl401_fl406_draft_template: FL-PRL-GOR-ENG-FL406-Power-Of-Arrest-Draft.docx
       fl401_fl406_draft_filename: Power_of_arrest_draft.pdf

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,6 +12,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDoc
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 
 @Data
@@ -45,5 +48,19 @@ public class DocumentManagementDetails {
     private List<Element<ManageDocuments>> manageDocuments;
     private String manageDocumentsTriggeredBy;
     private String manageDocumentsRestrictedFlag;
+
+    @JsonIgnore
+    public List<Element<QuarantineLegalDoc>> getRemovableDocuments() {
+        return Stream.of(
+            legalProfQuarantineDocsList,
+            courtStaffQuarantineDocsList,
+            cafcassQuarantineDocsList,
+            citizenQuarantineDocsList,
+            courtNavQuarantineDocumentList
+        )
+          .filter(Objects::nonNull)
+          .flatMap(List::stream)
+          .toList();
+    }
 
 }

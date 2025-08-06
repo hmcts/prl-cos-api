@@ -173,6 +173,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 import static uk.gov.hmcts.reform.prl.enums.Event.ADMIN_EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.EDIT_AND_APPROVE_ORDER;
+import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.MANAGE_ORDERS;
 import static uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -1459,7 +1460,8 @@ public class ManageOrderService {
 
     public String getOrderStatus(String orderSelectionType, String loggedInUserType, String eventId, String previousOrderStatus) {
         String currentOrderStatus;
-        if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equals(eventId)) {
+        if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equals(eventId)
+            || Event.HEARING_EDIT_AND_APPROVE_ORDER.getId().equals(eventId)) {
             currentOrderStatus = OrderStatusEnum.reviewedByCA.getDisplayedValue();
         } else if (EDIT_AND_APPROVE_ORDER.getId().equals(eventId)) {
             if (UserRoles.JUDGE.name().equals(loggedInUserType)) {
@@ -1551,6 +1553,9 @@ public class ManageOrderService {
                 servedOrderDetails.put(SERVE_RECIPIENT_NAME, serveRecipientName + " (" + SoaSolicitorServingRespondentsEnum
                     .applicantLegalRepresentative.getDisplayedValue() + ")");
             }
+        } else {
+            log.info("case id {} has serveToRespondentOptions = {}", caseData.getId(), caseData.getManageOrders().getServeToRespondentOptions());
+
         }
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
         servedOrderDetails.put(WHO_IS_RESPONSIBLE_TO_SERVE, getWhoIsResponsibleToServeOrder(caseData.getManageOrders()));
@@ -1591,6 +1596,8 @@ public class ManageOrderService {
             servingRespondentsOptions = getServingRespondentsOptions(caseData);
         } else if (YesNoNotApplicable.No.equals(serveOnRespondent)) {
             recipients = getRecipients(caseData);
+        } else if (YesNoNotApplicable.NotApplicable.equals(serveOnRespondent)) {
+            log.info("case id {} has serveToRespondentOptions = {}", caseData.getId(), caseData.getManageOrders().getServeToRespondentOptions());
         }
 
         String otherParties;
@@ -3415,7 +3422,8 @@ public class ManageOrderService {
 
     public void setFieldsForRequestSafeGuardingReportWaTask(CaseData caseData, Map<String, Object> waFieldsMap, String eventId) {
         if (((eventId.equals(MANAGE_ORDERS.getId()) && noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions()))
-                || eventId.equals(ADMIN_EDIT_AND_APPROVE_ORDER.getId()))
+                || eventId.equals(ADMIN_EDIT_AND_APPROVE_ORDER.getId())
+                || eventId.equals(HEARING_EDIT_AND_APPROVE_ORDER.getId()))
             && Yes.equals(caseData.getServeOrderData().getCafcassOrCymruNeedToProvideReport())
             && ObjectUtils.isNotEmpty(caseData.getServeOrderData().getWhenReportsMustBeFiled())
             && DAYS.between(LocalDate.now(), caseData.getServeOrderData().getWhenReportsMustBeFiled()) >= 7
@@ -3659,6 +3667,7 @@ public class ManageOrderService {
             && ((MANAGE_ORDERS.getId().equals(eventId)
             && noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions()))
             || ADMIN_EDIT_AND_APPROVE_ORDER.getId().equals(eventId)
+            || HEARING_EDIT_AND_APPROVE_ORDER.getId().equals(eventId)
             || EDIT_AND_APPROVE_ORDER.getId().equals(eventId))) {
             checkForAutomatedHearing = Yes;
         }
