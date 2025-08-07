@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.barrister.BarristerAddService;
 
 import java.util.HashMap;
@@ -33,8 +32,6 @@ public class BarristerControllerTest {
     private BarristerAddService barristerAddService;
     @Mock
     private AuthorisationService authorisationService;
-    @Mock
-    private UserService userService;
 
     @Mock
     private ObjectMapper objectMapper;
