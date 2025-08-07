@@ -134,22 +134,13 @@ public class TestingSupportService {
                 adminCreateApplication = true;
             }
             CaseDetails dummyCaseDetails = objectMapper.readValue(requestBody, CaseDetails.class);
-            Map<String, Object> updatedCaseDetails = updateCaseDetails(
+            return updateCaseDetails(
                 authorisation,
                 initialCaseDetails,
                 initialCaseData,
                 adminCreateApplication,
                 dummyCaseDetails
             );
-            if (!updatedCaseDetails.isEmpty()) {
-                // generate org policy roles for FL401 when creating case
-                CaseData updatedCaseData = objectMapper.convertValue(updatedCaseDetails, CaseData.class);
-                if (FL401_CASE_TYPE.equals(updatedCaseData.getCaseTypeOfApplication())) {
-                    updatedCaseDetails.putAll(noticeOfChangePartiesService.generate(updatedCaseData, DARESPONDENT));
-                    updatedCaseDetails.putAll(noticeOfChangePartiesService.generate(updatedCaseData, DAAPPLICANT));
-                }
-            }
-            return updatedCaseDetails;
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -348,6 +339,13 @@ public class TestingSupportService {
                 = tabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
             CaseData caseData = startAllTabsUpdateDataContent.caseData();
             Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
+            if (!caseDataUpdated.isEmpty()) {
+                // generate org policy roles for FL401 when creating case
+                if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
+                    caseDataUpdated.putAll(noticeOfChangePartiesService.generate(caseData, DARESPONDENT));
+                    caseDataUpdated.putAll(noticeOfChangePartiesService.generate(caseData, DAAPPLICANT));
+                }
+            }
             caseData = caseData.toBuilder()
                 .c8Document(objectMapper.convertValue(caseDataUpdated.get(DOCUMENT_FIELD_C8), Document.class))
                 .c1ADocument(objectMapper.convertValue(caseDataUpdated.get(DOCUMENT_FIELD_C1A), Document.class))
