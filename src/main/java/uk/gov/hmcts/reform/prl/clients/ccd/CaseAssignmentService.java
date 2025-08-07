@@ -406,35 +406,27 @@ public class CaseAssignmentService {
                                                  String barristerRole,
                                                  AllocatedBarrister allocatedBarrister) {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            updatedC100PartyWithBarristerDetails(
+            updatedPartyWithBarristerDetails(
                 barristerRole,
-                caseData,
                 userId,
-                allocatedBarrister
+                allocatedBarrister,
+                () -> getC100Party(caseData, allocatedBarrister.getPartyList().getValueCode())
             );
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            updatedFl401PartyWithBarristerDetails(
+            updatedPartyWithBarristerDetails(
                 barristerRole,
-                caseData,
                 userId,
-                allocatedBarrister
+                allocatedBarrister,
+                () -> getC401Party(caseData, allocatedBarrister.getPartyList().getValueCode())
             );
         }
     }
 
-    private void updatedC100PartyWithBarristerDetails(String barristerRole,
-                                                      CaseData caseData,
+    private void updatedPartyWithBarristerDetails(String barristerRole,
                                                       String userId,
-                                                      AllocatedBarrister allocatedBarrister) {
-        PartyDetails c100Party = getC100Party(caseData, allocatedBarrister.getPartyList().getValueCode());
+                                                      AllocatedBarrister allocatedBarrister,
+                                                      Supplier<PartyDetails> partyDetailsSupplier) {
+        PartyDetails c100Party = partyDetailsSupplier.get();
         updateBarrister(barristerRole, c100Party, allocatedBarrister, userId);
-    }
-
-    private void updatedFl401PartyWithBarristerDetails(String barristerRole,
-                                                                   CaseData caseData,
-                                                                   String userId,
-                                                                   AllocatedBarrister allocatedBarrister) {
-        PartyDetails c401Party = getC401Party(caseData, allocatedBarrister.getPartyList().getValueCode());
-        updateBarrister(barristerRole, c401Party, allocatedBarrister, userId);
     }
 }

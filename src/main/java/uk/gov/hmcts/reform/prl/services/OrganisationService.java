@@ -187,8 +187,9 @@ public class OrganisationService {
 
     public Optional<String> findUserByEmail(String email) {
 
+        String maskEmail = maskEmail(email);
         try {
-            log.info("Finding user by email");
+            log.info("Finding user by email: {}", maskEmail);
             OrganisationUser organisationUser = organisationApi.findUserByEmail(
                 systemUserService.getSysUserToken(),
                 authTokenGenerator.generate(),
@@ -196,10 +197,15 @@ public class OrganisationService {
             );
             return Optional.of(organisationUser.getUserIdentifier());
         } catch (FeignException.NotFound notFoundException) {
-            log.error("Could not find user by email {}", maskEmail(email));
+            log.error("Could not find user by email {}", maskEmail);
             return Optional.empty();
         } catch (FeignException exception) {
-            throw new RuntimeException(email != null ? maskEmail(getStackTrace(exception), email) : "Email is not valid or null");
+            String message = String.join(":", "Error while fetching user id by email",
+                                         Optional.ofNullable(email)
+                                             .map(value -> maskEmail(getStackTrace(exception), value))
+                                             .orElse(email));
+            log.error(message, exception);
+            throw new IllegalArgumentException(message);
         }
     }
 }
