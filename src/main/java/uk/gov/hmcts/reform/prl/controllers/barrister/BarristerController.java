@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
@@ -81,13 +84,18 @@ public class BarristerController extends AbstractCallbackController {
         log.info("Inside barrister/remove/about-to-start for case {}", callbackRequest.getCaseDetails().getId());
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
+            List<String> errorList = new ArrayList<>();
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-            caseDataUpdated.put(REMOVE_BARRISTER_AND_PARTIES_LIST, barristerRemoveService.getBarristerListToRemove(caseData, authorisation));
+            DynamicList barristerList = barristerRemoveService.getBarristerListToRemove(caseData, authorisation);
+            if (barristerList != null && !barristerList.getListItems().isEmpty()){
+                caseDataUpdated.put(REMOVE_BARRISTER_AND_PARTIES_LIST, barristerList);
+            } else {
+                errorList.add("Parties are not represented by counsel at this stage");
+            }
 
             AboutToStartOrSubmitCallbackResponse.AboutToStartOrSubmitCallbackResponseBuilder
-                builder = AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated);
+                builder = AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).data(caseDataUpdated);
             return builder.build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
