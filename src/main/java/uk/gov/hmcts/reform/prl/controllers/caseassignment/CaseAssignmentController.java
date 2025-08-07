@@ -90,7 +90,7 @@ public class CaseAssignmentController {
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder()
-                //.data(caseData.toMap(objectMapper))
+                .data(caseData.toMap(objectMapper))
                 .errors(errorList).build();
         } else {
             throw new IllegalArgumentException(INVALID_CLIENT);
