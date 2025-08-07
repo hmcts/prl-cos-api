@@ -40,6 +40,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATED_BARRISTER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SELECTED_PARTY_ID;
 
 @ExtendWith(MockitoExtension.class)
 class CaseAssignmentControllerTest {
@@ -201,6 +202,98 @@ class CaseAssignmentControllerTest {
             .build();
 
         assertThatThrownBy(() -> caseAssignmentController.submitAddBarrister(
+            "auth",
+            "s2sToken",
+            callbackRequest
+        )).isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining(INVALID_CLIENT);
+    }
+
+    @Test
+    void testSuccessSubmitRemoveBarrister() {
+        when(authorisationService.isAuthorized(any(), any()))
+            .thenReturn(true);
+
+        String selectedPartyId = UUID.randomUUID().toString();
+        Map<String, Object> caseData = of(SELECTED_PARTY_ID, selectedPartyId);
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(1234L)
+            .createdDate(LocalDateTime.now())
+            .lastModified(LocalDateTime.now())
+            .data(caseData)
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+
+        AboutToStartOrSubmitCallbackResponse response = caseAssignmentController.submitRemoveBarrister(
+            "auth",
+            "s2sToken",
+            callbackRequest
+        );
+
+        assertThat(response.getErrors()).isEmpty();
+
+        verify(caseAssignmentService).validateRemoveRequest(isA(CaseData.class),
+                                                         eq(selectedPartyId),
+                                                         anyList());
+        verify(caseAssignmentService).removeBarrister(isA(CaseData.class),
+                                                   eq(selectedPartyId));
+    }
+
+    @Test
+    void testErrorsSubmitRemoveBarrister() {
+        when(authorisationService.isAuthorized(any(), any()))
+            .thenReturn(true);
+
+        String selectedPartyId = UUID.randomUUID().toString();
+        Map<String, Object> caseData = of(SELECTED_PARTY_ID, selectedPartyId);
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(1234L)
+            .createdDate(LocalDateTime.now())
+            .lastModified(LocalDateTime.now())
+            .data(caseData)
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+
+        doAnswer(invocation -> {
+            List<String> errors = invocation.getArgument(2);
+            errors.add("errors");
+            return null;
+        }).when(caseAssignmentService).validateRemoveRequest(isA(CaseData.class),
+                                                             eq(selectedPartyId),
+                                                             anyList());
+
+        AboutToStartOrSubmitCallbackResponse response = caseAssignmentController.submitRemoveBarrister(
+            "auth",
+            "s2sToken",
+            callbackRequest
+        );
+
+        assertThat(response.getErrors()).contains("errors");
+
+        verify(caseAssignmentService).validateRemoveRequest(isA(CaseData.class),
+                                                         eq(selectedPartyId),
+                                                         anyList());
+        verify(caseAssignmentService, never()).removeBarrister(isA(CaseData.class),
+                                                   eq(selectedPartyId));
+    }
+
+    @Test
+    void testInvalidClientExceptionForSubmitRemoveBarrister() {
+
+        when(authorisationService.isAuthorized(any(), any()))
+            .thenReturn(false);
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .build();
+
+        assertThatThrownBy(() -> caseAssignmentController.submitRemoveBarrister(
             "auth",
             "s2sToken",
             callbackRequest
