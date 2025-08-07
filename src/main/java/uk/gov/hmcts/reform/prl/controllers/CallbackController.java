@@ -359,7 +359,7 @@ public class CallbackController {
                 caseData = populateMiamPolicyUpgradeDetails(caseData, caseDataUpdated);
             }
 
-            Map<String, Object> map = documentGenService.generateDocuments(authorisation, caseData);
+            Map<String, Object> map = documentGenService.createUpdatedCaseDataWithDocuments(authorisation, caseData);
             // updating Summary tab to update case status
             caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
             caseDataUpdated.putAll(map);
