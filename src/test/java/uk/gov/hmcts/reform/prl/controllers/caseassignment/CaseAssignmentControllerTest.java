@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.caseassignment;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -100,7 +101,8 @@ class CaseAssignmentControllerTest {
     }
 
     @Test
-    void testSuccessSubmitAddBarrister() {
+    void testSuccessSubmitAddBarrister() throws JsonProcessingException {
+        System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(allocatedBarrister));
         Optional<String> userId = Optional.of("userId");
         when(authorisationService.isAuthorized(any(), any()))
             .thenReturn(true);
