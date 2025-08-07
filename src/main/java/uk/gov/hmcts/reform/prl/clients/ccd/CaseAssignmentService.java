@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.clients.ccd;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import lombok.Builder;
@@ -24,27 +26,22 @@ import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssig
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
-import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole.Representing.CAAPPLICANT;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole.Representing.CARESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole.Representing.DAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole.Representing.DARESPONDENT;
 import static uk.gov.hmcts.reform.prl.utils.EmailUtils.maskEmail;
@@ -61,11 +58,12 @@ public class CaseAssignmentService {
     private final RoleAssignmentService roleAssignmentService;
     private final ObjectMapper objectMapper;
 
-    private static IllegalArgumentException getIllegalArgumentException(CaseData caseData) {
+    private static IllegalArgumentException getIllegalArgumentException(CaseData caseData,
+                                                                        String selectedPartyId) {
         log.error(
             "On case id {} no party found for {}",
             caseData.getId(),
-            caseData.getAllocatedBarrister().getPartyList().getValueCode()
+            selectedPartyId
         );
         return new IllegalArgumentException("Invalid party selected");
     }
@@ -83,7 +81,10 @@ public class CaseAssignmentService {
         );
     }
 
-    public void addBarrister(CaseData caseData, String userId, String barristerRole) {
+    public void addBarrister(CaseData caseData,
+                             String userId,
+                             String barristerRole,
+                             AllocatedBarrister allocatedBarrister) {
         log.info(
             "On case id {}, about to add {} case access for users {}",
             caseData.getId(),
@@ -93,21 +94,23 @@ public class CaseAssignmentService {
         grantBarristerCaseAccess(
             caseData,
             userId,
-            barristerRole
+            barristerRole,
+            allocatedBarrister
         );
         updatedPartyWithBarristerDetails(
             caseData,
             userId,
-            barristerRole
+            barristerRole,
+            allocatedBarrister
         );
     }
 
     private void grantBarristerCaseAccess(final CaseData caseData,
                                           final String userId,
-                                          final String caseRole) {
+                                          final String caseRole,
+                                          AllocatedBarrister allocatedBarrister) {
         Set<String> userIds = Set.of(userId);
         try {
-            AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
             CaseAssignmentUserRolesRequest addCaseAssignedUserRolesRequest = buildCaseAssignedUserRequest(
                 caseData.getId(),
                 caseRole,
@@ -148,9 +151,14 @@ public class CaseAssignmentService {
 
     }
 
-    public void removeBarrister(final CaseData caseData) {
-        PartyDetails selectedParty = getSelectedParty(caseData);
-        Barrister barrister = selectedParty.getBarrister();
+    public void removeBarrister(final CaseData caseData, String selectedPartyId) {
+        PartyDetails selectedParty = getSelectedParty(caseData, selectedPartyId);
+        removeBarristerCaseRole(caseData, selectedParty);
+        selectedParty.setBarrister(null);
+    }
+
+    private void removeBarristerCaseRole(CaseData caseData, PartyDetails partyDetails) {
+        Barrister barrister = partyDetails.getBarrister();
         Set<String> userIds = Set.of(barrister.getBarristerId());
         try {
             log.info(
@@ -184,8 +192,8 @@ public class CaseAssignmentService {
     }
 
     public void validateBarristerOrgRelationship(CaseData caseData,
+                                                 AllocatedBarrister allocatedBarrister,
                                                  List<String> errorList) {
-        AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
         OrgSolicitors organisationSolicitorDetails = organisationService.getOrganisationSolicitorDetails(
             systemUserService.getSysUserToken(),
             allocatedBarrister.getBarristerOrg().getOrganisationID()
@@ -209,9 +217,10 @@ public class CaseAssignmentService {
                 });
     }
 
-    public void validateUserRole(CaseData caseData,
+    private void validateUserRole(CaseData caseData,
+                                 String selectedPartyId,
                                  List<String> errorList) {
-        PartyDetails selectedParty = getSelectedParty(caseData);
+        PartyDetails selectedParty = getSelectedParty(caseData, selectedPartyId);
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentService
             .getRoleAssignmentForCase(String.valueOf(caseData.getId()));
 
@@ -226,35 +235,35 @@ public class CaseAssignmentService {
                 () -> {
                     log.error(
                         "Barrister {} is not associated with the case {}",
-                        maskEmail(caseData.getAllocatedBarrister().getBarristerEmail()),
+                        maskEmail(selectedParty.getBarrister().getBarristerEmail()),
                         caseData.getId()
                     );
                     errorList.add("Barrister is not associated with the case");
                 });
     }
 
-    private PartyDetails getSelectedParty(CaseData caseData) {
+    private PartyDetails getSelectedParty(CaseData caseData, String selectedPartyId) {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            return getC100Party(caseData);
+            return getC100Party(caseData, selectedPartyId);
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            return getC401Party(caseData);
+            return getC401Party(caseData, selectedPartyId);
         }
-        return null;
+        throw new  IllegalArgumentException(String.join(":",
+                                                        "Invalid case type",
+                                                        String.valueOf(caseData.getId())));
     }
 
-    private PartyDetails getC401Party(CaseData caseData) {
-        String selectedPartyId = caseData.getAllocatedBarrister().getPartyList().getValueCode();
+    private PartyDetails getC401Party(CaseData caseData, String selectedPartyId) {
 
         return Stream.of(caseData.getApplicantsFL401(), caseData.getRespondentsFL401())
             .filter(Objects::nonNull)
             .filter(partyDetails -> partyDetails.getPartyId()
                 .equals(UUID.fromString(selectedPartyId)))
             .findAny()
-            .orElseThrow(() -> getIllegalArgumentException(caseData));
+            .orElseThrow(() -> getIllegalArgumentException(caseData, selectedPartyId));
     }
 
-    private PartyDetails getC100Party(CaseData caseData) {
-        String selectedPartyId = caseData.getAllocatedBarrister().getPartyList().getValueCode();
+    private PartyDetails getC100Party(CaseData caseData, String selectedPartyId) {
 
         return Stream.of(caseData.getApplicants(), caseData.getRespondents())
             .filter(Objects::nonNull)
@@ -263,7 +272,7 @@ public class CaseAssignmentService {
                 .equals(UUID.fromString(selectedPartyId)))
             .findAny()
             .map(Element::getValue)
-            .orElseThrow(() -> getIllegalArgumentException(caseData));
+            .orElseThrow(() -> getIllegalArgumentException(caseData, selectedPartyId));
     }
 
     public void validateCaseRoles(CaseData caseData,
@@ -289,12 +298,13 @@ public class CaseAssignmentService {
     public void validateAddRequest(Optional<String> userId,
                                    CaseData caseData,
                                    Optional<String> barristerRole,
+                                   AllocatedBarrister allocatedBarrister,
                                    List<String> errorList) {
         userId.ifPresentOrElse(
             id ->
                 barristerRole.ifPresentOrElse(
                     role -> {
-                        validateBarristerOrgRelationship(caseData, errorList);
+                        validateBarristerOrgRelationship(caseData, allocatedBarrister, errorList);
                         validateCaseRoles(caseData, role, errorList);
                     },
                     () -> {
@@ -302,7 +312,7 @@ public class CaseAssignmentService {
                         log.error(
                             "Case id {}, could not map to barrister case role for selected party {}",
                             caseData.getId(),
-                            caseData.getAllocatedBarrister().getPartyList().getValueCode()
+                            allocatedBarrister.getPartyList().getValueCode()
                         );
                     }
                 ),
@@ -310,129 +320,113 @@ public class CaseAssignmentService {
         );
     }
 
-    public void validateRemoveRequest(CaseData caseData, List<String> errorList) {
-        validateUserRole(caseData, errorList);
+    public void validateRemoveRequest(CaseData caseData,
+                                      String selectedPartyId,
+                                      List<String> errorList) {
+        validateUserRole(caseData, selectedPartyId, errorList);
     }
 
-    public Optional<String> deriveBarristerRole(CaseData caseData) {
+    public Optional<String> deriveBarristerRole(Map<String, Object> data, CaseData caseData,
+                                                AllocatedBarrister allocatedBarrister) {
+        String selectedPartyId = allocatedBarrister.getPartyList().getValueCode();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            return getC100BarristerRole(caseData);
+            return getC100BarristerRole(data, caseData, selectedPartyId);
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            return getC401BarristerRole(caseData);
+            return getC401BarristerRole(caseData, selectedPartyId);
+        }
+        throw new  IllegalArgumentException(String.join(":",
+                                                   "Invalid case type",
+                                                   String.valueOf(caseData.getId())));
+    }
+
+    private Optional<String> getC401BarristerRole(CaseData caseData,
+                                                  String selectedPartyId) {
+        String barristerRole = get401BarristerCaseRole(
+            caseData::getApplicantsFL401,
+            selectedPartyId,
+            DAAPPLICANT
+        ).orElseGet(() -> get401BarristerCaseRole(
+            caseData::getRespondentsFL401,
+            selectedPartyId,
+            DARESPONDENT
+        ).orElse(null));
+        return Optional.ofNullable(barristerRole);
+    }
+
+    private Optional<String> get401BarristerCaseRole(Supplier<PartyDetails> partyDetails,
+                                                                  String selectedPartyId,
+                                                                  Representing representing) {
+        if (partyDetails.get().getPartyId().equals(UUID.fromString(selectedPartyId))) {
+            return Arrays.stream(BarristerRole.values())
+                .filter(barristerRole -> barristerRole.getRepresenting().equals(representing))
+                .map(BarristerRole::getCaseRoleLabel)
+                .findFirst();
         }
         return Optional.empty();
     }
 
-    private Optional<String> getC401BarristerRole(CaseData caseData) {
-        String selectedPartyId = caseData.getRemoveBarristerAndPartiesList().getValueCode();
-        String barristerRole = getBarristerCaseRole(
-            () -> ElementUtils.wrapElements(caseData.getApplicantsFL401()),
-            selectedPartyId,
-            DAAPPLICANT,
-            partyDetailsElement -> partyDetailsElement.getValue().getPartyId()
-        ).orElseGet(() -> getBarristerCaseRole(
-            () -> ElementUtils.wrapElements(caseData.getRespondentsFL401()),
-            selectedPartyId,
-            DARESPONDENT,
-            partyDetailsElement -> partyDetailsElement.getValue().getPartyId()
-        ).orElse(null));
-        return Optional.ofNullable(barristerRole);
-    }
+    private Optional<String> getC100BarristerRole(Map<String, Object> data,
+                                                      CaseData caseData,
+                                                      String selectedPartyId) {
+        PartyDetails c100Party = getC100Party(caseData, selectedPartyId);
+        String nameKey = String.join("-", c100Party.getFirstName(), c100Party.getLastName());
 
-    private Optional<String> getC100BarristerRole(CaseData caseData) {
-        String selectedPartyId = caseData.getRemoveBarristerAndPartiesList().getValueCode();
-
-        String barristerRole = getBarristerCaseRole(
-            caseData::getApplicants,
-            selectedPartyId,
-            CAAPPLICANT,
-            Element::getId
-        ).orElseGet(() -> getBarristerCaseRole(
-            caseData::getRespondents,
-            selectedPartyId,
-            CARESPONDENT,
-            Element::getId
-        ).orElse(null));
-
-        return Optional.ofNullable(barristerRole);
-    }
-
-    private Optional<String> getBarristerCaseRole(Supplier<List<Element<PartyDetails>>> partySupplier,
-                                                  String selectedPartyId,
-                                                  Representing representing,
-                                                  Function<Element<PartyDetails>, UUID> partyId) {
-        List<Element<PartyDetails>> parties = partySupplier.get();
-
-        return IntStream.range(0, parties.size())
-            .filter(i -> partyId.apply(parties.get(i)).equals(fromString(selectedPartyId)))
-            .findFirst()
-            .stream()
-            .mapToObj(i -> {
-                BarristerRole[] values = Arrays.stream(BarristerRole.values())
-                    .filter(barristerRole -> barristerRole.getRepresenting().equals(representing))
-                    .toArray(BarristerRole[]::new);
-                return Optional.of(values[i].getCaseRoleLabel());
+        return Arrays.stream(BarristerRole.RoleMapping.values())
+            .filter(roleMapping -> roleMapping.getRepresenting().equals(Representing.CAAPPLICANT)
+                || roleMapping.getRepresenting().equals(Representing.CARESPONDENT))
+            .filter(roleMap -> data.get(roleMap.getParty()) != null)
+            .filter(roleMap -> {
+                try {
+                    JsonNode jsonNode = objectMapper.readTree((String) data.get(roleMap.getParty()));
+                    String partyKey = String.join(
+                        "-",
+                        jsonNode.get("firstName").asText(),
+                        jsonNode.get("lastName").asText()
+                    );
+                    return partyKey.equals(nameKey);
+                } catch (JsonProcessingException e) {
+                    throw new IllegalArgumentException(String.join(
+                        ":", "Error processing role for case data",
+                        String.valueOf(caseData.getId()), " and selected party id ",
+                        selectedPartyId)
+                    );
+                }
             })
             .findFirst()
-            .orElse(Optional.empty());
+            .flatMap(roleMapping ->
+                         Arrays.stream(BarristerRole.values())
+                             .filter(barristerRole -> barristerRole.getRoleMapping().equals(roleMapping))
+                             .findFirst()
+            )
+            .map(BarristerRole::getCaseRoleLabel);
     }
 
-    public void updatedPartyWithBarristerDetails(CaseData caseData, String barristerRole, String userId) {
+    private void updatedPartyWithBarristerDetails(CaseData caseData,
+                                                 String userId,
+                                                 String barristerRole,
+                                                 AllocatedBarrister allocatedBarrister) {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             updatedPartyWithBarristerDetails(
-                caseData,
                 barristerRole,
-                caseData::getApplicants,
-                userId
-            ).orElseGet(() -> updatedPartyWithBarristerDetails(
-                caseData,
-                barristerRole,
-                caseData::getRespondents,
-                userId
-            ).orElse(null));
+                userId,
+                allocatedBarrister,
+                () -> getC100Party(caseData, allocatedBarrister.getPartyList().getValueCode())
+            );
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             updatedPartyWithBarristerDetails(
-                caseData,
                 barristerRole,
-                caseData.getApplicantsFL401(),
-                userId
-            )
-                .orElseGet(() -> updatedPartyWithBarristerDetails(
-                    caseData,
-                    barristerRole,
-                    caseData.getRespondentsFL401(),
-                    userId
-                )
-                    .orElse(null));
+                userId,
+                allocatedBarrister,
+                () -> getC401Party(caseData, allocatedBarrister.getPartyList().getValueCode())
+            );
         }
     }
 
-    private Optional<Boolean> updatedPartyWithBarristerDetails(CaseData caseData,
-                                                               String barristerRole,
-                                                               Supplier<List<Element<PartyDetails>>> parties,
-                                                               String userId) {
-        AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
-        Optional<Element<PartyDetails>> partyDetailsElement = parties.get().stream()
-            .filter(element -> element.getId()
-                .equals(fromString(allocatedBarrister.getPartyList().getValueCode())))
-            .findFirst();
-
-        if (partyDetailsElement.isPresent()) {
-            updateBarrister(barristerRole, partyDetailsElement.get().getValue(), allocatedBarrister, userId);
-            return Optional.of(true);
-        } else {
-            return Optional.empty();
-        }
-    }
-
-    private Optional<Boolean> updatedPartyWithBarristerDetails(CaseData caseData, String barristerRole, PartyDetails party, String userId) {
-        AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
-
-        if (party.getPartyId().equals(fromString(allocatedBarrister.getPartyList().getValueCode()))) {
-            updateBarrister(barristerRole, party, allocatedBarrister, userId);
-            return Optional.of(true);
-        } else {
-            return Optional.empty();
-        }
+    private void updatedPartyWithBarristerDetails(String barristerRole,
+                                                      String userId,
+                                                      AllocatedBarrister allocatedBarrister,
+                                                      Supplier<PartyDetails> partyDetailsSupplier) {
+        PartyDetails c100Party = partyDetailsSupplier.get();
+        updateBarrister(barristerRole, c100Party, allocatedBarrister, userId);
     }
 }

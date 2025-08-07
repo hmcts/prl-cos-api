@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -20,6 +21,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
@@ -30,6 +32,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATED_BARRISTER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REMOVE_BARRISTER_AND_PARTIES_LIST;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -49,32 +54,39 @@ public class CaseAssignmentController {
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse submitAddBarrister(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest) {
+            @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+            @RequestBody CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
         List<String> errorList = new ArrayList<>();
-        AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
+        AllocatedBarrister allocatedBarrister = objectMapper.convertValue(
+                caseDetails.getData().get(ALLOCATED_BARRISTER),
+                new TypeReference<>() { }
+        );
 
         Optional<String> userId = organisationService
-            .findUserByEmail(allocatedBarrister.getBarristerEmail());
-        Optional<String> barristerRole  = ccdCaseAssignmentService.deriveBarristerRole(caseData);
+                .findUserByEmail(allocatedBarrister.getBarristerEmail());
+        Optional<String> barristerRole  = ccdCaseAssignmentService.deriveBarristerRole(caseDetails.getData(),
+                caseData,
+                allocatedBarrister);
         ccdCaseAssignmentService.validateAddRequest(
                 userId,
                 caseData,
                 barristerRole,
+                allocatedBarrister,
                 errorList);
 
         if (errorList.isEmpty()) {
             ccdCaseAssignmentService.addBarrister(caseData,
-                                                  userId.get(),
-                                                  barristerRole.get());
+                    userId.get(),
+                    barristerRole.get(),
+                    allocatedBarrister);
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseData.toMap(objectMapper))
-            .errors(errorList).build();
+                .data(caseData.toMap(objectMapper))
+                .errors(errorList).build();
     }
 
     @PostMapping(path = "/barrister/remove/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -85,19 +97,27 @@ public class CaseAssignmentController {
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse submitRemoveBarrister(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest) {
+            @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+            @RequestBody CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<String> errorList = new ArrayList<>();
-        ccdCaseAssignmentService.validateRemoveRequest(caseData, errorList);
+        DynamicList selectedPartyDynamicList = objectMapper.convertValue(caseDetails.getData().get(REMOVE_BARRISTER_AND_PARTIES_LIST),
+                DynamicList.class);
 
-        if (errorList.isEmpty()) {
-            ccdCaseAssignmentService.removeBarrister(caseData);
+        if (selectedPartyDynamicList != null) {
+            String selectedPartyId = selectedPartyDynamicList.getValueCode();
+            ccdCaseAssignmentService.validateRemoveRequest(caseData, selectedPartyId, errorList);
+
+            if (errorList.isEmpty()) {
+                ccdCaseAssignmentService.removeBarrister(caseData, selectedPartyId);
+            }
+        } else {
+            errorList.add(INVALID_CLIENT);
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseData.toMap(objectMapper))
-            .errors(errorList).build();
+                .data(caseData.toMap(objectMapper))
+                .errors(errorList).build();
     }
 }

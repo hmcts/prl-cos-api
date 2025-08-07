@@ -15,11 +15,9 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.reopenclosedcases.ValidReopenClosedCasesStatusEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.RemovableDocument;
 import uk.gov.hmcts.reform.prl.models.complextypes.refuge.RefugeConfidentialDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
-import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.closingcases.ClosingCaseOptions;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.restrictedcaseaccessmanagement.CaseAccessStatusAndReason;
 import uk.gov.hmcts.reform.prl.models.serviceofdocuments.ServiceOfDocuments;
@@ -150,6 +148,4 @@ public class BaseCaseData {
     private List<Element<RemovableDocument>> removableDocuments;
     private String documentsToBeRemoved;
 
-    private AllocatedBarrister allocatedBarrister;
-    private DynamicList removeBarristerAndPartiesList;
 }
