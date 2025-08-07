@@ -112,6 +112,7 @@ public class UpdatePartyDetailsService {
 
     public Map<String, Object> updateApplicantRespondentAndChildData(CallbackRequest callbackRequest,
                                                                      String authorisation) {
+        log.info("Called updateApplicantRespondentAndChildData");
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetailsBefore().getData();
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
@@ -120,6 +121,7 @@ public class UpdatePartyDetailsService {
         CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
         updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
         updatedCaseData.putAll(confidentialityTabService.updateConfidentialityDetails(caseData));
+        log.info("Updated CaseData");
 
         String state = callbackRequest.getCaseDetails().getState();
         if (state != null) {
@@ -155,9 +157,12 @@ public class UpdatePartyDetailsService {
             }
         }
 
+        log.info("dded partyId for Hearings Api Spec");
+
         updatedCaseData.putAll(caseSummaryTabService.updateTab(caseData));
 
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
+            log.info("entered FL401_CASE_TYPE clause");
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, DARESPONDENT));
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, DAAPPLICANT));
 
@@ -168,6 +173,9 @@ public class UpdatePartyDetailsService {
 
             setFl401PartyNames(fl401Applicant, caseData, updatedCaseData, fl401respondent);
             setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData, caseData.getApplicantsFL401());
+
+            log.info("Updated case party info");
+
             confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
                 ofNullable(caseData.getApplicantsFL401()),
                 updatedCaseData,
@@ -200,6 +208,7 @@ public class UpdatePartyDetailsService {
             }
             cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
             findAndListRefugeDocsForFL401(callbackRequest, caseData, updatedCaseData);
+            log.info("Completed update");
         } else if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CARESPONDENT));
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CAAPPLICANT));
@@ -533,10 +542,12 @@ public class UpdatePartyDetailsService {
     private void generateC8DocumentsForRespondents(Map<String, Object> updatedCaseData, CallbackRequest callbackRequest, String authorisation,
                                                        CaseData caseData, List<Element<PartyDetails>> currentRespondents)
         throws Exception {
+        log.info("Generating C8 docs");
         int respondentIndex = 0;
         Map<String, Object> casDataMap = callbackRequest.getCaseDetailsBefore().getData();
         CaseData caseDataBefore = objectMapper.convertValue(casDataMap, CaseData.class);
         for (Element<PartyDetails> respondent: currentRespondents) {
+            log.info("Respondent " + respondent.getValue().getPartyId());
             PartyDetails updatedPartyDetails = respondent.getValue().toBuilder().response(getPartyResponse(respondent.getValue()).toBuilder()
                                                                                               .keepDetailsPrivate(
                                                                                                   updateRespondentKeepYourDetailsPrivateInformation(
@@ -550,12 +561,14 @@ public class UpdatePartyDetailsService {
             );
             //PRL-6790 - Add updated respondent details to dataMap for C8 document generation
             dataMap.put(RESPONDENT, respondent.getValue());
+            log.info("Ready to populate c8 document");
             populateC8Documents(authorisation,
                                 updatedCaseData,
                                 caseData,
                                 dataMap, checkIfConfidentialityDetailsChangedRespondent(caseDataBefore, respondent),
                                 respondentIndex, respondent
             );
+            log.info("Populated C8 documents");
             respondentIndex++;
         }
     }
