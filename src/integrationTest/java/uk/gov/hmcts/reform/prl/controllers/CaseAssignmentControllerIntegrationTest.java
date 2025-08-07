@@ -69,7 +69,7 @@ public class CaseAssignmentControllerIntegrationTest {
     @Test
     public void testAddBarrister() throws Exception {
         String url = "/case-assignment/barrister/add/about-to-submit";
-        String jsonRequest = ResourceLoader.loadJson("requests/barrister.json");
+        String jsonRequest = ResourceLoader.loadJson("requests/barristerRequest.json");
         when(organisationService.findUserByEmail(anyString()))
             .thenReturn(Optional.of(UUID.randomUUID().toString()));
         when(authorisationService.isAuthorized(anyString(), anyString()))
@@ -101,7 +101,7 @@ public class CaseAssignmentControllerIntegrationTest {
     @Test
     public void testRemoveBarrister() throws Exception {
         String url = "/case-assignment/barrister/remove/about-to-submit";
-        String jsonRequest = ResourceLoader.loadJson("requests/barrister.json");
+        String jsonRequest = ResourceLoader.loadJson("requests/barristerRequest.json");
         when(authorisationService.isAuthorized(anyString(), anyString()))
             .thenReturn(true);
 
