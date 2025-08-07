@@ -30,18 +30,16 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResponseToAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.acro.AcroResponse;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.DocumentLink;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.*;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
-import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
-import uk.gov.hmcts.reform.prl.services.cafcass.CafcassCcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CaseDataService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
-import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
 
 import java.io.IOException;
@@ -59,7 +57,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-public class CoreCaseDataServiceTest {
+public class AcroCaseDataServiceTest {
     private final String s2sToken = "s2s token";
 
     private final String userToken = "Bearer testToken";
@@ -68,25 +66,16 @@ public class CoreCaseDataServiceTest {
     HearingService hearingService;
 
     @Mock
-    CafcassCcdDataStoreService cafcassCcdDataStoreService;
-
-    @Mock
-    private CafCassFilter cafCassFilter;
+    AcroCaseSearchService acroCaseSearchService;
 
     @Mock
     AuthTokenGenerator authTokenGenerator;
 
     @InjectMocks
-    private CoreCaseDataService coreCaseDataService;
+    private AcroCaseDataService acroCaseDataService;
 
     @Mock
     SystemUserService systemUserService;
-
-    @Mock
-    private RefDataService refDataService;
-
-    @Mock
-    private OrganisationService organisationService;
 
     @Mock
     private CoreCaseDataApi coreCaseDataApi;
@@ -131,36 +120,14 @@ public class CoreCaseDataServiceTest {
         String expectedCafCassResponse = TestResourceUtil.readFileFrom("classpath:response/CafCaasResponse.json");
         SearchResult searchResult = objectMapper.readValue(expectedCafCassResponse,
                                                            SearchResult.class);
-        CafCassResponse cafCassResponse = objectMapper.readValue(expectedCafCassResponse, CafCassResponse.class);
+        CafCassResponse acroResponse = objectMapper.readValue(expectedCafCassResponse, CafCassResponse.class);
 
-        when(cafcassCcdDataStoreService.searchCases(anyString(),anyString(),any(),any())).thenReturn(searchResult);
-        Mockito.doNothing().when(cafCassFilter).filter(cafCassResponse);
-        when(hearingService.getHearings(anyString(),anyString())).thenReturn(hearings);
+        when(acroCaseSearchService.searchCases(anyString(), anyString(), any(), any())).thenReturn(searchResult);
         when(hearingService.getHearingsForAllCases(anyString(),anyMap())).thenReturn(listOfHearings);
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
-        when(organisationService.getOrganisationDetails(anyString(),anyString()))
-            .thenReturn(Organisations.builder()
-                            .name("test 1")
-                            .organisationIdentifier("EJK3DHI")
-                            .contactInformation(List.of(ContactInformation.builder()
-                                                            .addressLine1("Physio In The City")
-                                                            .addressLine2("1 Kingdom Street")
-                                                            .postCode("W2 6BD")
-                                                            .build()))
-                            .build());
 
-        Map<String, String> refDataMap = new HashMap<>();
-        refDataMap.put("ABA5-APL","Appeal");
-        when(refDataService.getRefDataCategoryValueMap(anyString(),anyString(),anyString(),anyString())).thenReturn(refDataMap);
-        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, new ArrayList<>(), new ArrayList<>());
-        when(coreCaseDataApi.getCategoriesAndDocuments(
-            Mockito.any(),
-            Mockito.any(),
-            Mockito.any()
-        )).thenReturn(categoriesAndDocuments);
-
-         coreCaseDataService.getCaseData("authorisation");
-//        assertEquals(objectMapper.writeValueAsString(cafCassResponse), objectMapper.writeValueAsString(realCafCassResponse));
+        AcroResponse realAcroResponse = acroCaseDataService.getCaseData("authorisation");
+        assertEquals(objectMapper.writeValueAsString(acroResponse), objectMapper.writeValueAsString(realAcroResponse));
 
     }
 
@@ -196,39 +163,24 @@ public class CoreCaseDataServiceTest {
                                                            SearchResult.class);
         CafCassResponse cafCassResponse = objectMapper.readValue(expectedCafCassResponse, CafCassResponse.class);
 
-        when(cafcassCcdDataStoreService.searchCases(anyString(),anyString(),any(),any())).thenReturn(searchResult);
-        Mockito.doNothing().when(cafCassFilter).filter(cafCassResponse);
+        when(acroCaseSearchService.searchCases(anyString(), anyString(), any(), any())).thenReturn(searchResult);
         when(hearingService.getHearings(anyString(),anyString())).thenReturn(hearings);
         when(hearingService.getHearingsForAllCases(anyString(),anyMap())).thenReturn(listOfHearings);
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
-        when(organisationService.getOrganisationDetails(anyString(),anyString()))
-            .thenReturn(Organisations.builder()
-                            .name("test 1")
-                            .organisationIdentifier("EJK3DHI")
-                            .contactInformation(List.of(ContactInformation.builder()
-                                                            .addressLine1("Physio In The City")
-                                                            .addressLine2("1 Kingdom Street")
-                                                            .postCode("W2 6BD")
-                                                            .build()))
-                            .build());
         List<String> caseStateList = new LinkedList<>();
         caseStateList.add("DECISION_OUTCOME");
-        ReflectionTestUtils.setField(coreCaseDataService, "caseStateList", caseStateList);
+        ReflectionTestUtils.setField(acroCaseDataService, "caseStateList", caseStateList);
 
         List<String> caseTypeList = new ArrayList<>();
         caseTypeList.add("C100");
-        ReflectionTestUtils.setField(coreCaseDataService, "caseTypeList", caseTypeList);
+        ReflectionTestUtils.setField(acroCaseDataService, "caseTypeList", caseTypeList);
 
-
-        Map<String, String> refDataMap = new HashMap<>();
-        refDataMap.put("ABA5-APL","Appeal");
-        when(refDataService.getRefDataCategoryValueMap(anyString(),anyString(),anyString(),anyString())).thenReturn(refDataMap);
         List<String> excludedDocumentCategoryList = new ArrayList<>();
         excludedDocumentCategoryList.add("draftOrders");
-        ReflectionTestUtils.setField(coreCaseDataService, "excludedDocumentCategoryList", excludedDocumentCategoryList);
+        ReflectionTestUtils.setField(acroCaseDataService, "excludedDocumentCategoryList", excludedDocumentCategoryList);
         List<String> excludedDocumentList = new ArrayList<>();
         excludedDocumentList.add("Draft_C100_application");
-        ReflectionTestUtils.setField(coreCaseDataService, "excludedDocumentList", excludedDocumentList);
+        ReflectionTestUtils.setField(acroCaseDataService, "excludedDocumentList", excludedDocumentList);
         uk.gov.hmcts.reform.ccd.client.model.Document documents =
             new uk.gov.hmcts.reform.ccd.client.model
                 .Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
@@ -242,7 +194,7 @@ public class CoreCaseDataServiceTest {
             Mockito.any()
         )).thenReturn(categoriesAndDocuments);
 
-        coreCaseDataService.getCaseData("authorisation" );
+        acroCaseDataService.getCaseData("authorisation" );
 //        assertNotNull(objectMapper.writeValueAsString(realCafCassResponse));
 
     }
@@ -257,13 +209,13 @@ public class CoreCaseDataServiceTest {
                                                            SearchResult.class);
         final CafCassResponse cafCassResponse = objectMapper.readValue(expectedCafCassResponse, CafCassResponse.class);
 
-        when(cafcassCcdDataStoreService.searchCases(anyString(),anyString(),any(),any())).thenReturn(searchResult);
+        when(acroCaseSearchService.searchCases(anyString(), anyString(), any(), any())).thenReturn(searchResult);
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
         List<String> caseStateList = new LinkedList<>();
         caseStateList.add("DECISION_OUTCOME");
-        ReflectionTestUtils.setField(coreCaseDataService, "caseStateList", caseStateList);
+        ReflectionTestUtils.setField(acroCaseDataService, "caseStateList", caseStateList);
 
-        coreCaseDataService.getCaseData("authorisation");
+        acroCaseDataService.getCaseData("authorisation");
 //        assertEquals(cafCassResponse, realCafCassResponse);
 //
 //        assertEquals(0, realCafCassResponse.getTotal());
@@ -302,16 +254,16 @@ public class CoreCaseDataServiceTest {
                                                            SearchResult.class);
         CafCassResponse cafCassResponse = objectMapper.readValue(expectedCafCassResponse, CafCassResponse.class);
         Exception exception = new RuntimeException();
-        when(cafcassCcdDataStoreService.searchCases(anyString(),anyString(),any(),any())).thenThrow(exception);
+        when(acroCaseSearchService.searchCases(anyString(), anyString(), any(), any())).thenThrow(exception);
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
         List<String> caseTypeList = new ArrayList<>();
         caseTypeList.add("C100");
-        ReflectionTestUtils.setField(coreCaseDataService, "caseTypeList", caseTypeList);
+        ReflectionTestUtils.setField(acroCaseDataService, "caseTypeList", caseTypeList);
         List<String> caseStateList = new LinkedList<>();
         caseStateList.add("DECISION_OUTCOME");
-        ReflectionTestUtils.setField(coreCaseDataService, "caseStateList", caseStateList);
+        ReflectionTestUtils.setField(acroCaseDataService, "caseStateList", caseStateList);
 
-        assertThrows(RuntimeException.class, () -> coreCaseDataService.getCaseData("authorisation"));
+        assertThrows(RuntimeException.class, () -> acroCaseDataService.getCaseData("authorisation"));
     }
 
 //    @Test
@@ -420,7 +372,7 @@ public class CoreCaseDataServiceTest {
             CafCassResponse.class
         );
         privateMethod.setAccessible(true);
-        privateMethod.invoke(coreCaseDataService, cafCassResponse);
+        privateMethod.invoke(acroCaseDataService, cafCassResponse);
 
         assertEquals("test", cafCassResponse.getCases().get(0).getCaseData().getOtherDocuments().get(0).getValue().getDocumentName());
         assertNull(cafCassResponse.getCases().get(0).getCaseData().getCourtStaffUploadDocListDocTab());

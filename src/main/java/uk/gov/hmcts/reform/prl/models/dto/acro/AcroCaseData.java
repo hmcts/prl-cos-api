@@ -10,11 +10,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CaseManagementLocation;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -48,9 +51,6 @@ public class AcroCaseData {
 
     @Setter(AccessLevel.NONE)
     private CaseManagementLocation caseManagementLocation;
-    private LocalDateTime nextHearingDate;
-    private LocalDateTime orderExpiryDate;
-    private OrderDetails fl404order;
-    private Hearings hearingData;
-
+    private List<OrderDetails> fl404Orders;
+    private List<CaseHearing> caseHearings;
 }

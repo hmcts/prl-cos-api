@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
+import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseDetail;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroResponse;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CaseManagementLocation;
@@ -52,12 +53,13 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CANCELLED;
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class CoreCaseDataService {
+public class AcroCaseDataService {
 
     private final CoreCaseDataApi coreCaseDataApi;
+    private final AcroCaseSearchService acroCaseSearchService;
     private final AuthTokenGenerator authTokenGenerator;
     @Value("${cafcaas.search-case-type-id}")
-    private String cafCassSearchCaseTypeId;
+    private String searchCaseTypeId;
     private final SystemUserService systemUserService;
     private final HearingService hearingService;
 
@@ -79,11 +81,11 @@ public class CoreCaseDataService {
             String userToken = systemUserService.getSysUserToken();
             final String s2sToken = authTokenGenerator.generate();
             log.info("Invoking search cases");
-            SearchResult searchResult = coreCaseDataApi.searchCases(
+            SearchResult searchResult = acroCaseSearchService.searchCases(
                 userToken,
                 searchString,
                 s2sToken,
-                cafCassSearchCaseTypeId
+                searchCaseTypeId
             );
             acroResponse = objectMapper.convertValue(
                 searchResult,
@@ -91,17 +93,17 @@ public class CoreCaseDataService {
             );
             if (acroResponse.getCases() != null && !acroResponse.getCases().isEmpty()) {
                 log.info("CCD Search Result Size --> {}", acroResponse.getTotal());
-                log.info("After applying filter Result Size --> {}", acroResponse.getTotal());
-                AcroResponse updatecroData = updateDetailsForAllCases(authorisation, s2sToken, acroResponse);
-                for (AcroCaseDetail acroCase : updatecroData.getCases()) {
+                log.info("Extracting data needed for ACRO --> {}", acroResponse.getTotal());
+                AcroResponse updatedAcroData = extractCaseDetailsForAllCases(authorisation, s2sToken, acroResponse);
+                for (AcroCaseDetail acroCase : updatedAcroData.getCases()) {
                     log.info(
                         "Found case with id {} and courtName {} ",
                         acroCase.getId(), acroCase.getCaseData().getCourtName()
                     );
                 }
                 return AcroResponse.builder()
-                    .cases(updatecroData.getCases())
-                    .total(updatecroData.getCases().size())
+                    .cases(updatedAcroData.getCases())
+                    .total(updatedAcroData.getCases().size())
                     .build();
             }
         } catch (Exception e) {
@@ -146,18 +148,21 @@ public class CoreCaseDataService {
             "data.applicantsFL401",
             "data.respondentsFL401",
             "data.applicantsConfidentialDetails",
-            "data.orderCollection"
+            "data.orderCollection",
+            "data.caseManagementLocation",
+            "currentHearingId"
         );
     }
 
-    private AcroResponse updateDetailsForAllCases(String authorisation, String s2sToken, AcroResponse acroResponse) {
-        AcroResponse filteredAcroResponse = AcroResponse.builder()
+    private AcroResponse extractCaseDetailsForAllCases(String authorisation, String s2sToken, AcroResponse acroResponse) {
+        AcroResponse extractedAcroResponse = AcroResponse.builder()
             .cases(new ArrayList<>())
             .build();
         Map<String, String> caseIdWithRegionIdMap = new HashMap<>();
         for (AcroCaseDetail caseDetails : acroResponse.getCases()) {
-            updateCourtEpmisId(caseDetails, caseIdWithRegionIdMap, filteredAcroResponse);
-            updateOrderExpiryDate(caseDetails);
+            updateCourtEpmisId(caseDetails, caseIdWithRegionIdMap, extractedAcroResponse);
+            extractOrderSpecificData(caseDetails);
+            extractedAcroResponse.getCases().add(caseDetails);
         }
         List<Hearings> listOfHearingDetails = hearingService.getHearingsForAllCases(
             authorisation,
@@ -168,7 +173,7 @@ public class CoreCaseDataService {
 
         updateHearingData(acroResponse, listOfHearingDetails);
 
-        return filteredAcroResponse;
+        return extractedAcroResponse;
     }
 
     private static void updateCourtEpmisId(AcroCaseDetail caseDetails, Map<String, String> caseIdWithRegionIdMap, AcroResponse filteredAcroResponse) {
@@ -193,8 +198,9 @@ public class CoreCaseDataService {
         }
     }
 
-    private void updateOrderExpiryDate(AcroCaseDetail acroCaseDetail) {
-        Optional<OrderDetails> orderDetails = acroCaseDetail.getCaseData().getOrderCollection().stream().map(Element::getValue)
+    private void extractOrderSpecificData(AcroCaseDetail acroCaseDetail) {
+        AcroCaseData caseData = acroCaseDetail.getCaseData();
+        Optional<OrderDetails> orderDetails = caseData.getOrderCollection().stream().map(Element::getValue)
             .filter(o -> o.getOrderType().equals("nonMolestation")
                 && o.getOrderTypeId().equals("Non-molestation order (FL404A)")
                 && o.getTypeOfOrder().equals("Final"))
@@ -202,12 +208,10 @@ public class CoreCaseDataService {
 
         if (orderDetails.isPresent()) {
             OrderDetails order = orderDetails.get();
-            acroCaseDetail.getCaseData().setFl404order(order);
-            LocalDateTime fl404bDateOrderEnd = order.getFl404CustomFields().getFl404bDateOrderEnd();
-            if (fl404bDateOrderEnd != null) {
-                acroCaseDetail.getCaseData().setOrderExpiryDate(fl404bDateOrderEnd);
+            if (caseData.getFl404Orders() != null) {
+                caseData.setFl404Orders(new ArrayList<>());
             }
-
+            caseData.getFl404Orders().add(order);
         }
     }
 
@@ -248,7 +252,7 @@ public class CoreCaseDataService {
                         acroCaseDetail.getId()))).findFirst().orElse(null);
 
                 if (filteredHearing != null && CollectionUtils.isNotEmpty(filteredHearing.getCaseHearings())) {
-                    acroCaseDetail.getCaseData().setHearingData(filteredHearing);
+                    acroCaseDetail.getCaseData().setCaseHearings(filteredHearing.getCaseHearings());
                     acroCaseDetail.getCaseData().setCourtName(filteredHearing.getCourtName());
                     acroCaseDetail.getCaseData().setCourtTypeId(filteredHearing.getCourtTypeId());
                     filteredHearing.setCourtName(null);
@@ -268,4 +272,6 @@ public class CoreCaseDataService {
             }
         }
     }
+
+
 }

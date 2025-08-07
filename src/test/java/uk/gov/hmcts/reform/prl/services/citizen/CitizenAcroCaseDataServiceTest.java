@@ -31,7 +31,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-public class CitizenCoreCaseDataServiceTest {
+public class CitizenAcroCaseDataServiceTest {
 
     @Mock
     private IdamClient idamClient;
