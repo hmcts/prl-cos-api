@@ -82,7 +82,7 @@ public class CaseAssignmentController {
                     allocatedBarrister,
                     errorList);
 
-            if (errorList.isEmpty()) {
+            if (errorList.isEmpty() && userId.isPresent() && barristerRole.isPresent()) {
                 caseAssignmentService.addBarrister(caseData,
                                                    userId.get(),
                                                    barristerRole.get(),
