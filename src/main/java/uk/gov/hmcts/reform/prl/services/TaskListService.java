@@ -106,6 +106,7 @@ public class TaskListService {
     private final LaunchDarklyClient launchDarklyClient;
     private final RoleAssignmentApi roleAssignmentApi;
     private final AuthTokenGenerator authTokenGenerator;
+    private final C8ArchiveService c8ArchiveService;
 
     private final MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
 
@@ -314,16 +315,18 @@ public class TaskListService {
                         startAllTabsUpdateDataContent.authorisation()
                     );
                 }
-                caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
+
+                c8ArchiveService.archiveC8DocumentIfConfidentialChanged(callbackRequest,caseData,caseDataUpdated);
+
+                caseDataUpdated.putAll(dgsService.createUpdatedCaseDataWithDocuments(authorisation, caseData));
                 CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
                 caseData = caseData.toBuilder()
                     .c8Document(updatedCaseData.getC8Document())
+                    .c8ArchivedDocuments(updatedCaseData.getC8ArchivedDocuments())
                     .c1ADocument(updatedCaseData.getC1ADocument())
                     .c8WelshDocument(updatedCaseData.getC8WelshDocument())
-                    .finalDocument(!JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)
-                                       ? updatedCaseData.getFinalDocument() : caseData.getFinalDocument())
-                    .finalWelshDocument(!JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)
-                                            ? updatedCaseData.getFinalWelshDocument() : caseData.getFinalWelshDocument())
+                    .finalDocument(updatedCaseData.getFinalDocument())
+                    .finalWelshDocument(updatedCaseData.getFinalWelshDocument())
                     .c1AWelshDocument(updatedCaseData.getC1AWelshDocument())
                     .c1ADraftDocument(SUBMITTED_STATE.equalsIgnoreCase(state)
                                           ? updatedCaseData.getC1ADraftDocument() : caseData.getC1ADraftDocument())
@@ -342,6 +345,8 @@ public class TaskListService {
             startAllTabsUpdateDataContent.eventRequestData(),
             caseData
         );
+
+        caseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
 
         if (!isCourtStaff
             || (isCourtStaff && (AWAITING_SUBMISSION_TO_HMCTS.getValue().equalsIgnoreCase(state)
