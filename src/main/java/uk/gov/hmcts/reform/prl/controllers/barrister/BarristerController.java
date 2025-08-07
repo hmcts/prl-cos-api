@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,6 +22,8 @@ import uk.gov.hmcts.reform.prl.services.barrister.BarristerAddService;
 import uk.gov.hmcts.reform.prl.services.barrister.BarristerRemoveService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -88,7 +88,7 @@ public class BarristerController extends AbstractCallbackController {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
             DynamicList barristerList = barristerRemoveService.getBarristerListToRemove(caseData, authorisation);
-            if (barristerList != null && !barristerList.getListItems().isEmpty()){
+            if (barristerList != null && !barristerList.getListItems().isEmpty()) {
                 caseDataUpdated.put(REMOVE_BARRISTER_AND_PARTIES_LIST, barristerList);
             } else {
                 errorList.add("Parties are not represented by counsel at this stage");
