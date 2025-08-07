@@ -58,8 +58,8 @@ class BarristerRemoveServiceTest extends BarristerTestAbstract {
         assertEquals(listOfBarristersToRemove.getValue(), null);
         assertEquals(2, listOfBarristersToRemove.getListItems().size());
 
-        assertPartyToRemove(listOfBarristersToRemove, true, BARRISTER_PARTY_ID_PREFIX, 0, 3);
-        assertPartyToRemove(listOfBarristersToRemove, false, BARRISTER_PARTY_ID_PREFIX, 1, 7);
+        assertPartyToRemove(listOfBarristersToRemove, true, PARTY_ID_PREFIX, 0, 3);
+        assertPartyToRemove(listOfBarristersToRemove, false, PARTY_ID_PREFIX, 1, 7);
     }
 
     protected void assertPartyToRemove(DynamicList listOfBarristersToRemove, boolean appResp, String prefix, int itemIndex, int partyIndex) {

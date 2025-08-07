@@ -36,7 +36,7 @@ public class BarristerRemoveService extends  AbstractBarristerService {
     }
 
     @Override
-    protected String getCodeForAction(Element<PartyDetails> partyDetails) {
-        return partyDetails.getValue().getBarrister().getBarristerId();
+    protected String getCodeForAction(Element<PartyDetails> partyDetailsElement) {
+        return partyDetailsElement.getId().toString();
     }
 }
