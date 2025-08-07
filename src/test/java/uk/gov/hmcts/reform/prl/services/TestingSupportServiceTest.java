@@ -57,6 +57,7 @@ import uk.gov.hmcts.reform.prl.services.caseinitiation.CaseInitiationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -137,7 +138,7 @@ public class TestingSupportServiceTest {
     private TaskListService taskListService;
 
     @Mock
-    private UpdatePartyDetailsService updatePartyDetailsService;
+    private NoticeOfChangePartiesService noticeOfChangePartiesService;
 
     private CourtNavFl401 courtNavFl401;
 
