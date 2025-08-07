@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
@@ -25,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import static java.util.Map.of;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -189,6 +194,58 @@ class CaseAssignmentControllerTest {
         verify(caseAssignmentService, never()).addBarrister(isA(CaseData.class),
                                                    eq(userId.get()),
                                                    eq(barristerRole.get()),
+                                                   isA(AllocatedBarrister.class));
+    }
+
+    static Stream<Arguments> parameterParameters() {
+        return Stream.of(
+                Arguments.of((Supplier<Optional<String>>) () -> Optional.of("userId"),
+                             (Supplier<Optional<String>>) Optional::empty),
+                Arguments.of((Supplier<Optional<String>>) Optional::empty,
+                             (Supplier<Optional<String>>) () -> Optional.of("barristerRole"))
+            );
+    }
+
+    @ParameterizedTest
+    @MethodSource("parameterParameters")
+    void testUserIdOrBarriesterRoleEmptyForSubmitAddBarrister(Supplier<Optional<String>> userId, Supplier<Optional<String>> barristerRole) {
+        when(authorisationService.isAuthorized(any(), any()))
+            .thenReturn(true);
+        when(organisationService.findUserByEmail(allocatedBarrister.getBarristerEmail()))
+            .thenReturn(userId.get());
+
+        when(caseAssignmentService.deriveBarristerRole(anyMap(), isA(CaseData.class), isA(AllocatedBarrister.class)))
+            .thenReturn(barristerRole.get());
+
+        Map<String, Object> caseData = of(ALLOCATED_BARRISTER, allocatedBarrister);
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(1234L)
+            .createdDate(LocalDateTime.now())
+            .lastModified(LocalDateTime.now())
+            .data(caseData)
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+
+        AboutToStartOrSubmitCallbackResponse response = caseAssignmentController.submitAddBarrister(
+            "auth",
+            "s2sToken",
+            callbackRequest
+        );
+
+        assertThat(response.getErrors()).isEmpty();
+
+        verify(caseAssignmentService).validateAddRequest(eq(userId.get()),
+                                                         isA(CaseData.class),
+                                                         eq(barristerRole.get()),
+                                                         isA(AllocatedBarrister.class),
+                                                         anyList());
+        verify(caseAssignmentService, never()).addBarrister(isA(CaseData.class),
+                                                   any(),
+                                                   any(),
                                                    isA(AllocatedBarrister.class));
     }
 
