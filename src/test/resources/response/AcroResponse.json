@@ -1,0 +1,34 @@
+{
+  "total": 4,
+  "cases": [
+    {
+      "id": 1673970714366224,
+      "jurisdiction": "PRIVATELAW",
+      "state": "DECISION_OUTCOME",
+      "caseTypeOfApplication": "FL401",
+      "case_type_id": "PRLAPPS",
+      "created_date": [
+        2023,
+        1,
+        17,
+        15,
+        51,
+        54,
+        358000000
+      ],
+      "last_modified": [
+        2023,
+        1,
+        23,
+        15,
+        46,
+        4,
+        556000000
+      ],
+      "case_data": {
+        "dateSubmitted": "2023-01-20",
+        "caseTypeOfApplication": "FL401"
+      }
+    }
+  ]
+}
