@@ -285,7 +285,7 @@ public class C100IssueCaseServiceTest {
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
+        when(documentGenService.createUpdatedCaseDataWithDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
             Map.of("c8Document", "document",
                    "c1ADocument", "document",
                    "c1AWelshDocument", "document",
@@ -411,7 +411,7 @@ public class C100IssueCaseServiceTest {
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(c100DocsMap);
+        when(documentGenService.createUpdatedCaseDataWithDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(c100DocsMap);
         when(courtFinderService.getCourtDetails(Mockito.anyString())).thenReturn(null);
         Map<String, Object> objectMap = c100IssueCaseService.issueAndSendToLocalCourt(
             authToken,
@@ -420,7 +420,7 @@ public class C100IssueCaseServiceTest {
         Assertions.assertNotNull(objectMap.get("c1ADocument"));
         Assertions.assertNotNull(objectMap.get("c1AWelshDocument"));
         Assertions.assertNotNull(objectMap.get("finalWelshDocument"));
-        verify(documentGenService, times(1)).generateDocuments(
+        verify(documentGenService, times(1)).createUpdatedCaseDataWithDocuments(
             Mockito.anyString(),
             Mockito.any(CaseData.class)
         );
@@ -516,7 +516,7 @@ public class C100IssueCaseServiceTest {
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
+        when(documentGenService.createUpdatedCaseDataWithDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
             Map.of("c1ADocument", "document",
                    "c1AWelshDocument", "document",
                    "finalWelshDocument", "document")
