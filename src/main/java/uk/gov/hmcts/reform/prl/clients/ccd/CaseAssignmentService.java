@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.prl.clients.ccd;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import lombok.Builder;
@@ -370,27 +368,22 @@ public class CaseAssignmentService {
                                                       String selectedPartyId) {
         PartyDetails c100Party = getC100Party(caseData, selectedPartyId);
         String nameKey = String.join("-", c100Party.getFirstName(), c100Party.getLastName());
+        record PartyInfo(String firstName, String lastName) {}
 
         return Arrays.stream(BarristerRole.RoleMapping.values())
             .filter(roleMapping -> roleMapping.getRepresenting().equals(BarristerRole.Representing.CAAPPLICANT)
                 || roleMapping.getRepresenting().equals(BarristerRole.Representing.CARESPONDENT))
             .filter(roleMap -> data.get(roleMap.getParty()) != null)
             .filter(roleMap -> {
-                try {
-                    JsonNode jsonNode = objectMapper.readTree((String) data.get(roleMap.getParty()));
-                    String partyKey = String.join(
-                        "-",
-                        jsonNode.get("firstName").asText(),
-                        jsonNode.get("lastName").asText()
-                    );
-                    return partyKey.equals(nameKey);
-                } catch (JsonProcessingException e) {
-                    throw new IllegalArgumentException(String.join(
-                        ":", "Error processing role for case data",
-                        String.valueOf(caseData.getId()), " and selected party id ",
-                        selectedPartyId)
-                    );
-                }
+                PartyInfo partyInfo = objectMapper.convertValue(data.get(roleMap.getParty()), PartyInfo.class);
+
+                String partyKey = String.join(
+                    "-",
+                    partyInfo.firstName,
+                    partyInfo.lastName
+                );
+
+                return partyKey.equals(nameKey);
             })
             .findFirst()
             .flatMap(roleMapping ->

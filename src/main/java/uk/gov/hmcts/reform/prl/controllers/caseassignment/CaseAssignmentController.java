@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,8 +21,10 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -33,6 +34,7 @@ import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATED_BARRISTER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SELECTED_PARTY_ID;
 
 @Slf4j
@@ -41,9 +43,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SELECTED_PARTY_
 @RequestMapping("/case-assignment")
 public class CaseAssignmentController {
 
-    private final CaseAssignmentService ccdCaseAssignmentService;
+    private final CaseAssignmentService caseAssignmentService;
     private final ObjectMapper objectMapper;
     private final OrganisationService organisationService;
+    private final AuthorisationService authorisationService;
 
     @PostMapping(path = "/barrister/add/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "About to submit to add Barrister")
@@ -53,39 +56,45 @@ public class CaseAssignmentController {
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse submitAddBarrister(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(javax.ws.rs.core.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-        List<String> errorList = new ArrayList<>();
-        AllocatedBarrister allocatedBarrister = objectMapper.convertValue(
-            caseDetails.getData().get(ALLOCATED_BARRISTER),
-            new TypeReference<>() { }
-        );
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            CaseDetails caseDetails = callbackRequest.getCaseDetails();
+            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-        Optional<String> userId = organisationService
-            .findUserByEmail(allocatedBarrister.getBarristerEmail());
-        Optional<String> barristerRole  = ccdCaseAssignmentService.deriveBarristerRole(caseDetails.getData(),
-                                                                                       caseData,
-                                                                                       allocatedBarrister);
-        ccdCaseAssignmentService.validateAddRequest(
-                userId,
-                caseData,
-                barristerRole,
-                allocatedBarrister,
-                errorList);
+            List<String> errorList = new ArrayList<>();
+            AllocatedBarrister allocatedBarrister = objectMapper.convertValue(
+                caseDetails.getData().get(ALLOCATED_BARRISTER),
+                new TypeReference<>() { }
+            );
 
-        if (errorList.isEmpty()) {
-            ccdCaseAssignmentService.addBarrister(caseData,
-                                                  userId.get(),
-                                                  barristerRole.get(),
-                                                  allocatedBarrister);
+            Optional<String> userId = organisationService
+                .findUserByEmail(allocatedBarrister.getBarristerEmail());
+            Optional<String> barristerRole  = caseAssignmentService.deriveBarristerRole(caseDetails.getData(),
+                                                                                        caseData,
+                                                                                        allocatedBarrister);
+            caseAssignmentService.validateAddRequest(
+                    userId,
+                    caseData,
+                    barristerRole,
+                    allocatedBarrister,
+                    errorList);
+
+            if (errorList.isEmpty()) {
+                caseAssignmentService.addBarrister(caseData,
+                                                   userId.get(),
+                                                   barristerRole.get(),
+                                                   allocatedBarrister);
+            }
+
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseData.toMap(objectMapper))
+                .errors(errorList).build();
+        } else {
+            throw new IllegalArgumentException(INVALID_CLIENT);
         }
-
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseData.toMap(objectMapper))
-            .errors(errorList).build();
     }
 
     @DeleteMapping(path = "/barrister/remove/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -96,21 +105,28 @@ public class CaseAssignmentController {
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse submitRemoveBarrister(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(javax.ws.rs.core.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        List<String> errorList = new ArrayList<>();
-        String selectedPartyId = objectMapper.convertValue(caseDetails.getData().get(SELECTED_PARTY_ID),
-                                                           String.class);
-        ccdCaseAssignmentService.validateRemoveRequest(caseData, selectedPartyId, errorList);
 
-        if (errorList.isEmpty()) {
-            ccdCaseAssignmentService.removeBarrister(caseData, selectedPartyId);
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            CaseDetails caseDetails = callbackRequest.getCaseDetails();
+            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+            List<String> errorList = new ArrayList<>();
+            String selectedPartyId = objectMapper.convertValue(caseDetails.getData().get(SELECTED_PARTY_ID),
+                                                               String.class);
+            caseAssignmentService.validateRemoveRequest(caseData, selectedPartyId, errorList);
+
+            if (errorList.isEmpty()) {
+                caseAssignmentService.removeBarrister(caseData, selectedPartyId);
+            }
+
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseData.toMap(objectMapper))
+                .errors(errorList).build();
+        } else {
+            throw new IllegalArgumentException(INVALID_CLIENT);
         }
 
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseData.toMap(objectMapper))
-            .errors(errorList).build();
     }
 }

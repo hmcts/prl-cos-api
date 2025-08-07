@@ -116,66 +116,16 @@ class CaseAssignmentServiceTest {
 
         caseDetails = CaseDetails.builder()
             .data(Map.of(
-                "caApplicant1", """
-                      {
-                        "firstName": "af1",
-                        "lastName": "al1"
-                      }
-                    """,
-                "caApplicant2", """
-                      {
-                        "firstName": "af2",
-                        "lastName": "al2"
-                      }
-                    """,
-                "caApplicant3", """
-                      {
-                        "firstName": "af3",
-                        "lastName": "al3"
-                      }
-                    """,
-                "caApplicant4", """
-                      {
-                        "firstName": "af4",
-                        "lastName": "al4"
-                      }
-                    """,
-                "caApplicant5", """
-                    {
-                        "firstName": "af5",
-                        "lastName": "al5"
-                      }
-                    """,
-                "caRespondent1", """
-                   {
-                        "firstName": "rf1",
-                        "lastName": "rl1"
-                      }
-                    """,
-                "caRespondent2", """
-                    {
-                        "firstName": "rf2",
-                        "lastName": "rl2"
-                      }
-                    """,
-                "caRespondent3", """
-                    {
-                        "firstName": "rf3",
-                        "lastName": "rl3"
-                      }
-                    """,
-                "caRespondent4", """
-                    {
-                        "firstName": "rf4",
-                        "lastName": "rl4"
-                      }
-                    """,
-                "caRespondent5", """
-                    {
-                        "firstName": "rf5",
-                        "lastName": "rl5"
-                      }
-                    """
+                "caApplicant1", Map.of("firstName", "af1", "lastName", "al1"),
+                "caApplicant2", Map.of("firstName", "af2", "lastName", "al2"),
+                "caApplicant3", Map.of("firstName", "af3", "lastName", "al3"),
+                "caApplicant4", Map.of("firstName", "af4", "lastName", "al4"),
+                "caApplicant5", Map.of("firstName", "af5", "lastName", "al5"),
+                "caRespondent1", Map.of("firstName", "rf1", "lastName", "rl1"),
+                "caRespondent2", Map.of("firstName", "rf2", "lastName", "rl2"),
+                "caRespondent3", Map.of("firstName", "rf3", "lastName", "rl3"),
+                "caRespondent4", Map.of("firstName", "rf4", "lastName", "rl4"),
+                "caRespondent5", Map.of("firstName", "rf5", "lastName", "rl5")
             ))
             .build();
 
