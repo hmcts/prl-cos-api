@@ -288,7 +288,7 @@ class CaseAssignmentServiceTest {
 
     @ParameterizedTest
     @CsvSource({
-        "fl401Applicant, [APPLICANTBARRISTER]",
+        "fl401Applicant, [FL401APPLICANTBARRISTER]",
         "fl401Respondent, [FL401RESPONDENTBARRISTER]",
     })
     void deriveBarristerRoleForFl401CaseData(String party, String barristerRole) {

@@ -27,12 +27,4 @@ public class AllocatedBarrister {
 
     @JsonProperty("barristerOrg")
     private final Organisation barristerOrg;
-
-    @Override
-    public String toString() {
-        return "AllocatedBarrister{"
-            + "barristerFirstName='" + barristerFirstName + '\''
-            + ", barristerLastName='" + barristerLastName + '\''
-            + '}';
-    }
 }
