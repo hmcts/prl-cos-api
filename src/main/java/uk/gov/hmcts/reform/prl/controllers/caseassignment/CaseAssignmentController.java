@@ -35,7 +35,6 @@ import java.util.Optional;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATED_BARRISTER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SELECTED_PARTY_ID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -113,12 +112,18 @@ public class CaseAssignmentController {
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             List<String> errorList = new ArrayList<>();
-            String selectedPartyId = objectMapper.convertValue(caseDetails.getData().get(SELECTED_PARTY_ID),
-                                                               String.class);
-            caseAssignmentService.validateRemoveRequest(caseData, selectedPartyId, errorList);
+            AllocatedBarrister allocatedBarrister = objectMapper.convertValue(
+                caseDetails.getData().get(ALLOCATED_BARRISTER),
+                new TypeReference<>() { }
+            );
+
+            caseAssignmentService.validateRemoveRequest(caseData,
+                                                        allocatedBarrister.getPartyList().getValueCode(),
+                                                        errorList);
 
             if (errorList.isEmpty()) {
-                caseAssignmentService.removeBarrister(caseData, selectedPartyId);
+                caseAssignmentService.removeBarrister(caseData,
+                                                      allocatedBarrister.getPartyList().getValueCode());
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder()

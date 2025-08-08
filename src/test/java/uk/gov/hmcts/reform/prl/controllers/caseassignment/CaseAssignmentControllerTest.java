@@ -46,7 +46,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATED_BARRISTER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SELECTED_PARTY_ID;
 
 @ExtendWith(MockitoExtension.class)
 class CaseAssignmentControllerTest {
@@ -273,8 +272,7 @@ class CaseAssignmentControllerTest {
         when(authorisationService.isAuthorized(any(), any()))
             .thenReturn(true);
 
-        String selectedPartyId = UUID.randomUUID().toString();
-        Map<String, Object> caseData = of(SELECTED_PARTY_ID, selectedPartyId);
+        Map<String, Object> caseData = of(ALLOCATED_BARRISTER, allocatedBarrister);
 
         CaseDetails caseDetails = CaseDetails.builder()
             .id(1234L)
@@ -295,9 +293,10 @@ class CaseAssignmentControllerTest {
 
         assertThat(response.getErrors()).isEmpty();
 
+        String selectedPartyId = allocatedBarrister.getPartyList().getValueCode();
         verify(caseAssignmentService).validateRemoveRequest(isA(CaseData.class),
-                                                         eq(selectedPartyId),
-                                                         anyList());
+                                                            eq(selectedPartyId),
+                                                            anyList());
         verify(caseAssignmentService).removeBarrister(isA(CaseData.class),
                                                    eq(selectedPartyId));
     }
@@ -308,7 +307,7 @@ class CaseAssignmentControllerTest {
             .thenReturn(true);
 
         String selectedPartyId = UUID.randomUUID().toString();
-        Map<String, Object> caseData = of(SELECTED_PARTY_ID, selectedPartyId);
+        Map<String, Object> caseData = of(ALLOCATED_BARRISTER, allocatedBarrister);
 
         CaseDetails caseDetails = CaseDetails.builder()
             .id(1234L)
