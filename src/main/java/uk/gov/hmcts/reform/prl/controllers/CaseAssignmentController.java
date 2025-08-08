@@ -97,7 +97,7 @@ public class CaseAssignmentController {
         }
     }
 
-    @DeleteMapping(path = "/barrister/remove/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/barrister/remove/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "About to submit to remove Barrister")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
