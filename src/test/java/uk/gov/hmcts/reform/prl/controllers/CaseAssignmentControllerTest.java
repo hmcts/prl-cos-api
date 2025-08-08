@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.Barrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -55,6 +56,8 @@ class CaseAssignmentControllerTest {
     private OrganisationService organisationService;
     @Mock
     private AuthorisationService authorisationService;
+    @Mock
+    private AllTabServiceImpl allTabService;
 
     private CaseAssignmentController caseAssignmentController;
     private ObjectMapper objectMapper;
@@ -69,7 +72,8 @@ class CaseAssignmentControllerTest {
             caseAssignmentService,
             objectMapper,
             organisationService,
-            authorisationService);
+            authorisationService,
+            allTabService);
         barrister = Barrister.builder()
             .barristerEmail("barristerEmail@gmail.com")
             .barristerFirstName("barristerName")
@@ -125,6 +129,7 @@ class CaseAssignmentControllerTest {
             .caseDetails(caseDetails)
             .build();
 
+        when(allTabService.getAllTabsFields(any(CaseData.class))).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse response = caseAssignmentController.submitAddBarrister(
             "auth",
             "s2sToken",
@@ -179,6 +184,7 @@ class CaseAssignmentControllerTest {
             .caseDetails(caseDetails)
             .build();
 
+        when(allTabService.getAllTabsFields(any(CaseData.class))).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse response = caseAssignmentController.submitAddBarrister(
             "auth",
             "s2sToken",
@@ -231,6 +237,7 @@ class CaseAssignmentControllerTest {
             .caseDetails(caseDetails)
             .build();
 
+        when(allTabService.getAllTabsFields(any(CaseData.class))).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse response = caseAssignmentController.submitAddBarrister(
             "auth",
             "s2sToken",
@@ -285,6 +292,7 @@ class CaseAssignmentControllerTest {
             .caseDetails(caseDetails)
             .build();
 
+        when(allTabService.getAllTabsFields(any(CaseData.class))).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse response = caseAssignmentController.submitRemoveBarrister(
             "auth",
             "s2sToken",
@@ -318,7 +326,7 @@ class CaseAssignmentControllerTest {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
-
+        when(allTabService.getAllTabsFields(any(CaseData.class))).thenReturn(caseData);
         doAnswer(invocation -> {
             List<String> errors = invocation.getArgument(2);
             errors.add("errors");

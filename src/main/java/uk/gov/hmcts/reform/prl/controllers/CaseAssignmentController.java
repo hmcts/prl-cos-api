@@ -25,14 +25,17 @@ import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATED_BARRISTER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @Slf4j
@@ -45,6 +48,7 @@ public class CaseAssignmentController {
     private final ObjectMapper objectMapper;
     private final OrganisationService organisationService;
     private final AuthorisationService authorisationService;
+    private final AllTabServiceImpl allTabService;
 
     @PostMapping(path = "/barrister/add/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "About to submit to add Barrister")
@@ -88,8 +92,15 @@ public class CaseAssignmentController {
                                                    allocatedBarrister);
             }
 
+            Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
+            caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
+
+            if (caseDataMap.containsKey(CASE_TYPE_OF_APPLICATION) && caseDataMap.get(CASE_TYPE_OF_APPLICATION) == null) {
+                caseDataMap.put(CASE_TYPE_OF_APPLICATION, caseData.getSelectedCaseTypeID());
+            }
+
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseData.toMap(objectMapper))
+                .data(caseDataMap)
                 .errors(errorList).build();
         } else {
             throw new IllegalArgumentException(INVALID_CLIENT);
@@ -133,8 +144,15 @@ public class CaseAssignmentController {
                 errorList.add(INVALID_CLIENT);
             }
 
+            Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
+            caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
+
+            if (caseDataMap.containsKey(CASE_TYPE_OF_APPLICATION) && caseDataMap.get(CASE_TYPE_OF_APPLICATION) == null) {
+                caseDataMap.put(CASE_TYPE_OF_APPLICATION, caseData.getSelectedCaseTypeID());
+            }
+
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseData.toMap(objectMapper))
+                .data(caseDataMap)
                 .errors(errorList).build();
         } else {
             throw new IllegalArgumentException(INVALID_CLIENT);
