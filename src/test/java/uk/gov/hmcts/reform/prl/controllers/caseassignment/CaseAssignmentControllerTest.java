@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -100,8 +101,8 @@ class CaseAssignmentControllerTest {
     }
 
     @Test
-    void testSuccessSubmitAddBarrister() throws JsonProcessingException {
-        System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(allocatedBarrister));
+    void testSuccessSubmitAddBarrister() {
+
         Optional<String> userId = Optional.of("userId");
         when(authorisationService.isAuthorized(any(), any()))
             .thenReturn(true);
@@ -112,7 +113,8 @@ class CaseAssignmentControllerTest {
         when(caseAssignmentService.deriveBarristerRole(anyMap(), isA(CaseData.class), isA(AllocatedBarrister.class)))
             .thenReturn(barristerRole);
 
-        Map<String, Object> caseData = of(ALLOCATED_BARRISTER, allocatedBarrister);
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(ALLOCATED_BARRISTER, allocatedBarrister);
 
         CaseDetails caseDetails = CaseDetails.builder()
             .id(1234L)
@@ -272,7 +274,8 @@ class CaseAssignmentControllerTest {
         when(authorisationService.isAuthorized(any(), any()))
             .thenReturn(true);
 
-        Map<String, Object> caseData = of(ALLOCATED_BARRISTER, allocatedBarrister);
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(ALLOCATED_BARRISTER, allocatedBarrister);
 
         CaseDetails caseDetails = CaseDetails.builder()
             .id(1234L)
@@ -306,7 +309,6 @@ class CaseAssignmentControllerTest {
         when(authorisationService.isAuthorized(any(), any()))
             .thenReturn(true);
 
-        String selectedPartyId = UUID.randomUUID().toString();
         Map<String, Object> caseData = of(ALLOCATED_BARRISTER, allocatedBarrister);
 
         CaseDetails caseDetails = CaseDetails.builder()
@@ -320,6 +322,7 @@ class CaseAssignmentControllerTest {
             .caseDetails(caseDetails)
             .build();
 
+        String selectedPartyId = allocatedBarrister.getPartyList().getValueCode();
         doAnswer(invocation -> {
             List<String> errors = invocation.getArgument(2);
             errors.add("errors");

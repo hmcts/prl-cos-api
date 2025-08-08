@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -86,10 +87,11 @@ public class CaseAssignmentController {
                                                    userId.get(),
                                                    barristerRole.get(),
                                                    allocatedBarrister);
+                updateCaseDetails(caseDetails, caseData);
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseData.toMap(objectMapper))
+                .data(caseDetails.getData())
                 .errors(errorList).build();
         } else {
             throw new IllegalArgumentException(INVALID_CLIENT);
@@ -124,14 +126,19 @@ public class CaseAssignmentController {
             if (errorList.isEmpty()) {
                 caseAssignmentService.removeBarrister(caseData,
                                                       allocatedBarrister.getPartyList().getValueCode());
+                updateCaseDetails(caseDetails, caseData);
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseData.toMap(objectMapper))
+                .data(caseDetails.getData())
                 .errors(errorList).build();
         } else {
             throw new IllegalArgumentException(INVALID_CLIENT);
         }
 
+    }
+
+    private void updateCaseDetails(CaseDetails caseDetails, CaseData caseData) {
+        caseDetails.getData().putAll(caseData.toMap(objectMapper));
     }
 }
