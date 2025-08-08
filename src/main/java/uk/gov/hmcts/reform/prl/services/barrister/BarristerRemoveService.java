@@ -9,6 +9,9 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
+import static uk.gov.hmcts.reform.prl.enums.PartyEnum.applicant;
+import static uk.gov.hmcts.reform.prl.enums.PartyEnum.respondent;
+
 @Slf4j
 @Service
 public class BarristerRemoveService extends  AbstractBarristerService {
@@ -29,7 +32,7 @@ public class BarristerRemoveService extends  AbstractBarristerService {
     @Override
     protected String getLabelForAction(boolean applicantOrRespondent, BarristerFilter barristerFilter, PartyDetails partyDetails) {
         return String.format("%s (%s), %s, %s", partyDetails.getLabelForDynamicList(),
-                             applicantOrRespondent ? APPLICANT : RESPONDENT,
+                             applicantOrRespondent ? applicant.getDisplayedValue() : respondent.getDisplayedValue(),
                              partyDetails.getRepresentativeFullName(),
                              partyDetails.getBarrister().getBarristerFullName()
         );
