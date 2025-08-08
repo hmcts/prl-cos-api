@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
@@ -53,13 +54,14 @@ class BarristerRemoveServiceTest extends BarristerTestAbstract {
             .respondents(allRespondents)
             .build();
 
-        DynamicList listOfBarristersToRemove = barristerRemoveService.getBarristerListToRemove(caseData, AUTHORISATION);
+        AllocatedBarrister allocatedBarrister = barristerRemoveService.getBarristerListToRemove(caseData, AUTHORISATION);
+        DynamicList listOfBarristersToRemove = allocatedBarrister.getPartyList();
 
         assertEquals(listOfBarristersToRemove.getValue(), null);
         assertEquals(2, listOfBarristersToRemove.getListItems().size());
 
-        assertPartyToRemove(listOfBarristersToRemove, true, BARRISTER_PARTY_ID_PREFIX, 0, 3);
-        assertPartyToRemove(listOfBarristersToRemove, false, BARRISTER_PARTY_ID_PREFIX, 1, 7);
+        assertPartyToRemove(listOfBarristersToRemove, true, PARTY_ID_PREFIX, 0, 3);
+        assertPartyToRemove(listOfBarristersToRemove, false, PARTY_ID_PREFIX, 1, 7);
     }
 
     protected void assertPartyToRemove(DynamicList listOfBarristersToRemove, boolean appResp, String prefix, int itemIndex, int partyIndex) {
