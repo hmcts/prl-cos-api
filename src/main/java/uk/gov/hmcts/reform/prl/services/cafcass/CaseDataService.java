@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CANCELLED;
 
 @Slf4j
@@ -319,11 +320,14 @@ public class CaseDataService {
             && null != caseData.getBundleInformation().getCaseBundles()
             && CollectionUtils.isNotEmpty(caseData.getBundleInformation().getCaseBundles())) {
             caseData.getBundleInformation().getCaseBundles().parallelStream().forEach(bundle -> {
-                uk.gov.hmcts.reform.prl.models.documents.Document document = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-                    .documentFileName(bundle.getValue().getStitchedDocument().documentFilename)
-                    .documentUrl(bundle.getValue().getStitchedDocument().getDocumentUrl())
-                    .build();
-                addInOtherDocuments("courtBundle", document, otherDocsList);
+                if (isNotEmpty(bundle.getValue().getStitchedDocument())) {
+                    uk.gov.hmcts.reform.prl.models.documents.Document document =
+                        uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                            .documentFileName(bundle.getValue().getStitchedDocument().getDocumentFilename())
+                            .documentUrl(bundle.getValue().getStitchedDocument().getDocumentUrl())
+                            .build();
+                    addInOtherDocuments("courtBundle", document, otherDocsList);
+                }
             });
         }
     }

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -59,6 +60,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -111,77 +113,114 @@ public class CaseDataServiceTest {
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
     }
 
-
-    @Test
-    public void getCaseData() throws IOException {
-
-        final List<CaseHearing> caseHearings = new ArrayList();
-
-        final CaseHearing caseHearing = CaseHearing.caseHearingWith().hearingID(Long.valueOf("1234"))
-            .hmcStatus("LISTED").hearingType("ABA5-FFH").hearingID(Long.valueOf("2000004659")).hearingDaySchedule(
-                List.of(
-                    HearingDaySchedule.hearingDayScheduleWith()
-                        .hearingVenueName("ROYAL COURTS OF JUSTICE - QUEENS BUILDING (AND WEST GREEN BUILDING)")
-                        .hearingStartDateTime(LocalDateTime.parse("2023-05-09T09:00:00")).hearingEndDateTime(LocalDateTime.parse(
-                            "2023-05-09T09:45:00")).build())).build();
-
-        caseHearings.add(caseHearing);
-
-        Hearings hearings = new Hearings();
-        hearings.setCaseRef("1673970714366224");
-        hearings.setCaseHearings(caseHearings);
-
-        List<Hearings> listOfHearings = new ArrayList<>();
-        listOfHearings.add(hearings);
+    @Nested
+    public class GetCaseData {
 
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
-        objectMapper.registerModule(new ParameterNamesModule());
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-        String expectedCafCassResponse = TestResourceUtil.readFileFrom("classpath:response/CafCaasResponse.json");
-        SearchResult searchResult = objectMapper.readValue(expectedCafCassResponse,
-                                                           SearchResult.class);
-        CafCassResponse cafCassResponse = objectMapper.readValue(expectedCafCassResponse, CafCassResponse.class);
 
-        when(cafcassCcdDataStoreService.searchCases(anyString(),anyString(),any(),any())).thenReturn(searchResult);
-        Mockito.doNothing().when(cafCassFilter).filter(cafCassResponse);
-        when(hearingService.getHearings(anyString(),anyString())).thenReturn(hearings);
-        when(hearingService.getHearingsForAllCases(anyString(),anyMap())).thenReturn(listOfHearings);
-        when(systemUserService.getSysUserToken()).thenReturn(userToken);
-        when(organisationService.getOrganisationDetails(anyString(),anyString()))
-            .thenReturn(Organisations.builder()
-                            .name("test 1")
-                            .organisationIdentifier("EJK3DHI")
-                            .contactInformation(List.of(ContactInformation.builder()
-                                                            .addressLine1("Physio In The City")
-                                                            .addressLine2("1 Kingdom Street")
-                                                            .postCode("W2 6BD")
-                                                            .build()))
-                            .build());
-        List<String> caseStateList = new LinkedList<>();
-        caseStateList.add("DECISION_OUTCOME");
-        ReflectionTestUtils.setField(caseDataService, "caseStateList", caseStateList);
+        @BeforeEach
+        public void init() {
+            objectMapper.registerModule(new ParameterNamesModule());
+            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+            objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
 
-        List<String> caseTypeList = new ArrayList<>();
-        caseTypeList.add("C100");
-        ReflectionTestUtils.setField(caseDataService, "caseTypeList", caseTypeList);
+            final List<CaseHearing> caseHearings = new ArrayList();
+            final CaseHearing caseHearing = CaseHearing.caseHearingWith().hearingID(Long.valueOf("1234"))
+                .hmcStatus("LISTED").hearingType("ABA5-FFH").hearingID(Long.valueOf("2000004659")).hearingDaySchedule(
+                    List.of(
+                        HearingDaySchedule.hearingDayScheduleWith()
+                            .hearingVenueName("ROYAL COURTS OF JUSTICE - QUEENS BUILDING (AND WEST GREEN BUILDING)")
+                            .hearingStartDateTime(LocalDateTime.parse("2023-05-09T09:00:00")).hearingEndDateTime(
+                                LocalDateTime.parse(
+                                    "2023-05-09T09:45:00")).build())).build();
 
+            caseHearings.add(caseHearing);
 
-        Map<String, String> refDataMap = new HashMap<>();
-        refDataMap.put("ABA5-APL","Appeal");
-        when(refDataService.getRefDataCategoryValueMap(anyString(),anyString(),anyString(),anyString())).thenReturn(refDataMap);
-        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, new ArrayList<>(), new ArrayList<>());
-        when(coreCaseDataApi.getCategoriesAndDocuments(
-            Mockito.any(),
-            Mockito.any(),
-            Mockito.any()
-        )).thenReturn(categoriesAndDocuments);
+            Hearings hearings = new Hearings();
+            hearings.setCaseRef("1673970714366224");
+            hearings.setCaseHearings(caseHearings);
 
-        CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation",
-                                                                          "start", "end");
-        assertEquals(objectMapper.writeValueAsString(cafCassResponse), objectMapper.writeValueAsString(realCafCassResponse));
+            List<Hearings> listOfHearings = new ArrayList<>();
+            listOfHearings.add(hearings);
 
+            when(hearingService.getHearings(anyString(),anyString())).thenReturn(hearings);
+            when(hearingService.getHearingsForAllCases(anyString(),anyMap())).thenReturn(listOfHearings);
+            when(systemUserService.getSysUserToken()).thenReturn(userToken);
+            when(organisationService.getOrganisationDetails(anyString(),anyString()))
+                .thenReturn(Organisations.builder()
+                                .name("test 1")
+                                .organisationIdentifier("EJK3DHI")
+                                .contactInformation(List.of(ContactInformation.builder()
+                                                                .addressLine1("Physio In The City")
+                                                                .addressLine2("1 Kingdom Street")
+                                                                .postCode("W2 6BD")
+                                                                .build()))
+                                .build());
+
+            Map<String, String> refDataMap = new HashMap<>();
+            refDataMap.put("ABA5-APL","Appeal");
+            when(refDataService.getRefDataCategoryValueMap(anyString(), anyString(), anyString(), anyString()))
+                .thenReturn(refDataMap);
+
+            CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(
+                1,
+                new ArrayList<>(),
+                new ArrayList<>()
+            );
+            when(coreCaseDataApi.getCategoriesAndDocuments(
+                Mockito.any(),
+                Mockito.any(),
+                Mockito.any()
+            )).thenReturn(categoriesAndDocuments);
+
+            List<String> caseStateList = new LinkedList<>();
+            caseStateList.add("DECISION_OUTCOME");
+            ReflectionTestUtils.setField(caseDataService, "caseStateList", caseStateList);
+
+            List<String> caseTypeList = new ArrayList<>();
+            caseTypeList.add("C100");
+            ReflectionTestUtils.setField(caseDataService, "caseTypeList", caseTypeList);
+
+        }
+
+        @Test
+        public void shouldNotThrowExceptionForFailedBundles() throws IOException {
+            String expectedCafCassResponse =
+                TestResourceUtil.readFileFrom("classpath:response/CafcassResponseNullBundles.json");
+
+            SearchResult searchResult = objectMapper.readValue(expectedCafCassResponse, SearchResult.class);
+            CafCassResponse cafCassResponse = objectMapper.readValue(expectedCafCassResponse, CafCassResponse.class);
+
+            when(cafcassCcdDataStoreService.searchCases(anyString(),anyString(),any(),any())).thenReturn(searchResult);
+            Mockito.doNothing().when(cafCassFilter).filter(cafCassResponse);
+
+            assertDoesNotThrow(() -> caseDataService.getCaseData("authorisation", "start", "end"));
+        }
+
+        @Test
+        public void getCaseData() throws IOException {
+            String expectedCafCassResponse = TestResourceUtil.readFileFrom("classpath:response/CafCaasResponse.json");
+            SearchResult searchResult = objectMapper.readValue(
+                expectedCafCassResponse,
+                SearchResult.class
+            );
+            CafCassResponse cafCassResponse = objectMapper.readValue(expectedCafCassResponse, CafCassResponse.class);
+
+            when(cafcassCcdDataStoreService.searchCases(
+                anyString(),
+                anyString(),
+                any(),
+                any()
+            )).thenReturn(searchResult);
+            Mockito.doNothing().when(cafCassFilter).filter(cafCassResponse);
+
+            CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation", "start", "end");
+            assertEquals(
+                objectMapper.writeValueAsString(cafCassResponse),
+                objectMapper.writeValueAsString(realCafCassResponse)
+            );
+        }
     }
 
     @Test
