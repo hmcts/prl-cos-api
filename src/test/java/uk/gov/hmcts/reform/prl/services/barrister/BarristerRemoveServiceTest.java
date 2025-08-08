@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
@@ -53,7 +54,8 @@ class BarristerRemoveServiceTest extends BarristerTestAbstract {
             .respondents(allRespondents)
             .build();
 
-        DynamicList listOfBarristersToRemove = barristerRemoveService.getBarristerListToRemove(caseData, AUTHORISATION);
+        AllocatedBarrister allocatedBarrister = barristerRemoveService.getBarristerListToRemove(caseData, AUTHORISATION);
+        DynamicList listOfBarristersToRemove = allocatedBarrister.getPartyList();
 
         assertEquals(listOfBarristersToRemove.getValue(), null);
         assertEquals(2, listOfBarristersToRemove.getListItems().size());

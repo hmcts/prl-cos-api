@@ -364,34 +364,34 @@ public class CaseAssignmentService {
     }
 
     private Optional<String> getC100BarristerRole(Map<String, Object> data,
-                                                  CaseData caseData,
-                                                  String selectedPartyId) {
+                                                      CaseData caseData,
+                                                      String selectedPartyId) {
         PartyDetails c100Party = getC100Party(caseData, selectedPartyId);
         String nameKey = String.join("-", c100Party.getFirstName(), c100Party.getLastName());
         record PartyInfo(String firstName, String lastName) {}
 
         return Arrays.stream(BarristerRole.RoleMapping.values())
-                .filter(roleMapping -> roleMapping.getRepresenting().equals(BarristerRole.Representing.CAAPPLICANT)
-                        || roleMapping.getRepresenting().equals(BarristerRole.Representing.CARESPONDENT))
-                .filter(roleMap -> data.get(roleMap.getParty()) != null)
-                .filter(roleMap -> {
-                    PartyInfo partyInfo = objectMapper.convertValue(data.get(roleMap.getParty()), PartyInfo.class);
+            .filter(roleMapping -> roleMapping.getRepresenting().equals(Representing.CAAPPLICANT)
+                || roleMapping.getRepresenting().equals(Representing.CARESPONDENT))
+            .filter(roleMap -> data.get(roleMap.getParty()) != null)
+            .filter(roleMap -> {
+                PartyInfo partyInfo = objectMapper.convertValue(data.get(roleMap.getParty()), PartyInfo.class);
 
-                    String partyKey = String.join(
-                            "-",
-                            partyInfo.firstName,
-                            partyInfo.lastName
-                    );
+                String partyKey = String.join(
+                    "-",
+                    partyInfo.firstName,
+                    partyInfo.lastName
+                );
 
-                    return partyKey.equals(nameKey);
-                })
-                .findFirst()
-                .flatMap(roleMapping ->
-                        Arrays.stream(BarristerRole.values())
-                                .filter(barristerRole -> barristerRole.getRoleMapping().equals(roleMapping))
-                                .findFirst()
-                )
-                .map(BarristerRole::getCaseRoleLabel);
+                return partyKey.equals(nameKey);
+            })
+            .findFirst()
+            .flatMap(roleMapping ->
+                         Arrays.stream(BarristerRole.values())
+                             .filter(barristerRole -> barristerRole.getRoleMapping().equals(roleMapping))
+                             .findFirst()
+            )
+            .map(BarristerRole::getCaseRoleLabel);
     }
 
     private void updatedPartyWithBarristerDetails(CaseData caseData,

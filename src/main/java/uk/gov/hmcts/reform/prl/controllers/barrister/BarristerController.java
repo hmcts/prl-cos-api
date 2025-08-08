@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
@@ -29,7 +29,6 @@ import java.util.Map;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATED_BARRISTER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REMOVE_BARRISTER_AND_PARTIES_LIST;
 
 @Slf4j
 @RestController
@@ -87,9 +86,10 @@ public class BarristerController extends AbstractCallbackController {
             List<String> errorList = new ArrayList<>();
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-            DynamicList barristerList = barristerRemoveService.getBarristerListToRemove(caseData, authorisation);
-            if (barristerList != null && !barristerList.getListItems().isEmpty()) {
-                caseDataUpdated.put(REMOVE_BARRISTER_AND_PARTIES_LIST, barristerList);
+            AllocatedBarrister barristerList = barristerRemoveService.getBarristerListToRemove(caseData, authorisation);
+            if (barristerList != null && barristerList.getPartyList() != null
+                && !barristerList.getPartyList().getListItems().isEmpty()) {
+                caseDataUpdated.put(ALLOCATED_BARRISTER, barristerList);
             } else {
                 errorList.add("Parties are not represented by counsel at this stage");
             }
