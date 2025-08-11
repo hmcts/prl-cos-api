@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssig
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
+import uk.gov.hmcts.reform.prl.utils.MaskEmail;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -42,7 +43,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole.Representing.DAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole.Representing.DARESPONDENT;
-import static uk.gov.hmcts.reform.prl.utils.EmailUtils.maskEmail;
 
 @Slf4j
 @Builder
@@ -54,6 +54,7 @@ public class CaseAssignmentService {
     private final AuthTokenGenerator tokenGenerator;
     private final OrganisationService organisationService;
     private final RoleAssignmentService roleAssignmentService;
+    private final MaskEmail maskEmail;
     private final ObjectMapper objectMapper;
 
     private static IllegalArgumentException getIllegalArgumentException(CaseData caseData,
@@ -207,7 +208,7 @@ public class CaseAssignmentService {
                     log.error(
                         "Case id {}: Barrister {} is not associated with the organisation {}",
                         caseData.getId(),
-                        maskEmail(allocatedBarrister.getBarristerEmail()),
+                        maskEmail.mask(allocatedBarrister.getBarristerEmail()),
                         allocatedBarrister.getBarristerOrg().getOrganisationID()
                     );
 
@@ -233,7 +234,7 @@ public class CaseAssignmentService {
                 () -> {
                     log.error(
                         "Barrister {} is not associated with the case {}",
-                        maskEmail(selectedParty.getBarrister().getBarristerEmail()),
+                        maskEmail.mask(selectedParty.getBarrister().getBarristerEmail()),
                         caseData.getId()
                     );
                     errorList.add("Barrister is not associated with the case");
