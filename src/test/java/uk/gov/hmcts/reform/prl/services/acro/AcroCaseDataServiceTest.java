@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
@@ -48,7 +49,7 @@ public class AcroCaseDataServiceTest {
     HearingService hearingService;
 
     @Mock
-    AcroCaseSearchService acroCaseSearchService;
+    private CoreCaseDataApi coreCaseDataApi;
 
     @Mock
     AuthTokenGenerator authTokenGenerator;
@@ -103,7 +104,7 @@ public class AcroCaseDataServiceTest {
             expectedAcroResponse,
             SearchResult.class
         );
-        when(acroCaseSearchService.searchCases(anyString(), anyString(), any(), any())).thenReturn(searchResult);
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), any(), any())).thenReturn(searchResult);
         when(hearingService.getHearingsForAllCases(anyString(), anyMap())).thenReturn(listOfHearings);
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
 
@@ -155,7 +156,7 @@ public class AcroCaseDataServiceTest {
             SearchResult.class
         );
 
-        when(acroCaseSearchService.searchCases(anyString(), anyString(), any(), any())).thenReturn(searchResult);
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), any(), any())).thenReturn(searchResult);
         when(hearingService.getHearings(anyString(), anyString())).thenReturn(hearings);
         when(hearingService.getHearingsForAllCases(anyString(), anyMap())).thenReturn(listOfHearings);
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
@@ -202,7 +203,7 @@ public class AcroCaseDataServiceTest {
         SearchResult searchResult = objectMapper.readValue(expectedCafCassResponse, SearchResult.class);
         CafCassResponse cafCassResponse = objectMapper.readValue(expectedCafCassResponse, CafCassResponse.class);
         Exception exception = new RuntimeException();
-        when(acroCaseSearchService.searchCases(anyString(), anyString(), any(), any())).thenThrow(exception);
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), any(), any())).thenThrow(exception);
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
 
         assertThrows(RuntimeException.class, () -> acroCaseDataService.getCaseData("authorisation"));

@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -58,7 +59,7 @@ public class AcroCaseDataService {
     public static final String NON_MOLESTATION = "nonMolestation";
     public static final String FINAL = "Final";
     public static final String FL_401 = "FL401";
-    private final AcroCaseSearchService acroCaseSearchService;
+    private final CoreCaseDataApi coreCaseDataApi;
     private final AuthTokenGenerator authTokenGenerator;
     @Value("${cafcaas.search-case-type-id}")
     private String searchCaseTypeId;
@@ -82,7 +83,7 @@ public class AcroCaseDataService {
             String userToken = systemUserService.getSysUserToken();
             final String s2sToken = authTokenGenerator.generate();
             log.info("Invoking search cases");
-            SearchResult searchResult = acroCaseSearchService.searchCases(
+            SearchResult searchResult = coreCaseDataApi.searchCases(
                 userToken,
                 searchString,
                 s2sToken,

@@ -12,6 +12,10 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 public class AcroServiceUtil {
 
+    private AcroServiceUtil() {
+        //Util for ACRO data
+    }
+
     /**
      * Code to get NextHearingDate with in case hearing.
      * Fetch order's hearingId.
