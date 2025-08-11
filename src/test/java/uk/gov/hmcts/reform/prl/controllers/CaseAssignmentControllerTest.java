@@ -23,9 +23,9 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.Barrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -56,8 +56,6 @@ class CaseAssignmentControllerTest {
     private OrganisationService organisationService;
     @Mock
     private AuthorisationService authorisationService;
-    @Mock
-    private AllTabServiceImpl allTabService;
 
     private CaseAssignmentController caseAssignmentController;
     private ObjectMapper objectMapper;
@@ -72,8 +70,7 @@ class CaseAssignmentControllerTest {
             caseAssignmentService,
             objectMapper,
             organisationService,
-            authorisationService,
-            allTabService);
+            authorisationService);
         barrister = Barrister.builder()
             .barristerEmail("barristerEmail@gmail.com")
             .barristerFirstName("barristerName")
@@ -116,7 +113,8 @@ class CaseAssignmentControllerTest {
         when(caseAssignmentService.deriveBarristerRole(anyMap(), isA(CaseData.class), isA(AllocatedBarrister.class)))
             .thenReturn(barristerRole);
 
-        Map<String, Object> caseData = of(ALLOCATED_BARRISTER, allocatedBarrister);
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(ALLOCATED_BARRISTER, allocatedBarrister);
 
         CaseDetails caseDetails = CaseDetails.builder()
             .id(1234L)
@@ -129,7 +127,6 @@ class CaseAssignmentControllerTest {
             .caseDetails(caseDetails)
             .build();
 
-        when(allTabService.getAllTabsFields(any(CaseData.class))).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse response = caseAssignmentController.submitAddBarrister(
             "auth",
             "s2sToken",
@@ -184,7 +181,6 @@ class CaseAssignmentControllerTest {
             .caseDetails(caseDetails)
             .build();
 
-        when(allTabService.getAllTabsFields(any(CaseData.class))).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse response = caseAssignmentController.submitAddBarrister(
             "auth",
             "s2sToken",
@@ -237,7 +233,6 @@ class CaseAssignmentControllerTest {
             .caseDetails(caseDetails)
             .build();
 
-        when(allTabService.getAllTabsFields(any(CaseData.class))).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse response = caseAssignmentController.submitAddBarrister(
             "auth",
             "s2sToken",
@@ -279,7 +274,8 @@ class CaseAssignmentControllerTest {
         when(authorisationService.isAuthorized(any(), any()))
             .thenReturn(true);
 
-        Map<String, Object> caseData = of(ALLOCATED_BARRISTER, allocatedBarrister);
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(ALLOCATED_BARRISTER, allocatedBarrister);
 
         CaseDetails caseDetails = CaseDetails.builder()
             .id(1234L)
@@ -292,7 +288,6 @@ class CaseAssignmentControllerTest {
             .caseDetails(caseDetails)
             .build();
 
-        when(allTabService.getAllTabsFields(any(CaseData.class))).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse response = caseAssignmentController.submitRemoveBarrister(
             "auth",
             "s2sToken",
@@ -326,7 +321,7 @@ class CaseAssignmentControllerTest {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
-        when(allTabService.getAllTabsFields(any(CaseData.class))).thenReturn(caseData);
+
         doAnswer(invocation -> {
             List<String> errors = invocation.getArgument(2);
             errors.add("errors");
