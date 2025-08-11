@@ -754,7 +754,7 @@ public class CaseService {
         citizenDocuments.addAll(getAllOrdersFromPreviousProceedings(caseData));
 
         //Applications within proceedings
-        otherDocuments.addAll(getAllApplicationWithinProceedingsDocuments(caseData, partyIdAndType));
+        citizenDocuments.addAll(getAllApplicationWithinProceedingsDocuments(caseData, partyIdAndType));
 
         //C9/FL415 - Statement of service documents
         otherDocuments.addAll(getAllStatementOfServiceDocuments(caseData));
