@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.controllers.barrister;
+package uk.gov.hmcts.reform.prl.controllers;
 
 import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
@@ -18,14 +18,14 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-public class BarristerControllerFunctionalTest {
+public class CaseAssignmentControllerFunctionalTest {
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;
 
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
-    private static final String VALID_REQUEST_BODY = "controller/barrister-request-casedata-body.json";
+    private static final String VALID_REQUEST_BODY = "controller/barristerRequest.json";
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
@@ -36,7 +36,8 @@ public class BarristerControllerFunctionalTest {
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
     @Test
-    public void testBarristerAddAboutToStartCallback() throws Exception {
+    public void testAddBarristerAboutToSubmit() throws Exception {
+
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
@@ -44,13 +45,13 @@ public class BarristerControllerFunctionalTest {
             .body(requestBody)
             .when()
             .contentType("application/json")
-            .post("/barrister/add/about-to-start")
+            .post("/case-assignment/barrister/add/about-to-submit")
             .then()
             .assertThat().statusCode(200);
     }
 
     @Test
-    public void testBarristerRemoveAboutToStartCallback() throws Exception {
+    public void testRemoveBarristerAboutToSubmit() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
@@ -58,7 +59,7 @@ public class BarristerControllerFunctionalTest {
             .body(requestBody)
             .when()
             .contentType("application/json")
-            .post("/barrister/remove/about-to-start")
+            .delete("/case-assignment/barrister/remove/about-to-submit")
             .then()
             .assertThat().statusCode(200);
     }
