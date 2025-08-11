@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
+import uk.gov.hmcts.reform.prl.exception.InvalidPartyIdException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
@@ -815,7 +816,7 @@ class CaseAssignmentServiceTest {
                                                                              id,
                                                     errors))
             .hasMessageContaining("Invalid party selected")
-            .isInstanceOf(IllegalArgumentException.class);
+            .isInstanceOf(InvalidPartyIdException.class);
     }
 
     @Test
