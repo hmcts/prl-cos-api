@@ -70,16 +70,15 @@ public class CaseAssignmentController {
 
             Optional<String> userId = organisationService
                 .findUserByEmail(allocatedBarrister.getBarristerEmail());
-
             Optional<String> barristerRole  = caseAssignmentService.deriveBarristerRole(caseDetails.getData(),
                                                                                         caseData,
                                                                                         allocatedBarrister);
             caseAssignmentService.validateAddRequest(
-                    userId,
-                    caseData,
-                    barristerRole,
-                    allocatedBarrister,
-                    errorList);
+                userId,
+                caseData,
+                barristerRole,
+                allocatedBarrister,
+                errorList);
 
             if (errorList.isEmpty() && userId.isPresent() && barristerRole.isPresent()) {
                 caseAssignmentService.addBarrister(caseData,
@@ -90,7 +89,7 @@ public class CaseAssignmentController {
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseData.toMap(objectMapper))
+                .data(caseDetails.getData())
                 .errors(errorList).build();
         } else {
             throw new IllegalArgumentException(INVALID_CLIENT);
