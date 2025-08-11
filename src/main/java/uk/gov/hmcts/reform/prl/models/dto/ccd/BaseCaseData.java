@@ -59,6 +59,9 @@ public class BaseCaseData {
     @JsonProperty("c1AWelshDraftDocument")
     private  Document c1AWelshDraftDocument;
 
+    @JsonProperty("c8ArchivedDocuments")
+    private List<Element<Document>> c8ArchivedDocuments;
+
     /**
      * Case Type Of Application.
      */
@@ -68,6 +71,9 @@ public class BaseCaseData {
      */
     @JsonProperty("caseTypeOfApplication")
     private String caseTypeOfApplication;
+
+    @JsonProperty("CaseAccessCategory")
+    private String caseAccessCategory;
     /**
      * Case name.
      */
