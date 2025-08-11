@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -55,7 +54,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CANCELLED;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AcroCaseDataService {
 
-    private final CoreCaseDataApi coreCaseDataApi;
+    public static final String NON_MOLESTATION_ORDER_FL_404_A = "Non-molestation order (FL404A)";
+    public static final String NON_MOLESTATION = "nonMolestation";
+    public static final String FINAL = "Final";
+    public static final String FL_401 = "FL401";
     private final AcroCaseSearchService acroCaseSearchService;
     private final AuthTokenGenerator authTokenGenerator;
     @Value("${cafcaas.search-case-type-id}")
@@ -130,11 +132,11 @@ public class AcroCaseDataService {
 
     private List<Should> populateMustQuery(LastModified dateCreatedRange) {
         List<Should> should = new ArrayList<>();
-        should.add(Should.builder().match(Match.builder().caseTypeOfApplication("FL401").build()).build());
-        should.add(Should.builder().match(Match.builder().orderType("nonMolestation").build()).build());
-        should.add(Should.builder().match(Match.builder().orderTypeId("Non-molestation order (FL404A)").build()).build());
+        should.add(Should.builder().match(Match.builder().caseTypeOfApplication(FL_401).build()).build());
+        should.add(Should.builder().match(Match.builder().orderType(NON_MOLESTATION).build()).build());
+        should.add(Should.builder().match(Match.builder().orderTypeId(NON_MOLESTATION_ORDER_FL_404_A).build()).build());
         should.add(Should.builder().range(Range.builder().dateCreated(dateCreatedRange).build()).build());
-        should.add(Should.builder().match(Match.builder().typeOfOrder("Final").build()).build());
+        should.add(Should.builder().match(Match.builder().typeOfOrder(FINAL).build()).build());
 
         return should;
     }
@@ -148,8 +150,7 @@ public class AcroCaseDataService {
             "data.respondentsFL401",
             "data.applicantsConfidentialDetails",
             "data.orderCollection",
-            "data.caseManagementLocation",
-            "currentHearingId"
+            "data.caseManagementLocation"
         );
     }
 
@@ -199,9 +200,9 @@ public class AcroCaseDataService {
     private void extractOrderSpecificData(AcroCaseDetail acroCaseDetail) {
         AcroCaseData caseData = acroCaseDetail.getCaseData();
         Optional<OrderDetails> orderDetails = caseData.getOrderCollection().stream().map(Element::getValue)
-            .filter(o -> o.getOrderType().equals("nonMolestation")
-                && o.getOrderTypeId().equals("Non-molestation order (FL404A)")
-                && o.getTypeOfOrder().equals("Final"))
+            .filter(o -> o.getOrderType().equals(NON_MOLESTATION)
+                && o.getOrderTypeId().equals(NON_MOLESTATION_ORDER_FL_404_A)
+                && o.getTypeOfOrder().equals(FINAL))
             .findFirst();
 
         if (orderDetails.isPresent()) {
