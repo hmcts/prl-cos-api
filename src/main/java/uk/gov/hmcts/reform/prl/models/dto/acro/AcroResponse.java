@@ -2,8 +2,11 @@ package uk.gov.hmcts.reform.prl.models.dto.acro;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.*;
-import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.List;
 

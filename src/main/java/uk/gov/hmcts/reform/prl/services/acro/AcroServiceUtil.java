@@ -13,15 +13,13 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 public class AcroServiceUtil {
 
     /**
-     * Code to get Next hearing date, fetch order's hearingId amd find the
-     * case hearing matching that hearing id from case hearings
-     * and pass Case Hearing in this method to get next hearing date
+     * Code to get NextHearingDate with in case hearing.
+     * Fetch order's hearingId.
+     * Find the case hearing matching that hearing id from case hearings.
      *
-     * @param hearing
      * @return Next Hearing Date
      */
     public static LocalDateTime getNextHearingDateWithInHearing(CaseHearing hearing) {
-
         LocalDateTime nextHearingDate = null;
         if (hearing.getHmcStatus().equals(LISTED)) {
             Optional<LocalDateTime> minDateOfHearingDaySche = nullSafeCollection(hearing.getHearingDaySchedule()).stream()
@@ -35,9 +33,9 @@ public class AcroServiceUtil {
         return nextHearingDate;
     }
 
-    /***
-     * code to get order expiry date from order
-     * @param order
+    /**
+     * Get order expiry date from order.
+     *
      * @return order expiry date
      */
     public static LocalDateTime getOrderExpiryDate(OrderDetails order) {

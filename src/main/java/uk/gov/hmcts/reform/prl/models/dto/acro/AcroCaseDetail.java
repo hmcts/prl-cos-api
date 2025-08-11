@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseData;
 
 import java.time.LocalDateTime;
 

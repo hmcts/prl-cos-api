@@ -1,5 +1,5 @@
 {
-  "total": 1,
+  "total": 4,
   "cases": [
     {
       "id": 1673970714366224,
@@ -30,11 +30,11 @@
         "caseTypeOfApplication": "FL401",
         "courtName": "Swansea Civil And Family Justice Centre",
         "caseManagementLocation": {
-          "region": null,
-          "regionId": "7",
+          "region": "7",
+          "regionId": null,
           "regionName": "Wales",
           "baseLocation": "234946",
-          "baseLocationId": "12",
+          "baseLocationId": null,
           "baseLocationName": "Swansea"
         },
         "respondentsFL401": {
@@ -1302,7 +1302,7 @@
                         }
                       ]
                     },
-                    "hearingId": "2000004659",
+                    "hearingId": "2000015598",
                     "hearingTypes": {
                       "value": {
                         "code": "ABA5-APP",

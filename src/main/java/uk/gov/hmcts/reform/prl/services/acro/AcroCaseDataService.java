@@ -77,7 +77,6 @@ public class AcroCaseDataService {
 
             QueryParam ccdQueryParam = buildCcdQueryParam();
             String searchString = objectMapper.writeValueAsString(ccdQueryParam);
-            log.info("Search string: {}", searchString);
             String userToken = systemUserService.getSysUserToken();
             final String s2sToken = authTokenGenerator.generate();
             log.info("Invoking search cases");
@@ -124,7 +123,7 @@ public class AcroCaseDataService {
         StateFilter stateFilter = StateFilter.builder().should(mustQuery).build();
         Filter filter = Filter.builder().range(range).build();
         Must must = Must.builder().stateFilter(stateFilter).build();
-        Bool bool = Bool.builder().filter(filter).must(must).build();
+        Bool bool = Bool.builder().filter(filter).must(must).minimumShouldMatch(2).build();
         Query query = Query.builder().bool(bool).build();
         return QueryParam.builder().query(query).dataToReturn(fetchFieldsRequiredForAcro()).build();
     }
@@ -171,7 +170,7 @@ public class AcroCaseDataService {
 
         filterCancelledHearingsBeforeListing(listOfHearingDetails);
 
-        updateHearingData(acroResponse, listOfHearingDetails);
+        extractHearingData(acroResponse, listOfHearingDetails);
 
         return extractedAcroResponse;
     }
@@ -179,15 +178,14 @@ public class AcroCaseDataService {
     private static void updateCourtEpmisId(AcroCaseDetail caseDetails, Map<String, String> caseIdWithRegionIdMap, AcroResponse filteredAcroResponse) {
         CaseManagementLocation caseManagementLocation = caseDetails.getCaseData().getCaseManagementLocation();
         if (caseManagementLocation != null) {
-            if (caseManagementLocation.getRegionId() != null
-                && Integer.parseInt(caseManagementLocation.getRegionId()) < 7) {
+            if (caseManagementLocation.getRegionId() != null) {
                 caseIdWithRegionIdMap.put(
                     caseDetails.getId().toString(), caseManagementLocation.getRegionId()
                         + "-" + caseManagementLocation.getBaseLocationId()
                 );
                 caseDetails.getCaseData().setCourtEpimsId(caseManagementLocation.getBaseLocationId());
                 filteredAcroResponse.getCases().add(caseDetails);
-            } else if (caseManagementLocation.getRegion() != null && Integer.parseInt(caseManagementLocation.getRegion()) < 7) {
+            } else if (caseManagementLocation.getRegion() != null) {
                 caseIdWithRegionIdMap.put(
                     String.valueOf(caseDetails.getId()),
                     caseManagementLocation.getRegion() + "-" + caseManagementLocation.getBaseLocation()
@@ -208,9 +206,6 @@ public class AcroCaseDataService {
 
         if (orderDetails.isPresent()) {
             OrderDetails order = orderDetails.get();
-            if (caseData.getFl404Orders() != null) {
-                caseData.setFl404Orders(new ArrayList<>());
-            }
             caseData.getFl404Orders().add(order);
         }
     }
@@ -244,7 +239,7 @@ public class AcroCaseDataService {
         return hearingCancelledBeforeListing;
     }
 
-    private void updateHearingData(AcroResponse acroResponse, List<Hearings> listOfHearingDetails) {
+    private void extractHearingData(AcroResponse acroResponse, List<Hearings> listOfHearingDetails) {
         if (null != listOfHearingDetails && !listOfHearingDetails.isEmpty()) {
             for (AcroCaseDetail acroCaseDetail : acroResponse.getCases()) {
                 Hearings filteredHearing =
