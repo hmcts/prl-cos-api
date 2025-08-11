@@ -98,7 +98,7 @@ public class FL401SubmitApplicationService {
 
         caseData = caseData.setDateSubmittedDate();
 
-        caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
+        caseDataUpdated.putAll(documentGenService.createUpdatedCaseDataWithDocuments(authorisation, caseData));
 
         caseDataUpdated.put(ISSUE_DATE_FIELD, localDate);
 
