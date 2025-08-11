@@ -91,7 +91,7 @@ public class BarristerController extends AbstractCallbackController {
                 && !barristerList.getPartyList().getListItems().isEmpty()) {
                 caseDataUpdated.put(ALLOCATED_BARRISTER, barristerList);
             } else {
-                errorList.add("Parties are not represented by counsel at this stage");
+                errorList.add("No barrister currently assigned to the selected party");
             }
 
             AboutToStartOrSubmitCallbackResponse.AboutToStartOrSubmitCallbackResponseBuilder
