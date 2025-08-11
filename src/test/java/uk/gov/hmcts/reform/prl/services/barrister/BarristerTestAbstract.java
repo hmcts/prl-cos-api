@@ -100,7 +100,7 @@ public class BarristerTestAbstract {
             .solicitorPartyId(hasRep ? UUID.fromString(SOL_PARTY_ID_PREFIX + id) : null)
             .representativeFirstName(hasRep ? repFirstName + id : null)
             .representativeLastName(hasRep ? repLastName + id : null)
-            .solicitorOrg(Organisation.builder().organisationName(orgName + id).build())
+            .solicitorOrg(Organisation.builder().organisationName(orgName + id).organisationID(orgName + id).build())
             .barrister(hasBar ? barrister : null)
             .build();
     }
