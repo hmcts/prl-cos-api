@@ -93,7 +93,7 @@ public class C100IssueCaseService {
         }
 
         // Generate All Docs and set to casedataupdated.
-        caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
+        caseDataUpdated.putAll(documentGenService.createUpdatedCaseDataWithDocuments(authorisation, caseData));
 
         // Refreshing the page in the same event. Hence no external event call needed.
         // Getting the tab fields and add it to the casedetails..
