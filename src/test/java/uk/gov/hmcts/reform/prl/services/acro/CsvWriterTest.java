@@ -59,8 +59,6 @@ class CsvWriterTest {
             .isEmailAddressConfidential(YesOrNo.Yes)
             .isPhoneNumberConfidential(YesOrNo.Yes)
             .build();
-        Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
-        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         return CaseData.builder()
             .id(1234567891234567L)
             .courtName("test")
@@ -68,8 +66,8 @@ class CsvWriterTest {
             .caseTypeOfApplication("FL401")
             .dateOrderMade(LocalDate.now())
             .finalCaseClosedDate("02-10-2026") //orderExpiryDate(LocalDate.now().plusYears(1))
-            .respondents(List.of(wrappedRespondent))
-            .applicants(List.of(wrappedApplicant))
+            .respondentsFL401(respondent)
+            .applicantsFL401(applicant)
             .build();
     }
 
@@ -169,44 +167,44 @@ class CsvWriterTest {
 
         private static Stream<Arguments> respondentPropertyTestCases() {
             return Stream.of(
-                arguments("respondents.lastName", "Doe"),
-                arguments("respondents.firstName", "John"),
-                arguments("respondents.dateOfBirth", LocalDate.parse("1994-07-05")),
-                arguments("respondents.address.addressLine1", "70 Petty France"),
-                arguments("respondents.address.addressLine2", "London"),
-                arguments("respondents.address.postCode", "SW1H 9EX")
+                arguments("respondentsFL401.lastName", "Doe"),
+                arguments("respondentsFL401.firstName", "John"),
+                arguments("respondentsFL401.dateOfBirth", LocalDate.parse("1994-07-05")),
+                arguments("respondentsFL401.address.addressLine1", "70 Petty France"),
+                arguments("respondentsFL401.address.addressLine2", "London"),
+                arguments("respondentsFL401.address.postCode", "SW1H 9EX")
             );
         }
 
         private static Stream<Arguments> applicantPropertyTestCases() {
             return Stream.of(
-                arguments("applicants.lastName", "Smith"),
-                arguments("applicants.firstName", "Jane"),
-                arguments("applicants.dateOfBirth", LocalDate.parse("1990-12-11")),
-                arguments("applicants.address.addressLine1", "123 Example Street"),
-                arguments("applicants.address.addressLine2", "London"),
-                arguments("applicants.address.postCode", "E1 6AN"),
-                arguments("applicants.phoneNumber", "1234567890"),
-                arguments("applicants.email", "test@test.com")
+                arguments("applicantsFL401.lastName", "Smith"),
+                arguments("applicantsFL401.firstName", "Jane"),
+                arguments("applicantsFL401.dateOfBirth", LocalDate.parse("1990-12-11")),
+                arguments("applicantsFL401.address.addressLine1", "123 Example Street"),
+                arguments("applicantsFL401.address.addressLine2", "London"),
+                arguments("applicantsFL401.address.postCode", "E1 6AN"),
+                arguments("applicantsFL401.phoneNumber", "1234567890"),
+                arguments("applicantsFL401.email", "test@test.com")
             );
         }
 
         private static Stream<Arguments> applicantConfidentialPropertyTestCases() {
             return Stream.of(
-                arguments("applicants.isAddressConfidential", false),
-                arguments("applicants.isEmailAddressConfidential", true),
-                arguments("applicants.isPhoneNumberConfidential", true)
+                arguments("applicantsFL401.isAddressConfidential", false),
+                arguments("applicantsFL401.isEmailAddressConfidential", true),
+                arguments("applicantsFL401.isPhoneNumberConfidential", true)
             );
         }
 
         private static Stream<Arguments> respondentWithNullValuesPropertyTestCases() {
             return Stream.of(
-                arguments("respondents.lastName", "Doe"),
-                arguments("respondents.firstName", "John"),
-                arguments("respondents.dateOfBirth", ""),
-                arguments("respondents.address.addressLine1", "70 Petty France"),
-                arguments("respondents.address.addressLine2", ""),
-                arguments("respondents.address.postCode", "SW1H 9EX")
+                arguments("respondentsFL401.lastName", "Doe"),
+                arguments("respondentsFL401.firstName", "John"),
+                arguments("respondentsFL401.dateOfBirth", ""),
+                arguments("respondentsFL401.address.addressLine1", "70 Petty France"),
+                arguments("respondentsFL401.address.addressLine2", ""),
+                arguments("respondentsFL401.address.postCode", "SW1H 9EX")
             );
         }
     }
@@ -233,8 +231,8 @@ class CsvWriterTest {
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         return CaseData.builder()
-            .respondents(List.of(wrappedRespondent))
-            .applicants(List.of(wrappedApplicant))
+            .respondentsFL401(respondent)
+            .applicantsFL401(applicant)
             .build();
     }
 
@@ -242,7 +240,7 @@ class CsvWriterTest {
         PartyDetails respondent = createPartyDetails("John", "Doe", null, "70 Petty France", null, "SW1H 9EX", "", "");
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
         return CaseData.builder()
-            .respondents(List.of(wrappedRespondent))
+            .respondentsFL401(respondent)
             .build();
     }
 
@@ -259,12 +257,12 @@ class CsvWriterTest {
         File csvFile = CsvWriter.writeCcdOrderDataToCsv(caseData);
 
         // Quick save for colleague review
-        File savedCsv = new File("test-output.csv");
-        Files.copy(csvFile.toPath(), savedCsv.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+        // File savedCsv = new File("test-output.csv");
+        // Files.copy(csvFile.toPath(), savedCsv.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
 
-        System.out.println("CSV saved to: " + savedCsv.getAbsolutePath());
+        // System.out.println("CSV saved to: " + savedCsv.getAbsolutePath());
         System.out.println("\nCSV Content:");
-        Files.lines(savedCsv.toPath()).forEach(System.out::println);
+        // Files.lines(savedCsv.toPath()).forEach(System.out::println);
 
         // Your existing assertions
         assertNotNull(csvFile);
