@@ -96,8 +96,19 @@ public class PartyDetails {
 
     private YesOrNo isRemoveLegalRepresentativeRequested;
 
+    private UUID partyId;
+    private UUID solicitorOrgUuid;
+    private UUID solicitorPartyId;
+
     @JsonUnwrapped
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Barrister barrister;
+
+    @JsonIgnore
+    private CitizenSos citizenSosObject;
+
+    private YesOrNo liveInRefuge;
+    private Document refugeConfidentialityC8Form;
 
     public boolean hasConfidentialInfo() {
         return this.isAddressConfidential.equals(YesOrNo.Yes)
@@ -160,15 +171,4 @@ public class PartyDetails {
         }
     }
 
-    private UUID partyId;
-
-    private UUID solicitorOrgUuid;
-
-    private UUID solicitorPartyId;
-
-    @JsonIgnore
-    private CitizenSos citizenSosObject;
-
-    private YesOrNo liveInRefuge;
-    private Document refugeConfidentialityC8Form;
 }
