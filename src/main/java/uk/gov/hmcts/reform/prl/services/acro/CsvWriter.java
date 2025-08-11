@@ -155,6 +155,4 @@ public class CsvWriter {
     private static boolean isEmpty(Object value) {
         return value == null || "".equals(value);
     }
-
-    // count total number of records in the CSV file. Add in a footer row with the total count. Needs to work with a crawler that can read the CSV file.
 }

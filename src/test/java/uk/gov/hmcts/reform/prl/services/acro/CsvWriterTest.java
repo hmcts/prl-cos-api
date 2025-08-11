@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.attribute.PosixFilePermission;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -209,7 +208,9 @@ class CsvWriterTest {
         }
     }
 
-    private static PartyDetails createPartyDetails(String firstName, String lastName, String dateOfBirth, String addressLine1, String addressLine2, String postCode, String phoneNumber, String email) {
+    private static PartyDetails createPartyDetails(String firstName, String lastName, String dateOfBirth,
+                                                   String addressLine1, String addressLine2, String postCode,
+                                                   String phoneNumber, String email) {
         Address address = Address.builder()
             .addressLine1(addressLine1)
             .addressLine2(addressLine2)
@@ -226,8 +227,12 @@ class CsvWriterTest {
     }
 
     private static CaseData createCaseDataWithParties() {
-        PartyDetails respondent = createPartyDetails("John", "Doe", "1994-07-05", "70 Petty France", "London", "SW1H 9EX", "", "");
-        PartyDetails applicant = createPartyDetails("Jane", "Smith", "1990-12-11", "123 Example Street", "London", "E1 6AN", "1234567890", "test@test.com");
+        PartyDetails respondent = createPartyDetails("John", "Doe", "1994-07-05",
+                                                     "70 Petty France", "London", "SW1H 9EX",
+                                                     "", "");
+        PartyDetails applicant = createPartyDetails("Jane", "Smith", "1990-12-11",
+                                                    "123 Example Street", "London", "E1 6AN",
+                                                    "1234567890", "test@test.com");
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         return CaseData.builder()
