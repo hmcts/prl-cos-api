@@ -110,9 +110,9 @@ public class IdamTokenGenerator {
         log.info(":::: Generating Bearer Token From Idam");
         solicitorIdamToken = idamClient.getAccessToken(solicitorUsername, solicitorPassword);
         systemIdamToken = systemUserService.getSysUserToken();
-//        judgeIdamToken = idamClient.getAccessToken(judgeUserName, judgePassword);
-//        cafcassIdamToken = idamClient.getAccessToken(cafcassUserName, cafcassPassword);
-//        citizenIdamToken = idamClient.getAccessToken(citizenUsername, citizenPassword);
-//        courtAdminIdamToken = idamClient.getAccessToken(courtAdminUsername, courtAdminPassword);
+        judgeIdamToken = idamClient.getAccessToken(judgeUserName, judgePassword);
+        cafcassIdamToken = idamClient.getAccessToken(cafcassUserName, cafcassPassword);
+        citizenIdamToken = idamClient.getAccessToken(citizenUsername, citizenPassword);
+        courtAdminIdamToken = idamClient.getAccessToken(courtAdminUsername, courtAdminPassword);
     }
 }
