@@ -20,10 +20,10 @@
         },
         "barristerFirstName" : "barristerName",
         "barristerLastName" : "barristerLastName",
-        "barristerEmail" : "barristerEmail@gmail.com",
-        "barristerOrg" : {
-          "OrganisationID" : "barristerOrgId",
-          "OrganisationName" : "barristerOrgName"
+        "barristerEmail": "prl_aat_noc_solicitor_3@mailinator.com",
+        "barristerOrg": {
+          "OrganisationID": "LM6OZX0",
+          "OrganisationName": "Private law NOC solution"
         }
       },
       "respOrdersForcedMarriageProtectionEndDate": null,
