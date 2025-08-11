@@ -43,6 +43,7 @@ import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
+import uk.gov.hmcts.reform.prl.utils.MaskEmail;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -86,11 +87,14 @@ class CaseAssignmentServiceTest {
     private AuthTokenGenerator tokenGenerator;
     @Mock
     private OrganisationService organisationService;
-    @Captor
-    private ArgumentCaptor<CaseAssignmentUserRolesRequest> caseAssignmentUserRolesRequestArgumentCaptor;
+    @Mock
+    private MaskEmail maskEmail;
 
     @InjectMocks
     private CaseAssignmentService caseAssignmentService;
+
+    @Captor
+    private ArgumentCaptor<CaseAssignmentUserRolesRequest> caseAssignmentUserRolesRequestArgumentCaptor;
     private CaseData c100CaseData;
     private CaseData fl401CaseData;
     private Map<String, UUID> partyIds;
@@ -268,6 +272,7 @@ class CaseAssignmentServiceTest {
             tokenGenerator,
             organisationService,
             roleAssignmentService,
+            maskEmail,
             objectMapper
         );
         AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder()

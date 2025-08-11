@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.OrganisationUser;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.utils.MaskEmail;
 
 import java.util.Collections;
 import java.util.List;
@@ -51,6 +52,8 @@ public class OrganisationServiceTest {
     private OrganisationApi organisationApi;
     @Mock
     private SystemUserService systemUserService;
+    @Mock
+    private MaskEmail maskEmail;
 
     private final String authToken = "Bearer testAuthtoken";
     private final String serviceAuthToken = "serviceTestAuthtoken";
@@ -461,6 +464,7 @@ public class OrganisationServiceTest {
     @Test
     public void testUserFoundReturnedByFindUserByEmail() {
         String email = "user@malinator.com";
+        when(maskEmail.mask(email)).thenReturn(email);
         OrganisationUser organisationUser = OrganisationUser.builder()
             .userIdentifier(UUID.randomUUID().toString())
             .build();
@@ -474,6 +478,7 @@ public class OrganisationServiceTest {
     @Test
     public void testNotUserNotFoundByFindUserByEmail() {
         String email = "user@malinator.com";
+        when(maskEmail.mask(email)).thenReturn(email);
         when(organisationApi.findUserByEmail(anyString(), anyString(), eq(email)))
             .thenThrow(feignException(404, "Not found"));
         Optional<String> userId = organisationService.findUserByEmail(email);
@@ -484,6 +489,7 @@ public class OrganisationServiceTest {
     @Test
     public void testExceptionThrownByFindUserByEmail() {
         String email = "user@malinator.com";
+        when(maskEmail.mask(email)).thenReturn(email);
         when(organisationApi.findUserByEmail(anyString(), anyString(), eq(email)))
             .thenThrow(feignException(500, "Internal Server Error"));
         assertThatThrownBy(() -> organisationService.findUserByEmail(email))
