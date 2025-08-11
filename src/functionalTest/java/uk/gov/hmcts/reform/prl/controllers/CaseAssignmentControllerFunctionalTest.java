@@ -59,7 +59,7 @@ public class CaseAssignmentControllerFunctionalTest {
             .body(requestBody)
             .when()
             .contentType("application/json")
-            .delete("/case-assignment/barrister/remove/about-to-submit")
+            .post("/case-assignment/barrister/remove/about-to-submit")
             .then()
             .assertThat().statusCode(200);
     }
