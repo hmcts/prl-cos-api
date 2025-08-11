@@ -112,7 +112,7 @@ public class CaseAssignmentControllerIntegrationTest {
             .when(caseAssignmentService).removeBarrister(any(), any());
 
         mockMvc.perform(
-                delete(url)
+                post(url)
                     .header(AUTHORISATION_HEADER, "testAuthToken")
                     .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
                     .accept(APPLICATION_JSON)
