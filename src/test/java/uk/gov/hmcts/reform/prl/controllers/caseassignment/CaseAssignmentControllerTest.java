@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole;
+import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -41,6 +42,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -144,6 +146,61 @@ class CaseAssignmentControllerTest {
                                                    eq(barristerRole.get()),
                                                    isA(AllocatedBarrister.class));
     }
+
+    @Test
+    void testGrantCaseAccessExceptionOnSubmitAddBarrister() {
+
+        Optional<String> userId = Optional.of("userId");
+        when(authorisationService.isAuthorized(any(), any()))
+            .thenReturn(true);
+        when(organisationService.findUserByEmail(allocatedBarrister.getBarristerEmail()))
+            .thenReturn(userId);
+        Optional<String> barristerRole = Optional.of(BarristerRole.C100APPLICANTBARRISTER1.getCaseRoleLabel());
+
+        when(caseAssignmentService.deriveBarristerRole(anyMap(), isA(CaseData.class), isA(AllocatedBarrister.class)))
+            .thenReturn(barristerRole);
+
+        doThrow(new GrantCaseAccessException("User(s) not granted [C100APPLICANTBARRISTER3] to the case "))
+            .when(caseAssignmentService).addBarrister(isA(CaseData.class),
+                                                     eq(userId.get()),
+                                                     eq(barristerRole.get()),
+                                                     isA(AllocatedBarrister.class));
+
+
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(ALLOCATED_BARRISTER, allocatedBarrister);
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(1234L)
+            .createdDate(LocalDateTime.now())
+            .lastModified(LocalDateTime.now())
+            .data(caseData)
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+
+        AboutToStartOrSubmitCallbackResponse response = caseAssignmentController.submitAddBarrister(
+            "auth",
+            "s2sToken",
+            callbackRequest
+        );
+
+        assertThat(response.getErrors())
+            .contains("User(s) not granted [C100APPLICANTBARRISTER3] to the case ");
+
+        verify(caseAssignmentService).validateAddRequest(eq(userId),
+                                                         isA(CaseData.class),
+                                                         eq(barristerRole),
+                                                         isA(AllocatedBarrister.class),
+                                                         anyList());
+        verify(caseAssignmentService).addBarrister(isA(CaseData.class),
+                                                   eq(userId.get()),
+                                                   eq(barristerRole.get()),
+                                                   isA(AllocatedBarrister.class));
+    }
+
 
     @Test
     void testErrorsSubmitAddBarrister() {

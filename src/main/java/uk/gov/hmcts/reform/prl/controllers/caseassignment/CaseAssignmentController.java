@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -82,11 +83,15 @@ public class CaseAssignmentController {
                     errorList);
 
             if (errorList.isEmpty() && userId.isPresent() && barristerRole.isPresent()) {
-                caseAssignmentService.addBarrister(caseData,
-                                                   userId.get(),
-                                                   barristerRole.get(),
-                                                   allocatedBarrister);
-                updateCaseDetails(caseDetails, caseData);
+                try {
+                    caseAssignmentService.addBarrister(caseData,
+                                                       userId.get(),
+                                                       barristerRole.get(),
+                                                       allocatedBarrister);
+                    updateCaseDetails(caseDetails, caseData);
+                } catch (GrantCaseAccessException grantCaseAccessException) {
+                    errorList.add(grantCaseAccessException.getMessage());
+                }
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder()
