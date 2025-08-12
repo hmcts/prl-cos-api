@@ -28,6 +28,7 @@ public class ManageDocumentsCategoryConstants {
     public static final String GUARDIAN_REPORT = "guardianReport";
     public static final String SPECIAL_GUARDIANSHIP_REPORT = "specialGuardianshipReport";
     public static final String OTHER_DOCS = "otherDocs";
+    public static final String C8_ARCHIVED_DOCUMENTS = "c8ArchivedDocuments";
     public static final String CONFIDENTIAL = "confidential";
     public static final String EMAILS_TO_COURT_TO_REQUEST_HEARINGS_ADJOURNED = "emailsToCourtToRequestHearingsAdjourned";
     public static final String PUBLIC_FUNDING_CERTIFICATES = "publicFundingCertificates";
