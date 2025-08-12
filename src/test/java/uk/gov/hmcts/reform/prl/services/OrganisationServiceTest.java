@@ -464,7 +464,7 @@ public class OrganisationServiceTest {
     @Test
     public void testUserFoundReturnedByFindUserByEmail() {
         String email = "user@malinator.com";
-        when(maskEmail.mask(email)).thenReturn(email);
+        when(maskEmail.mask(email)).thenReturn("u**r@malinator.com");
         OrganisationUser organisationUser = OrganisationUser.builder()
             .userIdentifier(UUID.randomUUID().toString())
             .build();
@@ -478,7 +478,7 @@ public class OrganisationServiceTest {
     @Test
     public void testNotUserNotFoundByFindUserByEmail() {
         String email = "user@malinator.com";
-        when(maskEmail.mask(email)).thenReturn(email);
+        when(maskEmail.mask(email)).thenReturn("u**r@malinator.com");
         when(organisationApi.findUserByEmail(anyString(), anyString(), eq(email)))
             .thenThrow(feignException(404, "Not found"));
         Optional<String> userId = organisationService.findUserByEmail(email);
@@ -489,7 +489,7 @@ public class OrganisationServiceTest {
     @Test
     public void testExceptionThrownByFindUserByEmail() {
         String email = "user@malinator.com";
-        when(maskEmail.mask(email)).thenReturn(email);
+        when(maskEmail.mask(email)).thenReturn("u**r@malinator.com");
         when(organisationApi.findUserByEmail(anyString(), anyString(), eq(email)))
             .thenThrow(feignException(500, "Internal Server Error"));
         assertThatThrownBy(() -> organisationService.findUserByEmail(email))
