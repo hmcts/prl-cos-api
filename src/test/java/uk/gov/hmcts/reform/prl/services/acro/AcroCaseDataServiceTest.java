@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.prl.models.cafcass.hearing.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroResponse;
-import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
@@ -172,36 +171,7 @@ public class AcroCaseDataServiceTest {
     }
 
     @Test
-    public void testGetCaseDataThrowingException() throws Exception {
-
-        final List<CaseHearing> caseHearings = new ArrayList();
-
-        final CaseHearing caseHearing = CaseHearing.caseHearingWith().hearingID(Long.valueOf("1234"))
-            .hmcStatus("LISTED").hearingType("ABA5-FFH").hearingID(Long.valueOf("2000004659")).hearingDaySchedule(
-                List.of(
-                    HearingDaySchedule.hearingDayScheduleWith()
-                        .hearingVenueName("ROYAL COURTS OF JUSTICE - QUEENS BUILDING (AND WEST GREEN BUILDING)")
-                        .hearingStartDateTime(LocalDateTime.parse("2023-05-09T09:00:00")).hearingEndDateTime(
-                            LocalDateTime.parse(
-                                "2023-05-09T09:45:00")).build())).build();
-
-        caseHearings.add(caseHearing);
-
-        Hearings hearings = new Hearings();
-        hearings.setCaseRef("1673970714366224");
-        hearings.setCaseHearings(caseHearings);
-
-        List<Hearings> listOfHearings = new ArrayList<>();
-        listOfHearings.add(hearings);
-
-        ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
-        objectMapper.registerModule(new ParameterNamesModule());
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-        String expectedCafCassResponse = TestResourceUtil.readFileFrom("classpath:response/AcroResponseWithRegion.json");
-        SearchResult searchResult = objectMapper.readValue(expectedCafCassResponse, SearchResult.class);
-        CafCassResponse cafCassResponse = objectMapper.readValue(expectedCafCassResponse, CafCassResponse.class);
+    public void testGetCaseDataThrowingException() {
         Exception exception = new RuntimeException();
         when(coreCaseDataApi.searchCases(anyString(), anyString(), any(), any())).thenThrow(exception);
         when(systemUserService.getSysUserToken()).thenReturn(userToken);

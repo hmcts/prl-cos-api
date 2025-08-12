@@ -25,7 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CcdAcroCaseDataServiceTest {
+public class CcdCaseCaseDataServiceTest {
 
     private final String jurisdiction = "PRIVATELAW";
     private final String caseType = "PRLAPPS";

@@ -61,7 +61,7 @@ public class AcroCaseDataService {
     public static final String FL_401 = "FL401";
     private final CoreCaseDataApi coreCaseDataApi;
     private final AuthTokenGenerator authTokenGenerator;
-    @Value("${cafcaas.search-case-type-id}")
+    @Value("${acro.search-case-type-id}")
     private String searchCaseTypeId;
     private final SystemUserService systemUserService;
     private final HearingService hearingService;
@@ -80,6 +80,7 @@ public class AcroCaseDataService {
 
             QueryParam ccdQueryParam = buildCcdQueryParam();
             String searchString = objectMapper.writeValueAsString(ccdQueryParam);
+            log.info("Search string: {}", searchString);
             String userToken = systemUserService.getSysUserToken();
             final String s2sToken = authTokenGenerator.generate();
             log.info("Invoking search cases");
@@ -177,7 +178,7 @@ public class AcroCaseDataService {
         return extractedAcroResponse;
     }
 
-    private static void updateCourtEpmisId(AcroCaseDetail caseDetails, Map<String, String> caseIdWithRegionIdMap, AcroResponse filteredAcroResponse) {
+    private void updateCourtEpmisId(AcroCaseDetail caseDetails, Map<String, String> caseIdWithRegionIdMap, AcroResponse filteredAcroResponse) {
         CaseManagementLocation caseManagementLocation = caseDetails.getCaseData().getCaseManagementLocation();
         if (caseManagementLocation != null) {
             if (caseManagementLocation.getRegionId() != null) {
@@ -226,7 +227,7 @@ public class AcroCaseDataService {
         }
     }
 
-    private static boolean checkIfHearingCancelledBeforeListing(CaseHearing caseHearing) {
+    private boolean checkIfHearingCancelledBeforeListing(CaseHearing caseHearing) {
         boolean hearingCancelledBeforeListing = false;
         if (CANCELLED.equals(caseHearing.getHmcStatus())
             && null != caseHearing.getHearingDaySchedule()) {
@@ -269,6 +270,5 @@ public class AcroCaseDataService {
             }
         }
     }
-
 
 }
