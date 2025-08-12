@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -22,6 +21,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -82,11 +82,15 @@ public class CaseAssignmentController {
                     errorList);
 
             if (errorList.isEmpty() && userId.isPresent() && barristerRole.isPresent()) {
-                caseAssignmentService.addBarrister(caseData,
-                                                   userId.get(),
-                                                   barristerRole.get(),
-                                                   allocatedBarrister);
-                updateCaseDetails(caseDetails, caseData);
+                try {
+                    caseAssignmentService.addBarrister(caseData,
+                                                       userId.get(),
+                                                       barristerRole.get(),
+                                                       allocatedBarrister);
+                    updateCaseDetails(caseDetails, caseData);
+                } catch (GrantCaseAccessException grantCaseAccessException) {
+                    errorList.add(grantCaseAccessException.getMessage());
+                }
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder()
@@ -97,7 +101,7 @@ public class CaseAssignmentController {
         }
     }
 
-    @DeleteMapping(path = "/barrister/remove/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/barrister/remove/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "About to submit to remove Barrister")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
