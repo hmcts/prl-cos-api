@@ -45,9 +45,10 @@ public abstract class AbstractBarristerService {
     }
 
     private BarristerFilter populateBarristerFilter(CaseData caseData, String authorisation) {
+        boolean isSolicitor = isSolicitor(authorisation);
         return BarristerFilter.builder()
-            .userOrgIdentifier(getUserOrgId(authorisation))
-            .caseworkerOrSolicitor(!isSolicitor(authorisation))
+            .userOrgIdentifier(isSolicitor ? getUserOrgId(authorisation) : null)
+            .caseworkerOrSolicitor(!isSolicitor)
             .caseTypeC100OrFL401(isC100CaseType(caseData))
             .build();
 
