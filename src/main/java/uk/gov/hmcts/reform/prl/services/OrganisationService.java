@@ -194,11 +194,11 @@ public class OrganisationService {
             OrganisationUser organisationUser = organisationApi.findUserByEmail(
                 systemUserService.getSysUserToken(),
                 authTokenGenerator.generate(),
-                maskedEmail
+                email
             );
             return Optional.of(organisationUser.getUserIdentifier());
         } catch (FeignException.NotFound notFoundException) {
-            log.error("Could not find user by email {}", maskedEmail);
+            log.error("Could not find user by email {}", maskEmail);
             return Optional.empty();
         } catch (FeignException exception) {
             String message = String.join(":", "Error while fetching user id by email",
