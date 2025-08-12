@@ -36,6 +36,11 @@ public abstract class AbstractBarristerService {
         return (partyDetails.getBarrister() != null && partyDetails.getBarrister().getBarristerId() != null);
     }
 
+    protected boolean partyHasSolicitorOrg(PartyDetails partyDetails) {
+        return (partyDetails.getSolicitorOrg() != null && partyDetails.getSolicitorOrg().getOrganisationID() != null
+            && partyDetails.getSolicitorOrg().getOrganisationName() != null);
+    }
+
     private BarristerFilter populateBarristerFilter(CaseData caseData, String authorisation) {
         return BarristerFilter.builder()
             .userOrgIdentifier(getUserOrgId(authorisation))
