@@ -10,8 +10,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
-import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
-
 @Slf4j
 @Service
 public class BarristerAddService extends AbstractBarristerService {
@@ -30,8 +28,7 @@ public class BarristerAddService extends AbstractBarristerService {
     @Override
     protected boolean isPartyApplicableForFiltering(boolean applicantOrRespondent, BarristerFilter barristerFilter, PartyDetails partyDetails) {
         if (barristerFilter.isCaseworkerOrSolicitor()) {
-            return (!hasBarrister(partyDetails)) && ((applicantOrRespondent && partyDetails.getSolicitorPartyId() != null)
-                || (!applicantOrRespondent && yes.equals(partyDetails.getDoTheyHaveLegalRepresentation())));
+            return (!hasBarrister(partyDetails)) && (partyHasSolicitorOrg(partyDetails));
         } else {
             return false;
         }
