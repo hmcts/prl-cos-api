@@ -1529,7 +1529,8 @@ public class CaseService {
                          .partyType(awp.getPartyType().getDisplayedValue())
                          .partyName(awp.getAuthor())
                          .uploadedBy(awp.getAuthor()) //PRL-6202 populate uploaded party name
-                         .categoryId(APPLICATIONS_WITHIN_PROCEEDINGS)
+                         .categoryId(PartyEnum.applicant.equals(awp.getPartyType())
+                                         ? APPLICATIONS_WITHIN_PROCEEDINGS : APPLICATIONS_FROM_OTHER_PROCEEDINGS)
                          .document(document)
                          .uploadedDate(LocalDateTime.parse(awp.getUploadedDateTime(),
                                                            DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS_AM_PM))
