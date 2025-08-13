@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
@@ -157,6 +158,8 @@ public class NoticeOfChangePartiesServiceTest {
     private Time time;
     @Mock
     PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+    @Mock
+    private CaseAssignmentService caseAssignmentService;
 
     private StartEventResponse startEventResponse;
 
@@ -292,9 +295,14 @@ public class NoticeOfChangePartiesServiceTest {
                                                                     .forename("solicitorResp")
                                                                     .surname("test").build());
         when(tokenGenerator.generate()).thenReturn("s2sToken");
-        noticeOfChangePartiesService.applyDecision(CallbackRequest.builder().build(), "testAuth");
+        noticeOfChangePartiesService.applyDecision(CallbackRequest.builder()
+                                                       .caseDetails(CaseDetails.builder()
+                                                                        .build())
+                                                       .build(),
+                                                   "testAuth");
         verify(assignCaseAccessClient, times(1)).applyDecision(Mockito.anyString(), Mockito.anyString(), Mockito.any(
             DecisionRequest.class));
+        verify(caseAssignmentService).removeBarristerIfPresent(any(CaseDetails.class));
     }
 
     @Test
