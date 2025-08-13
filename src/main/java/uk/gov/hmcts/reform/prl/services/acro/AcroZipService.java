@@ -16,13 +16,6 @@ import java.util.stream.Stream;
 public class AcroZipService {
     private static final Logger log = LoggerFactory.getLogger(AcroZipService.class);
 
-    /**
-     * Compresses all files in a folder to a 7zip archive
-     * @param sourceFolder The folder to compress
-     * @param exportFolder The destination folder for the archive
-     * @return The path to the created archive
-     * @throws Exception If compression fails
-     */
     public String zip(File sourceFolder, File exportFolder) throws Exception {
         validateInputs(sourceFolder, exportFolder);
 
