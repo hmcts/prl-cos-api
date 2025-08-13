@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.services.caseinitiation.CaseInitiationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
@@ -70,6 +71,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIEL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TESTING_SUPPORT_LD_FLAG_ENABLED;
 import static uk.gov.hmcts.reform.prl.enums.Event.TS_CA_URGENT_CASE;
 import static uk.gov.hmcts.reform.prl.enums.Event.TS_SOLICITOR_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -96,6 +99,7 @@ public class TestingSupportService {
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     private final CaseInitiationService caseInitiationService;
     private final TaskListService taskListService;
+    private final NoticeOfChangePartiesService noticeOfChangePartiesService;
 
     private static final String VALID_RESPONDENT_TASKLIST_INPUT_JSON = "Dummy_Respondent_Tasklist_Data.json";
 
@@ -335,6 +339,13 @@ public class TestingSupportService {
                 = tabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
             CaseData caseData = startAllTabsUpdateDataContent.caseData();
             Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
+            if (!caseDataUpdated.isEmpty()) {
+                // generate org policy roles for FL401 when creating case
+                if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
+                    caseDataUpdated.putAll(noticeOfChangePartiesService.generate(caseData, DARESPONDENT));
+                    caseDataUpdated.putAll(noticeOfChangePartiesService.generate(caseData, DAAPPLICANT));
+                }
+            }
             caseData = caseData.toBuilder()
                 .c8Document(objectMapper.convertValue(caseDataUpdated.get(DOCUMENT_FIELD_C8), Document.class))
                 .c1ADocument(objectMapper.convertValue(caseDataUpdated.get(DOCUMENT_FIELD_C1A), Document.class))
