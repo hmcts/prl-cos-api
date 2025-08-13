@@ -213,7 +213,7 @@ public class CaseAssignmentService {
                         allocatedBarrister.getBarristerOrg().getOrganisationID()
                     );
 
-                    errorList.add("Barrister doesn't belong to selected organisation");
+                    errorList.add("Barrister doesn't belong to the selected organisation.");
                 });
     }
 
@@ -316,7 +316,7 @@ public class CaseAssignmentService {
                         );
                     }
                 ),
-            () -> errorList.add("Could not find barrister with provided email")
+            () -> errorList.add("Could not find a registered barrister with the provided email address.")
         );
     }
 
