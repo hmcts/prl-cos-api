@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.barrister;
 
-import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisations;
@@ -17,8 +16,6 @@ import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.enums.PartyEnum.applicant;
-import static uk.gov.hmcts.reform.prl.enums.PartyEnum.respondent;
 
 public abstract class AbstractBarristerService {
     protected static final String APPLICANT = "Applicant";
@@ -81,12 +78,12 @@ public abstract class AbstractBarristerService {
         List<DynamicListElement> listItems = new ArrayList<>();
         List<Element<PartyDetails>> applicants = caseData.getApplicants();
         if (applicants != null) {
-            listItems.addAll(getPartyDynamicListElements(applicants, applicant, barristerFilter));
+            listItems.addAll(getPartyDynamicListElements(applicants, true, barristerFilter));
         }
 
         List<Element<PartyDetails>> respondents = caseData.getRespondents();
         if (respondents != null) {
-            listItems.addAll(getPartyDynamicListElements(respondents, respondent, barristerFilter));
+            listItems.addAll(getPartyDynamicListElements(respondents, false, barristerFilter));
         }
 
         return DynamicList.builder().value(null).listItems(listItems).build();
@@ -94,26 +91,25 @@ public abstract class AbstractBarristerService {
 
     private DynamicList getPartiesToListForFL401(CaseData caseData, BarristerFilter barristerFilter) {
         List<DynamicListElement> listItems = new ArrayList<>();
-        PartyDetails applicantPartyDetails = caseData.getApplicantsFL401();
-        checkAndAddPartyToListFL401(applicant, listItems, applicantPartyDetails, barristerFilter);
+        PartyDetails applicant = caseData.getApplicantsFL401();
+        checkAndAddPartyToListFL401(true, listItems, applicant, barristerFilter);
 
-        PartyDetails respondentPartyDetails = caseData.getRespondentsFL401();
-        checkAndAddPartyToListFL401(respondent, listItems, respondentPartyDetails, barristerFilter);
+        PartyDetails respondent = caseData.getRespondentsFL401();
+        checkAndAddPartyToListFL401(false, listItems, respondent, barristerFilter);
 
         return DynamicList.builder().value(null).listItems(listItems).build();
     }
 
-    private void checkAndAddPartyToListFL401(PartyEnum partyEnum, List<DynamicListElement> listToAddTo,
+    private void checkAndAddPartyToListFL401(boolean applicantOrRespondent, List<DynamicListElement> listToAddTo,
                                              PartyDetails party, BarristerFilter barristerFilter) {
         if (party != null) {
-            boolean isApplicant = partyEnum == applicant;
             //because the partyId on the PartyDetails is not actually being filled!
             Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder()
                 .id(party.getPartyId())
                 .value(party)
                 .build();
             DynamicListElement dynamicListElement = getPartyDynamicListElement(
-                isApplicant,
+                applicantOrRespondent,
                 barristerFilter, partyDetailsElement
             );
             if (dynamicListElement != null) {
@@ -123,12 +119,11 @@ public abstract class AbstractBarristerService {
     }
 
     private List<DynamicListElement> getPartyDynamicListElements(List<Element<PartyDetails>> partyDetailsList,
-                                                                 PartyEnum partyEnum, BarristerFilter barristerFilter) {
-        boolean isApplicant = partyEnum == applicant;
+                                                                 boolean applicantOrRespondent, BarristerFilter barristerFilter) {
         List<DynamicListElement> itemsList = new ArrayList<>();
         for (Element<PartyDetails> partyDetailsElement : partyDetailsList) {
             DynamicListElement dynamicListElement = getPartyDynamicListElement(
-                isApplicant,
+                applicantOrRespondent,
                 barristerFilter,
                 partyDetailsElement
             );
