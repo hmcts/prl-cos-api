@@ -4,10 +4,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
+import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 public class AcroZipService {
     private static final Logger log = LoggerFactory.getLogger(AcroZipService.class);
@@ -21,8 +29,6 @@ public class AcroZipService {
 
         String archivePath = exportFolder + "/" + createZipFileName(sourcePath);
 
-        File archiveFile = new File(archivePath);
-
         List<Path> filesToCompress = collectFiles(sourcePath);
 
         if (filesToCompress.isEmpty()) {
@@ -30,20 +36,20 @@ public class AcroZipService {
             return archivePath;
         }
 
-        try (java.util.zip.ZipOutputStream zos = new java.util.zip.ZipOutputStream(new java.io.FileOutputStream(archivePath))) {
-            Files.walkFileTree(sourcePath, new java.nio.file.SimpleFileVisitor<>() {
+        try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(archivePath))) {
+            Files.walkFileTree(sourcePath, new SimpleFileVisitor<>() {
                 @Override
-                public java.nio.file.FileVisitResult visitFile(Path file, java.nio.file.attribute.BasicFileAttributes attributes) {
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) {
                     if (attributes.isSymbolicLink()) {
-                        return java.nio.file.FileVisitResult.CONTINUE;
+                        return FileVisitResult.CONTINUE;
                     }
 
-                    try (java.io.FileInputStream fis = new java.io.FileInputStream(file.toFile())) {
+                    try (FileInputStream fis = new FileInputStream(file.toFile())) {
                         Path targetFile = sourcePath.relativize(file);
 
                         log.debug("File targeted : {}", file);
 
-                            zos.putNextEntry(new java.util.zip.ZipEntry(targetFile.toString()));
+                            zos.putNextEntry(new ZipEntry(targetFile.toString()));
 
                             byte[] buffer = new byte[1024];
                             int len;
@@ -58,13 +64,13 @@ public class AcroZipService {
                     } catch (IOException e) {
                         log.error("Error:", e);
                     }
-                    return java.nio.file.FileVisitResult.CONTINUE;
+                    return FileVisitResult.CONTINUE;
                 }
 
                 @Override
-                public java.nio.file.FileVisitResult visitFileFailed(Path file, IOException exc) {
+                public FileVisitResult visitFileFailed(Path file, IOException exc) {
                     log.error("Unable to zip : {}", file, exc);
-                    return java.nio.file.FileVisitResult.CONTINUE;
+                    return FileVisitResult.CONTINUE;
                 }
             });
 
@@ -77,7 +83,7 @@ public class AcroZipService {
     }
 
     private List<Path> collectFiles(Path sourcePath) throws IOException {
-        try (java.util.stream.Stream<java.nio.file.Path> files = Files.walk(sourcePath)) {
+        try (Stream<java.nio.file.Path> files = Files.walk(sourcePath)) {
             return files
                 .filter(Files::isRegularFile)
                 .toList();
