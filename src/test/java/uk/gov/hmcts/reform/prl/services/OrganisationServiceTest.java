@@ -18,20 +18,27 @@ import uk.gov.hmcts.reform.prl.models.ContactInformation;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
 import uk.gov.hmcts.reform.prl.models.Organisation;
+import uk.gov.hmcts.reform.prl.models.OrganisationUser;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.utils.MaskEmail;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import static feign.Request.HttpMethod.GET;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -45,6 +52,8 @@ public class OrganisationServiceTest {
     private OrganisationApi organisationApi;
     @Mock
     private SystemUserService systemUserService;
+    @Mock
+    private MaskEmail maskEmail;
 
     private final String authToken = "Bearer testAuthtoken";
     private final String serviceAuthToken = "serviceTestAuthtoken";
@@ -450,5 +459,41 @@ public class OrganisationServiceTest {
         ))
             .thenReturn(List.of(organisations));
         assertNotNull(organisationService.getAllActiveOrganisations(authToken));
+    }
+
+    @Test
+    public void testUserFoundReturnedByFindUserByEmail() {
+        String email = "user@malinator.com";
+        when(maskEmail.mask(email)).thenReturn("u**r@malinator.com");
+        OrganisationUser organisationUser = OrganisationUser.builder()
+            .userIdentifier(UUID.randomUUID().toString())
+            .build();
+        when(organisationApi.findUserByEmail(anyString(), anyString(), eq(email)))
+            .thenReturn(organisationUser);
+        Optional<String> userId = organisationService.findUserByEmail(email);
+        assertThat(userId)
+            .hasValue(organisationUser.getUserIdentifier());
+    }
+
+    @Test
+    public void testNotUserNotFoundByFindUserByEmail() {
+        String email = "user@malinator.com";
+        when(maskEmail.mask(email)).thenReturn("u**r@malinator.com");
+        when(organisationApi.findUserByEmail(anyString(), anyString(), eq(email)))
+            .thenThrow(feignException(404, "Not found"));
+        Optional<String> userId = organisationService.findUserByEmail(email);
+        assertThat(userId)
+            .isEmpty();
+    }
+
+    @Test
+    public void testExceptionThrownByFindUserByEmail() {
+        String email = "user@malinator.com";
+        when(maskEmail.mask(email)).thenReturn("u**r@malinator.com");
+        when(organisationApi.findUserByEmail(anyString(), anyString(), eq(email)))
+            .thenThrow(feignException(500, "Internal Server Error"));
+        assertThatThrownBy(() -> organisationService.findUserByEmail(email))
+            .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Error while fetching user id by email");
     }
 }

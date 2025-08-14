@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.roleassignment.RoleAssignmentDto;
+import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentQueryRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 
@@ -27,6 +28,10 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_ROLE;
 
@@ -328,5 +333,19 @@ public class RoleAssignmentServiceTest {
         callbackRequest = CallbackRequest.builder().caseDetails(caseDetails.toBuilder().data(stringObjectMap).build()).build();
         Map<String, String> rolesResponse = roleAssignmentService.fetchIdamAmRoles(auth, emailId);
         Assert.assertFalse(rolesResponse.isEmpty());
+    }
+
+    @Test
+    public void testRoleAssignmentForCase() {
+        when(systemUserService.getSysUserToken())
+            .thenReturn("auth");
+        when(authTokenGenerator.generate())
+            .thenReturn("test");
+        when(roleAssignmentApi.queryRoleAssignments(anyString(), anyString(), any(), isA(
+            RoleAssignmentQueryRequest.class)))
+            .thenReturn(RoleAssignmentServiceResponse.builder().build());
+        roleAssignmentService.getRoleAssignmentForCase("1234");
+        verify(roleAssignmentApi).queryRoleAssignments(anyString(), anyString(), any(), isA(
+            RoleAssignmentQueryRequest.class));
     }
 }
