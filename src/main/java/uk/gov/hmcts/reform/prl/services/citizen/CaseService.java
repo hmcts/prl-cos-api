@@ -1521,7 +1521,6 @@ public class CaseService {
     private List<CitizenDocuments> getAwpDocuments(AdditionalApplicationsBundle awp,
                                                    List<Element<Document>> documents,
                                                    String partyId) {
-        log.info("getAwpDocuments: partyId={}", partyId);
         return documents.stream()
             .map(Element::getValue)
             .map(document ->
