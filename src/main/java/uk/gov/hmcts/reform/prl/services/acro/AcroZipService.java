@@ -20,7 +20,7 @@ import java.util.zip.ZipOutputStream;
 public class AcroZipService {
     private static final Logger log = LoggerFactory.getLogger(AcroZipService.class);
 
-    public String zip(File sourceFolder, File exportFolder) throws Exception {
+    public String zip(File sourceFolder, File exportFolder, String password) throws Exception {
         Path sourcePath = sourceFolder.toPath();
 
         if (!Files.isDirectory(sourcePath)) {
