@@ -207,13 +207,13 @@ public class CaseAssignmentService {
                 },
                 () -> {
                     log.error(
-                        "Case id {}: Barrister {} is not associated with the organisation {}",
+                        "Case id {}: Barrister {} is not registered with the selected organisation {}",
                         caseData.getId(),
                         maskEmail.mask(allocatedBarrister.getBarristerEmail()),
                         allocatedBarrister.getBarristerOrg().getOrganisationID()
                     );
 
-                    errorList.add("Barrister doesn't belong to the selected organisation.");
+                    errorList.add("Barrister is not registered with the selected organisation");
                 });
     }
 
@@ -316,7 +316,7 @@ public class CaseAssignmentService {
                         );
                     }
                 ),
-            () -> errorList.add("Could not find a registered barrister with the provided email address.")
+            () -> errorList.add("Could not find a registered barrister with the email address provided")
         );
     }
 
