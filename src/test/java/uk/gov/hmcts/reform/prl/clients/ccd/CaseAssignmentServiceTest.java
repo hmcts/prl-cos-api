@@ -532,7 +532,7 @@ class CaseAssignmentServiceTest {
                                                  AllocatedBarrister.builder().build(),
                                                  errorList);
         assertThat(errorList)
-            .contains("Could not find a registered barrister with the provided email address.");
+            .contains("Could not find a registered barrister with the email address provided");
     }
 
     @Test
@@ -881,7 +881,7 @@ class CaseAssignmentServiceTest {
         List<String> errors = new ArrayList<>();
         caseAssignmentService.validateBarristerOrgRelationship(c100CaseData, allocatedBarrister, errors);
         assertThat(errors)
-            .contains("Barrister doesn't belong to the selected organisation.");
+            .contains("Barrister is not registered with the selected organisation");
     }
 
     @Test
