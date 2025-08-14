@@ -86,4 +86,27 @@ public class BarristerControllerIntegrationTest {
             .andReturn();
     }
 
+    @Test
+    public void testBarristerControllerRemoveAboutToStart() throws Exception {
+        objectMapper.registerModule(new ParameterNamesModule());
+        String url = "/barrister/remove/about-to-start";
+        String jsonRequest = ResourceLoader.loadJson("controller/barristerAboutToStartCallBackRequest.json");
+
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(organisationService.findUserOrganisation(any())).thenReturn(Optional.of(Organisations.builder()
+                                                                                         .organisationIdentifier("orgId")
+                                                                                         .build()));
+        when(userService.getUserDetails(any())).thenReturn(UserDetails.builder().roles(List.of(CASEWORKER)).build());
+
+        mockMvc.perform(
+                post(url)
+                    .header(AUTHORISATION_HEADER, AUTH_TOKEN)
+                    .header(SERVICE_AUTHORIZATION_HEADER, SERVICE_TOKEN)
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
+
 }
