@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRolesRequest;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole.Representing;
 import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
+import uk.gov.hmcts.reform.prl.exception.InvalidPartyIdException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -57,14 +58,14 @@ public class CaseAssignmentService {
     private final MaskEmail maskEmail;
     private final ObjectMapper objectMapper;
 
-    private static IllegalArgumentException getIllegalArgumentException(CaseData caseData,
-                                                                        String selectedPartyId) {
+    private static InvalidPartyIdException getInvalidPartyIdExceptionException(CaseData caseData,
+                                                                               String selectedPartyId) {
         log.error(
             "On case id {} no party found for {}",
             caseData.getId(),
             selectedPartyId
         );
-        return new IllegalArgumentException("Invalid party selected");
+        return new InvalidPartyIdException("Invalid party selected");
     }
 
     private static void updateBarrister(String barristerRole, PartyDetails partyDetails, AllocatedBarrister allocatedBarrister, String userId) {
@@ -212,7 +213,7 @@ public class CaseAssignmentService {
                         allocatedBarrister.getBarristerOrg().getOrganisationID()
                     );
 
-                    errorList.add("Barrister doesn't belong to selected organisation");
+                    errorList.add("Barrister doesn't belong to the selected organisation.");
                 });
     }
 
@@ -259,7 +260,7 @@ public class CaseAssignmentService {
             .filter(partyDetails -> partyDetails.getPartyId()
                 .equals(UUID.fromString(selectedPartyId)))
             .findAny()
-            .orElseThrow(() -> getIllegalArgumentException(caseData, selectedPartyId));
+            .orElseThrow(() -> getInvalidPartyIdExceptionException(caseData, selectedPartyId));
     }
 
     private PartyDetails getC100Party(CaseData caseData, String selectedPartyId) {
@@ -271,7 +272,7 @@ public class CaseAssignmentService {
                 .equals(UUID.fromString(selectedPartyId)))
             .findAny()
             .map(Element::getValue)
-            .orElseThrow(() -> getIllegalArgumentException(caseData, selectedPartyId));
+            .orElseThrow(() -> getInvalidPartyIdExceptionException(caseData, selectedPartyId));
     }
 
     public void validateCaseRoles(CaseData caseData,
@@ -315,7 +316,7 @@ public class CaseAssignmentService {
                         );
                     }
                 ),
-            () -> errorList.add("Could not find barrister with provided email")
+            () -> errorList.add("Could not find a registered barrister with the provided email address.")
         );
     }
 
