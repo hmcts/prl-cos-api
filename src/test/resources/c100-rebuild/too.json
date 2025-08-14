@@ -1,0 +1,26 @@
+{
+  "too_courtOrder":[
+    "whoChildLiveWith",
+    "childTimeSpent",
+    "stopOtherPeopleDoingSomething",
+    "resolveSpecificIssue"
+  ],
+  "too_stopOtherPeopleDoingSomethingSubField":[
+    "changeChildrenNameSurname",
+    "allowMedicalTreatment",
+    "takingChildOnHoliday",
+    "relocateChildrenDifferentUkArea",
+    "relocateChildrenOutsideUk"
+  ],
+  "too_resolveSpecificIssueSubField":[
+    "specificHoliday",
+    "whatSchoolChildrenWillGoTo",
+    "religiousIssue",
+    "changeChildrenNameSurnameA",
+    "medicalTreatment",
+    "relocateChildrenDifferentUkAreaA",
+    "relocateChildrenOutsideUkA",
+    "returningChildrenToYourCare"
+  ],
+  "too_shortStatement":"Describe what you want the court to do regarding the children in this application"
+}

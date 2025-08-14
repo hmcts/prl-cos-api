@@ -1,0 +1,65 @@
+{
+  "c1A_haveSafetyConcerns": "Yes",
+  "c1A_safetyConernAbout": [
+    "applicant"
+  ],
+  "onlycontinue": "true",
+  "c1A_concernAboutChild": [
+    "physicalAbuse",
+    "psychologicalAbuse",
+    "emotionalAbuse",
+    "sexualAbuse",
+    "financialAbuse",
+    "witnessingDomesticAbuse",
+    "somethingElse"
+  ],
+  "c1A_safteyConcerns": {
+    "applicant": {
+      "sexualAbuse": {
+        "behaviourDetails": "parent has sexual abuse",
+        "behaviourStartDate": null,
+        "isOngoingBehaviour": null,
+        "seekHelpFromPersonOrAgency": "Yes",
+        "seekHelpDetails": "did seek"
+      },
+      "financialAbuse": {
+        "behaviourDetails": "some financial abuse for parent",
+        "behaviourStartDate": "soem time bfr",
+        "isOngoingBehaviour": "Yes",
+        "seekHelpFromPersonOrAgency": "Yes",
+        "seekHelpDetails": "did seek"
+      }
+    }
+  },
+  "c1A_abductionReasonOutsideUk": "Test",
+  "c1A_childsCurrentLocation": "Test",
+  "c1A_passportOffice": "Yes",
+  "c1A_childrenMoreThanOnePassport": "Yes",
+  "c1A_possessionChildrenPassport": [
+    "Mother",
+    "Father",
+    "Other"
+  ],
+  "c1A_provideOtherDetails": "Test",
+  "c1A_abductionPassportOfficeNotified": "Yes",
+  "c1A_childAbductedBefore": "Yes",
+  "c1A_previousAbductionsShortDesc": "Test",
+  "c1A_policeOrInvestigatorInvolved": "Yes",
+  "c1A_policeOrInvestigatorOtherDetails": "Test",
+  "c1A_concernAboutApplicant": [
+    "physicalAbuse",
+    "psychologicalAbuse",
+    "emotionalAbuse",
+    "sexualAbuse",
+    "financialAbuse",
+    "somethingElse"
+  ],
+  "c1A_otherConcernsDrugs": "Yes",
+  "c1A_otherConcernsDrugsDetails": "Test",
+  "c1A_childSafetyConcerns": "Yes",
+  "c1A_childSafetyConcernsDetails": "Test",
+  "c1A_keepingSafeStatement": "Test",
+  "c1A_supervisionAgreementDetails": "Yes",
+  "c1A_agreementOtherWaysDetails": "Yes"
+}
+

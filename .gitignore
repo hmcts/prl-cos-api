@@ -1,0 +1,27 @@
+.gradle
+/build/
+!gradle/wrapper/gradle-wrapper.jar
+*.class
+bin/main/application.yaml
+src/main/resources/application.yaml
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+
+### IntelliJ IDEA ###
+.idea
+/out
+*.iws
+*.iml
+*.ipr
+
+.DS_Store
+/.aat-env
+/bin/ccd-config-PRL-local.xlsx
+/bin/
+/.mirrord/mirrord.json

@@ -1,0 +1,304 @@
+{
+  "total": 2,
+  "cases": [
+    {
+      "id": 1661164783455399,
+      "jurisdiction": "PRIVATELAW",
+      "state": "DECISION_OUTCOME",
+      "caseTypeOfApplication": "C100",
+      "case_type_id": "PRLAPPS",
+      "created_date": "2022-08-22T10:39:43.49",
+      "last_modified": "2022-08-22T10:44:54.055",
+      "case_data": {
+        "dateSubmitted": "2022-08-22",
+        "caseTypeOfApplication": "C100",
+        "confidentialDetails": {
+          "isConfidentialDetailsAvailable": "No"
+        },
+        "childrenKnownToLocalAuthority": "no",
+        "ordersApplyingFor": [
+          "childArrangementsOrder"
+        ],
+        "children": [
+          {
+            "id": "e1866c81-f3d3-484e-b13a-aad0f9dab468",
+            "value": {
+              "firstName": "fgfdg",
+              "lastName": "gdgffd",
+              "dateOfBirth": "1990-11-12",
+              "gender": "male",
+              "orderAppliedFor": [
+                "childArrangementsOrder"
+              ],
+              "applicantsRelationshipToChild": "stepFather",
+              "respondentsRelationshipToChild": "mother",
+              "childLiveWith": [
+                "applicant"
+              ],
+              "personWhoLivesWithChild": [],
+              "parentalResponsibilityDetails": "adw"
+            }
+          }
+        ],
+        "miamExemptionsTable": {
+          "reasonsForMiamExemption": "Urgency",
+          "domesticViolenceEvidence": "",
+          "urgencyEvidence": "Any delay caused by MIAM would cause unreasonable hardship to the prospective applicant",
+          "childProtectionEvidence": "",
+          "previousAttendenceEvidence": "",
+          "otherGroundsEvidence": ""
+        },
+        "summaryTabForOrderAppliedFor": {
+          "ordersApplyingFor": "Child Arrangements Order",
+          "typeOfChildArrangementsOrder": "Live with order"
+        },
+        "applicants": [
+          {
+            "id": "f03aff33-42ca-4b44-9dd9-c414294f87d5",
+            "value": {
+              "firstName": "sdfdsf",
+              "lastName": "sdf",
+              "previousName": "sdf",
+              "dateOfBirth": "2007-12-12",
+              "gender": "male",
+              "placeOfBirth": "Harrow",
+              "isAddressConfidential": "No",
+              "isAtAddressLessThan5Years": "No",
+              "canYouProvideEmailAddress": "No",
+              "isPhoneNumberConfidential": "No",
+              "otherPersonRelationshipToChildren": [],
+              "solicitorOrg": {
+                "OrganisationID": "V4031UM",
+                "OrganisationName": "AutoTestt43tdf4af7d"
+              },
+              "solicitorAddress": {
+                "AddressLine1": "29 Radnor Road",
+                "AddressLine2": "",
+                "AddressLine3": "",
+                "PostTown": "Harrow",
+                "County": "",
+                "Country": "United Kingdom",
+                "PostCode": "HA1 1SA"
+              },
+              "representativeFirstName": "Ayansh",
+              "representativeLastName": "Aman",
+              "solicitorEmail": "aa@gmail.com",
+              "phoneNumber": "07442772347",
+              "address": {
+                "AddressLine1": "29 Radnor Road",
+                "AddressLine2": "",
+                "AddressLine3": "",
+                "PostTown": "Harrow",
+                "County": "",
+                "Country": "United Kingdom",
+                "PostCode": "HA11SA"
+              }
+            }
+          }
+        ],
+        "respondents": [
+          {
+            "id": "5581032c-1333-4bf2-9651-9d2433351c1a",
+            "value": {
+              "firstName": "sad",
+              "lastName": "sdf",
+              "gender": "male",
+              "canYouProvideEmailAddress": "No",
+              "isDateOfBirthKnown": "No",
+              "isCurrentAddressKnown": "No",
+              "canYouProvidePhoneNumber": "No",
+              "isPlaceOfBirthKnown": "No",
+              "otherPersonRelationshipToChildren": [],
+              "solicitorOrg": {},
+              "solicitorAddress": {},
+              "isAtAddressLessThan5YearsWithDontKnow": "no",
+              "doTheyHaveLegalRepresentation": "no",
+              "address": {}
+            }
+          }
+        ],
+        "applicantsConfidentialDetails": [],
+        "applicantSolicitorEmailAddress": "prl-e2etestsolicitor@mailinator.com",
+        "solicitorName": "E2E Test Solicitor",
+        "courtName": "West London Family Court",
+        "otherPeopleInTheCaseTable": [
+          {
+            "id": "a5d86587-ba06-4db0-8620-10ef472af3e5",
+            "value": {
+              "address": {},
+              "relationshipToChild": []
+            }
+          }
+        ],
+        "submitAndPayDownloadApplicationLink": {
+          "document_filename": "Draft_C100_application.pdf",
+          "document_id": "e7226e49-fc92-4c12-bac5-e3e50ee4ff15"
+        }
+      }
+    },
+    {
+      "id": 1661447479032162,
+      "jurisdiction": "PRIVATELAW",
+      "state": "DECISION_OUTCOME",
+      "caseTypeOfApplication": "C100",
+      "case_type_id": "PRLAPPS",
+      "created_date": "2022-08-25T17:11:19.007",
+      "last_modified": "2022-08-25T17:23:10.405",
+      "case_data": {
+        "dateSubmitted": "2022-08-25",
+        "caseTypeOfApplication": "C100",
+        "confidentialDetails": {
+          "isConfidentialDetailsAvailable": "No"
+        },
+        "childrenKnownToLocalAuthority": "no",
+        "ordersApplyingFor": [
+          "childArrangementsOrder"
+        ],
+        "children": [
+          {
+            "id": "e42f62eb-bb04-46da-8fb9-b493da337250",
+            "value": {
+              "firstName": "test",
+              "lastName": "test",
+              "dateOfBirth": "1999-10-10",
+              "gender": "male",
+              "orderAppliedFor": [
+                "childArrangementsOrder"
+              ],
+              "applicantsRelationshipToChild": "father",
+              "respondentsRelationshipToChild": "mother",
+              "childLiveWith": [
+                "applicant"
+              ],
+              "personWhoLivesWithChild": [],
+              "parentalResponsibilityDetails": "test"
+            }
+          }
+        ],
+        "miamExemptionsTable": {
+          "reasonsForMiamExemption": "Domestic violence",
+          "domesticViolenceEvidence": "A letter or report from an organisation providing domestic violence support services in the United Kingdom confirming- \r\n(i) that a person with whom a prospective party is or was in a family relationship was refused admission to a refuge; \r\n(ii) the date on which they were refused admission to the refuge; and \r\n(iii)they sought admission to the refuge because of allegations of domestic violence by the prospective party referred to in paragraph (i);",
+          "urgencyEvidence": "",
+          "childProtectionEvidence": "",
+          "previousAttendenceEvidence": "",
+          "otherGroundsEvidence": ""
+        },
+        "summaryTabForOrderAppliedFor": {
+          "ordersApplyingFor": "Child Arrangements Order",
+          "typeOfChildArrangementsOrder": "Live with order"
+        },
+        "applicants": [
+          {
+            "id": "347da4a9-bfac-4df0-a49f-d8234a897704",
+            "value": {
+              "firstName": "Yogi",
+              "lastName": "UPasani",
+              "dateOfBirth": "1999-10-10",
+              "gender": "male",
+              "placeOfBirth": "Test",
+              "isAddressConfidential": "No",
+              "isAtAddressLessThan5Years": "No",
+              "canYouProvideEmailAddress": "No",
+              "isPhoneNumberConfidential": "No",
+              "otherPersonRelationshipToChildren": [],
+              "solicitorOrg": {
+                "OrganisationID": "6SFJUH7",
+                "OrganisationName": "Aat orgtest57"
+              },
+              "solicitorAddress": {
+                "AddressLine1": "102",
+                "AddressLine2": "Gabrielle House 332-336",
+                "AddressLine3": "Perth Road",
+                "PostTown": "Ilford",
+                "County": "",
+                "Country": "United Kingdom",
+                "PostCode": "IG2 6FG"
+              },
+              "dxNumber": "test",
+              "representativeFirstName": "test",
+              "representativeLastName": "test",
+              "solicitorEmail": "test@test.com",
+              "phoneNumber": "099999999999",
+              "address": {
+                "AddressLine1": "100",
+                "AddressLine2": "Gabrielle House 332-336",
+                "AddressLine3": "Perth Road",
+                "PostTown": "Ilford",
+                "County": "",
+                "Country": "United Kingdom",
+                "PostCode": "IG2 6FG"
+              }
+            }
+          }
+        ],
+        "respondents": [
+          {
+            "id": "d21d5017-7697-4cbc-906e-67dab326058e",
+            "value": {
+              "firstName": "testres",
+              "lastName": "testres",
+              "gender": "female",
+              "canYouProvideEmailAddress": "No",
+              "isDateOfBirthKnown": "No",
+              "isCurrentAddressKnown": "No",
+              "canYouProvidePhoneNumber": "No",
+              "isPlaceOfBirthKnown": "No",
+              "otherPersonRelationshipToChildren": [],
+              "solicitorOrg": {},
+              "solicitorAddress": {},
+              "isAtAddressLessThan5YearsWithDontKnow": "no",
+              "doTheyHaveLegalRepresentation": "no",
+              "address": {}
+            }
+          }
+        ],
+        "applicantsConfidentialDetails": [],
+        "applicantSolicitorEmailAddress": "prl_aat@mailinator.com",
+        "solicitorName": "private law aat user",
+        "courtName": "East London Family Court",
+        "otherPeopleInTheCaseTable": [
+          {
+            "id": "abfc44b2-2e8a-4365-805d-1f6c58989135",
+            "value": {
+              "address": {},
+              "relationshipToChild": []
+            }
+          }
+        ],
+        "hearingData": {
+          "hmctsServiceCode": "ABA5",
+          "caseRef": "1661447479032162",
+          "caseRef": "1661447479032162",
+          "caseHearings": [
+            {
+              "hearingID": 2000004862,
+              "hearingType": "ABA5-FHR",
+              "hearingTypeValue": "First Hearing",
+              "hearingDaySchedule": [
+                {
+                  "hearingVenueName": null,
+                  "hearingStartDateTime": "2023-04-13T09:00:00",
+                  "hearingEndDateTime": "2023-04-13T15:00:00"
+                },
+                {
+                  "hearingVenueName": null,
+                  "hearingStartDateTime": "2023-04-12T09:00:00",
+                  "hearingEndDateTime": "2023-04-12T15:00:00"
+                },
+                {
+                  "hearingVenueName": null,
+                  "hearingStartDateTime": "2023-04-11T09:00:00",
+                  "hearingEndDateTime": "2023-04-11T15:00:00"
+                }
+              ]
+            }
+          ]
+        },
+        "submitAndPayDownloadApplicationLink": {
+          "document_filename": "Draft_C100_application.pdf",
+          "document_id": "b5eaa277-7e48-491b-82aa-0fc048cc46b8"
+        }
+      }
+    }
+  ]
+}

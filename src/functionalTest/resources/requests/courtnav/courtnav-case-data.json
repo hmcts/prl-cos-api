@@ -1,0 +1,199 @@
+{
+  "applicantHowOld": "eighteenOrOlder",
+  "courtNavCaseName": "firstTest",
+  "ordersAppliedFor": [
+    "nonMolestationOrder"
+  ],
+  "ordersAppliedWithoutNotice": true,
+  "ordersAppliedWithoutNoticeReason": [
+    "riskOfSignificantHarm"
+  ],
+  "ordersAppliedWithoutNoticeReasonDetails": "test",
+  "bailConditionsOnRespondent": true,
+  "bailConditionsEndDate": "2022-08-08",
+  "additionalDetailsForCourt": "string",
+  "applicantDetails": {
+    "applicantFirstName": "testfirst",
+    "applicantLastName": "test last",
+    "applicantOtherNames": "string",
+    "applicantDateOfBirth": "2022-08-08",
+    "applicantGender": "Female",
+    "otherGender": "string",
+    "shareContactDetailsWithRespondent": true,
+    "isAddressConfidential": "Yes",
+    "isEmailAddressConfidential": "Yes",
+    "isPhoneNumberConfidential": "Yes",
+    "applicantPhoneNumber": "string",
+    "applicantEmailAddress": "string",
+    "applicantContactInstructions": "string",
+    "applicantAddress": {
+      "AddressLine1": "string",
+      "AddressLine2": "string",
+      "AddressLine3": "string",
+      "PostTown": "string",
+      "County": "string",
+      "Country": "string",
+      "PostCode": "LU1 5ET"
+    },
+    "applicantPreferredContact": "phone",
+    "legalRepresentativeFirm": {
+      "OrganisationID": "string",
+      "OrganisationName": "string"
+    },
+    "legalRepresentativeAddress": {
+      "AddressLine1": "string",
+      "AddressLine2": "string",
+      "AddressLine3": "string",
+      "PostTown": "string",
+      "County": "string",
+      "Country": "string",
+      "PostCode": "string"
+    },
+    "legalRepresentativeDx": "string",
+    "legalRepresentativeReference": "string",
+    "legalRepresentativeFirstName": "string",
+    "legalRepresentativeLastName": "string",
+    "applicantHasLegalRepresentative": true,
+    "legalRepresentativeEmail": "string",
+    "legalRepresentativePhone": "string"
+  },
+  "respondentDetails": {
+    "respondentFirstName": "string",
+    "respondentLastName": "string",
+    "respondentOtherNames": "string",
+    "respondentDateOfBirth": "2022-08-08",
+    "respondentPhoneNumber": "string",
+    "respondentEmailAddress": "string",
+    "respondentAddress": {
+      "AddressLine1": "string",
+      "AddressLine2": "string",
+      "AddressLine3": "string",
+      "PostTown": "string",
+      "County": "string",
+      "Country": "string",
+      "PostCode": "string"
+    },
+    "respondentLivesWithApplicant": true
+  },
+  "whoApplicationIsFor": "Yes",
+  "protectedChildren": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "fullName": "string",
+        "dateOfBirth": "2022-08-08",
+        "relationship": "string",
+        "parentalResponsibility": true,
+        "respondentRelationship": "string"
+      }
+    }
+  ],
+  "relationshipDescription": "marriedOrCivil",
+  "relationshipStartDate": "2022-08-08",
+  "relationshipEndDate": "2022-08-08",
+  "ceremonyDate": "2022-08-08",
+  "respondentsRelationshipToApplicant": "father",
+  "relationshipToApplicantOther": "string",
+  "anyChildren": true,
+  "applyingForMonMolestationOrder": true,
+  "stopBehaviourTowardsApplicant": [
+    "beingViolentOrThreatening"
+  ],
+  "stopBehaviourTowardsChildren": [
+    "beingViolentOrThreatening"
+  ],
+  "stopBehaviourAnythingElse": "string",
+  "applyingForOccupationOrder": true,
+  "occupationOrderAddress": {
+    "AddressLine1": "string",
+    "AddressLine2": "string",
+    "AddressLine3": "string",
+    "PostTown": "string",
+    "County": "string",
+    "Country": "string",
+    "PostCode": "string"
+  },
+  "currentlyLivesAtAddress": [
+    "applicant"
+  ],
+  "currentlyLivesAtAddressOther": "string",
+  "previouslyLivedAtAddress": "applicantAndRespondent",
+  "intendedToLiveAtAddress": "applicantAndRespondent",
+  "childrenApplicantResponsibility": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "fullName": "string",
+        "age": 0
+      }
+    }
+  ],
+  "propertySpeciallyAdapted": true,
+  "propertySpeciallyAdaptedDetails": "string",
+  "propertyHasMortgage": true,
+  "namedOnMortgage": [
+    "applicant"
+  ],
+  "namedOnMortgageOther": "string",
+  "mortgageNumber": "string",
+  "mortgageLenderName": "string",
+  "mortgageLenderAddress": {
+    "AddressLine1": "string",
+    "AddressLine2": "string",
+    "AddressLine3": "string",
+    "PostTown": "string",
+    "County": "string",
+    "Country": "string",
+    "PostCode": "string"
+  },
+  "propertyIsRented": true,
+  "namedOnRentalAgreement": [
+    "applicant"
+  ],
+  "namedOnRentalAgreementOther": "string",
+  "landlordName": "string",
+  "landlordAddress": {
+    "AddressLine1": "string",
+    "AddressLine2": "string",
+    "AddressLine3": "string",
+    "PostTown": "string",
+    "County": "string",
+    "Country": "string",
+    "PostCode": "string"
+  },
+  "haveHomeRights": true,
+  "wantToHappenWithLivingSituation": [
+    "stayInHome"
+  ],
+  "wantToHappenWithFamilyHome": [
+    "respondentToPayRepairsMaintenance"
+  ],
+  "anythingElseForCourtToConsider": "string",
+  "declaration": "fl401Consent",
+  "signature": "applicant",
+  "signatureDate": "2022-08-08",
+  "signatureFullName": "string",
+  "representativeFirmName": "string",
+  "representativePositionHeld": "string",
+  "anyOngoingCourtProceedings": true,
+  "ongoingCourtProceedings": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "nameOfCourt": "string",
+        "caseNumber": "string",
+        "caseType": "string",
+        "caseDetails": "string"
+      }
+    }
+  ],
+  "interpreterLanguage": "string",
+  "interpreterDialect": "string",
+  "anyDisabilityNeeds": true,
+  "disabilityNeedsDetails": "string",
+  "anySpecialMeasures": [
+    "separateWaitingRoom"
+  ],
+  "courtSpecialRequirements": "string",
+  "interpreterRequired": true
+}

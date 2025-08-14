@@ -1,0 +1,184 @@
+{
+  "case_details": {
+    "state": "JUDICIAL_REVIEW",
+    "id": "1711117454766387",
+    "case_data": {
+      "id": 1711117454766387,
+      "applicantCaseName": "John Smith",
+      "caseTypeOfApplication": "FL401",
+      "caseManagementLocation": {
+        "baseLocationId": "1",
+        "regionId": "1",
+        "baseName": "1",
+        "email": "test1@test.com"
+      },
+      "applicantsFL401": {
+        "user": {
+          "email": null,
+          "idamId": null,
+          "solicitorRepresented": null
+        },
+        "email": "applicant1@example.net",
+        "gender": "male",
+        "address": {
+          "County": "",
+          "Country": "United Kingdom",
+          "PostCode": "SW1H 9AJ",
+          "PostTown": "London",
+          "AddressLine1": "Ministry Of Justice",
+          "AddressLine2": "Seventh Floor 102 Petty France",
+          "AddressLine3": ""
+        },
+        "partyId": "f2847b15-dbb8-4df0-868a-420d9de11d29",
+        "dxNumber": null,
+        "landline": null,
+        "lastName": "Smith",
+        "firstName": "John",
+        "dateOfBirth": "1980-01-01",
+        "otherGender": null,
+        "phoneNumber": "07405123456",
+        "placeOfBirth": null,
+        "previousName": null,
+        "solicitorOrg": {
+          "OrganisationID": "QO4A1Q8",
+          "OrganisationName": "FPRL-test-organisation"
+        },
+        "partyLevelFlag": {
+          "details": [],
+          "partyName": "John Smith",
+          "roleOnCase": "Applicant"
+        },
+        "sendSignUpLink": null,
+        "solicitorEmail": "legal.solicitor@example.net",
+        "isAddressUnknown": null,
+        "solicitorAddress": {
+          "County": null,
+          "Country": null,
+          "PostCode": null,
+          "PostTown": null,
+          "AddressLine1": null,
+          "AddressLine2": null,
+          "AddressLine3": null
+        },
+        "solicitorOrgUuid": "c90440e6-22a4-4625-baa7-76a6fcb8309b",
+        "solicitorPartyId": "0d730a9e-74bf-468c-ac27-2f6cc9c9acef",
+        "currentRespondent": null,
+        "contactPreferences": null,
+        "isDateOfBirthKnown": null,
+        "solicitorReference": null,
+        "solicitorTelephone": "01234568999",
+        "isPlaceOfBirthKnown": null,
+        "isDateOfBirthUnknown": null,
+        "isAddressConfidential": "No",
+        "isCurrentAddressKnown": null,
+        "relationshipToChildren": null,
+        "representativeLastName": "Solicitor",
+        "representativeFirstName": "Legal",
+        "canYouProvidePhoneNumber": null,
+        "applicantPreferredContact": [],
+        "canYouProvideEmailAddress": "Yes",
+        "isAtAddressLessThan5Years": null,
+        "isPhoneNumberConfidential": "No",
+        "isEmailAddressConfidential": "No",
+        "applicantContactInstructions": null,
+        "respondentLivedWithApplicant": null,
+        "doTheyHaveLegalRepresentation": "yes",
+        "addressLivedLessThan5YearsDetails": null,
+        "otherPersonRelationshipToChildren": [],
+        "isAtAddressLessThan5YearsWithDontKnow": null
+      },
+      "respondentsFL401": {
+        "user": {
+          "email": null,
+          "idamId": null,
+          "solicitorRepresented": null
+        },
+        "email": "repondent1@example.net",
+        "gender": null,
+        "address": {
+          "County": null,
+          "Country": null,
+          "PostCode": null,
+          "PostTown": null,
+          "AddressLine1": null,
+          "AddressLine2": null,
+          "AddressLine3": null
+        },
+        "partyId": "a2b211f4-6072-4970-9c34-08a47ff6ec9c",
+        "dxNumber": null,
+        "landline": null,
+        "lastName": "Lynn",
+        "firstName": "Elise",
+        "dateOfBirth": null,
+        "otherGender": null,
+        "phoneNumber": null,
+        "placeOfBirth": null,
+        "previousName": null,
+        "solicitorOrg": {},
+        "partyLevelFlag": {
+          "details": [],
+          "partyName": "Elise Lynn",
+          "roleOnCase": "Respondent"
+        },
+        "sendSignUpLink": null,
+        "solicitorEmail": null,
+        "isAddressUnknown": null,
+        "solicitorAddress": {
+          "County": null,
+          "Country": null,
+          "PostCode": null,
+          "PostTown": null,
+          "AddressLine1": null,
+          "AddressLine2": null,
+          "AddressLine3": null
+        },
+        "solicitorOrgUuid": null,
+        "solicitorPartyId": null,
+        "currentRespondent": null,
+        "contactPreferences": null,
+        "isDateOfBirthKnown": "No",
+        "solicitorReference": null,
+        "solicitorTelephone": null,
+        "isPlaceOfBirthKnown": null,
+        "isDateOfBirthUnknown": null,
+        "isAddressConfidential": null,
+        "isCurrentAddressKnown": "No",
+        "relationshipToChildren": null,
+        "representativeLastName": null,
+        "representativeFirstName": null,
+        "canYouProvidePhoneNumber": "No",
+        "applicantPreferredContact": [],
+        "canYouProvideEmailAddress": "Yes",
+        "isAtAddressLessThan5Years": null,
+        "isPhoneNumberConfidential": null,
+        "isEmailAddressConfidential": null,
+        "applicantContactInstructions": null,
+        "respondentLivedWithApplicant": "No",
+        "doTheyHaveLegalRepresentation": null,
+        "addressLivedLessThan5YearsDetails": null,
+        "otherPersonRelationshipToChildren": [],
+        "isAtAddressLessThan5YearsWithDontKnow": null
+      },
+      "soaServingRespondentsOptionsDA": "applicantLegalRepresentative",
+      "unServedApplicantPack": {
+        "packDocument": [
+          {
+            "id": "97e25c77-f915-4b4e-8436-89a0d1678813",
+            "value": {
+              "documentUrl": ""
+            }
+          }
+        ],
+        "partyIds": [
+          {
+            "id": "97e25c77-f915-4b4e-8436-89a0d1678813",
+            "value": "97e25c77-f915-4b4e-8436-89a0d1678813"
+          }
+        ],
+        "servedBy": "",
+        "packCreatedDate": ""
+      }
+    }
+  },
+  "event_id": "litigationCapacity"
+}

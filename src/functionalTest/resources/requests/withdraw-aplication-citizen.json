@@ -1,0 +1,26 @@
+{
+  "case_details": {
+    "id": "1703068453862935",
+    "jurisdiction": "PRIVATELAW",
+    "case_type": "PRLAPPS",
+    "created_on": "2023-12-20T10:34:13.804091",
+    "last_modified_on": "2023-12-20T14:57:00.936309939",
+    "last_state_modified_on": "2023-12-20T10:34:13.804091",
+    "state": "SUBMITTED_PAID",
+    "security_classification": "PUBLIC",
+    "case_data": {
+      "withDrawApplicationData": {
+        "withDrawApplication": "Yes",
+        "withDrawApplicationReason": "withdrawApplicationReason"
+      }
+    },
+    "event": {
+      "id": "citizen-case-update",
+      "summary": "",
+      "description": ""
+    },
+    "event_token": "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJzcnBsMWpudWZvM3Nkb3V0a3Zrajkzcm8yYSIsInN1YiI6IjFkNGM5MGRjLWRhZTAtNDBlMi1hY2IwLWFiNGE1NDhhNDRjZSIsImlhdCI6MTcwMzA4NjA3NywiY2FzZS1pZCI6IjUiLCJldmVudC1pZCI6Im1hbmFnZU9yZGVycyIsImNhc2UtdHlwZS1pZCI6IlBSTEFQUFMiLCJqdXJpc2RpY3Rpb24taWQiOiJQUklWQVRFTEFXIiwiY2FzZS1zdGF0ZSI6IkpVRElDSUFMX1JFVklFVyIsImNhc2UtdmVyc2lvbiI6ImM1ZTI0NDk1NzM0ZjZiMjNiMTE3NjZlODVhNmYyZDM3YjA5NWU5MDdjODU0M2ViMTg5ZTNmZTU2M2YzYzQxZDQiLCJlbnRpdHktdmVyc2lvbiI6MTR9.kCNPN0iCvpa5OdHeVgX9sLC4w7tZUAey3Q4LDkGeBMM",
+    "ignore_warning": false
+  }
+}
+
