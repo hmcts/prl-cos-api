@@ -10,6 +10,9 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
+import static uk.gov.hmcts.reform.prl.enums.PartyEnum.applicant;
+import static uk.gov.hmcts.reform.prl.enums.PartyEnum.respondent;
+
 @Slf4j
 @Service
 public class BarristerRemoveService extends  AbstractBarristerService {
@@ -27,13 +30,25 @@ public class BarristerRemoveService extends  AbstractBarristerService {
 
     @Override
     protected boolean isPartyApplicableForFiltering(boolean applicantOrRespondent, BarristerFilter barristerFilter, PartyDetails partyDetails) {
-        return hasBarrister(partyDetails) && partyDetails.getBarrister().getBarristerId() != null;
+        boolean isApplicable = hasBarrister(partyDetails) && partyDetails.getBarrister().getBarristerId() != null;
+
+        if (barristerFilter.isCaseworkerOrSolicitor()) {
+            return isApplicable;
+        } else {
+            if (partyDetails.getSolicitorOrg() == null || barristerFilter.getUserOrgIdentifier() == null) {
+                log.info("This party {} has an empty solicitor org or the user org identifier is empty", partyDetails.getPartyId());
+                return false;
+            }
+
+            return isApplicable
+                && barristerFilter.getUserOrgIdentifier().equals(partyDetails.getSolicitorOrg().getOrganisationID());
+        }
     }
 
     @Override
     protected String getLabelForAction(boolean applicantOrRespondent, BarristerFilter barristerFilter, PartyDetails partyDetails) {
         return String.format("%s (%s), %s, %s", partyDetails.getLabelForDynamicList(),
-                             applicantOrRespondent ? APPLICANT : RESPONDENT,
+                             applicantOrRespondent ? applicant.getDisplayedValue() : respondent.getDisplayedValue(),
                              partyDetails.getRepresentativeFullName(),
                              partyDetails.getBarrister().getBarristerFullName()
         );
