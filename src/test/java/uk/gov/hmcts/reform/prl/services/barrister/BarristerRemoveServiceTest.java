@@ -278,7 +278,7 @@ class BarristerRemoveServiceTest extends BarristerTestAbstract {
     }
 
 
-    protected void assertPartyToRemove(DynamicList listOfBarristersToRemove, PartyEnum partyEnum, String prefix, int itemIndex, int partyIndex ) {
+    protected void assertPartyToRemove(DynamicList listOfBarristersToRemove, PartyEnum partyEnum, String prefix, int itemIndex, int partyIndex) {
         String appRepPrefix = partyEnum == applicant ? "App" : "Resp";
         DynamicListElement appParty = listOfBarristersToRemove.getListItems().get(itemIndex);
         String label = appRepPrefix + "FN" + partyIndex + " " + appRepPrefix + "LN" + partyIndex + " "
