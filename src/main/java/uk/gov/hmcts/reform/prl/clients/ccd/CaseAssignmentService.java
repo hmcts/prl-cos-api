@@ -42,12 +42,8 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole.Representing.DAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole.Representing.DARESPONDENT;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
@@ -432,31 +428,27 @@ public class CaseAssignmentService {
         updateBarrister(barristerRole, c100Party, allocatedBarrister, userId);
     }
 
-    public void removeBarristerIfPresent(CaseDetails caseDetails) {
+    public CaseData removeBarristerIfPresent(CaseDetails caseDetails) {
         CaseData caseData = getCaseData(caseDetails, objectMapper);
         ChangeOrganisationRequest changeOrganisationRequestField = caseData.getChangeOrganisationRequestField();
         String solicitorRole = changeOrganisationRequestField.getCaseRoleId().getValue().getCode();
         String barristerRole = getMatchingBarristerRole(solicitorRole);
-        removeBarristerIfPresent(caseData, barristerRole, caseDetails);
+        removeBarristerIfPresent(caseData, barristerRole);
+        return caseData;
     }
 
-    private void removeBarristerIfPresent(CaseData caseData, String barristerRole,  CaseDetails caseDetails) {
+    private void removeBarristerIfPresent(CaseData caseData, String barristerRole) {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             getC100SelectedParty(caseData, barristerRole)
                 .ifPresent(selectedParty -> {
                     removeBarristerCaseRole(caseData, selectedParty);
                     selectedParty.setBarrister(null);
-                    caseDetails.getData().put(APPLICANTS, caseData.getApplicants());
-                    caseDetails.getData().put(RESPONDENTS, caseData.getRespondents());
                 });
-
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             getFl401SelectedParty(caseData, barristerRole)
                 .ifPresent(selectedParty -> {
                     removeBarristerCaseRole(caseData, selectedParty);
                     selectedParty.setBarrister(null);
-                    caseDetails.getData().put(FL401_APPLICANTS, caseData.getApplicantsFL401());
-                    caseDetails.getData().put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
                 });
         }
     }
