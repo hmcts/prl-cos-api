@@ -59,6 +59,7 @@ public class UploadAdditionalApplicationController {
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Bundle created"),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public AboutToStartOrSubmitCallbackResponse createUploadAdditionalApplicationBundle(@RequestHeader("Authorization")
+                                                                                        @Parameter(hidden = true) String authorisation,
                                                                                         @RequestBody CallbackRequest callbackRequest,
                                                                                         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER)
                                                                                         String s2sToken) {
