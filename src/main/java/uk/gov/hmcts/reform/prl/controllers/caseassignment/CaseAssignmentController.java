@@ -34,7 +34,13 @@ import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATED_BARRISTER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -87,7 +93,7 @@ public class CaseAssignmentController {
                                                        userId.get(),
                                                        barristerRole.get(),
                                                        allocatedBarrister);
-                    updateCaseDetails(caseDetails, caseData);
+                    updateCaseDetailsWithPartyDetails(caseDetails, caseData);
                 } catch (GrantCaseAccessException grantCaseAccessException) {
                     errorList.add(grantCaseAccessException.getMessage());
                 }
@@ -129,7 +135,7 @@ public class CaseAssignmentController {
             if (errorList.isEmpty()) {
                 caseAssignmentService.removeBarrister(caseData,
                                                       allocatedBarrister.getPartyList().getValueCode());
-                updateCaseDetails(caseDetails, caseData);
+                updateCaseDetailsWithPartyDetails(caseDetails, caseData);
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder()
@@ -141,7 +147,13 @@ public class CaseAssignmentController {
 
     }
 
-    private void updateCaseDetails(CaseDetails caseDetails, CaseData caseData) {
-        caseDetails.getData().putAll(caseData.toMap(objectMapper));
+    private void updateCaseDetailsWithPartyDetails(CaseDetails caseDetails, CaseData caseData) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            caseDetails.getData().put(APPLICANTS, caseData.getApplicants());
+            caseDetails.getData().put(RESPONDENTS, caseData.getRespondents());
+        } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            caseDetails.getData().put(FL401_APPLICANTS, caseData.getApplicantsFL401());
+            caseDetails.getData().put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
+        }
     }
 }
