@@ -89,7 +89,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -301,10 +300,7 @@ public class NoticeOfChangePartiesServiceTest {
             DecisionRequest.class))).thenReturn(
                 AboutToStartOrSubmitCallbackResponse.builder().data(new HashMap<>()).build()
         );
-        when(caseAssignmentService.removeBarristerIfPresent(any(CaseDetails.class)))
-            .thenReturn(CaseData.builder()
-                            .caseTypeOfApplication(C100_CASE_TYPE)
-                            .build());
+
         noticeOfChangePartiesService.applyDecision(CallbackRequest.builder()
                                                        .caseDetails(CaseDetails.builder()
                                                                         .build())
@@ -313,32 +309,6 @@ public class NoticeOfChangePartiesServiceTest {
         verify(assignCaseAccessClient, times(1)).applyDecision(
             anyString(), anyString(), any(
             DecisionRequest.class));
-        verify(caseAssignmentService).removeBarristerIfPresent(any(CaseDetails.class));
-    }
-
-    @Test
-    public void testFl401ApplyDecision() {
-        when(userService.getUserDetails("testAuth")).thenReturn(UserDetails.builder()
-                                                                    .forename("solicitorResp")
-                                                                    .surname("test").build());
-        when(tokenGenerator.generate()).thenReturn("s2sToken");
-        when(assignCaseAccessClient.applyDecision(
-            anyString(), anyString(), any(
-                DecisionRequest.class))).thenReturn(
-            AboutToStartOrSubmitCallbackResponse.builder().data(new HashMap<>()).build()
-        );
-        when(caseAssignmentService.removeBarristerIfPresent(any(CaseDetails.class)))
-            .thenReturn(CaseData.builder()
-                            .caseTypeOfApplication(FL401_CASE_TYPE)
-                            .build());
-        noticeOfChangePartiesService.applyDecision(CallbackRequest.builder()
-                                                       .caseDetails(CaseDetails.builder()
-                                                                        .build())
-                                                       .build(),
-                                                   "testAuth");
-        verify(assignCaseAccessClient, times(1)).applyDecision(
-            anyString(), anyString(), any(
-                DecisionRequest.class));
         verify(caseAssignmentService).removeBarristerIfPresent(any(CaseDetails.class));
     }
 

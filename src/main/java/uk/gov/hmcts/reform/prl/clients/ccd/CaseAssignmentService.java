@@ -42,8 +42,12 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole.Representing.DAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole.Representing.DARESPONDENT;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
@@ -428,13 +432,21 @@ public class CaseAssignmentService {
         updateBarrister(barristerRole, c100Party, allocatedBarrister, userId);
     }
 
-    public CaseData removeBarristerIfPresent(CaseDetails caseDetails) {
+    public void removeBarristerIfPresent(CaseDetails caseDetails) {
         CaseData caseData = getCaseData(caseDetails, objectMapper);
         ChangeOrganisationRequest changeOrganisationRequestField = caseData.getChangeOrganisationRequestField();
         String solicitorRole = changeOrganisationRequestField.getCaseRoleId().getValue().getCode();
         String barristerRole = getMatchingBarristerRole(solicitorRole);
         removeBarristerIfPresent(caseData, barristerRole);
-        return caseData;
+
+        Map<String, Object> data = caseDetails.getData();
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            data.put(APPLICANTS, caseData.getApplicants());
+            data.put(RESPONDENTS, caseData.getRespondents());
+        } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            data.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
+            data.put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
+        }
     }
 
     private void removeBarristerIfPresent(CaseData caseData, String barristerRole) {
