@@ -45,12 +45,8 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATED_BARRISTER;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole.Representing.DAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole.Representing.DARESPONDENT;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
@@ -449,7 +445,7 @@ public class CaseAssignmentService {
     private Optional<AllocatedBarrister> removeBarristerIfPresent(CaseData caseData, String barristerRole) {
         AllocatedBarrister allocatedBarrister = null;
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            Optional<Element<PartyDetails>> c100SelectedParty = getC100SelectedPartyTest(caseData, barristerRole);
+            Optional<Element<PartyDetails>> c100SelectedParty = getC100SelectedParty(caseData, barristerRole);
             if (c100SelectedParty.isPresent()) {
                 removeBarristerCaseRole(caseData, c100SelectedParty.get().getValue());
                 allocatedBarrister = AllocatedBarrister.builder()
@@ -487,22 +483,7 @@ public class CaseAssignmentService {
             .findAny();
     }
 
-    private Optional<PartyDetails> getC100SelectedParty(CaseData caseData, String barristerRole) {
-        return Stream.of(caseData.getApplicants(), caseData.getRespondents())
-            .filter(Objects::nonNull)
-            .flatMap(Collection::stream)
-            .filter(partyDetailsElement ->
-                Optional.ofNullable(partyDetailsElement.getValue().getBarrister())
-                    .map(Barrister::getBarristerRole)
-                    .filter(Objects::nonNull)
-                    .filter(role -> role.equals(barristerRole))
-                    .isPresent()
-            )
-            .findAny()
-            .map(Element::getValue);
-    }
-
-    private Optional<Element<PartyDetails>> getC100SelectedPartyTest(CaseData caseData, String barristerRole) {
+    private Optional<Element<PartyDetails>> getC100SelectedParty(CaseData caseData, String barristerRole) {
         return Stream.of(caseData.getApplicants(), caseData.getRespondents())
             .filter(Objects::nonNull)
             .flatMap(Collection::stream)
