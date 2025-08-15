@@ -17,26 +17,75 @@ import static uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole.RoleMap
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole.RoleMapping.CARESPONDENT3;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole.RoleMapping.CARESPONDENT4;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole.RoleMapping.CARESPONDENT5;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.C100APPLICANTSOLICITOR1;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.C100APPLICANTSOLICITOR2;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.C100APPLICANTSOLICITOR3;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.C100APPLICANTSOLICITOR4;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.C100APPLICANTSOLICITOR5;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.C100RESPONDENTSOLICITOR1;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.C100RESPONDENTSOLICITOR2;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.C100RESPONDENTSOLICITOR3;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.C100RESPONDENTSOLICITOR4;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.C100RESPONDENTSOLICITOR5;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.FL401APPLICANTSOLICITOR;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.FL401RESPONDENTSOLICITOR;
 
 @RequiredArgsConstructor
 @Getter
 public enum BarristerRole {
-    C100APPLICANTBARRISTER1("[C100APPLICANTBARRISTER1]", CAAPPLICANT, CAAPPLICANT1),
-    C100APPLICANTBARRISTER2("[C100APPLICANTBARRISTER2]", CAAPPLICANT, CAAPPLICANT2),
-    C100APPLICANTBARRISTER3("[C100APPLICANTBARRISTER3]", CAAPPLICANT, CAAPPLICANT3),
-    C100APPLICANTBARRISTER4("[C100APPLICANTBARRISTER4]", CAAPPLICANT, CAAPPLICANT4),
-    C100APPLICANTBARRISTER5("[C100APPLICANTBARRISTER5]", CAAPPLICANT, CAAPPLICANT5),
-    C100RESPONDENTBARRISTER1("[C100RESPONDENTBARRISTER1]", CARESPONDENT, CARESPONDENT1),
-    C100RESPONDENTBARRISTER2("[C100RESPONDENTBARRISTER2]", CARESPONDENT, CARESPONDENT2),
-    C100RESPONDENTBARRISTER3("[C100RESPONDENTBARRISTER3]", CARESPONDENT, CARESPONDENT3),
-    C100RESPONDENTBARRISTER4("[C100RESPONDENTBARRISTER4]", CARESPONDENT, CARESPONDENT4),
-    C100RESPONDENTBARRISTER5("[C100RESPONDENTBARRISTER5]", CARESPONDENT, CARESPONDENT5),
-    FL401APPLICANTBARRISTER("[FL401APPLICANTBARRISTER]", DAAPPLICANT, RoleMapping.DAAPPLICANT),
-    FL401RESPONDENTBARRISTER("[FL401RESPONDENTBARRISTER]", DARESPONDENT, RoleMapping.DARESPONDENT);
+    C100APPLICANTBARRISTER1("[C100APPLICANTBARRISTER1]",
+                            C100APPLICANTSOLICITOR1.getCaseRoleLabel(),
+                            CAAPPLICANT,
+                            CAAPPLICANT1),
+    C100APPLICANTBARRISTER2("[C100APPLICANTBARRISTER2]",
+                            C100APPLICANTSOLICITOR2.getCaseRoleLabel(),
+                            CAAPPLICANT,
+                            CAAPPLICANT2),
+    C100APPLICANTBARRISTER3("[C100APPLICANTBARRISTER3]",
+                            C100APPLICANTSOLICITOR3.getCaseRoleLabel(),
+                            CAAPPLICANT,
+                            CAAPPLICANT3),
+    C100APPLICANTBARRISTER4("[C100APPLICANTBARRISTER4]",
+                            C100APPLICANTSOLICITOR4.getCaseRoleLabel(),
+                            CAAPPLICANT,
+                            CAAPPLICANT4),
+    C100APPLICANTBARRISTER5("[C100APPLICANTBARRISTER5]",
+                            C100APPLICANTSOLICITOR5.getCaseRoleLabel(),
+                            CAAPPLICANT,
+                            CAAPPLICANT5),
+    C100RESPONDENTBARRISTER1("[C100RESPONDENTBARRISTER1]",
+                             C100RESPONDENTSOLICITOR1.getCaseRoleLabel(),
+                             CARESPONDENT,
+                             CARESPONDENT1),
+    C100RESPONDENTBARRISTER2("[C100RESPONDENTBARRISTER2]",
+                             C100RESPONDENTSOLICITOR2.getCaseRoleLabel(),
+                             CARESPONDENT,
+                             CARESPONDENT2),
+    C100RESPONDENTBARRISTER3("[C100RESPONDENTBARRISTER3]",
+                             C100RESPONDENTSOLICITOR3.getCaseRoleLabel(),
+                             CARESPONDENT, CARESPONDENT3),
+    C100RESPONDENTBARRISTER4("[C100RESPONDENTBARRISTER4]",
+                             C100RESPONDENTSOLICITOR4.getCaseRoleLabel(),
+                             CARESPONDENT,
+                             CARESPONDENT4),
+    C100RESPONDENTBARRISTER5("[C100RESPONDENTBARRISTER5]",
+                             C100RESPONDENTSOLICITOR5.getCaseRoleLabel(),
+                             CARESPONDENT,
+                             CARESPONDENT5),
+    FL401APPLICANTBARRISTER("[FL401APPLICANTBARRISTER]",
+                            FL401APPLICANTSOLICITOR.getCaseRoleLabel(),
+                            DAAPPLICANT,
+                            RoleMapping.DAAPPLICANT),
+    FL401RESPONDENTBARRISTER("[FL401RESPONDENTBARRISTER]",
+                             FL401RESPONDENTSOLICITOR.getCaseRoleLabel(),
+                             DARESPONDENT,
+                             RoleMapping.DARESPONDENT);
 
     private final String caseRoleLabel;
+    private final String solicitorCaseRole;
     private final Representing representing;
     private final RoleMapping roleMapping;
+
 
     public enum Representing {
         CAAPPLICANT,
