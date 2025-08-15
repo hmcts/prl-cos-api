@@ -17,6 +17,8 @@ import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
 import uk.gov.hmcts.reform.prl.exception.InvalidPartyIdException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Barrister;
@@ -42,6 +44,7 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATED_BARRISTER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
@@ -437,32 +440,40 @@ public class CaseAssignmentService {
         ChangeOrganisationRequest changeOrganisationRequestField = caseData.getChangeOrganisationRequestField();
         String solicitorRole = changeOrganisationRequestField.getCaseRoleId().getValue().getCode();
         String barristerRole = getMatchingBarristerRole(solicitorRole);
-        removeBarristerIfPresent(caseData, barristerRole);
-
-        Map<String, Object> data = caseDetails.getData();
-        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            data.put(APPLICANTS, caseData.getApplicants());
-            data.put(RESPONDENTS, caseData.getRespondents());
-        } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            data.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
-            data.put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
-        }
+        removeBarristerIfPresent(caseData, barristerRole).ifPresent(
+            allocatedBarrister ->
+                caseDetails.getData().put(ALLOCATED_BARRISTER, allocatedBarrister)
+        );
     }
 
-    private void removeBarristerIfPresent(CaseData caseData, String barristerRole) {
+    private Optional<AllocatedBarrister> removeBarristerIfPresent(CaseData caseData, String barristerRole) {
+        AllocatedBarrister allocatedBarrister = null;
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            getC100SelectedParty(caseData, barristerRole)
-                .ifPresent(selectedParty -> {
-                    removeBarristerCaseRole(caseData, selectedParty);
-                    selectedParty.setBarrister(Barrister.builder().build());
-                });
+            Optional<Element<PartyDetails>> c100SelectedParty = getC100SelectedPartyTest(caseData, barristerRole);
+            if (c100SelectedParty.isPresent()) {
+                removeBarristerCaseRole(caseData, c100SelectedParty.get().getValue());
+                allocatedBarrister = AllocatedBarrister.builder()
+                    .partyList(DynamicList.builder()
+                                   .value(DynamicListElement.builder()
+                                              .code(c100SelectedParty.get().getId())
+                                              .build())
+                                   .build())
+                    .build();
+            }
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            getFl401SelectedParty(caseData, barristerRole)
-                .ifPresent(selectedParty -> {
-                    removeBarristerCaseRole(caseData, selectedParty);
-                    selectedParty.setBarrister(Barrister.builder().build());
-                });
+            Optional<PartyDetails> fl401SelectedParty = getFl401SelectedParty(caseData, barristerRole);
+            if (fl401SelectedParty.isPresent()) {
+                removeBarristerCaseRole(caseData, fl401SelectedParty.get());
+                allocatedBarrister = AllocatedBarrister.builder()
+                    .partyList(DynamicList.builder()
+                                   .value(DynamicListElement.builder()
+                                              .code(fl401SelectedParty.get().getPartyId())
+                                              .build())
+                                   .build())
+                    .build();
+            }
         }
+        return Optional.ofNullable(allocatedBarrister);
     }
 
     private Optional<PartyDetails> getFl401SelectedParty(CaseData caseData, String barristerRole) {
@@ -489,6 +500,20 @@ public class CaseAssignmentService {
             )
             .findAny()
             .map(Element::getValue);
+    }
+
+    private Optional<Element<PartyDetails>> getC100SelectedPartyTest(CaseData caseData, String barristerRole) {
+        return Stream.of(caseData.getApplicants(), caseData.getRespondents())
+            .filter(Objects::nonNull)
+            .flatMap(Collection::stream)
+            .filter(partyDetailsElement ->
+                        Optional.ofNullable(partyDetailsElement.getValue().getBarrister())
+                            .map(Barrister::getBarristerRole)
+                            .filter(Objects::nonNull)
+                            .filter(role -> role.equals(barristerRole))
+                            .isPresent()
+            )
+            .findAny();
     }
 
     private String getMatchingBarristerRole(String solicitorRole) {
