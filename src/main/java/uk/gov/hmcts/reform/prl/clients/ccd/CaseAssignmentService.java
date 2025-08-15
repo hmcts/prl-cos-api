@@ -442,13 +442,13 @@ public class CaseAssignmentService {
             getC100SelectedParty(caseData, barristerRole)
                 .ifPresent(selectedParty -> {
                     removeBarristerCaseRole(caseData, selectedParty);
-                    selectedParty.setBarrister(null);
+                    selectedParty.setBarrister(Barrister.builder().build());
                 });
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             getFl401SelectedParty(caseData, barristerRole)
                 .ifPresent(selectedParty -> {
                     removeBarristerCaseRole(caseData, selectedParty);
-                    selectedParty.setBarrister(null);
+                    selectedParty.setBarrister(Barrister.builder().build());
                 });
         }
     }

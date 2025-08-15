@@ -10,8 +10,10 @@ class PartyDetailsTest {
 
     @Test
     void testBarrister() throws JsonProcessingException {
-        Barrister barrister = null;
-        PartyDetails partyDetails = PartyDetails.builder().build();
+        Barrister barrister = Barrister.builder().build();
+        PartyDetails partyDetails = PartyDetails.builder()
+            .barrister(barrister)
+            .build();
         ObjectMapper mapper = new ObjectMapper();
         mapper.findAndRegisterModules();
         String s = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(partyDetails);
