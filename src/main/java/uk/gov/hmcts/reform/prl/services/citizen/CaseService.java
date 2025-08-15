@@ -98,6 +98,7 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_C1A_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICATIONS_FROM_OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICATIONS_WITHIN_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICATIONS_WITHIN_PROCEEDINGS_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.FM5_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ORDERS_FROM_OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION;
@@ -1499,7 +1500,7 @@ public class CaseService {
                     .partyName(awp.getAuthor())
                     .uploadedBy(awp.getAuthor())
                     .categoryId(PartyEnum.applicant.equals(awp.getPartyType())
-                        ? APPLICATIONS_WITHIN_PROCEEDINGS : APPLICATIONS_FROM_OTHER_PROCEEDINGS)
+                        ? APPLICATIONS_WITHIN_PROCEEDINGS : APPLICATIONS_WITHIN_PROCEEDINGS_RESPONDENT)
                     .document(document.getDocument())
                     .uploadedDate(LocalDateTime.parse(awp.getUploadedDateTime(),
                         DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS_AM_PM))
@@ -1530,7 +1531,7 @@ public class CaseService {
                          .partyName(awp.getAuthor())
                          .uploadedBy(awp.getAuthor()) //PRL-6202 populate uploaded party name
                          .categoryId(PartyEnum.applicant.equals(awp.getPartyType())
-                                         ? APPLICATIONS_WITHIN_PROCEEDINGS : APPLICATIONS_FROM_OTHER_PROCEEDINGS)
+                                         ? APPLICATIONS_WITHIN_PROCEEDINGS : APPLICATIONS_WITHIN_PROCEEDINGS_RESPONDENT)
                          .document(document)
                          .uploadedDate(LocalDateTime.parse(awp.getUploadedDateTime(),
                                                            DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS_AM_PM))
