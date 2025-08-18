@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -76,6 +78,8 @@ public class AcroZipService {
     }
 
     private String createSevenZipFileName(Path source) {
-        return source.getFileName().toString() + ".7z";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmm");
+        String timestamp = LocalDateTime.now().format(formatter);
+        return "PRL_ORDERS_" + timestamp + ".7z";
     }
 }
