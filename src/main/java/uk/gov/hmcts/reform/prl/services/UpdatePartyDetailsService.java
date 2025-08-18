@@ -231,15 +231,28 @@ public class UpdatePartyDetailsService {
             Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
             applicantList.ifPresent(elements -> setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData,
                     ElementUtils.unwrapElements(elements).get(0)));
-            try {
-                generateC8DocumentsForRespondents(updatedCaseData,
-                                                  callbackRequest,
-                                                  authorisation,
-                                                  caseData,
-                                                  caseData.getRespondents());
-                generateC8.accept(caseData);
-            } catch (Exception e) {
-                log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
+            CaseData latest = objectMapper.convertValue(updatedCaseData, CaseData.class);
+            List<Element<PartyDetails>> respondentsForC8 = latest.getRespondents();
+
+            if (respondentsForC8 == null || respondentsForC8.isEmpty()) {
+                CaseData before = objectMapper.convertValue(
+                    callbackRequest.getCaseDetailsBefore().getData(), CaseData.class);
+                respondentsForC8 = before != null ? before.getRespondents() : null;
+                log.info("Respondents missing in current payload; falling back to caseDetailsBefore ({} found).",
+                         respondentsForC8 == null ? 0 : respondentsForC8.size());
+            }
+
+            if (respondentsForC8 != null && !respondentsForC8.isEmpty()) {
+                try {
+                    generateC8DocumentsForRespondents(
+                        updatedCaseData, callbackRequest, authorisation, latest, respondentsForC8);
+                    generateC8.accept(latest);
+                }
+                catch (Exception e) {
+                    log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
+                }
+            } else {
+                log.info("No respondents available for C8 generation; skipping.");
             }
             cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
             findAndListRefugeDocsForC100(callbackRequest, caseData, updatedCaseData);
