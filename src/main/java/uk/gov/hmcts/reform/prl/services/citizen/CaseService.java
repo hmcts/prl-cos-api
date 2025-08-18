@@ -1447,6 +1447,7 @@ public class CaseService {
                 .forEach(awp -> {
                     //C2 bundle docs
                     if (null != awp.getC2DocumentBundle()) {
+                        //TODO: this needs change
                         if (CollectionUtils.isNotEmpty(awp.getC2DocumentBundle().getFinalDocument())) {
                             applicationsWithinProceedings.addAll(getAwpDocuments(
                                 awp,

@@ -165,6 +165,7 @@ public class CitizenAwpMapper {
                 .uploadedDateTime(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE))
                                       .format(DateTimeFormatter.ofPattern(DATE_FORMAT)))
                 .documentRelatedToCase(YesOrNo.Yes)
+                //TODO: this might need updating
                 .finalDocument(getDocuments(citizenAwpRequest.getUploadedApplicationForms()))
                 .supportingEvidenceBundle(YesOrNo.Yes.equals(citizenAwpRequest.getHasSupportingDocuments())
                                               ? getSupportingBundles(citizenAwpRequest) : null)

@@ -400,6 +400,7 @@ public class UploadAdditionalApplicationService {
                 .author(author)
                 .uploadedDateTime(currentDateTime)
                 .applicantName(partyName)
+                //TO DO: this might need change
                 .finalDocument(List.of(element(temporaryC2Document.getDocument())))
                 .documentRelatedToCase(CollectionUtils.isNotEmpty(temporaryC2Document.getDocumentAcknowledge())
                                            ? Yes : No)
