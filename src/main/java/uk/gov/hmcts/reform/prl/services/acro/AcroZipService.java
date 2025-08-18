@@ -1,13 +1,12 @@
 package uk.gov.hmcts.reform.prl.services.acro;
 
-import net.sf.sevenzipjbinding.*;
-import net.sf.sevenzipjbinding.impl.RandomAccessFileOutStream;
+import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
+import org.apache.commons.compress.archivers.sevenz.SevenZOutputFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -27,6 +26,7 @@ public class AcroZipService {
 
         if (filesToCompress.isEmpty()) {
             log.warn("No files found in source folder: {}", sourceFolder);
+            createEmptyArchive(archiveFile);
             return archivePath;
         }
 
@@ -53,92 +53,29 @@ public class AcroZipService {
         }
     }
 
-    private void createSevenZipArchive(File archiveFile, Path sourcePath, List<Path> filesToCompress) throws Exception {
-        try (RandomAccessFile randomAccessFile = new RandomAccessFile(archiveFile, "rw");
-             IOutCreateArchive7z outArchive = SevenZip.openOutArchive7z()) {
+    private void createSevenZipArchive(File archiveFile, Path sourcePath, List<Path> filesToCompress) throws IOException {
+        try (SevenZOutputFile sevenZOutput = new SevenZOutputFile(archiveFile)) {
+            for (Path fileToCompress : filesToCompress) {
+                Path relativePath = sourcePath.relativize(fileToCompress);
 
-            outArchive.createArchive(new RandomAccessFileOutStream(randomAccessFile),
-                filesToCompress.size(), new ArchiveCallback(sourcePath, filesToCompress));
+                SevenZArchiveEntry entry = new SevenZArchiveEntry();
+                entry.setName(relativePath.toString().replace('\\', '/'));
+                entry.setSize(Files.size(fileToCompress));
+
+                sevenZOutput.putArchiveEntry(entry);
+                sevenZOutput.write(Files.readAllBytes(fileToCompress));
+                sevenZOutput.closeArchiveEntry();
+            }
+        }
+    }
+
+    private void createEmptyArchive(File archiveFile) throws IOException {
+        try (SevenZOutputFile sevenZOutput = new SevenZOutputFile(archiveFile)) {
+            // Create empty archive - no entries added
         }
     }
 
     private String createSevenZipFileName(Path source) {
         return source.getFileName().toString() + ".7z";
-    }
-
-    private static class ArchiveCallback implements IOutCreateCallback<IOutItem7z> {
-        private final Path sourcePath;
-        private final List<Path> filesToCompress;
-
-        public ArchiveCallback(Path sourcePath, List<Path> filesToCompress) {
-            this.sourcePath = sourcePath;
-            this.filesToCompress = filesToCompress;
-        }
-
-        @Override
-        public void setOperationResult(boolean operationResultOk) {
-            // No action needed
-        }
-
-        @Override
-        public void setTotal(long total) {
-            // No action needed
-        }
-
-        @Override
-        public void setCompleted(long complete) {
-            // No action needed
-        }
-
-        public IOutItem7z getItemInformation(int index, net.sf.sevenzipjbinding.impl.OutItemFactory<net.sf.sevenzipjbinding.IOutItem7z> outItemFactory) {
-            Path fileToCompress = filesToCompress.get(index);
-            Path relativePath = sourcePath.relativize(fileToCompress);
-            IOutItem7z outItem = outItemFactory.createOutItem();
-            outItem.setPropertyPath(relativePath.toString().replace('\\', '/'));
-            try {
-                outItem.setDataSize(Files.size(fileToCompress));
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to get file size for: " + fileToCompress, e);
-            }
-            return outItem;
-        }
-
-        @Override
-        public ISequentialInStream getStream(int index) throws SevenZipException {
-            Path fileToCompress = filesToCompress.get(index);
-            try {
-                byte[] fileContent = Files.readAllBytes(fileToCompress);
-                return new FileInStream(fileContent);
-            } catch (IOException e) {
-                throw new SevenZipException("Failed to read file: " + fileToCompress, e);
-            }
-        }
-    }
-
-    private static class FileInStream implements ISequentialInStream {
-        private final byte[] data;
-        private int position = 0;
-
-        public FileInStream(byte[] data) {
-            this.data = data;
-        }
-
-        @Override
-        public int read(byte[] buffer) {
-            if (position >= data.length) {
-                return 0;
-            }
-
-            int bytesToRead = Math.min(buffer.length, data.length - position);
-            System.arraycopy(data, position, buffer, 0, bytesToRead);
-            position += bytesToRead;
-
-            return bytesToRead;
-        }
-
-        @Override
-        public void close() {
-            // No resources to close
-        }
     }
 }
