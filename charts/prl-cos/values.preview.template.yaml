@@ -73,7 +73,8 @@ java:
     CORE_CASE_DATA_API_URL: http://prl-ccd-definitions-pr-2837-ccd-data-store-api
     CCD_CASE_DOCS_AM_API: http://prl-ccd-definitions-pr-2837-cdam
     ACA_SERVICE_API_BASEURL: http://prl-ccd-definitions-pr-2837-aac-manage-case-assignment
-    BUNDLE_URL: http://prl-ccd-definitions-pr-2837-em-ccdorc
+    BUNDLE_URL: http://em-ccd-orchestrator-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+
     #CORE_CASE_DATA_API_URL: http://ccd-data-store-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     #CCD_CASE_DOCS_AM_API: http://ccd-case-document-am-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     #ACA_SERVICE_API_BASEURL: http://aac-manage-case-assignment-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
