@@ -91,7 +91,6 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
             .applicantsFL401(applicantFL401)
             .respondentsFL401(respondentFL401)
             .build();
-
         AllocatedBarrister allocatedBarrister = barristerAddService.getAllocatedBarrister(
             caseData,
             AUTHORISATION
