@@ -159,14 +159,12 @@ public class CitizenAwpMapper {
         if ("C2".equals(citizenAwpRequest.getAwpType())) {
 
             log.info("Inside mapping citizen awp C2");
-            return C2DocumentBundle.builder()
+            C2DocumentBundle.C2DocumentBundleBuilder builder = C2DocumentBundle.builder()
                 .applicantName(citizenAwpRequest.getPartyName())
                 .author(citizenAwpRequest.getPartyName())
                 .uploadedDateTime(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE))
                                       .format(DateTimeFormatter.ofPattern(DATE_FORMAT)))
                 .documentRelatedToCase(YesOrNo.Yes)
-                //TODO: this might need updating
-                .finalDocument(getDocuments(citizenAwpRequest.getUploadedApplicationForms()))
                 .supportingEvidenceBundle(YesOrNo.Yes.equals(citizenAwpRequest.getHasSupportingDocuments())
                                               ? getSupportingBundles(citizenAwpRequest) : null)
                 .combinedReasonsForC2Application(Arrays.asList(CombinedC2AdditionalOrdersRequested
@@ -177,8 +175,24 @@ public class CitizenAwpMapper {
                 .c2ApplicationDetails(getC2ApplicationDetails(citizenAwpRequest))
                 .applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue())
                 .requestedHearingToAdjourn(citizenAwpRequest.getHearingToDelayCancel())
-                .applicationStatus(getApplicationStatus(citizenAwpRequest))
-                .build();
+                .applicationStatus(getApplicationStatus(citizenAwpRequest));
+
+
+            List<Element<Document>> docs = getDocuments(citizenAwpRequest.getUploadedApplicationForms());
+
+            PartyEnum partyType = PartyEnum.valueOf(citizenAwpRequest.getPartyType());
+
+            if (PartyEnum.applicant.equals(partyType)) {
+                builder.finalDocumentApplicant(docs)
+                    .finalDocument(null); // keep legacy empty to avoid duplicates
+            } else if (PartyEnum.respondent.equals(partyType)) {
+                builder.finalDocumentRespondent(docs)
+                    .finalDocument(null);
+            } else {
+                // safety fallback for unknown/legacy cases
+                builder.finalDocument(docs);
+            }
+            return builder.build();
         }
         return null;
     }

@@ -1445,46 +1445,42 @@ public class CaseService {
                 .map(Element::getValue)
                 .filter(addlAppBundle -> filterApplicationsForParty(addlAppBundle, partyIdAndType.get(PARTY_ID)))
                 .forEach(awp -> {
-                    //C2 bundle docs
-                    if (null != awp.getC2DocumentBundle()) {
-                        //TODO: this needs change
-                        if (CollectionUtils.isNotEmpty(awp.getC2DocumentBundle().getFinalDocument())) {
-                            applicationsWithinProceedings.addAll(getAwpDocuments(
-                                awp,
-                                awp.getC2DocumentBundle().getFinalDocument(),
-                                partyIdAndType.get(PARTY_ID)
-                            ));
-                        }
-                        //supporting documents
-                        if (CollectionUtils.isNotEmpty(awp.getC2DocumentBundle().getSupportingEvidenceBundle())) {
-                            applicationsWithinProceedings.addAll(getSupportingEvidenceDocuments(
-                                awp,
-                                awp.getC2DocumentBundle().getSupportingEvidenceBundle(),
-                                partyIdAndType.get(PARTY_ID)
-                            ));
-                        }
+                    if (awp.getC2DocumentBundle() == null) {
+                        return;
                     }
 
-                    //Other bundle docs
-                    if (null != awp.getOtherApplicationsBundle()) {
-                        if (CollectionUtils.isNotEmpty(awp.getOtherApplicationsBundle().getFinalDocument())) {
-                            applicationsWithinProceedings.addAll(getAwpDocuments(
-                                awp,
-                                awp.getOtherApplicationsBundle().getFinalDocument(),
-                                partyIdAndType.get(PARTY_ID)
-                            ));
-                        }
-                        //supporting documents
-                        if (CollectionUtils.isNotEmpty(awp.getOtherApplicationsBundle().getSupportingEvidenceBundle())) {
-                            applicationsWithinProceedings.addAll(getSupportingEvidenceDocuments(
-                                awp,
-                                awp.getOtherApplicationsBundle().getSupportingEvidenceBundle(),
-                                partyIdAndType.get(PARTY_ID)
-                            ));
-                        }
+                    // pick the correct C2 docs for this bundle's party, with legacy fallback
+                    var c2 = awp.getC2DocumentBundle();
+                    List<Element<Document>> mainDocs;
+
+                    if (PartyEnum.applicant.equals(awp.getPartyType())) {
+                        mainDocs = CollectionUtils.isNotEmpty(c2.getFinalDocumentApplicant())
+                            ? c2.getFinalDocumentApplicant()
+                            : c2.getFinalDocument(); // legacy
+                    } else if (PartyEnum.respondent.equals(awp.getPartyType())) {
+                        mainDocs = CollectionUtils.isNotEmpty(c2.getFinalDocumentRespondent())
+                            ? c2.getFinalDocumentRespondent()
+                            : c2.getFinalDocument(); // legacy
+                    } else {
+                        mainDocs = c2.getFinalDocument(); // safety fallback
+                    }
+
+                    if (CollectionUtils.isNotEmpty(mainDocs)) {
+                        applicationsWithinProceedings.addAll(
+                            getAwpDocuments(awp, mainDocs, partyIdAndType.get(PARTY_ID))
+                        );
+                    }
+
+                    // supporting docs stay category is still derived from awp.getPartyType()
+                    if (CollectionUtils.isNotEmpty(c2.getSupportingEvidenceBundle())) {
+                        applicationsWithinProceedings.addAll(
+                            getSupportingEvidenceDocuments(
+                                awp, c2.getSupportingEvidenceBundle(), partyIdAndType.get(PARTY_ID))
+                        );
                     }
                 });
         }
+
         return applicationsWithinProceedings;
     }
 

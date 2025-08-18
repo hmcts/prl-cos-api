@@ -44,6 +44,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.S
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.SupportingEvidenceBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.UploadApplicationDraftOrder;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.Urgency;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UploadAdditionalApplicationData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
@@ -112,20 +113,24 @@ public class UploadAdditionalApplicationService {
     private final AuthTokenGenerator authTokenGenerator;
     private final UploadAdditionalApplicationUtils uploadAdditionalApplicationUtils;
 
-    public void getAdditionalApplicationElements(String authorisation, String userAuthorisation, CaseData caseData,
-                                                 List<Element<AdditionalApplicationsBundle>> additionalApplicationElements) {
+    public void getAdditionalApplicationElements(String authorisation, String userAuthorisation,
+                                                 CaseData caseData,
+                                                 List<Element<AdditionalApplicationsBundle>>
+                                                     additionalApplicationElements) {
         String author;
         UserDetails userDetails = idamClient.getUserDetails(userAuthorisation);
         if (caseData.getUploadAdditionalApplicationData() != null) {
             List<Element<ServedParties>> selectedParties = getSelectedParties(caseData);
             String partyName = getSelectedPartyName(selectedParties);
+            PartyEnum partyType = getPartyType(selectedParties, caseData);
             author = getAuthor(caseData.getUploadAdditionalApplicationData(), userDetails, partyName);
             String currentDateTime = LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).format(DateTimeFormatter.ofPattern(
                 "dd-MMM-yyyy HH:mm:ss a",
                 Locale.UK
             ));
 
-            C2DocumentBundle c2DocumentBundle = getC2DocumentBundle(caseData, author, currentDateTime, partyName);
+            C2DocumentBundle c2DocumentBundle = getC2DocumentBundle(
+                caseData, author, currentDateTime, partyName, partyType);
             OtherApplicationsBundle otherApplicationsBundle = getOtherApplicationsBundle(caseData,
                                                                                          author,
                                                                                          currentDateTime, partyName
@@ -392,42 +397,51 @@ public class UploadAdditionalApplicationService {
         return otherApplicationsBundle;
     }
 
-    private C2DocumentBundle getC2DocumentBundle(CaseData caseData, String author, String currentDateTime, String partyName) {
-        C2DocumentBundle c2DocumentBundle = null;
-        if (caseData.getUploadAdditionalApplicationData().getTemporaryC2Document() != null) {
-            C2DocumentBundle temporaryC2Document = caseData.getUploadAdditionalApplicationData().getTemporaryC2Document();
-            c2DocumentBundle = C2DocumentBundle.builder()
-                .author(author)
-                .uploadedDateTime(currentDateTime)
-                .applicantName(partyName)
-                //TO DO: this might need change
-                .finalDocument(List.of(element(temporaryC2Document.getDocument())))
-                .documentRelatedToCase(CollectionUtils.isNotEmpty(temporaryC2Document.getDocumentAcknowledge())
-                                           ? Yes : No)
-                .combinedReasonsForC2Application(getReasonsForApplication(temporaryC2Document))
-                .otherReasonsFoC2Application(StringUtils.isNotEmpty(temporaryC2Document.getOtherReasonsFoC2Application())
-                                                 ? temporaryC2Document.getOtherReasonsFoC2Application() : null)
-                .parentalResponsibilityType(
-                    temporaryC2Document.getParentalResponsibilityType())
-                .hearingList(temporaryC2Document.getHearingList())
-                .additionalDraftOrdersBundle(createAdditionalDraftOrdersBundle(temporaryC2Document.getAdditionalDraftOrdersBundle()))
-                .supplementsBundle(createSupplementsBundle(temporaryC2Document.getSupplementsBundle(), author))
-                .supportingEvidenceBundle(createSupportingEvidenceBundle(
-                    temporaryC2Document.getSupportingEvidenceBundle(),
-                    author
-                ))
-                .c2ApplicationDetails(C2ApplicationDetails.builder()
-                                          .consent(C2ApplicationTypeEnum.applicationWithNotice.equals(
-                                              caseData.getUploadAdditionalApplicationData().getTypeOfC2Application())
-                                                       ? C2Consent.withoutConsent : C2Consent.withConsent)
-                                          .build())
-                .urgency(null != temporaryC2Document.getUrgencyTimeFrameType()
-                             ? Urgency.builder().urgencyType(temporaryC2Document.getUrgencyTimeFrameType()).build() : null)
-                .requestedHearingToAdjourn(null != temporaryC2Document.getHearingList() && null != temporaryC2Document.getHearingList().getValue()
-                                               ? temporaryC2Document.getHearingList().getValue().getLabel() : null)
-                .build();
+    private C2DocumentBundle getC2DocumentBundle(CaseData caseData,
+                                                 String author,
+                                                 String currentDateTime,
+                                                 String partyName,
+                                                 PartyEnum partyType) {
+        if (caseData.getUploadAdditionalApplicationData().getTemporaryC2Document() == null) {
+            return null;
         }
-        return c2DocumentBundle;
+
+        C2DocumentBundle tmp = caseData.getUploadAdditionalApplicationData().getTemporaryC2Document();
+        List<Element<Document>> docs = List.of(element(tmp.getDocument()));
+
+        C2DocumentBundle.C2DocumentBundleBuilder b = C2DocumentBundle.builder()
+            .author(author)
+            .uploadedDateTime(currentDateTime)
+            .applicantName(partyName)
+            .documentRelatedToCase(CollectionUtils.isNotEmpty(tmp.getDocumentAcknowledge()) ? Yes : No)
+            .combinedReasonsForC2Application(getReasonsForApplication(tmp))
+            .otherReasonsFoC2Application(StringUtils.defaultIfBlank(tmp.getOtherReasonsFoC2Application(), null))
+            .parentalResponsibilityType(tmp.getParentalResponsibilityType())
+            .hearingList(tmp.getHearingList())
+            .additionalDraftOrdersBundle(createAdditionalDraftOrdersBundle(tmp.getAdditionalDraftOrdersBundle()))
+            .supplementsBundle(createSupplementsBundle(tmp.getSupplementsBundle(), author))
+            .supportingEvidenceBundle(createSupportingEvidenceBundle(tmp.getSupportingEvidenceBundle(), author))
+            .c2ApplicationDetails(C2ApplicationDetails.builder()
+                                      .consent(C2ApplicationTypeEnum.applicationWithNotice.equals(
+                                          caseData.getUploadAdditionalApplicationData().getTypeOfC2Application()
+                                      ) ? C2Consent.withoutConsent : C2Consent.withConsent)
+                                      .build())
+            .urgency(tmp.getUrgencyTimeFrameType() != null
+                         ? Urgency.builder().urgencyType(tmp.getUrgencyTimeFrameType()).build()
+                         : null)
+            .requestedHearingToAdjourn(tmp.getHearingList() != null && tmp.getHearingList().getValue() != null
+                                           ? tmp.getHearingList().getValue().getLabel()
+                                           : null);
+
+        if (PartyEnum.applicant.equals(partyType)) {
+            b.finalDocumentApplicant(docs);
+        } else if (PartyEnum.respondent.equals(partyType)) {
+            b.finalDocumentRespondent(docs);
+        } else {
+            // safety net for legacy/unknown
+            b.finalDocument(docs);
+        }
+        return b.build();
     }
 
     private List<CombinedC2AdditionalOrdersRequested> getReasonsForApplication(C2DocumentBundle temporaryC2Document) {
