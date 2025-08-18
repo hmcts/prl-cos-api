@@ -225,13 +225,12 @@ public class NoticeOfChangePartiesService {
 
     public AboutToStartOrSubmitCallbackResponse applyDecision(CallbackRequest callbackRequest, String authorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        caseAssignmentService.removeBarristerIfPresent(caseDetails);
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = assignCaseAccessClient.applyDecision(
+        caseAssignmentService.removeAmBarristerIfPresent(caseDetails);
+        return assignCaseAccessClient.applyDecision(
             authorisation,
             tokenGenerator.generate(),
             decisionRequest(caseDetails)
         );
-        return aboutToStartOrSubmitCallbackResponse;
     }
 
     public void nocRequestSubmitted(CallbackRequest callbackRequest) {
@@ -281,7 +280,8 @@ public class NoticeOfChangePartiesService {
         }
 
         if (solicitorDetails.isPresent()) {
-
+            caseAssignmentService.removePartyBarristerIfPresent(allTabsUpdateCaseData,
+                                                                changeOrganisationRequest);
             allTabsUpdateCaseData = updateRepresentedPartyDetails(
                 changeOrganisationRequest,
                 allTabsUpdateCaseData,

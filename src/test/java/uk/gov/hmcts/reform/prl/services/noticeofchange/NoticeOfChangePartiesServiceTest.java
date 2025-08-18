@@ -309,7 +309,7 @@ public class NoticeOfChangePartiesServiceTest {
         verify(assignCaseAccessClient, times(1)).applyDecision(
             anyString(), anyString(), any(
             DecisionRequest.class));
-        verify(caseAssignmentService).removeBarristerIfPresent(any(CaseDetails.class));
+        verify(caseAssignmentService).removeAmBarristerIfPresent(any(CaseDetails.class));
     }
 
     @Test
