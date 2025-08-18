@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
@@ -30,10 +31,12 @@ class BarristerRemoveServiceTest extends BarristerTestAbstract {
     protected UserService userService;
     @Mock
     protected OrganisationService organisationService;
+    @Mock
+    protected EventService eventPublisher;
 
     @BeforeEach
     public void setup() {
-        barristerRemoveService = new BarristerRemoveService(userService, organisationService);
+        barristerRemoveService = new BarristerRemoveService(userService, organisationService, eventPublisher);
         UserDetails userDetails = UserDetails.builder()
             .id("1")
             .roles(List.of(COURT_ADMIN))

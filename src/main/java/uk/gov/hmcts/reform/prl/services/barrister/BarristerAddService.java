@@ -2,11 +2,13 @@ package uk.gov.hmcts.reform.prl.services.barrister;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.enums.barrister.TypeOfBarristerEventEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
@@ -14,8 +16,10 @@ import uk.gov.hmcts.reform.prl.services.UserService;
 @Service
 public class BarristerAddService extends AbstractBarristerService {
 
-    public BarristerAddService(UserService userService, OrganisationService organisationService) {
-        super(userService, organisationService);
+    public BarristerAddService(UserService userService,
+                               OrganisationService organisationService,
+                               EventService eventPublisher) {
+        super(userService, organisationService, eventPublisher);
     }
 
     public AllocatedBarrister getAllocatedBarrister(CaseData caseData, String authorisation) {
@@ -47,6 +51,11 @@ public class BarristerAddService extends AbstractBarristerService {
     @Override
     protected String getCodeForAction(Element<PartyDetails> partyDetailsElement) {
         return partyDetailsElement.getId().toString();
+    }
+
+    @Override
+    protected void notifyBarrister(AllocatedBarrister allocatedBarrister, CaseData caseData) {
+        prepareAndPublishBarristerChangeEvent(allocatedBarrister, caseData, TypeOfBarristerEventEnum.addBarrister);
     }
 
 }
