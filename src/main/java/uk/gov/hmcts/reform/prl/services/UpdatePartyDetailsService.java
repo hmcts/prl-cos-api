@@ -196,7 +196,8 @@ public class UpdatePartyDetailsService {
                                                   List.of(ElementUtils.element(fl401respondent.getPartyId(), fl401respondent)));
                 generateC8.accept(caseData);
             } catch (Exception e) {
-                log.error("Failed to generate C8 document for Fl401 case {}", e.getMessage());
+                log.error("Failed to generate C8 document for Fl401 case {}, Error: {}",
+                          callbackRequest.getCaseDetails().getId(), e.getMessage());
             }
             cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
             findAndListRefugeDocsForFL401(callbackRequest, caseData, updatedCaseData);
