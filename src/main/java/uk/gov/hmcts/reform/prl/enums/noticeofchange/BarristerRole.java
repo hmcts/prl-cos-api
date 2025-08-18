@@ -86,7 +86,6 @@ public enum BarristerRole {
     private final Representing representing;
     private final RoleMapping roleMapping;
 
-
     public enum Representing {
         CAAPPLICANT,
         CARESPONDENT,
