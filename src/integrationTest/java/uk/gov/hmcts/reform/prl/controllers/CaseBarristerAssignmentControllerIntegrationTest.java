@@ -41,7 +41,7 @@ import static uk.gov.hmcts.reform.prl.util.TestConstants.AUTHORISATION_HEADER;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-public class CaseAssignmentControllerIntegrationTest {
+public class CaseBarristerAssignmentControllerIntegrationTest {
     private MockMvc mockMvc;
 
     @MockBean

@@ -39,7 +39,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/case-assignment")
-public class CaseAssignmentController {
+public class CaseBarristerAssignmentController {
 
     private final CaseAssignmentService caseAssignmentService;
     private final ObjectMapper objectMapper;

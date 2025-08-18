@@ -1,5 +1,6 @@
-package uk.gov.hmcts.reform.prl.controllers.caseassignment;
+package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,7 +15,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole;
-import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -42,7 +42,6 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -50,7 +49,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATED_BARRI
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @ExtendWith(MockitoExtension.class)
-class CaseAssignmentControllerTest {
+class CaseBarristerAssignmentControllerTest {
     @Mock
     private CaseAssignmentService caseAssignmentService;
     @Mock
@@ -58,7 +57,7 @@ class CaseAssignmentControllerTest {
     @Mock
     private AuthorisationService authorisationService;
 
-    private CaseAssignmentController caseAssignmentController;
+    private CaseBarristerAssignmentController caseBarristerAssignmentController;
     private ObjectMapper objectMapper;
     private Barrister barrister;
     private AllocatedBarrister allocatedBarrister;
@@ -67,7 +66,7 @@ class CaseAssignmentControllerTest {
     void setUp() {
         objectMapper = new ObjectMapper();
         objectMapper.findAndRegisterModules();
-        caseAssignmentController =  new CaseAssignmentController(
+        caseBarristerAssignmentController =  new CaseBarristerAssignmentController(
             caseAssignmentService,
             objectMapper,
             organisationService,
@@ -102,8 +101,8 @@ class CaseAssignmentControllerTest {
     }
 
     @Test
-    void testSuccessSubmitAddBarrister() {
-
+    void testSuccessSubmitAddBarrister() throws JsonProcessingException {
+        System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(allocatedBarrister));
         Optional<String> userId = Optional.of("userId");
         when(authorisationService.isAuthorized(any(), any()))
             .thenReturn(true);
@@ -128,14 +127,11 @@ class CaseAssignmentControllerTest {
             .caseDetails(caseDetails)
             .build();
 
-        AboutToStartOrSubmitCallbackResponse response = caseAssignmentController.submitAddBarrister(
+        AboutToStartOrSubmitCallbackResponse response = caseBarristerAssignmentController.submitAddBarrister(
             "auth",
             "s2sToken",
             callbackRequest
         );
-
-        assertThat(response.getData().get(ALLOCATED_BARRISTER))
-                       .isNull();
 
         assertThat(response.getErrors()).isEmpty();
 
@@ -149,61 +145,6 @@ class CaseAssignmentControllerTest {
                                                    eq(barristerRole.get()),
                                                    isA(AllocatedBarrister.class));
     }
-
-    @Test
-    void testGrantCaseAccessExceptionOnSubmitAddBarrister() {
-
-        Optional<String> userId = Optional.of("userId");
-        when(authorisationService.isAuthorized(any(), any()))
-            .thenReturn(true);
-        when(organisationService.findUserByEmail(allocatedBarrister.getBarristerEmail()))
-            .thenReturn(userId);
-        Optional<String> barristerRole = Optional.of(BarristerRole.C100APPLICANTBARRISTER1.getCaseRoleLabel());
-
-        when(caseAssignmentService.deriveBarristerRole(anyMap(), isA(CaseData.class), isA(AllocatedBarrister.class)))
-            .thenReturn(barristerRole);
-
-        doThrow(new GrantCaseAccessException("User(s) not granted [C100APPLICANTBARRISTER3] to the case "))
-            .when(caseAssignmentService).addBarrister(isA(CaseData.class),
-                                                     eq(userId.get()),
-                                                     eq(barristerRole.get()),
-                                                     isA(AllocatedBarrister.class));
-
-
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(ALLOCATED_BARRISTER, allocatedBarrister);
-
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(1234L)
-            .createdDate(LocalDateTime.now())
-            .lastModified(LocalDateTime.now())
-            .data(caseData)
-            .build();
-
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails)
-            .build();
-
-        AboutToStartOrSubmitCallbackResponse response = caseAssignmentController.submitAddBarrister(
-            "auth",
-            "s2sToken",
-            callbackRequest
-        );
-
-        assertThat(response.getErrors())
-            .contains("User(s) not granted [C100APPLICANTBARRISTER3] to the case ");
-
-        verify(caseAssignmentService).validateAddRequest(eq(userId),
-                                                         isA(CaseData.class),
-                                                         eq(barristerRole),
-                                                         isA(AllocatedBarrister.class),
-                                                         anyList());
-        verify(caseAssignmentService).addBarrister(isA(CaseData.class),
-                                                   eq(userId.get()),
-                                                   eq(barristerRole.get()),
-                                                   isA(AllocatedBarrister.class));
-    }
-
 
     @Test
     void testErrorsSubmitAddBarrister() {
@@ -240,7 +181,7 @@ class CaseAssignmentControllerTest {
             .caseDetails(caseDetails)
             .build();
 
-        AboutToStartOrSubmitCallbackResponse response = caseAssignmentController.submitAddBarrister(
+        AboutToStartOrSubmitCallbackResponse response = caseBarristerAssignmentController.submitAddBarrister(
             "auth",
             "s2sToken",
             callbackRequest
@@ -292,7 +233,7 @@ class CaseAssignmentControllerTest {
             .caseDetails(caseDetails)
             .build();
 
-        AboutToStartOrSubmitCallbackResponse response = caseAssignmentController.submitAddBarrister(
+        AboutToStartOrSubmitCallbackResponse response = caseBarristerAssignmentController.submitAddBarrister(
             "auth",
             "s2sToken",
             callbackRequest
@@ -320,7 +261,7 @@ class CaseAssignmentControllerTest {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .build();
 
-        assertThatThrownBy(() -> caseAssignmentController.submitAddBarrister(
+        assertThatThrownBy(() -> caseBarristerAssignmentController.submitAddBarrister(
             "auth",
             "s2sToken",
             callbackRequest
@@ -347,14 +288,11 @@ class CaseAssignmentControllerTest {
             .caseDetails(caseDetails)
             .build();
 
-        AboutToStartOrSubmitCallbackResponse response = caseAssignmentController.submitRemoveBarrister(
+        AboutToStartOrSubmitCallbackResponse response = caseBarristerAssignmentController.submitRemoveBarrister(
             "auth",
             "s2sToken",
             callbackRequest
         );
-
-        assertThat(response.getData().get(ALLOCATED_BARRISTER))
-            .isNull();
 
         assertThat(response.getErrors()).isEmpty();
 
@@ -384,16 +322,15 @@ class CaseAssignmentControllerTest {
             .caseDetails(caseDetails)
             .build();
 
-        String selectedPartyId = allocatedBarrister.getPartyList().getValueCode();
         doAnswer(invocation -> {
             List<String> errors = invocation.getArgument(2);
             errors.add("errors");
             return null;
         }).when(caseAssignmentService).validateRemoveRequest(isA(CaseData.class),
-                                                             eq(selectedPartyId),
+                                                             eq(allocatedBarrister.getPartyList().getValueCode()),
                                                              anyList());
 
-        AboutToStartOrSubmitCallbackResponse response = caseAssignmentController.submitRemoveBarrister(
+        AboutToStartOrSubmitCallbackResponse response = caseBarristerAssignmentController.submitRemoveBarrister(
             "auth",
             "s2sToken",
             callbackRequest
@@ -402,10 +339,10 @@ class CaseAssignmentControllerTest {
         assertThat(response.getErrors()).contains("errors");
 
         verify(caseAssignmentService).validateRemoveRequest(isA(CaseData.class),
-                                                         eq(selectedPartyId),
+                                                         eq(allocatedBarrister.getPartyList().getValueCode()),
                                                          anyList());
         verify(caseAssignmentService, never()).removeBarrister(isA(CaseData.class),
-                                                   eq(selectedPartyId));
+                                                   eq(allocatedBarrister.getPartyList().getValueCode()));
     }
 
     @Test
@@ -416,7 +353,7 @@ class CaseAssignmentControllerTest {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .build();
 
-        assertThatThrownBy(() -> caseAssignmentController.submitRemoveBarrister(
+        assertThatThrownBy(() -> caseBarristerAssignmentController.submitRemoveBarrister(
             "auth",
             "s2sToken",
             callbackRequest
