@@ -134,6 +134,9 @@ class CaseAssignmentControllerTest {
             callbackRequest
         );
 
+        assertThat(response.getData().get(ALLOCATED_BARRISTER))
+                       .isNull();
+
         assertThat(response.getErrors()).isEmpty();
 
         verify(caseAssignmentService).validateAddRequest(eq(userId),
@@ -349,6 +352,9 @@ class CaseAssignmentControllerTest {
             "s2sToken",
             callbackRequest
         );
+
+        assertThat(response.getData().get(ALLOCATED_BARRISTER))
+            .isNull();
 
         assertThat(response.getErrors()).isEmpty();
 
