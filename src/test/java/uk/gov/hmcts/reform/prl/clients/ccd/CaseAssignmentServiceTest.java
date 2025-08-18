@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
+import uk.gov.hmcts.reform.prl.exception.InvalidPartyIdException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
@@ -531,7 +532,7 @@ class CaseAssignmentServiceTest {
                                                  AllocatedBarrister.builder().build(),
                                                  errorList);
         assertThat(errorList)
-            .contains("Could not find barrister with provided email");
+            .contains("Could not find a registered barrister with the email address provided");
     }
 
     @Test
@@ -815,7 +816,7 @@ class CaseAssignmentServiceTest {
                                                                              id,
                                                     errors))
             .hasMessageContaining("Invalid party selected")
-            .isInstanceOf(IllegalArgumentException.class);
+            .isInstanceOf(InvalidPartyIdException.class);
     }
 
     @Test
@@ -880,7 +881,7 @@ class CaseAssignmentServiceTest {
         List<String> errors = new ArrayList<>();
         caseAssignmentService.validateBarristerOrgRelationship(c100CaseData, allocatedBarrister, errors);
         assertThat(errors)
-            .contains("Barrister doesn't belong to selected organisation");
+            .contains("Barrister is not registered with the selected organisation");
     }
 
     @Test
