@@ -93,7 +93,7 @@ public class CaseAssignmentController {
                                                        userId.get(),
                                                        barristerRole.get(),
                                                        allocatedBarrister);
-                    updateCaseDetailsWithPartyDetails(caseDetails, caseData);
+                    updateCaseDetails(caseDetails, caseData);
                 } catch (GrantCaseAccessException grantCaseAccessException) {
                     errorList.add(grantCaseAccessException.getMessage());
                 }
@@ -135,7 +135,7 @@ public class CaseAssignmentController {
             if (errorList.isEmpty()) {
                 caseAssignmentService.removeBarrister(caseData,
                                                       allocatedBarrister.getPartyList().getValueCode());
-                updateCaseDetailsWithPartyDetails(caseDetails, caseData);
+                updateCaseDetails(caseDetails, caseData);
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder()
@@ -147,7 +147,8 @@ public class CaseAssignmentController {
 
     }
 
-    private void updateCaseDetailsWithPartyDetails(CaseDetails caseDetails, CaseData caseData) {
+    private void updateCaseDetails(CaseDetails caseDetails, CaseData caseData) {
+        caseDetails.getData().put(ALLOCATED_BARRISTER, null);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseDetails.getData().put(APPLICANTS, caseData.getApplicants());
             caseDetails.getData().put(RESPONDENTS, caseData.getRespondents());
