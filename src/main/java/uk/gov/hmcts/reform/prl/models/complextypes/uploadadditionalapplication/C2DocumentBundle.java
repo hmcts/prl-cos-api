@@ -29,6 +29,8 @@ public class C2DocumentBundle {
     private final String applicantName;
     private final Document document;
     private final List<Element<Document>> finalDocument;
+    private final List<Element<Document>> finalDocumentApplicant;
+    private final List<Element<Document>> finalDocumentRespondent;
     private final List<DocumentAcknowledge> documentAcknowledge;
     private final List<C2AdditionalOrdersRequestedCa> caReasonsForC2Application;
     private final List<C2AdditionalOrdersRequestedCa> daReasonsForC2Application;

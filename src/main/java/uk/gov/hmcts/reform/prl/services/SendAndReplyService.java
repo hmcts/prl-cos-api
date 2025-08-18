@@ -1047,6 +1047,7 @@ public class SendAndReplyService {
 
     private static List<Element<Document>> getC2ApplicationDocuments(C2DocumentBundle c2DocumentBundle) {
         List<Element<Document>> c2ApplicationDocuments = new ArrayList<>();
+        //TODO: this might need change
         c2ApplicationDocuments.addAll(c2DocumentBundle.getFinalDocument());
 
         if (c2DocumentBundle.getSupportingEvidenceBundle() != null) {

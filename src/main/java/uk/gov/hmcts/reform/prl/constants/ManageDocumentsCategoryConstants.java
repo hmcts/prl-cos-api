@@ -10,7 +10,6 @@ public class ManageDocumentsCategoryConstants {
     public static final String APPLICANT_C1A_APPLICATION = "applicantC1AApplication";
     public static final String APPLICANT_C1A_RESPONSE = "applicantC1AResponse";
     public static final String APPLICATIONS_WITHIN_PROCEEDINGS = "applicationsWithinProceedings";
-    public static final String APPLICATIONS_WITHIN_PROCEEDINGS_RESPONDENT = "applicationsWithinProceedingsRespondent";
     public static final String MIAM_CERTIFICATE = "MIAMCertificate";
     public static final String PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION = "previousOrdersSubmittedWithApplication";
     public static final String RESPONDENT_APPLICATION = "respondentApplication";
