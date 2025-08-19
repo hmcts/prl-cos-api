@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -42,10 +44,12 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPolicyUpgradeChildProtectionConcernEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.Barrister;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuse;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
@@ -124,6 +128,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
 import static org.testng.AssertJUnit.assertTrue;
@@ -164,6 +169,11 @@ public class ApplicationsTabServiceTest {
     AllegationsOfHarmRevisedOrders allegationsOfHarmRevisedOrders;
     AllegationsOfHarmOrders allegationsOfHarmOrders;
     AllegationsOfHarmOrders emptyAllegationOfHarmOrder;
+
+    @Captor
+    ArgumentCaptor<FL401Applicant> fl401ApplicantArgumentCaptor;
+    @Captor
+    ArgumentCaptor<FL401Respondent> fl401RespondentArgumentCaptor;
 
     @Before
     public void setup() {
@@ -2056,6 +2066,151 @@ public class ApplicationsTabServiceTest {
             .thenReturn(Respondent.builder().build());
 
         assertNotNull(applicationsTabService.updateTab(caseDataWithParties));
+    }
+
+    @Test
+    public void testC100ApplicantTableMapperWithBarrister() {
+        Barrister barrister = Barrister.builder()
+            .barristerFirstName("BarFN")
+            .barristerLastName("BarLN")
+            .barristerEmail("bar@email.com")
+            .barristerOrg(Organisation.builder().organisationName("BarOrgName").organisationID("OrgId").build())
+            .build();
+
+        Applicant applicant = Applicant.builder()
+            .firstName("First name")
+            .lastName("Last name")
+            .dateOfBirth(LocalDate.of(1989, 11, 30))
+            .gender("Male")
+            .address(address)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("test@test.com")
+            .barrister(barrister)
+            .build();
+
+        Element<Applicant> applicantElement = Element.<Applicant>builder().value(applicant).build();
+        List<Element<Applicant>> expectedApplicantList = Collections.singletonList(applicantElement);
+
+        when(objectMapper.convertValue(partyDetails, Applicant.class)).thenReturn(applicant);
+        assertEquals(expectedApplicantList, applicationsTabService.getApplicantsTable(caseDataWithParties));
+    }
+
+    @Test
+    public void testC100RespondentTableMapperWithBarrister() {
+        Barrister barrister = Barrister.builder()
+            .barristerFirstName("BarFN")
+            .barristerLastName("BarLN")
+            .barristerEmail("bar@email.com")
+            .barristerOrg(Organisation.builder().organisationName("BarOrgName").organisationID("OrgId").build())
+            .build();
+
+        Respondent respondent = Respondent.builder()
+            .firstName("First name")
+            .lastName("Last name")
+            .dateOfBirth(LocalDate.of(1989, 11, 30))
+            .gender("Male")
+            .address(address)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("test@test.com")
+            .barrister(barrister)
+            .build();
+
+        Element<Respondent> respondentElement = Element.<Respondent>builder().value(respondent).build();
+        List<Element<Respondent>> expectedRespondentList = Collections.singletonList(respondentElement);
+
+        when(objectMapper.convertValue(partyDetails, Respondent.class)).thenReturn(respondent);
+        assertEquals(expectedRespondentList, applicationsTabService.getRespondentsTable(caseDataWithParties));
+    }
+
+    @Test
+    public void testFL401ApplicantTableMapperWithBarrister() {
+        Barrister barrister = Barrister.builder()
+            .barristerFirstName("BarFN")
+            .barristerLastName("BarLN")
+            .barristerEmail("bar@email.com")
+            .barristerOrg(Organisation.builder().organisationName("BarOrgName").organisationID("OrgId").build())
+            .build();
+
+        partyDetails = PartyDetails.builder()
+            .firstName("First name")
+            .lastName("Last name")
+            .dateOfBirth(LocalDate.of(1989, 11, 30))
+            .gender(Gender.male)
+            .address(address)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .otherPersonRelationshipToChildren(List.of(Element.<OtherPersonRelationshipToChild>builder().value(
+                OtherPersonRelationshipToChild.builder().personRelationshipToChild("Bro").build()).build()))
+            .email("test@test.com")
+            .barrister(uk.gov.hmcts.reform.prl.models.dto.ccd.Barrister.builder()
+                           .barristerFirstName("BarFN")
+                           .barristerLastName("BarLN")
+                           .barristerEmail("bar@email.com")
+                           .barristerOrg(Organisation.builder().organisationName("BarOrgName").organisationID("OrgId").build())
+                           .build())
+            .build();
+
+        FL401Applicant applicant = FL401Applicant.builder()
+            .firstName("First name")
+            .lastName("Last name")
+            .dateOfBirth(LocalDate.of(1989, 11, 30))
+            .gender("Male")
+            .address(address)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("test@test.com")
+            .barrister(barrister)
+            .build();
+
+        CaseData caseData = caseDataWithParties.toBuilder().applicants(null).applicantsFL401(partyDetails).build();
+        when(objectMapper.convertValue(partyDetails, FL401Applicant.class)).thenReturn(applicant);
+
+        applicationsTabService.getFl401ApplicantsTable(caseData);
+        verify(objectMapper).convertValue(fl401ApplicantArgumentCaptor.capture(), Mockito.eq(Map.class));
+        assertEquals(applicant, fl401ApplicantArgumentCaptor.getValue());
+    }
+
+    @Test
+    public void testFL401RespondentTableMapperWithBarrister() {
+        Barrister barrister = Barrister.builder()
+            .barristerFirstName("BarFN")
+            .barristerLastName("BarLN")
+            .barristerEmail("bar@email.com")
+            .barristerOrg(Organisation.builder().organisationName("BarOrgName").organisationID("OrgId").build())
+            .build();
+
+        partyDetails = PartyDetails.builder()
+            .firstName("First name")
+            .lastName("Last name")
+            .dateOfBirth(LocalDate.of(1989, 11, 30))
+            .gender(Gender.male)
+            .address(address)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .otherPersonRelationshipToChildren(List.of(Element.<OtherPersonRelationshipToChild>builder().value(
+                OtherPersonRelationshipToChild.builder().personRelationshipToChild("Bro").build()).build()))
+            .email("test@test.com")
+            .barrister(uk.gov.hmcts.reform.prl.models.dto.ccd.Barrister.builder()
+                           .barristerFirstName("BarFN")
+                           .barristerLastName("BarLN")
+                           .barristerEmail("bar@email.com")
+                           .barristerOrg(Organisation.builder().organisationName("BarOrgName").organisationID("OrgId").build())
+                           .build())
+            .build();
+
+        FL401Respondent applicant = FL401Respondent.builder()
+            .firstName("First name")
+            .lastName("Last name")
+            .dateOfBirth(LocalDate.of(1989, 11, 30))
+            .address(address)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("test@test.com")
+            .barrister(barrister)
+            .build();
+
+        CaseData caseData = caseDataWithParties.toBuilder().respondents(null).respondentsFL401(partyDetails).build();
+        when(objectMapper.convertValue(partyDetails, FL401Respondent.class)).thenReturn(applicant);
+
+        applicationsTabService.getFl401RespondentTable(caseData);
+        verify(objectMapper).convertValue(fl401RespondentArgumentCaptor.capture(), Mockito.eq(Map.class));
+        assertEquals(applicant, fl401RespondentArgumentCaptor.getValue());
     }
 
     private Element<PartyDetails> getElement(PartyDetails partyDetails) {
