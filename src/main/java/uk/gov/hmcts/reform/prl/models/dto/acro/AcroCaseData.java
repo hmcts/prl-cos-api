@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CaseManagementLocation;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,11 @@ public class AcroCaseData {
 
     @Setter(AccessLevel.NONE)
     private PartyDetails respondentsFL401;
+    @Setter(AccessLevel.NONE)
+    private List<Element<PartyDetails>> applicants;
+
+    @Setter(AccessLevel.NONE)
+    private List<Element<PartyDetails>> respondents;
 
     private List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails;
 
@@ -50,4 +56,5 @@ public class AcroCaseData {
     private CaseManagementLocation caseManagementLocation;
     private List<OrderDetails> fl404Orders = new ArrayList<>();
     private List<CaseHearing> caseHearings;
+    private List<Element<StmtOfServiceAddRecipient>> stmtOfServiceForOrder;
 }

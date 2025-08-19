@@ -57,7 +57,10 @@ public class AcroCaseDataServiceTest {
     private AcroCaseDataService acroCaseDataService;
 
     @Mock
-    SystemUserService systemUserService;
+    private SystemUserService systemUserService;
+
+    @Mock
+    private AcroDatesService acroDatesService;
 
     @BeforeEach
     public void setUp() {
@@ -106,6 +109,8 @@ public class AcroCaseDataServiceTest {
         when(coreCaseDataApi.searchCases(anyString(), anyString(), any(), any())).thenReturn(searchResult);
         when(hearingService.getHearingsForAllCases(anyString(), anyMap())).thenReturn(listOfHearings);
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
+        when(acroDatesService.getStartDateForSearch()).thenReturn(LocalDateTime.of(2025, 8, 5, 21, 0, 0));
+        when(acroDatesService.getEndDateForSearch()).thenReturn(LocalDateTime.of(2025, 8, 6, 21, 0, 0));
 
         AcroResponse realAcroResponse = acroCaseDataService.getCaseData("authorisation");
         AcroCaseData caseData = realAcroResponse.getCases().getFirst().getCaseData();
@@ -159,6 +164,9 @@ public class AcroCaseDataServiceTest {
         when(hearingService.getHearings(anyString(), anyString())).thenReturn(hearings);
         when(hearingService.getHearingsForAllCases(anyString(), anyMap())).thenReturn(listOfHearings);
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
+        when(acroDatesService.getStartDateForSearch()).thenReturn(LocalDateTime.of(2025, 8, 5, 21, 0, 0));
+        when(acroDatesService.getEndDateForSearch()).thenReturn(LocalDateTime.of(2025, 8, 6, 21, 0, 0));
+
         AcroResponse realAcroResponse = acroCaseDataService.getCaseData("authorisation");
         AcroCaseData caseData = realAcroResponse.getCases().getFirst().getCaseData();
         assertEquals(1, caseData.getFl404Orders().size());

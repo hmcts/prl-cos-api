@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
@@ -38,15 +37,11 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CANCELLED;
 
@@ -58,13 +53,13 @@ public class AcroCaseDataService {
     public static final String NON_MOLESTATION_ORDER_FL_404_A = "Non-molestation order (FL404A)";
     public static final String NON_MOLESTATION = "nonMolestation";
     public static final String FINAL = "Final";
-    public static final String FL_401 = "FL401";
     private final CoreCaseDataApi coreCaseDataApi;
     private final AuthTokenGenerator authTokenGenerator;
     @Value("${acro.search-case-type-id}")
     private String searchCaseTypeId;
     private final SystemUserService systemUserService;
     private final HearingService hearingService;
+    private final AcroDatesService acroDatesService;
 
     public AcroResponse getCaseData(String authorisation) throws IOException {
 
@@ -78,7 +73,9 @@ public class AcroCaseDataService {
             objectMapper.registerModule(new ParameterNamesModule());
             objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
 
-            QueryParam ccdQueryParam = buildCcdQueryParam();
+            LocalDateTime startDateForSearch = acroDatesService.getStartDateForSearch();
+            LocalDateTime endDateForSearch = acroDatesService.getEndDateForSearch();
+            QueryParam ccdQueryParam = buildCcdQueryParam(startDateForSearch, endDateForSearch);
             String searchString = objectMapper.writeValueAsString(ccdQueryParam);
             log.info("Search string: {}", searchString);
             String userToken = systemUserService.getSysUserToken();
@@ -97,7 +94,18 @@ public class AcroCaseDataService {
             if (acroResponse.getCases() != null && !acroResponse.getCases().isEmpty()) {
                 log.info("CCD Search Result Size --> {}", acroResponse.getTotal());
                 log.info("Extracting data needed for ACRO --> {}", acroResponse.getTotal());
-                AcroResponse updatedAcroData = extractCaseDetailsForAllCases(authorisation, s2sToken, acroResponse);
+
+                List<AcroCaseDetail> validCases = acroResponse.getCases().stream()
+                    .filter(c -> isValidForCaseTypeOfApplication(
+                        c.getCaseData())).toList();
+                AcroResponse filteredResponse = acroResponse.toBuilder().cases(validCases).build();
+                AcroResponse updatedAcroData = extractCaseDetailsForAllCases(
+                    authorisation,
+                    s2sToken,
+                    filteredResponse,
+                    startDateForSearch,
+                    endDateForSearch
+                );
                 for (AcroCaseDetail acroCase : updatedAcroData.getCases()) {
                     log.info(
                         "Found case with id {} and courtName {} ",
@@ -116,25 +124,35 @@ public class AcroCaseDataService {
         return acroResponse;
     }
 
-    private QueryParam buildCcdQueryParam() {
-        LastModified lastModified = LastModified.builder().gte(String.valueOf(LocalDateTime.of(
-                LocalDate.now(ZoneId.systemDefault()).minusDays(1L), LocalTime.of(20, 59, 59))))
-            .lte(String.valueOf(LocalDateTime.of(LocalDate.now(ZoneId.systemDefault()), LocalTime.of(21, 0, 0))))
+    private boolean isValidForCaseTypeOfApplication(AcroCaseData caseData) {
+        String caseTypeOfApplication = caseData.getCaseTypeOfApplication();
+        return (caseTypeOfApplication.equals("C100")
+            && caseData.getApplicants() != null
+            && caseData.getApplicants().size() == 1
+            && caseData.getRespondents() != null
+            && caseData.getRespondents().size() == 1)
+            || caseTypeOfApplication.equals(
+            "FL401");
+    }
+
+    private QueryParam buildCcdQueryParam(LocalDateTime startDateForSearch, LocalDateTime endDateForSearch) {
+        LastModified lastModified = LastModified.builder()
+            .gte(String.valueOf(startDateForSearch))
+            .lte(String.valueOf(endDateForSearch))
             .build();
 
         List<Should> mustQuery = populateMustQuery(lastModified);
         Range range = Range.builder().lastModified(lastModified).build();
-        StateFilter stateFilter = StateFilter.builder().should(mustQuery).build();
-        Filter filter = Filter.builder().range(range).build();
-        Must must = Must.builder().stateFilter(stateFilter).build();
-        Bool bool = Bool.builder().filter(filter).must(must).minimumShouldMatch(2).build();
+        Bool bool = Bool.builder()
+            .filter(Filter.builder().range(range).build())
+            .must(Must.builder().stateFilter(StateFilter.builder().should(mustQuery).build()).build())
+            .build();
         Query query = Query.builder().bool(bool).build();
         return QueryParam.builder().query(query).dataToReturn(fetchFieldsRequiredForAcro()).build();
     }
 
     private List<Should> populateMustQuery(LastModified dateCreatedRange) {
         List<Should> should = new ArrayList<>();
-        should.add(Should.builder().match(Match.builder().caseTypeOfApplication(FL_401).build()).build());
         should.add(Should.builder().match(Match.builder().orderType(NON_MOLESTATION).build()).build());
         should.add(Should.builder().match(Match.builder().orderTypeId(NON_MOLESTATION_ORDER_FL_404_A).build()).build());
         should.add(Should.builder().range(Range.builder().dateCreated(dateCreatedRange).build()).build());
@@ -145,25 +163,31 @@ public class AcroCaseDataService {
 
     private List<String> fetchFieldsRequiredForAcro() {
         return List.of(
+            "data.caseTypeOfApplication",
             "data.courtName",
             "data.courtEpimsId",
             "data.courtTypeId",
             "data.applicantsFL401",
+            "data.applicants",
             "data.respondentsFL401",
+            "data.respondents",
             "data.applicantsConfidentialDetails",
             "data.orderCollection",
-            "data.caseManagementLocation"
+            "data.caseManagementLocation",
+            "data.stmtOfServiceForOrder"
         );
     }
 
-    private AcroResponse extractCaseDetailsForAllCases(String authorisation, String s2sToken, AcroResponse acroResponse) {
+    private AcroResponse extractCaseDetailsForAllCases(
+        String authorisation, String s2sToken, AcroResponse acroResponse,
+        LocalDateTime startDateForSearch, LocalDateTime endDateForSearch) {
         AcroResponse extractedAcroResponse = AcroResponse.builder()
             .cases(new ArrayList<>())
             .build();
         Map<String, String> caseIdWithRegionIdMap = new HashMap<>();
         for (AcroCaseDetail caseDetails : acroResponse.getCases()) {
             updateCourtEpmisId(caseDetails, caseIdWithRegionIdMap, extractedAcroResponse);
-            extractOrderSpecificData(caseDetails);
+            extractOrderSpecificForSearchCrieteria(caseDetails, startDateForSearch, endDateForSearch);
             extractedAcroResponse.getCases().add(caseDetails);
         }
         List<Hearings> listOfHearingDetails = hearingService.getHearingsForAllCases(
@@ -178,7 +202,9 @@ public class AcroCaseDataService {
         return extractedAcroResponse;
     }
 
-    private void updateCourtEpmisId(AcroCaseDetail caseDetails, Map<String, String> caseIdWithRegionIdMap, AcroResponse filteredAcroResponse) {
+    private void updateCourtEpmisId(AcroCaseDetail caseDetails,
+                                    Map<String, String> caseIdWithRegionIdMap,
+                                    AcroResponse filteredAcroResponse) {
         CaseManagementLocation caseManagementLocation = caseDetails.getCaseData().getCaseManagementLocation();
         if (caseManagementLocation != null) {
             if (caseManagementLocation.getRegionId() != null) {
@@ -199,18 +225,18 @@ public class AcroCaseDataService {
         }
     }
 
-    private void extractOrderSpecificData(AcroCaseDetail acroCaseDetail) {
+    private void extractOrderSpecificForSearchCrieteria(AcroCaseDetail acroCaseDetail,
+                                                        LocalDateTime startDateForSearch,
+                                                        LocalDateTime endDateForSearch) {
         AcroCaseData caseData = acroCaseDetail.getCaseData();
-        Optional<OrderDetails> orderDetails = caseData.getOrderCollection().stream().map(Element::getValue)
+        caseData.getOrderCollection().stream().map(Element::getValue)
             .filter(o -> o.getOrderType().equals(NON_MOLESTATION)
                 && o.getOrderTypeId().equals(NON_MOLESTATION_ORDER_FL_404_A)
-                && o.getTypeOfOrder().equals(FINAL))
-            .findFirst();
-
-        if (orderDetails.isPresent()) {
-            OrderDetails order = orderDetails.get();
-            caseData.getFl404Orders().add(order);
-        }
+                && o.getTypeOfOrder().equals(FINAL)
+                && o.getDateCreated().isAfter(startDateForSearch)
+                && o.getDateCreated().isBefore(endDateForSearch)
+            )
+            .forEach(order -> caseData.getFl404Orders().add(order));
     }
 
     public void filterCancelledHearingsBeforeListing(List<Hearings> listOfHearingDetails) {
@@ -246,8 +272,9 @@ public class AcroCaseDataService {
         if (null != listOfHearingDetails && !listOfHearingDetails.isEmpty()) {
             for (AcroCaseDetail acroCaseDetail : acroResponse.getCases()) {
                 Hearings filteredHearing =
-                    listOfHearingDetails.stream().filter(hearings -> hearings.getCaseRef().equals(String.valueOf(
-                        acroCaseDetail.getId()))).findFirst().orElse(null);
+                    listOfHearingDetails.stream()
+                        .filter(h -> h.getCaseRef().equals(String.valueOf(acroCaseDetail.getId())))
+                        .findFirst().orElse(null);
 
                 if (filteredHearing != null && CollectionUtils.isNotEmpty(filteredHearing.getCaseHearings())) {
                     acroCaseDetail.getCaseData().setCaseHearings(filteredHearing.getCaseHearings());
