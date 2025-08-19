@@ -66,6 +66,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.FM5ReminderNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocumentsManagement;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
@@ -93,6 +94,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -1856,93 +1858,100 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testCitizenDocsIncludeAwpFinalDocumentApplicant() {
-         // Build a C2 bundle that has Applicant documents
-        Document appDoc = Document.builder()
-            .documentFileName("c2-applicant.pdf")
-            .documentUrl("url-a")
-            .build();
-
-        C2DocumentBundle c2Applicant = C2DocumentBundle.builder()
-            .finalDocumentApplicant(List.of(element(appDoc)))
-            .build();
-
-        // AWP entry for the applicant, selectedParties includes the current user's party id
-        AdditionalApplicationsBundle awpApplicant = AdditionalApplicationsBundle.builder()
-            .uploadedDateTime("01-Jan-2025 10:00:00 AM")
-            .partyType(PartyEnum.applicant)
-            .selectedParties(List.of(element(ServedParties.builder()
-                                                 .partyId(testUuid.toString())
-                                                 .build())))
-            .c2DocumentBundle(c2Applicant)
-            .build();
-
-        CaseData caseDataWithAwp = caseData.toBuilder()
-            .state(State.DECISION_OUTCOME)
-            .additionalApplicationsBundle(List.of(element(awpApplicant)))
-            .build();
-
-        var result = caseService.getAllCitizenDocumentsOrders(authToken, caseDataWithAwp);
-
-        // Assert – we just need to execute the new path; a light sanity check is enough
-        assertNotNull(result);
-        // at least one doc should be visible somewhere for the applicant after processing
-        assertTrue(
-            CollectionUtils.isNotEmpty(result.getApplicantDocuments())
-                || CollectionUtils.isNotEmpty(result.getCitizenOtherDocuments())
-                || CollectionUtils.isNotEmpty(result.getCitizenApplicationPacks())
+    public void testApplicationsWithinProceedingsShowsC2ApplicantDocs() {
+        // Logged-in user: id must match the party's idamId
+        when(userService.getUserDetails(authToken)).thenReturn(
+            UserDetails.builder()
+                .id(testUuid.toString())
+                .roles(List.of(Roles.CITIZEN.getValue()))
+                .build()
         );
+
+        // A C2 doc that will go into finalDocumentApplicant (new path)
+        Document c2Doc = Document.builder()
+            .documentFileName("c2.pdf")
+            .documentBinaryUrl("binary-url")
+            .documentUrl("doc-url")
+            .build();
+
+        C2DocumentBundle c2 = C2DocumentBundle.builder()
+            .finalDocumentApplicant(List.of(element(c2Doc)))
+            .build();
+
+        // Additional app bundle for the APPLICANT; selected partyId must match the element UUID below
+        AdditionalApplicationsBundle awp = AdditionalApplicationsBundle.builder()
+            .partyType(PartyEnum.applicant)
+            .uploadedDateTime("02-Feb-2025 11:00:00 AM")
+            .selectedParties(List.of(element(ServedParties.builder()
+                                                 .partyId(testUuid.toString()) // must equal the element id of the applicant
+                                                 .partyName("Applicant 1")
+                                                 .build())))
+            .c2DocumentBundle(c2)
+            .build();
+
+        PartyDetails applicantParty = partyDetails.toBuilder()
+            .partyId(testUuid)
+            .user(User.builder().idamId(testUuid.toString()).build())
+            .build();
+
+        CaseData cd = caseData.toBuilder()
+            .caseTypeOfApplication(C100_CASE_TYPE)              // <-- REQUIRED or findPartyIdAndType returns empty
+            .applicants(List.of(element(testUuid, applicantParty))) // element id == testUuid
+            .additionalApplicationsBundle(List.of(element(awp)))
+            .build();
+
+        // Act
+        var result = caseService.getAllCitizenDocumentsOrders(authToken, cd);
+
+        // Assert: AWP docs appear in "other documents" for the citizen view
+        assertNotNull(result);
+        assertTrue(CollectionUtils.isNotEmpty(result.getCitizenOtherDocuments()));
     }
+
 
     @Test
-    public void testCitizenDocsIncludeAwpFinalDocumentRespondent() {
-        // Switch the "current user" to a respondent for this test
-        UserDetails respondentUser = UserDetails.builder()
-            .id("respondent-user-id")
-            .roles(List.of(Roles.CITIZEN.getValue()))
-            .build();
-        when(userService.getUserDetails(authToken)).thenReturn(respondentUser);
-
-        // Create a respondent party with that idam id
-        UUID respondentPartyId = UUID.randomUUID();
-        PartyDetails respondentParty = PartyDetails.builder()
-            .partyId(respondentPartyId)
-            .user(User.builder().idamId(respondentUser.getId()).build())
-            .build();
-
-        // Build a C2 bundle that has Respondent documents
-        Document respDoc = Document.builder()
-            .documentFileName("c2-respondent.pdf")
-            .documentUrl("url-r")
-            .build();
-
-        C2DocumentBundle c2Respondent = C2DocumentBundle.builder()
-            .finalDocumentRespondent(List.of(element(respDoc)))
-            .build();
-
-        // AWP entry for the respondent, selectedParties includes respondent's party id
-        AdditionalApplicationsBundle awpRespondent = AdditionalApplicationsBundle.builder()
-            .uploadedDateTime("02-Jan-2025 11:00:00 AM")
-            .partyType(PartyEnum.respondent)
-            .selectedParties(List.of(element(ServedParties.builder()
-                                                 .partyId(respondentPartyId.toString())
-                                                 .build())))
-            .c2DocumentBundle(c2Respondent)
-            .build();
-
-        CaseData caseDataWithAwp = caseData.toBuilder()
-            .state(State.DECISION_OUTCOME)
-            .respondents(List.of(element(respondentParty)))
-            .additionalApplicationsBundle(List.of(element(awpRespondent)))
-            .build();
-
-        var result = caseService.getAllCitizenDocumentsOrders(authToken, caseDataWithAwp);
-
-        assertNotNull(result);
-        assertTrue(
-            CollectionUtils.isNotEmpty(result.getRespondentDocuments())
-                || CollectionUtils.isNotEmpty(result.getCitizenOtherDocuments())
-                || CollectionUtils.isNotEmpty(result.getCitizenApplicationPacks())
+    public void testApplicationsWithinProceedingsShowsC2RespondentDocs() {
+        when(userService.getUserDetails(authToken)).thenReturn(
+            UserDetails.builder()
+                .id(testUuid.toString())
+                .roles(List.of(Roles.CITIZEN.getValue()))
+                .build()
         );
+
+        Document c2Doc = Document.builder()
+            .documentFileName("c2Respondent.pdf")
+            .documentBinaryUrl("binary-url")
+            .documentUrl("doc-url")
+            .build();
+
+        C2DocumentBundle c2 = C2DocumentBundle.builder()
+            .finalDocumentApplicant(List.of(element(c2Doc)))
+            .build();
+
+        AdditionalApplicationsBundle awp = AdditionalApplicationsBundle.builder()
+            .partyType(PartyEnum.applicant)
+            .uploadedDateTime("02-Feb-2025 11:00:00 AM")
+            .selectedParties(List.of(element(ServedParties.builder()
+                                                 .partyId(testUuid.toString()) // must equal the element id of the applicant
+                                                 .partyName("Respondent 1")
+                                                 .build())))
+            .c2DocumentBundle(c2)
+            .build();
+
+        PartyDetails applicantParty = partyDetails.toBuilder()
+            .partyId(testUuid)
+            .user(User.builder().idamId(testUuid.toString()).build())
+            .build();
+
+        CaseData cd = caseData.toBuilder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .respondents(List.of(element(testUuid, applicantParty)))
+            .additionalApplicationsBundle(List.of(element(awp)))
+            .build();
+
+        var result = caseService.getAllCitizenDocumentsOrders(authToken, cd);
+        assertNotNull(result);
+        assertTrue(CollectionUtils.isNotEmpty(result.getCitizenOtherDocuments()));
     }
+
 }

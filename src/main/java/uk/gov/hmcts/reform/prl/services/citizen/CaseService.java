@@ -1504,16 +1504,23 @@ public class CaseService {
             ).toList();
     }
 
-    private boolean filterApplicationsForParty(AdditionalApplicationsBundle addlAppBundle,
-                                               String partyId) {
-        if (null != addlAppBundle
-            && CollectionUtils.isNotEmpty(addlAppBundle.getSelectedParties())) {
-            return addlAppBundle.getSelectedParties().stream()
-                .map(Element::getValue)
-                .anyMatch(servedParty -> partyId.equals(servedParty.getPartyId()));
+    private boolean filterApplicationsForParty(AdditionalApplicationsBundle bundle, String partyId) {
+        // If we don't know who the current user/party is, don't show anything
+        if (StringUtils.isBlank(partyId)) {
+            return false;
         }
-        return false;
+
+        if (bundle == null || CollectionUtils.isEmpty(bundle.getSelectedParties())) {
+            return false;
+        }
+
+        return bundle.getSelectedParties().stream()
+            .map(Element::getValue)
+            .filter(Objects::nonNull)
+            .map(ServedParties::getPartyId)
+            .anyMatch(id -> Objects.equals(id, partyId));
     }
+
 
     private List<CitizenDocuments> getAwpDocuments(AdditionalApplicationsBundle awp,
                                                    List<Element<Document>> documents,
