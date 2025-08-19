@@ -956,15 +956,6 @@ class CaseAssignmentServiceTest {
                                                         String solicitorRole,
                                                         Function<CaseData, PartyDetails> parties) {
 
-        CaseAssignmentService localCaseAssignmentService = new CaseAssignmentService(
-            caseAssignmentApi,
-            systemUserService,
-            tokenGenerator,
-            organisationService,
-            roleAssignmentService,
-            maskEmail,
-            objectMapper
-        );
 
         Barrister updatedBarrister = barrister.toBuilder()
             .barristerRole(barristerRole)
@@ -995,6 +986,16 @@ class CaseAssignmentServiceTest {
             .id(1234L)
             .data(updatedCaseData.toMap(objectMapper))
             .build();
+
+        CaseAssignmentService localCaseAssignmentService = new CaseAssignmentService(
+            caseAssignmentApi,
+            systemUserService,
+            tokenGenerator,
+            organisationService,
+            roleAssignmentService,
+            maskEmail,
+            objectMapper
+        );
 
         localCaseAssignmentService.removeAmBarristerIfPresent(caseDetails);
         assertThat(parties.apply(fl401CaseData).getBarrister())
@@ -1071,16 +1072,6 @@ class CaseAssignmentServiceTest {
                                                        String solicitorRole,
                                                        Function<CaseData, List<Element<PartyDetails>>> parties) {
 
-        CaseAssignmentService localCaseAssignmentService = new CaseAssignmentService(
-            caseAssignmentApi,
-            systemUserService,
-            tokenGenerator,
-            organisationService,
-            roleAssignmentService,
-            maskEmail,
-            objectMapper
-        );
-
         Barrister updatedBarrister = barrister.toBuilder()
             .barristerRole(barristerRole)
             .barristerId(UUID.randomUUID().toString())
@@ -1110,6 +1101,17 @@ class CaseAssignmentServiceTest {
             .id(1234L)
             .data(updatedCaseData.toMap(objectMapper))
             .build();
+
+
+        CaseAssignmentService localCaseAssignmentService = new CaseAssignmentService(
+            caseAssignmentApi,
+            systemUserService,
+            tokenGenerator,
+            organisationService,
+            roleAssignmentService,
+            maskEmail,
+            objectMapper
+        );
 
         localCaseAssignmentService.removeAmBarristerIfPresent(caseDetails);
         assertThat(parties.apply(c100CaseData).get(index).getValue().getBarrister())
