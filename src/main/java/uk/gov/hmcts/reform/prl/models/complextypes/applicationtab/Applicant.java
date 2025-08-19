@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Organisation;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.Barrister;
 
 import java.time.LocalDate;
 
@@ -39,8 +40,6 @@ public class Applicant {
     private final String solicitorReference;
     private final String dxNumber;
     private final Organisation solicitorOrg;
-
-
-
+    private final Barrister barrister;
 }
 
