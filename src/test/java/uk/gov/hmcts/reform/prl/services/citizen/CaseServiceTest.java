@@ -1952,4 +1952,146 @@ public class CaseServiceTest {
         assertTrue(CollectionUtils.isNotEmpty(result.getCitizenOtherDocuments()));
     }
 
+    @Test
+    public void testApplicationsWithinProceedingsSkipsWhenC2BundleNull() {
+        when(userService.getUserDetails(authToken)).thenReturn(
+            UserDetails.builder()
+                .id(testUuid.toString())
+                .roles(List.of(Roles.CITIZEN.getValue()))
+                .build()
+        );
+
+        AdditionalApplicationsBundle awp = AdditionalApplicationsBundle.builder()
+            .partyType(PartyEnum.applicant)
+            .uploadedDateTime("02-Feb-2025 11:00:00 AM") // format OK even though it won't be parsed on this branch
+            .selectedParties(List.of(element(ServedParties.builder()
+                                                 .partyId(testUuid.toString()) // MUST match applicant element id
+                                                 .partyName("Applicant 1")
+                                                 .build())))
+            // .c2DocumentBundle(null)  // intentionally omitted
+            .build();
+
+        PartyDetails applicantParty = partyDetails.toBuilder()
+            .partyId(testUuid)
+            .user(User.builder().idamId(testUuid.toString()).build())
+            .build();
+
+        CaseData cd = caseData.toBuilder()
+            .caseTypeOfApplication(C100_CASE_TYPE)                // required so findPartyIdAndType resolves
+            .applicants(List.of(element(testUuid, applicantParty))) // element id == testUuid
+            .additionalApplicationsBundle(List.of(element(awp)))
+            .build();
+
+        var result = caseService.getAllCitizenDocumentsOrders(authToken, cd);
+
+        assertNotNull(result);
+        assertTrue(CollectionUtils.isEmpty(result.getCitizenOtherDocuments()));
+    }
+
+    @Test
+    public void testApplicationsWithinProceedingsFallsBackToLegacyDocsForApplicant() {
+        // Logged-in user is the APPLICANT
+        when(userService.getUserDetails(authToken)).thenReturn(
+            UserDetails.builder()
+                .id(testUuid.toString())
+                .roles(List.of(Roles.CITIZEN.getValue()))
+                .build()
+        );
+
+        // Legacy C2 doc only (finalDocumentApplicant is absent)
+        Document legacyDoc = Document.builder()
+            .documentFileName("c2-legacy-applicant.pdf")
+            .documentBinaryUrl("bin-url-legacy-app")
+            .documentUrl("url-legacy-app")
+            .build();
+
+        C2DocumentBundle c2 = C2DocumentBundle.builder()
+            .finalDocument(List.of(element(legacyDoc))) // legacy path
+            .build();
+
+        AdditionalApplicationsBundle awp = AdditionalApplicationsBundle.builder()
+            .partyType(PartyEnum.applicant)
+            .uploadedDateTime("02-Feb-2025 11:00:00 AM")
+            .selectedParties(List.of(element(ServedParties.builder()
+                                                 .partyId(testUuid.toString())
+                                                 .partyName("Applicant 1")
+                                                 .build())))
+            .c2DocumentBundle(c2)
+            .build();
+
+        PartyDetails applicantParty = partyDetails.toBuilder()
+            .partyId(testUuid)
+            .user(User.builder().idamId(testUuid.toString()).build())
+            .build();
+
+        CaseData cd = caseData.toBuilder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(element(testUuid, applicantParty)))   // element id == testUuid
+            .additionalApplicationsBundle(List.of(element(awp)))
+            .build();
+
+        var result = caseService.getAllCitizenDocumentsOrders(authToken, cd);
+
+        assertNotNull(result);
+        // falls back → should surface in "other documents"
+        assertTrue(CollectionUtils.isNotEmpty(result.getCitizenOtherDocuments()));
+    }
+
+    @Test
+    public void testApplicationsWithinProceedingsFallsBackToLegacyDocsForRespondent() {
+        // Logged-in user is the RESPONDENT (not the applicant)
+        when(userService.getUserDetails(authToken)).thenReturn(
+            UserDetails.builder()
+                .id(testUuid.toString())
+                .roles(List.of(Roles.CITIZEN.getValue()))
+                .build()
+        );
+
+        // Applicant with a different idamId so findPartyIdAndType picks respondent
+        PartyDetails otherApplicant = partyDetails.toBuilder()
+            .partyId(UUID.randomUUID())
+            .user(User.builder().idamId("someone-else").build())
+            .build();
+
+        // Respondent matches logged-in user (idamId == testUuid)
+        PartyDetails respondentParty = partyDetails.toBuilder()
+            .partyId(testUuid)
+            .user(User.builder().idamId(testUuid.toString()).build())
+            .build();
+
+        // Legacy C2 doc only (finalDocumentRespondent is absent)
+        Document legacyDoc = Document.builder()
+            .documentFileName("c2-legacy-respondent.pdf")
+            .documentBinaryUrl("bin-url-legacy-resp")
+            .documentUrl("url-legacy-resp")
+            .build();
+
+        C2DocumentBundle c2 = C2DocumentBundle.builder()
+            .finalDocument(List.of(element(legacyDoc))) // legacy path
+            .build();
+
+        AdditionalApplicationsBundle awp = AdditionalApplicationsBundle.builder()
+            .partyType(PartyEnum.respondent)
+            .uploadedDateTime("02-Feb-2025 11:00:00 AM")
+            .selectedParties(List.of(element(ServedParties.builder()
+                                                 .partyId(testUuid.toString()) // must match respondent element id
+                                                 .partyName("Respondent 1")
+                                                 .build())))
+            .c2DocumentBundle(c2)
+            .build();
+
+        CaseData cd = caseData.toBuilder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(element(UUID.randomUUID(), otherApplicant)))
+            .respondents(List.of(element(testUuid, respondentParty))) // element id == testUuid
+            .additionalApplicationsBundle(List.of(element(awp)))
+            .build();
+
+        var result = caseService.getAllCitizenDocumentsOrders(authToken, cd);
+
+        assertNotNull(result);
+        // falls back → should surface in "other documents"
+        assertTrue(CollectionUtils.isNotEmpty(result.getCitizenOtherDocuments()));
+    }
+
 }
