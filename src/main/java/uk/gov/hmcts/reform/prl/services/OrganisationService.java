@@ -10,9 +10,11 @@ import uk.gov.hmcts.reform.prl.clients.OrganisationApi;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
+import uk.gov.hmcts.reform.prl.models.OrganisationUser;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.utils.MaskEmail;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +22,7 @@ import java.util.Optional;
 import javax.ws.rs.NotFoundException;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace;
 
 @Service
 @Slf4j
@@ -30,6 +33,7 @@ public class OrganisationService {
     private Organisations organisations;
     private final AuthTokenGenerator authTokenGenerator;
     private final SystemUserService systemUserService;
+    private final MaskEmail maskEmail;
     private List<Element<PartyDetails>> applicantsWithOrganisationDetails = new ArrayList<>();
 
     public CaseData getApplicantOrganisationDetails(CaseData caseData) {
@@ -182,4 +186,27 @@ public class OrganisationService {
         return (List<Organisations>) orgObject;
     }
 
+    public Optional<String> findUserByEmail(String email) {
+
+        String maskedEmail = maskEmail.mask(email);
+        try {
+            log.info("Finding user by email: {}", maskedEmail);
+            OrganisationUser organisationUser = organisationApi.findUserByEmail(
+                systemUserService.getSysUserToken(),
+                authTokenGenerator.generate(),
+                email
+            );
+            return Optional.of(organisationUser.getUserIdentifier());
+        } catch (FeignException.NotFound notFoundException) {
+            log.error("Could not find user by email {}", maskEmail);
+            return Optional.empty();
+        } catch (FeignException exception) {
+            String message = String.join(":", "Error while fetching user id by email",
+                                         Optional.ofNullable(email)
+                                             .map(value -> maskEmail.mask(getStackTrace(exception), value))
+                                             .orElse(email));
+            log.error(message, exception);
+            throw new IllegalArgumentException(message);
+        }
+    }
 }
