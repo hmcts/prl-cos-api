@@ -50,7 +50,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATED_BARRI
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @ExtendWith(MockitoExtension.class)
-class CaseBarristerAssignmentControllerTest {
+class CaseAssignmentControllerTest {
     @Mock
     private CaseAssignmentService caseAssignmentService;
     @Mock

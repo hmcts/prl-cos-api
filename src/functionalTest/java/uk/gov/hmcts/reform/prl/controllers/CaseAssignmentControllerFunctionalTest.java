@@ -18,7 +18,7 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-public class CaseBarristerAssignmentControllerFunctionalTest {
+public class CaseAssignmentControllerFunctionalTest {
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;
 
