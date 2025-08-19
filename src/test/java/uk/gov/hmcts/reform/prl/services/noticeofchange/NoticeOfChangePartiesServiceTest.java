@@ -84,6 +84,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -376,6 +377,8 @@ public class NoticeOfChangePartiesServiceTest {
             .build();
 
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
+        verify(caseAssignmentService).removePartyBarristerIfPresent(eq(caseData),
+                                                                    eq(changeOrganisationRequest));
         verify(tabService, times(1)).updatePartyDetailsForNoc(
             anyString(),
             anyString(),
