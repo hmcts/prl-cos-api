@@ -21,7 +21,7 @@ public class AcroZipService {
         validateInputs(sourceFolder, exportFolder);
 
         Path sourcePath = sourceFolder.toPath();
-        String archivePath = exportFolder + "/" + createSevenZipFileName(sourcePath);
+        String archivePath = exportFolder + "/" + createSevenZipFileName();
         File archiveFile = new File(archivePath);
 
         List<Path> filesToCompress = collectFiles(sourcePath);
@@ -77,7 +77,7 @@ public class AcroZipService {
         }
     }
 
-    private String createSevenZipFileName(Path source) {
+    private String createSevenZipFileName() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmm");
         String timestamp = LocalDateTime.now().format(formatter);
         return "PRL_ORDERS_" + timestamp + ".7z";
