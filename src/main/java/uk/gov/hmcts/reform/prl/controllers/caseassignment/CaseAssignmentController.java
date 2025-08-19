@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.controllers;
+package uk.gov.hmcts.reform.prl.controllers.caseassignment;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -33,7 +34,13 @@ import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATED_BARRISTER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -74,18 +81,22 @@ public class CaseAssignmentController {
                                                                                         caseData,
                                                                                         allocatedBarrister);
             caseAssignmentService.validateAddRequest(
-                userId,
-                caseData,
-                barristerRole,
-                allocatedBarrister,
-                errorList);
+                    userId,
+                    caseData,
+                    barristerRole,
+                    allocatedBarrister,
+                    errorList);
 
             if (errorList.isEmpty() && userId.isPresent() && barristerRole.isPresent()) {
-                caseAssignmentService.addBarrister(caseData,
-                                                   userId.get(),
-                                                   barristerRole.get(),
-                                                   allocatedBarrister);
-                updateCaseDetails(caseDetails, caseData);
+                try {
+                    caseAssignmentService.addBarrister(caseData,
+                                                       userId.get(),
+                                                       barristerRole.get(),
+                                                       allocatedBarrister);
+                    updateCaseDetails(caseDetails, caseData);
+                } catch (GrantCaseAccessException grantCaseAccessException) {
+                    errorList.add(grantCaseAccessException.getMessage());
+                }
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder()
@@ -116,22 +127,15 @@ public class CaseAssignmentController {
                 caseDetails.getData().get(ALLOCATED_BARRISTER),
                 new TypeReference<>() { }
             );
-            if (allocatedBarrister != null && allocatedBarrister.getPartyList() != null) {
-                caseAssignmentService.validateRemoveRequest(
-                    caseData,
-                    allocatedBarrister.getPartyList().getValueCode(),
-                    errorList
-                );
 
-                if (errorList.isEmpty()) {
-                    caseAssignmentService.removeBarrister(
-                        caseData,
-                        allocatedBarrister.getPartyList().getValueCode()
-                    );
-                    updateCaseDetails(caseDetails, caseData);
-                }
-            } else {
-                errorList.add(INVALID_CLIENT);
+            caseAssignmentService.validateRemoveRequest(caseData,
+                                                        allocatedBarrister.getPartyList().getValueCode(),
+                                                        errorList);
+
+            if (errorList.isEmpty()) {
+                caseAssignmentService.removeBarrister(caseData,
+                                                      allocatedBarrister.getPartyList().getValueCode());
+                updateCaseDetails(caseDetails, caseData);
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder()
@@ -144,6 +148,13 @@ public class CaseAssignmentController {
     }
 
     private void updateCaseDetails(CaseDetails caseDetails, CaseData caseData) {
-        caseDetails.getData().putAll(caseData.toMap(objectMapper));
+        caseDetails.getData().put(ALLOCATED_BARRISTER, null);
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            caseDetails.getData().put(APPLICANTS, caseData.getApplicants());
+            caseDetails.getData().put(RESPONDENTS, caseData.getRespondents());
+        } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            caseDetails.getData().put(FL401_APPLICANTS, caseData.getApplicantsFL401());
+            caseDetails.getData().put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
+        }
     }
 }
