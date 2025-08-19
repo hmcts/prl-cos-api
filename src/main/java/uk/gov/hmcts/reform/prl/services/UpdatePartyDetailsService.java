@@ -253,7 +253,8 @@ public class UpdatePartyDetailsService {
                               callbackRequest.getCaseDetails().getId(), e.getMessage());
                 }
             } else {
-                log.info("No respondents available for C8 generation; skipping.");
+                log.info("No respondents available for C8 generation for case: {}; skipping.",
+                         callbackRequest.getCaseDetails().getId());
             }
             cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
             findAndListRefugeDocsForC100(callbackRequest, caseData, updatedCaseData);
