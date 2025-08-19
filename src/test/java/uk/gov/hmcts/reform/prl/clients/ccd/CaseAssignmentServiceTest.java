@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
 import uk.gov.hmcts.reform.prl.exception.InvalidPartyIdException;
+import uk.gov.hmcts.reform.prl.exception.InvalidSolicitorRoleException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
@@ -1161,6 +1162,22 @@ class CaseAssignmentServiceTest {
         verify(caseAssignmentApi, never()).removeCaseUserRoles(anyString(),
                                                       anyString(),
                                                       isA(CaseAssignmentUserRolesRequest.class));
+    }
+
+    @Test
+    void testInvalidSolicitorRoleWhenCaseTypeC100() {
+        ChangeOrganisationRequest changeOrganisationRequest = ChangeOrganisationRequest.builder()
+            .caseRoleId(DynamicList.builder()
+                            .value(DynamicListElement.builder()
+                                       .code("InvalidSolicitorRole")
+                                       .build())
+                            .build())
+            .build();
+        assertThatThrownBy(() -> caseAssignmentService.removePartyBarristerIfPresent(c100CaseData,
+                                                                                     changeOrganisationRequest))
+            .isInstanceOf(InvalidSolicitorRoleException.class)
+            .hasMessageContaining("No barrister matching role found for the given solicitor InvalidSolicitorRole")
+        ;
     }
 
     private RoleAssignmentResponse getRoleAssignmentResponse(String actorId, String roleName) {

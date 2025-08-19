@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole.Representing;
 import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
 import uk.gov.hmcts.reform.prl.exception.InvalidPartyIdException;
+import uk.gov.hmcts.reform.prl.exception.InvalidSolicitorRoleException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -498,7 +499,7 @@ public class CaseAssignmentService {
             .filter(barristerRole -> barristerRole.getSolicitorCaseRole().equals(solicitorRole))
             .map(BarristerRole::getCaseRoleLabel)
             .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("No barrister matching role found for the given solicitor "
+            .orElseThrow(() -> new InvalidSolicitorRoleException("No barrister matching role found for the given solicitor "
                                                                 + solicitorRole));
     }
 }
