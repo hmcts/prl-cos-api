@@ -36,7 +36,8 @@ public class BarristerRemoveService extends  AbstractBarristerService {
             return isApplicable;
         } else {
             if (partyDetails.getSolicitorOrg() == null || barristerFilter.getUserOrgIdentifier() == null) {
-                log.info("This party {} has an empty solicitor org or the user org identifier is empty", partyDetails.getPartyId());
+                log.info("BarristerRemoveService - This party {} has an empty solicitor org or the user org identifier is empty",
+                         partyDetails.getPartyId());
                 return false;
             }
 
