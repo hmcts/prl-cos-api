@@ -134,7 +134,9 @@ public class BarristerControllerTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
         when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
 
-        AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder().build();
+        AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder()
+            .partyList(DynamicList.builder()
+                           .listItems(Lists.newArrayList()).build()).build();
         when(barristerRemoveService.getBarristerListToRemove(caseData1, AUTH_TOKEN)).thenReturn(allocatedBarrister);
         AboutToStartOrSubmitCallbackResponse callbackResponse = barristerController
             .handleRemoveAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
@@ -157,5 +159,21 @@ public class BarristerControllerTest {
             RuntimeException.class,
             () -> barristerController
                 .handleMidEvent(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest));
+    }
+
+    @Test
+    public void shouldNotHandleRemoveAboutToStartWhenNotAuthorised() {
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .build())
+            .build();
+
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(false);
+
+        assertThrows(
+            RuntimeException.class,
+            () -> barristerController
+                .handleRemoveAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest));
     }
 }
