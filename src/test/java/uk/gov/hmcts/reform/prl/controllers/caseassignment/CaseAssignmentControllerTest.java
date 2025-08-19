@@ -120,6 +120,7 @@ class CaseAssignmentControllerTest {
 
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(ALLOCATED_BARRISTER, allocatedBarrister);
+        caseData.put("caseTypeOfApplication", "C100");
 
         CaseDetails caseDetails = CaseDetails.builder()
             .id(1234L)
@@ -152,6 +153,8 @@ class CaseAssignmentControllerTest {
                                                    eq(userId.get()),
                                                    eq(barristerRole.get()),
                                                    isA(AllocatedBarrister.class));
+
+        verify(applicationsTabService).updateTab(isA(CaseData.class));
     }
 
     @Test
@@ -338,6 +341,7 @@ class CaseAssignmentControllerTest {
             .thenReturn(true);
 
         Map<String, Object> caseData = new HashMap<>();
+        caseData.put("caseTypeOfApplication", "FL401");
         caseData.put(ALLOCATED_BARRISTER, allocatedBarrister);
 
         CaseDetails caseDetails = CaseDetails.builder()
@@ -368,6 +372,7 @@ class CaseAssignmentControllerTest {
                                                             anyList());
         verify(caseAssignmentService).removeBarrister(isA(CaseData.class),
                                                    eq(selectedPartyId));
+        verify(applicationsTabService).updateTab(isA(CaseData.class));
     }
 
     @Test

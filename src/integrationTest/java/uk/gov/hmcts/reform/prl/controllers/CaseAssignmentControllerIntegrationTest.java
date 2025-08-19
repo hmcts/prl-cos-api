@@ -101,6 +101,7 @@ public class CaseAssignmentControllerIntegrationTest {
                                                    any(),
                                                    eq(C100APPLICANTBARRISTER1.getCaseRoleLabel()),
                                                    any());
+        verify(applicationsTabService).updateTab(any());
     }
 
     @Test
