@@ -453,7 +453,7 @@ public class CaseAssignmentService {
         );
     }
 
-    public void removeBarristerIfPresent(CaseData caseData,
+    private void removeBarristerIfPresent(CaseData caseData,
                                          ChangeOrganisationRequest changeOrganisationRequest,
                                          Consumer<Element<PartyDetails>> partyDetailsElement,
                                          Consumer<PartyDetails> partyDetails) {

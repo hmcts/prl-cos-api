@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
 import uk.gov.hmcts.reform.prl.exception.InvalidPartyIdException;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -38,6 +39,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Barrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
@@ -64,6 +66,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -71,8 +74,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole.C100APPLICANTBARRISTER1;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole.C100APPLICANTBARRISTER3;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole.C100APPLICANTBARRISTER5;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole.C100RESPONDENTBARRISTER5;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole.FL401APPLICANTBARRISTER;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole.FL401RESPONDENTBARRISTER;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.C100APPLICANTSOLICITOR3;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.C100RESPONDENTSOLICITOR5;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
@@ -102,6 +108,7 @@ class CaseAssignmentServiceTest {
     private Map<String, UUID> fl401PartyIds;
     private Barrister barrister;
     private CaseDetails caseDetails;
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
@@ -246,6 +253,9 @@ class CaseAssignmentServiceTest {
                               .organisationName("barristerOrgName")
                               .build())
             .build();
+
+        objectMapper = new ObjectMapper();
+        objectMapper.findAndRegisterModules();
     }
 
 
@@ -265,8 +275,6 @@ class CaseAssignmentServiceTest {
         "applicant3, [C100APPLICANTBARRISTER3]",
     })
     void deriveBarristerRoleForC100CaseData(String party, String barristerRole) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.findAndRegisterModules();
         CaseAssignmentService localCaseAssignmentService = new CaseAssignmentService(
             caseAssignmentApi,
             systemUserService,
@@ -340,7 +348,7 @@ class CaseAssignmentServiceTest {
                (Function<CaseData, List<Element<PartyDetails>>>) CaseData::getApplicants),
             of("respondent5",
                4,
-               C100APPLICANTBARRISTER5.getCaseRoleLabel(),
+               C100RESPONDENTBARRISTER5.getCaseRoleLabel(),
                (Function<CaseData, List<Element<PartyDetails>>>) CaseData::getRespondents)
         );
     }
@@ -929,6 +937,228 @@ class CaseAssignmentServiceTest {
         );
         assertThat(errors)
             .isEmpty();
+    }
+
+    static Stream<Arguments> parameterFl401SolicitorParties() {
+        return Stream.of(
+            of(FL401APPLICANTBARRISTER.getCaseRoleLabel(),
+               SolicitorRole.FL401APPLICANTSOLICITOR.getCaseRoleLabel(),
+               (Function<CaseData, PartyDetails>)CaseData::getApplicantsFL401),
+            of(FL401RESPONDENTBARRISTER.getCaseRoleLabel(),
+               SolicitorRole.FL401RESPONDENTSOLICITOR.getCaseRoleLabel(),
+               (Function<CaseData, PartyDetails>) CaseData::getRespondentsFL401)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("parameterFl401SolicitorParties")
+    void testRemoveBarristerRoleFromAmWhenCaseTypeFl401(String barristerRole,
+                                                        String solicitorRole,
+                                                        Function<CaseData, PartyDetails> parties) {
+
+        CaseAssignmentService localCaseAssignmentService = new CaseAssignmentService(
+            caseAssignmentApi,
+            systemUserService,
+            tokenGenerator,
+            organisationService,
+            roleAssignmentService,
+            maskEmail,
+            objectMapper
+        );
+
+        Barrister updatedBarrister = barrister.toBuilder()
+            .barristerRole(barristerRole)
+            .barristerId(UUID.randomUUID().toString())
+            .build();
+
+        parties.apply(fl401CaseData)
+            .setBarrister(updatedBarrister);
+
+        when(systemUserService.getSysUserToken())
+            .thenReturn("sysUserToken");
+        when(tokenGenerator.generate())
+            .thenReturn("token");
+
+        ChangeOrganisationRequest changeOrganisationRequest = ChangeOrganisationRequest.builder()
+            .caseRoleId(DynamicList.builder()
+                            .value(DynamicListElement.builder()
+                                       .code(solicitorRole)
+                                       .build())
+                            .build())
+            .build();
+
+        CaseData updatedCaseData = fl401CaseData.toBuilder()
+            .changeOrganisationRequestField(changeOrganisationRequest)
+            .build();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(1234L)
+            .data(updatedCaseData.toMap(objectMapper))
+            .build();
+
+        localCaseAssignmentService.removeAmBarristerIfPresent(caseDetails);
+        assertThat(parties.apply(fl401CaseData).getBarrister())
+            .isNotNull();
+
+        verify(caseAssignmentApi).removeCaseUserRoles(anyString(),
+                                                      anyString(),
+                                                      isA(CaseAssignmentUserRolesRequest.class));
+
+
+    }
+
+    @ParameterizedTest
+    @MethodSource("parameterFl401SolicitorParties")
+    void testRemoveBarristerRoleFromPartyWhenCaseTypeFl401(String barristerRole,
+                                                        String solicitorRole,
+                                                        Function<CaseData, PartyDetails> parties) {
+
+        CaseAssignmentService localCaseAssignmentService = new CaseAssignmentService(
+            caseAssignmentApi,
+            systemUserService,
+            tokenGenerator,
+            organisationService,
+            roleAssignmentService,
+            maskEmail,
+            objectMapper
+        );
+
+        Barrister updatedBarrister = barrister.toBuilder()
+            .barristerRole(barristerRole)
+            .barristerId(UUID.randomUUID().toString())
+            .build();
+
+        parties.apply(fl401CaseData)
+            .setBarrister(updatedBarrister);
+
+        ChangeOrganisationRequest changeOrganisationRequest = ChangeOrganisationRequest.builder()
+            .caseRoleId(DynamicList.builder()
+                            .value(DynamicListElement.builder()
+                                       .code(solicitorRole)
+                                       .build())
+                            .build())
+            .build();
+
+        localCaseAssignmentService.removePartyBarristerIfPresent(fl401CaseData,
+                                                                 changeOrganisationRequest);
+
+        assertThat(parties.apply(fl401CaseData).getBarrister())
+            .isNull();
+        verify(caseAssignmentApi, never()).removeCaseUserRoles(anyString(),
+                                                      anyString(),
+                                                      isA(CaseAssignmentUserRolesRequest.class));
+
+
+    }
+
+    static Stream<Arguments> parameterC100SolicitorParties() {
+        return Stream.of(
+            of(2,
+               C100APPLICANTBARRISTER3.getCaseRoleLabel(),
+               C100APPLICANTSOLICITOR3.getCaseRoleLabel(),
+               (Function<CaseData, List<Element<PartyDetails>>>)CaseData::getApplicants),
+            of(4,
+               C100RESPONDENTBARRISTER5.getCaseRoleLabel(),
+               C100RESPONDENTSOLICITOR5.getCaseRoleLabel(),
+               (Function<CaseData, List<Element<PartyDetails>>>) CaseData::getRespondents)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("parameterC100SolicitorParties")
+    void testRemoveBarristerRoleFromAmWhenCaseTypeC100(int index,
+                                                       String barristerRole,
+                                                       String solicitorRole,
+                                                       Function<CaseData, List<Element<PartyDetails>>> parties) {
+
+        CaseAssignmentService localCaseAssignmentService = new CaseAssignmentService(
+            caseAssignmentApi,
+            systemUserService,
+            tokenGenerator,
+            organisationService,
+            roleAssignmentService,
+            maskEmail,
+            objectMapper
+        );
+
+        Barrister updatedBarrister = barrister.toBuilder()
+            .barristerRole(barristerRole)
+            .barristerId(UUID.randomUUID().toString())
+            .build();
+
+        parties.apply(c100CaseData).get(index).getValue()
+            .setBarrister(updatedBarrister);
+
+        when(systemUserService.getSysUserToken())
+            .thenReturn("sysUserToken");
+        when(tokenGenerator.generate())
+            .thenReturn("token");
+
+        ChangeOrganisationRequest changeOrganisationRequest = ChangeOrganisationRequest.builder()
+            .caseRoleId(DynamicList.builder()
+                            .value(DynamicListElement.builder()
+                                       .code(solicitorRole)
+                                       .build())
+                            .build())
+            .build();
+
+        CaseData updatedCaseData = c100CaseData.toBuilder()
+            .changeOrganisationRequestField(changeOrganisationRequest)
+            .build();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(1234L)
+            .data(updatedCaseData.toMap(objectMapper))
+            .build();
+
+        localCaseAssignmentService.removeAmBarristerIfPresent(caseDetails);
+        assertThat(parties.apply(c100CaseData).get(index).getValue().getBarrister())
+            .isNotNull();
+        verify(caseAssignmentApi).removeCaseUserRoles(anyString(),
+                                                      anyString(),
+                                                      isA(CaseAssignmentUserRolesRequest.class));
+    }
+
+    @ParameterizedTest
+    @MethodSource("parameterC100SolicitorParties")
+    void testRemoveBarristerRoleFromPartyWhenCaseTypeC100(int index,
+                                                       String barristerRole,
+                                                       String solicitorRole,
+                                                       Function<CaseData, List<Element<PartyDetails>>> parties) {
+
+        CaseAssignmentService localCaseAssignmentService = new CaseAssignmentService(
+            caseAssignmentApi,
+            systemUserService,
+            tokenGenerator,
+            organisationService,
+            roleAssignmentService,
+            maskEmail,
+            objectMapper
+        );
+
+        Barrister updatedBarrister = barrister.toBuilder()
+            .barristerRole(barristerRole)
+            .barristerId(UUID.randomUUID().toString())
+            .build();
+
+        parties.apply(c100CaseData).get(index).getValue()
+            .setBarrister(updatedBarrister);
+
+        ChangeOrganisationRequest changeOrganisationRequest = ChangeOrganisationRequest.builder()
+            .caseRoleId(DynamicList.builder()
+                            .value(DynamicListElement.builder()
+                                       .code(solicitorRole)
+                                       .build())
+                            .build())
+            .build();
+
+        localCaseAssignmentService.removePartyBarristerIfPresent(c100CaseData,
+                                                                 changeOrganisationRequest);
+        assertThat(parties.apply(c100CaseData).get(index).getValue().getBarrister())
+            .isNull();
+        verify(caseAssignmentApi, never()).removeCaseUserRoles(anyString(),
+                                                      anyString(),
+                                                      isA(CaseAssignmentUserRolesRequest.class));
     }
 
     private RoleAssignmentResponse getRoleAssignmentResponse(String actorId, String roleName) {
