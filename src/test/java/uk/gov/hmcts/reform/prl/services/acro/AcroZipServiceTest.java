@@ -11,6 +11,7 @@ import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("AcroZipService Tests")
@@ -64,6 +65,65 @@ class AcroZipServiceTest {
         String fileName = archiveFile.getName();
         assertTrue(fileName.matches("PRL_ORDERS_\\d{8}_\\d{4}\\.7z"),
                    "Archive name should match format PRL_ORDERS_YYYYMMDD_HHMM.7z");
+    }
+
+    @Test
+    @DisplayName("Should create empty archive when source directory is empty")
+    void shouldCreateEmptyArchiveWhenSourceDirectoryIsEmpty() throws Exception {
+        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile());
+        File archiveFile = new File(archivePath);
+
+        assertTrue(archiveFile.exists(), "Archive should be created even for empty directory");
+        assertTrue(archiveFile.length() > 0, "Archive should have minimal 7z structure");
+    }
+
+    @Test
+    @DisplayName("Should handle multiple files and subdirectories")
+    void shouldHandleMultipleFilesAndSubdirectories() throws Exception {
+        Path subDir = Files.createDirectory(tempSourceDir.resolve("subdir"));
+        Files.writeString(Files.createFile(tempSourceDir.resolve("file1.txt")), "Content 1");
+        Files.writeString(Files.createFile(subDir.resolve("file2.txt")), "Content 2");
+        Files.writeString(Files.createFile(subDir.resolve("file3.txt")), "Content 3");
+
+        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile());
+        File archiveFile = new File(archivePath);
+
+        assertTrue(archiveFile.exists(), "Archive should be created");
+        assertTrue(archiveFile.length() > 100, "Archive should contain multiple files");
+    }
+
+    @Test
+    @DisplayName("Should throw exception when source directory does not exist")
+    void shouldThrowExceptionWhenSourceDirectoryDoesNotExist() throws Exception {
+        File nonExistentDir = new File("/non/existent/path");
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                                                          () -> acroZipService.zip(nonExistentDir, tempExportDir.toFile()));
+
+        assertTrue(exception.getMessage().contains("Source must be an existing directory"));
+    }
+
+    @Test
+    @DisplayName("Should throw exception when export directory does not exist")
+    void shouldThrowExceptionWhenExportDirectoryDoesNotExist() throws Exception {
+        File nonExistentDir = new File("/non/existent/export");
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                                                          () -> acroZipService.zip(tempSourceDir.toFile(), nonExistentDir));
+
+        assertTrue(exception.getMessage().contains("Export folder must be an existing directory"));
+    }
+
+    @Test
+    @DisplayName("Should handle files with special characters in names")
+    void shouldHandleFilesWithSpecialCharactersInNames() throws Exception {
+        Files.writeString(Files.createFile(tempSourceDir.resolve("file with spaces.txt")), "Content");
+        Files.writeString(Files.createFile(tempSourceDir.resolve("file-with-dashes.txt")), "Content");
+
+        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile());
+        File archiveFile = new File(archivePath);
+
+        assertTrue(archiveFile.exists(), "Archive should handle special characters in filenames");
     }
 
     // For manual review only; comment out by default
