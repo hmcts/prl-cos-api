@@ -187,5 +187,5 @@ public abstract class AbstractBarristerService {
 
     protected abstract String getCodeForAction(Element<PartyDetails> partyDetailsElement);
 
-    protected abstract void notifyBarrister(AllocatedBarrister allocatedBarrister, CaseData caseData);
+    public abstract void notifyBarrister(AllocatedBarrister allocatedBarrister, CaseData caseData);
 }

@@ -54,7 +54,7 @@ public class BarristerAddService extends AbstractBarristerService {
     }
 
     @Override
-    protected void notifyBarrister(AllocatedBarrister allocatedBarrister, CaseData caseData) {
+    public void notifyBarrister(AllocatedBarrister allocatedBarrister, CaseData caseData) {
         prepareAndPublishBarristerChangeEvent(allocatedBarrister, caseData, TypeOfBarristerEventEnum.addBarrister);
     }
 

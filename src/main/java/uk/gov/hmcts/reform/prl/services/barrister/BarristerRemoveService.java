@@ -49,7 +49,7 @@ public class BarristerRemoveService extends AbstractBarristerService {
     }
 
     @Override
-    protected void notifyBarrister(AllocatedBarrister allocatedBarrister, CaseData caseData) {
+    public void notifyBarrister(AllocatedBarrister allocatedBarrister, CaseData caseData) {
         prepareAndPublishBarristerChangeEvent(allocatedBarrister, caseData, TypeOfBarristerEventEnum.removeBarrister);
     }
 }
