@@ -376,8 +376,8 @@ public class NoticeOfChangePartiesServiceTest {
             .build();
 
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
-        verify(caseAssignmentService).removePartyBarristerIfPresent(eq(caseData),
-                                                                    eq(changeOrganisationRequest));
+        verify(caseAssignmentService).removePartyBarristerIfPresent(caseData,
+                                                                    changeOrganisationRequest);
         verify(tabService, times(1)).updatePartyDetailsForNoc(
             anyString(),
             anyString(),
