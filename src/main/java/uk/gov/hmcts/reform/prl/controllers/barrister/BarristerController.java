@@ -87,8 +87,7 @@ public class BarristerController extends AbstractCallbackController {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
             AllocatedBarrister barristerList = barristerRemoveService.getBarristerListToRemove(caseData, authorisation);
-            if (barristerList != null && barristerList.getPartyList() != null
-                && !barristerList.getPartyList().getListItems().isEmpty()) {
+            if (!barristerList.getPartyList().getListItems().isEmpty()) {
                 caseDataUpdated.put(ALLOCATED_BARRISTER, barristerList);
             } else {
                 errorList.add("No barrister currently assigned to the selected party");
