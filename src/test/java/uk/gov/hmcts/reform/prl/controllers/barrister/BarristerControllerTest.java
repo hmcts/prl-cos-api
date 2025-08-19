@@ -160,4 +160,20 @@ public class BarristerControllerTest {
             () -> barristerController
                 .handleMidEvent(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest));
     }
+
+    @Test
+    public void shouldNotHandleRemoveAboutToStartWhenNotAuthorised() {
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .build())
+            .build();
+
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(false);
+
+        assertThrows(
+            RuntimeException.class,
+            () -> barristerController
+                .handleRemoveAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest));
+    }
 }
