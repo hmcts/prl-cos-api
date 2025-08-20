@@ -4,20 +4,20 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
-import java.io.IOException;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -72,7 +72,7 @@ public class CsvWriter {
 
     private static final CsvColumn[] COLUMNS = CsvColumn.values();
 
-    public static File writeCcdOrderDataToCsv(CaseData ccdOrderData, boolean confidentialAllowed ) throws IOException {
+    public static File writeCcdOrderDataToCsv(CaseData ccdOrderData, boolean confidentialAllowed) throws IOException {
         Path path = Files.createTempFile("AcroReport", ".csv", ATTRIBUTE);
         File file = path.toFile();
         String[] headers = Arrays.stream(COLUMNS).map(CsvColumn::getHeader).toArray(String[]::new);
