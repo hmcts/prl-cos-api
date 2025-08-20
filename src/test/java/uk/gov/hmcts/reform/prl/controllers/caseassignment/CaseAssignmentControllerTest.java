@@ -346,9 +346,6 @@ class CaseAssignmentControllerTest {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
-        String selectedPartyId = allocatedBarrister.getPartyList().getValueCode();
-        when(caseAssignmentService.updateAllocatedBarrister(eq(allocatedBarrister), any(CaseData.class), eq(selectedPartyId)))
-            .thenReturn(allocatedBarrister);
 
         AboutToStartOrSubmitCallbackResponse response = caseAssignmentController.submitRemoveBarrister(
             "auth",
@@ -361,6 +358,7 @@ class CaseAssignmentControllerTest {
 
         assertThat(response.getErrors()).isEmpty();
 
+        String selectedPartyId = allocatedBarrister.getPartyList().getValueCode();
         verify(caseAssignmentService).validateRemoveRequest(isA(CaseData.class),
                                                             eq(selectedPartyId),
                                                             anyList());

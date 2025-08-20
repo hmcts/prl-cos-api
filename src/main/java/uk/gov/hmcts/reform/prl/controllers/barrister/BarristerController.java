@@ -13,8 +13,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -38,14 +41,17 @@ public class BarristerController extends AbstractCallbackController {
     private final AuthorisationService authorisationService;
     private final BarristerAddService barristerAddService;
     private final BarristerRemoveService barristerRemoveService;
+    private final CaseAssignmentService caseAssignmentService;
 
     public BarristerController(ObjectMapper objectMapper, EventService eventPublisher,
                                BarristerAddService barristerAddService,
                                BarristerRemoveService barristerRemoveService,
+                               CaseAssignmentService caseAssignmentService,
                                AuthorisationService authorisationService) {
         super(objectMapper, eventPublisher);
         this.barristerAddService = barristerAddService;
         this.barristerRemoveService = barristerRemoveService;
+        this.caseAssignmentService = caseAssignmentService;
         this.authorisationService = authorisationService;
     }
 
@@ -127,6 +133,36 @@ public class BarristerController extends AbstractCallbackController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    @PostMapping("/remove/mid-event")
+    public AboutToStartOrSubmitCallbackResponse handleRemoveMidEvent(@RequestHeader("Authorization")
+                                                          @Parameter(hidden = true) String authorisation,
+                                                          @RequestBody CallbackRequest callbackRequest) {
+
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        List<String> errors = new ArrayList<>();
+        AllocatedBarrister allocatedBarrister = objectMapper.convertValue(
+            caseDetails.getData().get(ALLOCATED_BARRISTER),
+            new TypeReference<>() { }
+        );
+        if (allocatedBarrister != null && !allocatedBarrister.getPartyList().getListItems().isEmpty()) {
+            PartyDetails selectedParty = caseAssignmentService.getSelectedParty(caseData, allocatedBarrister.getPartyList().getValueCode());
+            if (selectedParty != null) {
+                allocatedBarrister = AllocatedBarrister.builder()
+                    .partyList(allocatedBarrister.getPartyList())
+                    .barristerOrg(allocatedBarrister.getBarristerOrg())
+                    .barristerEmail(selectedParty.getBarrister().getBarristerEmail())
+                    .barristerFirstName(selectedParty.getBarrister().getBarristerFirstName())
+                    .barristerLastName(selectedParty.getBarrister().getBarristerLastName())
+                    .build();
+            }
+            caseDetails.getData().put(ALLOCATED_BARRISTER, allocatedBarrister);
+        }
+
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(callbackRequest.getCaseDetails().getData()).build();
     }
 
     @PostMapping(path = "/remove/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
