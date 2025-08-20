@@ -136,7 +136,7 @@ public class CsvWriter {
             }
         }
 
-        return currentValue != null ? currentValue : "";
+        return currentValue;
     }
 
     private static Object getPropertyValue(Object obj, String propertyName) {
