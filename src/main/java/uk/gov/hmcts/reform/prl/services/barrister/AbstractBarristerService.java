@@ -65,6 +65,7 @@ public abstract class AbstractBarristerService {
         if (allocatedBarrister != null) {
             BarristerChangeEvent barristerChangeEvent = BarristerChangeEvent.builder()
                 .caseData(newCaseData)
+                .allocatedBarrister(allocatedBarrister)
                 .typeOfEvent(typeOfEvent)
                 .build();
             eventPublisher.publishEvent(barristerChangeEvent);
