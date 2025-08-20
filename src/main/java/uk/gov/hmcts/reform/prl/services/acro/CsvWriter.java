@@ -5,8 +5,11 @@ import org.apache.commons.csv.CSVPrinter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 
+import java.io.IOException;
 import java.io.File;
+import java.io.FileWriter;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,6 +17,7 @@ import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -68,17 +72,22 @@ public class CsvWriter {
 
     private static final CsvColumn[] COLUMNS = CsvColumn.values();
 
-    public static File writeCcdOrderDataToCsv(CaseData ccdOrderData) throws java.io.IOException {
+    public static File writeCcdOrderDataToCsv(CaseData ccdOrderData, boolean confidentialAllowed ) throws IOException {
         Path path = Files.createTempFile("AcroReport", ".csv", ATTRIBUTE);
         File file = path.toFile();
         String[] headers = Arrays.stream(COLUMNS).map(CsvColumn::getHeader).toArray(String[]::new);
         CSVFormat csvFileHeader = CSVFormat.DEFAULT.withHeader(headers);
 
-        try (java.io.FileWriter fileWriter = new java.io.FileWriter(file);
+        try (FileWriter fileWriter = new FileWriter(file);
              CSVPrinter printer = new CSVPrinter(fileWriter, csvFileHeader)) {
-            List<String> record = new java.util.ArrayList<>();
+            List<String> record = new ArrayList<>();
             for (CsvColumn column : COLUMNS) {
                 Object value = extractPropertyValues(ccdOrderData, column.getProperty());
+
+                if (!confidentialAllowed && shouldBlankConfidentialValue(ccdOrderData, column)) {
+                    value = "-";
+                }
+
                 if (value == null || value.toString().isEmpty()) {
                     logger.warn("Missing value for CSV column '{}' (property '{}')", column.getHeader(), column.getProperty());
                 }
@@ -87,6 +96,29 @@ public class CsvWriter {
             printer.printRecord(record);
         }
         return file;
+    }
+
+    private static boolean shouldBlankConfidentialValue(CaseData caseData, CsvColumn column) {
+        return switch (column) {
+            case APPLICANT_PHONE -> isConfidential(caseData, "applicantsFL401.isPhoneNumberConfidential");
+            case APPLICANT_EMAIL -> isConfidential(caseData, "applicantsFL401.isEmailAddressConfidential");
+            case APPLICANT_ADDRESS1, APPLICANT_ADDRESS2, APPLICANT_POSTCODE ->
+                isConfidential(caseData, "applicantsFL401.isAddressConfidential");
+            case RESPONDENT_ADDRESS1, RESPONDENT_ADDRESS2, RESPONDENT_POSTCODE ->
+                isConfidential(caseData, "respondentsFL401.isAddressConfidential");
+            default -> false;
+        };
+    }
+
+    private static boolean isConfidential(CaseData caseData, String confidentialityProperty) {
+        Object value = extractPropertyValues(caseData, confidentialityProperty);
+        if (value instanceof YesOrNo) {
+            return YesOrNo.Yes.equals(value);
+        }
+        if (value instanceof Boolean) {
+            return (Boolean) value;
+        }
+        return "Yes".equalsIgnoreCase(String.valueOf(value)) || "true".equalsIgnoreCase(String.valueOf(value));
     }
 
     public static Object extractPropertyValues(Object obj, String propertyPath) {

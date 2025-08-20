@@ -77,7 +77,7 @@ class CsvWriterTest {
         @DisplayName("Should create a valid CSV file")
         void shouldCreateValidCsvFile() throws Exception {
             CaseData caseData = createCaseData();
-            File csvFile = CsvWriter.writeCcdOrderDataToCsv(caseData);
+            File csvFile = CsvWriter.writeCcdOrderDataToCsv(caseData, true);
             assertAll("CSV file validation",
                 () -> assertNotNull(csvFile, "CSV file should not be null"),
                 () -> assertTrue(csvFile.exists(), "CSV file should exist"),
@@ -89,7 +89,7 @@ class CsvWriterTest {
         @DisplayName("Should have correct file permissions")
         void shouldHaveCorrectFilePermissions() throws Exception {
             CaseData caseData = createCaseData();
-            File csvFile = CsvWriter.writeCcdOrderDataToCsv(caseData);
+            File csvFile = CsvWriter.writeCcdOrderDataToCsv(caseData, true);
             Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(csvFile.toPath());
             assertAll("File permissions validation",
                 () -> assertTrue(permissions.contains(PosixFilePermission.OWNER_READ), "Owner should have read permission"),
@@ -106,7 +106,7 @@ class CsvWriterTest {
         @DisplayName("Should contain all expected headers")
         void shouldContainAllExpectedHeaders() throws Exception {
             CaseData caseData = createCaseData();
-            File csvFile = CsvWriter.writeCcdOrderDataToCsv(caseData);
+            File csvFile = CsvWriter.writeCcdOrderDataToCsv(caseData, true);
             String headerLine = readFirstLine(csvFile);
             assertNotNull(headerLine, "Header line should not be null");
             for (String expectedHeader : EXPECTED_CSV_HEADERS) {
@@ -118,7 +118,7 @@ class CsvWriterTest {
         @DisplayName("Should have headers in correct order")
         void shouldHaveHeadersInCorrectOrder() throws Exception {
             CaseData caseData = createCaseData();
-            File csvFile = CsvWriter.writeCcdOrderDataToCsv(caseData);
+            File csvFile = CsvWriter.writeCcdOrderDataToCsv(caseData, true);
             String headerLine = readFirstLine(csvFile);
             String[] actualHeaders = headerLine.split(",");
             assertArrayEquals(EXPECTED_CSV_HEADERS, actualHeaders, "Headers should be in the expected order");
@@ -259,7 +259,7 @@ class CsvWriterTest {
     @DisplayName("Should create a valid CSV file with saved output")
     void shouldCreateValidCsvFile() throws Exception {
         CaseData caseData = createCaseData();
-        File csvFile = CsvWriter.writeCcdOrderDataToCsv(caseData);
+        File csvFile = CsvWriter.writeCcdOrderDataToCsv(caseData, true);
 
         // Quick save for colleague review
         // File savedCsv = new File("test-output.csv");
