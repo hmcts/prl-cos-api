@@ -355,13 +355,15 @@ public class DynamicMultiSelectListService {
             PartyDetails partyDetails = applicant.getValue();
             if (YesOrNo.Yes.equals(partyDetails.getUser().getSolicitorRepresented())
                 || YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation())
+                || partyDetails.getBarrister() != null
                 || (partyDetails.getSolicitorOrg() != null && partyDetails.getSolicitorOrg().getOrganisationID() != null)) {
                 addRepresentedParties(listItems, applicant.getId(), partyDetails);
             }
         });
         caseData.getRespondents().stream().forEach(respondent -> {
             PartyDetails partyDetails = respondent.getValue();
-            if (YesOrNo.Yes.equals(partyDetails.getUser().getSolicitorRepresented())) {
+            if (YesOrNo.Yes.equals(partyDetails.getUser().getSolicitorRepresented())
+                || partyDetails.getBarrister() != null) {
                 addRepresentedParties(listItems, respondent.getId(), partyDetails
                 );
             }
