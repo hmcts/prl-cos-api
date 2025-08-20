@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRolesRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole.Representing;
+import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
 import uk.gov.hmcts.reform.prl.exception.InvalidPartyIdException;
 import uk.gov.hmcts.reform.prl.exception.InvalidSolicitorRoleException;
@@ -160,6 +161,14 @@ public class CaseAssignmentService {
         PartyDetails selectedParty = getSelectedParty(caseData, selectedPartyId);
         removeAmBarristerCaseRole(caseData, selectedParty);
         selectedParty.setBarrister(null);
+    }
+
+    public void removeAmBarristerCaseRole(final CaseData caseData,
+                                Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap) {
+        selectedPartyDetailsMap.values().stream()
+            .map(Element::getValue)
+            .filter(partyDetails -> partyDetails.getBarrister().getBarristerId() != null)
+            .forEach(selectedParty -> removeAmBarristerCaseRole(caseData, selectedParty));
     }
 
     private void removeAmBarristerCaseRole(CaseData caseData, PartyDetails partyDetails) {
