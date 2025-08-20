@@ -135,7 +135,7 @@ class CaseAssignmentControllerTest {
         );
 
         assertThat(response.getData().get(ALLOCATED_BARRISTER))
-                       .isNull();
+                       .isNotNull();
 
         assertThat(response.getErrors()).isEmpty();
 
@@ -354,7 +354,7 @@ class CaseAssignmentControllerTest {
         );
 
         assertThat(response.getData().get(ALLOCATED_BARRISTER))
-            .isNull();
+            .isNotNull();
 
         assertThat(response.getErrors()).isEmpty();
 

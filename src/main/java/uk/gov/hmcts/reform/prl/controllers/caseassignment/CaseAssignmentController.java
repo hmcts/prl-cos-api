@@ -148,7 +148,6 @@ public class CaseAssignmentController {
     }
 
     private void updateCaseDetails(CaseDetails caseDetails, CaseData caseData) {
-        caseDetails.getData().put(ALLOCATED_BARRISTER, null);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseDetails.getData().put(APPLICANTS, caseData.getApplicants());
             caseDetails.getData().put(RESPONDENTS, caseData.getRespondents());
