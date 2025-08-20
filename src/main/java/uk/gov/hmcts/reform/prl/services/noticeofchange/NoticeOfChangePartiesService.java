@@ -280,6 +280,8 @@ public class NoticeOfChangePartiesService {
         }
 
         if (solicitorDetails.isPresent()) {
+            caseAssignmentService.removePartyBarristerIfPresent(allTabsUpdateCaseData,
+                                                                changeOrganisationRequest);
             allTabsUpdateCaseData = updateRepresentedPartyDetails(
                 changeOrganisationRequest,
                 allTabsUpdateCaseData,
