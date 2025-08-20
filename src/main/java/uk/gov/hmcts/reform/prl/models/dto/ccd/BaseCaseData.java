@@ -147,5 +147,4 @@ public class BaseCaseData {
 
     private List<Element<RemovableDocument>> removableDocuments;
     private String documentsToBeRemoved;
-
 }
