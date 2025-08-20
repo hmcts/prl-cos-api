@@ -400,13 +400,6 @@ public class BundleCreateRequestMapper {
                 .documentGroup(BundlingDocGroupEnum.medicalReports).build() : null
         );
         bundleMap.put(
-            MEDICAL_RECORDS,
-            Objects.nonNull(doc.getMedicalRecordsDocument()) ? BundlingRequestDocument.builder()
-                .documentLink(doc.getMedicalRecordsDocument())
-                .documentFileName(doc.getMedicalRecordsDocument().getDocumentFileName())
-                .documentGroup(BundlingDocGroupEnum.medicalRecords).build() : null
-        );
-        bundleMap.put(
             DRUG_AND_ALCOHOL_TEST,
             Objects.nonNull(doc.getDrugAndAlcoholTestDocument()) ? BundlingRequestDocument.builder()
                 .documentLink(doc.getDrugAndAlcoholTestDocument())
@@ -430,13 +423,6 @@ public class BundleCreateRequestMapper {
                 .documentLink(doc.getResultsOfHairStrandBloodTestsDocument())
                 .documentFileName(doc.getResultsOfHairStrandBloodTestsDocument().getDocumentFileName())
                 .documentGroup(BundlingDocGroupEnum.resultsOfHairStrandBloodTests).build() : null
-        );
-        bundleMap.put(
-            POLICE_DISCLOSURES,
-            Objects.nonNull(doc.getPoliceDisclosuresDocument()) ? BundlingRequestDocument.builder()
-                .documentLink(doc.getPoliceDisclosuresDocument())
-                .documentFileName(doc.getPoliceDisclosuresDocument().getDocumentFileName())
-                .documentGroup(BundlingDocGroupEnum.policeDisclosures).build() : null
         );
         bundleMap.put(ANY_OTHER_DOC, Objects.nonNull(doc.getAnyOtherDocDocument()) ? BundlingRequestDocument.builder()
             .documentLink(doc.getAnyOtherDocDocument())
