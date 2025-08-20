@@ -69,6 +69,7 @@ public class BarristerChangeEventHandler {
             .caseReference(String.valueOf(caseData.getId()))
             .caseName(caseData.getApplicantCaseName())
             .barristerName(barristerName)
+            .solicitorName(barristerName)
             .caseLink(manageCaseUrl + URL_STRING + caseData.getId())
             .issueDate(CommonUtils.formatDate(D_MMM_YYYY, caseData.getIssueDate()))
             .build();
