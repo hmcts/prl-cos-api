@@ -133,6 +133,8 @@ public class CaseAssignmentController {
                                                         errorList);
 
             if (errorList.isEmpty()) {
+                allocatedBarrister = caseAssignmentService.updateAllocatedBarrister(allocatedBarrister, caseData,
+                                                                                    allocatedBarrister.getPartyList().getValueCode());
                 caseAssignmentService.removeBarrister(caseData,
                                                       allocatedBarrister.getPartyList().getValueCode());
                 updateCaseDetails(caseDetails, caseData);

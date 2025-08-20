@@ -83,7 +83,14 @@ public class BarristerController extends AbstractCallbackController {
 
         log.info("Inside barrister/add/submitted for case {}", callbackRequest.getCaseDetails().getId());
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            notifyBarrister(callbackRequest);
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            AllocatedBarrister allocatedBarrister = objectMapper.convertValue(
+                caseDataUpdated.get(ALLOCATED_BARRISTER), new TypeReference<>() { }
+            );
+            if (allocatedBarrister != null) {
+                barristerAddService.notifyBarrister(allocatedBarrister, caseData);
+            }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -132,7 +139,14 @@ public class BarristerController extends AbstractCallbackController {
 
         log.info("Inside barrister/remove/submitted for case {}", callbackRequest.getCaseDetails().getId());
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            notifyBarrister(callbackRequest);
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            AllocatedBarrister allocatedBarrister = objectMapper.convertValue(
+                caseDataUpdated.get(ALLOCATED_BARRISTER), new TypeReference<>() { }
+            );
+            if (allocatedBarrister != null) {
+                barristerRemoveService.notifyBarrister(allocatedBarrister, caseData);
+            }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -140,16 +154,5 @@ public class BarristerController extends AbstractCallbackController {
         //if a message is being closed then no notification email is sent
         return AboutToStartOrSubmitCallbackResponse.builder()
             .build();
-    }
-
-    private void notifyBarrister(CallbackRequest callbackRequest) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        AllocatedBarrister allocatedBarrister = objectMapper.convertValue(
-            caseDataUpdated.get(ALLOCATED_BARRISTER), new TypeReference<>() { }
-        );
-        if (allocatedBarrister != null) {
-            barristerAddService.notifyBarrister(allocatedBarrister, caseData);
-        }
     }
 }
