@@ -49,7 +49,6 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.Barrister;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuse;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
@@ -2070,13 +2069,6 @@ public class ApplicationsTabServiceTest {
 
     @Test
     public void testC100ApplicantTableMapperWithBarrister() {
-        Barrister barrister = Barrister.builder()
-            .barristerFirstName("BarFN")
-            .barristerLastName("BarLN")
-            .barristerEmail("bar@email.com")
-            .barristerOrg(Organisation.builder().organisationName("BarOrgName").organisationID("OrgId").build())
-            .build();
-
         Applicant applicant = Applicant.builder()
             .firstName("First name")
             .lastName("Last name")
@@ -2085,7 +2077,10 @@ public class ApplicationsTabServiceTest {
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("test@test.com")
-            .barrister(barrister)
+            .barristerFirstName("BarFN")
+            .barristerLastName("BarLN")
+            .barristerEmail("bar@email.com")
+            .barristerOrg(Organisation.builder().organisationName("BarOrgName").organisationID("OrgId").build())
             .build();
 
         Element<Applicant> applicantElement = Element.<Applicant>builder().value(applicant).build();
@@ -2097,13 +2092,6 @@ public class ApplicationsTabServiceTest {
 
     @Test
     public void testC100RespondentTableMapperWithBarrister() {
-        Barrister barrister = Barrister.builder()
-            .barristerFirstName("BarFN")
-            .barristerLastName("BarLN")
-            .barristerEmail("bar@email.com")
-            .barristerOrg(Organisation.builder().organisationName("BarOrgName").organisationID("OrgId").build())
-            .build();
-
         Respondent respondent = Respondent.builder()
             .firstName("First name")
             .lastName("Last name")
@@ -2112,7 +2100,10 @@ public class ApplicationsTabServiceTest {
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("test@test.com")
-            .barrister(barrister)
+            .barristerFirstName("BarFN")
+            .barristerLastName("BarLN")
+            .barristerEmail("bar@email.com")
+            .barristerOrg(Organisation.builder().organisationName("BarOrgName").organisationID("OrgId").build())
             .build();
 
         Element<Respondent> respondentElement = Element.<Respondent>builder().value(respondent).build();
@@ -2124,13 +2115,6 @@ public class ApplicationsTabServiceTest {
 
     @Test
     public void testFL401ApplicantTableMapperWithBarrister() {
-        Barrister barrister = Barrister.builder()
-            .barristerFirstName("BarFN")
-            .barristerLastName("BarLN")
-            .barristerEmail("bar@email.com")
-            .barristerOrg(Organisation.builder().organisationName("BarOrgName").organisationID("OrgId").build())
-            .build();
-
         partyDetails = PartyDetails.builder()
             .firstName("First name")
             .lastName("Last name")
@@ -2157,7 +2141,10 @@ public class ApplicationsTabServiceTest {
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("test@test.com")
-            .barrister(barrister)
+            .barristerFirstName("BarFN")
+            .barristerLastName("BarLN")
+            .barristerEmail("bar@email.com")
+            .barristerOrg(Organisation.builder().organisationName("BarOrgName").organisationID("OrgId").build())
             .build();
 
         CaseData caseData = caseDataWithParties.toBuilder().applicants(null).applicantsFL401(partyDetails).build();
@@ -2170,12 +2157,6 @@ public class ApplicationsTabServiceTest {
 
     @Test
     public void testFL401RespondentTableMapperWithBarrister() {
-        Barrister barrister = Barrister.builder()
-            .barristerFirstName("BarFN")
-            .barristerLastName("BarLN")
-            .barristerEmail("bar@email.com")
-            .barristerOrg(Organisation.builder().organisationName("BarOrgName").organisationID("OrgId").build())
-            .build();
 
         partyDetails = PartyDetails.builder()
             .firstName("First name")
@@ -2202,7 +2183,10 @@ public class ApplicationsTabServiceTest {
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("test@test.com")
-            .barrister(barrister)
+            .barristerFirstName("BarFN")
+            .barristerLastName("BarLN")
+            .barristerEmail("bar@email.com")
+            .barristerOrg(Organisation.builder().organisationName("BarOrgName").organisationID("OrgId").build())
             .build();
 
         CaseData caseData = caseDataWithParties.toBuilder().respondents(null).respondentsFL401(partyDetails).build();

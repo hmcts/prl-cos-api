@@ -7,7 +7,6 @@ import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Organisation;
-import uk.gov.hmcts.reform.prl.models.complextypes.Barrister;
 
 import java.time.LocalDate;
 
@@ -37,6 +36,9 @@ public class FL401Respondent {
     private final Organisation solicitorOrg;
     private final ContactPreferences contactPreferences;
 
-    private final Barrister barrister;
+    private final String barristerFirstName;
+    private final String barristerLastName;
+    private final String barristerEmail;
+    private final Organisation barristerOrg;
 }
 
