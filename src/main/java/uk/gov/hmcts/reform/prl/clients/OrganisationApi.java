@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
+import uk.gov.hmcts.reform.prl.models.OrganisationUser;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -43,5 +44,12 @@ public interface OrganisationApi {
         @RequestHeader("Authorization") String authorisation,
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
         @RequestParam(value = "status") String status
+    );
+
+    @GetMapping("/refdata/external/v1/organisations/users/accountId")
+    OrganisationUser findUserByEmail(
+        @RequestHeader(AUTHORIZATION) String authorisation,
+        @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorization,
+        @RequestHeader("UserEmail") final String email
     );
 }

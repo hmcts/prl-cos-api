@@ -335,7 +335,9 @@ public class Fm5ReminderService {
                                                    long days) {
         Hearings hearingsToProcess;
         hearingsToProcess = hearings;
-        if (null != hearingsToProcess) {
+        if (null != hearingsToProcess && CollectionUtils.isNotEmpty(hearingsToProcess.getCaseHearings())) {
+            log.info("hearingsToProcess is not null, checking for first hearing in date range for case {}",
+                     hearingsToProcess.getCaseRef());
             log.info("sorting schedule for hearing {}", hearingsToProcess.getCaseHearings().getFirst().getHearingID());
             List<HearingDaySchedule> sortedHearingDaySchedules = nullSafeCollection(hearingsToProcess
                                                                                         .getCaseHearings()).stream()
