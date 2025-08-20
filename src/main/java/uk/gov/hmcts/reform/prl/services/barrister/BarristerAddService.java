@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
+
 @Slf4j
 @Service
 public class BarristerAddService extends AbstractBarristerService {
@@ -27,21 +28,23 @@ public class BarristerAddService extends AbstractBarristerService {
 
     @Override
     protected boolean isPartyApplicableForFiltering(boolean applicantOrRespondent, BarristerFilter barristerFilter, PartyDetails partyDetails) {
-        if (barristerFilter.isCaseworkerOrSolicitor()) {
-            return (!hasBarrister(partyDetails)) && (partyHasSolicitorOrg(partyDetails));
-        } else {
-            return false;
-        }
+        boolean isApplicable = (!hasBarrister(partyDetails)) && (partyHasSolicitorOrg(partyDetails));
+
+        return isPartyApplicableForFiltering(applicantOrRespondent,
+                                             barristerFilter,
+                                             partyDetails,
+                                             isApplicable,
+                                             partyId -> log.info("Barrister Add Service - This party {} has an empty solicitor org or "
+                                                                     + "the user org identifier is empty", partyId.toString()));
+
     }
+
 
     @Override
     protected String getLabelForAction(boolean applicantOrRespondent, BarristerFilter barristerFilter, PartyDetails partyDetails) {
-        return String.format("%s %s (%s), %s, %s", partyDetails.getFirstName(),
-                                     partyDetails.getLastName(),
-                                     applicantOrRespondent ? APPLICANT : RESPONDENT,
-                                     partyDetails.getRepresentativeFullName(),
-                                     partyDetails.getSolicitorOrg().getOrganisationName()
-        );
+        String partyDetailsInfo = partyDetails.getSolicitorOrg().getOrganisationName();
+
+        return getLabelForAction(applicantOrRespondent, barristerFilter, partyDetails, partyDetailsInfo);
     }
 
     @Override
