@@ -421,6 +421,7 @@ public class DocumentGenService {
                                                 CaseData caseData,
                                                 Map<String, Object> updatedCaseData,
                                                 C8DocumentDetails documentDetails) throws Exception {
+        log.info("checking isAnyC100ApplicantInfoConfidential for case: {}", caseData.getId());
         if (isAnyC100ApplicantInfoConfidential(caseData)) {
             if (State.CASE_ISSUED.equals(caseData.getState())
                 || State.JUDICIAL_REVIEW.equals(caseData.getState())
