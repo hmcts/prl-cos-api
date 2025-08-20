@@ -135,34 +135,46 @@ public class BarristerController extends AbstractCallbackController {
         }
     }
 
-    @PostMapping("/remove/mid-event")
-    public AboutToStartOrSubmitCallbackResponse handleRemoveMidEvent(@RequestHeader("Authorization")
-                                                          @Parameter(hidden = true) String authorisation,
-                                                          @RequestBody CallbackRequest callbackRequest) {
+    @PostMapping(path = "/remove/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to remove a barrister on mid-event")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse handleRemoveMidEvent(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) {
 
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        List<String> errors = new ArrayList<>();
-        AllocatedBarrister allocatedBarrister = objectMapper.convertValue(
-            caseDetails.getData().get(ALLOCATED_BARRISTER),
-            new TypeReference<>() { }
-        );
-        if (allocatedBarrister != null && !allocatedBarrister.getPartyList().getListItems().isEmpty()) {
-            PartyDetails selectedParty = caseAssignmentService.getSelectedParty(caseData, allocatedBarrister.getPartyList().getValueCode());
-            if (selectedParty != null) {
-                allocatedBarrister = AllocatedBarrister.builder()
-                    .partyList(allocatedBarrister.getPartyList())
-                    .barristerOrg(allocatedBarrister.getBarristerOrg())
-                    .barristerEmail(selectedParty.getBarrister().getBarristerEmail())
-                    .barristerFirstName(selectedParty.getBarrister().getBarristerFirstName())
-                    .barristerLastName(selectedParty.getBarrister().getBarristerLastName())
-                    .build();
+        log.info("Inside barrister/remove/mid-event for case {}", callbackRequest.getCaseDetails().getId());
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            CaseDetails caseDetails = callbackRequest.getCaseDetails();
+            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+
+            AllocatedBarrister allocatedBarrister = objectMapper.convertValue(
+                caseDetails.getData().get(ALLOCATED_BARRISTER),
+                new TypeReference<>() {
+                }
+            );
+            if (allocatedBarrister != null && !allocatedBarrister.getPartyList().getListItems().isEmpty()) {
+                PartyDetails selectedParty = caseAssignmentService.getSelectedParty(
+                    caseData,
+                    allocatedBarrister.getPartyList().getValueCode()
+                );
+                if (selectedParty != null) {
+                    allocatedBarrister = AllocatedBarrister.builder()
+                        .partyList(allocatedBarrister.getPartyList())
+                        .barristerOrg(selectedParty.getBarrister().getBarristerOrg())
+                        .barristerEmail(selectedParty.getBarrister().getBarristerEmail())
+                        .barristerFirstName(selectedParty.getBarrister().getBarristerFirstName())
+                        .barristerLastName(selectedParty.getBarrister().getBarristerLastName())
+                        .build();
+                }
+                caseDetails.getData().put(ALLOCATED_BARRISTER, allocatedBarrister);
             }
-            caseDetails.getData().put(ALLOCATED_BARRISTER, allocatedBarrister);
-        }
 
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(callbackRequest.getCaseDetails().getData()).build();
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(callbackRequest.getCaseDetails().getData()).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 
     @PostMapping(path = "/remove/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
