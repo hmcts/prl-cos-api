@@ -14,6 +14,8 @@ import uk.gov.hmcts.reform.prl.services.UserService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Consumer;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -166,8 +168,31 @@ public abstract class AbstractBarristerService {
         }
     }
 
+    protected boolean isPartyApplicableForFiltering(boolean applicantOrRespondent, BarristerFilter barristerFilter,
+                                                             PartyDetails partyDetails, Boolean isApplicable, Consumer<UUID> logger) {
+        if (barristerFilter.isCaseworkerOrSolicitor()) {
+            return isApplicable;
+        } else {
+            if (partyDetails.getSolicitorOrg() == null || barristerFilter.getUserOrgIdentifier() == null) {
+                logger.accept(partyDetails.getPartyId());
+                return false;
+            }
+
+            return isApplicable
+                && barristerFilter.getUserOrgIdentifier().equals(partyDetails.getSolicitorOrg().getOrganisationID());
+        }
+    }
+
     protected abstract boolean isPartyApplicableForFiltering(boolean applicantOrRespondent, BarristerFilter barristerFilter,
                                                              PartyDetails partyDetails);
+
+    protected String getLabelForAction(boolean applicantOrRespondent, BarristerFilter barristerFilter,
+                                       PartyDetails partyDetails,String partyDetailsInfo) {
+        return String.format("%s (%s), %s, %s", partyDetails.getLabelForDynamicList(),
+                             applicantOrRespondent ? applicant.getDisplayedValue() : respondent.getDisplayedValue(),
+                             partyDetails.getRepresentativeFullName(),
+                             partyDetailsInfo);
+    }
 
     protected abstract String getLabelForAction(boolean applicantOrRespondent, BarristerFilter barristerFilter, PartyDetails partyDetails);
 
