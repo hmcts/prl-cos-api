@@ -141,7 +141,7 @@ public class BarristerControllerTest {
         AboutToStartOrSubmitCallbackResponse callbackResponse = barristerController
             .handleRemoveAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
 
-        assertEquals("No barrister currently assigned to the selected party", callbackResponse.getErrors().get(0));
+        assertEquals("No barrister currently assigned to any party", callbackResponse.getErrors().get(0));
         verify(barristerRemoveService, times(1)).getBarristerListToRemove(caseData1, AUTH_TOKEN);
     }
 
