@@ -207,7 +207,7 @@ public class MiamPolicyUpgradeFileUploadServiceTest {
 
     @Test
     public void testRenameMiamPolicyUpgradeDocumentDomesticMpuReasonEvidenceProvidedWithDoc() {
-        when(manageDocumentsService.downloadAndDeleteDocument(any(), any())).thenReturn(Document.builder().build());
+        when(manageDocumentsService.renameAndReuploadFileToBeConfidential(any())).thenReturn(Document.builder().build());
         assertNotNull(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(CaseData
                 .builder()
                 .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails

@@ -80,6 +80,9 @@ public class CitizenCallbackController extends AbstractCallbackController {
                 = allTabsService.updateAllTabsIncludingConfTab(String.valueOf(callbackRequest.getCaseDetails().getId()));
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         citizenEmailService.sendCitizenCaseSubmissionEmail(authorisation, caseData);
+
+        // todo cleanup miam documents which were renamed in about-to-submit, can now delete the old copies
+
     }
 
     @PostMapping(path = "/citizen-case-withdrawn-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

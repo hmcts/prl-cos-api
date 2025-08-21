@@ -68,10 +68,9 @@ public class MiamPolicyUpgradeFileUploadService {
                 && ObjectUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuDocFromDisputeResolutionProvider())
                 && !caseData.getMiamPolicyUpgradeDetails().getMpuDocFromDisputeResolutionProvider().getDocumentFileName().startsWith(
                 CONFIDENTIAL)) {
-                Document mpuDocFromDisputeResolutionProvider = manageDocumentsService.downloadAndDeleteDocument(
-                    caseData.getMiamPolicyUpgradeDetails().getMpuDocFromDisputeResolutionProvider(),
-                    systemAuthorisation
-                );
+                Document mpuDocFromDisputeResolutionProvider = manageDocumentsService
+                    .renameAndReuploadFileToBeConfidential(caseData.getMiamPolicyUpgradeDetails()
+                                                               .getMpuDocFromDisputeResolutionProvider());
                 caseData = caseData.toBuilder()
                     .miamPolicyUpgradeDetails(caseData.getMiamPolicyUpgradeDetails()
                                                   .toBuilder()
@@ -84,9 +83,8 @@ public class MiamPolicyUpgradeFileUploadService {
                 && ObjectUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuCertificateByMediator())
                 && !caseData.getMiamPolicyUpgradeDetails().getMpuCertificateByMediator().getDocumentFileName().startsWith(
                 CONFIDENTIAL)) {
-                Document mpuCertificateByMediator = manageDocumentsService.downloadAndDeleteDocument(
-                    caseData.getMiamPolicyUpgradeDetails().getMpuCertificateByMediator(),
-                    systemAuthorisation
+                Document mpuCertificateByMediator = manageDocumentsService.renameAndReuploadFileToBeConfidential(
+                    caseData.getMiamPolicyUpgradeDetails().getMpuCertificateByMediator()
                 );
                 caseData = caseData.toBuilder()
                     .miamPolicyUpgradeDetails(caseData.getMiamPolicyUpgradeDetails()
@@ -108,8 +106,8 @@ public class MiamPolicyUpgradeFileUploadService {
                 .stream().forEach(domesticAbuseEvidenceDocument -> {
                     Document domesticAbuseDocument = domesticAbuseEvidenceDocument.getValue().getDomesticAbuseDocument();
                     if (!domesticAbuseDocument.getDocumentFileName().startsWith(CONFIDENTIAL)) {
-                        domesticAbuseDocument = manageDocumentsService.downloadAndDeleteDocument(
-                            domesticAbuseDocument, systemAuthorisation);
+                        domesticAbuseDocument = manageDocumentsService.renameAndReuploadFileToBeConfidential(
+                            domesticAbuseDocument);
                     }
                     mpuConfidentialDomesticAbuseEvidenceDocument.add(element(DomesticAbuseEvidenceDocument.builder().domesticAbuseDocument(
                         domesticAbuseDocument).build()));
@@ -262,5 +260,13 @@ public class MiamPolicyUpgradeFileUploadService {
             log.error("Failed to upload new document {}", ex.getMessage());
         }
         return newUploadedDocument;
+    }
+
+    private void deleteDocument(String systemAuthorisation, String serviceToken, UUID documentId) {
+        try {
+            caseDocumentClient.deleteDocument(systemAuthorisation, serviceToken, documentId, true);
+        } catch (Exception e) {
+            log.error("Failed to delete document with id: {}", documentId, e);
+        }
     }
 }
