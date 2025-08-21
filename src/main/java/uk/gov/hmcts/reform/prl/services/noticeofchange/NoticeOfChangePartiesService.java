@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
-import uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.CaseRole;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.ChangeOrganisationApprovalStatus;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
@@ -941,32 +940,6 @@ public class NoticeOfChangePartiesService {
         List<Element<PartyDetails>> solicitorRepresentedParties = new ArrayList<>();
         for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
             SolicitorRole.fromCaseRoleLabel(caseUser.getCaseRole()).ifPresent(
-                x -> {
-                    switch (x.getRepresenting()) {
-                        case CAAPPLICANT:
-                            solicitorRepresentedParties.add(caseData.getApplicants().get(x.getIndex()));
-                            break;
-                        case CARESPONDENT:
-                            solicitorRepresentedParties.add(caseData.getRespondents().get(x.getIndex()));
-                            break;
-                        case DAAPPLICANT:
-                            solicitorRepresentedParties.add(ElementUtils.element(
-                                caseData.getApplicantsFL401().getPartyId(),
-                                caseData.getApplicantsFL401()
-                            ));
-                            break;
-                        case DARESPONDENT:
-                            solicitorRepresentedParties.add(ElementUtils.element(
-                                caseData.getRespondentsFL401().getPartyId(),
-                                caseData.getRespondentsFL401()
-                            ));
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            );
-            BarristerRole.fromCaseRoleLabel(caseUser.getCaseRole()).ifPresent(
                 x -> {
                     switch (x.getRepresenting()) {
                         case CAAPPLICANT:
