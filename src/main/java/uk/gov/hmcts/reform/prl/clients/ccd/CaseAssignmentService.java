@@ -167,7 +167,8 @@ public class CaseAssignmentService {
                                 Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap) {
         selectedPartyDetailsMap.values().stream()
             .map(Element::getValue)
-            .filter(partyDetails -> partyDetails.getBarrister().getBarristerId() != null)
+            .filter(partyDetails -> partyDetails.getBarrister() != null
+                && partyDetails.getBarrister().getBarristerId() != null)
             .forEach(selectedParty -> removeAmBarristerCaseRole(caseData, selectedParty));
     }
 
