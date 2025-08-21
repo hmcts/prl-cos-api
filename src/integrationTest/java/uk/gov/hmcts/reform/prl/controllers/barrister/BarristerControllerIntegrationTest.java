@@ -73,7 +73,7 @@ public class BarristerControllerIntegrationTest {
         when(organisationService.findUserOrganisation(any())).thenReturn(Optional.of(Organisations.builder()
                                                                                          .organisationIdentifier("orgId")
                                                                                          .build()));
-        when(userService.getUserDetails(any())).thenReturn(UserDetails.builder().roles(List.of(CASEWORKER)).build());
+        when(userService.getUserDetails(AUTH_TOKEN)).thenReturn(UserDetails.builder().roles(List.of(CASEWORKER)).build());
 
         mockMvc.perform(
                 post(url)
