@@ -7,12 +7,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
+import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseData;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -21,6 +24,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.attribute.PosixFilePermission;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -36,6 +41,9 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 @DisplayName("CSV Writer Tests")
 class CsvWriterTest {
 
+    @InjectMocks
+    private CsvWriter csvWriter;
+
     private static final String[] EXPECTED_CSV_HEADERS = {
         "Case No.", "Court Name/Location", "Court Code", "Order Name", "Court Date DD/MM/YYYY", "Order Expiry Date",
         "Respondent Surname", "Respondent Forename(s)", "Respondent DOB", "Respondent 1st Line of Address",
@@ -45,26 +53,36 @@ class CsvWriterTest {
         "Is Applicant Phone Confidential", "Order File Name"
     };
 
-    private CaseData createCaseData() {
-        PartyDetails respondent = createPartyDetails("John", "Doe", "1994-07-05", "70 Petty France", "London", "SW1H 9EX", "", "");
+    private AcroCaseData createCaseData() {
+        PartyDetails respondent = createPartyDetails(
+            "John",
+            "Doe",
+            "1994-07-05",
+            "70 Petty France",
+            "London",
+            "SW1H 9EX",
+            "",
+            ""
+        );
         PartyDetails applicant = PartyDetails.builder()
             .firstName("Jane")
             .lastName("Smith")
             .dateOfBirth(LocalDate.parse("1990-12-11"))
-            .address(Address.builder().addressLine1("123 Example Street").addressLine2("London").postCode("E1 6AN").build())
+            .address(Address.builder().addressLine1("123 Example Street").addressLine2("London").postCode("E1 6AN")
+                         .build())
             .phoneNumber("1234567890")
             .email("test@test.com")
             .isAddressConfidential(YesOrNo.No)
             .isEmailAddressConfidential(YesOrNo.Yes)
             .isPhoneNumberConfidential(YesOrNo.Yes)
             .build();
-        return CaseData.builder()
+        return AcroCaseData.builder()
             .id(1234567891234567L)
             .courtName("test")
-            .courtId("Manchester")
+            .courtEpimsId("Manchester")
             .caseTypeOfApplication("FL401")
-            .dateOrderMade(LocalDate.now())
-            .finalCaseClosedDate("02-10-2026") //orderExpiryDate(LocalDate.now().plusYears(1))
+            .fl404Orders(List.of(OrderDetails.builder().fl404CustomFields(FL404.builder().orderSpecifiedDateTime(
+                LocalDateTime.now()).build()).build()))
             .respondentsFL401(respondent)
             .applicantsFL401(applicant)
             .build();
@@ -76,9 +94,10 @@ class CsvWriterTest {
         @Test
         @DisplayName("Should create a valid CSV file")
         void shouldCreateValidCsvFile() throws Exception {
-            CaseData caseData = createCaseData();
-            File csvFile = CsvWriter.writeCcdOrderDataToCsv(caseData, true);
-            assertAll("CSV file validation",
+            AcroCaseData caseData = createCaseData();
+            File csvFile = csvWriter.writeCcdOrderDataToCsv(caseData, true);
+            assertAll(
+                "CSV file validation",
                 () -> assertNotNull(csvFile, "CSV file should not be null"),
                 () -> assertTrue(csvFile.exists(), "CSV file should exist"),
                 () -> assertTrue(csvFile.getName().endsWith(".csv"), "File should have .csv extension")
@@ -88,13 +107,23 @@ class CsvWriterTest {
         @Test
         @DisplayName("Should have correct file permissions")
         void shouldHaveCorrectFilePermissions() throws Exception {
-            CaseData caseData = createCaseData();
-            File csvFile = CsvWriter.writeCcdOrderDataToCsv(caseData, true);
+            AcroCaseData caseData = createCaseData();
+            File csvFile = csvWriter.writeCcdOrderDataToCsv(caseData, true);
             Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(csvFile.toPath());
-            assertAll("File permissions validation",
-                () -> assertTrue(permissions.contains(PosixFilePermission.OWNER_READ), "Owner should have read permission"),
-                () -> assertTrue(permissions.contains(PosixFilePermission.OWNER_WRITE), "Owner should have write permission"),
-                () -> assertTrue(permissions.contains(PosixFilePermission.OWNER_EXECUTE), "Owner should have execute permission")
+            assertAll(
+                "File permissions validation",
+                () -> assertTrue(
+                    permissions.contains(PosixFilePermission.OWNER_READ),
+                    "Owner should have read permission"
+                ),
+                () -> assertTrue(
+                    permissions.contains(PosixFilePermission.OWNER_WRITE),
+                    "Owner should have write permission"
+                ),
+                () -> assertTrue(
+                    permissions.contains(PosixFilePermission.OWNER_EXECUTE),
+                    "Owner should have execute permission"
+                )
             );
         }
     }
@@ -105,8 +134,8 @@ class CsvWriterTest {
         @Test
         @DisplayName("Should contain all expected headers")
         void shouldContainAllExpectedHeaders() throws Exception {
-            CaseData caseData = createCaseData();
-            File csvFile = CsvWriter.writeCcdOrderDataToCsv(caseData, true);
+            AcroCaseData caseData = createCaseData();
+            File csvFile = csvWriter.writeCcdOrderDataToCsv(caseData, true);
             String headerLine = readFirstLine(csvFile);
             assertNotNull(headerLine, "Header line should not be null");
             for (String expectedHeader : EXPECTED_CSV_HEADERS) {
@@ -117,8 +146,8 @@ class CsvWriterTest {
         @Test
         @DisplayName("Should have headers in correct order")
         void shouldHaveHeadersInCorrectOrder() throws Exception {
-            CaseData caseData = createCaseData();
-            File csvFile = CsvWriter.writeCcdOrderDataToCsv(caseData, true);
+            AcroCaseData caseData = createCaseData();
+            File csvFile = csvWriter.writeCcdOrderDataToCsv(caseData, true);
             String headerLine = readFirstLine(csvFile);
             String[] actualHeaders = headerLine.split(",");
             assertArrayEquals(EXPECTED_CSV_HEADERS, actualHeaders, "Headers should be in the expected order");
@@ -132,11 +161,16 @@ class CsvWriterTest {
         @MethodSource("respondentPropertyTestCases")
         @DisplayName("Respondent property extraction")
         void shouldExtractRespondentProperties(String propertyName, Object expectedValue) {
-            CaseData caseData = createCaseData();
-            Object actualValue = CsvWriter.extractPropertyValues(caseData, propertyName);
-            assertAll("Property extraction validation",
+            AcroCaseData caseData = createCaseData();
+            Object actualValue = csvWriter.extractPropertyValues(caseData, propertyName);
+            assertAll(
+                "Property extraction validation",
                 () -> assertNotNull(actualValue, "Property value should not be null for: " + propertyName),
-                () -> assertEquals(expectedValue, actualValue, "Property value should match expected for: " + propertyName)
+                () -> assertEquals(
+                    expectedValue,
+                    actualValue,
+                    "Property value should match expected for: " + propertyName
+                )
             );
         }
 
@@ -144,11 +178,16 @@ class CsvWriterTest {
         @MethodSource("applicantPropertyTestCases")
         @DisplayName("Applicant property extraction")
         void shouldExtractApplicantProperties(String propertyName, Object expectedValue) {
-            CaseData caseData = createCaseDataWithParties();
-            Object actualValue = CsvWriter.extractPropertyValues(caseData, propertyName);
-            assertAll("Property extraction validation",
+            AcroCaseData caseData = createCaseDataWithParties();
+            Object actualValue = csvWriter.extractPropertyValues(caseData, propertyName);
+            assertAll(
+                "Property extraction validation",
                 () -> assertNotNull(actualValue, "Property value should not be null for: " + propertyName),
-                () -> assertEquals(expectedValue, actualValue, "Property value should match expected for: " + propertyName)
+                () -> assertEquals(
+                    expectedValue,
+                    actualValue,
+                    "Property value should match expected for: " + propertyName
+                )
             );
         }
 
@@ -156,11 +195,16 @@ class CsvWriterTest {
         @MethodSource("respondentWithNullValuesPropertyTestCases")
         @DisplayName("Respondent with null values property extraction")
         void shouldExtractRespondentPropertiesWhenNullValuesPresent(String propertyName, Object expectedValue) {
-            CaseData caseData = createCaseDataWithPartiesNullValues();
-            Object actualValue = CsvWriter.extractPropertyValues(caseData, propertyName);
-            assertAll("Property extraction validation",
+            AcroCaseData caseData = createCaseDataWithPartiesNullValues();
+            Object actualValue = csvWriter.extractPropertyValues(caseData, propertyName);
+            assertAll(
+                "Property extraction validation",
                 () -> assertNotNull(actualValue, "Property value should not be null for: " + propertyName),
-                () -> assertEquals(expectedValue, actualValue, "Property value should match expected for: " + propertyName)
+                () -> assertEquals(
+                    expectedValue,
+                    actualValue,
+                    "Property value should match expected for: " + propertyName
+                )
             );
         }
 
@@ -226,25 +270,29 @@ class CsvWriterTest {
             .build();
     }
 
-    private static CaseData createCaseDataWithParties() {
-        PartyDetails respondent = createPartyDetails("John", "Doe", "1994-07-05",
-                                                     "70 Petty France", "London", "SW1H 9EX",
-                                                     "", "");
-        PartyDetails applicant = createPartyDetails("Jane", "Smith", "1990-12-11",
-                                                    "123 Example Street", "London", "E1 6AN",
-                                                    "1234567890", "test@test.com");
+    private static AcroCaseData createCaseDataWithParties() {
+        PartyDetails respondent = createPartyDetails(
+            "John", "Doe", "1994-07-05",
+            "70 Petty France", "London", "SW1H 9EX",
+            "", ""
+        );
+        PartyDetails applicant = createPartyDetails(
+            "Jane", "Smith", "1990-12-11",
+            "123 Example Street", "London", "E1 6AN",
+            "1234567890", "test@test.com"
+        );
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
-        return CaseData.builder()
+        return AcroCaseData.builder()
             .respondentsFL401(respondent)
             .applicantsFL401(applicant)
             .build();
     }
 
-    private static CaseData createCaseDataWithPartiesNullValues() {
+    private static AcroCaseData createCaseDataWithPartiesNullValues() {
         PartyDetails respondent = createPartyDetails("John", "Doe", null, "70 Petty France", null, "SW1H 9EX", "", "");
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
-        return CaseData.builder()
+        return AcroCaseData.builder()
             .respondentsFL401(respondent)
             .build();
     }
@@ -258,8 +306,8 @@ class CsvWriterTest {
     @Test
     @DisplayName("Should create a valid CSV file with saved output")
     void shouldCreateValidCsvFile() throws Exception {
-        CaseData caseData = createCaseData();
-        File csvFile = CsvWriter.writeCcdOrderDataToCsv(caseData, true);
+        AcroCaseData caseData = createCaseData();
+        File csvFile = csvWriter.writeCcdOrderDataToCsv(caseData, true);
 
         // Quick save for colleague review
         // File savedCsv = new File("test-output.csv");

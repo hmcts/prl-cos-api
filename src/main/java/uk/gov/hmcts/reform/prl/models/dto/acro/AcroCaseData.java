@@ -27,6 +27,8 @@ import java.util.List;
 @Builder(toBuilder = true)
 public class AcroCaseData {
 
+    private Long id;
+
     @Setter(AccessLevel.NONE)
     private List<Element<OrderDetails>> orderCollection;
 

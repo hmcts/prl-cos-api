@@ -19,8 +19,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.concurrent.TimeUnit;
 
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
-
 @Slf4j
 @Service
 @Component
