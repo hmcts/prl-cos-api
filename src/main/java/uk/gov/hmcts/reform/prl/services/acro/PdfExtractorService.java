@@ -22,7 +22,7 @@ import java.util.Optional;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class Fl404aPdfExtractorService {
+public class PdfExtractorService {
 
     private final AuthTokenGenerator authTokenGenerator;
     private final CaseDocumentClient caseDocumentClient;

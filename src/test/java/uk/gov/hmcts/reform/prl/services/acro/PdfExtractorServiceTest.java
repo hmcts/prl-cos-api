@@ -39,7 +39,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class Fl404aPdfExtractorServiceTest {
+class PdfExtractorServiceTest {
 
     @Mock
     private AuthTokenGenerator authTokenGenerator;
@@ -57,7 +57,7 @@ class Fl404aPdfExtractorServiceTest {
     private Resource resource;
 
     @InjectMocks
-    private Fl404aPdfExtractorService service;
+    private PdfExtractorService service;
 
     private static final String CASE_ID = "1234567890";
     private static final String USER_TOKEN = "userToken";

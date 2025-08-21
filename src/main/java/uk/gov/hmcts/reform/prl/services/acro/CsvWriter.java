@@ -1,10 +1,14 @@
 package uk.gov.hmcts.reform.prl.services.acro;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.io.File;
@@ -21,8 +25,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+@Service
+@Slf4j
+@RequiredArgsConstructor
 public class CsvWriter {
-    private static final Logger logger = LoggerFactory.getLogger(CsvWriter.class);
 
     private static final FileAttribute<Set<PosixFilePermission>> ATTRIBUTE = PosixFilePermissions
         .asFileAttribute(PosixFilePermissions.fromString("rwx------"));
@@ -72,7 +78,7 @@ public class CsvWriter {
 
     private static final CsvColumn[] COLUMNS = CsvColumn.values();
 
-    public static File writeCcdOrderDataToCsv(CaseData ccdOrderData, boolean confidentialAllowed) throws IOException {
+    public File writeCcdOrderDataToCsv(AcroCaseData ccdOrderData, boolean confidentialAllowed) throws IOException {
         Path path = Files.createTempFile("AcroReport", ".csv", ATTRIBUTE);
         File file = path.toFile();
         String[] headers = Arrays.stream(COLUMNS).map(CsvColumn::getHeader).toArray(String[]::new);
@@ -89,7 +95,11 @@ public class CsvWriter {
                 }
 
                 if (value == null || value.toString().isEmpty()) {
-                    logger.warn("Missing value for CSV column '{}' (property '{}')", column.getHeader(), column.getProperty());
+                    log.warn(
+                        "Missing value for CSV column '{}' (property '{}')",
+                        column.getHeader(),
+                        column.getProperty()
+                    );
                 }
                 record.add(value != null ? value.toString() : "");
             }
@@ -98,7 +108,7 @@ public class CsvWriter {
         return file;
     }
 
-    private static boolean shouldBlankConfidentialValue(CaseData caseData, CsvColumn column) {
+    private boolean shouldBlankConfidentialValue(AcroCaseData caseData, CsvColumn column) {
         return switch (column) {
             case APPLICANT_PHONE -> isConfidential(caseData, "applicantsFL401.isPhoneNumberConfidential");
             case APPLICANT_EMAIL -> isConfidential(caseData, "applicantsFL401.isEmailAddressConfidential");
@@ -110,7 +120,7 @@ public class CsvWriter {
         };
     }
 
-    private static boolean isConfidential(CaseData caseData, String confidentialityProperty) {
+    private boolean isConfidential(AcroCaseData caseData, String confidentialityProperty) {
         Object value = extractPropertyValues(caseData, confidentialityProperty);
         if (value instanceof YesOrNo) {
             return YesOrNo.Yes.equals(value);
@@ -121,7 +131,7 @@ public class CsvWriter {
         return "Yes".equalsIgnoreCase(String.valueOf(value)) || "true".equalsIgnoreCase(String.valueOf(value));
     }
 
-    public static Object extractPropertyValues(Object obj, String propertyPath) {
+    public Object extractPropertyValues(Object obj, String propertyPath) {
         if (obj == null || propertyPath == null || propertyPath.trim().isEmpty()) {
             return "";
         }
@@ -139,7 +149,7 @@ public class CsvWriter {
         return currentValue != null ? currentValue : "";
     }
 
-    private static Object getPropertyValue(Object obj, String propertyName) {
+    private Object getPropertyValue(Object obj, String propertyName) {
         if (obj == null) {
             return "";
         }
@@ -155,17 +165,17 @@ public class CsvWriter {
         }
     }
 
-    private static Method createGetter(Class<?> clazz, String propertyName) throws NoSuchMethodException {
+    private Method createGetter(Class<?> clazz, String propertyName) throws NoSuchMethodException {
         String getterName = "get" + propertyName.substring(0, 1).toUpperCase() + propertyName.substring(1);
         return clazz.getMethod(getterName);
     }
 
-    private static boolean isWrappedListProperty(String propertyName) {
+    private boolean isWrappedListProperty(String propertyName) {
         Set<String> wrappedListProperties = Set.of("respondents", "applicants");
         return wrappedListProperties.contains(propertyName.toLowerCase());
     }
 
-    private static Object extractFromWrappedList(Object value) {
+    private Object extractFromWrappedList(Object value) {
         if (!(value instanceof List)) {
             return value;
         }
@@ -184,7 +194,7 @@ public class CsvWriter {
         }
     }
 
-    private static boolean isEmpty(Object value) {
+    private boolean isEmpty(Object value) {
         return value == null || "".equals(value);
     }
 }

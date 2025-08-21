@@ -1,9 +1,12 @@
 package uk.gov.hmcts.reform.prl.services.acro;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZOutputFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,8 +17,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Stream;
 
+@Service
+@Slf4j
+@RequiredArgsConstructor
 public class AcroZipService {
-    private static final Logger log = LoggerFactory.getLogger(AcroZipService.class);
 
     public String zip(File sourceFolder, File exportFolder) throws Exception {
         validateInputs(sourceFolder, exportFolder);
