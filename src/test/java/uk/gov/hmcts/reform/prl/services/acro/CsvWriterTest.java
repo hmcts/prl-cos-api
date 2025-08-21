@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.attribute.PosixFilePermission;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -42,46 +41,24 @@ class CsvWriterTest {
     private static final String[] EXPECTED_CSV_HEADERS = {
         "Case No.", "Court Name/Location", "Court Code", "Order Name", "Court Date DD/MM/YYYY", "Order Expiry Date",
         "Respondent Surname", "Respondent Forename(s)", "Respondent DOB", "Respondent 1st Line of Address",
-        "Respondent 2nd Line of Address", "Respondent Postcode", "Applicant Surname", "Applicant Forename(s)",
-        "Applicant DOB", "Applicant First Line of Address", "Applicant Second Line of Address", "Applicant Postcode",
-        "Applicant Phone", "Applicant Email", "Is Applicant Address Confidential", "Is Applicant Email Confidential",
-        "Is Applicant Phone Confidential", "Order File Name"
+        "Respondent 2nd Line of Address", "Respondent Postcode", "Respondent Phone", "Respondent Email",
+        "Is Respondent Address Confidential", "Is Respondent Phone Confidential", "Is Respondent Email Confidential",
+        "Applicant Surname", "Applicant Forename(s)", "Applicant DOB", "Applicant First Line of Address",
+        "Applicant Second Line of Address", "Applicant Postcode", "Applicant Phone", "Applicant Safe Time to Call", "Applicant Email",
+        "Is Applicant Address Confidential", "Is Applicant Phone Confidential", "Is Applicant Email Confidential", "Order File Name"
     };
 
-    private static final String TEST_PHONE = "1234567890";
-    private static final String TEST_EMAIL = "test@test.com";
+    private static final String APPLICANT_PHONE = "1234567890";
+    private static final String APPLICANT_EMAIL = "test@test.com";
     private static final String APPLICANT_ADDRESS_LINE1 = "123 Example Street";
     private static final String APPLICANT_ADDRESS_LINE2 = "London";
     private static final String APPLICANT_POSTCODE = "E1 6AN";
     private static final String RESPONDENT_ADDRESS_LINE1 = "70 Petty France";
     private static final String RESPONDENT_ADDRESS_LINE2 = "Westminster";
     private static final String RESPONDENT_POSTCODE = "SW1H 9EX";
+    private static final String RESPONDENT_PHONE = "07700900123";
+    private static final String RESPONDENT_EMAIL = "respondent@example.com";
     private static final String BLANK_VALUE = "-";
-
-    private CaseData createCaseData() {
-        PartyDetails respondent = TestDataFactory.createPartyDetails("John", "Doe", "1994-07-05", "70 Petty France", "London", "SW1H 9EX", "", "");
-        PartyDetails applicant = PartyDetails.builder()
-            .firstName("Jane")
-            .lastName("Smith")
-            .dateOfBirth(LocalDate.parse("1990-12-11"))
-            .address(Address.builder().addressLine1("123 Example Street").addressLine2("London").postCode("E1 6AN").build())
-            .phoneNumber("1234567890")
-            .email("test@test.com")
-            .isAddressConfidential(YesOrNo.No)
-            .isEmailAddressConfidential(YesOrNo.Yes)
-            .isPhoneNumberConfidential(YesOrNo.Yes)
-            .build();
-        return CaseData.builder()
-            .id(1234567891234567L)
-            .courtName("test")
-            .courtId("Manchester")
-            .caseTypeOfApplication("FL401")
-            .dateOrderMade(LocalDate.now())
-            .finalCaseClosedDate("02-10-2026")
-            .respondentsFL401(respondent)
-            .applicantsFL401(applicant)
-            .build();
-    }
 
     @Nested
     @DisplayName("CSV File Creation Tests")
@@ -202,31 +179,31 @@ class CsvWriterTest {
     class ConfidentialDataHandlingTests {
 
         @Test
-        @DisplayName("Should include confidential data when allowed")
-        void shouldIncludeConfidentialDataWhenAllowed() throws Exception {
+        @DisplayName("Should create CSV file with all expected data when confidential data is allowed")
+        void shouldCreateCsvFileWithAllDataWhenConfidentialDataAllowed() throws Exception {
             CaseData caseData = TestDataFactory.createStandardCaseData();
             File csvFile = CsvWriter.writeCcdOrderDataToCsv(caseData, true);
             String csvContent = Files.readString(csvFile.toPath());
 
             assertAll("Confidential data should be included",
-                () -> assertTrue(csvContent.contains(TEST_PHONE), "Phone number should be present"),
-                () -> assertTrue(csvContent.contains(TEST_EMAIL), "Email should be present"),
+                () -> assertTrue(csvContent.contains(APPLICANT_PHONE), "Phone number should be present"),
+                () -> assertTrue(csvContent.contains(APPLICANT_EMAIL), "Email should be present"),
                 () -> assertTrue(csvContent.contains(APPLICANT_ADDRESS_LINE1), "Address line 1 should be present"),
                 () -> assertTrue(csvContent.contains(APPLICANT_POSTCODE), "Postcode should be present")
             );
         }
 
         @Test
-        @DisplayName("Should blank confidential data when not allowed")
-        void shouldBlankConfidentialDataWhenNotAllowed() throws Exception {
-            CaseData caseData = TestDataFactory.createStandardCaseData();
+        @DisplayName("Should replace confidential fields with dash when confidential data is not allowed")
+        void shouldCreateCsvFileWithDashesWhenConfidfentialDataNotAllowed() throws Exception {
+            CaseData caseData = TestDataFactory.createCaseDataWithAllConfidentialFields();
             File csvFile = CsvWriter.writeCcdOrderDataToCsv(caseData, false);
             String csvContent = Files.readString(csvFile.toPath());
 
             assertAll("Confidential data should be blanked",
                 () -> assertTrue(csvContent.contains(BLANK_VALUE), "Should contain blanked values"),
-                () -> assertFalse(csvContent.contains(TEST_PHONE), "Phone number should be blanked"),
-                () -> assertFalse(csvContent.contains(TEST_EMAIL), "Email should be blanked")
+                () -> assertFalse(csvContent.contains(APPLICANT_PHONE), "Phone number should be blanked"),
+                () -> assertFalse(csvContent.contains(APPLICANT_EMAIL), "Email should be blanked")
             );
         }
 
@@ -267,15 +244,17 @@ class CsvWriterTest {
         @MethodSource("uk.gov.hmcts.reform.prl.services.acro.CsvWriterTest#confidentialFlagTestCases")
         @DisplayName("Should handle different confidential flag types")
         void shouldHandleConfidentialFlagTypes(String flagType, YesOrNo flagValue, boolean expectedConfidential) throws Exception {
-            CaseData caseData = TestDataFactory.createCaseDataWithPhoneConfidentiality(flagValue);
+            CaseData caseData = expectedConfidential
+                ? TestDataFactory.createCaseDataWithAllConfidentialFields()
+                : TestDataFactory.createStandardCaseData();
             File csvFile = CsvWriter.writeCcdOrderDataToCsv(caseData, false);
             String csvContent = Files.readString(csvFile.toPath());
 
             if (expectedConfidential) {
-                assertFalse(csvContent.contains(TEST_PHONE),
+                assertFalse(csvContent.contains(APPLICANT_PHONE),
                     "Phone should be blanked when " + flagType + " indicates confidential");
             } else {
-                assertTrue(csvContent.contains(TEST_PHONE),
+                assertTrue(csvContent.contains(APPLICANT_PHONE),
                     "Phone should be included when " + flagType + " indicates not confidential");
             }
         }
@@ -309,10 +288,12 @@ class CsvWriterTest {
         return Stream.of(
             arguments("respondentsFL401.lastName", "Doe", standardCase),
             arguments("respondentsFL401.firstName", "John", standardCase),
+            arguments("respondentsFL401.phoneNumber", RESPONDENT_PHONE, standardCase),
+            arguments("respondentsFL401.email", RESPONDENT_EMAIL, standardCase),
             arguments("applicantsFL401.lastName", "Smith", standardCase),
             arguments("applicantsFL401.firstName", "Jane", standardCase),
-            arguments("applicantsFL401.phoneNumber", TEST_PHONE, standardCase),
-            arguments("applicantsFL401.email", TEST_EMAIL, standardCase),
+            arguments("applicantsFL401.phoneNumber", APPLICANT_PHONE, standardCase),
+            arguments("applicantsFL401.email", APPLICANT_EMAIL, standardCase),
 
             arguments("respondentsFL401.dateOfBirth", "", nullValuesCase),
             arguments("respondentsFL401.address.addressLine2", "", nullValuesCase)
@@ -321,10 +302,12 @@ class CsvWriterTest {
 
     static Stream<Arguments> confidentialityTestCases() {
         return Stream.of(
-            arguments("Applicant Phone", TestDataFactory.createCaseDataWithPhoneConfidentiality(YesOrNo.Yes), TEST_PHONE),
-            arguments("Applicant Email", TestDataFactory.createCaseDataWithEmailConfidentiality(YesOrNo.Yes), TEST_EMAIL),
-            arguments("Applicant Address", TestDataFactory.createCaseDataWithAddressConfidentiality(YesOrNo.Yes), APPLICANT_ADDRESS_LINE1),
-            arguments("Respondent Address", TestDataFactory.createCaseDataWithRespondentAddressConfidentiality(YesOrNo.Yes), RESPONDENT_ADDRESS_LINE1)
+            arguments("Applicant Phone", TestDataFactory.createCaseDataWithAllConfidentialFields(), APPLICANT_PHONE),
+            arguments("Applicant Email", TestDataFactory.createCaseDataWithAllConfidentialFields(), APPLICANT_EMAIL),
+            arguments("Applicant Address", TestDataFactory.createCaseDataWithAllConfidentialFields(), APPLICANT_ADDRESS_LINE1),
+            arguments("Respondent Phone", TestDataFactory.createCaseDataWithAllConfidentialFields(), RESPONDENT_PHONE),
+            arguments("Respondent Email", TestDataFactory.createCaseDataWithAllConfidentialFields(), RESPONDENT_EMAIL),
+            arguments("Respondent Address", TestDataFactory.createCaseDataWithAllConfidentialFields(), RESPONDENT_ADDRESS_LINE1)
         );
     }
 
@@ -339,32 +322,32 @@ class CsvWriterTest {
     static Stream<Arguments> wrappedListExtractionTestCases() {
         return Stream.of(
             arguments("firstName from basic wrapped list",
-                TestDataFactory.createCaseDataWithWrappedList(),
+                TestDataFactory.createStandardCaseData(),
                 "respondents.firstName",
                 "John"),
             arguments("nested address property from wrapped list",
-                TestDataFactory.createCaseDataWithWrappedListAndAddress(),
+                TestDataFactory.createStandardCaseData(),
                 "applicants.address.addressLine1",
-                "123 Test Street"),
+                APPLICANT_ADDRESS_LINE1),
             arguments("first element from multiple item list",
-                TestDataFactory.createCaseDataWithMultipleWrappedElements(),
+                TestDataFactory.createStandardCaseData(),
                 "applicants.firstName",
-                "First")
+                "Jane")
         );
     }
 
     static Stream<Arguments> wrappedListEdgeCaseTestCases() {
         return Stream.of(
             arguments("empty wrapped list",
-                TestDataFactory.createCaseDataWithEmptyWrappedList(),
+                TestDataFactory.createCaseDataWithNullValues(),
                 "respondents.firstName",
                 ""),
             arguments("null wrapped list",
-                TestDataFactory.createCaseDataWithNullWrappedList(),
+                TestDataFactory.createCaseDataWithNullValues(),
                 "respondents.firstName",
                 ""),
             arguments("null elements in list",
-                TestDataFactory.createCaseDataWithNullElements(),
+                TestDataFactory.createCaseDataWithNullValues(),
                 "applicants.firstName",
                 "")
         );
@@ -377,21 +360,95 @@ class CsvWriterTest {
     }
 
     static class TestDataFactory {
-
         static CaseData createStandardCaseData() {
             PartyDetails respondent = createPartyDetails("John", "Doe", "1994-07-05",
-                RESPONDENT_ADDRESS_LINE1, "London", RESPONDENT_POSTCODE, "", "");
-            PartyDetails applicant = PartyDetails.builder()
-                .firstName("Jane")
-                .lastName("Smith")
-                .dateOfBirth(LocalDate.parse("1990-12-11"))
-                .address(createAddress(APPLICANT_ADDRESS_LINE1, APPLICANT_ADDRESS_LINE2, APPLICANT_POSTCODE))
-                .phoneNumber(TEST_PHONE)
-                .email(TEST_EMAIL)
-                .isAddressConfidential(YesOrNo.No)
-                .isEmailAddressConfidential(YesOrNo.Yes)
-                .isPhoneNumberConfidential(YesOrNo.Yes)
+                                                         RESPONDENT_ADDRESS_LINE1, RESPONDENT_ADDRESS_LINE2, RESPONDENT_POSTCODE,
+                                                         RESPONDENT_PHONE, RESPONDENT_EMAIL, YesOrNo.No, YesOrNo.No, YesOrNo.No);
+
+            PartyDetails applicant = createPartyDetails("Jane", "Smith", "1990-12-11",
+                                                        APPLICANT_ADDRESS_LINE1, APPLICANT_ADDRESS_LINE2, APPLICANT_POSTCODE,
+                                                        APPLICANT_PHONE,
+                                                        APPLICANT_EMAIL, YesOrNo.No, YesOrNo.No, YesOrNo.No);
+
+            String contactInstructions = "9am-5pm weekdays";
+
+            return createCaseData(respondent, applicant, contactInstructions);
+        }
+
+        static CaseData createCaseDataWithAllConfidentialFields() {
+            PartyDetails respondent = createPartyDetails("John", "Doe", "1994-07-05",
+                RESPONDENT_ADDRESS_LINE1, RESPONDENT_ADDRESS_LINE2, RESPONDENT_POSTCODE,
+                RESPONDENT_PHONE, RESPONDENT_EMAIL, YesOrNo.Yes, YesOrNo.Yes, YesOrNo.Yes);
+
+            PartyDetails applicant = createPartyDetails("Jane", "Smith", "1990-12-11",
+                                                        APPLICANT_ADDRESS_LINE1, APPLICANT_ADDRESS_LINE2, APPLICANT_POSTCODE,
+                                                        APPLICANT_PHONE,
+                                                        APPLICANT_EMAIL, YesOrNo.Yes, YesOrNo.Yes, YesOrNo.Yes);
+
+            return createCaseData(respondent, applicant, "9am-5pm weekdays");
+        }
+
+        static CaseData createCaseDataWithNullValues() {
+            PartyDetails respondent = PartyDetails.builder()
+                .firstName("John")
+                .lastName("Doe")
+                .dateOfBirth(null)
+                .address(Address.builder()
+                    .addressLine1(RESPONDENT_ADDRESS_LINE1)
+                    .addressLine2(null)
+                    .postCode(RESPONDENT_POSTCODE)
+                    .build())
+                .phoneNumber("")
+                .email("")
                 .build();
+
+            return CaseData.builder()
+                .respondentsFL401(respondent)
+                .build();
+        }
+
+        static CaseData createMixedConfidentialityCaseData() {
+            PartyDetails respondent = createPartyDetails("John", "Doe", "1994-07-05",
+                RESPONDENT_ADDRESS_LINE1, RESPONDENT_ADDRESS_LINE2, RESPONDENT_POSTCODE,
+                RESPONDENT_PHONE, RESPONDENT_EMAIL, YesOrNo.No, YesOrNo.No, YesOrNo.No);
+
+            PartyDetails applicant = createPartyDetails("Jane", "Smith", "1990-12-11",
+                                                        APPLICANT_ADDRESS_LINE1, APPLICANT_ADDRESS_LINE2, APPLICANT_POSTCODE,
+                                                        APPLICANT_PHONE,
+                                                        APPLICANT_EMAIL, YesOrNo.No, YesOrNo.Yes, YesOrNo.No);
+
+            return createCaseData(respondent, applicant, "9am-5pm weekdays");
+        }
+
+
+        private static PartyDetails createPartyDetails(String firstName, String lastName, String dateOfBirth,
+                                                       String addressLine1, String addressLine2, String postCode,
+                                                       String phoneNumber, String email,
+                                                       YesOrNo isAddressConfidential, YesOrNo isPhoneConfidential, YesOrNo isEmailConfidential) {
+            return PartyDetails.builder()
+                .firstName(firstName)
+                .lastName(lastName)
+                .dateOfBirth(dateOfBirth != null ? LocalDate.parse(dateOfBirth) : null)
+                .address(createAddress(addressLine1, addressLine2, postCode))
+                .phoneNumber(phoneNumber)
+                .email(email)
+                .isAddressConfidential(isAddressConfidential)
+                .isPhoneNumberConfidential(isPhoneConfidential)
+                .isEmailAddressConfidential(isEmailConfidential)
+                .build();
+        }
+
+        private static Address createAddress(String addressLine1, String addressLine2, String postCode) {
+            return Address.builder()
+                .addressLine1(addressLine1)
+                .addressLine2(addressLine2)
+                .postCode(postCode)
+                .build();
+        }
+
+        private static CaseData createCaseData(PartyDetails respondent, PartyDetails applicant, String contactInstructions) {
+            Element<PartyDetails> respondentElement = Element.<PartyDetails>builder().value(respondent).build();
+            Element<PartyDetails> applicantElement = Element.<PartyDetails>builder().value(applicant).build();
 
             return CaseData.builder()
                 .id(1234567891234567L)
@@ -402,173 +459,9 @@ class CsvWriterTest {
                 .finalCaseClosedDate("02-10-2026")
                 .respondentsFL401(respondent)
                 .applicantsFL401(applicant)
-                .build();
-        }
-
-        static CaseData createCaseDataWithNullValues() {
-            PartyDetails respondent = createPartyDetails("John", "Doe", null,
-                RESPONDENT_ADDRESS_LINE1, null, RESPONDENT_POSTCODE, "", "");
-            return CaseData.builder().respondentsFL401(respondent).build();
-        }
-
-        static CaseData createMixedConfidentialityCaseData() {
-            PartyDetails respondent = PartyDetails.builder()
-                .firstName("John")
-                .lastName("Doe")
-                .address(createAddress(RESPONDENT_ADDRESS_LINE1, APPLICANT_ADDRESS_LINE2, RESPONDENT_POSTCODE))
-                .isAddressConfidential(YesOrNo.No)
-                .build();
-
-            PartyDetails applicant = PartyDetails.builder()
-                .firstName("Jane")
-                .lastName("Smith")
-                .phoneNumber(TEST_PHONE)
-                .email(TEST_EMAIL)
-                .address(createAddress(APPLICANT_ADDRESS_LINE1, APPLICANT_ADDRESS_LINE2, APPLICANT_POSTCODE))
-                .isPhoneNumberConfidential(YesOrNo.Yes)
-                .isEmailAddressConfidential(YesOrNo.No)
-                .isAddressConfidential(YesOrNo.No)
-                .build();
-
-            return CaseData.builder()
-                .respondentsFL401(respondent)
-                .applicantsFL401(applicant)
-                .build();
-        }
-
-        static CaseData createCaseDataWithPhoneConfidentiality(YesOrNo confidential) {
-            PartyDetails applicant = PartyDetails.builder()
-                .firstName("Jane")
-                .lastName("Smith")
-                .phoneNumber(TEST_PHONE)
-                .isPhoneNumberConfidential(confidential)
-                .build();
-            return CaseData.builder().applicantsFL401(applicant).build();
-        }
-
-        static CaseData createCaseDataWithEmailConfidentiality(YesOrNo confidential) {
-            PartyDetails applicant = PartyDetails.builder()
-                .firstName("Jane")
-                .lastName("Smith")
-                .email(TEST_EMAIL)
-                .isEmailAddressConfidential(confidential)
-                .build();
-            return CaseData.builder().applicantsFL401(applicant).build();
-        }
-
-        static CaseData createCaseDataWithAddressConfidentiality(YesOrNo confidential) {
-            PartyDetails applicant = PartyDetails.builder()
-                .firstName("Jane")
-                .lastName("Smith")
-                .address(createAddress(APPLICANT_ADDRESS_LINE1, APPLICANT_ADDRESS_LINE2, APPLICANT_POSTCODE))
-                .isAddressConfidential(confidential)
-                .build();
-            return CaseData.builder().applicantsFL401(applicant).build();
-        }
-
-        static CaseData createCaseDataWithRespondentAddressConfidentiality(YesOrNo confidential) {
-            PartyDetails respondent = PartyDetails.builder()
-                .firstName("John")
-                .lastName("Doe")
-                .address(createAddress(RESPONDENT_ADDRESS_LINE1, RESPONDENT_ADDRESS_LINE2, RESPONDENT_POSTCODE))
-                .isAddressConfidential(confidential)
-                .build();
-            return CaseData.builder().respondentsFL401(respondent).build();
-        }
-
-        static CaseData createCaseDataWithWrappedList() {
-            PartyDetails partyDetails = PartyDetails.builder()
-                .firstName("John")
-                .lastName("Doe")
-                .build();
-
-            Element<PartyDetails> wrappedParty = Element.<PartyDetails>builder()
-                .value(partyDetails)
-                .build();
-
-            return CaseData.builder()
-                .respondents(List.of(wrappedParty))
-                .build();
-        }
-
-        static CaseData createCaseDataWithWrappedListAndAddress() {
-            PartyDetails partyDetails = PartyDetails.builder()
-                .firstName("Jane")
-                .lastName("Smith")
-                .address(createAddress("123 Test Street", "Test City", "AB1 2CD"))
-                .build();
-
-            Element<PartyDetails> wrappedParty = Element.<PartyDetails>builder()
-                .value(partyDetails)
-                .build();
-
-            return CaseData.builder()
-                .applicants(List.of(wrappedParty))
-                .build();
-        }
-
-        static CaseData createCaseDataWithEmptyWrappedList() {
-            return CaseData.builder()
-                .respondents(List.of())
-                .build();
-        }
-
-        static CaseData createCaseDataWithNullWrappedList() {
-            return CaseData.builder()
-                .respondents(null)
-                .build();
-        }
-
-        static CaseData createCaseDataWithNullElements() {
-            List<Element<PartyDetails>> applicantsList = new ArrayList<>();
-            applicantsList.add(null);
-            return CaseData.builder()
-                .applicants(applicantsList)
-                .build();
-        }
-
-        static CaseData createCaseDataWithMultipleWrappedElements() {
-            PartyDetails firstParty = PartyDetails.builder()
-                .firstName("First")
-                .lastName("Party")
-                .build();
-
-            PartyDetails secondParty = PartyDetails.builder()
-                .firstName("Second")
-                .lastName("Party")
-                .build();
-
-            Element<PartyDetails> firstElement = Element.<PartyDetails>builder()
-                .value(firstParty)
-                .build();
-
-            Element<PartyDetails> secondElement = Element.<PartyDetails>builder()
-                .value(secondParty)
-                .build();
-
-            return CaseData.builder()
-                .applicants(List.of(firstElement, secondElement))
-                .build();
-        }
-
-        private static PartyDetails createPartyDetails(String firstName, String lastName, String dateOfBirth,
-                                                      String addressLine1, String addressLine2, String postCode,
-                                                      String phoneNumber, String email) {
-            return PartyDetails.builder()
-                .firstName(firstName)
-                .lastName(lastName)
-                .dateOfBirth(dateOfBirth != null ? LocalDate.parse(dateOfBirth) : null)
-                .address(createAddress(addressLine1, addressLine2, postCode))
-                .phoneNumber(phoneNumber)
-                .email(email)
-                .build();
-        }
-
-        private static Address createAddress(String addressLine1, String addressLine2, String postCode) {
-            return Address.builder()
-                .addressLine1(addressLine1)
-                .addressLine2(addressLine2)
-                .postCode(postCode)
+                .respondents(List.of(respondentElement))
+                .applicants(List.of(applicantElement))
+                .daApplicantContactInstructions(contactInstructions)
                 .build();
         }
     }
