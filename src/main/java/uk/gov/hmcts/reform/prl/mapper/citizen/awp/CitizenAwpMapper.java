@@ -64,7 +64,9 @@ public class CitizenAwpMapper {
     }
 
     private static Document withCategory(Document doc, String categoryId) {
-        if (StringUtils.isBlank(categoryId)) return doc; // if no category play safe and don't add a default
+        if (StringUtils.isBlank(categoryId)) {
+            return doc; // if no category play safe and don't add a default
+        }
         return doc == null ? null : doc.toBuilder().categoryId(categoryId).build();
     }
 
