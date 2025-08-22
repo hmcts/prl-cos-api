@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -114,6 +115,7 @@ public class NoticeOfChangePartiesService {
     private final CaseEventService caseEventService;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     private final ServiceOfApplicationService serviceOfApplicationService;
+    private final CaseAssignmentService caseAssignmentService;
 
     public static final String REPRESENTATIVE_REMOVED_LABEL = "# Representative removed";
 
@@ -223,6 +225,7 @@ public class NoticeOfChangePartiesService {
 
     public AboutToStartOrSubmitCallbackResponse applyDecision(CallbackRequest callbackRequest, String authorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        caseAssignmentService.removeAmBarristerIfPresent(caseDetails);
 
         return assignCaseAccessClient.applyDecision(
             authorisation,
@@ -278,6 +281,8 @@ public class NoticeOfChangePartiesService {
         }
 
         if (solicitorDetails.isPresent()) {
+            caseAssignmentService.removePartyBarristerIfPresent(allTabsUpdateCaseData,
+                                                                changeOrganisationRequest);
 
             allTabsUpdateCaseData = updateRepresentedPartyDetails(
                 changeOrganisationRequest,
