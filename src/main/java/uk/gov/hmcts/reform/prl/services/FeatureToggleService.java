@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.prl.models.Features.ADD_BARRISTER;
+import static uk.gov.hmcts.reform.prl.models.Features.IS_BARRISTER_FEATURE_ENABLED;
 
 
 /**
@@ -42,8 +42,8 @@ public class FeatureToggleService {
     /*
      * Defaulted to true. Only to be set to false in Preview as ACA API is not deployed there
      */
-    public boolean isAddBarristerIsEnabled() {
-        return isFeatureEnabled(ADD_BARRISTER);
+    public boolean isBarristerFeatureEnabled() {
+        return isFeatureEnabled(IS_BARRISTER_FEATURE_ENABLED);
     }
 
 }

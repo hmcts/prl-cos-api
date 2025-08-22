@@ -974,7 +974,7 @@ class CaseAssignmentServiceTest {
             .thenReturn("sysUserToken");
         when(tokenGenerator.generate())
             .thenReturn("token");
-        when(featureToggleService.isAddBarristerIsEnabled())
+        when(featureToggleService.isBarristerFeatureEnabled())
             .thenReturn(true);
 
         ChangeOrganisationRequest changeOrganisationRequest = ChangeOrganisationRequest.builder()
@@ -1048,7 +1048,7 @@ class CaseAssignmentServiceTest {
                                        .build())
                             .build())
             .build();
-        when(featureToggleService.isAddBarristerIsEnabled())
+        when(featureToggleService.isBarristerFeatureEnabled())
             .thenReturn(true);
 
         localCaseAssignmentService.removePartyBarristerIfPresent(fl401CaseData,
@@ -1124,7 +1124,7 @@ class CaseAssignmentServiceTest {
             objectMapper,
             featureToggleService
         );
-        when(featureToggleService.isAddBarristerIsEnabled())
+        when(featureToggleService.isBarristerFeatureEnabled())
             .thenReturn(true);
 
         localCaseAssignmentService.removeAmBarristerIfPresent(caseDetails);
@@ -1168,7 +1168,7 @@ class CaseAssignmentServiceTest {
                                        .build())
                             .build())
             .build();
-        when(featureToggleService.isAddBarristerIsEnabled())
+        when(featureToggleService.isBarristerFeatureEnabled())
             .thenReturn(true);
 
         localCaseAssignmentService.removePartyBarristerIfPresent(c100CaseData,
@@ -1182,7 +1182,7 @@ class CaseAssignmentServiceTest {
 
     @Test
     void testInvalidSolicitorRoleWhenCaseTypeC100() {
-        when(featureToggleService.isAddBarristerIsEnabled())
+        when(featureToggleService.isBarristerFeatureEnabled())
             .thenReturn(true);
 
         ChangeOrganisationRequest changeOrganisationRequest = ChangeOrganisationRequest.builder()
