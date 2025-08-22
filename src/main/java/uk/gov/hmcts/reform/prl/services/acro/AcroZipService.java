@@ -21,10 +21,10 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class AcroZipService {
 
-    @Value("${acro.source-directory}")
+    @Value("${acro.source.path}")
     private String sourceDirectory;
 
-    @Value("${acro.output-directory}")
+    @Value("${acro.export.path}")
     private String outputDirectory;
 
     public String zip() throws Exception {

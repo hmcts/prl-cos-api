@@ -7,14 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroResponse;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -27,19 +24,13 @@ import java.util.concurrent.TimeUnit;
 public class BaisDocumentUploadService {
 
     private final SystemUserService systemUserService;
-    private final AuthTokenGenerator authTokenGenerator;
-
     private final AcroCaseDataService acroCaseDataService;
     private final AcroZipService acroZipService;
     private final CsvWriter csvWriter;
     private final PdfExtractorService pdfExtractorService;
 
-    @Value("acro.source-directory")
+    @Value("${acro.source.path}")
     private String sourceDirectory;
-
-    public static final String DOCUMENT_SOURCE_DIRECTORY = "acro-sources";
-    public static final String OUTPUT_DIRECTORY = "acro-output";
-
 
     public void uploadFL404Orders() {
         long startTime = System.currentTimeMillis();
@@ -49,9 +40,6 @@ public class BaisDocumentUploadService {
         try {
             //Fetch all cases with FL404A Orders
             AcroResponse acroResponse = acroCaseDataService.getCaseData(sysUserToken);
-
-            Path sourcePath = Files.createTempDirectory(DOCUMENT_SOURCE_DIRECTORY);
-            Path outputDirectory = Files.createTempDirectory(OUTPUT_DIRECTORY);
 
             if (acroResponse.getTotal() == 0 || acroResponse.getCases() == null || acroResponse.getCases().isEmpty()) {
                 log.info("Search has resulted empty cases with Final FL404a orders, so need to send empty csv file");
