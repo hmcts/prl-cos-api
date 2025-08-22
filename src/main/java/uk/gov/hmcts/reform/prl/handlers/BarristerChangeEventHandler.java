@@ -9,6 +9,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.events.BarristerChangeEvent;
+import uk.gov.hmcts.reform.prl.exception.GovUkNotificationException;
+import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.BarristerEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
@@ -26,26 +28,26 @@ public class BarristerChangeEventHandler {
     @Value("${xui.url}")
     private String manageCaseUrl;
 
-    @Value("${citizen.url}")
-    private String citizenUrl;
-
     private final EmailService emailService;
 
     @Async
     @EventListener(condition = "#event.typeOfEvent.displayedValue eq 'Add Barrister'")
-    public void notifyBarrister(final BarristerChangeEvent event) {
+    public void notifyAddBarrister(final BarristerChangeEvent event) {
         CaseData caseData = event.getCaseData();
-        sendEmailToBarrister(caseData, event, EmailTemplateNames.CA_DA_ADD_BARRISTER_SELF);
+
+        ignoreAndLogNotificationFailures(() -> sendEmailToBarrister(caseData, EmailTemplateNames.CA_DA_ADD_BARRISTER_SELF));
+
     }
 
-    private void sendEmailToBarrister(CaseData caseData, BarristerChangeEvent event, EmailTemplateNames emailTemplateName) {
-        if (null != event.getAllocatedBarrister().getBarristerEmail()) {
+    private void sendEmailToBarrister(CaseData caseData, EmailTemplateNames emailTemplateName) {
+        AllocatedBarrister barrister = caseData.getAllocatedBarrister();
+        if (null != barrister.getBarristerEmail()) {
             log.info("Sending Barrister email on case id {}", caseData.getId());
 
             emailService.send(
-                event.getAllocatedBarrister().getBarristerEmail(),
+                barrister.getBarristerEmail(),
                 emailTemplateName,
-                buildEmailBarrister(caseData, event.getAllocatedBarrister().getBarristerFullName()),
+                buildEmailBarrister(caseData, barrister.getBarristerFullName()),
                 LanguagePreference.getPreferenceLanguage(caseData)
             );
         } else {
@@ -60,7 +62,9 @@ public class BarristerChangeEventHandler {
     @EventListener(condition = "#event.typeOfEvent.displayedValue eq 'Remove Barrister'")
     public void notifyWhenBarristerRemoved(final BarristerChangeEvent event) {
         CaseData caseData = event.getCaseData();
-        sendEmailToBarrister(caseData, event, EmailTemplateNames.CA_DA_REMOVE_BARRISTER_SELF);
+
+        ignoreAndLogNotificationFailures(() -> sendEmailToBarrister(caseData, EmailTemplateNames.CA_DA_REMOVE_BARRISTER_SELF));
+
     }
 
     private EmailTemplateVars buildEmailBarrister(CaseData caseData,
@@ -73,5 +77,13 @@ public class BarristerChangeEventHandler {
             .caseLink(manageCaseUrl + URL_STRING + caseData.getId())
             .issueDate(CommonUtils.formatDate(D_MMM_YYYY, caseData.getIssueDate()))
             .build();
+    }
+
+    private void ignoreAndLogNotificationFailures(Runnable emailTask) {
+        try {
+            emailTask.run();
+        } catch (GovUkNotificationException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 }

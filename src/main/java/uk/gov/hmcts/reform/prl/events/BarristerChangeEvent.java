@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import uk.gov.hmcts.reform.prl.enums.barrister.TypeOfBarristerEventEnum;
-import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 
@@ -16,5 +15,4 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 public class BarristerChangeEvent {
     private final CaseData caseData;
     private final TypeOfBarristerEventEnum typeOfEvent;
-    private final AllocatedBarrister allocatedBarrister;
 }

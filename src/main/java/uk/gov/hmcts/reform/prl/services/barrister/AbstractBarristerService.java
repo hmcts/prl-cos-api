@@ -8,7 +8,6 @@ import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
@@ -59,13 +58,11 @@ public abstract class AbstractBarristerService {
 
     }
 
-    protected BarristerChangeEvent prepareAndPublishBarristerChangeEvent(AllocatedBarrister allocatedBarrister,
-                                                              CaseData newCaseData,
+    protected BarristerChangeEvent prepareAndPublishBarristerChangeEvent(CaseData caseData,
                                                               TypeOfBarristerEventEnum typeOfEvent) {
-        if (allocatedBarrister != null) {
+        if (caseData.getAllocatedBarrister() != null) {
             BarristerChangeEvent barristerChangeEvent = BarristerChangeEvent.builder()
-                .caseData(newCaseData)
-                .allocatedBarrister(allocatedBarrister)
+                .caseData(caseData)
                 .typeOfEvent(typeOfEvent)
                 .build();
             eventPublisher.publishEvent(barristerChangeEvent);
@@ -188,5 +185,5 @@ public abstract class AbstractBarristerService {
 
     protected abstract String getCodeForAction(Element<PartyDetails> partyDetailsElement);
 
-    public abstract void notifyBarrister(AllocatedBarrister allocatedBarrister, CaseData caseData);
+    public abstract void notifyBarrister(CaseData caseData);
 }

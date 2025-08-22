@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers.barrister;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -13,11 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -41,17 +37,14 @@ public class BarristerController extends AbstractCallbackController {
     private final AuthorisationService authorisationService;
     private final BarristerAddService barristerAddService;
     private final BarristerRemoveService barristerRemoveService;
-    private final CaseAssignmentService caseAssignmentService;
 
     public BarristerController(ObjectMapper objectMapper, EventService eventPublisher,
                                BarristerAddService barristerAddService,
                                BarristerRemoveService barristerRemoveService,
-                               CaseAssignmentService caseAssignmentService,
                                AuthorisationService authorisationService) {
         super(objectMapper, eventPublisher);
         this.barristerAddService = barristerAddService;
         this.barristerRemoveService = barristerRemoveService;
-        this.caseAssignmentService = caseAssignmentService;
         this.authorisationService = authorisationService;
     }
 
@@ -90,18 +83,13 @@ public class BarristerController extends AbstractCallbackController {
         log.info("Inside barrister/add/submitted for case {}", callbackRequest.getCaseDetails().getId());
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            AllocatedBarrister allocatedBarrister = objectMapper.convertValue(
-                caseDataUpdated.get(ALLOCATED_BARRISTER), new TypeReference<>() { }
-            );
-            if (allocatedBarrister != null) {
-                barristerAddService.notifyBarrister(allocatedBarrister, caseData);
+            if (caseData.getAllocatedBarrister() != null) {
+                barristerAddService.notifyBarrister(caseData);
             }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
 
-        //if a message is being closed then no notification email is sent
         return AboutToStartOrSubmitCallbackResponse.builder()
             .build();
     }
@@ -135,48 +123,6 @@ public class BarristerController extends AbstractCallbackController {
         }
     }
 
-    @PostMapping(path = "/remove/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to remove a barrister on mid-event")
-    @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse handleRemoveMidEvent(
-        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest) {
-
-        log.info("Inside barrister/remove/mid-event for case {}", callbackRequest.getCaseDetails().getId());
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            CaseDetails caseDetails = callbackRequest.getCaseDetails();
-            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-
-            AllocatedBarrister allocatedBarrister = objectMapper.convertValue(
-                caseDetails.getData().get(ALLOCATED_BARRISTER),
-                new TypeReference<>() {
-                }
-            );
-            if (allocatedBarrister != null && !allocatedBarrister.getPartyList().getListItems().isEmpty()) {
-                PartyDetails selectedParty = caseAssignmentService.getSelectedParty(
-                    caseData,
-                    allocatedBarrister.getPartyList().getValueCode()
-                );
-                if (selectedParty != null) {
-                    allocatedBarrister = AllocatedBarrister.builder()
-                        .partyList(allocatedBarrister.getPartyList())
-                        .barristerOrg(selectedParty.getBarrister().getBarristerOrg())
-                        .barristerEmail(selectedParty.getBarrister().getBarristerEmail())
-                        .barristerFirstName(selectedParty.getBarrister().getBarristerFirstName())
-                        .barristerLastName(selectedParty.getBarrister().getBarristerLastName())
-                        .build();
-                }
-                caseDetails.getData().put(ALLOCATED_BARRISTER, allocatedBarrister);
-            }
-
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(callbackRequest.getCaseDetails().getData()).build();
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
-    }
-
     @PostMapping(path = "/remove/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to remove a barrister on submitted")
     @SecurityRequirement(name = "Bearer Authentication")
@@ -188,12 +134,8 @@ public class BarristerController extends AbstractCallbackController {
         log.info("Inside barrister/remove/submitted for case {}", callbackRequest.getCaseDetails().getId());
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            AllocatedBarrister allocatedBarrister = objectMapper.convertValue(
-                caseDataUpdated.get(ALLOCATED_BARRISTER), new TypeReference<>() { }
-            );
-            if (allocatedBarrister != null) {
-                barristerRemoveService.notifyBarrister(allocatedBarrister, caseData);
+            if (caseData.getAllocatedBarrister() != null) {
+                barristerRemoveService.notifyBarrister(caseData);
             }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
