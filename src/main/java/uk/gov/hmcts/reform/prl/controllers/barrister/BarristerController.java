@@ -61,7 +61,6 @@ public class BarristerController extends AbstractCallbackController {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
             caseDataUpdated.put(ALLOCATED_BARRISTER, barristerAddService.getAllocatedBarrister(caseData, authorisation));
 
             AboutToStartOrSubmitCallbackResponse.AboutToStartOrSubmitCallbackResponseBuilder
@@ -112,7 +111,7 @@ public class BarristerController extends AbstractCallbackController {
             if (!barristerList.getPartyList().getListItems().isEmpty()) {
                 caseDataUpdated.put(ALLOCATED_BARRISTER, barristerList);
             } else {
-                errorList.add("No barrister currently assigned to the selected party");
+                errorList.add("No barrister currently assigned to any party");
             }
 
             AboutToStartOrSubmitCallbackResponse.AboutToStartOrSubmitCallbackResponseBuilder
