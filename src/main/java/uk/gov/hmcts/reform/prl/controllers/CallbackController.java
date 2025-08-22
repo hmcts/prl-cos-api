@@ -114,6 +114,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CREATED_BY
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.GATEKEEPING_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -333,6 +334,7 @@ public class CallbackController {
 
             ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            caseDataUpdated.put(DATE_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
             caseDataUpdated.put(
                 CASE_DATE_AND_TIME_SUBMITTED_FIELD,
                 DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime)

@@ -1577,6 +1577,7 @@ public class CallbackControllerTest {
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1ADocument"));
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1AWelshDocument"));
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("finalWelshDocument"));
+        Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("dateSubmitted"));
     }
 
     @Test
