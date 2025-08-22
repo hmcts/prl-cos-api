@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.models.dto.acro;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -59,4 +60,6 @@ public class AcroCaseData {
     private List<OrderDetails> fl404Orders = new ArrayList<>();
     private List<CaseHearing> caseHearings;
     private List<Element<StmtOfServiceAddRecipient>> stmtOfServiceForOrder;
+    @JsonProperty("daApplicantContactInstructions")
+    private String daApplicantContactInstructions;
 }

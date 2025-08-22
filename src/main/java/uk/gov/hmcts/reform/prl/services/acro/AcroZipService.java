@@ -21,16 +21,15 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class AcroZipService {
 
-    @Value("${acro-source-directory}")
-    private String sourcePath;
+    @Value("${acro.source-directory}")
+    private String sourceDirectory;
 
-    @Value("${acro-export-directory}")
-    private String exportPath;
+    @Value("${acro.output-directory}")
+    private String outputDirectory;
 
     public String zip() throws Exception {
-        File sourceFolder = new File(sourcePath);
-        File exportFolder = new File(exportPath);
-
+        File sourceFolder = new File(sourceDirectory);
+        File exportFolder = new File(outputDirectory);
         validateInputs(sourceFolder, exportFolder);
 
         Path sourcePath = sourceFolder.toPath();

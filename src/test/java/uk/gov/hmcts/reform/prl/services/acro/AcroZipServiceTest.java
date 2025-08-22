@@ -30,8 +30,8 @@ class AcroZipServiceTest {
         tempSourceDir = Files.createTempDirectory("acrozip-src");
         tempExportDir = Files.createTempDirectory("acrozip-exp");
 
-        ReflectionTestUtils.setField(acroZipService, "sourcePath", tempSourceDir.toString());
-        ReflectionTestUtils.setField(acroZipService, "exportPath", tempExportDir.toString());
+        ReflectionTestUtils.setField(acroZipService, "sourceDirectory", tempSourceDir.toString());
+        ReflectionTestUtils.setField(acroZipService, "outputDirectory", tempExportDir.toString());
     }
 
     @Test
@@ -96,7 +96,7 @@ class AcroZipServiceTest {
     @Test
     @DisplayName("Should throw exception when source directory does not exist")
     void shouldThrowExceptionWhenSourceDirectoryDoesNotExist() throws Exception {
-        ReflectionTestUtils.setField(acroZipService, "sourcePath", "/non/existent/path");
+        ReflectionTestUtils.setField(acroZipService, "sourceDirectory", "/non/existent/path");
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                                                           () -> acroZipService.zip());
@@ -107,7 +107,7 @@ class AcroZipServiceTest {
     @Test
     @DisplayName("Should throw exception when export directory does not exist")
     void shouldThrowExceptionWhenExportDirectoryDoesNotExist() throws Exception {
-        ReflectionTestUtils.setField(acroZipService, "exportPath", "/non/existent/export");
+        ReflectionTestUtils.setField(acroZipService, "outputDirectory", "/non/existent/export");
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                                                           () -> acroZipService.zip());
