@@ -52,7 +52,6 @@ import uk.gov.hmcts.reform.prl.models.noticeofchange.DecisionRequest;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeParties;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.EventService;
-import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
@@ -161,8 +160,6 @@ public class NoticeOfChangePartiesServiceTest {
     PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     @Mock
     private CaseAssignmentService caseAssignmentService;
-    @Mock
-    private FeatureToggleService featureToggleService;
 
     private StartEventResponse startEventResponse;
 
@@ -304,8 +301,6 @@ public class NoticeOfChangePartiesServiceTest {
             DecisionRequest.class))).thenReturn(
                 AboutToStartOrSubmitCallbackResponse.builder().data(new HashMap<>()).build()
         );
-        when(featureToggleService.isAddBarristerIsEnabled())
-            .thenReturn(true);
 
         noticeOfChangePartiesService.applyDecision(CallbackRequest.builder()
                                                        .caseDetails(CaseDetails.builder()
@@ -375,8 +370,6 @@ public class NoticeOfChangePartiesServiceTest {
             PartyRole.Representing.CARESPONDENTSOLICITOR,
             true
         )).thenReturn(caseData);
-        when(featureToggleService.isAddBarristerIsEnabled())
-            .thenReturn(true);
 
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
