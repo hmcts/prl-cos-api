@@ -10,6 +10,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
+import static uk.gov.hmcts.reform.prl.enums.PartyEnum.applicant;
+import static uk.gov.hmcts.reform.prl.enums.PartyEnum.respondent;
 
 @Slf4j
 @Service
@@ -36,7 +38,6 @@ public class BarristerAddService extends AbstractBarristerService {
                                              isApplicable,
                                              partyId -> log.info("Barrister Add Service - This party {} has an empty solicitor org or "
                                                                      + "the user org identifier is empty", partyId.toString()));
-
     }
 
 
