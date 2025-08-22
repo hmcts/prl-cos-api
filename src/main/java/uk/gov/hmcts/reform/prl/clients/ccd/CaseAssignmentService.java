@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
+import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -63,6 +64,7 @@ public class CaseAssignmentService {
     private final RoleAssignmentService roleAssignmentService;
     private final MaskEmail maskEmail;
     private final ObjectMapper objectMapper;
+    private final FeatureToggleService featureToggleService;
 
     private static InvalidPartyIdException getInvalidPartyIdExceptionException(CaseData caseData,
                                                                                String selectedPartyId) {
@@ -441,27 +443,35 @@ public class CaseAssignmentService {
     }
 
     public void removeAmBarristerIfPresent(CaseDetails caseDetails) {
-        CaseData caseData = getCaseData(caseDetails, objectMapper);
+        if (featureToggleService.isAddBarristerIsEnabled()) {
+            CaseData caseData = getCaseData(caseDetails, objectMapper);
 
-        removeBarristerIfPresent(caseData,
-                                 caseData.getChangeOrganisationRequestField(),
-                                 partyDetailsElement ->
-                                     removeAmBarristerCaseRole(caseData,
-                                                               partyDetailsElement.getValue()),
-                                 partyDetails -> removeAmBarristerCaseRole(caseData,
-                                                                           partyDetails)
-        );
+            removeBarristerIfPresent(caseData,
+                                     caseData.getChangeOrganisationRequestField(),
+                                     partyDetailsElement ->
+                                         removeAmBarristerCaseRole(caseData,
+                                                                   partyDetailsElement.getValue()),
+                                     partyDetails -> removeAmBarristerCaseRole(caseData,
+                                                                               partyDetails)
+            );
+        } else {
+            log.info("Barrister feature is disabled");
+        }
     }
 
     public void removePartyBarristerIfPresent(CaseData caseData,
                                               ChangeOrganisationRequest changeOrganisationRequest) {
-        removeBarristerIfPresent(caseData,
-                                 changeOrganisationRequest,
-                                 partyDetailsElement ->
-                                     partyDetailsElement.getValue().setBarrister(null),
-                                 partyDetails ->
-                                     partyDetails.setBarrister(null)
-        );
+        if (featureToggleService.isAddBarristerIsEnabled()) {
+            removeBarristerIfPresent(caseData,
+                                     changeOrganisationRequest,
+                                     partyDetailsElement ->
+                                         partyDetailsElement.getValue().setBarrister(null),
+                                     partyDetails ->
+                                         partyDetails.setBarrister(null)
+            );
+        } else {
+            log.info("Barrister feature is disabled");
+        }
     }
 
     private void removeBarristerIfPresent(CaseData caseData,
