@@ -39,7 +39,7 @@ public class BaisDocumentUploadService {
 
     public void uploadFL404Orders() {
         long startTime = System.currentTimeMillis();
-        log.info("inside checkHwfPaymentStatus");
+        log.info("inside uploadFL404Orders");
 
         String sysUserToken = systemUserService.getSysUserToken();
         try {
