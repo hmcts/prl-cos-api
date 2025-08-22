@@ -104,13 +104,13 @@ public class BarristerControllerTest {
 
         AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder()
             .partyList(DynamicList.builder().listItems(Lists.newArrayList(dynamicListElement)).build()).build();
-        when(barristerRemoveService.getBarristerListToRemove(caseData1, AUTH_TOKEN)).thenReturn(allocatedBarrister);
+        when(barristerRemoveService.getBarristerListToRemove(caseData1, AUTH_TOKEN, false)).thenReturn(allocatedBarrister);
         AboutToStartOrSubmitCallbackResponse callbackResponse = barristerController
             .handleRemoveAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
 
         assertEquals(allocatedBarrister, callbackResponse.getData().get("allocatedBarrister"));
 
-        verify(barristerRemoveService, times(1)).getBarristerListToRemove(caseData1, AUTH_TOKEN);
+        verify(barristerRemoveService, times(1)).getBarristerListToRemove(caseData1, AUTH_TOKEN, false);
     }
 
     @Test
@@ -137,12 +137,12 @@ public class BarristerControllerTest {
         AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder()
             .partyList(DynamicList.builder()
                            .listItems(Lists.newArrayList()).build()).build();
-        when(barristerRemoveService.getBarristerListToRemove(caseData1, AUTH_TOKEN)).thenReturn(allocatedBarrister);
+        when(barristerRemoveService.getBarristerListToRemove(caseData1, AUTH_TOKEN, false)).thenReturn(allocatedBarrister);
         AboutToStartOrSubmitCallbackResponse callbackResponse = barristerController
             .handleRemoveAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
 
         assertEquals("No barrister currently assigned to any party", callbackResponse.getErrors().get(0));
-        verify(barristerRemoveService, times(1)).getBarristerListToRemove(caseData1, AUTH_TOKEN);
+        verify(barristerRemoveService, times(1)).getBarristerListToRemove(caseData1, AUTH_TOKEN, false);
     }
 
     @Test
