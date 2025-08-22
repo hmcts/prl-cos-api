@@ -157,6 +157,16 @@ public class CaseAssignmentService {
         selectedParty.setBarrister(null);
     }
 
+    public AllocatedBarrister updateAllocatedBarrister(AllocatedBarrister allocatedBarrister,
+                                         final CaseData caseData,
+                                         String selectedPartyId) {
+        PartyDetails selectedParty = getSelectedParty(caseData, selectedPartyId);
+        return AllocatedBarrister.builder()
+            .partyList(allocatedBarrister.getPartyList())
+            .barristerEmail(selectedParty.getBarrister().getBarristerEmail())
+            .build();
+    }
+
     private void removeBarristerCaseRole(CaseData caseData, PartyDetails partyDetails) {
         Barrister barrister = partyDetails.getBarrister();
         Set<String> userIds = Set.of(barrister.getBarristerId());
@@ -242,7 +252,7 @@ public class CaseAssignmentService {
                 });
     }
 
-    private PartyDetails getSelectedParty(CaseData caseData, String selectedPartyId) {
+    public PartyDetails getSelectedParty(CaseData caseData, String selectedPartyId) {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             return getC100Party(caseData, selectedPartyId);
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
