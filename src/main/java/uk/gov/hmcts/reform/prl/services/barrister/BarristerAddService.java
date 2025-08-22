@@ -30,8 +30,7 @@ public class BarristerAddService extends AbstractBarristerService {
     protected boolean isPartyApplicableForFiltering(boolean applicantOrRespondent, BarristerFilter barristerFilter, PartyDetails partyDetails) {
         boolean isApplicable = (!hasBarrister(partyDetails)) && (partyHasSolicitorOrg(partyDetails));
 
-        return isPartyApplicableForFiltering(applicantOrRespondent,
-                                             barristerFilter,
+        return isPartyApplicableForFiltering(barristerFilter,
                                              partyDetails,
                                              isApplicable,
                                              partyId -> log.info("Barrister Add Service - This party {} has an empty solicitor org or "
@@ -44,7 +43,7 @@ public class BarristerAddService extends AbstractBarristerService {
     protected String getLabelForAction(boolean applicantOrRespondent, BarristerFilter barristerFilter, PartyDetails partyDetails) {
         String partyDetailsInfo = partyDetails.getSolicitorOrg().getOrganisationName();
 
-        return getLabelForAction(applicantOrRespondent, barristerFilter, partyDetails, partyDetailsInfo);
+        return getLabelForAction(applicantOrRespondent, partyDetails, partyDetailsInfo);
     }
 
     @Override
