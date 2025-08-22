@@ -4,6 +4,7 @@ package uk.gov.hmcts.reform.prl.services.acro;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -32,6 +33,9 @@ public class BaisDocumentUploadService {
     private final AcroZipService acroZipService;
     private final CsvWriter csvWriter;
     private final PdfExtractorService pdfExtractorService;
+
+    @Value("acro.source-directory")
+    private String sourceDirectory;
 
     public static final String DOCUMENT_SOURCE_DIRECTORY = "acro-sources";
     public static final String OUTPUT_DIRECTORY = "acro-output";
@@ -96,7 +100,7 @@ public class BaisDocumentUploadService {
 
     private String getFileName(String caseId, LocalDateTime orderCreatedDate, boolean isWelsh) {
         ZonedDateTime zdt = ZonedDateTime.of(orderCreatedDate, ZoneId.systemDefault());
-        String filename = DOCUMENT_SOURCE_DIRECTORY + "/FL404A-" + caseId + "-" + zdt.toEpochSecond();
+        String filename = sourceDirectory + "/FL404A-" + caseId + "-" + zdt.toEpochSecond();
         return isWelsh ? filename + "-Welsh.pdf" : filename + ".pdf";
     }
 

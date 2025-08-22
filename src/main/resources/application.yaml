@@ -804,3 +804,5 @@ hearing:
 
 acro:
   search-case-type-id: PRLAPPS
+  source-directory: acro/sources
+  output-directory: acro/output
