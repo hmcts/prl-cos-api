@@ -42,7 +42,7 @@ public class FeatureToggleService {
     /*
      * Defaulted to true. Only to be set to false in Preview as ACA API is not deployed there
      */
-    public boolean isAddBarristerIsEnabled(Features feature) {
+    public boolean isAddBarristerIsEnabled() {
         return isFeatureEnabled(ADD_BARRISTER);
     }
 

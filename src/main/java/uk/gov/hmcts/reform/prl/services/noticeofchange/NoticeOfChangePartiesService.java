@@ -45,6 +45,7 @@ import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeParties;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.EventService;
+import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -116,6 +117,7 @@ public class NoticeOfChangePartiesService {
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     private final ServiceOfApplicationService serviceOfApplicationService;
     private final CaseAssignmentService caseAssignmentService;
+    private final FeatureToggleService featureToggleService;
 
     public static final String REPRESENTATIVE_REMOVED_LABEL = "# Representative removed";
 
@@ -225,7 +227,11 @@ public class NoticeOfChangePartiesService {
 
     public AboutToStartOrSubmitCallbackResponse applyDecision(CallbackRequest callbackRequest, String authorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        caseAssignmentService.removeAmBarristerIfPresent(caseDetails);
+
+        if (featureToggleService.isAddBarristerIsEnabled()) {
+            caseAssignmentService.removeAmBarristerIfPresent(caseDetails);
+        }
+
         return assignCaseAccessClient.applyDecision(
             authorisation,
             tokenGenerator.generate(),
@@ -280,8 +286,11 @@ public class NoticeOfChangePartiesService {
         }
 
         if (solicitorDetails.isPresent()) {
-            caseAssignmentService.removePartyBarristerIfPresent(allTabsUpdateCaseData,
-                                                                changeOrganisationRequest);
+            if (featureToggleService.isAddBarristerIsEnabled()) {
+                caseAssignmentService.removePartyBarristerIfPresent(allTabsUpdateCaseData,
+                                                                    changeOrganisationRequest);
+            }
+
             allTabsUpdateCaseData = updateRepresentedPartyDetails(
                 changeOrganisationRequest,
                 allTabsUpdateCaseData,
