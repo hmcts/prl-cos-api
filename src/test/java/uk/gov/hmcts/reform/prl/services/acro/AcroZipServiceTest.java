@@ -1,9 +1,11 @@
 package uk.gov.hmcts.reform.prl.services.acro;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -14,8 +16,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@ExtendWith(MockitoExtension.class)
 @DisplayName("AcroZipService Tests")
 class AcroZipServiceTest {
+
     private AcroZipService acroZipService;
     private Path tempSourceDir;
     private Path tempExportDir;
@@ -25,12 +29,9 @@ class AcroZipServiceTest {
         acroZipService = new AcroZipService();
         tempSourceDir = Files.createTempDirectory("acrozip-src");
         tempExportDir = Files.createTempDirectory("acrozip-exp");
-    }
 
-    @AfterEach
-    void tearDown() throws Exception {
-        Files.walk(tempSourceDir).map(Path::toFile).forEach(File::delete);
-        Files.walk(tempExportDir).map(Path::toFile).forEach(File::delete);
+        ReflectionTestUtils.setField(acroZipService, "sourcePath", tempSourceDir.toString());
+        ReflectionTestUtils.setField(acroZipService, "exportPath", tempExportDir.toString());
     }
 
     @Test
@@ -39,7 +40,7 @@ class AcroZipServiceTest {
         Path file1 = Files.createFile(tempSourceDir.resolve("file1.txt"));
         Files.writeString(file1, "Test content");
 
-        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile());
+        String archivePath = acroZipService.zip();
         File archiveFile = new File(archivePath);
 
         byte[] header = new byte[6];
@@ -59,7 +60,7 @@ class AcroZipServiceTest {
         Path file1 = Files.createFile(tempSourceDir.resolve("file1.txt"));
         Files.writeString(file1, "Test content");
 
-        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile());
+        String archivePath = acroZipService.zip();
         File archiveFile = new File(archivePath);
 
         String fileName = archiveFile.getName();
@@ -70,7 +71,7 @@ class AcroZipServiceTest {
     @Test
     @DisplayName("Should create empty archive when source directory is empty")
     void shouldCreateEmptyArchiveWhenSourceDirectoryIsEmpty() throws Exception {
-        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile());
+        String archivePath = acroZipService.zip();
         File archiveFile = new File(archivePath);
 
         assertTrue(archiveFile.exists(), "Archive should be created even for empty directory");
@@ -85,7 +86,7 @@ class AcroZipServiceTest {
         Files.writeString(Files.createFile(subDir.resolve("file2.txt")), "Content 2");
         Files.writeString(Files.createFile(subDir.resolve("file3.txt")), "Content 3");
 
-        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile());
+        String archivePath = acroZipService.zip();
         File archiveFile = new File(archivePath);
 
         assertTrue(archiveFile.exists(), "Archive should be created");
@@ -95,10 +96,10 @@ class AcroZipServiceTest {
     @Test
     @DisplayName("Should throw exception when source directory does not exist")
     void shouldThrowExceptionWhenSourceDirectoryDoesNotExist() throws Exception {
-        File nonExistentDir = new File("/non/existent/path");
+        ReflectionTestUtils.setField(acroZipService, "sourcePath", "/non/existent/path");
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                                                          () -> acroZipService.zip(nonExistentDir, tempExportDir.toFile()));
+                                                          () -> acroZipService.zip());
 
         assertTrue(exception.getMessage().contains("Source must be an existing directory"));
     }
@@ -106,10 +107,10 @@ class AcroZipServiceTest {
     @Test
     @DisplayName("Should throw exception when export directory does not exist")
     void shouldThrowExceptionWhenExportDirectoryDoesNotExist() throws Exception {
-        File nonExistentDir = new File("/non/existent/export");
+        ReflectionTestUtils.setField(acroZipService, "exportPath", "/non/existent/export");
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                                                          () -> acroZipService.zip(tempSourceDir.toFile(), nonExistentDir));
+                                                          () -> acroZipService.zip());
 
         assertTrue(exception.getMessage().contains("Export folder must be an existing directory"));
     }
@@ -120,24 +121,9 @@ class AcroZipServiceTest {
         Files.writeString(Files.createFile(tempSourceDir.resolve("file with spaces.txt")), "Content");
         Files.writeString(Files.createFile(tempSourceDir.resolve("file-with-dashes.txt")), "Content");
 
-        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile());
+        String archivePath = acroZipService.zip();
         File archiveFile = new File(archivePath);
 
         assertTrue(archiveFile.exists(), "Archive should handle special characters in filenames");
     }
-
-    // For manual review only; comment out by default
-    /*
-    @Test
-    @DisplayName("Manual test - creates archive in project root for inspection")
-    void manualTest_CreatesArchiveInProjectRootForInspection() throws Exception {
-        Path file1 = Files.createFile(tempSourceDir.resolve("file1.txt"));
-        Files.writeString(file1, "Test content");
-
-        File projectRoot = new File(System.getProperty("user.dir"));
-        String archivePath = acroZipService.zip(tempSourceDir.toFile(), projectRoot);
-
-        System.out.println("7zip archive saved to: " + archivePath);
-    }
-    */
 }

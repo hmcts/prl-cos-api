@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZOutputFile;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -20,7 +21,16 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class AcroZipService {
 
-    public String zip(File sourceFolder, File exportFolder) throws Exception {
+    @Value("${acro-source-directory}")
+    private String sourcePath;
+
+    @Value("${acro-export-directory}")
+    private String exportPath;
+
+    public String zip() throws Exception {
+        File sourceFolder = new File(sourcePath);
+        File exportFolder = new File(exportPath);
+
         validateInputs(sourceFolder, exportFolder);
 
         Path sourcePath = sourceFolder.toPath();
