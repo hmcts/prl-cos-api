@@ -10,9 +10,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
-import static uk.gov.hmcts.reform.prl.enums.PartyEnum.applicant;
-import static uk.gov.hmcts.reform.prl.enums.PartyEnum.respondent;
-
 @Slf4j
 @Service
 public class BarristerAddService extends AbstractBarristerService {

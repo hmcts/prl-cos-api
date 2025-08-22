@@ -97,15 +97,15 @@ public abstract class AbstractBarristerService {
     private DynamicList getPartiesToListForFL401(CaseData caseData, BarristerFilter barristerFilter) {
         List<DynamicListElement> listItems = new ArrayList<>();
         PartyDetails applicantPartyDetails = caseData.getApplicantsFL401();
-        checkAndAddPartyToListFL401(applicant, listItems, applicantPartyDetails, barristerFilter);
+        listItems.addAll(getPartiesToAddForFL401(applicant, applicantPartyDetails, barristerFilter));
 
         PartyDetails respondentPartyDetails = caseData.getRespondentsFL401();
-        checkAndAddPartyToListFL401(respondent, listItems, respondentPartyDetails, barristerFilter);
+        listItems.addAll(getPartiesToAddForFL401(respondent, respondentPartyDetails, barristerFilter));
 
         return DynamicList.builder().value(null).listItems(listItems).build();
     }
 
-    private void checkAndAddPartyToListFL401(PartyEnum partyEnum, List<DynamicListElement> listToAddTo,
+    private List<DynamicListElement> getPartiesToAddForFL401(PartyEnum partyEnum,
                                              PartyDetails party, BarristerFilter barristerFilter) {
         List<DynamicListElement> itemsList = new ArrayList<>();
         if (party != null) {
