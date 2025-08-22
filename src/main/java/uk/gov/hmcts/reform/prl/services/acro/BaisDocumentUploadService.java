@@ -33,8 +33,8 @@ public class BaisDocumentUploadService {
     private final CsvWriter csvWriter;
     private final PdfExtractorService pdfExtractorService;
 
-    public static final String DOCUMENT_SOURCE_DIRECTORY = "acro/sources";
-    public static final String OUTPUT_DIRECTORY = "acro/output";
+    public static final String DOCUMENT_SOURCE_DIRECTORY = "acro-sources";
+    public static final String OUTPUT_DIRECTORY = "acro-output";
 
 
     public void uploadFL404Orders() {
@@ -94,10 +94,10 @@ public class BaisDocumentUploadService {
         }
     }
 
-    private static String getFileName(String caseId, LocalDateTime orderCreatedDate, boolean isWelsh) {
+    private String getFileName(String caseId, LocalDateTime orderCreatedDate, boolean isWelsh) {
         ZonedDateTime zdt = ZonedDateTime.of(orderCreatedDate, ZoneId.systemDefault());
-        String filename = DOCUMENT_SOURCE_DIRECTORY + "/FL404A-" + caseId + zdt.toEpochSecond();
-        return isWelsh ? filename + "Welsh.pdf" : filename + ".pdf";
+        String filename = DOCUMENT_SOURCE_DIRECTORY + "/FL404A-" + caseId + "-" + zdt.toEpochSecond();
+        return isWelsh ? filename + "-Welsh.pdf" : filename + ".pdf";
     }
 
 }
