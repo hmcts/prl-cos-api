@@ -8,5 +8,6 @@ import lombok.Data;
 public class BarristerFilter {
     private String userOrgIdentifier;
     private boolean caseworkerOrSolicitor;
+    private boolean isBarrister;
     private boolean caseTypeC100OrFL401;
 }

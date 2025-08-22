@@ -18,9 +18,9 @@ public class BarristerRemoveService extends  AbstractBarristerService {
         super(userService, organisationService);
     }
 
-    public AllocatedBarrister getBarristerListToRemove(CaseData caseData, String authorisation) {
+    public AllocatedBarrister getBarristerListToRemove(CaseData caseData, String authorisation, Boolean isBarrister) {
         return AllocatedBarrister.builder()
-            .partyList(getPartiesToList(caseData, authorisation))
+            .partyList(getPartiesToList(caseData, authorisation, isBarrister))
             .barristerOrg(Organisation.builder().build())
             .build();
     }
@@ -28,10 +28,9 @@ public class BarristerRemoveService extends  AbstractBarristerService {
 
     @Override
     protected boolean isPartyApplicableForFiltering(boolean applicantOrRespondent, BarristerFilter barristerFilter, PartyDetails partyDetails) {
-        boolean isApplicable = hasBarrister(partyDetails) && partyDetails.getBarrister().getBarristerId() != null;
+        boolean isApplicable = hasBarrister(partyDetails);
 
-        return isPartyApplicableForFiltering(applicantOrRespondent,
-                                             barristerFilter,
+        return isPartyApplicableForFiltering(barristerFilter,
                                              partyDetails,
                                              isApplicable,
                                              partyId -> log.info("Barrister Remove Service - This party {} has an empty solicitor org or "
@@ -43,7 +42,7 @@ public class BarristerRemoveService extends  AbstractBarristerService {
     protected String getLabelForAction(boolean applicantOrRespondent, BarristerFilter barristerFilter, PartyDetails partyDetails) {
         String partyDetailsInfo = partyDetails.getBarrister().getBarristerFullName();
 
-        return getLabelForAction(applicantOrRespondent, barristerFilter, partyDetails, partyDetailsInfo);
+        return getLabelForAction(applicantOrRespondent, partyDetails, partyDetailsInfo);
     }
 
     @Override

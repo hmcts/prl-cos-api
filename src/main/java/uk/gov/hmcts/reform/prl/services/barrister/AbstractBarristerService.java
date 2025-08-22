@@ -34,7 +34,11 @@ public abstract class AbstractBarristerService {
     }
 
     protected DynamicList getPartiesToList(CaseData caseData, String authorisation) {
-        return getPartiesToListForC100OrFL401(caseData, populateBarristerFilter(caseData, authorisation));
+        return getPartiesToListForC100OrFL401(caseData, populateBarristerFilter(caseData, authorisation, false));
+    }
+
+    protected DynamicList getPartiesToList(CaseData caseData, String authorisation, boolean isBarrister) {
+        return getPartiesToListForC100OrFL401(caseData, populateBarristerFilter(caseData, authorisation, isBarrister));
     }
 
     protected boolean hasBarrister(PartyDetails partyDetails) {
@@ -46,12 +50,13 @@ public abstract class AbstractBarristerService {
             && partyDetails.getSolicitorOrg().getOrganisationName() != null);
     }
 
-    private BarristerFilter populateBarristerFilter(CaseData caseData, String authorisation) {
+    private BarristerFilter populateBarristerFilter(CaseData caseData, String authorisation, Boolean isBarrister) {
         boolean isSolicitor = isSolicitor(authorisation);
         return BarristerFilter.builder()
             .userOrgIdentifier(isSolicitor ? getUserOrgId(authorisation) : null)
             .caseworkerOrSolicitor(!isSolicitor)
             .caseTypeC100OrFL401(isC100CaseType(caseData))
+            .isBarrister(isBarrister)
             .build();
 
     }
@@ -168,16 +173,23 @@ public abstract class AbstractBarristerService {
         }
     }
 
-    protected boolean isPartyApplicableForFiltering(boolean applicantOrRespondent, BarristerFilter barristerFilter,
-                                                             PartyDetails partyDetails, Boolean isApplicable, Consumer<UUID> logger) {
-        if (barristerFilter.isCaseworkerOrSolicitor()) {
+    protected boolean isPartyApplicableForFiltering(BarristerFilter barristerFilter,
+                                                             PartyDetails partyDetails, Boolean isApplicable,
+                                                             Consumer<UUID> logger) {
+        if (barristerFilter.isBarrister() && hasBarrister(partyDetails)) {
+            System.out.println("BARRISTER");
+            System.out.println(barristerFilter.getUserOrgIdentifier());
+            System.out.println(partyDetails.getBarrister().getBarristerOrg().getOrganisationID());
+            System.out.println(barristerFilter.getUserOrgIdentifier().equals(partyDetails.getBarrister().getBarristerOrg().getOrganisationID()));
+            return isApplicable
+                && barristerFilter.getUserOrgIdentifier().equals(partyDetails.getBarrister().getBarristerOrg().getOrganisationID());
+        } else if (barristerFilter.isCaseworkerOrSolicitor()) {
             return isApplicable;
         } else {
             if (partyDetails.getSolicitorOrg() == null || barristerFilter.getUserOrgIdentifier() == null) {
                 logger.accept(partyDetails.getPartyId());
                 return false;
             }
-
             return isApplicable
                 && barristerFilter.getUserOrgIdentifier().equals(partyDetails.getSolicitorOrg().getOrganisationID());
         }
@@ -186,7 +198,7 @@ public abstract class AbstractBarristerService {
     protected abstract boolean isPartyApplicableForFiltering(boolean applicantOrRespondent, BarristerFilter barristerFilter,
                                                              PartyDetails partyDetails);
 
-    protected String getLabelForAction(boolean applicantOrRespondent, BarristerFilter barristerFilter,
+    protected String getLabelForAction(boolean applicantOrRespondent,
                                        PartyDetails partyDetails,String partyDetailsInfo) {
         return String.format("%s (%s), %s, %s", partyDetails.getLabelForDynamicList(),
                              applicantOrRespondent ? applicant.getDisplayedValue() : respondent.getDisplayedValue(),
