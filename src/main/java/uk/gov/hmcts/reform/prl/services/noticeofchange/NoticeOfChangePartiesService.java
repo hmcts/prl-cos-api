@@ -665,8 +665,11 @@ public class NoticeOfChangePartiesService {
                     }
                 });
         }
-        caseAssignmentService.removeAmBarristerCaseRole(caseData,
-                                                        selectedPartyDetailsMap);
+        if (featureToggleService.isAddBarristerIsEnabled()) {
+            caseAssignmentService.removeAmBarristerCaseRole(caseData,
+                                                            selectedPartyDetailsMap);
+        }
+
         caseDataUpdated = createChangeOrgReqAndRemoveRepresentative(
             authorisation,
             caseDetails,

@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -894,6 +895,7 @@ public class NoticeOfChangePartiesServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn("");
         when(assignCaseAccessClient.applyDecision(anyString(), anyString(), any(DecisionRequest.class))).thenReturn(
             AboutToStartOrSubmitCallbackResponse.builder().data(caseData.toMap(realObjectMapper)).build());
+        when(featureToggleService.isAddBarristerIsEnabled()).thenReturn(true);
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
@@ -905,6 +907,8 @@ public class NoticeOfChangePartiesServiceTest {
             .build();
         noticeOfChangePartiesService.aboutToSubmitStopRepresenting("testAuth", callbackRequest);
         verify(assignCaseAccessClient, times(1)).applyDecision(any(), any(), any());
+        verify(caseAssignmentService).removeAmBarristerCaseRole(isA(CaseData.class),
+                                                                ArgumentMatchers.<Map<Optional<SolicitorRole>, Element<PartyDetails>>>any());
     }
 
     @Test
@@ -942,6 +946,7 @@ public class NoticeOfChangePartiesServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn("");
         when(assignCaseAccessClient.applyDecision(anyString(), anyString(), any(DecisionRequest.class))).thenReturn(
             AboutToStartOrSubmitCallbackResponse.builder().data(caseData.toMap(realObjectMapper)).build());
+        when(featureToggleService.isAddBarristerIsEnabled()).thenReturn(true);
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
@@ -953,6 +958,8 @@ public class NoticeOfChangePartiesServiceTest {
             .build();
         noticeOfChangePartiesService.aboutToSubmitStopRepresenting("testAuth", callbackRequest);
         verify(assignCaseAccessClient, times(1)).applyDecision(any(), any(), any());
+        verify(caseAssignmentService).removeAmBarristerCaseRole(isA(CaseData.class),
+                                                                ArgumentMatchers.<Map<Optional<SolicitorRole>, Element<PartyDetails>>>any());
     }
 
     @Test
@@ -988,6 +995,7 @@ public class NoticeOfChangePartiesServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn("");
         when(assignCaseAccessClient.applyDecision(anyString(), anyString(), any(DecisionRequest.class))).thenReturn(
             AboutToStartOrSubmitCallbackResponse.builder().data(caseData.toMap(realObjectMapper)).build());
+        when(featureToggleService.isAddBarristerIsEnabled()).thenReturn(true);
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
@@ -999,6 +1007,8 @@ public class NoticeOfChangePartiesServiceTest {
             .build();
         noticeOfChangePartiesService.aboutToSubmitStopRepresenting("testAuth", callbackRequest);
         verify(assignCaseAccessClient, times(1)).applyDecision(any(), any(), any());
+        verify(caseAssignmentService).removeAmBarristerCaseRole(isA(CaseData.class),
+                                                                ArgumentMatchers.<Map<Optional<SolicitorRole>, Element<PartyDetails>>>any());
     }
 
     @Test
@@ -1033,6 +1043,7 @@ public class NoticeOfChangePartiesServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn("");
         when(assignCaseAccessClient.applyDecision(anyString(), anyString(), any(DecisionRequest.class))).thenReturn(
             AboutToStartOrSubmitCallbackResponse.builder().data(caseData.toMap(realObjectMapper)).build());
+        when(featureToggleService.isAddBarristerIsEnabled()).thenReturn(true);
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
@@ -1044,6 +1055,8 @@ public class NoticeOfChangePartiesServiceTest {
             .build();
         noticeOfChangePartiesService.aboutToSubmitStopRepresenting("testAuth", callbackRequest);
         verify(assignCaseAccessClient, times(1)).applyDecision(any(), any(), any());
+        verify(caseAssignmentService).removeAmBarristerCaseRole(isA(CaseData.class),
+                                                                ArgumentMatchers.<Map<Optional<SolicitorRole>, Element<PartyDetails>>>any());
     }
 
     @Test
@@ -1507,7 +1520,6 @@ public class NoticeOfChangePartiesServiceTest {
             .build();
     }
 
-    //Todo
     @Test
     public void testSubmittedStopRepresentingWithAccessCode() {
         List<Element<PartyDetails>> applicant = new ArrayList<>();
