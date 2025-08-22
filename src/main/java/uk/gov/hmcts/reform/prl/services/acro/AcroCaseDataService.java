@@ -145,7 +145,8 @@ public class AcroCaseDataService {
         Range range = Range.builder().lastModified(lastModified).build();
         Bool bool = Bool.builder()
             .filter(Filter.builder().range(range).build())
-            .must(Must.builder().stateFilter(StateFilter.builder().should(mustQuery).build()).build())
+            .must(Must.builder().stateFilter(StateFilter.builder().should(mustQuery).minimumShouldMatch(4).build())
+                      .build())
             .build();
         Query query = Query.builder().bool(bool).build();
         return QueryParam.builder().query(query).dataToReturn(fetchFieldsRequiredForAcro()).build();
