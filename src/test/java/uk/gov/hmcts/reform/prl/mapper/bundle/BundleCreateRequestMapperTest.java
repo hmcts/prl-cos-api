@@ -462,7 +462,8 @@ public class BundleCreateRequestMapperTest {
         assertThat(bundleCreateRequest.getCaseDetails().getCaseData().getData().getAllOtherDocuments().stream()
                        .map(Element::getValue)
                        .map(BundlingRequestDocument::getDocumentFileName)
-                       .filter(fileName -> List.of("policeDisclosures", "medicalRecords").contains(fileName)).toList())
+                       .filter(fileName -> List.of("policeDisclosures", "medicalRecords", "anyOtherDocuments")
+                           .contains(fileName)).toList())
             .asInstanceOf(LIST).isEmpty();
     }
 

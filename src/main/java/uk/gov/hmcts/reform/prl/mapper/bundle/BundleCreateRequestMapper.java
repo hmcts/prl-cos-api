@@ -40,7 +40,6 @@ import java.util.Optional;
 
 import static java.util.Collections.reverse;
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ANY_OTHER_DOC;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_C1A_RESPONSE;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CASE_SUMMARY;
@@ -422,10 +421,6 @@ public class BundleCreateRequestMapper {
                 .documentFileName(doc.getResultsOfHairStrandBloodTestsDocument().getDocumentFileName())
                 .documentGroup(BundlingDocGroupEnum.resultsOfHairStrandBloodTests).build() : null
         );
-        bundleMap.put(ANY_OTHER_DOC, Objects.nonNull(doc.getAnyOtherDocDocument()) ? BundlingRequestDocument.builder()
-            .documentLink(doc.getAnyOtherDocDocument())
-            .documentFileName(doc.getAnyOtherDocDocument().getDocumentFileName())
-            .documentGroup(BundlingDocGroupEnum.anyOtherDocuments).build() : null);
     }
 
     private static void mapWitnessStatements(QuarantineLegalDoc doc, HashMap<String, BundlingRequestDocument> bundleMap) {
