@@ -1214,6 +1214,8 @@ class CaseAssignmentServiceTest {
             .thenReturn("sysUserToken");
         when(tokenGenerator.generate())
             .thenReturn("token");
+        when(featureToggleService.isAddBarristerIsEnabled())
+            .thenReturn(true);
 
         caseAssignmentService.removeAmBarristerCaseRole(caseData,
                                                         Map.of(Optional.of(SolicitorRole.C100APPLICANTSOLICITOR3),
