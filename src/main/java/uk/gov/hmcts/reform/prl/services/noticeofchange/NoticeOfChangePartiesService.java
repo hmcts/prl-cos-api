@@ -539,8 +539,12 @@ public class NoticeOfChangePartiesService {
                 .solicitorOrg(Organisation.builder().organisationID(organisations.getOrganisationIdentifier()).organisationName(
                     organisations.getName()).build()).build();
         } else if (TypeOfNocEventEnum.removeLegalRepresentation.equals(typeOfNocEvent)) {
-            partyDetails = partyDetails.toBuilder().solicitorOrg(Organisation.builder().build())
-                .solicitorReference(null).solicitorTelephone(null).build();
+            partyDetails = partyDetails.toBuilder()
+                .solicitorOrg(Organisation.builder().build())
+                .solicitorReference(null)
+                .solicitorTelephone(null)
+                .barrister(null)
+                .build();
         }
         return partyDetails;
     }
@@ -654,6 +658,9 @@ public class NoticeOfChangePartiesService {
                     }
                 });
         }
+        caseAssignmentService.removeAmBarristerCaseRole(caseData,
+                                                        selectedPartyDetailsMap);
+
         caseDataUpdated = createChangeOrgReqAndRemoveRepresentative(
             authorisation,
             caseDetails,
