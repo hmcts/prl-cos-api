@@ -23,5 +23,5 @@ public class Bool {
     private List<Should> should;
 
     @JsonProperty("minimum_should_match")
-    public int minimumShouldMatch;
+    public Integer minimumShouldMatch;
 }
