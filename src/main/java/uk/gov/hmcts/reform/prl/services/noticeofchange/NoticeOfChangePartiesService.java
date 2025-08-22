@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.noticeofchange;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +14,6 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -41,7 +39,6 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
-import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeParties;
@@ -69,7 +66,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATED_BARRISTER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -90,7 +86,6 @@ public class NoticeOfChangePartiesService {
     public static final String NO_REPRESENTATION_FOUND_ERROR = "You do not represent anyone in this case.";
     public static final String CASE_NOT_REPRESENTED_BY_SOLICITOR_ERROR = "This case is not represented by solicitor anymore.";
     public static final String SOL_STOP_REP_CHOOSE_PARTIES = "solStopRepChooseParties";
-    public static final String BAR_STOP_REP_CHOOSE_PARTIES = "barStopRepChooseParties";
 
     public static final String REMOVE_LEGAL_REPRESENTATIVE_AND_PARTIES_LIST = "removeLegalRepAndPartiesList";
     public static final String IS_NO_LONGER_REPRESENTING = " is no longer representing ";
@@ -112,8 +107,6 @@ public class NoticeOfChangePartiesService {
 
     private final CcdDataStoreService userDataStoreService;
     private final SystemUserService systemUserService;
-
-    private final CaseAssignmentService caseAssignmentService;
 
     private final CaseInviteManager caseInviteManager;
     private final OrganisationService organisationService;
@@ -593,24 +586,14 @@ public class NoticeOfChangePartiesService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         List<Element<PartyDetails>> partyElementList = findSolicitorRepresentedParties(caseData, authorisation);
-        List<Optional<String>> barPartyElementList = findBarristerRepresentedParties(caseData, authorisation,
-                                                                                     callbackRequest.getCaseDetails());
         DynamicMultiSelectList solicitorRepresentedParties
             = dynamicMultiSelectListService.getSolicitorRepresentedParties(partyElementList);
 
-        DynamicMultiSelectList barristerRepresentedParties
-            = dynamicMultiSelectListService.getBarristerRepresentedParties(barPartyElementList);
-
         if (solicitorRepresentedParties.getListItems().isEmpty()) {
-            if (barristerRepresentedParties.getListItems().isEmpty()) {
-                errorList.add(NO_REPRESENTATION_FOUND_ERROR);
-            } else {
-                caseDataUpdated.put(BAR_STOP_REP_CHOOSE_PARTIES, barristerRepresentedParties);
-            }
+            errorList.add(NO_REPRESENTATION_FOUND_ERROR);
         } else {
             caseDataUpdated.put(SOL_STOP_REP_CHOOSE_PARTIES, solicitorRepresentedParties);
         }
-
         return caseDataUpdated;
     }
 
@@ -953,23 +936,8 @@ public class NoticeOfChangePartiesService {
         return solicitorRepresentedParties;
     }
 
-    private List<Optional<String>> findBarristerRepresentedParties(CaseData caseData, String authorisation, CaseDetails caseDetails) {
-        List<Optional<String>> barristerRepresentedParties = new ArrayList<>();
-        FindUserCaseRolesResponse findUserCaseRolesResponse
-            = findUserCaseRoles(String.valueOf(caseData.getId()), authorisation);
-
-        if (findUserCaseRolesResponse != null) {
-            barristerRepresentedParties.add(getBarristerRepresentedParties(
-                caseData,
-                caseDetails
-            ));
-        }
-        return barristerRepresentedParties;
-    }
-
     private List<Element<PartyDetails>> getSolicitorRepresentedParties(CaseData caseData, FindUserCaseRolesResponse findUserCaseRolesResponse) {
         List<Element<PartyDetails>> solicitorRepresentedParties = new ArrayList<>();
-
         for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
             SolicitorRole.fromCaseRoleLabel(caseUser.getCaseRole()).ifPresent(
                 x -> {
@@ -999,16 +967,6 @@ public class NoticeOfChangePartiesService {
             );
         }
         return solicitorRepresentedParties;
-    }
-
-    private Optional<String> getBarristerRepresentedParties(CaseData caseData, CaseDetails caseDetails) {
-        AllocatedBarrister allocatedBarrister = objectMapper.convertValue(
-            caseDetails.getData().get(ALLOCATED_BARRISTER),
-            new TypeReference<>() { }
-        );
-        return caseAssignmentService.deriveBarristerRole(caseDetails.getData(),
-                                                         caseData,
-                                                         allocatedBarrister);
     }
 
     private FindUserCaseRolesResponse findUserCaseRoles(String caseId, String authorisation) {

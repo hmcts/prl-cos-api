@@ -320,18 +320,6 @@ public class DynamicMultiSelectListService {
         return DynamicMultiSelectList.builder().listItems(listItems).build();
     }
 
-    public DynamicMultiSelectList getBarristerRepresentedParties(List<Optional<String>> partyElementList) {
-        List<DynamicMultiselectListElement> listItems = new ArrayList<>();
-        partyElementList.stream().forEach(x -> {
-            listItems.add(DynamicMultiselectListElement
-                              .builder()
-                              .code(String.valueOf(x))
-                              .label(String.valueOf(x))
-                              .build());
-        });
-        return DynamicMultiSelectList.builder().listItems(listItems).build();
-    }
-
     public DynamicMultiSelectList getRemoveLegalRepAndPartiesList(CaseData caseData) {
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {

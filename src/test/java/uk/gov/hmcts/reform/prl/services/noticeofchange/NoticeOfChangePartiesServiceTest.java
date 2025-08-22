@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
@@ -151,8 +150,6 @@ public class NoticeOfChangePartiesServiceTest {
     CcdCoreCaseDataService ccdCoreCaseDataService;
     @Mock
     OrganisationService organisationService;
-    @Mock
-    CaseAssignmentService caseAssignmentService;
 
     @Mock
     CaseEventService caseEventService;
