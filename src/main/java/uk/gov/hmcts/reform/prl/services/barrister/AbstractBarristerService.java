@@ -18,6 +18,8 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASEWORKER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.PartyEnum.applicant;
 import static uk.gov.hmcts.reform.prl.enums.PartyEnum.respondent;
@@ -25,7 +27,6 @@ import static uk.gov.hmcts.reform.prl.enums.PartyEnum.respondent;
 public abstract class AbstractBarristerService {
     protected static final String APPLICANT = "Applicant";
     protected static final String RESPONDENT = "Respondent";
-    protected static final String COURT_ADMIN = "Court admin";
     private final UserService userService;
     private final OrganisationService organisationService;
 
@@ -77,8 +78,8 @@ public abstract class AbstractBarristerService {
         List<String> roles = userService.getUserDetails(authorisation).getRoles();
         if (roles.contains(Roles.SOLICITOR.getValue())) {
             return Roles.SOLICITOR.getValue();
-        } else if (roles.contains(COURT_ADMIN)) {
-            return Roles.COURT_ADMIN.getValue();
+        } else if (roles.contains(CASEWORKER) || roles.contains(COURT_ADMIN)) {
+            return roles.contains(CASEWORKER) ? CASEWORKER : COURT_ADMIN;
         } else {
             return null;
         }
