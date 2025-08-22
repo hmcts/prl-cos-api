@@ -40,7 +40,6 @@ import java.util.Optional;
 
 import static java.util.Collections.reverse;
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ANY_OTHER_DOC;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_C1A_RESPONSE;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CASE_SUMMARY;
@@ -52,13 +51,11 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.GUARDIAN_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.LA_OTHER_DOCS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.MAGISTRATES_FACTS_AND_REASONS;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.MEDICAL_RECORDS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.MEDICAL_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.MIAM_CERTIFICATE;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ORDERS_FROM_OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.OTHER_DOCS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.OTHER_WITNESS_STATEMENTS;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.POLICE_DISCLOSURES;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.POLICE_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.POSITION_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION;
@@ -400,13 +397,6 @@ public class BundleCreateRequestMapper {
                 .documentGroup(BundlingDocGroupEnum.medicalReports).build() : null
         );
         bundleMap.put(
-            MEDICAL_RECORDS,
-            Objects.nonNull(doc.getMedicalRecordsDocument()) ? BundlingRequestDocument.builder()
-                .documentLink(doc.getMedicalRecordsDocument())
-                .documentFileName(doc.getMedicalRecordsDocument().getDocumentFileName())
-                .documentGroup(BundlingDocGroupEnum.medicalRecords).build() : null
-        );
-        bundleMap.put(
             DRUG_AND_ALCOHOL_TEST,
             Objects.nonNull(doc.getDrugAndAlcoholTestDocument()) ? BundlingRequestDocument.builder()
                 .documentLink(doc.getDrugAndAlcoholTestDocument())
@@ -431,17 +421,6 @@ public class BundleCreateRequestMapper {
                 .documentFileName(doc.getResultsOfHairStrandBloodTestsDocument().getDocumentFileName())
                 .documentGroup(BundlingDocGroupEnum.resultsOfHairStrandBloodTests).build() : null
         );
-        bundleMap.put(
-            POLICE_DISCLOSURES,
-            Objects.nonNull(doc.getPoliceDisclosuresDocument()) ? BundlingRequestDocument.builder()
-                .documentLink(doc.getPoliceDisclosuresDocument())
-                .documentFileName(doc.getPoliceDisclosuresDocument().getDocumentFileName())
-                .documentGroup(BundlingDocGroupEnum.policeDisclosures).build() : null
-        );
-        bundleMap.put(ANY_OTHER_DOC, Objects.nonNull(doc.getAnyOtherDocDocument()) ? BundlingRequestDocument.builder()
-            .documentLink(doc.getAnyOtherDocDocument())
-            .documentFileName(doc.getAnyOtherDocDocument().getDocumentFileName())
-            .documentGroup(BundlingDocGroupEnum.anyOtherDocuments).build() : null);
     }
 
     private static void mapWitnessStatements(QuarantineLegalDoc doc, HashMap<String, BundlingRequestDocument> bundleMap) {

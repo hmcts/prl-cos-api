@@ -41,6 +41,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.FM5_STATEMENTS;
@@ -456,6 +458,13 @@ public class BundleCreateRequestMapperTest {
         BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(c100CaseData,"eventI",
             Hearings.hearingsWith().build(),"sample.yaml");
         assertNotNull(bundleCreateRequest);
+        // Should not contain police disclosures or medical records
+        assertThat(bundleCreateRequest.getCaseDetails().getCaseData().getData().getAllOtherDocuments().stream()
+                       .map(Element::getValue)
+                       .map(BundlingRequestDocument::getDocumentFileName)
+                       .filter(fileName -> List.of("policeDisclosures", "medicalRecords", "anyOtherDocuments")
+                           .contains(fileName)).toList())
+            .asInstanceOf(LIST).isEmpty();
     }
 
     @Test
