@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers.barrister;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.barrister.BarristerAddService;
+import uk.gov.hmcts.reform.prl.services.barrister.BarristerRemoveService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,6 +36,10 @@ public class BarristerControllerTest {
 
     @Mock
     private BarristerAddService barristerAddService;
+
+    @Mock
+    private BarristerRemoveService barristerRemoveService;
+
     @Mock
     private AuthorisationService authorisationService;
 
@@ -96,6 +102,9 @@ public class BarristerControllerTest {
                              .build())
             .build();
 
+        DynamicListElement dynamicListElement = DynamicListElement.builder().code("12345:").label("test")
+            .build();
+
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
         when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
 
@@ -117,6 +126,50 @@ public class BarristerControllerTest {
 
     @Test
     public void shouldNotHandleAboutToStartEventWhenNotAuthorised() {
+            .partyList(DynamicList.builder().listItems(Lists.newArrayList(dynamicListElement)).build()).build();
+        when(barristerRemoveService.getBarristerListToRemove(caseData1, AUTH_TOKEN)).thenReturn(allocatedBarrister);
+        AboutToStartOrSubmitCallbackResponse callbackResponse = barristerController
+            .handleRemoveAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
+
+        assertEquals(allocatedBarrister, callbackResponse.getData().get("allocatedBarrister"));
+
+        verify(barristerRemoveService, times(1)).getBarristerListToRemove(caseData1, AUTH_TOKEN);
+    }
+
+    @Test
+    public void handleRemoveAboutToStartWhenNoBarristerList() {
+        Map caseData = new HashMap<>();
+        caseData.put("id", 12345L);
+        caseData.put("caseTypeOfApplication", "C100");
+
+        CaseData caseData1 = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .data(caseData)
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
+
+        AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder()
+            .partyList(DynamicList.builder()
+                           .listItems(Lists.newArrayList()).build()).build();
+        when(barristerRemoveService.getBarristerListToRemove(caseData1, AUTH_TOKEN)).thenReturn(allocatedBarrister);
+        AboutToStartOrSubmitCallbackResponse callbackResponse = barristerController
+            .handleRemoveAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
+
+        assertEquals("No barrister currently assigned to any party", callbackResponse.getErrors().get(0));
+        verify(barristerRemoveService, times(1)).getBarristerListToRemove(caseData1, AUTH_TOKEN);
+    }
+
+    @Test
+    public void shouldNotHandleMidEventWhenNotAuthorised() {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
                              .id(1L)
@@ -129,5 +182,21 @@ public class BarristerControllerTest {
             RuntimeException.class,
             () -> barristerController
                 .handleAboutToStartEvent(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest));
+    }
+
+    @Test
+    public void shouldNotHandleRemoveAboutToStartWhenNotAuthorised() {
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .build())
+            .build();
+
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(false);
+
+        assertThrows(
+            RuntimeException.class,
+            () -> barristerController
+                .handleRemoveAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest));
     }
 }

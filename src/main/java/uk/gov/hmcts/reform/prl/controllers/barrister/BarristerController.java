@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.barrister.BarristerAddService;
+import uk.gov.hmcts.reform.prl.services.barrister.BarristerRemoveService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
@@ -35,12 +36,15 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 public class BarristerController extends AbstractCallbackController {
     private final AuthorisationService authorisationService;
     private final BarristerAddService barristerAddService;
+    private final BarristerRemoveService barristerRemoveService;
 
     public BarristerController(ObjectMapper objectMapper, EventService eventPublisher,
                                BarristerAddService barristerAddService,
+                               BarristerRemoveService barristerRemoveService,
                                AuthorisationService authorisationService) {
         super(objectMapper, eventPublisher);
         this.barristerAddService = barristerAddService;
+        this.barristerRemoveService = barristerRemoveService;
         this.authorisationService = authorisationService;
     }
 
@@ -68,6 +72,35 @@ public class BarristerController extends AbstractCallbackController {
                 builder = AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(errorList)
                     .data(caseDataUpdated);
+            return builder.build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(path = "/remove/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to remove a barrister on about-to-start")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse handleRemoveAboutToStart(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) {
+
+        log.info("Inside barrister/remove/about-to-start for case {}", callbackRequest.getCaseDetails().getId());
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            List<String> errorList = new ArrayList<>();
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+            AllocatedBarrister barristerList = barristerRemoveService.getBarristerListToRemove(caseData, authorisation);
+            if (!barristerList.getPartyList().getListItems().isEmpty()) {
+                caseDataUpdated.put(ALLOCATED_BARRISTER, barristerList);
+            } else {
+                errorList.add("No barrister currently assigned to any party");
+            }
+
+            AboutToStartOrSubmitCallbackResponse.AboutToStartOrSubmitCallbackResponseBuilder
+                builder = AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).data(caseDataUpdated);
             return builder.build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
