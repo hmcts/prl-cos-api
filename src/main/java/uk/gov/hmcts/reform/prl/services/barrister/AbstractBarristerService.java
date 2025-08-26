@@ -186,8 +186,6 @@ public abstract class AbstractBarristerService {
                 logger.accept(partyDetails.getPartyId());
                 return false;
             }
-
-
             return isApplicable
                 && barristerFilter.getUserOrgIdentifier().equals(partyDetails.getSolicitorOrg().getOrganisationID());
         }
