@@ -2572,5 +2572,20 @@ public class ManageDocumentsServiceTest {
         verify(caseDocumentClient).uploadDocuments(eq("userToken"), eq("sysToken"), any(), any(), any());
     }
 
+    @Test
+    public void shouldSkipRenameAndReuploadFileIfConfidentialAlready() {
+        when(systemUserService.getSysUserToken()).thenReturn("userToken");
+        when(authTokenGenerator.generate()).thenReturn("sysToken");
+        manageDocumentsService.renameAndReuploadFileToBeConfidential(
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentUrl("00000000-0000-0000-0000-000000000000")
+                .documentFileName("Confidential_test")
+                .build());
+
+        verify(caseDocumentClient, never()).deleteDocument(any(), any(), any(), anyBoolean());
+        verify(caseDocumentClient, never()).getDocumentBinary(eq("userToken"), eq("sysToken"), any(UUID.class));
+        verify(caseDocumentClient, never()).uploadDocuments(eq("userToken"), eq("sysToken"), any(), any(), any());
+    }
+
 }
 
