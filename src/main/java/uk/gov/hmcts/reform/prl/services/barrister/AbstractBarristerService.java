@@ -177,10 +177,6 @@ public abstract class AbstractBarristerService {
                                                              PartyDetails partyDetails, Boolean isApplicable,
                                                              Consumer<UUID> logger) {
         if (barristerFilter.isBarrister() && hasBarrister(partyDetails)) {
-            System.out.println("BARRISTER");
-            System.out.println(barristerFilter.getUserOrgIdentifier());
-            System.out.println(partyDetails.getBarrister().getBarristerOrg().getOrganisationID());
-            System.out.println(barristerFilter.getUserOrgIdentifier().equals(partyDetails.getBarrister().getBarristerOrg().getOrganisationID()));
             return isApplicable
                 && barristerFilter.getUserOrgIdentifier().equals(partyDetails.getBarrister().getBarristerOrg().getOrganisationID());
         } else if (barristerFilter.isCaseworkerOrSolicitor()) {
