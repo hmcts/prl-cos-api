@@ -10,6 +10,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -125,9 +126,10 @@ public class CitizenCallbackControllerTest {
     public void updateCitizenApplicationTest() {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
+            .data(stringObjectMap).build();
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
-                                                       .data(stringObjectMap).build()).build();
+            .CallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build();
         when(allTabsService.updateAllTabsIncludingConfTab(anyString())).thenReturn(callbackRequest.getCaseDetails());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
