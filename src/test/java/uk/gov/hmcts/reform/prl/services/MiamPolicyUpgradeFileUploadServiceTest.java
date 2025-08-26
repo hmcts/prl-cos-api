@@ -20,9 +20,12 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamPolicyUpgradeDetails;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_1;
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_2;
@@ -30,6 +33,8 @@ import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPreviousAttend
 @RunWith(MockitoJUnitRunner.class)
 @Slf4j
 public class MiamPolicyUpgradeFileUploadServiceTest {
+
+    private static final String DOCUMENT_ID = "00000000-0000-0000-0000-000000000000";
 
     @InjectMocks
     private MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
@@ -473,5 +478,68 @@ public class MiamPolicyUpgradeFileUploadServiceTest {
         miamPolicyUpgradeFileUploadService.downloadAndUploadDocumentWithoutConfidential(doc, "test");
 
     }
+
+    @Test
+    public void shouldAttemptToDeletePreviousDomesticAbuseDocument() {
+        CaseData caseData = CaseData.builder()
+            .miamPolicyUpgradeDetails(
+                MiamPolicyUpgradeDetails.builder()
+                    .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuDomesticAbuse))
+                .mpuIsDomesticAbuseEvidenceProvided(YesOrNo.Yes)
+                .mpuDomesticAbuseEvidenceDocument(List.of(
+                    Element.<DomesticAbuseEvidenceDocument>builder().value(DomesticAbuseEvidenceDocument.builder()
+                        .domesticAbuseDocument(Document.builder()
+                                                   .documentUrl(DOCUMENT_ID).documentFileName("test").build())
+                        .build()).build()
+                ))
+                .build())
+            .build();
+
+        when(authTokenGenerator.generate()).thenReturn("test");
+        miamPolicyUpgradeFileUploadService.deleteOldMiamPolicyUpgradeDocuments(caseData, "test");
+
+        verify(caseDocumentClient)
+            .deleteDocument(eq("test"), eq("test"), eq(UUID.fromString(DOCUMENT_ID)), eq(true));
+    }
+
+    @Test
+    public void shouldAttemptToDeletePreviousMiamAttendanceDocumentDisputeResolution() {
+        CaseData caseData = CaseData.builder()
+            .miamPolicyUpgradeDetails(
+                MiamPolicyUpgradeDetails.builder()
+                    .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
+                .mpuPreviousMiamAttendanceReason(miamPolicyUpgradePreviousAttendance_Value_1)
+                .mpuDocFromDisputeResolutionProvider(Document.builder()
+                                                   .documentUrl(DOCUMENT_ID).documentFileName("test").build())
+                .build())
+            .build();
+
+        when(authTokenGenerator.generate()).thenReturn("test");
+        miamPolicyUpgradeFileUploadService.deleteOldMiamPolicyUpgradeDocuments(caseData, "test");
+
+        verify(caseDocumentClient)
+            .deleteDocument(eq("test"), eq("test"), eq(UUID.fromString(DOCUMENT_ID)), eq(true));
+    }
+
+    @Test
+    public void shouldAttemptToDeletePreviousMiamAttendanceDocumentMediatorCertificate() {
+        CaseData caseData = CaseData.builder()
+            .miamPolicyUpgradeDetails(
+                MiamPolicyUpgradeDetails.builder()
+                    .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
+                    .mpuPreviousMiamAttendanceReason(miamPolicyUpgradePreviousAttendance_Value_2)
+                    .mpuTypeOfPreviousMiamAttendanceEvidence(TypeOfMiamAttendanceEvidenceEnum.miamCertificate)
+                    .mpuCertificateByMediator(Document.builder()
+                                                  .documentUrl(DOCUMENT_ID).documentFileName("test").build())
+                    .build())
+            .build();
+
+        when(authTokenGenerator.generate()).thenReturn("test");
+        miamPolicyUpgradeFileUploadService.deleteOldMiamPolicyUpgradeDocuments(caseData, "test");
+
+        verify(caseDocumentClient)
+            .deleteDocument(eq("test"), eq("test"), eq(UUID.fromString(DOCUMENT_ID)), eq(true));
+    }
+
 
 }
