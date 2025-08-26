@@ -450,22 +450,19 @@ public class ManageDocumentsService {
     }
 
     public Document renameAndReuploadFileToBeConfidential(Document document) {
-        try {
-            if (!document.getDocumentFileName().startsWith(CONFIDENTIAL)) {
-                UUID documentId = UUID.fromString(DocumentUtils.getDocumentId(document.getDocumentUrl()));
-                Document newUploadedDocument = getNewUploadedDocument(
-                    document,
-                    documentId
-                );
-                if (null != newUploadedDocument) {
-                    return newUploadedDocument;
-                }
-            } else {
-                log.info("Since the document name starts with confidential it is not renamed");
+        UUID documentId = UUID.fromString(DocumentUtils.getDocumentId(document.getDocumentUrl()));
+        if (!document.getDocumentFileName().startsWith(CONFIDENTIAL)) {
+            Document newUploadedDocument = getNewUploadedDocument(
+                document,
+                documentId
+            );
+            if (null != newUploadedDocument) {
+                return newUploadedDocument;
             }
-        } catch (Exception e) {
-            throw new IllegalStateException("Failed to rename document to confidential", e);
+        } else {
+            log.info("Since the document name starts with confidential it is not renamed");
         }
+        log.info("Using original document {}", documentId);
         return document;
     }
 
