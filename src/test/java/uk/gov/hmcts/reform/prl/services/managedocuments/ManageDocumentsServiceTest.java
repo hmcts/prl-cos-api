@@ -75,6 +75,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -2554,6 +2555,21 @@ public class ManageDocumentsServiceTest {
                         YesOrNo.Yes).build()))).build()).build()
         );
         assertNotNull(caseDataUpdated1.get("confidentialDocuments"));
+    }
+
+    @Test
+    public void shouldRenameAndReuploadFileWithoutDeletion() {
+        when(systemUserService.getSysUserToken()).thenReturn("userToken");
+        when(authTokenGenerator.generate()).thenReturn("sysToken");
+        manageDocumentsService.renameAndReuploadFileToBeConfidential(
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentUrl("00000000-0000-0000-0000-000000000000")
+                .documentFileName("test")
+                .build());
+
+        verify(caseDocumentClient, never()).deleteDocument(any(), any(), any(), anyBoolean());
+        verify(caseDocumentClient).getDocumentBinary(eq("userToken"), eq("sysToken"), any(UUID.class));
+        verify(caseDocumentClient).uploadDocuments(eq("userToken"), eq("sysToken"), any(), any(), any());
     }
 
 }
