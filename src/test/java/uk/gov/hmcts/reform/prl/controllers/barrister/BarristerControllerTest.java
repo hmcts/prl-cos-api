@@ -176,4 +176,88 @@ public class BarristerControllerTest {
             () -> barristerController
                 .handleRemoveAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest));
     }
+
+    @Test
+    public void handleStopRepresentingAboutToStart() {
+        Map caseData = new HashMap<>();
+        caseData.put("id", 12345L);
+        caseData.put("caseTypeOfApplication", "C100");
+
+        CaseData caseData1 = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .data(caseData)
+                             .build())
+            .build();
+
+        DynamicListElement dynamicListElement = DynamicListElement.builder()
+            .code("12345:").label("test")
+            .build();
+
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
+
+        AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder()
+            .partyList(DynamicList.builder().listItems(Lists.newArrayList(dynamicListElement)).build()).build();
+        when(barristerRemoveService.getBarristerListToRemove(caseData1, AUTH_TOKEN, true)).thenReturn(allocatedBarrister);
+
+        AboutToStartOrSubmitCallbackResponse callbackResponse =
+            barristerController.handleStopRepresentingAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
+
+        assertEquals(allocatedBarrister, callbackResponse.getData().get("allocatedBarrister"));
+        verify(barristerRemoveService, times(1)).getBarristerListToRemove(caseData1, AUTH_TOKEN, true);
+    }
+
+    @Test
+    public void handleStopRepresentingAboutToStartWhenNoBarristerList() {
+        Map caseData = new HashMap<>();
+        caseData.put("id", 12345L);
+        caseData.put("caseTypeOfApplication", "C100");
+
+        CaseData caseData1 = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .data(caseData)
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
+
+        AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder()
+            .partyList(DynamicList.builder().listItems(Lists.newArrayList()).build()).build();
+        when(barristerRemoveService.getBarristerListToRemove(caseData1, AUTH_TOKEN, true)).thenReturn(allocatedBarrister);
+
+        AboutToStartOrSubmitCallbackResponse callbackResponse =
+            barristerController.handleStopRepresentingAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
+
+        assertEquals("You're not currently assigned to any party", callbackResponse.getErrors().get(0));
+        verify(barristerRemoveService, times(1)).getBarristerListToRemove(caseData1, AUTH_TOKEN, true);
+    }
+
+    @Test
+    public void shouldNotHandleStopRepresentingAboutToStartWhenNotAuthorised() {
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .build())
+            .build();
+
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(false);
+
+        assertThrows(
+            RuntimeException.class,
+            () -> barristerController.handleStopRepresentingAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest));
+    }
+
 }
