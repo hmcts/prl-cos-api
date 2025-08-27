@@ -75,7 +75,7 @@ pba:
 
 feature:
   toggle:
-    add_barrister: ${FEATURE_ADD_BARRISTER:false}
+    barristerFeatureEnabled: ${BARRISTER_FEATURE_ENABLED:false}
 
 xui:
   url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}

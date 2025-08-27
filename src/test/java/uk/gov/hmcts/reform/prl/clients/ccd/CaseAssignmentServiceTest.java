@@ -974,7 +974,7 @@ class CaseAssignmentServiceTest {
             .thenReturn("sysUserToken");
         when(tokenGenerator.generate())
             .thenReturn("token");
-        when(featureToggleService.isAddBarristerIsEnabled())
+        when(featureToggleService.isBarristerFeatureEnabled())
             .thenReturn(true);
 
         ChangeOrganisationRequest changeOrganisationRequest = ChangeOrganisationRequest.builder()
@@ -1048,7 +1048,7 @@ class CaseAssignmentServiceTest {
                                        .build())
                             .build())
             .build();
-        when(featureToggleService.isAddBarristerIsEnabled())
+        when(featureToggleService.isBarristerFeatureEnabled())
             .thenReturn(true);
 
         localCaseAssignmentService.removePartyBarristerIfPresent(fl401CaseData,
@@ -1124,7 +1124,7 @@ class CaseAssignmentServiceTest {
             objectMapper,
             featureToggleService
         );
-        when(featureToggleService.isAddBarristerIsEnabled())
+        when(featureToggleService.isBarristerFeatureEnabled())
             .thenReturn(true);
 
         localCaseAssignmentService.removeAmBarristerIfPresent(caseDetails);
@@ -1168,7 +1168,7 @@ class CaseAssignmentServiceTest {
                                        .build())
                             .build())
             .build();
-        when(featureToggleService.isAddBarristerIsEnabled())
+        when(featureToggleService.isBarristerFeatureEnabled())
             .thenReturn(true);
 
         localCaseAssignmentService.removePartyBarristerIfPresent(c100CaseData,
@@ -1182,7 +1182,7 @@ class CaseAssignmentServiceTest {
 
     @Test
     void testInvalidSolicitorRoleWhenCaseTypeC100() {
-        when(featureToggleService.isAddBarristerIsEnabled())
+        when(featureToggleService.isBarristerFeatureEnabled())
             .thenReturn(true);
 
         ChangeOrganisationRequest changeOrganisationRequest = ChangeOrganisationRequest.builder()
@@ -1219,7 +1219,7 @@ class CaseAssignmentServiceTest {
 
         caseAssignmentService.removeAmBarristerCaseRole(caseData,
                                                         Map.of(Optional.of(SolicitorRole.C100APPLICANTSOLICITOR3),
-                                                                   caseData.getApplicants().get(2))
+                                                               caseData.getApplicants().get(2))
         );
         assertThat(caseData.getApplicants().get(2).getValue().getBarrister())
             .isNotNull();
@@ -1237,8 +1237,8 @@ class CaseAssignmentServiceTest {
         assertThat(c100CaseData.getApplicants().get(2).getValue().getBarrister())
             .isNull();
         verify(caseAssignmentApi, never()).removeCaseUserRoles(anyString(),
-                                                      anyString(),
-                                                      isA(CaseAssignmentUserRolesRequest.class));
+                                                               anyString(),
+                                                               isA(CaseAssignmentUserRolesRequest.class));
     }
 
     private RoleAssignmentResponse getRoleAssignmentResponse(String actorId, String roleName) {
