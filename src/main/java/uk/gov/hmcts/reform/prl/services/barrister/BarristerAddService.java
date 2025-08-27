@@ -10,6 +10,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
+import java.util.function.Function;
+
 @Slf4j
 @Service
 public class BarristerAddService extends AbstractBarristerService {
@@ -18,9 +20,11 @@ public class BarristerAddService extends AbstractBarristerService {
         super(userService, organisationService);
     }
 
-    public AllocatedBarrister getAllocatedBarrister(CaseData caseData, String authorisation) {
+    public AllocatedBarrister getAllocatedBarrister(CaseData caseData,
+                                                    String authorisation,
+                                                    Function<PartyDetails, String> legalRepOrganisation) {
         return AllocatedBarrister.builder()
-            .partyList(getPartiesToList(caseData, authorisation))
+            .partyList(getPartiesToList(caseData, authorisation, legalRepOrganisation))
             .barristerOrg(Organisation.builder().build())
             .build();
     }

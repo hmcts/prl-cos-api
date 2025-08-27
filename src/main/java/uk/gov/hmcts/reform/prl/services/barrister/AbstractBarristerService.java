@@ -34,14 +34,6 @@ public abstract class AbstractBarristerService {
         this.organisationService = organisationService;
     }
 
-    protected DynamicList getPartiesToList(CaseData caseData, String authorisation) {
-        return getPartiesToListForC100OrFL401(caseData, populateBarristerFilter(caseData, authorisation, false));
-    }
-
-    protected DynamicList getPartiesToList(CaseData caseData, String authorisation, boolean isBarrister) {
-        return getPartiesToListForC100OrFL401(caseData, populateBarristerFilter(caseData, authorisation, isBarrister));
-    }
-
     protected DynamicList getPartiesToList(CaseData caseData, String authorisation, Function<PartyDetails, String> legalRepOrganisation) {
         return getPartiesToListForC100OrFL401(caseData, populateBarristerFilter(caseData, authorisation, legalRepOrganisation));
     }

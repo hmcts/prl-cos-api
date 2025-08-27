@@ -20,13 +20,6 @@ public class BarristerRemoveService extends  AbstractBarristerService {
         super(userService, organisationService);
     }
 
-    public AllocatedBarrister getBarristerListToRemove(CaseData caseData, String authorisation, Boolean isBarrister) {
-        return AllocatedBarrister.builder()
-            .partyList(getPartiesToList(caseData, authorisation, isBarrister))
-            .barristerOrg(Organisation.builder().build())
-            .build();
-    }
-
     public AllocatedBarrister getBarristerListToRemove(CaseData caseData,
                                                        String authorisation,
                                                        Function<PartyDetails, String> legalRepOrganisation) {

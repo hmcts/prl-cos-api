@@ -61,7 +61,14 @@ public class BarristerController extends AbstractCallbackController {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            caseDataUpdated.put(ALLOCATED_BARRISTER, barristerAddService.getAllocatedBarrister(caseData, authorisation));
+            caseDataUpdated.put(
+                ALLOCATED_BARRISTER,
+                barristerAddService.getAllocatedBarrister(
+                    caseData,
+                    authorisation,
+                    partyDetails -> partyDetails.getSolicitorOrg().getOrganisationID()
+                )
+            );
 
             AboutToStartOrSubmitCallbackResponse.AboutToStartOrSubmitCallbackResponseBuilder
                 builder = AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated);
@@ -85,10 +92,12 @@ public class BarristerController extends AbstractCallbackController {
             List<String> errorList = new ArrayList<>();
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-            AllocatedBarrister barristerList = barristerRemoveService.getBarristerListToRemove(caseData,
-                                                                                               authorisation,
-                                                                                               partyDetails ->
-                                                                                                   partyDetails.getSolicitorOrg().getOrganisationID());
+            AllocatedBarrister barristerList =
+                barristerRemoveService.getBarristerListToRemove(
+                    caseData,
+                    authorisation,
+                    partyDetails -> partyDetails.getSolicitorOrg().getOrganisationID()
+                );
             if (!barristerList.getPartyList().getListItems().isEmpty()) {
                 caseDataUpdated.put(ALLOCATED_BARRISTER, barristerList);
             } else {
@@ -117,10 +126,13 @@ public class BarristerController extends AbstractCallbackController {
             List<String> errorList = new ArrayList<>();
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-            AllocatedBarrister barristerList = barristerRemoveService.getBarristerListToRemove(caseData,
-                                                                                               authorisation,
-                                                                                               partyDetails ->
-                                                                                                   partyDetails.getBarrister().getBarristerOrg().getOrganisationID());
+            AllocatedBarrister barristerList =
+                barristerRemoveService.getBarristerListToRemove(
+                    caseData,
+                    authorisation,
+                    partyDetails -> partyDetails.getBarrister().getBarristerOrg().getOrganisationID()
+                );
+
             if (!barristerList.getPartyList().getListItems().isEmpty()) {
                 caseDataUpdated.put(ALLOCATED_BARRISTER, barristerList);
             } else {
