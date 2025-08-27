@@ -17,6 +17,8 @@ import uk.gov.hmcts.reform.prl.services.UserService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Consumer;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -114,16 +116,17 @@ public abstract class AbstractBarristerService {
     private DynamicList getPartiesToListForFL401(CaseData caseData, BarristerFilter barristerFilter) {
         List<DynamicListElement> listItems = new ArrayList<>();
         PartyDetails applicantPartyDetails = caseData.getApplicantsFL401();
-        checkAndAddPartyToListFL401(applicant, listItems, applicantPartyDetails, barristerFilter);
+        listItems.addAll(getPartiesToAddForFL401(applicant, applicantPartyDetails, barristerFilter));
 
         PartyDetails respondentPartyDetails = caseData.getRespondentsFL401();
-        checkAndAddPartyToListFL401(respondent, listItems, respondentPartyDetails, barristerFilter);
+        listItems.addAll(getPartiesToAddForFL401(respondent, respondentPartyDetails, barristerFilter));
 
         return DynamicList.builder().value(null).listItems(listItems).build();
     }
 
-    private void checkAndAddPartyToListFL401(PartyEnum partyEnum, List<DynamicListElement> listToAddTo,
+    private List<DynamicListElement> getPartiesToAddForFL401(PartyEnum partyEnum,
                                              PartyDetails party, BarristerFilter barristerFilter) {
+        List<DynamicListElement> itemsList = new ArrayList<>();
         if (party != null) {
             boolean isApplicant = partyEnum == applicant;
             //because the partyId on the PartyDetails is not actually being filled!
@@ -136,9 +139,10 @@ public abstract class AbstractBarristerService {
                 barristerFilter, partyDetailsElement
             );
             if (dynamicListElement != null) {
-                listToAddTo.add(dynamicListElement);
+                itemsList.add(dynamicListElement);
             }
         }
+        return itemsList;
     }
 
     private List<DynamicListElement> getPartyDynamicListElements(List<Element<PartyDetails>> partyDetailsList,
@@ -183,8 +187,31 @@ public abstract class AbstractBarristerService {
         }
     }
 
+    protected boolean isPartyApplicableForFiltering(boolean applicantOrRespondent, BarristerFilter barristerFilter,
+                                                             PartyDetails partyDetails, Boolean isApplicable, Consumer<UUID> logger) {
+        if (barristerFilter.isCaseworkerOrSolicitor()) {
+            return isApplicable;
+        } else {
+            if (partyDetails.getSolicitorOrg() == null || barristerFilter.getUserOrgIdentifier() == null) {
+                logger.accept(partyDetails.getPartyId());
+                return false;
+            }
+
+            return isApplicable
+                && barristerFilter.getUserOrgIdentifier().equals(partyDetails.getSolicitorOrg().getOrganisationID());
+        }
+    }
+
     protected abstract boolean isPartyApplicableForFiltering(boolean applicantOrRespondent, BarristerFilter barristerFilter,
                                                              PartyDetails partyDetails);
+
+    protected String getLabelForAction(boolean applicantOrRespondent, BarristerFilter barristerFilter,
+                                       PartyDetails partyDetails,String partyDetailsInfo) {
+        return String.format("%s (%s), %s, %s", partyDetails.getLabelForDynamicList(),
+                             applicantOrRespondent ? applicant.getDisplayedValue() : respondent.getDisplayedValue(),
+                             partyDetails.getRepresentativeFullName(),
+                             partyDetailsInfo);
+    }
 
     protected abstract String getLabelForAction(boolean applicantOrRespondent, BarristerFilter barristerFilter, PartyDetails partyDetails);
 
