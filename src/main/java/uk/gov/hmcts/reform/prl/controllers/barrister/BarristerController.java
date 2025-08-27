@@ -85,7 +85,10 @@ public class BarristerController extends AbstractCallbackController {
             List<String> errorList = new ArrayList<>();
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-            AllocatedBarrister barristerList = barristerRemoveService.getBarristerListToRemove(caseData, authorisation, false);
+            AllocatedBarrister barristerList = barristerRemoveService.getBarristerListToRemove(caseData,
+                                                                                               authorisation,
+                                                                                               partyDetails ->
+                                                                                                   partyDetails.getSolicitorOrg().getOrganisationID());
             if (!barristerList.getPartyList().getListItems().isEmpty()) {
                 caseDataUpdated.put(ALLOCATED_BARRISTER, barristerList);
             } else {
@@ -114,7 +117,10 @@ public class BarristerController extends AbstractCallbackController {
             List<String> errorList = new ArrayList<>();
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-            AllocatedBarrister barristerList = barristerRemoveService.getBarristerListToRemove(caseData, authorisation, true);
+            AllocatedBarrister barristerList = barristerRemoveService.getBarristerListToRemove(caseData,
+                                                                                               authorisation,
+                                                                                               partyDetails ->
+                                                                                                   partyDetails.getBarrister().getBarristerOrg().getOrganisationID());
             if (!barristerList.getPartyList().getListItems().isEmpty()) {
                 caseDataUpdated.put(ALLOCATED_BARRISTER, barristerList);
             } else {

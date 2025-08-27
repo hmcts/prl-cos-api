@@ -10,6 +10,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
+import java.util.function.Function;
+
 @Slf4j
 @Service
 public class BarristerRemoveService extends  AbstractBarristerService {
@@ -21,6 +23,15 @@ public class BarristerRemoveService extends  AbstractBarristerService {
     public AllocatedBarrister getBarristerListToRemove(CaseData caseData, String authorisation, Boolean isBarrister) {
         return AllocatedBarrister.builder()
             .partyList(getPartiesToList(caseData, authorisation, isBarrister))
+            .barristerOrg(Organisation.builder().build())
+            .build();
+    }
+
+    public AllocatedBarrister getBarristerListToRemove(CaseData caseData,
+                                                       String authorisation,
+                                                       Function<PartyDetails, String> legalRepOrganisation) {
+        return AllocatedBarrister.builder()
+            .partyList(getPartiesToList(caseData, authorisation, legalRepOrganisation))
             .barristerOrg(Organisation.builder().build())
             .build();
     }

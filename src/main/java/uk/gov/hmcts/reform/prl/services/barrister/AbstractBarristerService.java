@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -41,6 +42,10 @@ public abstract class AbstractBarristerService {
         return getPartiesToListForC100OrFL401(caseData, populateBarristerFilter(caseData, authorisation, isBarrister));
     }
 
+    protected DynamicList getPartiesToList(CaseData caseData, String authorisation, Function<PartyDetails, String> legalRepOrganisation) {
+        return getPartiesToListForC100OrFL401(caseData, populateBarristerFilter(caseData, authorisation, legalRepOrganisation));
+    }
+
     protected boolean hasBarrister(PartyDetails partyDetails) {
         return (partyDetails.getBarrister() != null && partyDetails.getBarrister().getBarristerId() != null);
     }
@@ -57,6 +62,17 @@ public abstract class AbstractBarristerService {
             .caseworkerOrSolicitor(!isSolicitor)
             .caseTypeC100OrFL401(isC100CaseType(caseData))
             .isBarrister(isBarrister)
+            .build();
+
+    }
+
+    private BarristerFilter populateBarristerFilter(CaseData caseData, String authorisation, Function<PartyDetails, String> legalRepOrganisation) {
+        boolean isSolicitor = isSolicitor(authorisation);
+        return BarristerFilter.builder()
+            .userOrgIdentifier(isSolicitor ? getUserOrgId(authorisation) : null)
+            .caseworkerOrSolicitor(!isSolicitor)
+            .caseTypeC100OrFL401(isC100CaseType(caseData))
+            .legalRepOrganisation(legalRepOrganisation)
             .build();
 
     }
@@ -173,7 +189,7 @@ public abstract class AbstractBarristerService {
         }
     }
 
-    protected boolean isPartyApplicableForFiltering(BarristerFilter barristerFilter,
+    protected boolean isPartyApplicableForFilteringTemp(BarristerFilter barristerFilter,
                                                              PartyDetails partyDetails, Boolean isApplicable,
                                                              Consumer<UUID> logger) {
         if (barristerFilter.isBarrister() && hasBarrister(partyDetails)) {
@@ -190,6 +206,22 @@ public abstract class AbstractBarristerService {
                 && barristerFilter.getUserOrgIdentifier().equals(partyDetails.getSolicitorOrg().getOrganisationID());
         }
     }
+
+    protected boolean isPartyApplicableForFiltering(BarristerFilter barristerFilter,
+                                                    PartyDetails partyDetails, Boolean isApplicable,
+                                                    Consumer<UUID> logger) {
+        if (barristerFilter.isCaseworkerOrSolicitor()) {
+            return isApplicable;
+        } else {
+            if (partyDetails.getSolicitorOrg() == null || barristerFilter.getUserOrgIdentifier() == null) {
+                logger.accept(partyDetails.getPartyId());
+                return false;
+            }
+            return isApplicable
+                && barristerFilter.getUserOrgIdentifier().equals(barristerFilter.getLegalRepOrganisation().apply(partyDetails));
+        }
+    }
+
 
     protected abstract boolean isPartyApplicableForFiltering(boolean applicantOrRespondent, BarristerFilter barristerFilter,
                                                              PartyDetails partyDetails);
