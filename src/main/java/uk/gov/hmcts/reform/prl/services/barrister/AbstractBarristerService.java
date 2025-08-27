@@ -47,17 +47,6 @@ public abstract class AbstractBarristerService {
             && partyDetails.getSolicitorOrg().getOrganisationName() != null);
     }
 
-    private BarristerFilter populateBarristerFilter(CaseData caseData, String authorisation, Boolean isBarrister) {
-        boolean isSolicitor = isSolicitor(authorisation);
-        return BarristerFilter.builder()
-            .userOrgIdentifier(isSolicitor ? getUserOrgId(authorisation) : null)
-            .caseworkerOrSolicitor(!isSolicitor)
-            .caseTypeC100OrFL401(isC100CaseType(caseData))
-            .isBarrister(isBarrister)
-            .build();
-
-    }
-
     private BarristerFilter populateBarristerFilter(CaseData caseData, String authorisation, Function<PartyDetails, String> legalRepOrganisation) {
         boolean isSolicitor = isSolicitor(authorisation);
         return BarristerFilter.builder()
@@ -178,24 +167,6 @@ public abstract class AbstractBarristerService {
             return true;
         } else {
             throw new RuntimeException("Invalid case type detected for case " + caseData.getId());
-        }
-    }
-
-    protected boolean isPartyApplicableForFilteringTemp(BarristerFilter barristerFilter,
-                                                             PartyDetails partyDetails, Boolean isApplicable,
-                                                             Consumer<UUID> logger) {
-        if (barristerFilter.isBarrister() && hasBarrister(partyDetails)) {
-            return isApplicable
-                && barristerFilter.getUserOrgIdentifier().equals(partyDetails.getBarrister().getBarristerOrg().getOrganisationID());
-        } else if (barristerFilter.isCaseworkerOrSolicitor()) {
-            return isApplicable;
-        } else {
-            if (partyDetails.getSolicitorOrg() == null || barristerFilter.getUserOrgIdentifier() == null) {
-                logger.accept(partyDetails.getPartyId());
-                return false;
-            }
-            return isApplicable
-                && barristerFilter.getUserOrgIdentifier().equals(partyDetails.getSolicitorOrg().getOrganisationID());
         }
     }
 
