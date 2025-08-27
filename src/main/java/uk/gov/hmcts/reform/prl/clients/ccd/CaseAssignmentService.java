@@ -167,7 +167,7 @@ public class CaseAssignmentService {
 
     public void removeAmBarristerCaseRole(final CaseData caseData,
                                 Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap) {
-        if (featureToggleService.isAddBarristerIsEnabled()) {
+        if (featureToggleService.isBarristerFeatureEnabled()) {
             selectedPartyDetailsMap.values().stream()
                 .map(Element::getValue)
                 .filter(partyDetails -> partyDetails.getBarrister() != null

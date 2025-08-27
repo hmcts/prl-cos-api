@@ -989,7 +989,7 @@ class CaseAssignmentServiceTest {
             .changeOrganisationRequestField(changeOrganisationRequest)
             .build();
 
-        CaseDetails caseDetails = CaseDetails.builder()
+        CaseDetails localCaseDetails = CaseDetails.builder()
             .id(1234L)
             .data(updatedCaseData.toMap(objectMapper))
             .build();
@@ -1005,7 +1005,7 @@ class CaseAssignmentServiceTest {
             featureToggleService
         );
 
-        localCaseAssignmentService.removeAmBarristerIfPresent(caseDetails);
+        localCaseAssignmentService.removeAmBarristerIfPresent(localCaseDetails);
         assertThat(parties.apply(fl401CaseData).getBarrister())
             .isNotNull();
 
@@ -1108,7 +1108,7 @@ class CaseAssignmentServiceTest {
             .changeOrganisationRequestField(changeOrganisationRequest)
             .build();
 
-        CaseDetails caseDetails = CaseDetails.builder()
+        CaseDetails localCaseDetails = CaseDetails.builder()
             .id(1234L)
             .data(updatedCaseData.toMap(objectMapper))
             .build();
@@ -1127,7 +1127,7 @@ class CaseAssignmentServiceTest {
         when(featureToggleService.isBarristerFeatureEnabled())
             .thenReturn(true);
 
-        localCaseAssignmentService.removeAmBarristerIfPresent(caseDetails);
+        localCaseAssignmentService.removeAmBarristerIfPresent(localCaseDetails);
         assertThat(parties.apply(c100CaseData).get(index).getValue().getBarrister())
             .isNotNull();
         verify(caseAssignmentApi).removeCaseUserRoles(anyString(),
@@ -1214,7 +1214,7 @@ class CaseAssignmentServiceTest {
             .thenReturn("sysUserToken");
         when(tokenGenerator.generate())
             .thenReturn("token");
-        when(featureToggleService.isAddBarristerIsEnabled())
+        when(featureToggleService.isBarristerFeatureEnabled())
             .thenReturn(true);
 
         caseAssignmentService.removeAmBarristerCaseRole(caseData,
