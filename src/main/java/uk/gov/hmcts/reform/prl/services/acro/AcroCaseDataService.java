@@ -144,7 +144,8 @@ public class AcroCaseDataService {
         Range range = Range.builder().lastModified(lastModified).build();
         Bool bool = Bool.builder()
             .filter(Filter.builder().range(range).build())
-            .must(Must.builder().stateFilter(StateFilter.builder().should(mustQuery).minimumShouldMatch(4).build())
+            .must(Must.builder()
+                      .stateFilter(StateFilter.builder().should(mustQuery).minimumShouldMatch(2).build())
                       .build())
             .build();
         Query query = Query.builder().bool(bool).build();
@@ -153,10 +154,10 @@ public class AcroCaseDataService {
 
     private List<Should> populateMustQuery(LastModified dateCreatedRange) {
         List<Should> should = new ArrayList<>();
-        should.add(Should.builder().match(Match.builder().orderType(NON_MOLESTATION).build()).build());
+        //should.add(Should.builder().match(Match.builder().orderType(NON_MOLESTATION).build()).build());
         should.add(Should.builder().match(Match.builder().orderTypeId(NON_MOLESTATION_ORDER_FL_404_A).build()).build());
         should.add(Should.builder().range(Range.builder().dateCreated(dateCreatedRange).build()).build());
-        should.add(Should.builder().match(Match.builder().typeOfOrder(FINAL).build()).build());
+        //should.add(Should.builder().match(Match.builder().typeOfOrder(FINAL).build()).build());
 
         return should;
     }

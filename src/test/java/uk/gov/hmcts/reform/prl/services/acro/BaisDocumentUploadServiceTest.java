@@ -13,9 +13,7 @@ import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseDetail;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroResponse;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
-import java.io.IOException;
 import java.io.File;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -66,8 +64,10 @@ class BaisDocumentUploadServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(AUTHORISATION);
         AcroCaseData acroCaseData = AcroCaseData.builder()
             .fl404Orders(List.of(OrderDetails.builder().dateCreated(LocalDateTime.now())
-                                     .orderDocument(Document.builder().documentUrl("some url").documentBinaryUrl("some binary").build())
-                                     .orderDocumentWelsh(Document.builder().documentUrl("some url").documentBinaryUrl("some binary").build())
+                                     .orderDocument(Document.builder().documentUrl("some url").documentBinaryUrl(
+                                         "some binary").build())
+                                     .orderDocumentWelsh(Document.builder().documentUrl("some url").documentBinaryUrl(
+                                         "some binary").build())
                                      .build()))
             .build();
         AcroCaseDetail case1 = AcroCaseDetail.builder().id(1L).caseData(acroCaseData).build();
