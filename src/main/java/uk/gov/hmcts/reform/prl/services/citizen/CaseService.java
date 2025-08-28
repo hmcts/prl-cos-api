@@ -1498,6 +1498,10 @@ public class CaseService {
                     .partyType(awp.getPartyType().getDisplayedValue())
                     .partyName(awp.getAuthor())
                     .uploadedBy(awp.getAuthor())
+                    //TODO: need to figure out how this from other proceedings should actually be mapped
+                    //it is not clear to me what the plan was with this other proceedings
+                    //it's only mapped to respondent folder on ccd defs should confirm with prod data
+                    //thinking APPLICATIONS_WITHIN_PROCEEDINGS_RESP is likely needed
                     .categoryId(PartyEnum.applicant.equals(awp.getPartyType())
                         ? APPLICATIONS_WITHIN_PROCEEDINGS : APPLICATIONS_FROM_OTHER_PROCEEDINGS)
                     .document(document.getDocument())
