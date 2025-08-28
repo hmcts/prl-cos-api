@@ -989,7 +989,7 @@ class CaseAssignmentServiceTest {
             .changeOrganisationRequestField(changeOrganisationRequest)
             .build();
 
-        CaseDetails caseDetails = CaseDetails.builder()
+        CaseDetails localCaseDetails = CaseDetails.builder()
             .id(1234L)
             .data(updatedCaseData.toMap(objectMapper))
             .build();
@@ -1005,7 +1005,7 @@ class CaseAssignmentServiceTest {
             featureToggleService
         );
 
-        localCaseAssignmentService.removeAmBarristerIfPresent(caseDetails);
+        localCaseAssignmentService.removeAmBarristerIfPresent(localCaseDetails);
         assertThat(parties.apply(fl401CaseData).getBarrister())
             .isNotNull();
 
@@ -1108,7 +1108,7 @@ class CaseAssignmentServiceTest {
             .changeOrganisationRequestField(changeOrganisationRequest)
             .build();
 
-        CaseDetails caseDetails = CaseDetails.builder()
+        CaseDetails localCaseDetails = CaseDetails.builder()
             .id(1234L)
             .data(updatedCaseData.toMap(objectMapper))
             .build();
@@ -1127,7 +1127,7 @@ class CaseAssignmentServiceTest {
         when(featureToggleService.isBarristerFeatureEnabled())
             .thenReturn(true);
 
-        localCaseAssignmentService.removeAmBarristerIfPresent(caseDetails);
+        localCaseAssignmentService.removeAmBarristerIfPresent(localCaseDetails);
         assertThat(parties.apply(c100CaseData).get(index).getValue().getBarrister())
             .isNotNull();
         verify(caseAssignmentApi).removeCaseUserRoles(anyString(),
@@ -1197,6 +1197,48 @@ class CaseAssignmentServiceTest {
             .isInstanceOf(InvalidSolicitorRoleException.class)
             .hasMessageContaining("No barrister matching role found for the given solicitor InvalidSolicitorRole")
         ;
+    }
+
+    @Test
+    void testSolicitorStopRepresentingWhenBarristerPresent() {
+
+        Barrister updatedBarrister = barrister.toBuilder()
+            .barristerRole(C100APPLICANTBARRISTER3.getCaseRoleLabel())
+            .barristerId(UUID.randomUUID().toString())
+            .build();
+        CaseData caseData = c100CaseData.toBuilder().build();
+        caseData.getApplicants().get(2).getValue().setBarrister(updatedBarrister);
+
+
+        when(systemUserService.getSysUserToken())
+            .thenReturn("sysUserToken");
+        when(tokenGenerator.generate())
+            .thenReturn("token");
+        when(featureToggleService.isBarristerFeatureEnabled())
+            .thenReturn(true);
+
+        caseAssignmentService.removeAmBarristerCaseRole(caseData,
+                                                        Map.of(Optional.of(SolicitorRole.C100APPLICANTSOLICITOR3),
+                                                               caseData.getApplicants().get(2))
+        );
+        assertThat(caseData.getApplicants().get(2).getValue().getBarrister())
+            .isNotNull();
+        verify(caseAssignmentApi).removeCaseUserRoles(anyString(),
+                                                      anyString(),
+                                                      isA(CaseAssignmentUserRolesRequest.class));
+    }
+
+    @Test
+    void testSolicitorStopRepresentingWhenBarristerNotPresent() {
+        caseAssignmentService.removeAmBarristerCaseRole(c100CaseData,
+                                                        Map.of(Optional.of(SolicitorRole.C100APPLICANTSOLICITOR3),
+                                                               c100CaseData.getApplicants().get(2))
+        );
+        assertThat(c100CaseData.getApplicants().get(2).getValue().getBarrister())
+            .isNull();
+        verify(caseAssignmentApi, never()).removeCaseUserRoles(anyString(),
+                                                               anyString(),
+                                                               isA(CaseAssignmentUserRolesRequest.class));
     }
 
     private RoleAssignmentResponse getRoleAssignmentResponse(String actorId, String roleName) {
