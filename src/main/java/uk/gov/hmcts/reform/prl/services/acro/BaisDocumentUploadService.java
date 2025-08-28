@@ -63,7 +63,7 @@ public class BaisDocumentUploadService {
                 log.info("Search has resulted empty cases with Final FL404a orders, so need to send empty csv file");
 
                 csvWriter.writeCcdOrderDataToCsv(AcroCaseData.builder().build(), false);
-                acroZipService.zip(tempSourcePath.toString(), tempOutputPath.toString());
+                acroZipService.zip();
                 return;
             }
 
@@ -93,7 +93,7 @@ public class BaisDocumentUploadService {
                 });
             });
 
-            acroZipService.zip(tempSourcePath.toString(), tempOutputPath.toString());
+            acroZipService.zip();
 
             log.info(
                 "*** Total time taken to run Bais Document upload task - {}s ***",

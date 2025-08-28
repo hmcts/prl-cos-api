@@ -27,9 +27,9 @@ public class AcroZipService {
     @Value("${acro.export.path}")
     private String outputDirectory;
 
-    public String zip(String sourceDir, String outputDir) throws Exception {
-        File sourceFolder = new File(sourceDir);
-        File exportFolder = new File(outputDir);
+    public String zip() throws Exception {
+        File sourceFolder = new File(sourceDirectory);
+        File exportFolder = new File(outputDirectory);
         validateInputs(sourceFolder, exportFolder);
 
         Path sourcePath = sourceFolder.toPath();
