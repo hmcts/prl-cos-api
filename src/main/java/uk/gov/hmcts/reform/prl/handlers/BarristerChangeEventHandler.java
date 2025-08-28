@@ -16,7 +16,11 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.BarristerEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.EmailService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
@@ -34,12 +38,17 @@ public class BarristerChangeEventHandler {
     @EventListener(condition = "#event.typeOfEvent.displayedValue eq 'Add Barrister'")
     public void notifyAddBarrister(final BarristerChangeEvent event) {
         CaseData caseData = event.getCaseData();
+        // notify - barrister
+        ignoreAndLogNotificationFailures(
+            () -> sendEmailToBarrister(caseData, event, EmailTemplateNames.CA_DA_ADD_BARRISTER_SELF));
 
-        ignoreAndLogNotificationFailures(() -> sendEmailToBarrister(caseData, EmailTemplateNames.CA_DA_ADD_BARRISTER_SELF));
+        // notify applicants/respondents LRs
+        ignoreAndLogNotificationFailures(
+            () -> sendEmailToAppRespSolicitors(caseData, event, EmailTemplateNames.CA_DA_ADD_BARRISTER_TO_SOLICITOR));
 
     }
 
-    private void sendEmailToBarrister(CaseData caseData, EmailTemplateNames emailTemplateName) {
+    private void sendEmailToBarrister(CaseData caseData, BarristerChangeEvent event, EmailTemplateNames emailTemplateName) {
         AllocatedBarrister barrister = caseData.getAllocatedBarrister();
         if (null != barrister.getBarristerEmail()) {
             log.info("Sending Barrister email on case id {}", caseData.getId());
@@ -47,7 +56,7 @@ public class BarristerChangeEventHandler {
             emailService.send(
                 barrister.getBarristerEmail(),
                 emailTemplateName,
-                buildEmailBarrister(caseData, barrister.getBarristerFullName()),
+                buildEmailBarrister(caseData, event),
                 LanguagePreference.getPreferenceLanguage(caseData)
             );
         } else {
@@ -58,22 +67,39 @@ public class BarristerChangeEventHandler {
         }
     }
 
+    private void sendEmailToAppRespSolicitors(CaseData caseData, BarristerChangeEvent event, EmailTemplateNames emailTemplateNames) {
+        Map<String, String> solicitorsToNotify = new HashMap<>();
+        solicitorsToNotify.putAll(CaseUtils.getApplicantSolicitorsToNotify(caseData));
+        solicitorsToNotify.putAll(CaseUtils.getRespondentSolicitorsToNotify(caseData));
+        if (!solicitorsToNotify.isEmpty()) {
+            solicitorsToNotify.forEach(
+                (key, value) -> {
+                    if (!key.equalsIgnoreCase(event.getSolicitorEmailAddress())) {
+                        emailService.send(
+                            key,
+                            emailTemplateNames,
+                            buildEmailBarrister(caseData, event),
+                            LanguagePreference.getPreferenceLanguage(caseData)
+                        );
+                    }
+                });
+        }
+    }
+
     @Async
     @EventListener(condition = "#event.typeOfEvent.displayedValue eq 'Remove Barrister'")
     public void notifyWhenBarristerRemoved(final BarristerChangeEvent event) {
         CaseData caseData = event.getCaseData();
 
-        ignoreAndLogNotificationFailures(() -> sendEmailToBarrister(caseData, EmailTemplateNames.CA_DA_REMOVE_BARRISTER_SELF));
-
     }
 
-    private EmailTemplateVars buildEmailBarrister(CaseData caseData,
-                                                    String barristerName) {
+    private EmailTemplateVars buildEmailBarrister(CaseData caseData, BarristerChangeEvent event) {
+        AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
         return BarristerEmail.builder()
             .caseReference(String.valueOf(caseData.getId()))
             .caseName(caseData.getApplicantCaseName())
-            .barristerName(barristerName)
-            .solicitorName(barristerName)
+            .barristerName(allocatedBarrister.getBarristerFullName())
+            .solicitorName(event.getSolicitorName())
             .caseLink(manageCaseUrl + URL_STRING + caseData.getId())
             .issueDate(CommonUtils.formatDate(D_MMM_YYYY, caseData.getIssueDate()))
             .build();

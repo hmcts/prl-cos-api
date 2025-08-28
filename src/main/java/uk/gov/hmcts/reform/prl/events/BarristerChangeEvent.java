@@ -15,4 +15,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 public class BarristerChangeEvent {
     private final CaseData caseData;
     private final TypeOfBarristerEventEnum typeOfEvent;
+    private final String solicitorEmailAddress;
+    private final String solicitorName;
 }
