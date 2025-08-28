@@ -37,18 +37,19 @@ public class BarristerChangeEventHandler {
     @Async
     @EventListener(condition = "#event.typeOfEvent.displayedValue eq 'Add Barrister'")
     public void notifyAddBarrister(final BarristerChangeEvent event) {
-        CaseData caseData = event.getCaseData();
+
         // notify - barrister
         ignoreAndLogNotificationFailures(
-            () -> sendEmailToBarrister(caseData, event, EmailTemplateNames.CA_DA_ADD_BARRISTER_SELF));
+            () -> sendEmailToBarrister(event, EmailTemplateNames.CA_DA_ADD_BARRISTER_SELF));
 
         // notify applicants/respondents LRs
         ignoreAndLogNotificationFailures(
-            () -> sendEmailToAppRespSolicitors(caseData, event, EmailTemplateNames.CA_DA_ADD_BARRISTER_TO_SOLICITOR));
+            () -> sendEmailToAppRespSolicitors(event, EmailTemplateNames.CA_DA_ADD_BARRISTER_TO_SOLICITOR));
 
     }
 
-    private void sendEmailToBarrister(CaseData caseData, BarristerChangeEvent event, EmailTemplateNames emailTemplateName) {
+    private void sendEmailToBarrister(BarristerChangeEvent event, EmailTemplateNames emailTemplateName) {
+        CaseData caseData = event.getCaseData();
         AllocatedBarrister barrister = caseData.getAllocatedBarrister();
         if (null != barrister.getBarristerEmail()) {
             log.info("Sending Barrister email on case id {}", caseData.getId());
@@ -67,21 +68,20 @@ public class BarristerChangeEventHandler {
         }
     }
 
-    private void sendEmailToAppRespSolicitors(CaseData caseData, BarristerChangeEvent event, EmailTemplateNames emailTemplateNames) {
+    private void sendEmailToAppRespSolicitors(BarristerChangeEvent event, EmailTemplateNames emailTemplateNames) {
+        CaseData caseData = event.getCaseData();
         Map<String, String> solicitorsToNotify = new HashMap<>();
         solicitorsToNotify.putAll(CaseUtils.getApplicantSolicitorsToNotify(caseData));
         solicitorsToNotify.putAll(CaseUtils.getRespondentSolicitorsToNotify(caseData));
         if (!solicitorsToNotify.isEmpty()) {
             solicitorsToNotify.forEach(
                 (key, value) -> {
-                    if (!key.equalsIgnoreCase(event.getSolicitorEmailAddress())) {
-                        emailService.send(
-                            key,
-                            emailTemplateNames,
-                            buildEmailBarrister(caseData, event),
-                            LanguagePreference.getPreferenceLanguage(caseData)
-                        );
-                    }
+                    emailService.send(
+                        key,
+                        emailTemplateNames,
+                        buildEmailBarrister(caseData, event),
+                        LanguagePreference.getPreferenceLanguage(caseData)
+                    );
                 });
         }
     }
