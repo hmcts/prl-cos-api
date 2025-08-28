@@ -93,7 +93,7 @@ public class BaisDocumentUploadService {
                 });
             });
 
-            acroZipService.zip();
+            acroZipService.zip(tempSourcePath.toString(), tempOutputPath.toString());
 
             log.info(
                 "*** Total time taken to run Bais Document upload task - {}s ***",
