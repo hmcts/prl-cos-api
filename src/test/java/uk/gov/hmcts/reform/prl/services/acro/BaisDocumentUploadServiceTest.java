@@ -15,9 +15,13 @@ import uk.gov.hmcts.reform.prl.models.dto.acro.AcroResponse;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -93,5 +97,60 @@ class BaisDocumentUploadServiceTest {
         verify(csvWriter, Mockito.times(1)).writeCcdOrderDataToCsv(anyList(), anyBoolean());
         verify(pdfExtractorService, Mockito.times(2)).downloadFl404aDocument(
             anyString(), eq(AUTHORISATION), anyString(), any(Document.class));
+    }
+
+    @Test
+    void shouldCopyDownloadedFilesWhenPresentAndExists() throws Exception {
+        when(systemUserService.getSysUserToken()).thenReturn(AUTHORISATION);
+        File tempCsv = File.createTempFile("test", ".csv");
+        when(csvWriter.writeCcdOrderDataToCsv(anyList(), anyBoolean())).thenReturn(tempCsv);
+        when(acroZipService.zip()).thenReturn("/path/to/archive.7z");
+
+        File englishFile = File.createTempFile("english", ".pdf");
+        File welshFile = File.createTempFile("welsh", ".pdf");
+        AcroCaseData acroCaseData = AcroCaseData.builder()
+            .fl404Orders(List.of(OrderDetails.builder().dateCreated(LocalDateTime.now())
+                .orderDocument(Document.builder().documentUrl("url").documentBinaryUrl("binary").build())
+                .orderDocumentWelsh(Document.builder().documentUrl("url").documentBinaryUrl("binary").build())
+                .build()))
+            .build();
+        AcroCaseDetail case1 = AcroCaseDetail.builder().id(1L).caseData(acroCaseData).build();
+        AcroResponse acroResponse = AcroResponse.builder().total(1).cases(List.of(case1)).build();
+        when(acroCaseDataService.getCaseData(AUTHORISATION)).thenReturn(acroResponse);
+        when(pdfExtractorService.downloadFl404aDocument(anyString(), eq(AUTHORISATION), anyString(), any(Document.class)))
+            .thenReturn(java.util.Optional.of(englishFile))
+            .thenReturn(java.util.Optional.of(welshFile));
+
+        baisDocumentUploadService.uploadFL404Orders();
+
+        verify(pdfExtractorService, Mockito.times(2)).downloadFl404aDocument(anyString(), eq(AUTHORISATION), anyString(), any(Document.class));
+    }
+
+    @Test
+    void shouldLogErrorWhenFileCopyThrowsIOException() throws Exception {
+        when(systemUserService.getSysUserToken()).thenReturn(AUTHORISATION);
+        File tempCsv = File.createTempFile("test", ".csv");
+        when(csvWriter.writeCcdOrderDataToCsv(anyList(), anyBoolean())).thenReturn(tempCsv);
+        when(acroZipService.zip()).thenReturn("/path/to/archive.7z");
+
+        File englishFile = File.createTempFile("english", ".pdf");
+        AcroCaseData acroCaseData = AcroCaseData.builder()
+            .fl404Orders(List.of(OrderDetails.builder().dateCreated(LocalDateTime.now())
+                .orderDocument(Document.builder().documentUrl("url").documentBinaryUrl("binary").build())
+                .orderDocumentWelsh(Document.builder().documentUrl("url").documentBinaryUrl("binary").build())
+                .build()))
+            .build();
+        AcroCaseDetail case1 = AcroCaseDetail.builder().id(1L).caseData(acroCaseData).build();
+        AcroResponse acroResponse = AcroResponse.builder().total(1).cases(List.of(case1)).build();
+        when(acroCaseDataService.getCaseData(AUTHORISATION)).thenReturn(acroResponse);
+        when(pdfExtractorService.downloadFl404aDocument(anyString(), eq(AUTHORISATION), anyString(), any(Document.class)))
+            .thenReturn(java.util.Optional.of(englishFile))
+            .thenReturn(java.util.Optional.empty());
+
+        try (org.mockito.MockedStatic<Files> filesMock = Mockito.mockStatic(Files.class)) {
+            filesMock.when(() -> Files.copy(any(Path.class), any(Path.class), any(java.nio.file.CopyOption.class)))
+                .thenThrow(new IOException("Simulated IO error"));
+            assertThrows(RuntimeException.class, () -> baisDocumentUploadService.uploadFL404Orders());
+        }
     }
 }
