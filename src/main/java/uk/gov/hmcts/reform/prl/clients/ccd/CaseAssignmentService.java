@@ -159,6 +159,16 @@ public class CaseAssignmentService {
 
     }
 
+    public AllocatedBarrister updateAllocatedBarrister(AllocatedBarrister allocatedBarrister,
+                                                       final CaseData caseData,
+                                                       String selectedPartyId) {
+        PartyDetails selectedParty = getSelectedParty(caseData, selectedPartyId);
+        return AllocatedBarrister.builder()
+            .partyList(allocatedBarrister.getPartyList())
+            .barristerEmail(selectedParty.getBarrister().getBarristerEmail())
+            .build();
+    }
+
     public void removeBarrister(final CaseData caseData, String selectedPartyId) {
         PartyDetails selectedParty = getSelectedParty(caseData, selectedPartyId);
         removeAmBarristerCaseRole(caseData, selectedParty);
@@ -261,7 +271,7 @@ public class CaseAssignmentService {
                 });
     }
 
-    private PartyDetails getSelectedParty(CaseData caseData, String selectedPartyId) {
+    public PartyDetails getSelectedParty(CaseData caseData, String selectedPartyId) {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             return getC100Party(caseData, selectedPartyId);
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
