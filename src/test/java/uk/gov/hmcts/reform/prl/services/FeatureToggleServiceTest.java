@@ -17,7 +17,7 @@ class FeatureToggleServiceTest {
     @Nested
     @RunWith(SpringRunner.class)
     @SpringBootTest(properties = {
-        "feature.toggle.add_barrister=true"
+        "feature.toggle.barristerFeatureEnabled=true"
     })
     class FeatureFlagSwitchOn {
 
@@ -26,7 +26,7 @@ class FeatureToggleServiceTest {
 
         @Test
         void isAddBarristerFlagReturnTrue() {
-            assertThat(featureToggleService.isAddBarristerIsEnabled(), is(true));
+            assertThat(featureToggleService.isBarristerFeatureEnabled(), is(true));
         }
     }
 }

@@ -167,7 +167,7 @@ public class CaseAssignmentService {
 
     public void removeAmBarristerCaseRole(final CaseData caseData,
                                 Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap) {
-        if (featureToggleService.isAddBarristerIsEnabled()) {
+        if (featureToggleService.isBarristerFeatureEnabled()) {
             selectedPartyDetailsMap.values().stream()
                 .map(Element::getValue)
                 .filter(partyDetails -> partyDetails.getBarrister() != null
@@ -445,7 +445,7 @@ public class CaseAssignmentService {
     }
 
     public void removeAmBarristerIfPresent(CaseDetails caseDetails) {
-        if (featureToggleService.isAddBarristerIsEnabled()) {
+        if (featureToggleService.isBarristerFeatureEnabled()) {
             CaseData caseData = getCaseData(caseDetails, objectMapper);
 
             removeBarristerIfPresent(caseData,
@@ -463,7 +463,7 @@ public class CaseAssignmentService {
 
     public void removePartyBarristerIfPresent(CaseData caseData,
                                               ChangeOrganisationRequest changeOrganisationRequest) {
-        if (featureToggleService.isAddBarristerIsEnabled()) {
+        if (featureToggleService.isBarristerFeatureEnabled()) {
             removeBarristerIfPresent(caseData,
                                      changeOrganisationRequest,
                                      partyDetailsElement ->
