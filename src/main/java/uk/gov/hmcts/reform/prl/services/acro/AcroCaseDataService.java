@@ -76,16 +76,15 @@ public class AcroCaseDataService {
             LocalDateTime startDateForSearch = acroDatesService.getStartDateForSearch();
             LocalDateTime endDateForSearch = acroDatesService.getEndDateForSearch();
             QueryParam ccdQueryParam = buildCcdQueryParam(startDateForSearch, endDateForSearch);
-            String searchString = objectMapper.writeValueAsString(ccdQueryParam);
-            log.info("Search string: {}", searchString);
+            String searchString = buildRawJsonQuery(startDateForSearch, endDateForSearch, objectMapper);
             String userToken = systemUserService.getSysUserToken();
             final String s2sToken = authTokenGenerator.generate();
             log.info("Invoking search cases");
             SearchResult searchResult = coreCaseDataApi.searchCases(
                 userToken,
-                searchString,
                 s2sToken,
-                searchCaseTypeId
+                searchCaseTypeId,
+                searchString
             );
             acroResponse = objectMapper.convertValue(
                 searchResult,
@@ -162,6 +161,59 @@ public class AcroCaseDataService {
         return should;
     }
 
+    private String buildRawJsonQuery(LocalDateTime startDateForSearch, LocalDateTime endDateForSearch, ObjectMapper objectMapper) {
+        try {
+            return """
+  {
+  "query": {
+    "bool": {
+      "filter": {
+        "range": {
+          "last_modified": {
+            "gte": "2025-08-18T00:59:59",
+            "lte": "2025-08-27T21:00"
+          }
+        }
+      },
+      "must": [
+        {
+          "term": {
+            "data.orderCollection.value.orderTypeId.keyword": "Non-molestation order (FL404A)"
+          }
+        },
+        {
+          "range": {
+            "data.orderCollection.value.dateCreated": {
+              "gte": "2025-08-18T00:59:59",
+              "lte": "2025-08-27T21:00"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "_source": [
+    "data.caseTypeOfApplication",
+    "data.courtName",
+    "data.courtEpimsId",
+    "data.courtTypeId",
+    "data.applicantsFL401",
+    "data.applicants",
+    "data.respondentsFL401",
+    "data.respondents",
+    "data.applicantsConfidentialDetails",
+    "data.orderCollection",
+    "data.caseManagementLocation",
+    "data.stmtOfServiceForOrder"
+  ]
+}
+        """;
+        } catch (Exception e) {
+            log.error("Error building JSON query: {}", e.getMessage());
+            throw new RuntimeException("Failed to build search query", e);
+        }
+    }
+
     private List<String> fetchFieldsRequiredForAcro() {
         return List.of(
             "data.caseTypeOfApplication",
@@ -189,7 +241,6 @@ public class AcroCaseDataService {
         for (AcroCaseDetail caseDetails : acroResponse.getCases()) {
             updateCourtEpmisId(caseDetails, caseIdWithRegionIdMap, extractedAcroResponse);
             extractOrderSpecificForSearchCrieteria(caseDetails, startDateForSearch, endDateForSearch);
-            extractedAcroResponse.getCases().add(caseDetails);
         }
         List<Hearings> listOfHearingDetails = hearingService.getHearingsForAllCases(
             authorisation,

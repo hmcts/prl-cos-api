@@ -429,7 +429,7 @@ test-url: ${TEST_URL:http://localhost:4044}
 core_case_data:
   api:
     #url: ${CORE_CASE_DATA_API_URL:http://ccd-data-store-api-aat.service.core-compute-aat.internal}
-    url: ${CORE_CASE_DATA_API_URL:https://ccd-data-store-api-prl-ccd-definitions-pr-2822.preview.platform.hmcts.net/}
+    url: ${CORE_CASE_DATA_API_URL:https://ccd-data-store-api-prl-ccd-definitions-pr-2817.preview.platform.hmcts.net/}
 
 
 auth:
@@ -804,7 +804,5 @@ hearing:
 
 acro:
   search-case-type-id: PRLAPPS
-  source:
-    path: /secure/acro/source
-  export:
-    path: /secure/acro/export
+  source-directory: /secure/acro/source
+  output-directory: /secure/acro/export

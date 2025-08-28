@@ -34,8 +34,10 @@ public class BaisDocumentUploadService {
     private final CsvWriter csvWriter;
     private final PdfExtractorService pdfExtractorService;
 
-    @Value("acro.source-directory")
+    @Value("${acro.source-directory}")
     private String sourceDirectory;
+    @Value("${acro.output-directory}")
+    private String outputDirectory;
 
     public static final String DOCUMENT_SOURCE_DIRECTORY = "acro-sources";
     public static final String OUTPUT_DIRECTORY = "acro-output";
@@ -50,14 +52,18 @@ public class BaisDocumentUploadService {
             //Fetch all cases with FL404A Orders
             AcroResponse acroResponse = acroCaseDataService.getCaseData(sysUserToken);
 
-            Path sourcePath = Files.createTempDirectory(DOCUMENT_SOURCE_DIRECTORY);
-            Path outputDirectory = Files.createTempDirectory(OUTPUT_DIRECTORY);
+            Path tempSourcePath = Files.createTempDirectory("acro-sources");
+            Path tempOutputPath = Files.createTempDirectory("acro-output");
+
+            // Override the configured directories with writable temp directories
+            this.sourceDirectory = tempSourcePath.toString();
+            this.outputDirectory = tempOutputPath.toString();
 
             if (acroResponse.getTotal() == 0 || acroResponse.getCases() == null || acroResponse.getCases().isEmpty()) {
                 log.info("Search has resulted empty cases with Final FL404a orders, so need to send empty csv file");
 
                 csvWriter.writeCcdOrderDataToCsv(AcroCaseData.builder().build(), false);
-                acroZipService.zip();
+                acroZipService.zip(tempSourcePath.toString(), tempOutputPath.toString());
                 return;
             }
 
@@ -87,7 +93,7 @@ public class BaisDocumentUploadService {
                 });
             });
 
-            acroZipService.zip();
+            acroZipService.zip(tempSourcePath.toString(), tempOutputPath.toString());
 
             log.info(
                 "*** Total time taken to run Bais Document upload task - {}s ***",
