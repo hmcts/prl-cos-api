@@ -626,7 +626,5 @@ closing_case:
 
 acro:
   search-case-type-id: PRLAPPS
-  source:
-    path: /secure/acro/source
-  export:
-    path: /secure/acro/export
+  source-directory: /tmp/acro/source
+  output-directory: /tmp/acro/output
