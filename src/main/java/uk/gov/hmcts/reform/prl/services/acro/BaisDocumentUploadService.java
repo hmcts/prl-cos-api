@@ -15,6 +15,8 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -39,10 +41,6 @@ public class BaisDocumentUploadService {
     @Value("${acro.output-directory}")
     private String outputDirectory;
 
-    public static final String DOCUMENT_SOURCE_DIRECTORY = "acro-sources";
-    public static final String OUTPUT_DIRECTORY = "acro-output";
-
-
     public void uploadFL404Orders() {
         long startTime = System.currentTimeMillis();
         log.info("inside uploadFL404Orders");
@@ -52,8 +50,12 @@ public class BaisDocumentUploadService {
             //Fetch all cases with FL404A Orders
             AcroResponse acroResponse = acroCaseDataService.getCaseData(sysUserToken);
 
-            Path tempSourcePath = Files.createTempDirectory("acro-sources");
-            Path tempOutputPath = Files.createTempDirectory("acro-output");
+            FileAttribute<?> permissions = PosixFilePermissions.asFileAttribute(
+                PosixFilePermissions.fromString("rwx------")
+            );
+
+            Path tempSourcePath = Files.createTempDirectory("acro-sources", permissions);
+            Path tempOutputPath = Files.createTempDirectory("acro-output", permissions);
 
             // Override the configured directories with writable temp directories
             this.sourceDirectory = tempSourcePath.toString();
