@@ -53,6 +53,7 @@ import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.awp.CitizenAwpMapper.getAwpTaskName;
 import static uk.gov.hmcts.reform.prl.services.citizen.CitizenCaseUpdateService.CASE_STATUS;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.DATE_TIME_OF_SUBMISSION_FORMAT;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
@@ -101,7 +102,12 @@ public class HelpWithFeesService {
                 .state(SUBMITTED_PAID.getLabel())
                 .build());
             caseDataUpdated.put(IS_THE_CASE_IN_DRAFT_STATE, YesOrNo.Yes.getDisplayedValue());
-            caseDataUpdated.put(DATE_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE.format(ZonedDateTime.now(ZoneId.of("Europe/London"))));
+            if (isEmpty(caseData.getDateSubmitted())) {
+                caseDataUpdated.put(
+                    DATE_SUBMITTED_FIELD,
+                    DateTimeFormatter.ISO_LOCAL_DATE.format(ZonedDateTime.now(ZoneId.of("Europe/London")))
+                );
+            }
         } else {
             Element<AdditionalApplicationsBundle> chosenAdditionalApplication = getChosenAdditionalApplication(caseData);
             List<Element<AdditionalApplicationsBundle>> additionalApplications
