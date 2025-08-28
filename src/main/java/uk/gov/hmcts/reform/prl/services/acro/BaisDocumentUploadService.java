@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.services.acro;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,11 +14,10 @@ import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroResponse;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.FileAttribute;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -47,53 +48,79 @@ public class BaisDocumentUploadService {
 
         String sysUserToken = systemUserService.getSysUserToken();
         try {
-            //Fetch all cases with FL404A Orders
+            Files.createDirectories(Path.of(sourceDirectory));
+            Files.createDirectories(Path.of(outputDirectory));
+
             AcroResponse acroResponse = acroCaseDataService.getCaseData(sysUserToken);
 
-            FileAttribute<?> permissions = PosixFilePermissions.asFileAttribute(
-                PosixFilePermissions.fromString("rwx------")
-            );
+            // 28th August - Write AcroResponse to JSON file for QA
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.registerModule(new JavaTimeModule());
+            File jsonFile = new File(outputDirectory, "AcroResponse.json");
+            objectMapper.writeValue(jsonFile, acroResponse);
 
-            Path tempSourcePath = Files.createTempDirectory("acro-sources", permissions);
-            Path tempOutputPath = Files.createTempDirectory("acro-output", permissions);
-
-            // Override the configured directories with writable temp directories
-            this.sourceDirectory = tempSourcePath.toString();
-            this.outputDirectory = tempOutputPath.toString();
-
+            File csvFile;
             if (acroResponse.getTotal() == 0 || acroResponse.getCases() == null || acroResponse.getCases().isEmpty()) {
                 log.info("Search has resulted empty cases with Final FL404a orders, so need to send empty csv file");
-
-                csvWriter.writeCcdOrderDataToCsv(AcroCaseData.builder().build(), false);
-                acroZipService.zip();
-                return;
+                csvFile = csvWriter.writeCcdOrderDataToCsv(java.util.List.of(AcroCaseData.builder().build()), false);
+            } else {
+                csvFile = csvWriter.writeCcdOrderDataToCsv(
+                    acroResponse.getCases().stream().map(acroCase -> acroCase.getCaseData()).toList(),
+                    true
+                );
+            }
+            // Save the CSV file to outputDirectory
+            if (csvFile != null && csvFile.exists()) {
+                File outputCsv = new File(outputDirectory, "AcroReport.csv");
+                Files.copy(csvFile.toPath(), outputCsv.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            } else {
+                log.error("CSV file does not exist: {}", csvFile != null ? csvFile.getAbsolutePath() : "null");
             }
 
-            acroResponse.getCases().forEach(acroCase -> {
-                AcroCaseData caseData = acroCase.getCaseData();
-                caseData.getFl404Orders().forEach(order -> {
-                    String caseId = String.valueOf(acroCase.getId());
-                    String fileName = getFileName(caseId, order.getDateCreated(), false);
-                    String welshFileName = getFileName(caseId, order.getDateCreated(), true);
-                    pdfExtractorService.downloadFl404aDocument(
-                        caseId,
-                        sysUserToken,
-                        fileName,
-                        order.getOrderDocument()
-                    );
-                    pdfExtractorService.downloadFl404aDocument(
-                        caseId,
-                        sysUserToken,
-                        welshFileName,
-                        order.getOrderDocumentWelsh()
-                    );
-                    try {
-                        csvWriter.writeCcdOrderDataToCsv(caseData, true);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
+            // Only process cases if not null and not empty
+            if (acroResponse.getCases() != null && !acroResponse.getCases().isEmpty()) {
+                acroResponse.getCases().forEach(acroCase -> {
+                    AcroCaseData caseData = acroCase.getCaseData();
+                    if (caseData.getFl404Orders() != null) {
+                        caseData.getFl404Orders().forEach(order -> {
+                            String caseId = String.valueOf(acroCase.getId());
+                            String fileName = getFileName(caseId, order.getDateCreated(), false);
+                            String welshFileName = getFileName(caseId, order.getDateCreated(), true);
+                            java.util.Optional<File> downloadedFileOpt = pdfExtractorService.downloadFl404aDocument(
+                                caseId,
+                                sysUserToken,
+                                fileName,
+                                order.getOrderDocument()
+                            );
+                            if (downloadedFileOpt.isPresent() && downloadedFileOpt.get().exists()) {
+                                File downloadedFile = downloadedFileOpt.get();
+                                File outputFile = new File(outputDirectory, downloadedFile.getName());
+                                try {
+                                    Files.copy(downloadedFile.toPath(), outputFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                                } catch (IOException e) {
+                                    log.error("Failed to copy file {} to output directory: {}", downloadedFile.getName(), e.getMessage());
+                                }
+                            }
+                            java.util.Optional<File> downloadedWelshFileOpt = pdfExtractorService.downloadFl404aDocument(
+                                caseId,
+                                sysUserToken,
+                                welshFileName,
+                                order.getOrderDocumentWelsh()
+                            );
+                            if (downloadedWelshFileOpt.isPresent() && downloadedWelshFileOpt.get().exists()) {
+                                File downloadedWelshFile = downloadedWelshFileOpt.get();
+                                File outputWelshFile = new File(outputDirectory, downloadedWelshFile.getName());
+                                try {
+                                    Files.copy(downloadedWelshFile.toPath(), outputWelshFile.toPath(),
+                                               java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                                } catch (IOException e) {
+                                    log.error("Failed to copy Welsh file {} to output directory: {}", downloadedWelshFile.getName(), e.getMessage());
+                                }
+                            }
+                        });
                     }
                 });
-            });
+            }
 
             acroZipService.zip();
 

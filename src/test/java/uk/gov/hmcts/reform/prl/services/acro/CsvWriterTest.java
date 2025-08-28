@@ -73,28 +73,32 @@ class CsvWriterTest {
         @Test
         @DisplayName("Should create a valid CSV file")
         void shouldCreateValidCsvFile() throws Exception {
-            AcroCaseData caseData = TestDataFactory.createStandardCaseData();
-            File csvFile = csvWriter.writeCcdOrderDataToCsv(caseData, true);
+            List<AcroCaseData> caseDataList = List.of(
+                TestDataFactory.createStandardCaseData(),
+                TestDataFactory.createCaseDataWithAllConfidentialFields()
+            );
+            File csvFile = csvWriter.writeCcdOrderDataToCsv(caseDataList, true);
 
             // Quick save for colleague review
             // File savedCsv = new File("test-output.csv");
             // Files.copy(csvFile.toPath(), savedCsv.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
 
             // System.out.println("CSV saved to: " + savedCsv.getAbsolutePath());
-            System.out.println("\nCSV Content:");
+            // System.out.println("\nCSV Content:");
             // Files.lines(savedCsv.toPath()).forEach(System.out::println);
 
-            // Your existing assertions
             assertNotNull(csvFile);
             assertTrue(csvFile.exists());
             assertTrue(csvFile.getName().endsWith(".csv"));
+            List<String> lines = Files.readAllLines(csvFile.toPath());
+            assertEquals(3, lines.size(), "CSV should have header and two data lines");
         }
 
         @Test
         @DisplayName("Should have correct file permissions")
         void shouldHaveCorrectFilePermissions() throws Exception {
             AcroCaseData caseData = TestDataFactory.createStandardCaseData();
-            File csvFile = csvWriter.writeCcdOrderDataToCsv(caseData, true);
+            File csvFile = csvWriter.writeCcdOrderDataToCsv(List.of(caseData), true);
             Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(csvFile.toPath());
             assertAll(
                 "File permissions validation",
@@ -117,7 +121,7 @@ class CsvWriterTest {
         @DisplayName("Should create a valid CSV file with output verification")
         void shouldCreateValidCsvFileWithOutputVerification() throws Exception {
             AcroCaseData caseData = TestDataFactory.createStandardCaseData();
-            File csvFile = csvWriter.writeCcdOrderDataToCsv(caseData, true);
+            File csvFile = csvWriter.writeCcdOrderDataToCsv(List.of(caseData), true);
 
             System.out.println("\nCSV Content:");
 
@@ -128,6 +132,19 @@ class CsvWriterTest {
                 () -> assertTrue(csvFile.getName().endsWith(".csv"), "File should have .csv extension")
             );
         }
+
+        @Test
+        @DisplayName("Should create a valid CSV file for multiple case data")
+        void shouldCreateValidCsvFileForMultipleCases() throws Exception {
+            List<AcroCaseData> caseDataList = List.of(
+                TestDataFactory.createStandardCaseData(),
+                TestDataFactory.createCaseDataWithAllConfidentialFields()
+            );
+            File csvFile = csvWriter.writeCcdOrderDataToCsv(caseDataList, true);
+            assertNotNull(csvFile);
+            assertTrue(csvFile.exists());
+            assertTrue(csvFile.getName().endsWith(".csv"));
+        }
     }
 
     @Nested
@@ -137,7 +154,7 @@ class CsvWriterTest {
         @DisplayName("Should contain all expected headers")
         void shouldContainAllExpectedHeaders() throws Exception {
             AcroCaseData caseData = TestDataFactory.createStandardCaseData();
-            File csvFile = csvWriter.writeCcdOrderDataToCsv(caseData, true);
+            File csvFile = csvWriter.writeCcdOrderDataToCsv(List.of(caseData), true);
             String headerLine = readFirstLine(csvFile);
             assertNotNull(headerLine, "Header line should not be null");
             for (String expectedHeader : EXPECTED_CSV_HEADERS) {
@@ -149,7 +166,7 @@ class CsvWriterTest {
         @DisplayName("Should have headers in correct order")
         void shouldHaveHeadersInCorrectOrder() throws Exception {
             AcroCaseData caseData = TestDataFactory.createStandardCaseData();
-            File csvFile = csvWriter.writeCcdOrderDataToCsv(caseData, true);
+            File csvFile = csvWriter.writeCcdOrderDataToCsv(List.of(caseData), true);
             String headerLine = readFirstLine(csvFile);
             String[] actualHeaders = headerLine.split(",");
             assertArrayEquals(EXPECTED_CSV_HEADERS, actualHeaders, "Headers should be in the expected order");
@@ -222,7 +239,7 @@ class CsvWriterTest {
         @DisplayName("Should create CSV file with all expected data when confidential data is allowed")
         void shouldCreateCsvFileWithAllDataWhenConfidentialDataAllowed() throws Exception {
             AcroCaseData caseData = TestDataFactory.createStandardCaseData();
-            File csvFile = csvWriter.writeCcdOrderDataToCsv(caseData, true);
+            File csvFile = csvWriter.writeCcdOrderDataToCsv(List.of(caseData), true);
             String csvContent = Files.readString(csvFile.toPath());
 
             assertAll(
@@ -238,7 +255,7 @@ class CsvWriterTest {
         @DisplayName("Should replace confidential fields with dash when confidential data is not allowed")
         void shouldCreateCsvFileWithDashesWhenConfidfentialDataNotAllowed() throws Exception {
             AcroCaseData caseData = TestDataFactory.createCaseDataWithAllConfidentialFields();
-            File csvFile = csvWriter.writeCcdOrderDataToCsv(caseData, false);
+            File csvFile = csvWriter.writeCcdOrderDataToCsv(List.of(caseData), false);
             String csvContent = Files.readString(csvFile.toPath());
 
             assertAll(

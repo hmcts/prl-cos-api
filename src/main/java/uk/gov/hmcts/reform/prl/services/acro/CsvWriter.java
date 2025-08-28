@@ -110,6 +110,37 @@ public class CsvWriter {
         return file;
     }
 
+    /**
+     * Writes a list of case data to a CSV file with configurable confidential data handling.
+     *
+     * @param cases the list of case data to write
+     * @param confidentialAllowed toggle to include confidential data or replace with "-"
+     * @return the created CSV file
+     * @throws IOException if file creation fails
+     */
+    public File writeCcdOrderDataToCsv(List<AcroCaseData> cases, boolean confidentialAllowed) throws IOException {
+        Path path = Files.createTempFile("AcroReport", ".csv", ATTRIBUTE);
+        File file = path.toFile();
+        String[] headers = Arrays.stream(COLUMNS).map(CsvColumn::getHeader).toArray(String[]::new);
+        CSVFormat csvFileHeader = CSVFormat.DEFAULT.builder().setHeader(headers).build();
+
+        try (FileWriter fileWriter = new FileWriter(file);
+             CSVPrinter printer = new CSVPrinter(fileWriter, csvFileHeader)) {
+            for (AcroCaseData ccdOrderData : cases) {
+                List<String> record = new ArrayList<>();
+                for (CsvColumn column : COLUMNS) {
+                    Object value = extractPropertyValues(ccdOrderData, column.getProperty());
+                    if (!confidentialAllowed && isConfidentialField(ccdOrderData, column)) {
+                        value = "-";
+                    }
+                    record.add(value != null ? value.toString() : "");
+                }
+                printer.printRecord(record);
+            }
+        }
+        return file;
+    }
+
     private boolean isConfidentialField(AcroCaseData caseData, CsvColumn column) {
         return switch (column) {
             case APPLICANT_PHONE -> isConfidential(caseData, "applicantsFL401.isPhoneNumberConfidential");
