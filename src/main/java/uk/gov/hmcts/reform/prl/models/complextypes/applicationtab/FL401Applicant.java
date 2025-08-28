@@ -6,6 +6,7 @@ import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.Organisation;
 
 import java.time.LocalDate;
 
@@ -27,4 +28,9 @@ public class FL401Applicant {
     private final String phoneNumber;
     private final YesOrNo isPhoneNumberConfidential;
     private final ContactPreferences contactPreferences;
+
+    private final String barristerFirstName;
+    private final String barristerLastName;
+    private final String barristerEmail;
+    private final Organisation barristerOrg;
 }
