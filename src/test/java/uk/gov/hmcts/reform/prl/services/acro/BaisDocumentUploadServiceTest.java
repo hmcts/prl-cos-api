@@ -127,7 +127,7 @@ class BaisDocumentUploadServiceTest {
     }
 
     @Test
-    void shouldLogErrorWhenFileCopyThrowsIOException() throws Exception {
+    void shouldLogErrorWhenFileCopyThrowsIoException() throws Exception {
         when(systemUserService.getSysUserToken()).thenReturn(AUTHORISATION);
         File tempCsv = File.createTempFile("test", ".csv");
         when(csvWriter.writeCcdOrderDataToCsv(anyList(), anyBoolean())).thenReturn(tempCsv);
