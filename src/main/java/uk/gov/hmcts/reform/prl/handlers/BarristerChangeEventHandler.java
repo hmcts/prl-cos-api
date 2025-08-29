@@ -76,14 +76,12 @@ public class BarristerChangeEventHandler {
         solicitorsToNotify.putAll(CaseUtils.getRespondentSolicitorsToNotify(caseData));
         if (!solicitorsToNotify.isEmpty()) {
             solicitorsToNotify.forEach(
-                (key, value) -> {
-                    emailService.send(
-                        key,
-                        emailTemplateNames,
-                        buildEmailBarrister(caseData, value),
-                        LanguagePreference.getPreferenceLanguage(caseData)
-                    );
-                });
+                (key, value) -> emailService.send(
+                    key,
+                    emailTemplateNames,
+                    buildEmailBarrister(caseData, value),
+                    LanguagePreference.getPreferenceLanguage(caseData))
+            );
         }
     }
 
