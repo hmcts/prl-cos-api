@@ -15,10 +15,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.barrister.BarristerRemoveService;
 
 import java.util.List;
 import java.util.Optional;
@@ -54,6 +59,8 @@ public class BarristerControllerIntegrationTest {
     UserService userService;
     @MockBean
     OrganisationService organisationService;
+    @MockBean
+    BarristerRemoveService barristerRemoveService;
 
     private static final String AUTH_TOKEN = "auth-token";
     private static final String SERVICE_TOKEN = "service-token";
@@ -114,13 +121,29 @@ public class BarristerControllerIntegrationTest {
     public void testBarristerControllerStopRepresentingAboutToStart() throws Exception {
         objectMapper.registerModule(new ParameterNamesModule());
         String url = "/barrister/stop-representing/about-to-start";
-        String jsonRequest = ResourceLoader.loadJson("controller/barristerAboutToStartCallBackRequest.json");
+        String jsonRequest =
+            ResourceLoader.loadJson("controller/barristerAboutToStartCallBackRequest.json");
 
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(organisationService.findUserOrganisation(any())).thenReturn(Optional.of(Organisations.builder()
-                                                                                         .organisationIdentifier("orgId")
-                                                                                         .build()));
-        when(userService.getUserDetails(any())).thenReturn(UserDetails.builder().roles(List.of(SOLICITOR)).build());
+        when(organisationService.findUserOrganisation(any()))
+            .thenReturn(Optional.of(Organisations.builder()
+                                        .organisationIdentifier("orgId")
+                                        .build()));
+        when(userService.getUserDetails(any()))
+            .thenReturn(UserDetails.builder().roles(List.of(SOLICITOR)).build());
+
+        DynamicListElement element = DynamicListElement.builder()
+            .code("12345:")
+            .label("Test Barrister")
+            .build();
+
+        AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder()
+            .partyList(DynamicList.builder().listItems(List.of(element)).build())
+            .barristerOrg(Organisation.builder().organisationID("orgId").build())
+            .build();
+
+        when(barristerRemoveService.getBarristerListToRemove(any(), any(), any()))
+            .thenReturn(allocatedBarrister);
 
         mockMvc.perform(
                 post(url)
