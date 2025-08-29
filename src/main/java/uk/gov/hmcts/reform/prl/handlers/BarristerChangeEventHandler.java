@@ -77,13 +77,14 @@ public class BarristerChangeEventHandler {
         if (!solicitorsToNotify.isEmpty()) {
             solicitorsToNotify.forEach(
                 (key, value) -> {
-                    log.info("Sending Barrister email to Solicitors email: {} and name: {}", key, value);
-                    emailService.send(
-                        key,
-                        emailTemplateNames,
-                        buildEmailBarrister(caseData, value),
-                        LanguagePreference.getPreferenceLanguage(caseData)
-                    );
+                    if (key != null) {
+                        emailService.send(
+                            key,
+                            emailTemplateNames,
+                            buildEmailBarrister(caseData, value),
+                            LanguagePreference.getPreferenceLanguage(caseData)
+                        );
+                    }
                 }
             );
         }
