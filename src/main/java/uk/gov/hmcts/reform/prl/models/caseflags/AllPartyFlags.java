@@ -54,6 +54,11 @@ public class AllPartyFlags {
     private Flags caApplicantSolicitor3InternalFlags;
     private Flags caApplicantSolicitor4InternalFlags;
     private Flags caApplicantSolicitor5InternalFlags;
+    private Flags caApplicantBarrister1InternalFlags;
+    private Flags caApplicantBarrister2InternalFlags;
+    private Flags caApplicantBarrister3InternalFlags;
+    private Flags caApplicantBarrister4InternalFlags;
+    private Flags caApplicantBarrister5InternalFlags;
     private Flags caRespondent1InternalFlags;
     private Flags caRespondent2InternalFlags;
     private Flags caRespondent3InternalFlags;
@@ -64,6 +69,11 @@ public class AllPartyFlags {
     private Flags caRespondentSolicitor3InternalFlags;
     private Flags caRespondentSolicitor4InternalFlags;
     private Flags caRespondentSolicitor5InternalFlags;
+    private Flags caRespondentBarrister1InternalFlags;
+    private Flags caRespondentBarrister2InternalFlags;
+    private Flags caRespondentBarrister3InternalFlags;
+    private Flags caRespondentBarrister4InternalFlags;
+    private Flags caRespondentBarrister5InternalFlags;
     private Flags caOtherParty1InternalFlags;
     private Flags caOtherParty2InternalFlags;
     private Flags caOtherParty3InternalFlags;
@@ -71,6 +81,8 @@ public class AllPartyFlags {
     private Flags caOtherParty5InternalFlags;
     private Flags daApplicantInternalFlags;
     private Flags daApplicantSolicitorInternalFlags;
+    private Flags daApplicantBarristerInternalFlags;
     private Flags daRespondentInternalFlags;
     private Flags daRespondentSolicitorInternalFlags;
+    private Flags daRespondentBarristerInternalFlags;
 }
