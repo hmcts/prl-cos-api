@@ -7,6 +7,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
@@ -24,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.Barrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.utils.CaseHelper;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -58,6 +61,10 @@ class CaseAssignmentControllerTest {
     private OrganisationService organisationService;
     @Mock
     private AuthorisationService authorisationService;
+    @Mock
+    private CaseHelper caseHelper;
+    @Captor
+    ArgumentCaptor<Supplier<PartyDetails>> supplierPartyDetailsArgumentCaptor;
 
     private CaseAssignmentController caseAssignmentController;
     @Mock
@@ -71,7 +78,8 @@ class CaseAssignmentControllerTest {
             caseAssignmentService,
             objectMapper,
             organisationService,
-            authorisationService);
+            authorisationService,
+            caseHelper);
         barrister = Barrister.builder()
             .barristerEmail("barristerEmail@gmail.com")
             .barristerFirstName("barristerName")
@@ -387,7 +395,11 @@ class CaseAssignmentControllerTest {
                                                             anyList());
         verify(caseAssignmentService).removeBarrister(isA(CaseData.class),
                                                    eq(selectedPartyId));
-        verify(caseAssignmentService).getSelectedParty(isA(CaseData.class), eq(selectedPartyId));
+        verify(caseHelper).setAllocatedBarrister(supplierPartyDetailsArgumentCaptor.capture(),
+                                                 isA(CaseData.class),
+                                                 eq(UUID.fromString(selectedPartyId)));
+        assertThat(supplierPartyDetailsArgumentCaptor.getValue().get())
+            .isEqualTo(partyDetails);
     }
 
     @Test
@@ -433,6 +445,9 @@ class CaseAssignmentControllerTest {
                                                          anyList());
         verify(caseAssignmentService, never()).removeBarrister(isA(CaseData.class),
                                                    eq(selectedPartyId));
+        verify(caseHelper, never()).setAllocatedBarrister(any(Supplier.class),
+                                                 any(CaseData.class),
+                                                 any(UUID.class));
     }
 
     @Test

@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 @RequiredArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AllocatedBarrister {

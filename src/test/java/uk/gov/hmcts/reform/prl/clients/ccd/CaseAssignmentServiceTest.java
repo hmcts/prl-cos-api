@@ -27,7 +27,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
-import uk.gov.hmcts.reform.prl.exception.InvalidPartyIdException;
+import uk.gov.hmcts.reform.prl.exception.InvalidPartyException;
 import uk.gov.hmcts.reform.prl.exception.InvalidSolicitorRoleException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -47,6 +47,8 @@ import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
+import uk.gov.hmcts.reform.prl.services.barrister.BarristerRemoveService;
+import uk.gov.hmcts.reform.prl.utils.CaseHelper;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.MaskEmail;
 
@@ -57,6 +59,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
@@ -100,12 +103,18 @@ class CaseAssignmentServiceTest {
     private MaskEmail maskEmail;
     @Mock
     private FeatureToggleService featureToggleService;
+    @Mock
+    private CaseHelper casehelper;
+    @Mock
+    private BarristerRemoveService barristerRemoveService;
 
     @InjectMocks
     private CaseAssignmentService caseAssignmentService;
 
     @Captor
     private ArgumentCaptor<CaseAssignmentUserRolesRequest> caseAssignmentUserRolesRequestArgumentCaptor;
+    @Captor
+    ArgumentCaptor<Supplier<PartyDetails>> supplierCaptor;
     private CaseData c100CaseData;
     private CaseData fl401CaseData;
     private Map<String, UUID> partyIds;
@@ -287,7 +296,9 @@ class CaseAssignmentServiceTest {
             roleAssignmentService,
             maskEmail,
             objectMapper,
-            featureToggleService
+            featureToggleService,
+            casehelper,
+            barristerRemoveService
         );
         AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder()
             .partyList(DynamicList.builder()
@@ -829,7 +840,7 @@ class CaseAssignmentServiceTest {
                                                                              id,
                                                     errors))
             .hasMessageContaining("Invalid party selected")
-            .isInstanceOf(InvalidPartyIdException.class);
+            .isInstanceOf(InvalidPartyException.class);
     }
 
     @Test
@@ -1002,7 +1013,9 @@ class CaseAssignmentServiceTest {
             roleAssignmentService,
             maskEmail,
             objectMapper,
-            featureToggleService
+            featureToggleService,
+            casehelper,
+            barristerRemoveService
         );
 
         localCaseAssignmentService.removeAmBarristerIfPresent(localCaseDetails);
@@ -1030,7 +1043,9 @@ class CaseAssignmentServiceTest {
             roleAssignmentService,
             maskEmail,
             objectMapper,
-            featureToggleService
+            featureToggleService,
+            casehelper,
+            barristerRemoveService
         );
 
         Barrister updatedBarrister = barrister.toBuilder()
@@ -1059,8 +1074,12 @@ class CaseAssignmentServiceTest {
         verify(caseAssignmentApi, never()).removeCaseUserRoles(anyString(),
                                                       anyString(),
                                                       isA(CaseAssignmentUserRolesRequest.class));
-
-
+        verify(casehelper).setAllocatedBarrister(supplierCaptor.capture(),
+                                                 isA(CaseData.class),
+                                                 isA(UUID.class));
+        assertThat(supplierCaptor.getValue().get())
+            .isNotNull();
+        verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
     }
 
     static Stream<Arguments> parameterC100SolicitorParties() {
@@ -1122,7 +1141,9 @@ class CaseAssignmentServiceTest {
             roleAssignmentService,
             maskEmail,
             objectMapper,
-            featureToggleService
+            featureToggleService,
+            casehelper,
+            barristerRemoveService
         );
         when(featureToggleService.isBarristerFeatureEnabled())
             .thenReturn(true);
@@ -1133,6 +1154,7 @@ class CaseAssignmentServiceTest {
         verify(caseAssignmentApi).removeCaseUserRoles(anyString(),
                                                       anyString(),
                                                       isA(CaseAssignmentUserRolesRequest.class));
+
     }
 
     @ParameterizedTest
@@ -1150,7 +1172,9 @@ class CaseAssignmentServiceTest {
             roleAssignmentService,
             maskEmail,
             objectMapper,
-            featureToggleService
+            featureToggleService,
+            casehelper,
+            barristerRemoveService
         );
 
         Barrister updatedBarrister = barrister.toBuilder()
@@ -1178,6 +1202,12 @@ class CaseAssignmentServiceTest {
         verify(caseAssignmentApi, never()).removeCaseUserRoles(anyString(),
                                                       anyString(),
                                                       isA(CaseAssignmentUserRolesRequest.class));
+        verify(casehelper).setAllocatedBarrister(supplierCaptor.capture(),
+                                                 isA(CaseData.class),
+                                                 isA(UUID.class));
+        assertThat(supplierCaptor.getValue().get())
+            .isNotNull();
+        verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
     }
 
     @Test

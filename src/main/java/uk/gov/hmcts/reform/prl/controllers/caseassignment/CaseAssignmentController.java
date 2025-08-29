@@ -21,16 +21,17 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.utils.CaseHelper;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATED_BARRISTER;
@@ -52,6 +53,7 @@ public class CaseAssignmentController {
     private final ObjectMapper objectMapper;
     private final OrganisationService organisationService;
     private final AuthorisationService authorisationService;
+    private final CaseHelper caseHelper;
 
     @PostMapping(path = "/barrister/add/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "About to submit to add Barrister")
@@ -129,19 +131,12 @@ public class CaseAssignmentController {
             if (errorList.isEmpty()) {
                 caseAssignmentService.removeBarrister(caseData,
                                                       allocatedBarrister.getPartyList().getValueCode());
-                PartyDetails selectedParty = caseAssignmentService.getSelectedParty(
-                    caseData,
-                    allocatedBarrister.getPartyList().getValueCode()
-                );
-                if (selectedParty != null) {
-                    caseData.setAllocatedBarrister(AllocatedBarrister.builder()
-                        .partyList(allocatedBarrister.getPartyList())
-                        .barristerOrg(selectedParty.getBarrister().getBarristerOrg())
-                        .barristerEmail(selectedParty.getBarrister().getBarristerEmail())
-                        .barristerFirstName(selectedParty.getBarrister().getBarristerFirstName())
-                        .barristerLastName(selectedParty.getBarrister().getBarristerLastName())
-                        .build());
-                }
+
+                caseHelper.setAllocatedBarrister(() -> caseAssignmentService
+                                                    .getSelectedParty(caseData, allocatedBarrister.getPartyList().getValueCode()),
+                                                 caseData,
+                                                 UUID.fromString(allocatedBarrister.getPartyList().getValueCode()));
+
                 updateCaseDetails(caseDetails, caseData);
             }
 
