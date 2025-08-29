@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services.barrister;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
 import uk.gov.hmcts.reform.prl.enums.barrister.TypeOfBarristerEventEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
@@ -19,9 +18,8 @@ public class BarristerRemoveService extends AbstractBarristerService {
 
     public BarristerRemoveService(UserService userService,
                                   OrganisationService organisationService,
-                                  CaseAssignmentService caseAssignmentService,
                                   EventService eventPublisher) {
-        super(userService, organisationService, caseAssignmentService, eventPublisher);
+        super(userService, organisationService, eventPublisher);
     }
 
     public AllocatedBarrister getBarristerListToRemove(CaseData caseData, String authorisation) {

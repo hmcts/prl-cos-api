@@ -159,16 +159,6 @@ public class CaseAssignmentService {
 
     }
 
-    public AllocatedBarrister updateAllocatedBarrister(AllocatedBarrister allocatedBarrister,
-                                                       final CaseData caseData,
-                                                       String selectedPartyId) {
-        PartyDetails selectedParty = getSelectedParty(caseData, selectedPartyId);
-        return AllocatedBarrister.builder()
-            .partyList(allocatedBarrister.getPartyList())
-            .barristerEmail(selectedParty.getBarrister().getBarristerEmail())
-            .build();
-    }
-
     public void removeBarrister(final CaseData caseData, String selectedPartyId) {
         PartyDetails selectedParty = getSelectedParty(caseData, selectedPartyId);
         removeAmBarristerCaseRole(caseData, selectedParty);

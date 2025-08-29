@@ -176,4 +176,52 @@ public class BarristerControllerTest {
             () -> barristerController
                 .handleRemoveAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest));
     }
+
+    @Test
+    public void handleAddSubmittedSuccess() {
+        Map caseDataMap = new HashMap<>();
+        caseDataMap.put("id", 12345L);
+        caseDataMap.put("caseTypeOfApplication", "C100");
+
+        AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder()
+            .partyList(DynamicList.builder()
+                           .listItems(Lists.newArrayList()).build()).build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .allocatedBarrister(allocatedBarrister)
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .data(caseDataMap)
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
+
+        AboutToStartOrSubmitCallbackResponse callbackResponse = barristerController
+            .handleAddSubmitted(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
+
+        verify(barristerAddService).notifyBarrister(caseData);
+    }
+
+    @Test
+    public void shouldNothandleAddSubmittedWhenNotAuthorised() {
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .build())
+            .build();
+
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(false);
+
+        assertThrows(
+            RuntimeException.class,
+            () -> barristerController
+                .handleAddSubmitted(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest));
+    }
 }

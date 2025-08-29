@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Barrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -357,8 +358,17 @@ class CaseAssignmentControllerTest {
             .caseDetails(caseDetails)
             .build();
 
+        PartyDetails partyDetails = PartyDetails.builder()
+            .barrister(Barrister.builder()
+                           .barristerEmail("testbarrister@test.com")
+                           .barristerFirstName("test")
+                           .barristerLastName("barrister").build())
+            .build();
+
         CaseData caseData = CaseData.builder().allocatedBarrister(allocatedBarrister).build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        when(caseAssignmentService.getSelectedParty(caseData, allocatedBarrister.getPartyList().getValueCode()))
+            .thenReturn(partyDetails);
 
         AboutToStartOrSubmitCallbackResponse response = caseAssignmentController.submitRemoveBarrister(
             "auth",
@@ -377,6 +387,7 @@ class CaseAssignmentControllerTest {
                                                             anyList());
         verify(caseAssignmentService).removeBarrister(isA(CaseData.class),
                                                    eq(selectedPartyId));
+        verify(caseAssignmentService).getSelectedParty(isA(CaseData.class), eq(selectedPartyId));
     }
 
     @Test
