@@ -187,6 +187,24 @@ public class PartyLevelCaseFlagsGeneratorTest {
     }
 
     @Test
+    public void generatePartyFlagsForApplicantBarristerWithInternalFlag() {
+        String partyName = STRING_CONSTANT;
+        String caseDataField;
+        String roleOnCase = STRING_CONSTANT;
+        boolean internalFlag = true;
+        String groupId = STRING_CONSTANT;
+        List resultList = new ArrayList();
+        for (int i = 1; i <= 5; i++) {
+            caseDataField = "caApplicantBarrister" + i + "InternalFlags";
+            CaseData updatedCaseData = partyLevelCaseFlagsGenerator
+                .generatePartyFlags(caseData, partyName, caseDataField, roleOnCase, internalFlag, groupId);
+            resultList.add(updatedCaseData);
+        }
+
+        Assert.assertEquals(5, resultList.size());
+    }
+
+    @Test
     public void generatePartyFlagsForRespondentWithInternalFlag() {
         String partyName = STRING_CONSTANT;
         String caseDataField;
@@ -214,6 +232,24 @@ public class PartyLevelCaseFlagsGeneratorTest {
         List resultList = new ArrayList();
         for (int i = 1; i <= 5; i++) {
             caseDataField = "caRespondentSolicitor" + i + "InternalFlags";
+            CaseData updatedCaseData = partyLevelCaseFlagsGenerator
+                .generatePartyFlags(caseData, partyName, caseDataField, roleOnCase, internalFlag, groupId);
+            resultList.add(updatedCaseData);
+        }
+
+        Assert.assertEquals(5, resultList.size());
+    }
+
+    @Test
+    public void generatePartyFlagsForRespondentBarristerWithInternalFlag() {
+        String partyName = STRING_CONSTANT;
+        String caseDataField;
+        String roleOnCase = STRING_CONSTANT;
+        boolean internalFlag = true;
+        String groupId = STRING_CONSTANT;
+        List resultList = new ArrayList();
+        for (int i = 1; i <= 5; i++) {
+            caseDataField = "caRespondentBarrister" + i + "InternalFlags";
             CaseData updatedCaseData = partyLevelCaseFlagsGenerator
                 .generatePartyFlags(caseData, partyName, caseDataField, roleOnCase, internalFlag, groupId);
             resultList.add(updatedCaseData);
