@@ -43,7 +43,7 @@ public class BarristerChangeEventHandler {
         ignoreAndLogNotificationFailures(
             () -> sendEmailToBarrister(event, EmailTemplateNames.CA_DA_ADD_BARRISTER_SELF));
 
-        // notify applicants/respondents LRs
+        // notify applicants/respondents Solicitors
         ignoreAndLogNotificationFailures(
             () -> sendEmailToAppRespSolicitors(event, EmailTemplateNames.CA_DA_ADD_BARRISTER_TO_SOLICITOR));
 
@@ -90,7 +90,13 @@ public class BarristerChangeEventHandler {
     @Async
     @EventListener(condition = "#event.typeOfEvent.displayedValue eq 'Remove Barrister'")
     public void notifyWhenBarristerRemoved(final BarristerChangeEvent event) {
-        CaseData caseData = event.getCaseData();
+        // notify - barrister
+        ignoreAndLogNotificationFailures(
+            () -> sendEmailToBarrister(event, EmailTemplateNames.CA_DA_REMOVE_BARRISTER_SELF));
+
+        // notify applicants/respondents Solicitors
+        ignoreAndLogNotificationFailures(
+            () -> sendEmailToAppRespSolicitors(event, EmailTemplateNames.CA_DA_REMOVE_BARRISTER_TO_SOLICITOR));
 
     }
 
