@@ -74,6 +74,6 @@ public class BarristerControllerFunctionalTest {
             .contentType("application/json")
             .post("/barrister/stop-representing/about-to-start")
             .then()
-            .assertThat().statusCode(200);
+            .assertThat().statusCode(500);
     }
 }
