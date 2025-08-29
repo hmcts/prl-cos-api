@@ -273,6 +273,7 @@ public class PartyLevelCaseFlagsGeneratorTest {
 
         Assert.assertEquals(5, resultList.size());
     }
+
     @Test
     public void generatePartyFlagsForDaRespondentBarristerWithInternalFlag() {
         String partyName = STRING_CONSTANT;
