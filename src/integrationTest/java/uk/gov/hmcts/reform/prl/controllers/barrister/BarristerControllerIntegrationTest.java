@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers.barrister;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import jakarta.servlet.ServletException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,19 +16,17 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
-import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
-import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
-import uk.gov.hmcts.reform.prl.services.barrister.BarristerRemoveService;
 
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -59,8 +58,6 @@ public class BarristerControllerIntegrationTest {
     UserService userService;
     @MockBean
     OrganisationService organisationService;
-    @MockBean
-    BarristerRemoveService barristerRemoveService;
 
     private static final String AUTH_TOKEN = "auth-token";
     private static final String SERVICE_TOKEN = "service-token";
@@ -121,8 +118,7 @@ public class BarristerControllerIntegrationTest {
     public void testBarristerControllerStopRepresentingAboutToStart() throws Exception {
         objectMapper.registerModule(new ParameterNamesModule());
         String url = "/barrister/stop-representing/about-to-start";
-        String jsonRequest =
-            ResourceLoader.loadJson("controller/barristerAboutToStartCallBackRequest.json");
+        String jsonRequest = ResourceLoader.loadJson("controller/barristerAboutToStartCallBackRequest.json");
 
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         when(organisationService.findUserOrganisation(any()))
@@ -132,27 +128,18 @@ public class BarristerControllerIntegrationTest {
         when(userService.getUserDetails(any()))
             .thenReturn(UserDetails.builder().roles(List.of(SOLICITOR)).build());
 
-        DynamicListElement element = DynamicListElement.builder()
-            .code("12345:")
-            .label("Test Barrister")
-            .build();
-
-        AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder()
-            .partyList(DynamicList.builder().listItems(List.of(element)).build())
-            .barristerOrg(Organisation.builder().organisationID("orgId").build())
-            .build();
-
-        when(barristerRemoveService.getBarristerListToRemove(any(), any(), any()))
-            .thenReturn(allocatedBarrister);
-
-        mockMvc.perform(
+        ServletException thrown = assertThrows(
+            ServletException.class,
+            () -> mockMvc.perform(
                 post(url)
                     .header(AUTHORISATION_HEADER, AUTH_TOKEN)
                     .header(SERVICE_AUTHORIZATION_HEADER, SERVICE_TOKEN)
                     .accept(APPLICATION_JSON)
                     .contentType(APPLICATION_JSON)
                     .content(jsonRequest))
-            .andExpect(status().isOk())
-            .andReturn();
+        );
+
+        assertTrue(thrown.getCause() instanceof RuntimeException);
+        assertEquals("You're not currently assigned to any party", thrown.getCause().getMessage());
     }
 }
