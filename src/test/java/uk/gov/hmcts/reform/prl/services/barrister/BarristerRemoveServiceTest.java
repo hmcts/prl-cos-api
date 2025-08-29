@@ -9,6 +9,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
+import uk.gov.hmcts.reform.prl.events.BarristerChangeEvent;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -25,6 +26,9 @@ import java.util.Optional;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.enums.PartyEnum.applicant;
@@ -277,6 +281,43 @@ class BarristerRemoveServiceTest extends BarristerTestAbstract {
         );
 
         assertEquals(0, allocatedBarrister.getPartyList().getListItems().size());
+    }
+
+    @Test
+    void shouldNotifyBarristerSuccessfully() {
+        setupApplicantsC100();
+        allApplicants.getFirst().getValue().setBarrister(Barrister.builder().barristerId("barrister-id").build());
+        allApplicants.get(1).getValue().getSolicitorOrg().setOrganisationID("Org1");
+        allApplicants.get(1).getValue().getSolicitorOrg().setOrganisationName("Org1");
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .allocatedBarrister(AllocatedBarrister.builder().build())
+            .applicants(allApplicants)
+            .build();
+
+        barristerRemoveService.notifyBarrister(caseData);
+
+        verify(eventPublisher).publishEvent(isA(BarristerChangeEvent.class));
+
+    }
+
+    @Test
+    void shouldNotNotifyBarristerWhenAllocatedBarristerIsNull() {
+        setupApplicantsC100();
+        allApplicants.getFirst().getValue().setBarrister(Barrister.builder().barristerId("barrister-id").build());
+        allApplicants.get(1).getValue().getSolicitorOrg().setOrganisationID("Org1");
+        allApplicants.get(1).getValue().getSolicitorOrg().setOrganisationName("Org1");
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .applicants(allApplicants)
+            .build();
+
+        barristerRemoveService.notifyBarrister(caseData);
+
+        verifyNoInteractions(eventPublisher);
+
     }
 
 

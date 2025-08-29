@@ -1,13 +1,13 @@
 package uk.gov.hmcts.reform.prl.handlers;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -32,7 +32,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
+@ExtendWith(SpringExtension.class)
 @Slf4j
 public class BarristerChangeEventHandlerTest {
 
@@ -50,7 +50,7 @@ public class BarristerChangeEventHandlerTest {
     private PartyDetails respondent3;
     private CaseData caseData;
 
-    @Before
+    @BeforeEach
     public void init() {
         applicant1 = PartyDetails.builder()
             .firstName("af1").lastName("al1")
@@ -107,7 +107,7 @@ public class BarristerChangeEventHandlerTest {
     }
 
     @Test
-    public void shouldNotifyAddBarristerWhenCaseTypeIsC100() {
+    void shouldNotifyAddBarristerWhenCaseTypeIsC100() {
         barristerChangeEventHandler.notifyAddBarrister(barristerChangeEvent);
 
         verify(emailService,times(3)).send(Mockito.anyString(),
@@ -117,7 +117,7 @@ public class BarristerChangeEventHandlerTest {
     }
 
     @Test
-    public void shouldNotNotifyAddBarristerWhenNoEmailAddressIsProvided() {
+    void shouldNotNotifyAddBarristerWhenNoEmailAddressIsProvided() {
         caseData = CaseData.builder()
             .id(nextLong())
             .allocatedBarrister(AllocatedBarrister.builder().build())
@@ -137,7 +137,7 @@ public class BarristerChangeEventHandlerTest {
     }
 
     @Test
-    public void shouldNotifyAddBarristerWhenCaseTypeIsC100AndHasOneSolicitor() {
+    void shouldNotifyAddBarristerWhenCaseTypeIsC100AndHasOneSolicitor() {
 
         caseData = caseData.toBuilder()
             .applicants(Arrays.asList(element(applicant1)))
@@ -157,7 +157,7 @@ public class BarristerChangeEventHandlerTest {
     }
 
     @Test
-    public void shouldNotifyAddBarristerWhenCaseTypeIsFL401() {
+    void shouldNotifyAddBarristerWhenCaseTypeIsFL401() {
         caseData = caseData.toBuilder()
             .applicants(Collections.emptyList())
             .respondents(Collections.emptyList())
@@ -176,6 +176,5 @@ public class BarristerChangeEventHandlerTest {
                                            Mockito.any(), Mockito.any());
 
     }
-
 
 }
