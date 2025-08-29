@@ -40,12 +40,10 @@ public class BarristerChangeEventHandler {
     public void notifyAddBarrister(final BarristerChangeEvent event) {
 
         // notify - barrister
-        ignoreAndLogNotificationFailures(
-            () -> sendEmailToBarrister(event, EmailTemplateNames.CA_DA_ADD_BARRISTER_SELF));
+        sendEmailToBarrister(event, EmailTemplateNames.CA_DA_ADD_BARRISTER_SELF);
 
         // notify applicants/respondents Solicitors
-        ignoreAndLogNotificationFailures(
-            () -> sendEmailToAppRespSolicitors(event, EmailTemplateNames.CA_DA_ADD_BARRISTER_TO_SOLICITOR));
+        sendEmailToAppRespSolicitors(event, EmailTemplateNames.CA_DA_ADD_BARRISTER_TO_SOLICITOR);
 
     }
 
@@ -55,12 +53,12 @@ public class BarristerChangeEventHandler {
         if (null != barrister.getBarristerEmail()) {
             log.info("Sending Barrister email on case id {}", caseData.getId());
 
-            emailService.send(
+            ignoreAndLogNotificationFailures(() -> emailService.send(
                 barrister.getBarristerEmail(),
                 emailTemplateName,
                 buildEmailBarrister(caseData, EMPTY_STRING),
                 LanguagePreference.getPreferenceLanguage(caseData)
-            );
+            ));
         } else {
             log.info(
                 "Unable to send email to Barrister as the they don't have any email address for case id {}",
@@ -77,13 +75,16 @@ public class BarristerChangeEventHandler {
         if (!solicitorsToNotify.isEmpty()) {
             solicitorsToNotify.forEach(
                 (key, value) -> {
-                    emailService.send(
-                        key,
-                        emailTemplateNames,
-                        buildEmailBarrister(caseData, value),
-                        LanguagePreference.getPreferenceLanguage(caseData)
-                    );
-                });
+                    if (key != null) {
+                        ignoreAndLogNotificationFailures(() -> emailService.send(
+                            key,
+                            emailTemplateNames,
+                            buildEmailBarrister(caseData, value),
+                            LanguagePreference.getPreferenceLanguage(caseData)
+                        ));
+                    }
+                }
+            );
         }
     }
 
@@ -91,12 +92,10 @@ public class BarristerChangeEventHandler {
     @EventListener(condition = "#event.typeOfEvent.displayedValue eq 'Remove Barrister'")
     public void notifyWhenBarristerRemoved(final BarristerChangeEvent event) {
         // notify - barrister
-        ignoreAndLogNotificationFailures(
-            () -> sendEmailToBarrister(event, EmailTemplateNames.CA_DA_REMOVE_BARRISTER_SELF));
+        sendEmailToBarrister(event, EmailTemplateNames.CA_DA_REMOVE_BARRISTER_SELF);
 
         // notify applicants/respondents Solicitors
-        ignoreAndLogNotificationFailures(
-            () -> sendEmailToAppRespSolicitors(event, EmailTemplateNames.CA_DA_REMOVE_BARRISTER_TO_SOLICITOR));
+        sendEmailToAppRespSolicitors(event, EmailTemplateNames.CA_DA_REMOVE_BARRISTER_TO_SOLICITOR);
 
     }
 

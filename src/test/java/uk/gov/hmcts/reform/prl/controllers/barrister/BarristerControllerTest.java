@@ -203,8 +203,7 @@ public class BarristerControllerTest {
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
 
-        AboutToStartOrSubmitCallbackResponse callbackResponse = barristerController
-            .handleAddSubmitted(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
+        barristerController.handleAddSubmitted(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
 
         verify(barristerAddService).notifyBarrister(caseData);
     }
