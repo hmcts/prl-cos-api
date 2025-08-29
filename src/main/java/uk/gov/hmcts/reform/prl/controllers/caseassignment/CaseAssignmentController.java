@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers.caseassignment;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -26,11 +25,13 @@ import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.utils.CaseHelper;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATED_BARRISTER;
@@ -52,6 +53,7 @@ public class CaseAssignmentController {
     private final ObjectMapper objectMapper;
     private final OrganisationService organisationService;
     private final AuthorisationService authorisationService;
+    private final CaseHelper caseHelper;
 
     @PostMapping(path = "/barrister/add/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "About to submit to add Barrister")
@@ -70,10 +72,7 @@ public class CaseAssignmentController {
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
             List<String> errorList = new ArrayList<>();
-            AllocatedBarrister allocatedBarrister = objectMapper.convertValue(
-                caseDetails.getData().get(ALLOCATED_BARRISTER),
-                new TypeReference<>() { }
-            );
+            AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
 
             Optional<String> userId = organisationService
                 .findUserByEmail(allocatedBarrister.getBarristerEmail());
@@ -123,10 +122,7 @@ public class CaseAssignmentController {
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             List<String> errorList = new ArrayList<>();
-            AllocatedBarrister allocatedBarrister = objectMapper.convertValue(
-                caseDetails.getData().get(ALLOCATED_BARRISTER),
-                new TypeReference<>() { }
-            );
+            AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
 
             caseAssignmentService.validateRemoveRequest(caseData,
                                                         allocatedBarrister.getPartyList().getValueCode(),
@@ -135,6 +131,12 @@ public class CaseAssignmentController {
             if (errorList.isEmpty()) {
                 caseAssignmentService.removeBarrister(caseData,
                                                       allocatedBarrister.getPartyList().getValueCode());
+
+                caseHelper.setAllocatedBarrister(() -> caseAssignmentService
+                                                    .getSelectedParty(caseData, allocatedBarrister.getPartyList().getValueCode()),
+                                                 caseData,
+                                                 UUID.fromString(allocatedBarrister.getPartyList().getValueCode()));
+
                 updateCaseDetails(caseDetails, caseData);
             }
 
@@ -148,7 +150,7 @@ public class CaseAssignmentController {
     }
 
     private void updateCaseDetails(CaseDetails caseDetails, CaseData caseData) {
-        caseDetails.getData().put(ALLOCATED_BARRISTER, null);
+        caseDetails.getData().put(ALLOCATED_BARRISTER, caseData.getAllocatedBarrister());
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseDetails.getData().put(APPLICANTS, caseData.getApplicants());
             caseDetails.getData().put(RESPONDENTS, caseData.getRespondents());
