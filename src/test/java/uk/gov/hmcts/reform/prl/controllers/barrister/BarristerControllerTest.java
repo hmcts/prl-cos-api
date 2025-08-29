@@ -229,7 +229,7 @@ public class BarristerControllerTest {
 
     @Test
     public void handleStopRepresentingAboutToStartWhenNoBarristerList() {
-        Map caseData = new HashMap<>();
+        Map<String, Object> caseData = new HashMap<>();
         caseData.put("id", 12345L);
         caseData.put("caseTypeOfApplication", "C100");
 
@@ -249,15 +249,19 @@ public class BarristerControllerTest {
         when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
 
         AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder()
-            .partyList(DynamicList.builder().listItems(Lists.newArrayList()).build()).build();
+            .partyList(DynamicList.builder().listItems(Lists.newArrayList()).build())
+            .build();
+
         when(barristerRemoveService.getBarristerListToRemove(
             eq(caseData1), eq(AUTH_TOKEN), any(Function.class)))
             .thenReturn(allocatedBarrister);
 
-        AboutToStartOrSubmitCallbackResponse callbackResponse =
-            barristerController.handleStopRepresentingAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+            barristerController.handleStopRepresentingAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest)
+        );
 
-        assertEquals("You're not currently assigned to any party", callbackResponse.getErrors().get(0));
+        assertEquals("You're not currently assigned to any party", exception.getMessage());
+
         verify(barristerRemoveService, times(1))
             .getBarristerListToRemove(eq(caseData1), eq(AUTH_TOKEN), any(Function.class));
     }
