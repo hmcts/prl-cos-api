@@ -7,7 +7,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.models.Organisations;
@@ -41,8 +40,6 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
     @Mock
     protected OrganisationService organisationService;
     @Mock
-    protected CaseAssignmentService caseAssignmentService;
-    @Mock
     protected EventService eventPublisher;
     @Mock
     private UserDetails userDetails;
@@ -50,7 +47,7 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
 
     @BeforeEach
     public void setup() {
-        barristerAddService = new BarristerAddService(userService, organisationService, caseAssignmentService, eventPublisher);
+        barristerAddService = new BarristerAddService(userService, organisationService, eventPublisher);
         UserDetails userDetails = UserDetails.builder()
             .id("1")
             .roles(List.of(COURT_ADMIN))

@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 
 @Slf4j
@@ -57,7 +58,7 @@ public class BarristerChangeEventHandler {
             emailService.send(
                 barrister.getBarristerEmail(),
                 emailTemplateName,
-                buildEmailBarrister(caseData, event),
+                buildEmailBarrister(caseData, EMPTY_STRING),
                 LanguagePreference.getPreferenceLanguage(caseData)
             );
         } else {
@@ -79,7 +80,7 @@ public class BarristerChangeEventHandler {
                     emailService.send(
                         key,
                         emailTemplateNames,
-                        buildEmailBarrister(caseData, event),
+                        buildEmailBarrister(caseData, value),
                         LanguagePreference.getPreferenceLanguage(caseData)
                     );
                 });
@@ -93,13 +94,13 @@ public class BarristerChangeEventHandler {
 
     }
 
-    private EmailTemplateVars buildEmailBarrister(CaseData caseData, BarristerChangeEvent event) {
+    private EmailTemplateVars buildEmailBarrister(CaseData caseData, String solicitorName) {
         AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
         return BarristerEmail.builder()
             .caseReference(String.valueOf(caseData.getId()))
             .caseName(caseData.getApplicantCaseName())
             .barristerName(allocatedBarrister.getBarristerFullName())
-            .solicitorName(event.getSolicitorName())
+            .solicitorName(solicitorName)
             .caseLink(manageCaseUrl + URL_STRING + caseData.getId())
             .issueDate(CommonUtils.formatDate(D_MMM_YYYY, caseData.getIssueDate()))
             .build();

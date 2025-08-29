@@ -101,8 +101,6 @@ public class BarristerChangeEventHandlerTest {
 
         barristerChangeEvent = BarristerChangeEvent.builder()
             .caseData(caseData)
-            .solicitorEmailAddress("testemail@test.com")
-            .solicitorName("test sol name")
             .build();
         List<Document> documents = new ArrayList<>();
         documents.add(Document.builder().build());
@@ -129,8 +127,6 @@ public class BarristerChangeEventHandlerTest {
             .build();
         barristerChangeEvent = barristerChangeEvent.toBuilder()
             .caseData(caseData)
-            .solicitorEmailAddress("testemail@test.com")
-            .solicitorName("test sol name")
             .build();
         barristerChangeEventHandler.notifyAddBarrister(barristerChangeEvent);
 
@@ -150,8 +146,6 @@ public class BarristerChangeEventHandlerTest {
             .build();
         barristerChangeEvent = barristerChangeEvent.toBuilder()
             .caseData(caseData)
-            .solicitorEmailAddress("testemail@test.com")
-            .solicitorName("test sol name")
             .build();
 
         barristerChangeEventHandler.notifyAddBarrister(barristerChangeEvent);
@@ -174,8 +168,6 @@ public class BarristerChangeEventHandlerTest {
 
         barristerChangeEvent = barristerChangeEvent.toBuilder()
             .caseData(caseData)
-            .solicitorEmailAddress("testemail@test.com")
-            .solicitorName("test sol name")
             .build();
         barristerChangeEventHandler.notifyAddBarrister(barristerChangeEvent);
 
