@@ -25,6 +25,11 @@ public enum PartyRole {
     C100APPLICANTSOLICITOR3("Applicant solicitor 3", 3, Representing.CAAPPLICANTSOLICITOR),
     C100APPLICANTSOLICITOR4("Applicant solicitor 4", 4, Representing.CAAPPLICANTSOLICITOR),
     C100APPLICANTSOLICITOR5("Applicant solicitor 5", 5, Representing.CAAPPLICANTSOLICITOR),
+    C100APPLICANTBARRISTER1("Applicant barrister 1", 1, Representing.CAAPPLICANTBARRISTER),
+    C100APPLICANTBARRISTER2("Applicant barrister 2", 2, Representing.CAAPPLICANTBARRISTER),
+    C100APPLICANTBARRISTER3("Applicant barrister 3", 3, Representing.CAAPPLICANTBARRISTER),
+    C100APPLICANTBARRISTER4("Applicant barrister 4", 4, Representing.CAAPPLICANTBARRISTER),
+    C100APPLICANTBARRISTER5("Applicant barrister 5", 5, Representing.CAAPPLICANTBARRISTER),
     C100RESPONDENT1("Respondent 1", 1, Representing.CARESPONDENT),
     C100RESPONDENT2("Respondent 2", 2, Representing.CARESPONDENT),
     C100RESPONDENT3("Respondent 3", 3, Representing.CARESPONDENT),
@@ -35,6 +40,11 @@ public enum PartyRole {
     C100RESPONDENTSOLICITOR3("Respondent solicitor 3", 3, Representing.CARESPONDENTSOLICITOR),
     C100RESPONDENTSOLICITOR4("Respondent solicitor 4", 4, Representing.CARESPONDENTSOLICITOR),
     C100RESPONDENTSOLICITOR5("Respondent solicitor 5", 5, Representing.CARESPONDENTSOLICITOR),
+    C100RESPONDENTBARRISTER1("Respondent barrister 1", 1, Representing.CARESPONDENTBARRISTER),
+    C100RESPONDENTBARRISTER2("Respondent barrister 2", 2, Representing.CARESPONDENTBARRISTER),
+    C100RESPONDENTBARRISTER3("Respondent barrister 3", 3, Representing.CARESPONDENTBARRISTER),
+    C100RESPONDENTBARRISTER4("Respondent barrister 4", 4, Representing.CARESPONDENTBARRISTER),
+    C100RESPONDENTBARRISTER5("Respondent barrister 5", 5, Representing.CARESPONDENTBARRISTER),
     C100OTHERPARTY1("Other people in the case 1", 1, Representing.CAOTHERPARTY),
     C100OTHERPARTY2("Other people in the case 2", 2, Representing.CAOTHERPARTY),
     C100OTHERPARTY3("Other people in the case 3", 3, Representing.CAOTHERPARTY),
@@ -42,8 +52,9 @@ public enum PartyRole {
     C100OTHERPARTY5("Other people in the case 5", 5, Representing.CAOTHERPARTY),
     FL401APPLICANT("Applicant", 1, Representing.DAAPPLICANT),
     FL401APPLICANTSOLICITOR("Applicant solicitor", 1, Representing.DAAPPLICANTSOLICITOR),
+    FL401APPLICANTBARRISTER("Applicant barrister", 1, Representing.DAAPPLICANTBARRISTER),
     FL401RESPONDENT("Respondent", 1, Representing.DARESPONDENT),
-    FL401RESPONDENTSOLICITOR("Respondent solicitor", 1, Representing.DARESPONDENTSOLICITOR);
+    FL401RESPONDENTBARRISTER("Respondent barrister", 1, Representing.DARESPONDENTBARRISTER);
 
     private final String caseRoleLabel;
     private final int index;
@@ -90,6 +101,12 @@ public enum PartyRole {
                 Constants.CA_APPLICANT_SOLICITOR_EXTERNAL,
                 Constants.CA_APPLICANT_SOLICITOR_INTERNAL,
                 Constants.CA_APPLICANT_SOLICITOR_GROUP_ID),
+        CAAPPLICANTBARRISTER(
+            CaseData::getApplicants,
+            CaseData::getApplicantsFL401,
+            Constants.CA_APPLICANT_BARRISTER_EXTERNAL,
+            Constants.CA_APPLICANT_BARRISTER_INTERNAL,
+            Constants.CA_APPLICANT_BARRISTER_GROUP_ID),
         CARESPONDENT(
                 CaseData::getRespondents,
                 CaseData::getRespondentsFL401,
@@ -102,6 +119,12 @@ public enum PartyRole {
                 Constants.CA_RESPONDENT_SOLICITOR_EXTERNAL,
                 Constants.CA_RESPONDENT_SOLICITOR_INTERNAL,
                 Constants.CA_RESPONDENT_SOLICITOR_GROUP_ID),
+        CARESPONDENTBARRISTER(
+                CaseData::getRespondents,
+                CaseData::getRespondentsFL401,
+                Constants.CA_RESPONDENT_BARRISTER_EXTERNAL,
+                Constants.CA_RESPONDENT_BARRISTER_INTERNAL,
+                Constants.CA_RESPONDENT_BARRISTER_GROUP_ID),
         CAOTHERPARTY(
                 CaseData::getOtherPartyInTheCaseRevised,
                 null,
@@ -120,6 +143,12 @@ public enum PartyRole {
                 Constants.DA_APPLICANT_SOLICITOR_EXTERNAL,
                 Constants.DA_APPLICANT_SOLICITOR_INTERNAL,
                 Constants.DA_APPLICANT_SOLICITOR_GROUP_ID),
+        DAAPPLICANTBARRISTER(
+                CaseData::getApplicants,
+                CaseData::getApplicantsFL401,
+                Constants.DA_APPLICANT_BARRISTER_EXTERNAL,
+                Constants.DA_APPLICANT_BARRISTER_INTERNAL,
+                Constants.DA_APPLICANT_BARRISTER_GROUP_ID),
         DARESPONDENT(
                 CaseData::getRespondents,
                 CaseData::getRespondentsFL401,
@@ -131,7 +160,13 @@ public enum PartyRole {
                 CaseData::getRespondentsFL401,
                 Constants.DA_RESPONDENT_SOLICITOR_EXTERNAL,
                 Constants.DA_RESPONDENT_SOLICITOR_INTERNAL,
-                Constants.DA_RESPONDENT_SOLICITOR_GROUP_ID);
+                Constants.DA_RESPONDENT_SOLICITOR_GROUP_ID),
+        DARESPONDENTBARRISTER(
+                CaseData::getRespondents,
+                CaseData::getRespondentsFL401,
+                Constants.DA_RESPONDENT_BARRISTER_EXTERNAL,
+                Constants.DA_RESPONDENT_BARRISTER_INTERNAL,
+                Constants.DA_RESPONDENT_BARRISTER_GROUP_ID);
 
         private final Function<CaseData, List<Element<PartyDetails>>> caTarget;
         private final Function<CaseData, PartyDetails> daTarget;
@@ -177,31 +212,43 @@ public enum PartyRole {
         private static class Constants {
             public static final String CA_APPLICANT_EXTERNAL = "caApplicant%dExternalFlags";
             public static final String CA_APPLICANT_SOLICITOR_EXTERNAL = "caApplicantSolicitor%dExternalFlags";
+            public static final String CA_APPLICANT_BARRISTER_EXTERNAL = "caApplicantSolicitor%dExternalFlags";
             public static final String CA_RESPONDENT_EXTERNAL = "caRespondent%dExternalFlags";
             public static final String CA_RESPONDENT_SOLICITOR_EXTERNAL = "caRespondentSolicitor%dExternalFlags";
+            public static final String CA_RESPONDENT_BARRISTER_EXTERNAL = "caRespondentBarrister%dExternalFlags";
             public static final String CA_OTHER_PARTY_EXTERNAL = "caOtherParty%dExternalFlags";
             public static final String DA_APPLICANT_EXTERNAL = "daApplicantExternalFlags";
             public static final String DA_APPLICANT_SOLICITOR_EXTERNAL = "daApplicantSolicitorExternalFlags";
+            public static final String DA_APPLICANT_BARRISTER_EXTERNAL = "daApplicantBarristerExternalFlags";
             public static final String DA_RESPONDENT_EXTERNAL = "daRespondentExternalFlags";
             public static final String DA_RESPONDENT_SOLICITOR_EXTERNAL = "daRespondentSolicitorExternalFlags";
+            public static final String DA_RESPONDENT_BARRISTER_EXTERNAL = "daRespondentBarristerExternalFlags";
             public static final String CA_APPLICANT_INTERNAL = "caApplicant%dInternalFlags";
             public static final String CA_APPLICANT_SOLICITOR_INTERNAL = "caApplicantSolicitor%dInternalFlags";
+            public static final String CA_APPLICANT_BARRISTER_INTERNAL = "caApplicantBarrister%dInternalFlags";
             public static final String CA_RESPONDENT_INTERNAL = "caRespondent%dInternalFlags";
             public static final String CA_RESPONDENT_SOLICITOR_INTERNAL = "caRespondentSolicitor%dInternalFlags";
+            public static final String CA_RESPONDENT_BARRISTER_INTERNAL = "caRespondentBarrister%dInternalFlags";
             public static final String CA_OTHER_PARTY_INTERNAL = "caOtherParty%dInternalFlags";
             public static final String DA_APPLICANT_INTERNAL = "daApplicantInternalFlags";
             public static final String DA_APPLICANT_SOLICITOR_INTERNAL = "daApplicantSolicitorInternalFlags";
+            public static final String DA_APPLICANT_BARRISTER_INTERNAL = "daApplicantBarristerInternalFlags";
             public static final String DA_RESPONDENT_INTERNAL = "daRespondentInternalFlags";
             public static final String DA_RESPONDENT_SOLICITOR_INTERNAL = "daRespondentSolicitorInternalFlags";
+            public static final String DA_RESPONDENT_BARRISTER_INTERNAL = "daRespondentBarristerInternalFlags";
             public static final String CA_APPLICANT_GROUP_ID = "caApplicant%d";
             public static final String CA_APPLICANT_SOLICITOR_GROUP_ID = "caApplicantSolicitor%d";
+            public static final String CA_APPLICANT_BARRISTER_GROUP_ID = "caApplicantBarrister%d";
             public static final String CA_RESPONDENT_GROUP_ID = "caRespondent%d";
             public static final String CA_RESPONDENT_SOLICITOR_GROUP_ID = "caRespondentSolicitor%d";
+            public static final String CA_RESPONDENT_BARRISTER_GROUP_ID = "caRespondentBarrister%d";
             public static final String CA_OTHER_PARTY_GROUP_ID = "caOtherParty%d";
             public static final String DA_APPLICANT_GROUP_ID = "daApplicant";
             public static final String DA_APPLICANT_SOLICITOR_GROUP_ID = "daApplicantSolicitor";
+            public static final String DA_APPLICANT_BARRISTER_GROUP_ID = "daApplicantBarrister";
             public static final String DA_RESPONDENT_GROUP_ID = "daRespondent";
             public static final String DA_RESPONDENT_SOLICITOR_GROUP_ID = "daRespondentSolicitor";
+            public static final String DA_RESPONDENT_BARRISTER_GROUP_ID = "daRespondentBarrister";
         }
     }
 }
