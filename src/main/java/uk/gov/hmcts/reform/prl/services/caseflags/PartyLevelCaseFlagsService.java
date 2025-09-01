@@ -49,6 +49,8 @@ public class PartyLevelCaseFlagsService {
     private static final String AMEND_APPLICANTS_DETAILS = "amendApplicantsDetails";
     private static final String AMEND_RESPONDENT_DETAILS = "amendRespondentsDetails";
     private static final String AMEND_OTHER_PEOPLE_IN_THE_CASE = "amendOtherPeopleInTheCaseRevised";
+    private static final String ADMIN_ADD_BARRISTER = "adminAddBarrister";
+    private static final String SOLICITOR_ADD_BARRISTER = "solicitorAddBarrister";
 
     public static final String CA_APPLICANT = "CA_APPLICANT";
     private final ObjectMapper objectMapper;
@@ -110,7 +112,7 @@ public class PartyLevelCaseFlagsService {
         return data;
     }
 
-    public Map<String, Object> generateC100PartyCaseFlags(CaseData caseData, PartyRole.Representing representing) {
+    private Map<String, Object> generateC100PartyCaseFlags(CaseData caseData, PartyRole.Representing representing) {
         Map<String, Object> data = new HashMap<>();
         List<Element<PartyDetails>> caElements = representing.getCaTarget().apply(caseData);
         int numElements = null != caElements ? caElements.size() : 0;
@@ -396,7 +398,7 @@ public class PartyLevelCaseFlagsService {
         return caseData;
     }
 
-    public CaseData generateC100IndividualPartyCaseFlags(CaseData caseData, CaseData startEventResponseData, PartyRole.Representing representing) {
+    private CaseData generateC100IndividualPartyCaseFlags(CaseData caseData, CaseData startEventResponseData, PartyRole.Representing representing) {
         List<Element<PartyDetails>> caElements = representing.getCaTarget().apply(startEventResponseData);
         int numElements = null != caElements ? caElements.size() : 0;
         List<PartyRole> partyRoles = PartyRole.matchingRoles(representing);
@@ -485,7 +487,9 @@ public class PartyLevelCaseFlagsService {
         if (C100_CASE_TYPE.equals(updatedCaseData.getCaseTypeOfApplication())
             && Arrays.asList(AMEND_APPLICANTS_DETAILS,
                              AMEND_RESPONDENT_DETAILS,
-                             AMEND_OTHER_PEOPLE_IN_THE_CASE).contains(eventId)) {
+                             AMEND_OTHER_PEOPLE_IN_THE_CASE,
+                             ADMIN_ADD_BARRISTER,
+                             SOLICITOR_ADD_BARRISTER).contains(eventId)) {
             List<Element<PartyDetails>> parties = getPartiesBaseOnEventID(updatedCaseData, eventId);
             List<Element<PartyDetails>> oldParties = getPartiesBaseOnEventID(oldCaseData, eventId);
             if (CollectionUtils.isNotEmpty(parties) && CollectionUtils.isNotEmpty(oldParties)) {
@@ -518,6 +522,13 @@ public class PartyLevelCaseFlagsService {
             }
             case AMEND_OTHER_PEOPLE_IN_THE_CASE -> {
                 return List.of(CAOTHERPARTY);
+            }
+            case ADMIN_ADD_BARRISTER, SOLICITOR_ADD_BARRISTER -> {
+                return List.of(PartyRole.Representing.CAAPPLICANTBARRISTER,
+                               PartyRole.Representing.CARESPONDENTBARRISTER,
+                               PartyRole.Representing.DAAPPLICANTBARRISTER,
+                               PartyRole.Representing.DARESPONDENTBARRISTER
+                               );
             }
             default -> {
                 return Collections.emptyList();

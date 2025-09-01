@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.Barrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -57,6 +58,8 @@ class CaseAssignmentControllerTest {
     private OrganisationService organisationService;
     @Mock
     private AuthorisationService authorisationService;
+    @Mock
+    private PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     private CaseAssignmentController caseAssignmentController;
     private ObjectMapper objectMapper;
@@ -71,7 +74,8 @@ class CaseAssignmentControllerTest {
             caseAssignmentService,
             objectMapper,
             organisationService,
-            authorisationService);
+            authorisationService,
+            partyLevelCaseFlagsService);
         barrister = Barrister.builder()
             .barristerEmail("barristerEmail@gmail.com")
             .barristerFirstName("barristerName")

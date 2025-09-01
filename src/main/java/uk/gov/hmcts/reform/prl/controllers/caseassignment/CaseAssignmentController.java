@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
@@ -52,6 +53,7 @@ public class CaseAssignmentController {
     private final ObjectMapper objectMapper;
     private final OrganisationService organisationService;
     private final AuthorisationService authorisationService;
+    private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     @PostMapping(path = "/barrister/add/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "About to submit to add Barrister")
@@ -156,5 +158,6 @@ public class CaseAssignmentController {
             caseDetails.getData().put(FL401_APPLICANTS, caseData.getApplicantsFL401());
             caseDetails.getData().put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
         }
+        caseDetails.getData().putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(caseData));
     }
 }
