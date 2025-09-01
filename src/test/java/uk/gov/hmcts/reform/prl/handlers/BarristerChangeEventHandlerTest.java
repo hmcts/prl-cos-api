@@ -11,6 +11,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.barrister.TypeOfBarristerEventEnum;
 import uk.gov.hmcts.reform.prl.events.BarristerChangeEvent;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
@@ -96,6 +97,7 @@ class BarristerChangeEventHandlerTest {
             .build();
 
         barristerChangeEvent = BarristerChangeEvent.builder()
+            .typeOfEvent(TypeOfBarristerEventEnum.addBarrister)
             .caseData(caseData)
             .build();
         when(maskEmail.mask(anyString()))
@@ -177,7 +179,10 @@ class BarristerChangeEventHandlerTest {
     void shouldNotifyWhenBarristerIsRemovedWhenCaseTypeIsC100() {
         when(featureToggleService.isBarristerFeatureEnabled())
             .thenReturn(true);
-        barristerChangeEventHandler.notifyWhenBarristerRemoved(barristerChangeEvent);
+        BarristerChangeEvent barristerRemoveEvent = barristerChangeEvent.toBuilder()
+            .typeOfEvent(TypeOfBarristerEventEnum.addBarrister)
+            .build();
+        barristerChangeEventHandler.notifyWhenBarristerRemoved(barristerRemoveEvent);
 
         verify(emailService,times(3)).send(Mockito.anyString(),
                                            Mockito.any(),
@@ -209,6 +214,7 @@ class BarristerChangeEventHandlerTest {
             .respondents(Arrays.asList(element(respondent1), element(respondent2)))
             .build();
         barristerChangeEvent = barristerChangeEvent.toBuilder()
+            .typeOfEvent(TypeOfBarristerEventEnum.removeBarrister)
             .caseData(caseData)
             .build();
         barristerChangeEventHandler.notifyWhenBarristerRemoved(barristerChangeEvent);
@@ -229,6 +235,7 @@ class BarristerChangeEventHandlerTest {
             .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
         barristerChangeEvent = barristerChangeEvent.toBuilder()
+            .typeOfEvent(TypeOfBarristerEventEnum.removeBarrister)
             .caseData(caseData)
             .build();
 
@@ -253,6 +260,7 @@ class BarristerChangeEventHandlerTest {
             .build();
 
         barristerChangeEvent = barristerChangeEvent.toBuilder()
+            .typeOfEvent(TypeOfBarristerEventEnum.removeBarrister)
             .caseData(caseData)
             .build();
         barristerChangeEventHandler.notifyWhenBarristerRemoved(barristerChangeEvent);
