@@ -97,6 +97,24 @@ public class PartyLevelCaseFlagsGeneratorTest {
     }
 
     @Test
+    public void generatePartyFlagsForCaApplicantBarristerWithExternalFlag() {
+        String partyName = STRING_CONSTANT;
+        String caseDataField;
+        String roleOnCase = STRING_CONSTANT;
+        boolean internalFlag = false;
+        String groupId = STRING_CONSTANT;
+        List resultList = new ArrayList();
+        for (int i = 1; i <= 5; i++) {
+            caseDataField = "caApplicantBarrister" + i + "ExternalFlags";
+            CaseData updatedCaseData = partyLevelCaseFlagsGenerator
+                .generatePartyFlags(caseData, partyName, caseDataField, roleOnCase, internalFlag, groupId);
+            resultList.add(updatedCaseData);
+        }
+
+        Assert.assertEquals(5, resultList.size());
+    }
+
+    @Test
     public void generatePartyFlagsForRespondentWithExternalFlag() {
         String partyName = STRING_CONSTANT;
         String caseDataField;
@@ -124,6 +142,24 @@ public class PartyLevelCaseFlagsGeneratorTest {
         List resultList = new ArrayList();
         for (int i = 1; i <= 5; i++) {
             caseDataField = "caRespondentSolicitor" + i + "ExternalFlags";
+            CaseData updatedCaseData = partyLevelCaseFlagsGenerator
+                .generatePartyFlags(caseData, partyName, caseDataField, roleOnCase, internalFlag, groupId);
+            resultList.add(updatedCaseData);
+        }
+
+        Assert.assertEquals(5, resultList.size());
+    }
+
+    @Test
+    public void generatePartyFlagsForRespondentBarristerWithExternalFlag() {
+        String partyName = STRING_CONSTANT;
+        String caseDataField;
+        String roleOnCase = STRING_CONSTANT;
+        boolean internalFlag = false;
+        String groupId = STRING_CONSTANT;
+        List resultList = new ArrayList();
+        for (int i = 1; i <= 5; i++) {
+            caseDataField = "caRespondentBarrister" + i + "ExternalFlags";
             CaseData updatedCaseData = partyLevelCaseFlagsGenerator
                 .generatePartyFlags(caseData, partyName, caseDataField, roleOnCase, internalFlag, groupId);
             resultList.add(updatedCaseData);
@@ -205,6 +241,86 @@ public class PartyLevelCaseFlagsGeneratorTest {
     }
 
     @Test
+    public void generatePartyFlagsForDaApplicantWithInternalFlag() {
+        String partyName = STRING_CONSTANT;
+        String caseDataField;
+        String roleOnCase = STRING_CONSTANT;
+        boolean internalFlag = true;
+        String groupId = STRING_CONSTANT;
+        List resultList = new ArrayList();
+        caseDataField = "daApplicantInternalFlags";
+        CaseData updatedCaseData = partyLevelCaseFlagsGenerator
+            .generatePartyFlags(caseData, partyName, caseDataField, roleOnCase, internalFlag, groupId);
+        resultList.add(updatedCaseData);
+
+        Assert.assertEquals(1, resultList.size());
+    }
+
+    @Test
+    public void generatePartyFlagsForDaApplicantWithExternalFlag() {
+        String partyName = STRING_CONSTANT;
+        String caseDataField;
+        String roleOnCase = STRING_CONSTANT;
+        boolean internalFlag = true;
+        String groupId = STRING_CONSTANT;
+        List resultList = new ArrayList();
+        caseDataField = "daApplicantExternalFlags";
+        CaseData updatedCaseData = partyLevelCaseFlagsGenerator
+            .generatePartyFlags(caseData, partyName, caseDataField, roleOnCase, internalFlag, groupId);
+        resultList.add(updatedCaseData);
+
+        Assert.assertEquals(1, resultList.size());
+    }
+
+    @Test
+    public void generatePartyFlagsForDaApplicantSolicitorWithInternalFlag() {
+        String partyName = STRING_CONSTANT;
+        String caseDataField;
+        String roleOnCase = STRING_CONSTANT;
+        boolean internalFlag = true;
+        String groupId = STRING_CONSTANT;
+        List resultList = new ArrayList();
+        caseDataField = "daApplicantSolicitorInternalFlags";
+        CaseData updatedCaseData = partyLevelCaseFlagsGenerator
+            .generatePartyFlags(caseData, partyName, caseDataField, roleOnCase, internalFlag, groupId);
+        resultList.add(updatedCaseData);
+
+        Assert.assertEquals(1, resultList.size());
+    }
+
+    @Test
+    public void generatePartyFlagsForDaApplicantSolicitorWithExternalFlag() {
+        String partyName = STRING_CONSTANT;
+        String caseDataField;
+        String roleOnCase = STRING_CONSTANT;
+        boolean internalFlag = false;
+        String groupId = STRING_CONSTANT;
+        List resultList = new ArrayList();
+        caseDataField = "daApplicantSolicitorExternalFlags";
+        CaseData updatedCaseData = partyLevelCaseFlagsGenerator
+            .generatePartyFlags(caseData, partyName, caseDataField, roleOnCase, internalFlag, groupId);
+        resultList.add(updatedCaseData);
+
+        Assert.assertEquals(1, resultList.size());
+    }
+
+    @Test
+    public void generatePartyFlagsForDaApplicantBarristerWithExternalFlag() {
+        String partyName = STRING_CONSTANT;
+        String caseDataField;
+        String roleOnCase = STRING_CONSTANT;
+        boolean internalFlag = false;
+        String groupId = STRING_CONSTANT;
+        List resultList = new ArrayList();
+        caseDataField = "daApplicantBarristerExternalFlags";
+        CaseData updatedCaseData = partyLevelCaseFlagsGenerator
+            .generatePartyFlags(caseData, partyName, caseDataField, roleOnCase, internalFlag, groupId);
+        resultList.add(updatedCaseData);
+
+        Assert.assertEquals(1, resultList.size());
+    }
+
+    @Test
     public void generatePartyFlagsForDaApplicantBarristerWithInternalFlag() {
         String partyName = STRING_CONSTANT;
         String caseDataField;
@@ -219,6 +335,103 @@ public class PartyLevelCaseFlagsGeneratorTest {
 
         Assert.assertEquals(1, resultList.size());
     }
+
+    @Test
+    public void generatePartyFlagsForDaRespondentWithExternalFlag() {
+        String partyName = STRING_CONSTANT;
+        String caseDataField;
+        String roleOnCase = STRING_CONSTANT;
+        boolean internalFlag = false;
+        String groupId = STRING_CONSTANT;
+        List resultList = new ArrayList();
+        caseDataField = "daRespondentExternalFlags";
+        CaseData updatedCaseData = partyLevelCaseFlagsGenerator
+            .generatePartyFlags(caseData, partyName, caseDataField, roleOnCase, internalFlag, groupId);
+        resultList.add(updatedCaseData);
+
+        Assert.assertEquals(1, resultList.size());
+    }
+
+    @Test
+    public void generatePartyFlagsForDaRespondentWithInternalFlag() {
+        String partyName = STRING_CONSTANT;
+        String caseDataField;
+        String roleOnCase = STRING_CONSTANT;
+        boolean internalFlag = true;
+        String groupId = STRING_CONSTANT;
+        List resultList = new ArrayList();
+        caseDataField = "daRespondentInternalFlags";
+        CaseData updatedCaseData = partyLevelCaseFlagsGenerator
+            .generatePartyFlags(caseData, partyName, caseDataField, roleOnCase, internalFlag, groupId);
+        resultList.add(updatedCaseData);
+
+        Assert.assertEquals(1, resultList.size());
+    }
+
+    @Test
+    public void generatePartyFlagsForDaRespondentSolicitorWithInternalFlag() {
+        String partyName = STRING_CONSTANT;
+        String caseDataField;
+        String roleOnCase = STRING_CONSTANT;
+        boolean internalFlag = true;
+        String groupId = STRING_CONSTANT;
+        List resultList = new ArrayList();
+        caseDataField = "daRespondentSolicitorInternalFlags";
+        CaseData updatedCaseData = partyLevelCaseFlagsGenerator
+            .generatePartyFlags(caseData, partyName, caseDataField, roleOnCase, internalFlag, groupId);
+        resultList.add(updatedCaseData);
+
+        Assert.assertEquals(1, resultList.size());
+    }
+
+    @Test
+    public void generatePartyFlagsForDaRespondentSolicitorWithExternalFlag() {
+        String partyName = STRING_CONSTANT;
+        String caseDataField;
+        String roleOnCase = STRING_CONSTANT;
+        boolean internalFlag = false;
+        String groupId = STRING_CONSTANT;
+        List resultList = new ArrayList();
+        caseDataField = "daRespondentSolicitorExternalFlags";
+        CaseData updatedCaseData = partyLevelCaseFlagsGenerator
+            .generatePartyFlags(caseData, partyName, caseDataField, roleOnCase, internalFlag, groupId);
+        resultList.add(updatedCaseData);
+
+        Assert.assertEquals(1, resultList.size());
+    }
+
+    @Test
+    public void generatePartyFlagsForDaRespondentBarristerWithInternalFlag() {
+        String partyName = STRING_CONSTANT;
+        String caseDataField;
+        String roleOnCase = STRING_CONSTANT;
+        boolean internalFlag = true;
+        String groupId = STRING_CONSTANT;
+        List resultList = new ArrayList();
+        caseDataField = "daRespondentBarristerInternalFlags";
+        CaseData updatedCaseData = partyLevelCaseFlagsGenerator
+            .generatePartyFlags(caseData, partyName, caseDataField, roleOnCase, internalFlag, groupId);
+        resultList.add(updatedCaseData);
+
+        Assert.assertEquals(1, resultList.size());
+    }
+
+    @Test
+    public void generatePartyFlagsForDaRespondentBarristerWithExternalFlag() {
+        String partyName = STRING_CONSTANT;
+        String caseDataField;
+        String roleOnCase = STRING_CONSTANT;
+        boolean internalFlag = false;
+        String groupId = STRING_CONSTANT;
+        List resultList = new ArrayList();
+        caseDataField = "daRespondentBarristerExternalFlags";
+        CaseData updatedCaseData = partyLevelCaseFlagsGenerator
+            .generatePartyFlags(caseData, partyName, caseDataField, roleOnCase, internalFlag, groupId);
+        resultList.add(updatedCaseData);
+
+        Assert.assertEquals(1, resultList.size());
+    }
+
 
     @Test
     public void generatePartyFlagsForRespondentWithInternalFlag() {
@@ -272,22 +485,6 @@ public class PartyLevelCaseFlagsGeneratorTest {
         }
 
         Assert.assertEquals(5, resultList.size());
-    }
-
-    @Test
-    public void generatePartyFlagsForDaRespondentBarristerWithInternalFlag() {
-        String partyName = STRING_CONSTANT;
-        String caseDataField;
-        String roleOnCase = STRING_CONSTANT;
-        boolean internalFlag = true;
-        String groupId = STRING_CONSTANT;
-        List resultList = new ArrayList();
-        caseDataField = "caRespondentBarristerInternalFlags";
-        CaseData updatedCaseData = partyLevelCaseFlagsGenerator
-            .generatePartyFlags(caseData, partyName, caseDataField, roleOnCase, internalFlag, groupId);
-        resultList.add(updatedCaseData);
-
-        Assert.assertEquals(1, resultList.size());
     }
 
     @Test
