@@ -17,11 +17,13 @@ import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
+import uk.gov.hmcts.reform.prl.utils.MaskEmail;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -38,6 +40,8 @@ class BarristerChangeEventHandlerTest {
     private EmailService emailService;
     @Mock
     private FeatureToggleService featureToggleService;
+    @Mock
+    private MaskEmail maskEmail;
 
     @InjectMocks
     private BarristerChangeEventHandler barristerChangeEventHandler;
@@ -94,6 +98,8 @@ class BarristerChangeEventHandlerTest {
         barristerChangeEvent = BarristerChangeEvent.builder()
             .caseData(caseData)
             .build();
+        when(maskEmail.mask(anyString()))
+            .thenReturn("mask@email.com");
     }
 
     @Test
