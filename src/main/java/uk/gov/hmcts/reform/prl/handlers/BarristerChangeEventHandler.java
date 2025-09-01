@@ -55,9 +55,11 @@ public class BarristerChangeEventHandler {
         CaseData caseData = event.getCaseData();
         AllocatedBarrister barrister = caseData.getAllocatedBarrister();
         if (null != barrister.getBarristerEmail()) {
-            log.info("For case id {}, sending email to barrister {}",
+            log.info("Event: {} - For case id {}, sending email to barrister {}",
+                     event.getTypeOfEvent().getDisplayedValue(),
                      caseData.getId(),
                      maskEmail.mask(barrister.getBarristerEmail()));
+
             ignoreAndLogNotificationFailures(() -> emailService.send(
                 barrister.getBarristerEmail(),
                 emailTemplateName,
@@ -82,7 +84,8 @@ public class BarristerChangeEventHandler {
                 (key, value) -> {
                     if (key != null) {
                         ignoreAndLogNotificationFailures(() -> {
-                            log.info("For case id {}, sending email to solicitor {}",
+                            log.info("Event: {} - For case id {}, sending email to solicitor {}",
+                                     event.getTypeOfEvent().getDisplayedValue(),
                                      caseData.getId(),
                                      maskEmail.mask(key));
                             emailService.send(
