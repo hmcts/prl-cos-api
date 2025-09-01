@@ -264,6 +264,7 @@ public class MiamPolicyUpgradeFileUploadService {
 
     private void deleteDocument(String systemAuthorisation, String serviceToken, UUID documentId) {
         try {
+            log.info("Deleting document with id: {}", documentId);
             caseDocumentClient.deleteDocument(systemAuthorisation, serviceToken, documentId, true);
         } catch (Exception e) {
             log.error("Failed to delete document with id: {}", documentId, e);
