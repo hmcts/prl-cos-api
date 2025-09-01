@@ -626,7 +626,7 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/DraftAnOrderService.java',
   '**uk/gov/hmcts/reform/prl/services/ManageOrderService.java',
   '**uk/gov/hmcts/reform/prl/services/caseflags/PartyLevelCaseFlagsService.java',
-  '**uk/gov/hmcts/reform/prl/services/caseflags/PartyLevelCaseFlagsGenerator.java'
+  '**uk/gov/hmcts/reform/prl/utils/caseflags/PartyLevelCaseFlagsGenerator.java'
 ]
 
 sonarqube {
