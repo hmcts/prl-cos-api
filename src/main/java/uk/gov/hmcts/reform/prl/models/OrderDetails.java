@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.BulkPrintOrderDetail;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.FinalisationJudgeDetails;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -69,6 +70,8 @@ public class OrderDetails {
     private final YesOrNo doesOrderDocumentNeedSeal;
 
     private YesOrNo isAutoHearingReqPending;
+
+    private FinalisationJudgeDetails finalisationJudgeDetails;
 
     //PRL-4225 - serve order & additional docs to other person
     @JsonProperty("bulkPrintOrderDetails")

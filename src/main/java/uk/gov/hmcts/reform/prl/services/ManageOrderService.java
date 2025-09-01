@@ -81,6 +81,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.FinalisationJudgeDetails;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
@@ -2389,6 +2390,7 @@ public class ManageOrderService {
                            //Admin creating and finalising the order
                            .isAutoHearingReqPending(isEligibleForAutomatedHearing(
                                caseData.getManageOrders().getOrdersHearingDetails()) ? Yes : No)
+                           .finalisationJudgeDetails(new FinalisationJudgeDetails(caseData.getAllocatedJudge().getTierOfJudge()))
                            .build());
     }
 
