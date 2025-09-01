@@ -76,7 +76,7 @@ public class AcroCaseDataService {
             LocalDateTime startDateForSearch = acroDatesService.getStartDateForSearch();
             LocalDateTime endDateForSearch = acroDatesService.getEndDateForSearch();
             QueryParam ccdQueryParam = buildCcdQueryParam(startDateForSearch, endDateForSearch);
-             String searchString = objectMapper.writeValueAsString(ccdQueryParam);
+            String searchString = objectMapper.writeValueAsString(ccdQueryParam);
             //String searchString = buildRawJsonQuery(startDateForSearch, endDateForSearch, objectMapper);
             log.info("Search string: {}", searchString);
             String userToken = systemUserService.getSysUserToken();
