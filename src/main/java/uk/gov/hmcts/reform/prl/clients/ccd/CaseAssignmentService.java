@@ -163,8 +163,7 @@ public class CaseAssignmentService {
 
     }
 
-    public void removeBarrister(final CaseData caseData, String selectedPartyId) {
-        PartyDetails selectedParty = getSelectedParty(caseData, selectedPartyId);
+    public void removeBarrister(final CaseData caseData, PartyDetails selectedParty) {
         removeAmBarristerCaseRole(caseData, selectedParty);
         selectedParty.setBarrister(null);
     }
@@ -472,14 +471,14 @@ public class CaseAssignmentService {
                                      changeOrganisationRequest,
                                      caPartyDetailsElement -> {
                                          casehelper.setAllocatedBarrister(
-                                             caPartyDetailsElement::getValue,
+                                             caPartyDetailsElement.getValue(),
                                              caseData,
                                              caPartyDetailsElement.getId());
                                          barristerRemoveService.notifyBarrister(caseData);
                                          caPartyDetailsElement.getValue().setBarrister(null);
                                      },
                                      daPartyDetails -> {
-                                         casehelper.setAllocatedBarrister(() -> daPartyDetails,
+                                         casehelper.setAllocatedBarrister(daPartyDetails,
                                                                           caseData,
                                                                           daPartyDetails.getPartyId());
                                          barristerRemoveService.notifyBarrister(caseData);

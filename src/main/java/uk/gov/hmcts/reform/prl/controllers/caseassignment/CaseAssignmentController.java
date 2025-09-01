@@ -21,10 +21,13 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
+import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.barrister.BarristerRemoveService;
 import uk.gov.hmcts.reform.prl.utils.CaseHelper;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -40,7 +43,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
 
 @Slf4j
@@ -54,6 +56,7 @@ public class CaseAssignmentController {
     private final OrganisationService organisationService;
     private final AuthorisationService authorisationService;
     private final CaseHelper caseHelper;
+    private final BarristerRemoveService barristerRemoveService;
 
     @PostMapping(path = "/barrister/add/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "About to submit to add Barrister")
@@ -102,7 +105,7 @@ public class CaseAssignmentController {
                 .data(caseDetails.getData())
                 .errors(errorList).build();
         } else {
-            throw new IllegalArgumentException(INVALID_CLIENT);
+            throw new InvalidClientException();
         }
     }
 
@@ -129,14 +132,12 @@ public class CaseAssignmentController {
                                                         errorList);
 
             if (errorList.isEmpty()) {
-                caseAssignmentService.removeBarrister(caseData,
-                                                      allocatedBarrister.getPartyList().getValueCode());
-
-                caseHelper.setAllocatedBarrister(() -> caseAssignmentService
-                                                    .getSelectedParty(caseData, allocatedBarrister.getPartyList().getValueCode()),
+                PartyDetails partyDetails = caseAssignmentService
+                    .getSelectedParty(caseData, allocatedBarrister.getPartyList().getValueCode());
+                caseHelper.setAllocatedBarrister(partyDetails,
                                                  caseData,
                                                  UUID.fromString(allocatedBarrister.getPartyList().getValueCode()));
-
+                caseAssignmentService.removeBarrister(caseData, partyDetails);
                 updateCaseDetails(caseDetails, caseData);
             }
 
@@ -144,10 +145,13 @@ public class CaseAssignmentController {
                 .data(caseDetails.getData())
                 .errors(errorList).build();
         } else {
-            throw new IllegalArgumentException(INVALID_CLIENT);
+            throw new InvalidClientException();
         }
 
     }
+
+
+
 
     private void updateCaseDetails(CaseDetails caseDetails, CaseData caseData) {
         caseDetails.getData().put(ALLOCATED_BARRISTER, caseData.getAllocatedBarrister());

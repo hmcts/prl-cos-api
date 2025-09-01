@@ -691,8 +691,8 @@ class CaseAssignmentServiceTest {
             .caseTypeOfApplication("NOT_VALID")
             .build();
         String id = UUID.randomUUID().toString();
-        assertThatThrownBy(() -> caseAssignmentService.removeBarrister(caseData,
-                                                                       id))
+        assertThatThrownBy(() -> caseAssignmentService.getSelectedParty(caseData,
+                                                                        id))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Invalid case type");
     }
@@ -708,7 +708,8 @@ class CaseAssignmentServiceTest {
             .barristerId(UUID.randomUUID().toString())
             .build();
 
-        parties.apply(c100CaseData).get(index).getValue()
+        List<Element<PartyDetails>> partDetailsElement = parties.apply(c100CaseData);
+        partDetailsElement.get(index).getValue()
             .setBarrister(updatedBarrister);
 
         when(systemUserService.getSysUserToken())
@@ -717,7 +718,7 @@ class CaseAssignmentServiceTest {
             .thenReturn("token");
 
         caseAssignmentService.removeBarrister(c100CaseData,
-                                              partyIds.get(party).toString());
+                                              partDetailsElement.get(index).getValue());
         verify(caseAssignmentApi).removeCaseUserRoles(anyString(),
                                                      anyString(),
                                                      isA(CaseAssignmentUserRolesRequest.class));
@@ -733,8 +734,8 @@ class CaseAssignmentServiceTest {
             .barristerRole(barristerRole)
             .barristerId(UUID.randomUUID().toString())
             .build();
-
-        parties.apply(fl401CaseData)
+        PartyDetails partyDetails = parties.apply(fl401CaseData);
+        partyDetails
             .setBarrister(updatedBarrister);
 
         when(systemUserService.getSysUserToken())
@@ -743,7 +744,7 @@ class CaseAssignmentServiceTest {
             .thenReturn("token");
 
         caseAssignmentService.removeBarrister(fl401CaseData,
-                                              fl401PartyIds.get(party).toString());
+                                              partyDetails);
         verify(caseAssignmentApi).removeCaseUserRoles(anyString(),
                                                      anyString(),
                                                      isA(CaseAssignmentUserRolesRequest.class));
@@ -756,8 +757,8 @@ class CaseAssignmentServiceTest {
             .barristerId(UUID.randomUUID().toString())
             .build();
 
-        c100CaseData.getApplicants().get(2).getValue()
-            .setBarrister(updatedBarrister);
+        PartyDetails partyDetails = c100CaseData.getApplicants().get(2).getValue();
+        partyDetails.setBarrister(updatedBarrister);
 
         when(systemUserService.getSysUserToken())
             .thenReturn("sysUserToken");
@@ -771,9 +772,9 @@ class CaseAssignmentServiceTest {
                 .reason("Internal Server Error")
                 .request(Request.create(HttpMethod.DELETE, "/case-users", Map.of(), null, null, null))
                 .build()));
-        String partyId = partyIds.get("applicant3").toString();
+
         assertThatThrownBy(() -> caseAssignmentService.removeBarrister(c100CaseData,
-                                                                       partyId
+                                                                       partyDetails
         ))
             .isInstanceOf(GrantCaseAccessException.class)
             .hasMessageContaining("Could not remove the user");
@@ -1053,8 +1054,8 @@ class CaseAssignmentServiceTest {
             .barristerId(UUID.randomUUID().toString())
             .build();
 
-        parties.apply(fl401CaseData)
-            .setBarrister(updatedBarrister);
+        PartyDetails partyDetails = parties.apply(fl401CaseData);
+        partyDetails.setBarrister(updatedBarrister);
 
         ChangeOrganisationRequest changeOrganisationRequest = ChangeOrganisationRequest.builder()
             .caseRoleId(DynamicList.builder()
@@ -1074,12 +1075,9 @@ class CaseAssignmentServiceTest {
         verify(caseAssignmentApi, never()).removeCaseUserRoles(anyString(),
                                                       anyString(),
                                                       isA(CaseAssignmentUserRolesRequest.class));
-        verify(casehelper).setAllocatedBarrister(supplierCaptor.capture(),
+        verify(casehelper).setAllocatedBarrister(eq(partyDetails),
                                                  isA(CaseData.class),
                                                  isA(UUID.class));
-        assertThat(supplierCaptor.getValue().get())
-            .isNotNull();
-        verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
     }
 
     static Stream<Arguments> parameterC100SolicitorParties() {
@@ -1182,8 +1180,8 @@ class CaseAssignmentServiceTest {
             .barristerId(UUID.randomUUID().toString())
             .build();
 
-        parties.apply(c100CaseData).get(index).getValue()
-            .setBarrister(updatedBarrister);
+        PartyDetails partyDetails = parties.apply(c100CaseData).get(index).getValue();
+        partyDetails.setBarrister(updatedBarrister);
 
         ChangeOrganisationRequest changeOrganisationRequest = ChangeOrganisationRequest.builder()
             .caseRoleId(DynamicList.builder()
@@ -1202,12 +1200,9 @@ class CaseAssignmentServiceTest {
         verify(caseAssignmentApi, never()).removeCaseUserRoles(anyString(),
                                                       anyString(),
                                                       isA(CaseAssignmentUserRolesRequest.class));
-        verify(casehelper).setAllocatedBarrister(supplierCaptor.capture(),
+        verify(casehelper).setAllocatedBarrister(eq(partyDetails),
                                                  isA(CaseData.class),
                                                  isA(UUID.class));
-        assertThat(supplierCaptor.getValue().get())
-            .isNotNull();
-        verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
     }
 
     @Test

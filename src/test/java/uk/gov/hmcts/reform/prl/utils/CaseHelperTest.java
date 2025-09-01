@@ -30,7 +30,7 @@ public class CaseHelperTest {
     @Test
     public void testAllocatedBarristerDetailsNotSet() {
         CaseData spyCaseData = spy(CaseData.builder().build());
-        caseHelper.setAllocatedBarrister(() -> null, spyCaseData, UUID.randomUUID());
+        caseHelper.setAllocatedBarrister(null, spyCaseData, UUID.randomUUID());
         verify(spyCaseData, never()).setAllocatedBarrister(any());
     }
 
@@ -39,8 +39,9 @@ public class CaseHelperTest {
         CaseData spyCaseData = spy(CaseData.builder()
                                        .allocatedBarrister(AllocatedBarrister.builder().build())
                                        .build());
-        caseHelper.setAllocatedBarrister(() -> PartyDetails.builder()
-                                             .barrister(Barrister.builder().build())
+        caseHelper.setAllocatedBarrister(PartyDetails.builder()
+                                             .barrister(Barrister.builder()
+                                                            .build())
                                              .build(),
                                          spyCaseData,
                                          UUID.randomUUID());

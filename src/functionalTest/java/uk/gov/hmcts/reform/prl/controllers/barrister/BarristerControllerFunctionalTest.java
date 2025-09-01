@@ -77,4 +77,18 @@ public class BarristerControllerFunctionalTest {
             .assertThat().statusCode(200);
     }
 
+    @Test
+    public void testBarristerRemoveSubmittedCallback() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/barrister/remove/submitted")
+            .then()
+            .assertThat().statusCode(200);
+    }
+
 }

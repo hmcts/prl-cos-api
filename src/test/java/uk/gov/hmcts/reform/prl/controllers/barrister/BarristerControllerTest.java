@@ -10,6 +10,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
@@ -18,14 +19,20 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.barrister.BarristerAddService;
 import uk.gov.hmcts.reform.prl.services.barrister.BarristerRemoveService;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATED_BARRISTER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BarristerControllerTest {
@@ -222,5 +229,55 @@ public class BarristerControllerTest {
             RuntimeException.class,
             () -> barristerController
                 .handleAddSubmitted(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest));
+    }
+
+    @Test
+    public void testSuccessSubmittedRemoveBarrister() {
+        when(authorisationService.isAuthorized(any(), any()))
+            .thenReturn(true);
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("id", 12345L);
+        caseDataMap.put("caseTypeOfApplication", "C100");
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .allocatedBarrister(AllocatedBarrister.builder()
+                                    .build())
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .data(caseDataMap)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(caseDataMap, CaseData.class))
+            .thenReturn(caseData);
+
+        barristerController.handleRemoveSubmitted(AUTH_TOKEN,
+                                                  SERVICE_TOKEN,
+                                                  callbackRequest);
+        verify(barristerRemoveService)
+            .notifyBarrister(isA(CaseData.class));
+    }
+
+
+    @Test
+    public void testInvalidClientExceptionForSubmittedRemoveBarrister() {
+        when(authorisationService.isAuthorized(any(), any()))
+            .thenReturn(false);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .build())
+            .build();
+        assertThatThrownBy(() -> barristerController.handleRemoveSubmitted(AUTH_TOKEN,
+                                                                           SERVICE_TOKEN,
+                                                                           callbackRequest))
+            .isInstanceOf(InvalidClientException.class)
+            .hasMessageContaining(INVALID_CLIENT);
     }
 }

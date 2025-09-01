@@ -8,16 +8,14 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.UUID;
-import java.util.function.Supplier;
 
 @Slf4j
 @Component
 public class CaseHelper {
 
-    public void setAllocatedBarrister(Supplier<? extends PartyDetails> partySupplier,
+    public void setAllocatedBarrister(PartyDetails partyDetails,
                                       CaseData caseData,
                                       UUID partyId) {
-        PartyDetails partyDetails = partySupplier.get();
         if (partyDetails != null) {
             caseData.setAllocatedBarrister(caseData.getAllocatedBarrister().toBuilder()
                                                .partyList(
@@ -32,7 +30,7 @@ public class CaseHelper {
                                                .barristerLastName(partyDetails.getBarrister().getBarristerLastName())
                                                .build());
         } else {
-            log.error("For case id {} : Failed to set allocated barrister for party id {}",
+            log.error("For case id {} : Party details not present. So,Failed to set allocated barrister for party id {}",
                       caseData.getId(),
                       partyId);
         }
