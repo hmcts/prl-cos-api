@@ -326,6 +326,32 @@ public class PartyLevelCaseFlagsGenerator {
                     break;
                 }
 
+                case "caApplicantBarrister1ExternalFlags": {
+                    caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caApplicantBarrister1ExternalFlags(
+                        partyExternalFlag).build()).build();
+                    break;
+                }
+                case "caApplicantBarrister2ExternalFlags": {
+                    caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caApplicantBarrister2ExternalFlags(
+                        partyExternalFlag).build()).build();
+                    break;
+                }
+                case "caApplicantBarrister3ExternalFlags": {
+                    caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caApplicantBarrister3ExternalFlags(
+                        partyExternalFlag).build()).build();
+                    break;
+                }
+                case "caApplicantBarrister4ExternalFlags": {
+                    caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caApplicantBarrister4ExternalFlags(
+                        partyExternalFlag).build()).build();
+                    break;
+                }
+                case "caApplicantBarrister5ExternalFlags": {
+                    caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caApplicantBarrister5ExternalFlags(
+                        partyExternalFlag).build()).build();
+                    break;
+                }
+
                 case "caRespondent1ExternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caRespondent1ExternalFlags(
                         partyExternalFlag).build()).build();
@@ -378,6 +404,32 @@ public class PartyLevelCaseFlagsGenerator {
                     break;
                 }
 
+                case "caRespondentBarrister1ExternalFlags": {
+                    caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caRespondentBarrister1ExternalFlags(
+                        partyExternalFlag).build()).build();
+                    break;
+                }
+                case "caRespondentBarrister2ExternalFlags": {
+                    caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caRespondentBarrister2ExternalFlags(
+                        partyExternalFlag).build()).build();
+                    break;
+                }
+                case "caRespondentBarrister3ExternalFlags": {
+                    caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caRespondentBarrister3ExternalFlags(
+                        partyExternalFlag).build()).build();
+                    break;
+                }
+                case "caRespondentBarrister4ExternalFlags": {
+                    caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caRespondentBarrister4ExternalFlags(
+                        partyExternalFlag).build()).build();
+                    break;
+                }
+                case "caRespondentBarrister5ExternalFlags": {
+                    caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caRespondentBarrister5ExternalFlags(
+                        partyExternalFlag).build()).build();
+                    break;
+                }
+
                 case "caOtherParty1ExternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caOtherParty1ExternalFlags(
                         partyExternalFlag).build()).build();
@@ -414,6 +466,11 @@ public class PartyLevelCaseFlagsGenerator {
                         partyExternalFlag).build()).build();
                     break;
                 }
+                case "daApplicantBarristerExternalFlags": {
+                    caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().daApplicantBarristerExternalFlags(
+                        partyExternalFlag).build()).build();
+                    break;
+                }
                 case "daRespondentExternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().daRespondentExternalFlags(
                         partyExternalFlag).build()).build();
@@ -421,6 +478,11 @@ public class PartyLevelCaseFlagsGenerator {
                 }
                 case "daRespondentSolicitorExternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().daRespondentSolicitorExternalFlags(
+                        partyExternalFlag).build()).build();
+                    break;
+                }
+                case "daRespondentBarristerExternalFlags": {
+                    caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().daRespondentBarristerExternalFlags(
                         partyExternalFlag).build()).build();
                     break;
                 }
