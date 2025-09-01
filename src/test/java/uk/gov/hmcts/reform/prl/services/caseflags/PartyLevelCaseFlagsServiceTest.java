@@ -252,10 +252,6 @@ public class PartyLevelCaseFlagsServiceTest {
     @Test
     public void testIndividualCaseFlagForFl401CaseWhenPartiesRepresent() {
 
-        when(partyLevelCaseFlagsGenerator
-                 .generatePartyFlags(any(),
-                                     any(), any(), any(), Mockito.anyBoolean(), any()))
-            .thenReturn(caseDataFl401);
         CaseData caseData =  partyLevelCaseFlagsService
             .generateIndividualPartySolicitorCaseFlags(
                 caseDataFl401, 0, DARESPONDENTSOLICITOR, false);

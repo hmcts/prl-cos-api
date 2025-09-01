@@ -212,7 +212,7 @@ public enum PartyRole {
         private static class Constants {
             public static final String CA_APPLICANT_EXTERNAL = "caApplicant%dExternalFlags";
             public static final String CA_APPLICANT_SOLICITOR_EXTERNAL = "caApplicantSolicitor%dExternalFlags";
-            public static final String CA_APPLICANT_BARRISTER_EXTERNAL = "caApplicantSolicitor%dExternalFlags";
+            public static final String CA_APPLICANT_BARRISTER_EXTERNAL = "caApplicantBarrister%dExternalFlags";
             public static final String CA_RESPONDENT_EXTERNAL = "caRespondent%dExternalFlags";
             public static final String CA_RESPONDENT_SOLICITOR_EXTERNAL = "caRespondentSolicitor%dExternalFlags";
             public static final String CA_RESPONDENT_BARRISTER_EXTERNAL = "caRespondentBarrister%dExternalFlags";

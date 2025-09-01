@@ -96,12 +96,16 @@ public class PartyLevelCaseFlagsService {
             if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
                 data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.CAAPPLICANTSOLICITOR));
                 data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.CARESPONDENTSOLICITOR));
+                data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.CAAPPLICANTBARRISTER));
+                data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.CARESPONDENTBARRISTER));
             }
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DAAPPLICANT));
             data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DAAPPLICANTSOLICITOR));
+            data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DAAPPLICANTBARRISTER));
             data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DARESPONDENT));
             data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DARESPONDENTSOLICITOR));
+            data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DARESPONDENTBARRISTER));
         }
         return data;
     }
@@ -161,7 +165,7 @@ public class PartyLevelCaseFlagsService {
                 }
                 break;
             }
-            case CAAPPLICANTSOLICITOR, CARESPONDENTSOLICITOR: {
+            case CAAPPLICANTSOLICITOR, CARESPONDENTSOLICITOR, CAAPPLICANTBARRISTER, CARESPONDENTBARRISTER: {
                 if (partyDetails.isPresent()
                     && !StringUtils.isEmpty(partyDetails.get().getValue().getRepresentativeFullNameForCaseFlags())) {
                     data.put(
@@ -231,7 +235,7 @@ public class PartyLevelCaseFlagsService {
                         }
                         break;
                     }
-                    case DAAPPLICANTSOLICITOR, DARESPONDENTSOLICITOR: {
+                    case DAAPPLICANTSOLICITOR, DARESPONDENTSOLICITOR, DAAPPLICANTBARRISTER, DARESPONDENTBARRISTER: {
                         if (!StringUtils.isEmpty(partyDetails.getRepresentativeFullNameForCaseFlags())) {
                             data.put(
                                 caseDataExternalField,
@@ -266,7 +270,7 @@ public class PartyLevelCaseFlagsService {
                                                               PartyRole.Representing representing,
                                                               boolean solicitorRepresented) {
         switch (representing) {
-            case CAAPPLICANTSOLICITOR, CARESPONDENTSOLICITOR: {
+            case CAAPPLICANTSOLICITOR, CARESPONDENTSOLICITOR, CAAPPLICANTBARRISTER, CARESPONDENTBARRISTER: {
                 List<Element<PartyDetails>> caElements = representing.getCaTarget().apply(caseData);
                 Optional<Element<PartyDetails>> partyDetails = Optional.ofNullable(caElements.get(partyIndex));
                 if (partyDetails.isPresent()) {
@@ -280,7 +284,7 @@ public class PartyLevelCaseFlagsService {
                 }
                 break;
             }
-            case DAAPPLICANTSOLICITOR, DARESPONDENTSOLICITOR: {
+            case DAAPPLICANTSOLICITOR, DARESPONDENTSOLICITOR, DAAPPLICANTBARRISTER, DARESPONDENTBARRISTER: {
                 Optional<PartyDetails> partyDetails = Optional.ofNullable(representing.getDaTarget().apply(caseData));
                 if (partyDetails.isPresent()) {
                     caseData = regenerateSolicitorFlags(
@@ -367,12 +371,22 @@ public class PartyLevelCaseFlagsService {
         caseData = generateC100IndividualPartyCaseFlags(
             caseData,
             startEventResponseData,
+            PartyRole.Representing.CAAPPLICANTBARRISTER
+        );
+        caseData = generateC100IndividualPartyCaseFlags(
+            caseData,
+            startEventResponseData,
             PartyRole.Representing.CARESPONDENT
         );
         caseData = generateC100IndividualPartyCaseFlags(
             caseData,
             startEventResponseData,
             PartyRole.Representing.CARESPONDENTSOLICITOR
+        );
+        caseData = generateC100IndividualPartyCaseFlags(
+            caseData,
+            startEventResponseData,
+            PartyRole.Representing.CARESPONDENTBARRISTER
         );
         caseData = generateC100IndividualPartyCaseFlags(
             caseData,
@@ -429,7 +443,7 @@ public class PartyLevelCaseFlagsService {
                 }
                 break;
             }
-            case CAAPPLICANTSOLICITOR, CARESPONDENTSOLICITOR: {
+            case CAAPPLICANTSOLICITOR, CARESPONDENTSOLICITOR, CAAPPLICANTBARRISTER, CARESPONDENTBARRISTER: {
                 if (partyDetails.isPresent()
                     && !StringUtils.isEmpty(partyDetails.get().getValue().getRepresentativeFullNameForCaseFlags())) {
                     caseData = partyLevelCaseFlagsGenerator.generatePartyFlags(
@@ -494,11 +508,13 @@ public class PartyLevelCaseFlagsService {
         switch (eventId) {
             case AMEND_APPLICANTS_DETAILS -> {
                 return Arrays.asList(
-                    CAAPPLICANT, PartyRole.Representing.CAAPPLICANTSOLICITOR);
+                    CAAPPLICANT, PartyRole.Representing.CAAPPLICANTSOLICITOR,
+                    PartyRole.Representing.CAAPPLICANTBARRISTER);
             }
             case AMEND_RESPONDENT_DETAILS -> {
                 return Arrays.asList(
-                    CARESPONDENT, PartyRole.Representing.CARESPONDENTSOLICITOR);
+                    CARESPONDENT, PartyRole.Representing.CARESPONDENTSOLICITOR,
+                    PartyRole.Representing.CARESPONDENTBARRISTER);
             }
             case AMEND_OTHER_PEOPLE_IN_THE_CASE -> {
                 return List.of(CAOTHERPARTY);
@@ -536,7 +552,9 @@ public class PartyLevelCaseFlagsService {
                 representing1.getCaseDataInternalField()
             );
             if (representing1 == CAAPPLICANT || representing1 == PartyRole.Representing.CAAPPLICANTSOLICITOR
+                || representing1 == PartyRole.Representing.CAAPPLICANTBARRISTER
                 || representing1 == CAOTHERPARTY || representing1 == PartyRole.Representing.CARESPONDENTSOLICITOR
+                || representing1 == PartyRole.Representing.CARESPONDENTBARRISTER
                 || representing1 == CARESPONDENT) {
                 for (int i = 0; i < 5; i++) {
                     if (i >= parties.size()) {
@@ -655,7 +673,7 @@ public class PartyLevelCaseFlagsService {
             case CAAPPLICANT,CARESPONDENT,CAOTHERPARTY -> {
                 return applicant.getLabelForDynamicList();
             }
-            case CAAPPLICANTSOLICITOR,CARESPONDENTSOLICITOR -> {
+            case CAAPPLICANTSOLICITOR,CARESPONDENTSOLICITOR,CAAPPLICANTBARRISTER,CARESPONDENTBARRISTER -> {
                 return applicant.getRepresentativeFullNameForCaseFlags();
             }
             default -> {
