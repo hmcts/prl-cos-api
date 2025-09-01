@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.EmailService;
+import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -23,6 +24,8 @@ import java.util.UUID;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -33,6 +36,9 @@ class BarristerChangeEventHandlerTest {
 
     @Mock
     private EmailService emailService;
+
+    @Mock
+    private FeatureToggleService featureToggleService;
 
     @InjectMocks
     private BarristerChangeEventHandler barristerChangeEventHandler;
@@ -89,6 +95,8 @@ class BarristerChangeEventHandlerTest {
         barristerChangeEvent = BarristerChangeEvent.builder()
             .caseData(caseData)
             .build();
+
+        when(featureToggleService.isBarristerFeatureEnabled()).thenReturn(true);
     }
 
     @Test
@@ -99,6 +107,13 @@ class BarristerChangeEventHandlerTest {
                                            Mockito.any(),
                                            Mockito.any(), Mockito.any());
 
+    }
+
+    @Test
+    void shoudNotNotifyAddBarristerIfFeatureIsDisabled() {
+        when(featureToggleService.isBarristerFeatureEnabled()).thenReturn(false);
+        barristerChangeEventHandler.notifyAddBarrister(barristerChangeEvent);
+        verifyNoInteractions(emailService);
     }
 
     @Test
@@ -170,6 +185,13 @@ class BarristerChangeEventHandlerTest {
                                            Mockito.any(),
                                            Mockito.any(), Mockito.any());
 
+    }
+
+    @Test
+    void shoudNotNotifyRemoveBarristerIfFeatureIsDisabled() {
+        when(featureToggleService.isBarristerFeatureEnabled()).thenReturn(false);
+        barristerChangeEventHandler.notifyWhenBarristerRemoved(barristerChangeEvent);
+        verifyNoInteractions(emailService);
     }
 
     @Test

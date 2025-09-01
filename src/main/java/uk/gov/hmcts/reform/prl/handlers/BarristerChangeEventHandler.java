@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.BarristerEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.EmailService;
+import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
@@ -34,16 +35,19 @@ public class BarristerChangeEventHandler {
     private String manageCaseUrl;
 
     private final EmailService emailService;
+    private final FeatureToggleService featureToggleService;
 
     @Async
     @EventListener(condition = "#event.typeOfEvent.displayedValue eq 'Add Barrister'")
     public void notifyAddBarrister(final BarristerChangeEvent event) {
 
-        // notify - barrister
-        sendEmailToBarrister(event, EmailTemplateNames.CA_DA_ADD_BARRISTER_SELF);
+        if (featureToggleService.isBarristerFeatureEnabled()) {
+            // notify - barrister
+            sendEmailToBarrister(event, EmailTemplateNames.CA_DA_ADD_BARRISTER_SELF);
 
-        // notify applicants/respondents Solicitors
-        sendEmailToAppRespSolicitors(event, EmailTemplateNames.CA_DA_ADD_BARRISTER_TO_SOLICITOR);
+            // notify applicants/respondents Solicitors
+            sendEmailToAppRespSolicitors(event, EmailTemplateNames.CA_DA_ADD_BARRISTER_TO_SOLICITOR);
+        }
 
     }
 
@@ -91,11 +95,13 @@ public class BarristerChangeEventHandler {
     @Async
     @EventListener(condition = "#event.typeOfEvent.displayedValue eq 'Remove Barrister'")
     public void notifyWhenBarristerRemoved(final BarristerChangeEvent event) {
-        // notify - barrister
-        sendEmailToBarrister(event, EmailTemplateNames.CA_DA_REMOVE_BARRISTER_SELF);
+        if (featureToggleService.isBarristerFeatureEnabled()) {
+            // notify - barrister
+            sendEmailToBarrister(event, EmailTemplateNames.CA_DA_REMOVE_BARRISTER_SELF);
 
-        // notify applicants/respondents Solicitors
-        sendEmailToAppRespSolicitors(event, EmailTemplateNames.CA_DA_REMOVE_BARRISTER_TO_SOLICITOR);
+            // notify applicants/respondents Solicitors
+            sendEmailToAppRespSolicitors(event, EmailTemplateNames.CA_DA_REMOVE_BARRISTER_TO_SOLICITOR);
+        }
 
     }
 
