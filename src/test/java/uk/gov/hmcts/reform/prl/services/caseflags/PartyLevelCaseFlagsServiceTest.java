@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.Barrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -39,10 +40,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
-import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.CAAPPLICANTSOLICITOR;
-import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.CARESPONDENTSOLICITOR;
-import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.DAAPPLICANTSOLICITOR;
-import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.DARESPONDENTSOLICITOR;
+import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PartyLevelCaseFlagsServiceTest {
@@ -275,6 +273,37 @@ public class PartyLevelCaseFlagsServiceTest {
     }
 
     @Test
+    public void testIndividualCaseFlagForC100CaseWhenSolicitorRepresentAndBarrister() {
+        PartyDetails partyDetailsApplicantSolicitorBarrister = PartyDetails.builder()
+            .firstName("")
+            .lastName("")
+            .email("")
+            .user(User.builder().email("").idamId("").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .representativeFirstName("first name")
+            .lastName("last name")
+            .barrister(Barrister.builder().barristerId("")
+                           .barristerFirstName("BarrFN").barristerLastName("BarrLN").build())
+            .build();
+
+        CaseData caseDataSolicitorBarristerRepresent = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(Element.<PartyDetails>builder().value(partyDetailsApplicantSolicitorBarrister).build()))
+            .build();
+
+        when(partyLevelCaseFlagsGenerator
+                 .generatePartyFlags(any(),
+                                     any(), any(), any(), Mockito.anyBoolean(), any()))
+            .thenReturn(caseDataSolicitorBarristerRepresent);
+        CaseData caseData =  partyLevelCaseFlagsService
+            .generateIndividualPartySolicitorCaseFlags(
+                caseDataSolicitorBarristerRepresent, 0, CAAPPLICANTBARRISTER, true);
+
+        Assert.assertNotNull(caseData);
+        Assert.assertEquals(C100_CASE_TYPE, caseData.getCaseTypeOfApplication());
+    }
+
+    @Test
     public void testIndividualCaseFlagForFl401CaseWhenSolicitorRepresent() {
 
         when(partyLevelCaseFlagsGenerator
@@ -284,6 +313,37 @@ public class PartyLevelCaseFlagsServiceTest {
         CaseData caseData =  partyLevelCaseFlagsService
             .generateIndividualPartySolicitorCaseFlags(
                 caseDataFl401SolicitorRepresent, 0, DAAPPLICANTSOLICITOR, true);
+        Assert.assertNotNull(caseData);
+        Assert.assertEquals(FL401_CASE_TYPE, caseData.getCaseTypeOfApplication());
+    }
+
+    @Test
+    public void testIndividualCaseFlagForFl401CaseWhenSolicitorBarristerRepresent() {
+
+        PartyDetails partyDetailsApplicantSolicitorBarrister = PartyDetails.builder()
+            .firstName("")
+            .lastName("")
+            .email("")
+            .user(User.builder().email("").idamId("").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .representativeFirstName("first name")
+            .lastName("last name")
+            .barrister(Barrister.builder().barristerId("")
+                           .barristerFirstName("BarrFN").barristerLastName("BarrLN").build())
+            .build();
+        CaseData caseDataFl401SolicitorBarristerRepresent = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(partyDetailsApplicantSolicitorBarrister)
+            .build();
+
+        when(partyLevelCaseFlagsGenerator
+                 .generatePartyFlags(any(),
+                                     any(), any(), any(), Mockito.anyBoolean(), any()))
+            .thenReturn(caseDataFl401SolicitorBarristerRepresent);
+
+        CaseData caseData =  partyLevelCaseFlagsService
+            .generateIndividualPartySolicitorCaseFlags(
+                caseDataFl401SolicitorBarristerRepresent, 0, DAAPPLICANTSOLICITOR, true);
         Assert.assertNotNull(caseData);
         Assert.assertEquals(FL401_CASE_TYPE, caseData.getCaseTypeOfApplication());
     }
