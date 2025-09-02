@@ -44,5 +44,10 @@ public class Respondent {
     private final YesOrNo isEmailAddressConfidential;
     private final YesOrNo isPhoneNumberConfidential;
     private final ContactPreferences contactPreferences;
+
+    private final String barristerFirstName;
+    private final String barristerLastName;
+    private final String barristerEmail;
+    private final Organisation barristerOrg;
 }
 
