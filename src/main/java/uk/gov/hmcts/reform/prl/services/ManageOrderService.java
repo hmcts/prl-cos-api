@@ -2336,6 +2336,14 @@ public class ManageOrderService {
             }
         }
 
+        //        if (caseData.getAllocatedJudge() != null && caseData.getAllocatedJudge().getTierOfJudge() != null) {
+        //            orderDetails = orderDetails.toBuilder().finalisationJudgeDetails(
+        //                new FinalisationJudgeDetails(caseData.getAllocatedJudge().getTierOfJudge())).build();
+        //        }
+
+        orderDetails = orderDetails.toBuilder().finalisationJudgeDetails(
+            new FinalisationJudgeDetails("Circuit Judge")).build();
+
         UserDetails userDetails = userService.getUserDetails(authorisation);
 
         return element(orderDetails.toBuilder()
@@ -2390,7 +2398,6 @@ public class ManageOrderService {
                            //Admin creating and finalising the order
                            .isAutoHearingReqPending(isEligibleForAutomatedHearing(
                                caseData.getManageOrders().getOrdersHearingDetails()) ? Yes : No)
-                           .finalisationJudgeDetails(new FinalisationJudgeDetails(caseData.getAllocatedJudge().getTierOfJudge()))
                            .build());
     }
 
