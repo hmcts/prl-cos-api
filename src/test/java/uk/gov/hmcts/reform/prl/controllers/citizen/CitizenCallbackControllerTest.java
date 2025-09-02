@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum;
+import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
@@ -82,6 +84,9 @@ public class CitizenCallbackControllerTest {
     private MiamPolicyUpgradeService miamPolicyUpgradeService;
 
     @Mock
+    private CitizenPartyDetailsMapper citizenPartyDetailsMapper;
+
+    @Mock
     private EventService eventService;
 
     @Mock
@@ -146,7 +151,7 @@ public class CitizenCallbackControllerTest {
     }
 
     @Test
-    public void updateCitizenApplicationTest() {
+    public void updateCitizenApplicationTest() throws JsonProcessingException {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
