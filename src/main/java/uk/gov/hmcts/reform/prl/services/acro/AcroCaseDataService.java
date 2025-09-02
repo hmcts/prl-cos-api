@@ -26,13 +26,13 @@ import uk.gov.hmcts.reform.prl.models.dto.cafcass.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Bool;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Filter;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.LastModified;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Match;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Must;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Query;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.QueryParam;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Range;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Should;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.StateFilter;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Term;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 
@@ -97,8 +97,9 @@ public class AcroCaseDataService {
                 log.info("Extracting data needed for ACRO --> {}", acroResponse.getTotal());
 
                 List<AcroCaseDetail> validCases = acroResponse.getCases().stream()
-                    .filter(c -> isValidForCaseTypeOfApplication(
-                        c.getCaseData())).toList();
+                    .filter(c -> isValidForCaseTypeOfApplication(c.getCaseData()))
+                    .toList();
+
                 AcroResponse filteredResponse = acroResponse.toBuilder().cases(validCases).build();
                 AcroResponse updatedAcroData = extractCaseDetailsForAllCases(
                     authorisation,
@@ -120,7 +121,7 @@ public class AcroCaseDataService {
             }
         } catch (Exception e) {
             log.error("Error in search cases {}", e.getMessage());
-            throw e;
+            throw new RuntimeException("Failed search query", e);
         }
         return acroResponse;
     }
@@ -146,9 +147,7 @@ public class AcroCaseDataService {
         Range range = Range.builder().lastModified(lastModified).build();
         Bool bool = Bool.builder()
             .filter(Filter.builder().range(range).build())
-            .must(Must.builder()
-                      .stateFilter(StateFilter.builder().should(mustQuery).minimumShouldMatch(2).build())
-                      .build())
+            .must(Must.builder().stateFilter(StateFilter.builder().should(mustQuery).build()).build())
             .build();
         Query query = Query.builder().bool(bool).build();
         return QueryParam.builder().query(query).dataToReturn(fetchFieldsRequiredForAcro()).build();
@@ -210,7 +209,7 @@ public class AcroCaseDataService {
     private List<Should> populateMustQuery(LastModified dateCreatedRange) {
         List<Should> should = new ArrayList<>();
         //should.add(Should.builder().match(Match.builder().orderType(NON_MOLESTATION).build()).build());
-        should.add(Should.builder().match(Match.builder().orderTypeId(NON_MOLESTATION_ORDER_FL_404_A).build()).build());
+        should.add(Should.builder().term(Term.builder().orderTypeId(NON_MOLESTATION_ORDER_FL_404_A).build()).build());
         should.add(Should.builder().range(Range.builder().dateCreated(dateCreatedRange).build()).build());
         //should.add(Should.builder().match(Match.builder().typeOfOrder(FINAL).build()).build());
 

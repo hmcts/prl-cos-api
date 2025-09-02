@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,9 +12,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder
-public class Should {
+public class Term {
 
-    private Match match;
-    private Range range;
-    private Term term;
+    @JsonProperty("data.orderCollection.value.orderTypeId.keyword")
+    private String orderTypeId;
 }
