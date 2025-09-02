@@ -19,9 +19,11 @@ import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -56,6 +58,9 @@ public class CaseAssignmentControllerIntegrationTest {
     @Autowired
     private WebApplicationContext webApplicationContext;
 
+    @MockBean
+    private ApplicationsTabService applicationsTabService;
+
     @SpyBean
     private CaseAssignmentService caseAssignmentService;
 
@@ -74,6 +79,7 @@ public class CaseAssignmentControllerIntegrationTest {
     public void testAddBarrister() throws Exception {
         String url = "/case-assignment/barrister/add/about-to-submit";
         String jsonRequest = ResourceLoader.loadJson("requests/barristerRequest.json");
+        when(applicationsTabService.updateTab(any())).thenReturn(new HashMap());
         when(organisationService.findUserByEmail(anyString()))
             .thenReturn(Optional.of(UUID.randomUUID().toString()));
         when(authorisationService.isAuthorized(anyString(), anyString()))
@@ -100,12 +106,14 @@ public class CaseAssignmentControllerIntegrationTest {
                                                    any(),
                                                    eq(C100APPLICANTBARRISTER1.getCaseRoleLabel()),
                                                    any());
+        verify(applicationsTabService).updateTab(any());
     }
 
     @Test
     public void testRemoveBarristerAboutToSubmit() throws Exception {
         String url = "/case-assignment/barrister/remove/about-to-submit";
         String jsonRequest = ResourceLoader.loadJson("requests/barristerRequest.json");
+        when(applicationsTabService.updateTab(any())).thenReturn(new HashMap());
         when(authorisationService.isAuthorized(anyString(), anyString()))
             .thenReturn(true);
 

@@ -25,9 +25,9 @@ import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
-import uk.gov.hmcts.reform.prl.services.barrister.BarristerRemoveService;
 import uk.gov.hmcts.reform.prl.utils.CaseHelper;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -56,7 +56,7 @@ public class CaseAssignmentController {
     private final OrganisationService organisationService;
     private final AuthorisationService authorisationService;
     private final CaseHelper caseHelper;
-    private final BarristerRemoveService barristerRemoveService;
+    private final ApplicationsTabService applicationsTabService;
 
     @PostMapping(path = "/barrister/add/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "About to submit to add Barrister")
@@ -158,9 +158,11 @@ public class CaseAssignmentController {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseDetails.getData().put(APPLICANTS, caseData.getApplicants());
             caseDetails.getData().put(RESPONDENTS, caseData.getRespondents());
+            caseDetails.getData().putAll(applicationsTabService.updateTab(caseData));
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseDetails.getData().put(FL401_APPLICANTS, caseData.getApplicantsFL401());
             caseDetails.getData().put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
+            caseDetails.getData().putAll(applicationsTabService.updateTab(caseData));
         }
     }
 }
