@@ -70,11 +70,11 @@ class CaseAssignmentControllerTest {
     private CaseHelper caseHelper;
     @Mock
     private ApplicationsTabService applicationsTabService;
-
-    private CaseAssignmentController caseAssignmentController;
     @Spy
     private ObjectMapper objectMapper;
-    private Barrister barrister;
+
+    private CaseAssignmentController caseAssignmentController;
+
     private AllocatedBarrister allocatedBarrister;
 
     @BeforeEach
@@ -87,7 +87,7 @@ class CaseAssignmentControllerTest {
             authorisationService,
             caseHelper,
             applicationsTabService);
-        barrister = Barrister.builder()
+        Barrister barrister = Barrister.builder()
             .barristerEmail("barristerEmail@gmail.com")
             .barristerFirstName("barristerName")
             .barristerLastName("barristerLastName")
