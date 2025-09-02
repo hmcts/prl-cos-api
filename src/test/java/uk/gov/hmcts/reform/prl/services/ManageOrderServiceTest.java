@@ -97,6 +97,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingDataFromTabTo
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.FinalisationJudgeDetails;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
@@ -6602,5 +6603,98 @@ public class ManageOrderServiceTest {
         assertEquals(caseData.getJusticeLegalAdviserFullName(), draftOrder.getJusticeLegalAdviserFullName());
         assertEquals(caseData.getMagistrateLastName(), draftOrder.getMagistrateLastName());
         assertEquals(manageOrders.getIsTheOrderByConsent(), draftOrder.getIsTheOrderByConsent());
+    }
+
+    @Test
+    public void testShouldFinaliseOrderAndPopulateTierOfJudge() throws Exception {
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+
+        List<DynamicMultiselectListElement> elements = new ArrayList<>();
+        DynamicMultiselectListElement element = DynamicMultiselectListElement.builder()
+            .code("1234")
+            .label("test label").build();
+        elements.add(element);
+        ManageOrders manageOrders = ManageOrders.builder()
+            .cafcassCymruServedOptions(No)
+            .childArrangementsOrdersToIssue(List.of(childArrangementsOrder,prohibitedStepsOrder))
+            .selectChildArrangementsOrder(ChildArrangementOrderTypeEnum.liveWithOrder)
+            .serveOrderDynamicList(dynamicMultiSelectList)
+            .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
+                                                     .emailInformation(EmailInformation.builder().emailName("").build())
+                                                     .build())))
+            .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
+                                                       .value(Document.builder().documentFileName(
+                                                           "abc.pdf").build())
+                                                       .build()))
+            .recipientsOptions(DynamicMultiSelectList.builder()
+                                   .listItems(elements)
+                                   .build())
+            .childOption(DynamicMultiSelectList.builder()
+                             .listItems(elements)
+                             .build())
+            .otherParties(DynamicMultiSelectList.builder()
+                              .listItems(elements)
+                              .build())
+            .serveToRespondentOptions(YesNoNotApplicable.Yes)
+            .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+            .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+            .cafcassCymruEmail("test")
+            .deliveryByOptionsCA(DeliveryByEnum.post)
+            .emailInformationCA(List.of(Element.<EmailInformation>builder()
+                                            .value(EmailInformation.builder().emailAddress("test").build()).build()))
+            .postalInformationCA(List.of(Element.<PostalInformation>builder()
+                                             .value(PostalInformation.builder().postalAddress(
+                                                 Address.builder().postCode("NE65LA").build()).build()).build()))
+            .build();
+
+        Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid).value(OrderDetails
+                                                                                          .builder()
+                                                                                          .finalisationJudgeDetails(new FinalisationJudgeDetails("Circuit Judge"))
+                                                                                          .orderDocument(Document
+                                                                                                             .builder()
+                                                                                                             .build())
+                                                                                          .dateCreated(now)
+                                                                                          .orderTypeId(TEST_UUID)
+                                                                                          .otherDetails(
+                                                                                              OtherOrderDetails.builder().build())
+                                                                                          .build()).build();
+        List<Element<OrderDetails>> orderList = new ArrayList<>();
+        orderList.add(orders);
+
+        List<Element<PartyDetails>> partyDetails = new ArrayList<>();
+        PartyDetails details = PartyDetails.builder().firstName("first").lastName("lastname")
+            .solicitorOrg(Organisation.builder().organisationName("test Org").build())
+            .build();
+        Element<PartyDetails> partyDetailsElement = element(details);
+        partyDetails.add(partyDetailsElement);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicants(partyDetails)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(orderList)
+            .dateOrderMade(LocalDate.now())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .manageOrders(manageOrders)
+            .allocatedJudge(AllocatedJudge.builder().tierOfJudge("Circuit Judge").build())
+            .build();
+
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+
+        assertNotNull(manageOrderService.serveOrder(caseData,orderList));
+        assertEquals(caseData.getAllocatedJudge().getTierOfJudge(), orders.getValue().getFinalisationJudgeDetails().getAppointment());
     }
 }
