@@ -52,7 +52,8 @@ public class CitizenCallbackController extends AbstractCallbackController {
                                         AuthTokenGenerator authTokenGenerator,
                                         SystemUserService systemUserService,
                                         CitizenEmailService citizenEmailService,
-                                        MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService, MiamPolicyUpgradeService miamPolicyUpgradeService) {
+                                        MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService,
+                                        MiamPolicyUpgradeService miamPolicyUpgradeService) {
         super(objectMapper, eventPublisher);
         this.allTabsService = allTabsService;
         this.coreCaseDataApi = coreCaseDataApi;
