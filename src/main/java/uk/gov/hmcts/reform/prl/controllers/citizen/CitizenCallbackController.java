@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeFileUploadService;
+import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenEmailService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -41,6 +42,7 @@ public class CitizenCallbackController extends AbstractCallbackController {
     private final SystemUserService systemUserService;
     private final CitizenEmailService citizenEmailService;
     private final MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
+    private final MiamPolicyUpgradeService miamPolicyUpgradeService;
 
     @Autowired
     protected CitizenCallbackController(ObjectMapper objectMapper,
@@ -50,7 +52,7 @@ public class CitizenCallbackController extends AbstractCallbackController {
                                         AuthTokenGenerator authTokenGenerator,
                                         SystemUserService systemUserService,
                                         CitizenEmailService citizenEmailService,
-                                        MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService) {
+                                        MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService, MiamPolicyUpgradeService miamPolicyUpgradeService) {
         super(objectMapper, eventPublisher);
         this.allTabsService = allTabsService;
         this.coreCaseDataApi = coreCaseDataApi;
@@ -58,6 +60,7 @@ public class CitizenCallbackController extends AbstractCallbackController {
         this.systemUserService = systemUserService;
         this.citizenEmailService = citizenEmailService;
         this.miamPolicyUpgradeFileUploadService = miamPolicyUpgradeFileUploadService;
+        this.miamPolicyUpgradeService = miamPolicyUpgradeService;
     }
 
     @PostMapping("/citizen-case-creation-callback/submitted")
@@ -92,8 +95,9 @@ public class CitizenCallbackController extends AbstractCallbackController {
         CaseData caseDataBefore = CaseUtils.getCaseData(caseDetailsBefore, objectMapper);
 
         // cleanup miam documents which were renamed in about-to-submit, can delete the old copies from caseDataBefore
+        caseDataBefore = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(caseDataBefore, new HashMap<>());
         if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseDataBefore))
-            && TASK_LIST_VERSION_V3.equalsIgnoreCase(caseDataBefore.getTaskListVersion())
+            && TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())
             && isNotEmpty(caseDataBefore.getMiamPolicyUpgradeDetails())) {
             miamPolicyUpgradeFileUploadService
                 .deleteOldMiamPolicyUpgradeDocuments(caseDataBefore, systemUserService.getSysUserToken());
