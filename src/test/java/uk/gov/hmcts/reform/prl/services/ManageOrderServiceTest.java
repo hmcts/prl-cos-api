@@ -6654,7 +6654,9 @@ public class ManageOrderServiceTest {
 
         Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid).value(OrderDetails
                                                                                           .builder()
-                                                                                          .finalisationJudgeDetails(new FinalisationJudgeDetails("Circuit Judge"))
+                                                                                          .finalisationJudgeDetails(
+                                                                                              new FinalisationJudgeDetails(
+                                                                                                  "Circuit Judge"))
                                                                                           .orderDocument(Document
                                                                                                              .builder()
                                                                                                              .build())
