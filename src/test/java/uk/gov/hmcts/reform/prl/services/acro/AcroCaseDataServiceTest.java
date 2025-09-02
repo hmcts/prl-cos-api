@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
@@ -106,11 +107,14 @@ public class AcroCaseDataServiceTest {
             expectedAcroResponse,
             SearchResult.class
         );
-        when(coreCaseDataApi.searchCases(anyString(), anyString(), any(), any())).thenReturn(searchResult);
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString())).thenReturn(searchResult);
         when(hearingService.getHearingsForAllCases(anyString(), anyMap())).thenReturn(listOfHearings);
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
         when(acroDatesService.getStartDateForSearch()).thenReturn(LocalDateTime.of(2025, 8, 5, 21, 0, 0));
         when(acroDatesService.getEndDateForSearch()).thenReturn(LocalDateTime.of(2025, 8, 6, 21, 0, 0));
+
+        ReflectionTestUtils.setField(acroCaseDataService, "searchCaseTypeId", "PRLAPPS");
 
         AcroResponse realAcroResponse = acroCaseDataService.getCaseData("authorisation");
         AcroCaseData caseData = realAcroResponse.getCases().getFirst().getCaseData();
@@ -160,12 +164,14 @@ public class AcroCaseDataServiceTest {
             SearchResult.class
         );
 
-        when(coreCaseDataApi.searchCases(anyString(), anyString(), any(), any())).thenReturn(searchResult);
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString())).thenReturn(searchResult);
         when(hearingService.getHearings(anyString(), anyString())).thenReturn(hearings);
         when(hearingService.getHearingsForAllCases(anyString(), anyMap())).thenReturn(listOfHearings);
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
         when(acroDatesService.getStartDateForSearch()).thenReturn(LocalDateTime.of(2025, 8, 5, 21, 0, 0));
         when(acroDatesService.getEndDateForSearch()).thenReturn(LocalDateTime.of(2025, 8, 6, 21, 0, 0));
+        ReflectionTestUtils.setField(acroCaseDataService, "searchCaseTypeId", "PRLAPPS");
 
         AcroResponse realAcroResponse = acroCaseDataService.getCaseData("authorisation");
         AcroCaseData caseData = realAcroResponse.getCases().getFirst().getCaseData();
