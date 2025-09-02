@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.barrister;
 
+import lombok.AllArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.barrister.TypeOfBarristerEventEnum;
@@ -13,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.utils.CaseHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,27 +27,22 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 import static uk.gov.hmcts.reform.prl.enums.PartyEnum.applicant;
 import static uk.gov.hmcts.reform.prl.enums.PartyEnum.respondent;
 
+
+@AllArgsConstructor
 public abstract class AbstractBarristerService {
     protected static final String APPLICANT = "Applicant";
     protected static final String RESPONDENT = "Respondent";
-    private final UserService userService;
-    private final OrganisationService organisationService;
-    private final EventService eventPublisher;
-
-    protected AbstractBarristerService(UserService userService,
-                                       OrganisationService organisationService,
-                                       EventService eventPublisher) {
-        this.userService = userService;
-        this.organisationService = organisationService;
-        this.eventPublisher = eventPublisher;
-    }
+    protected final UserService userService;
+    protected final OrganisationService organisationService;
+    protected final EventService eventPublisher;
+    protected final CaseHelper caseHelper;
 
     protected DynamicList getPartiesToList(CaseData caseData, String authorisation) {
         return getPartiesToListForC100OrFL401(caseData, populateBarristerFilter(caseData, authorisation));
     }
 
     protected boolean hasBarrister(PartyDetails partyDetails) {
-        return (partyDetails.getBarrister() != null && partyDetails.getBarrister().getBarristerId() != null);
+        return caseHelper.hasBarrister(partyDetails);
     }
 
     protected boolean partyHasSolicitorOrg(PartyDetails partyDetails) {

@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -31,7 +30,7 @@ public class CaseHelperTest {
     public void testAllocatedBarristerDetailsNotSet() {
         CaseData spyCaseData = spy(CaseData.builder().build());
         caseHelper.setAllocatedBarrister(null, spyCaseData, UUID.randomUUID());
-        verify(spyCaseData, never()).setAllocatedBarrister(any());
+        verify(spyCaseData).setAllocatedBarrister(null);
     }
 
     @Test
@@ -41,10 +40,23 @@ public class CaseHelperTest {
                                        .build());
         caseHelper.setAllocatedBarrister(PartyDetails.builder()
                                              .barrister(Barrister.builder()
+                                                            .barristerId(UUID.randomUUID().toString())
                                                             .build())
                                              .build(),
                                          spyCaseData,
                                          UUID.randomUUID());
         verify(spyCaseData).setAllocatedBarrister(any());
+    }
+
+    @Test
+    public void testAllocatedWhenBarristerNotPresent() {
+        CaseData spyCaseData = spy(CaseData.builder()
+                                       .allocatedBarrister(AllocatedBarrister.builder().build())
+                                       .build());
+        caseHelper.setAllocatedBarrister(PartyDetails.builder()
+                                             .build(),
+                                         spyCaseData,
+                                         UUID.randomUUID());
+        verify(spyCaseData).setAllocatedBarrister(null);
     }
 }

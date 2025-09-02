@@ -49,6 +49,7 @@ import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.barrister.BarristerRemoveService;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessClient;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
@@ -56,6 +57,7 @@ import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelec
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
+import uk.gov.hmcts.reform.prl.utils.CaseHelper;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.noticeofchange.NoticeOfChangePartiesConverter;
@@ -116,6 +118,8 @@ public class NoticeOfChangePartiesService {
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     private final ServiceOfApplicationService serviceOfApplicationService;
     private final CaseAssignmentService caseAssignmentService;
+    private final CaseHelper caseHelper;
+    private final BarristerRemoveService barristerRemoveService;
 
     public static final String REPRESENTATIVE_REMOVED_LABEL = "# Representative removed";
 
@@ -931,7 +935,10 @@ public class NoticeOfChangePartiesService {
             TypeOfNocEventEnum.removeLegalRepresentation.getDisplayedValue()
         );
         eventPublisher.publishEvent(noticeOfChangeEvent);
-
+        caseHelper.setAllocatedBarrister(oldPartyDetails.getValue(),
+                                         caseData,
+                                         oldPartyDetails.getId());
+        barristerRemoveService.notifyBarrister(caseData);
     }
 
     private List<Element<PartyDetails>> findSolicitorRepresentedParties(CaseData caseData, String authorisation) {

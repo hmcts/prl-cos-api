@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.UUID;
@@ -16,8 +17,8 @@ public class CaseHelper {
     public void setAllocatedBarrister(PartyDetails partyDetails,
                                       CaseData caseData,
                                       UUID partyId) {
-        if (partyDetails != null) {
-            caseData.setAllocatedBarrister(caseData.getAllocatedBarrister().toBuilder()
+        if (partyDetails != null && hasBarrister(partyDetails)) {
+            caseData.setAllocatedBarrister(AllocatedBarrister.builder()
                                                .partyList(
                                                    DynamicList.builder()
                                                        .value(DynamicListElement.builder()
@@ -30,10 +31,12 @@ public class CaseHelper {
                                                .barristerLastName(partyDetails.getBarrister().getBarristerLastName())
                                                .build());
         } else {
-            log.error("For case id {} : Party details not present. So,Failed to set allocated barrister for party id {}",
-                      caseData.getId(),
-                      partyId);
+            caseData.setAllocatedBarrister(null);
         }
+    }
+
+    public boolean hasBarrister(PartyDetails partyDetails) {
+        return (partyDetails.getBarrister() != null && partyDetails.getBarrister().getBarristerId() != null);
     }
 }
 
