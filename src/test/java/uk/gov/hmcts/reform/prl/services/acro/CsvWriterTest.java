@@ -39,12 +39,12 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 class CsvWriterTest {
 
     private static final String[] EXPECTED_CSV_HEADERS = {
-        "Case No.", "Court Name/Location", "Court Code", "Order Name", "Court Date DD/MM/YYYY", "Order Expiry Date",
+        "Case No.", "Court Name/Location", "Court Code", "Order Name", "Court Date", "Order Expiry Date",
         "Respondent Surname", "Respondent Forename(s)", "Respondent DOB", "Respondent 1st Line of Address",
         "Respondent 2nd Line of Address", "Respondent Postcode", "Respondent Phone", "Respondent Email",
         "Is Respondent Address Confidential", "Is Respondent Phone Confidential", "Is Respondent Email Confidential",
-        "Applicant Surname", "Applicant Forename(s)", "Applicant DOB", "Applicant First Line of Address",
-        "Applicant Second Line of Address", "Applicant Postcode", "Applicant Phone", "Applicant Safe Time to Call", "Applicant Email",
+        "Applicant Surname", "Applicant Forename(s)", "Applicant DOB", "Applicant 1st Line of Address",
+        "Applicant 2nd Line of Address", "Applicant Postcode", "Applicant Phone", "Applicant Safe Time to Call", "Applicant Email",
         "Is Applicant Address Confidential", "Is Applicant Phone Confidential", "Is Applicant Email Confidential", "Order File Name"
     };
 
