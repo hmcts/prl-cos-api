@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Barrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
@@ -60,6 +61,8 @@ class CaseAssignmentControllerTest {
     private AuthorisationService authorisationService;
     @Mock
     private PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+    @Mock
+    private ApplicationsTabService applicationsTabService;
 
     private CaseAssignmentController caseAssignmentController;
     private ObjectMapper objectMapper;
@@ -75,8 +78,10 @@ class CaseAssignmentControllerTest {
             objectMapper,
             organisationService,
             authorisationService,
-            partyLevelCaseFlagsService);
-        barrister = Barrister.builder()
+            partyLevelCaseFlagsService,
+            applicationsTabService);
+
+      barrister = Barrister.builder()
             .barristerEmail("barristerEmail@gmail.com")
             .barristerFirstName("barristerName")
             .barristerLastName("barristerLastName")
@@ -120,6 +125,7 @@ class CaseAssignmentControllerTest {
 
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(ALLOCATED_BARRISTER, allocatedBarrister);
+        caseData.put("caseTypeOfApplication", "C100");
 
         CaseDetails caseDetails = CaseDetails.builder()
             .id(1234L)
@@ -152,6 +158,8 @@ class CaseAssignmentControllerTest {
                                                    eq(userId.get()),
                                                    eq(barristerRole.get()),
                                                    isA(AllocatedBarrister.class));
+
+        verify(applicationsTabService).updateTab(isA(CaseData.class));
     }
 
     @Test
@@ -338,6 +346,7 @@ class CaseAssignmentControllerTest {
             .thenReturn(true);
 
         Map<String, Object> caseData = new HashMap<>();
+        caseData.put("caseTypeOfApplication", "FL401");
         caseData.put(ALLOCATED_BARRISTER, allocatedBarrister);
 
         CaseDetails caseDetails = CaseDetails.builder()
@@ -368,6 +377,7 @@ class CaseAssignmentControllerTest {
                                                             anyList());
         verify(caseAssignmentService).removeBarrister(isA(CaseData.class),
                                                    eq(selectedPartyId));
+        verify(applicationsTabService).updateTab(isA(CaseData.class));
     }
 
     @Test
