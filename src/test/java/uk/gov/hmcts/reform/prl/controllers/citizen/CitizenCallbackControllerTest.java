@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamPolicyUpgradeDetails;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenCaseSubmissionEmail;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeFileUploadService;
+import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenEmailService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -34,6 +35,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -75,6 +77,9 @@ public class CitizenCallbackControllerTest {
 
     @Mock
     private CitizenEmailService citizenEmailService;
+
+    @Mock
+    private MiamPolicyUpgradeService miamPolicyUpgradeService;
 
     @Mock
     private EventService eventService;
@@ -151,6 +156,7 @@ public class CitizenCallbackControllerTest {
         when(allTabsService.updateAllTabsIncludingConfTab(anyString())).thenReturn(callbackRequest.getCaseDetails());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(systemUserService.getSysUserToken()).thenReturn("sysToken");
+        when(miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(any(), any())).thenReturn(caseData);
         citizenCallbackController.updateCitizenApplication(authToken, callbackRequest);
 
         verify(allTabsService, times(1)).updateAllTabsIncludingConfTab(anyString());
