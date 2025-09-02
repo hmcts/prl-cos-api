@@ -7,9 +7,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -28,7 +27,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
-import uk.gov.hmcts.reform.prl.services.barrister.BarristerRemoveService;
 import uk.gov.hmcts.reform.prl.utils.CaseHelper;
 
 import java.time.LocalDateTime;
@@ -55,6 +53,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATED_BARRISTER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @ExtendWith(MockitoExtension.class)
@@ -68,20 +69,17 @@ class CaseAssignmentControllerTest {
     @Mock
     private CaseHelper caseHelper;
     @Mock
-    private BarristerRemoveService barristerRemoveService;
-    @Captor
-    ArgumentCaptor<Supplier<PartyDetails>> supplierPartyDetailsArgumentCaptor;
-    @Mock
     private ApplicationsTabService applicationsTabService;
 
     private CaseAssignmentController caseAssignmentController;
-    @Mock
+    @Spy
     private ObjectMapper objectMapper;
     private Barrister barrister;
     private AllocatedBarrister allocatedBarrister;
 
     @BeforeEach
     void setUp() {
+        objectMapper.findAndRegisterModules();
         caseAssignmentController =  new CaseAssignmentController(
             caseAssignmentService,
             objectMapper,
@@ -133,7 +131,7 @@ class CaseAssignmentControllerTest {
 
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put(ALLOCATED_BARRISTER, allocatedBarrister);
-        caseDataMap.put("caseTypeOfApplication", "C100");
+        caseDataMap.put(CASE_TYPE_OF_APPLICATION, C100_CASE_TYPE);
 
         CaseDetails caseDetails = CaseDetails.builder()
             .id(1234L)
@@ -145,9 +143,6 @@ class CaseAssignmentControllerTest {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
-
-        CaseData caseData = CaseData.builder().allocatedBarrister(allocatedBarrister).build();
-        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
 
         AboutToStartOrSubmitCallbackResponse response = caseAssignmentController.submitAddBarrister(
             "auth",
@@ -366,7 +361,7 @@ class CaseAssignmentControllerTest {
 
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put(ALLOCATED_BARRISTER, allocatedBarrister);
-        caseDataMap.put("caseTypeOfApplication", "FL401");
+        caseDataMap.put(CASE_TYPE_OF_APPLICATION, FL401_CASE_TYPE);
 
         CaseDetails caseDetails = CaseDetails.builder()
             .id(1234L)
@@ -386,9 +381,8 @@ class CaseAssignmentControllerTest {
                            .barristerLastName("barrister").build())
             .build();
 
-        CaseData caseData = CaseData.builder().allocatedBarrister(allocatedBarrister).build();
-        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(caseAssignmentService.getSelectedParty(caseData, allocatedBarrister.getPartyList().getValueCode()))
+        when(caseAssignmentService.getSelectedParty(isA(CaseData.class),
+                                                    eq(allocatedBarrister.getPartyList().getValueCode())))
             .thenReturn(partyDetails);
 
         AboutToStartOrSubmitCallbackResponse response = caseAssignmentController.submitRemoveBarrister(
