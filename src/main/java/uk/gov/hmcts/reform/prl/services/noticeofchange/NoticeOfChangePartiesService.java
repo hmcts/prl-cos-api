@@ -935,9 +935,13 @@ public class NoticeOfChangePartiesService {
             TypeOfNocEventEnum.removeLegalRepresentation.getDisplayedValue()
         );
         eventPublisher.publishEvent(noticeOfChangeEvent);
-        caseHelper.setAllocatedBarrister(oldPartyDetails.getValue(),
+        caseHelper.setAllocatedBarrister(Optional.ofNullable(oldPartyDetails)
+                                             .map(Element::getValue)
+                                             .orElseGet(newPartyDetails::getValue),
                                          caseData,
-                                         oldPartyDetails.getId());
+                                         Optional.ofNullable(oldPartyDetails)
+                                             .map(Element::getId)
+                                             .orElseGet(newPartyDetails::getId));
         barristerRemoveService.notifyBarrister(caseData);
     }
 
