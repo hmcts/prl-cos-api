@@ -23,16 +23,14 @@ import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseDetail;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroResponse;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CaseManagementLocation;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Bool;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Filter;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.request.LastModified;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Must;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Query;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.request.QueryParam;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Range;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Should;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.request.StateFilter;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Term;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.acro.Bool;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.acro.Filter;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.acro.LastModified;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.acro.Must;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.acro.Query;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.acro.QueryParam;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.acro.Range;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.acro.Term;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 
@@ -143,11 +141,14 @@ public class AcroCaseDataService {
             .lte(String.valueOf(endDateForSearch))
             .build();
 
-        List<Should> mustQuery = populateMustQuery(lastModified);
+
         Range range = Range.builder().lastModified(lastModified).build();
         Bool bool = Bool.builder()
             .filter(Filter.builder().range(range).build())
-            .must(Must.builder().stateFilter(StateFilter.builder().should(mustQuery).build()).build())
+            .must(List.of(
+                Must.builder().term(Term.builder().orderTypeId(NON_MOLESTATION_ORDER_FL_404_A).build()).build(),
+                Must.builder().range(Range.builder().dateCreated(lastModified).build()).build()
+            ))
             .build();
         Query query = Query.builder().bool(bool).build();
         return QueryParam.builder().query(query).dataToReturn(fetchFieldsRequiredForAcro()).build();
@@ -204,16 +205,6 @@ public class AcroCaseDataService {
             log.error("Error building JSON query: {}", e.getMessage());
             throw new RuntimeException("Failed to build search query", e);
         }
-    }
-
-    private List<Should> populateMustQuery(LastModified dateCreatedRange) {
-        List<Should> should = new ArrayList<>();
-        //should.add(Should.builder().match(Match.builder().orderType(NON_MOLESTATION).build()).build());
-        should.add(Should.builder().term(Term.builder().orderTypeId(NON_MOLESTATION_ORDER_FL_404_A).build()).build());
-        should.add(Should.builder().range(Range.builder().dateCreated(dateCreatedRange).build()).build());
-        //should.add(Should.builder().match(Match.builder().typeOfOrder(FINAL).build()).build());
-
-        return should;
     }
 
     private List<String> fetchFieldsRequiredForAcro() {

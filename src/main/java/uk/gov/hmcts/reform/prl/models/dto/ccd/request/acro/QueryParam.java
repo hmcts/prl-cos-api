@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.models.dto.ccd.request;
+package uk.gov.hmcts.reform.prl.models.dto.ccd.request.acro;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -14,14 +14,11 @@ import java.util.List;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder
-public class Bool {
-
-    private Filter filter;
-
-    private Must must;
-
-    private List<Should> should;
-
-    @JsonProperty("minimum_should_match")
-    public int minimumShouldMatch;
+public class QueryParam {
+    private Query query;
+    private String size;
+    private String from;
+    @JsonProperty("_source")
+    private List<String> dataToReturn;
 }
+

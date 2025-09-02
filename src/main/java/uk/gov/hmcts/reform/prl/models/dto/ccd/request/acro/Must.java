@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.models.dto.ccd.request;
+package uk.gov.hmcts.reform.prl.models.dto.ccd.request.acro;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
@@ -11,7 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder
-public class Should {
+public class Must {
 
-    private Match match;
+    private Range range;
+    private Term term;
 }
