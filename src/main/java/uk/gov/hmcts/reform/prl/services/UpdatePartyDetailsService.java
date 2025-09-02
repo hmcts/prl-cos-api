@@ -941,6 +941,37 @@ public class UpdatePartyDetailsService {
         return updatedCaseData;
     }
 
+    public List<String> validateUpdatePartyDetails(CallbackRequest callbackRequest) {
+        List<String> validationErrors = new ArrayList<>();
+        Map<String, Object> caseDataMapBefore = callbackRequest.getCaseDetailsBefore().getData();
+        Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+
+        CaseData caseDataBefore = objectMapper.convertValue(caseDataMapBefore, CaseData.class);
+        CaseData caseData = objectMapper.convertValue(caseDataMap, CaseData.class);
+
+        if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
+            List<Element<PartyDetails>> removeParty = new ArrayList<>();
+            removeParty.addAll(caseDataBefore.getApplicants().stream()
+                .filter(applicant -> !caseData.getApplicants().contains(applicant))
+                .toList());
+
+            removeParty.addAll(caseDataBefore.getRespondents().stream()
+                .filter(respondent -> !caseData.getRespondents().contains(respondent))
+                .toList());
+
+            if (!removeParty.isEmpty()) {
+                PartyDetails partyDetails = removeParty.getFirst().getValue();
+                if (partyDetails.getBarrister() != null && partyDetails.getBarrister().getBarristerEmail() != null) {
+                    validationErrors.add("Barrister is associated with the party,"
+                                             + " please remove the barrister first then remove the party");
+                }
+            }
+        }
+
+
+        return validationErrors;
+    }
+
     private void findAndListRefugeDocsForC100(CallbackRequest callbackRequest, CaseData caseData, Map<String, Object> updatedCaseData) {
         CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
         boolean eligibleForDocumentProcessing
