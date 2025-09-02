@@ -81,7 +81,7 @@ class CaseAssignmentControllerTest {
             partyLevelCaseFlagsService,
             applicationsTabService);
 
-      barrister = Barrister.builder()
+        barrister = Barrister.builder()
             .barristerEmail("barristerEmail@gmail.com")
             .barristerFirstName("barristerName")
             .barristerLastName("barristerLastName")
