@@ -87,7 +87,7 @@ public class BarristerController extends AbstractCallbackController {
                 barristerAddService.notifyBarrister(caseData);
             }
         } else {
-            throw (new InvalidClientException(INVALID_CLIENT));
+            throw new InvalidClientException(INVALID_CLIENT);
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder()
@@ -119,7 +119,7 @@ public class BarristerController extends AbstractCallbackController {
                 builder = AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).data(caseDataUpdated);
             return builder.build();
         } else {
-            throw (new InvalidClientException(INVALID_CLIENT));
+            throw new InvalidClientException(INVALID_CLIENT);
         }
     }
 }
