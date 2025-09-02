@@ -17,6 +17,7 @@ import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
@@ -28,6 +29,7 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -116,7 +118,7 @@ public class CaseAssignmentControllerIntegrationTest {
             .when(caseAssignmentService).validateRemoveRequest(any(), any(), any());
 
         doNothing()
-            .when(caseAssignmentService).removeBarrister(any(), any());
+            .when(caseAssignmentService).removeBarrister(isA(CaseData.class), anyString());
 
         mockMvc.perform(
                 post(url)
@@ -129,6 +131,6 @@ public class CaseAssignmentControllerIntegrationTest {
             .andExpect(jsonPath("$.errors").isEmpty())
             .andReturn();
         verify(caseAssignmentService).validateRemoveRequest(any(), any(), any());
-        verify(caseAssignmentService).removeBarrister(any(), any());
+        verify(caseAssignmentService).removeBarrister(isA(CaseData.class), anyString());
     }
 }
