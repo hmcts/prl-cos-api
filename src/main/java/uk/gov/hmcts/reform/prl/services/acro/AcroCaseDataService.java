@@ -84,9 +84,9 @@ public class AcroCaseDataService {
             log.info("Invoking search cases");
             SearchResult searchResult = coreCaseDataApi.searchCases(
                 userToken,
-                searchString,
                 s2sToken,
-                searchCaseTypeId
+                searchCaseTypeId,
+                searchString
             );
             acroResponse = objectMapper.convertValue(
                 searchResult,
