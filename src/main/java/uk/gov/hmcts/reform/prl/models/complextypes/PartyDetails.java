@@ -173,8 +173,8 @@ public class PartyDetails {
 
     @JsonIgnore
     public String getBarristerFullNameForCaseFlags() {
-        if (getBarrister() != null && !StringUtils.isEmpty(getBarrister().getBarristerFirstName()) &&
-            !StringUtils.isEmpty(getBarrister().getBarristerLastName())) {
+        if (getBarrister() != null && !StringUtils.isEmpty(getBarrister().getBarristerFirstName())
+            && !StringUtils.isEmpty(getBarrister().getBarristerLastName())) {
             return getBarrister().getBarristerFullName();
         } else {
             return StringUtils.EMPTY;
