@@ -71,7 +71,7 @@ public class OrderDetails {
 
     private YesOrNo isAutoHearingReqPending;
 
-    private final FinalisationJudgeDetails finalisationJudgeDetails;
+    private final FinalisationJudgeDetails tierOfJudiciaryType;
 
     //PRL-4225 - serve order & additional docs to other person
     @JsonProperty("bulkPrintOrderDetails")

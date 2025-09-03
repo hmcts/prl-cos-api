@@ -2336,13 +2336,10 @@ public class ManageOrderService {
             }
         }
 
-        //        if (caseData.getAllocatedJudge() != null && caseData.getAllocatedJudge().getTierOfJudge() != null) {
-        //            orderDetails = orderDetails.toBuilder().finalisationJudgeDetails(
-        //                new FinalisationJudgeDetails(caseData.getAllocatedJudge().getTierOfJudge())).build();
-        //        }
-
-        orderDetails = orderDetails.toBuilder().finalisationJudgeDetails(
-            new FinalisationJudgeDetails("Circuit Judge")).build();
+        if (caseData.getAllocatedJudge() != null && caseData.getAllocatedJudge().getTierOfJudge() != null) {
+            orderDetails = orderDetails.toBuilder().tierOfJudiciaryType(
+                new FinalisationJudgeDetails(caseData.getAllocatedJudge().getTierOfJudiciary())).build();
+        }
 
         UserDetails userDetails = userService.getUserDetails(authorisation);
 
