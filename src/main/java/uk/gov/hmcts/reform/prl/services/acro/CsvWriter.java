@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseData;
@@ -14,9 +15,12 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,6 +33,9 @@ public class CsvWriter {
 
     private static final FileAttribute<Set<PosixFilePermission>> ATTRIBUTE = PosixFilePermissions
         .asFileAttribute(PosixFilePermissions.fromString("rwx------"));
+
+    @Value("${acro.output-directory}")
+    private String outputDirectory;
 
     public enum CsvColumn {
         CASE_NUMBER("Case No.", "id"),
@@ -82,68 +89,88 @@ public class CsvWriter {
     private static final CsvColumn[] COLUMNS = CsvColumn.values();
 
     /**
-     * Writes case data to a CSV file with configurable confidential data handling.
+     * Creates a new CSV file with headers in the configured output directory.
+     * This should be called first before appending data rows.
      *
-     * @param ccdOrderData the case data to write
-     * @param confidentialAllowed toggle to include confidential data or replace with "-"
-     * @return the created CSV file
+     * @return the created CSV file with headers
      * @throws IOException if file creation fails
      */
-    public File writeCcdOrderDataToCsv(AcroCaseData ccdOrderData, boolean confidentialAllowed) throws IOException {
-        Path path = Files.createTempFile("AcroReport", ".csv", ATTRIBUTE);
-        File file = path.toFile();
+    public File createCsvFileWithHeaders() throws IOException {
+        File csvFile = createCsvFile();
         String[] headers = Arrays.stream(COLUMNS).map(CsvColumn::getHeader).toArray(String[]::new);
         CSVFormat csvFileHeader = CSVFormat.DEFAULT.builder().setHeader(headers).build();
 
-        try (FileWriter fileWriter = new FileWriter(file);
+        try (FileWriter fileWriter = new FileWriter(csvFile);
              CSVPrinter printer = new CSVPrinter(fileWriter, csvFileHeader)) {
-            List<String> record = new ArrayList<>();
-            for (CsvColumn column : COLUMNS) {
-                Object value = extractPropertyValues(ccdOrderData, column.getProperty());
-
-                if (!confidentialAllowed && isConfidentialField(ccdOrderData, column)) {
-                    value = "-";
-                }
-
-                if (value == null || value.toString().isEmpty()) {
-                    log.warn("Missing value for CSV column '{}' (property '{}')", column.getHeader(), column.getProperty());
-                }
-                record.add(value != null ? value.toString() : "");
-            }
-            printer.printRecord(record);
+            log.info("Created CSV file with headers: {}", csvFile.getAbsolutePath());
         }
-        return file;
+        return csvFile;
     }
 
     /**
-     * Writes a list of case data to a CSV file with configurable confidential data handling.
+     * Creates CSV row data for a single case.
+     * Returns a list of strings that can be written to a CSV file by another service.
      *
-     * @param cases the list of case data to write
+     * @param ccdOrderData the case data to convert to CSV row
      * @param confidentialAllowed toggle to include confidential data or replace with "-"
-     * @return the created CSV file
-     * @throws IOException if file creation fails
+     * @param filename the filename to be added to the Order File Name column
+     * @return list of strings representing the CSV row data
      */
-    public File writeCcdOrderDataToCsv(List<AcroCaseData> cases, boolean confidentialAllowed) throws IOException {
-        Path path = Files.createTempFile("AcroReport", ".csv", ATTRIBUTE);
-        File file = path.toFile();
-        String[] headers = Arrays.stream(COLUMNS).map(CsvColumn::getHeader).toArray(String[]::new);
-        CSVFormat csvFileHeader = CSVFormat.DEFAULT.builder().setHeader(headers).build();
+    public List<String> createCsvRowData(AcroCaseData ccdOrderData, boolean confidentialAllowed, String filename) {
+        List<String> record = new ArrayList<>();
+        for (CsvColumn column : COLUMNS) {
+            Object value;
 
-        try (FileWriter fileWriter = new FileWriter(file);
-             CSVPrinter printer = new CSVPrinter(fileWriter, csvFileHeader)) {
-            for (AcroCaseData ccdOrderData : cases) {
-                List<String> record = new ArrayList<>();
-                for (CsvColumn column : COLUMNS) {
-                    Object value = extractPropertyValues(ccdOrderData, column.getProperty());
-                    if (!confidentialAllowed && isConfidentialField(ccdOrderData, column)) {
-                        value = "-";
-                    }
-                    record.add(value != null ? value.toString() : "");
-                }
-                printer.printRecord(record);
+            if (column == CsvColumn.PDF_IDENTIFIER) {
+                value = filename != null ? filename : "";
+            } else {
+                value = extractPropertyValues(ccdOrderData, column.getProperty());
             }
+
+            if (!confidentialAllowed && isConfidentialField(ccdOrderData, column)) {
+                value = "-";
+            }
+
+            if (value == null || value.toString().isEmpty()) {
+                log.warn("Missing value for CSV column '{}' (property '{}')", column.getHeader(), column.getProperty());
+            }
+            record.add(value != null ? value.toString() : "");
         }
-        return file;
+        return record;
+    }
+
+    /**
+     * Gets the CSV headers as an array of strings.
+     * This can be used by other services to create CSV files with proper headers.
+     *
+     * @return array of CSV header strings
+     */
+    public String[] getCsvHeaders() {
+        return Arrays.stream(COLUMNS).map(CsvColumn::getHeader).toArray(String[]::new);
+    }
+
+
+    /**
+     * Creates a CSV file in the configured output directory with a date-stamped filename.
+     *
+     * @return the created CSV file
+     * @throws IOException if directory creation or file creation fails
+     */
+    private File createCsvFile() throws IOException {
+        Path outputPath = Paths.get(outputDirectory);
+        if (!Files.exists(outputPath)) {
+            Files.createDirectories(outputPath);
+        }
+
+        return new File(outputDirectory, generateCsvFilename());
+    }
+
+    private String generateCsvFilename() {
+        LocalDate currentDate = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+        String formattedDate = currentDate.format(formatter);
+
+        return "manifest-" + formattedDate + ".csv";
     }
 
     private boolean isConfidentialField(AcroCaseData caseData, CsvColumn column) {
