@@ -49,6 +49,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATED_BARRISTER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @ExtendWith(MockitoExtension.class)
@@ -120,7 +123,7 @@ class CaseAssignmentControllerTest {
 
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put(ALLOCATED_BARRISTER, allocatedBarrister);
-        caseDataMap.put("caseTypeOfApplication", "C100");
+        caseDataMap.put(CASE_TYPE_OF_APPLICATION, C100_CASE_TYPE);
 
         CaseDetails caseDetails = CaseDetails.builder()
             .id(1234L)
@@ -133,7 +136,7 @@ class CaseAssignmentControllerTest {
             .caseDetails(caseDetails)
             .build();
 
-        CaseData caseData = CaseData.builder().allocatedBarrister(allocatedBarrister).build();
+        CaseData caseData = CaseData.builder().caseTypeOfApplication(C100_CASE_TYPE).allocatedBarrister(allocatedBarrister).build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
 
         AboutToStartOrSubmitCallbackResponse response = caseAssignmentController.submitAddBarrister(
@@ -352,7 +355,7 @@ class CaseAssignmentControllerTest {
             .thenReturn(true);
 
         Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("caseTypeOfApplication", "FL401");
+        caseDataMap.put(CASE_TYPE_OF_APPLICATION, FL401_CASE_TYPE);
         caseDataMap.put(ALLOCATED_BARRISTER, allocatedBarrister);
 
         CaseDetails caseDetails = CaseDetails.builder()
@@ -373,7 +376,7 @@ class CaseAssignmentControllerTest {
                            .barristerLastName("barrister").build())
             .build();
 
-        CaseData caseData = CaseData.builder().allocatedBarrister(allocatedBarrister).build();
+        CaseData caseData = CaseData.builder().caseTypeOfApplication(FL401_CASE_TYPE).allocatedBarrister(allocatedBarrister).build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         when(caseAssignmentService.getSelectedParty(caseData, allocatedBarrister.getPartyList().getValueCode()))
             .thenReturn(partyDetails);
