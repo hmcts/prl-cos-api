@@ -68,9 +68,12 @@ public class MiamPolicyUpgradeFileUploadService {
                 && ObjectUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuDocFromDisputeResolutionProvider())
                 && !caseData.getMiamPolicyUpgradeDetails().getMpuDocFromDisputeResolutionProvider().getDocumentFileName().startsWith(
                 CONFIDENTIAL)) {
+                Document originalMpuDocFromResolutionProvider = caseData.getMiamPolicyUpgradeDetails()
+                    .getMpuDocFromDisputeResolutionProvider();
+                log.info("Renaming mpu document from resolution provider to confidential with id: {}",
+                         DocumentUtils.getDocumentId(originalMpuDocFromResolutionProvider.getDocumentUrl()));
                 Document mpuDocFromDisputeResolutionProvider = manageDocumentsService
-                    .renameAndReuploadFileToBeConfidential(caseData.getMiamPolicyUpgradeDetails()
-                                                               .getMpuDocFromDisputeResolutionProvider());
+                    .renameAndReuploadFileToBeConfidential(originalMpuDocFromResolutionProvider);
                 caseData = caseData.toBuilder()
                     .miamPolicyUpgradeDetails(caseData.getMiamPolicyUpgradeDetails()
                                                   .toBuilder()
@@ -83,8 +86,11 @@ public class MiamPolicyUpgradeFileUploadService {
                 && ObjectUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuCertificateByMediator())
                 && !caseData.getMiamPolicyUpgradeDetails().getMpuCertificateByMediator().getDocumentFileName().startsWith(
                 CONFIDENTIAL)) {
+                Document originalMediatorDoc = caseData.getMiamPolicyUpgradeDetails().getMpuCertificateByMediator();
+                log.info("Renaming mpu certificate from mediator to confidential with id: {}",
+                         DocumentUtils.getDocumentId(originalMediatorDoc.getDocumentUrl()));
                 Document mpuCertificateByMediator = manageDocumentsService.renameAndReuploadFileToBeConfidential(
-                    caseData.getMiamPolicyUpgradeDetails().getMpuCertificateByMediator()
+                    originalMediatorDoc
                 );
                 caseData = caseData.toBuilder()
                     .miamPolicyUpgradeDetails(caseData.getMiamPolicyUpgradeDetails()
@@ -106,6 +112,8 @@ public class MiamPolicyUpgradeFileUploadService {
                 .stream().forEach(domesticAbuseEvidenceDocument -> {
                     Document domesticAbuseDocument = domesticAbuseEvidenceDocument.getValue().getDomesticAbuseDocument();
                     if (!domesticAbuseDocument.getDocumentFileName().startsWith(CONFIDENTIAL)) {
+                        log.info("Renaming domestic abuse document to confidential with id: {}",
+                                 DocumentUtils.getDocumentId(domesticAbuseDocument.getDocumentUrl()));
                         domesticAbuseDocument = manageDocumentsService.renameAndReuploadFileToBeConfidential(
                             domesticAbuseDocument);
                     }
