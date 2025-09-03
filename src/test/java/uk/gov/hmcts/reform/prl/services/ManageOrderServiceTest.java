@@ -34,7 +34,6 @@ import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.dio.DioBeforeAEnum;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForCourtAdminOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
-import uk.gov.hmcts.reform.prl.enums.gatekeeping.TierOfJudiciaryEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
@@ -6615,10 +6614,6 @@ public class ManageOrderServiceTest {
             .build();
 
 
-        AllocatedJudge allocatedJudge = AllocatedJudge.builder()
-            .tierOfJudiciary(TierOfJudiciaryEnum.circuitJudge)
-            .build();
-
         List<DynamicMultiselectListElement> elements = new ArrayList<>();
         DynamicMultiselectListElement element = DynamicMultiselectListElement.builder()
             .code("1234")
@@ -6626,6 +6621,7 @@ public class ManageOrderServiceTest {
         elements.add(element);
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassCymruServedOptions(No)
+            .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
             .childArrangementsOrdersToIssue(List.of(childArrangementsOrder,prohibitedStepsOrder))
             .selectChildArrangementsOrder(ChildArrangementOrderTypeEnum.liveWithOrder)
             .serveOrderDynamicList(dynamicMultiSelectList)
@@ -6661,7 +6657,8 @@ public class ManageOrderServiceTest {
                                                                                           .builder()
                                                                                           .tierOfJudiciaryType(
                                                                                               new FinalisationJudgeDetails(
-                                                                                                  allocatedJudge.getTierOfJudiciary()))
+                                                                                                 manageOrders.getJudgeOrMagistrateTitle()
+                                                                                                  ))
                                                                                           .orderDocument(Document
                                                                                                              .builder()
                                                                                                              .build())
@@ -6692,7 +6689,6 @@ public class ManageOrderServiceTest {
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
             .manageOrders(manageOrders)
-            .allocatedJudge(allocatedJudge)
             .build();
 
 
@@ -6702,6 +6698,6 @@ public class ManageOrderServiceTest {
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
         assertNotNull(manageOrderService.serveOrder(caseData,orderList));
-        assertEquals(caseData.getAllocatedJudge().getTierOfJudiciary(), orders.getValue().getTierOfJudiciaryType().getTierOfJudiciary());
+        assertEquals(caseData.getManageOrders().getJudgeOrMagistrateTitle(), orders.getValue().getTierOfJudiciaryType().getJudgeOrMagistrateTitle());
     }
 }

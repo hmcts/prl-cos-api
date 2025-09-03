@@ -2336,10 +2336,10 @@ public class ManageOrderService {
             }
         }
 
-        if (caseData.getAllocatedJudge() != null && caseData.getAllocatedJudge().getTierOfJudge() != null) {
-            orderDetails = orderDetails.toBuilder().tierOfJudiciaryType(
-                new FinalisationJudgeDetails(caseData.getAllocatedJudge().getTierOfJudiciary())).build();
-        }
+        // if (caseData.getAllocatedJudge() != null && caseData.getAllocatedJudge().getTierOfJudge() != null) {
+        //     orderDetails = orderDetails.toBuilder().tierOfJudiciaryType(
+        //         new FinalisationJudgeDetails(caseData.getAllocatedJudge().getTierOfJudiciary())).build();
+        // }
 
         UserDetails userDetails = userService.getUserDetails(authorisation);
 
@@ -2388,6 +2388,7 @@ public class ManageOrderService {
                            .c21OrderOptions(caseData.getManageOrders().getC21OrderOptions())
                            .selectChildArrangementsOrder(caseData.getManageOrders().getSelectChildArrangementsOrder())
                            .childArrangementsOrdersToIssue(caseData.getManageOrders().getChildArrangementsOrdersToIssue())
+                           .tierOfJudiciaryType(new FinalisationJudgeDetails(caseData.getManageOrders().getJudgeOrMagistrateTitle()))
                            .childOption(getChildOption(caseData))
                            .isOrderUploaded(No)
                            //PRL-6046 - persist FL404 data
