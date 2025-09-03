@@ -108,7 +108,8 @@ public class MiamPolicyUpgradeFileUploadServiceTest {
                     .builder()
                     .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
                     .mpuPreviousMiamAttendanceReason(miamPolicyUpgradePreviousAttendance_Value_1)
-                    .mpuDocFromDisputeResolutionProvider(Document.builder().documentFileName("test").build())
+                    .mpuDocFromDisputeResolutionProvider(
+                        Document.builder().documentFileName("test").documentUrl(DOCUMENT_ID).build())
                     .build())
                 .build(),
             "4f854707-91bf-4fa0-98ec-893ae0025cae"));
@@ -164,7 +165,8 @@ public class MiamPolicyUpgradeFileUploadServiceTest {
                     .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
                     .mpuPreviousMiamAttendanceReason(miamPolicyUpgradePreviousAttendance_Value_2)
                     .mpuTypeOfPreviousMiamAttendanceEvidence(TypeOfMiamAttendanceEvidenceEnum.miamCertificate)
-                    .mpuCertificateByMediator(Document.builder().documentFileName("test").build())
+                    .mpuCertificateByMediator(
+                        Document.builder().documentFileName("test").documentUrl(DOCUMENT_ID).build())
                     .build())
                 .build(),
             "4f854707-91bf-4fa0-98ec-893ae0025cae"));
@@ -222,7 +224,8 @@ public class MiamPolicyUpgradeFileUploadServiceTest {
                     .mpuDomesticAbuseEvidenceDocument(List.of(Element
                         .<DomesticAbuseEvidenceDocument>builder().value(DomesticAbuseEvidenceDocument
                             .builder()
-                            .domesticAbuseDocument(Document.builder().documentFileName("test").build())
+                            .domesticAbuseDocument(
+                                Document.builder().documentFileName("test").documentUrl(DOCUMENT_ID).build())
                             .build())
                         .build()))
                     .build())
