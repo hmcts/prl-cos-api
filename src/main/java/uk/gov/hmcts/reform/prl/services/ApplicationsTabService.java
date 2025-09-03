@@ -117,9 +117,12 @@ import java.util.stream.Collectors;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_APPLICANT_TABLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENT_TABLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_AND_CAFCASS_OFFICER_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANT_TABLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENT_TABLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper.COMMA_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -141,7 +144,7 @@ public class ApplicationsTabService implements TabService {
         Map<String, Object> applicationTab = new HashMap<>();
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             applicationTab.put("hearingUrgencyTable", getHearingUrgencyTable(caseData));
-            applicationTab.put("applicantTable", getApplicantsTable(caseData));
+            applicationTab.put(C100_APPLICANT_TABLE, getApplicantsTable(caseData));
             applicationTab.put(C100_RESPONDENT_TABLE, getRespondentsTable(caseData));
             applicationTab.put("declarationTable", getDeclarationTable(caseData));
             applicationTab.put("typeOfApplicationTable", getTypeOfApplicationTable(caseData));
@@ -186,9 +189,9 @@ public class ApplicationsTabService implements TabService {
         } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             applicationTab.put("fl401TypeOfApplicationTable", getFL401TypeOfApplicationTable(caseData));
             applicationTab.put("withoutNoticeOrderTable", getWithoutNoticeOrder(caseData));
-            applicationTab.put("fl401ApplicantTable", getFl401ApplicantsTable(caseData));
+            applicationTab.put(FL401_APPLICANT_TABLE, getFl401ApplicantsTable(caseData));
             applicationTab.put("fl401SolicitorDetailsTable", getFl401ApplicantsSolictorDetailsTable(caseData));
-            applicationTab.put("fl401RespondentTable", getFl401RespondentTable(caseData));
+            applicationTab.put(FL401_RESPONDENT_TABLE, getFl401RespondentTable(caseData));
             Map<String,Object> applicantFamilyMap = getApplicantsFamilyDetails(caseData);
             applicationTab.put("applicantFamilyTable", applicantFamilyMap);
             if (("Yes").equals(applicantFamilyMap.get("doesApplicantHaveChildren"))) {

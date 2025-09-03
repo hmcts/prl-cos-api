@@ -5,9 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
@@ -18,6 +20,7 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
@@ -46,6 +49,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListEleme
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.Barrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.DecisionRequest;
@@ -76,6 +80,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -84,10 +89,12 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -157,8 +164,13 @@ public class NoticeOfChangePartiesServiceTest {
     private Time time;
     @Mock
     PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+    @Mock
+    private CaseAssignmentService caseAssignmentService;
 
     private StartEventResponse startEventResponse;
+
+    @Captor
+    private ArgumentCaptor<CaseData> caseDataArgumentCaptor;
 
     @Before
     public void setUp() {
@@ -292,9 +304,21 @@ public class NoticeOfChangePartiesServiceTest {
                                                                     .forename("solicitorResp")
                                                                     .surname("test").build());
         when(tokenGenerator.generate()).thenReturn("s2sToken");
-        noticeOfChangePartiesService.applyDecision(CallbackRequest.builder().build(), "testAuth");
-        verify(assignCaseAccessClient, times(1)).applyDecision(Mockito.anyString(), Mockito.anyString(), Mockito.any(
+        when(assignCaseAccessClient.applyDecision(
+            anyString(), anyString(), any(
+            DecisionRequest.class))).thenReturn(
+                AboutToStartOrSubmitCallbackResponse.builder().data(new HashMap<>()).build()
+        );
+
+        noticeOfChangePartiesService.applyDecision(CallbackRequest.builder()
+                                                       .caseDetails(CaseDetails.builder()
+                                                                        .build())
+                                                       .build(),
+                                                   "testAuth");
+        verify(assignCaseAccessClient, times(1)).applyDecision(
+            anyString(), anyString(), any(
             DecisionRequest.class));
+        verify(caseAssignmentService).removeAmBarristerIfPresent(any(CaseDetails.class));
     }
 
     @Test
@@ -309,7 +333,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .respondents(respondents)
             .changeOrganisationRequestField(ChangeOrganisationRequest.builder()
                                                 .createdBy("test_solicitor@mailinator.com")
@@ -361,14 +385,16 @@ public class NoticeOfChangePartiesServiceTest {
             .build();
 
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
+        verify(caseAssignmentService).removePartyBarristerIfPresent(caseData,
+                                                                    changeOrganisationRequest);
         verify(tabService, times(1)).updatePartyDetailsForNoc(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.any(StartEventResponse.class),
-            Mockito.any(EventRequestData.class),
-            Mockito.any(CaseData.class)
+            anyString(),
+            anyString(),
+            any(StartEventResponse.class),
+            any(EventRequestData.class),
+            any(CaseData.class)
         );
-        verify(eventPublisher, times(1)).publishEvent(Mockito.any(NoticeOfChangeEvent.class));
+        verify(eventPublisher, times(1)).publishEvent(any(NoticeOfChangeEvent.class));
     }
 
     @Test
@@ -399,7 +425,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .respondents(respondents)
             .changeOrganisationRequestField(ChangeOrganisationRequest.builder()
                                                 .createdBy("test_solicitor@mailinator.com")
@@ -452,13 +478,13 @@ public class NoticeOfChangePartiesServiceTest {
 
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
         verify(tabService, times(1)).updatePartyDetailsForNoc(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.any(StartEventResponse.class),
-            Mockito.any(EventRequestData.class),
-            Mockito.any(CaseData.class)
+            anyString(),
+            anyString(),
+            any(StartEventResponse.class),
+            any(EventRequestData.class),
+            any(CaseData.class)
         );
-        verify(eventPublisher, times(1)).publishEvent(Mockito.any(NoticeOfChangeEvent.class));
+        verify(eventPublisher, times(1)).publishEvent(any(NoticeOfChangeEvent.class));
     }
 
 
@@ -474,7 +500,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(applicants)
             .changeOrganisationRequestField(ChangeOrganisationRequest.builder()
                                                 .createdBy("test_solicitor@mailinator.com")
@@ -526,13 +552,13 @@ public class NoticeOfChangePartiesServiceTest {
 
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
         verify(tabService, times(1)).updatePartyDetailsForNoc(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.any(StartEventResponse.class),
-            Mockito.any(EventRequestData.class),
-            Mockito.any(CaseData.class)
+            anyString(),
+            anyString(),
+            any(StartEventResponse.class),
+            any(EventRequestData.class),
+            any(CaseData.class)
         );
-        verify(eventPublisher, times(1)).publishEvent(Mockito.any(NoticeOfChangeEvent.class));
+        verify(eventPublisher, times(1)).publishEvent(any(NoticeOfChangeEvent.class));
     }
 
     @Test
@@ -543,7 +569,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(applicants)
             .changeOrganisationRequestField(ChangeOrganisationRequest.builder()
                                                 .createdBy("test_solicitor@mailinator.com")
@@ -590,11 +616,11 @@ public class NoticeOfChangePartiesServiceTest {
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
 
         verify(tabService, times(1)).updatePartyDetailsForNoc(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.any(StartEventResponse.class),
-            Mockito.any(EventRequestData.class),
-            Mockito.any(CaseData.class)
+            anyString(),
+            anyString(),
+            any(StartEventResponse.class),
+            any(EventRequestData.class),
+            any(CaseData.class)
         );
     }
 
@@ -666,13 +692,13 @@ public class NoticeOfChangePartiesServiceTest {
             .build();
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
         verify(tabService, times(1)).updatePartyDetailsForNoc(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.any(StartEventResponse.class),
-            Mockito.any(EventRequestData.class),
-            Mockito.any(CaseData.class)
+            anyString(),
+            anyString(),
+            any(StartEventResponse.class),
+            any(EventRequestData.class),
+            any(CaseData.class)
         );
-        verify(eventPublisher, times(1)).publishEvent(Mockito.any(NoticeOfChangeEvent.class));
+        verify(eventPublisher, times(1)).publishEvent(any(NoticeOfChangeEvent.class));
     }
 
     @Test
@@ -741,13 +767,13 @@ public class NoticeOfChangePartiesServiceTest {
 
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
         verify(tabService, times(1)).updatePartyDetailsForNoc(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.any(StartEventResponse.class),
-            Mockito.any(EventRequestData.class),
-            Mockito.any(CaseData.class)
+            anyString(),
+            anyString(),
+            any(StartEventResponse.class),
+            any(EventRequestData.class),
+            any(CaseData.class)
         );
-        verify(eventPublisher, times(1)).publishEvent(Mockito.any(NoticeOfChangeEvent.class));
+        verify(eventPublisher, times(1)).publishEvent(any(NoticeOfChangeEvent.class));
     }
 
     @Test
@@ -766,7 +792,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseData newRepresentedParty = CaseData.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .respondents(respondentsNoRep)
             .changeOrganisationRequestField(ChangeOrganisationRequest.builder()
                                                 .createdBy("test_solicitor@mailinator.com")
@@ -784,7 +810,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseData oldRepresentedParty = CaseData.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .respondents(respondentRep)
             .changeOrganisationRequestField(ChangeOrganisationRequest.builder()
                                                 .createdBy("test_solicitor@mailinator.com")
@@ -824,7 +850,7 @@ public class NoticeOfChangePartiesServiceTest {
             .build();
 
         noticeOfChangePartiesService.updateLegalRepresentation(callbackRequest, "testAuth", newRepresentedParty);
-        verify(assignCaseAccessClient, times(1)).applyDecision(Mockito.any(), Mockito.any(), Mockito.any());
+        verify(assignCaseAccessClient, times(1)).applyDecision(any(), any(), any());
     }
 
     @Test
@@ -841,7 +867,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(applicant)
             .solStopRepChooseParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
                 dynamicListElement)).build())
@@ -862,6 +888,7 @@ public class NoticeOfChangePartiesServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn("");
         when(assignCaseAccessClient.applyDecision(anyString(), anyString(), any(DecisionRequest.class))).thenReturn(
             AboutToStartOrSubmitCallbackResponse.builder().data(caseData.toMap(realObjectMapper)).build());
+
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
@@ -872,7 +899,9 @@ public class NoticeOfChangePartiesServiceTest {
             .caseDetailsBefore(caseDetails)
             .build();
         noticeOfChangePartiesService.aboutToSubmitStopRepresenting("testAuth", callbackRequest);
-        verify(assignCaseAccessClient, times(1)).applyDecision(Mockito.any(), Mockito.any(), Mockito.any());
+        verify(assignCaseAccessClient, times(1)).applyDecision(any(), any(), any());
+        verify(caseAssignmentService).removeAmBarristerCaseRole(isA(CaseData.class),
+                                                                ArgumentMatchers.<Map<Optional<SolicitorRole>, Element<PartyDetails>>>any());
     }
 
     @Test
@@ -889,7 +918,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .respondents(respondent)
             .solStopRepChooseParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
                 dynamicListElement)).build())
@@ -910,6 +939,7 @@ public class NoticeOfChangePartiesServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn("");
         when(assignCaseAccessClient.applyDecision(anyString(), anyString(), any(DecisionRequest.class))).thenReturn(
             AboutToStartOrSubmitCallbackResponse.builder().data(caseData.toMap(realObjectMapper)).build());
+
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
@@ -920,7 +950,9 @@ public class NoticeOfChangePartiesServiceTest {
             .caseDetailsBefore(caseDetails)
             .build();
         noticeOfChangePartiesService.aboutToSubmitStopRepresenting("testAuth", callbackRequest);
-        verify(assignCaseAccessClient, times(1)).applyDecision(Mockito.any(), Mockito.any(), Mockito.any());
+        verify(assignCaseAccessClient, times(1)).applyDecision(any(), any(), any());
+        verify(caseAssignmentService).removeAmBarristerCaseRole(isA(CaseData.class),
+                                                                ArgumentMatchers.<Map<Optional<SolicitorRole>, Element<PartyDetails>>>any());
     }
 
     @Test
@@ -956,6 +988,7 @@ public class NoticeOfChangePartiesServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn("");
         when(assignCaseAccessClient.applyDecision(anyString(), anyString(), any(DecisionRequest.class))).thenReturn(
             AboutToStartOrSubmitCallbackResponse.builder().data(caseData.toMap(realObjectMapper)).build());
+
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
@@ -966,7 +999,9 @@ public class NoticeOfChangePartiesServiceTest {
             .caseDetailsBefore(caseDetails)
             .build();
         noticeOfChangePartiesService.aboutToSubmitStopRepresenting("testAuth", callbackRequest);
-        verify(assignCaseAccessClient, times(1)).applyDecision(Mockito.any(), Mockito.any(), Mockito.any());
+        verify(assignCaseAccessClient, times(1)).applyDecision(any(), any(), any());
+        verify(caseAssignmentService).removeAmBarristerCaseRole(isA(CaseData.class),
+                                                                ArgumentMatchers.<Map<Optional<SolicitorRole>, Element<PartyDetails>>>any());
     }
 
     @Test
@@ -1001,6 +1036,7 @@ public class NoticeOfChangePartiesServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn("");
         when(assignCaseAccessClient.applyDecision(anyString(), anyString(), any(DecisionRequest.class))).thenReturn(
             AboutToStartOrSubmitCallbackResponse.builder().data(caseData.toMap(realObjectMapper)).build());
+
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
@@ -1011,7 +1047,9 @@ public class NoticeOfChangePartiesServiceTest {
             .caseDetailsBefore(caseDetails)
             .build();
         noticeOfChangePartiesService.aboutToSubmitStopRepresenting("testAuth", callbackRequest);
-        verify(assignCaseAccessClient, times(1)).applyDecision(Mockito.any(), Mockito.any(), Mockito.any());
+        verify(assignCaseAccessClient, times(1)).applyDecision(any(), any(), any());
+        verify(caseAssignmentService).removeAmBarristerCaseRole(isA(CaseData.class),
+                                                                ArgumentMatchers.<Map<Optional<SolicitorRole>, Element<PartyDetails>>>any());
     }
 
     @Test
@@ -1039,7 +1077,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(applicant)
             .solStopRepChooseParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
                 dynamicListElement)).build())
@@ -1092,7 +1130,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .respondents(respondent)
             .solStopRepChooseParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
                 dynamicListElement)).build())
@@ -1123,6 +1161,11 @@ public class NoticeOfChangePartiesServiceTest {
     @Test
     public void testSubmittedStopRepresenting() {
         List<Element<PartyDetails>> applicant = new ArrayList<>();
+        partyDetails.setBarrister(Barrister.builder()
+                                      .barristerEmail("barrister@gmail.com")
+                                      .barristerId(UUID.randomUUID().toString())
+                                      .build());
+
         Element partyDetailsElement = element(partyDetails);
         applicant.add(partyDetailsElement);
         DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
@@ -1143,7 +1186,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(applicant)
             .solStopRepChooseParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
                 dynamicListElement)).build())
@@ -1174,7 +1217,22 @@ public class NoticeOfChangePartiesServiceTest {
             .build();
 
         noticeOfChangePartiesService.submittedStopRepresenting(callbackRequest);
-        verify(eventPublisher, times(1)).publishEvent(Mockito.any(NoticeOfChangeEvent.class));
+        verify(eventPublisher, times(1)).publishEvent(any(NoticeOfChangeEvent.class));
+        verify(tabService).updatePartyDetailsForNoc(anyString(),
+                                                   anyString(),
+                                                   isA(StartEventResponse.class),
+                                                   isA(EventRequestData.class),
+                                                   caseDataArgumentCaptor.capture());
+        CaseData updatedCaseData = caseDataArgumentCaptor.getValue();
+        PartyDetails party = updatedCaseData.getApplicants().getFirst().getValue();
+        assertThat(party.getBarrister())
+            .isNull();
+        assertThat(party.getSolicitorReference())
+            .isNull();
+        assertThat(party.getSolicitorTelephone())
+            .isNull();
+        assertThat(party.getSolicitorOrg())
+            .isEqualTo(Organisation.builder().build());
     }
 
     @Test
@@ -1191,7 +1249,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .respondents(respondent)
             .solStopRepChooseParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
                 dynamicListElement)).build())
@@ -1245,7 +1303,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(applicants)
             .respondents(respondent)
             .removeLegalRepAndPartiesList(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
@@ -1480,7 +1538,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(applicant)
             .caseInvites(List.of(element(caseInvite)))
             .solStopRepChooseParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
@@ -1512,7 +1570,7 @@ public class NoticeOfChangePartiesServiceTest {
             .build();
 
         noticeOfChangePartiesService.submittedStopRepresenting(callbackRequest);
-        verify(eventPublisher, times(1)).publishEvent(Mockito.any(NoticeOfChangeEvent.class));
+        verify(eventPublisher, times(1)).publishEvent(any(NoticeOfChangeEvent.class));
     }
 
     @Test
