@@ -75,7 +75,6 @@ public class AcroCaseDataService {
             LocalDateTime endDateForSearch = acroDatesService.getEndDateForSearch();
             QueryParam ccdQueryParam = buildCcdQueryParam(startDateForSearch, endDateForSearch);
             String searchString = objectMapper.writeValueAsString(ccdQueryParam);
-            //String searchString = buildRawJsonQuery(startDateForSearch, endDateForSearch, objectMapper);
             log.info("Search string: {}", searchString);
             String userToken = systemUserService.getSysUserToken();
             final String s2sToken = authTokenGenerator.generate();
@@ -154,59 +153,6 @@ public class AcroCaseDataService {
         return QueryParam.builder().query(query).dataToReturn(fetchFieldsRequiredForAcro()).build();
     }
 
-    private String buildRawJsonQuery(LocalDateTime startDateForSearch, LocalDateTime endDateForSearch, ObjectMapper objectMapper) {
-        try {
-            return """
-                {
-                    "query": {
-                        "bool": {
-                            "filter": {
-                                "range": {
-                                    "last_modified": {
-                                        "gte": "2025-08-18T00:59:59",
-                                        "lte": "2025-08-27T21:00"
-                                    }
-                                }
-                            },
-                            "must": [
-                                {
-                                    "term": {
-                                        "data.orderCollection.value.orderTypeId.keyword": "Non-molestation order (FL404A)"
-                                    }
-                                },
-                                {
-                                    "range": {
-                                        "data.orderCollection.value.dateCreated": {
-                                            "gte": "2025-08-18T00:59:59",
-                                            "lte": "2025-08-27T21:00"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "_source": [
-                        "data.caseTypeOfApplication",
-                        "data.courtName",
-                        "data.courtEpimsId",
-                        "data.courtTypeId",
-                        "data.applicantsFL401",
-                        "data.applicants",
-                        "data.respondentsFL401",
-                        "data.respondents",
-                        "data.applicantsConfidentialDetails",
-                        "data.orderCollection",
-                        "data.caseManagementLocation",
-                        "data.stmtOfServiceForOrder"
-                    ]
-                }
-                """;
-        } catch (Exception e) {
-            log.error("Error building JSON query: {}", e.getMessage());
-            throw new RuntimeException("Failed to build search query", e);
-        }
-    }
-
     private List<String> fetchFieldsRequiredForAcro() {
         return List.of(
             "data.caseTypeOfApplication",
@@ -232,7 +178,7 @@ public class AcroCaseDataService {
             .build();
         Map<String, String> caseIdWithRegionIdMap = new HashMap<>();
         for (AcroCaseDetail caseDetails : acroResponse.getCases()) {
-            updateCourtEpmisId(caseDetails, caseIdWithRegionIdMap, extractedAcroResponse);
+            updateCourtEpmisId(caseDetails, caseIdWithRegionIdMap);
             extractOrderSpecificForSearchCrieteria(caseDetails, startDateForSearch, endDateForSearch);
             extractedAcroResponse.getCases().add(caseDetails);
         }
@@ -243,14 +189,12 @@ public class AcroCaseDataService {
 
         filterCancelledHearingsBeforeListing(listOfHearingDetails);
 
-        extractHearingData(acroResponse, listOfHearingDetails);
+        extractHearingData(extractedAcroResponse, listOfHearingDetails);
 
         return extractedAcroResponse;
     }
 
-    private void updateCourtEpmisId(AcroCaseDetail caseDetails,
-                                    Map<String, String> caseIdWithRegionIdMap,
-                                    AcroResponse filteredAcroResponse) {
+    private void updateCourtEpmisId(AcroCaseDetail caseDetails, Map<String, String> caseIdWithRegionIdMap) {
         CaseManagementLocation caseManagementLocation = caseDetails.getCaseData().getCaseManagementLocation();
         if (caseManagementLocation != null) {
             if (caseManagementLocation.getRegionId() != null) {
@@ -259,14 +203,12 @@ public class AcroCaseDataService {
                         + "-" + caseManagementLocation.getBaseLocationId()
                 );
                 caseDetails.getCaseData().setCourtEpimsId(caseManagementLocation.getBaseLocationId());
-                filteredAcroResponse.getCases().add(caseDetails);
             } else if (caseManagementLocation.getRegion() != null) {
                 caseIdWithRegionIdMap.put(
                     String.valueOf(caseDetails.getId()),
                     caseManagementLocation.getRegion() + "-" + caseManagementLocation.getBaseLocation()
                 );
                 caseDetails.getCaseData().setCourtEpimsId(caseManagementLocation.getBaseLocation());
-                filteredAcroResponse.getCases().add(caseDetails);
             }
         }
     }
@@ -276,9 +218,7 @@ public class AcroCaseDataService {
                                                         LocalDateTime endDateForSearch) {
         AcroCaseData caseData = acroCaseDetail.getCaseData();
         caseData.getOrderCollection().stream().map(Element::getValue)
-            .filter(o -> o.getOrderType().equals(NON_MOLESTATION)
-                && o.getOrderTypeId().equals(NON_MOLESTATION_ORDER_FL_404_A)
-                && o.getTypeOfOrder().equals(FINAL)
+            .filter(o -> o.getOrderTypeId().equals(NON_MOLESTATION_ORDER_FL_404_A)
                 && o.getDateCreated().isAfter(startDateForSearch)
                 && o.getDateCreated().isBefore(endDateForSearch)
             )

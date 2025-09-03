@@ -69,6 +69,7 @@ public class BaisDocumentUploadService {
                     true
                 );
             }
+            //TODO test code, need removal
             // Save the CSV file to outputDirectory
             if (csvFile != null && csvFile.exists()) {
                 File outputCsv = new File(outputDirectory, "AcroReport.csv");
@@ -77,50 +78,7 @@ public class BaisDocumentUploadService {
                 log.error("CSV file does not exist: {}", csvFile != null ? csvFile.getAbsolutePath() : "null");
             }
 
-            // Only process cases if not null and not empty
-            if (acroResponse.getCases() != null && !acroResponse.getCases().isEmpty()) {
-                acroResponse.getCases().forEach(acroCase -> {
-                    AcroCaseData caseData = acroCase.getCaseData();
-                    if (caseData.getFl404Orders() != null) {
-                        caseData.getFl404Orders().forEach(order -> {
-                            String caseId = String.valueOf(acroCase.getId());
-                            String fileName = getFileName(caseId, order.getDateCreated(), false);
-                            String welshFileName = getFileName(caseId, order.getDateCreated(), true);
-                            java.util.Optional<File> downloadedFileOpt = pdfExtractorService.downloadFl404aDocument(
-                                caseId,
-                                sysUserToken,
-                                fileName,
-                                order.getOrderDocument()
-                            );
-                            if (downloadedFileOpt.isPresent() && downloadedFileOpt.get().exists()) {
-                                File downloadedFile = downloadedFileOpt.get();
-                                File outputFile = new File(outputDirectory, downloadedFile.getName());
-                                try {
-                                    Files.copy(downloadedFile.toPath(), outputFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-                                } catch (IOException e) {
-                                    log.error("Failed to copy file {} to output directory: {}", downloadedFile.getName(), e.getMessage());
-                                }
-                            }
-                            java.util.Optional<File> downloadedWelshFileOpt = pdfExtractorService.downloadFl404aDocument(
-                                caseId,
-                                sysUserToken,
-                                welshFileName,
-                                order.getOrderDocumentWelsh()
-                            );
-                            if (downloadedWelshFileOpt.isPresent() && downloadedWelshFileOpt.get().exists()) {
-                                File downloadedWelshFile = downloadedWelshFileOpt.get();
-                                File outputWelshFile = new File(outputDirectory, downloadedWelshFile.getName());
-                                try {
-                                    Files.copy(downloadedWelshFile.toPath(), outputWelshFile.toPath(),
-                                               java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-                                } catch (IOException e) {
-                                    log.error("Failed to copy Welsh file {} to output directory: {}", downloadedWelshFile.getName(), e.getMessage());
-                                }
-                            }
-                        });
-                    }
-                });
-            }
+            downloadPdfsInOutputDirectory(acroResponse, sysUserToken);
 
             acroZipService.zip();
 
@@ -130,6 +88,53 @@ public class BaisDocumentUploadService {
             );
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void downloadPdfsInOutputDirectory(AcroResponse acroResponse, String sysUserToken) {
+        // Only process cases if not null and not empty
+        if (acroResponse.getCases() != null && !acroResponse.getCases().isEmpty()) {
+            acroResponse.getCases().forEach(acroCase -> {
+                AcroCaseData caseData = acroCase.getCaseData();
+                if (caseData.getFl404Orders() != null) {
+                    caseData.getFl404Orders().forEach(order -> {
+                        String caseId = String.valueOf(acroCase.getId());
+                        String fileName = getFileName(caseId, order.getDateCreated(), false);
+                        String welshFileName = getFileName(caseId, order.getDateCreated(), true);
+                        java.util.Optional<File> downloadedFileOpt = pdfExtractorService.downloadFl404aDocument(
+                            caseId,
+                            sysUserToken,
+                            fileName,
+                            order.getOrderDocument()
+                        );
+                        if (downloadedFileOpt.isPresent() && downloadedFileOpt.get().exists()) {
+                            File downloadedFile = downloadedFileOpt.get();
+                            File outputFile = new File(outputDirectory, downloadedFile.getName());
+                            try {
+                                Files.copy(downloadedFile.toPath(), outputFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                            } catch (IOException e) {
+                                log.error("Failed to copy file {} to output directory: {}", downloadedFile.getName(), e.getMessage());
+                            }
+                        }
+                        java.util.Optional<File> downloadedWelshFileOpt = pdfExtractorService.downloadFl404aDocument(
+                            caseId,
+                            sysUserToken,
+                            welshFileName,
+                            order.getOrderDocumentWelsh()
+                        );
+                        if (downloadedWelshFileOpt.isPresent() && downloadedWelshFileOpt.get().exists()) {
+                            File downloadedWelshFile = downloadedWelshFileOpt.get();
+                            File outputWelshFile = new File(outputDirectory, downloadedWelshFile.getName());
+                            try {
+                                Files.copy(downloadedWelshFile.toPath(), outputWelshFile.toPath(),
+                                           java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                            } catch (IOException e) {
+                                log.error("Failed to copy Welsh file {} to output directory: {}", downloadedWelshFile.getName(), e.getMessage());
+                            }
+                        }
+                    });
+                }
+            });
         }
     }
 
