@@ -17,15 +17,19 @@ import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -53,6 +57,9 @@ public class CaseAssignmentControllerIntegrationTest {
     @Autowired
     private WebApplicationContext webApplicationContext;
 
+    @MockBean
+    private ApplicationsTabService applicationsTabService;
+
     @SpyBean
     private CaseAssignmentService caseAssignmentService;
 
@@ -69,6 +76,7 @@ public class CaseAssignmentControllerIntegrationTest {
     public void testAddBarrister() throws Exception {
         String url = "/case-assignment/barrister/add/about-to-submit";
         String jsonRequest = ResourceLoader.loadJson("requests/barristerRequest.json");
+        when(applicationsTabService.updateTab(any())).thenReturn(new HashMap());
         when(organisationService.findUserByEmail(anyString()))
             .thenReturn(Optional.of(UUID.randomUUID().toString()));
         when(authorisationService.isAuthorized(anyString(), anyString()))
@@ -95,12 +103,14 @@ public class CaseAssignmentControllerIntegrationTest {
                                                    any(),
                                                    eq(C100APPLICANTBARRISTER1.getCaseRoleLabel()),
                                                    any());
+        verify(applicationsTabService).updateTab(any());
     }
 
     @Test
     public void testRemoveBarrister() throws Exception {
         String url = "/case-assignment/barrister/remove/about-to-submit";
         String jsonRequest = ResourceLoader.loadJson("requests/barristerRequest.json");
+        when(applicationsTabService.updateTab(any())).thenReturn(new HashMap());
         when(authorisationService.isAuthorized(anyString(), anyString()))
             .thenReturn(true);
 
@@ -108,7 +118,7 @@ public class CaseAssignmentControllerIntegrationTest {
             .when(caseAssignmentService).validateRemoveRequest(any(), any(), any());
 
         doNothing()
-            .when(caseAssignmentService).removeBarrister(any(), any());
+            .when(caseAssignmentService).removeBarrister(isA(CaseData.class), anyString());
 
         mockMvc.perform(
                 post(url)
@@ -121,6 +131,6 @@ public class CaseAssignmentControllerIntegrationTest {
             .andExpect(jsonPath("$.errors").isEmpty())
             .andReturn();
         verify(caseAssignmentService).validateRemoveRequest(any(), any(), any());
-        verify(caseAssignmentService).removeBarrister(any(), any());
+        verify(caseAssignmentService).removeBarrister(isA(CaseData.class), anyString());
     }
 }
