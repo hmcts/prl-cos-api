@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.beust.jcommander.internal.Lists;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -34,6 +33,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDoc
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.refuge.RefugeConfidentialDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.Barrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.RespondentC8Document;
@@ -58,7 +58,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -2457,14 +2459,232 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void shouldNotReturnAnyValidationErrors() {
-        PartyDetails applicant = PartyDetails.builder().firstName("App").build();
-        PartyDetails respondent = PartyDetails.builder().firstName("Resp").build();
+    public void shouldReturnEmptyValidateUpdatePartyDetailsIfBarristerPresentAndApplicantIsNotRemoveForC100() {
+        Element<PartyDetails> applicant1 = getPartyDetails("App1", true);
+        Element<PartyDetails> applicant2 = getPartyDetails("App2", true);
+
+        Element<PartyDetails> respondent = getPartyDetails("Resp", true);
+
+        CaseData caseDataBefore = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(applicant1, applicant2))
+            .respondents(List.of(respondent))
+            .build();
 
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
-            .applicants(Lists.newArrayList(Element.<PartyDetails>builder().value(applicant).build()))
-            .respondents(Lists.newArrayList(Element.<PartyDetails>builder().value(respondent).build()))
+            .applicants(List.of(applicant1, applicant2))
+            .respondents(List.of(respondent))
+            .build();
+
+
+        Map<String,Object> caseDataMapBefore = new HashMap<>();
+        Map<String,Object> caseDataMap = new HashMap<>();
+        caseDataMapBefore.put("before", true);
+        caseDataMap.put("before", false);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetailsBefore(CaseDetails.builder()
+                                   .id(12345L)
+                                   .data(caseDataMap)
+                                   .build())
+            .caseDetails(CaseDetails.builder()
+                             .id(12345L)
+                             .data(caseDataMap)
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class)))
+            .thenAnswer(invocation -> {
+                Map<String, Object> map = invocation.getArgument(0);
+                if (map.get("before").equals(true)) {
+                    return caseDataBefore;
+                } else if (map.get("before").equals(false)) {
+                    return caseData;
+                }
+                return null;
+            });
+
+        List<String> validationErrorList = updatePartyDetailsService.validateUpdatePartyDetails(callbackRequest);
+
+        assertTrue(validationErrorList.isEmpty());
+
+    }
+
+    @Test
+    public void shouldReturnEmptyValidateUpdatePartyDetailsIfNoBarristerAndApplicantIsRemoveForC100() {
+        Element<PartyDetails> applicant1 = getPartyDetails("App1", false);
+        Element<PartyDetails> applicant2 = getPartyDetails("App2", false);
+
+        Element<PartyDetails> respondent = getPartyDetails("Resp", false);
+
+        CaseData caseDataBefore = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(applicant1, applicant2))
+            .respondents(List.of(respondent))
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(applicant1))
+            .respondents(List.of(respondent))
+            .build();
+
+
+        Map<String,Object> caseDataMapBefore = new HashMap<>();
+        Map<String,Object> caseDataMap = new HashMap<>();
+        caseDataMapBefore.put("before", true);
+        caseDataMap.put("before", false);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetailsBefore(CaseDetails.builder()
+                                   .id(12345L)
+                                   .data(caseDataMap)
+                                   .build())
+            .caseDetails(CaseDetails.builder()
+                             .id(12345L)
+                             .data(caseDataMap)
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class)))
+            .thenAnswer(invocation -> {
+                Map<String, Object> map = invocation.getArgument(0);
+                if (map.get("before").equals(true)) {
+                    return caseDataBefore;
+                } else if (map.get("before").equals(false)) {
+                    return caseData;
+                }
+                return null;
+            });
+
+        List<String> validationErrorList = updatePartyDetailsService.validateUpdatePartyDetails(callbackRequest);
+
+        assertTrue(validationErrorList.isEmpty());
+
+    }
+
+    @Test
+    public void shouldReturnValidateUpdatePartyDetailsIfBarristerPresentAndApplicantIsRemovedForC100() {
+        Element<PartyDetails> applicant1 = getPartyDetails("App1", true);
+        Element<PartyDetails> applicant2 = getPartyDetails("App2", true);
+
+        Element<PartyDetails> respondent = getPartyDetails("Resp", true);
+
+        CaseData caseDataBefore = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(applicant1, applicant2))
+            .respondents(List.of(respondent))
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(applicant1))
+            .respondents(List.of(respondent))
+            .build();
+
+        Map<String,Object> caseDataMapBefore = new HashMap<>();
+        Map<String,Object> caseDataMap = new HashMap<>();
+        caseDataMapBefore.put("before", true);
+        caseDataMap.put("before", false);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetailsBefore(CaseDetails.builder()
+                                   .id(12345L)
+                                   .data(caseDataMapBefore)
+                                   .build())
+            .caseDetails(CaseDetails.builder()
+                             .id(12345L)
+                             .data(caseDataMap)
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class)))
+            .thenAnswer(invocation -> {
+                Map<String, Object> map = invocation.getArgument(0);
+                if (map.get("before").equals(true)) {
+                    return caseDataBefore;
+                } else if (map.get("before").equals(false)) {
+                    return caseData;
+                }
+                return null;
+            });
+
+
+        List<String> validationErrorList = updatePartyDetailsService.validateUpdatePartyDetails(callbackRequest);
+
+        assertTrue(!validationErrorList.isEmpty());
+        assertEquals("Barrister is associated with the party,"
+            + " please remove the barrister first then remove the party", validationErrorList.getFirst());
+
+    }
+
+
+    @Test
+    public void shouldReturnValidateUpdatePartyDetailsIfBarristerPresentAndRespondentIsRemovedForC100() {
+        Element<PartyDetails> applicant1 = getPartyDetails("App1", true);
+        Element<PartyDetails> applicant2 = getPartyDetails("App2", true);
+
+        Element<PartyDetails> respondent1 = getPartyDetails("Resp1", true);
+        Element<PartyDetails> respondent2 = getPartyDetails("Resp2", true);
+
+        CaseData caseDataBefore = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(applicant1, applicant2))
+            .respondents(List.of(respondent1, respondent2))
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(applicant1, respondent2))
+            .respondents(List.of(respondent1))
+            .build();
+
+        Map<String,Object> caseDataMapBefore = new HashMap<>();
+        Map<String,Object> caseDataMap = new HashMap<>();
+        caseDataMapBefore.put("before", true);
+        caseDataMap.put("before", false);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetailsBefore(CaseDetails.builder()
+                                   .id(12345L)
+                                   .data(caseDataMapBefore)
+                                   .build())
+            .caseDetails(CaseDetails.builder()
+                             .id(12345L)
+                             .data(caseDataMap)
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class)))
+            .thenAnswer(invocation -> {
+                Map<String, Object> map = invocation.getArgument(0);
+                if (map.get("before").equals(true)) {
+                    return caseDataBefore;
+                } else if (map.get("before").equals(false)) {
+                    return caseData;
+                }
+                return null;
+            });
+
+
+        List<String> validationErrorList = updatePartyDetailsService.validateUpdatePartyDetails(callbackRequest);
+
+        assertTrue(!validationErrorList.isEmpty());
+        assertEquals("Barrister is associated with the party,"
+                         + " please remove the barrister first then remove the party", validationErrorList.getFirst());
+
+    }
+
+    @Test
+    public void shouldReturnEmptyValidateUpdatePartyDetailsForFL401() {
+        PartyDetails applicant = getPartyDetails("App1", true).getValue();
+        PartyDetails respondent = getPartyDetails("Resp", true).getValue();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(applicant)
+            .respondentsFL401(respondent)
             .build();
 
         Map<String,Object> caseDataMap = new HashMap<>();
@@ -2486,6 +2706,16 @@ public class UpdatePartyDetailsServiceTest {
 
         assertTrue(validationErrorList.isEmpty());
 
+    }
+
+    private Element<PartyDetails> getPartyDetails(String partyName, boolean hasBarrister) {
+        return Element.<PartyDetails>builder().id(UUID.randomUUID())
+            .value(PartyDetails.builder()
+                       .barrister(hasBarrister ? Barrister.builder()
+                                      .barristerEmail("test1@test.com")
+                                      .build() : null)
+                       .firstName(partyName).build())
+            .build();
     }
 
 }

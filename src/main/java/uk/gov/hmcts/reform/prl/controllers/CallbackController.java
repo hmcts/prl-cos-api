@@ -670,11 +670,10 @@ public class CallbackController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            List<String> validationError = updatePartyDetailsService.validateUpdatePartyDetails(callbackRequest);
             return AboutToStartOrSubmitCallbackResponse
                 .builder()
                 .data(callbackRequest.getCaseDetails().getData())
-                .errors(validationError)
+                .errors(updatePartyDetailsService.validateUpdatePartyDetails(callbackRequest))
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
