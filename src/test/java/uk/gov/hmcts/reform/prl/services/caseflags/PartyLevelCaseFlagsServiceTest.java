@@ -40,11 +40,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
-import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.CAAPPLICANTBARRISTER;
-import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.CAAPPLICANTSOLICITOR;
-import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.CARESPONDENTSOLICITOR;
-import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.DAAPPLICANTSOLICITOR;
-import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.DARESPONDENTSOLICITOR;
+import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PartyLevelCaseFlagsServiceTest {
@@ -397,7 +393,7 @@ public class PartyLevelCaseFlagsServiceTest {
 
         CaseData caseData =  partyLevelCaseFlagsService
             .generateIndividualPartySolicitorCaseFlags(
-                caseDataFl401SolicitorBarristerRepresent, 0, DAAPPLICANTSOLICITOR, true);
+                caseDataFl401SolicitorBarristerRepresent, 0, DAAPPLICANTBARRISTER, true);
         Assert.assertNotNull(caseData);
         Assert.assertEquals(FL401_CASE_TYPE, caseData.getCaseTypeOfApplication());
     }
