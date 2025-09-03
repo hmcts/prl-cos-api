@@ -27,7 +27,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
-import uk.gov.hmcts.reform.prl.utils.CaseHelper;
+import uk.gov.hmcts.reform.prl.utils.BarristerHelper;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -67,7 +67,7 @@ class CaseAssignmentControllerTest {
     @Mock
     private AuthorisationService authorisationService;
     @Mock
-    private CaseHelper caseHelper;
+    private BarristerHelper caseHelper;
     @Mock
     private ApplicationsTabService applicationsTabService;
     @Spy

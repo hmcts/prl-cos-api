@@ -19,11 +19,11 @@ import static org.mockito.Mockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public class CaseHelperTest {
 
-    private CaseHelper caseHelper;
+    private BarristerHelper caseHelper;
 
     @Before
     public void setUp() {
-        caseHelper = new CaseHelper();
+        caseHelper = new BarristerHelper();
     }
 
     @Test

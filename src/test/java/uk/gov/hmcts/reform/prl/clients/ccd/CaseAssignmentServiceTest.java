@@ -48,7 +48,7 @@ import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.barrister.BarristerRemoveService;
-import uk.gov.hmcts.reform.prl.utils.CaseHelper;
+import uk.gov.hmcts.reform.prl.utils.BarristerHelper;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.MaskEmail;
 
@@ -104,7 +104,7 @@ class CaseAssignmentServiceTest {
     @Mock
     private FeatureToggleService featureToggleService;
     @Mock
-    private CaseHelper casehelper;
+    private BarristerHelper casehelper;
     @Mock
     private BarristerRemoveService barristerRemoveService;
 

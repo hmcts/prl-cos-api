@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
-import uk.gov.hmcts.reform.prl.utils.CaseHelper;
+import uk.gov.hmcts.reform.prl.utils.BarristerHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +35,7 @@ public abstract class AbstractBarristerService {
     protected final UserService userService;
     protected final OrganisationService organisationService;
     protected final EventService eventPublisher;
-    protected final CaseHelper caseHelper;
+    protected final BarristerHelper caseHelper;
 
     protected DynamicList getPartiesToList(CaseData caseData, String authorisation) {
         return getPartiesToListForC100OrFL401(caseData, populateBarristerFilter(caseData, authorisation));

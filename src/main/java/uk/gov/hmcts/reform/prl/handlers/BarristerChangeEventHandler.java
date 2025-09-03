@@ -101,7 +101,6 @@ public class BarristerChangeEventHandler {
         }
     }
 
-    //TODO: ADD TEMPLATES
     @Async
     @EventListener(condition = "#event.typeOfEvent.displayedValue eq 'Remove Barrister'")
     public void notifyWhenBarristerRemoved(final BarristerChangeEvent event) {

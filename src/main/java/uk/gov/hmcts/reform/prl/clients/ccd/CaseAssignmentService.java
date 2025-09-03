@@ -31,7 +31,7 @@ import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.barrister.BarristerRemoveService;
-import uk.gov.hmcts.reform.prl.utils.CaseHelper;
+import uk.gov.hmcts.reform.prl.utils.BarristerHelper;
 import uk.gov.hmcts.reform.prl.utils.MaskEmail;
 
 import java.util.Arrays;
@@ -67,7 +67,7 @@ public class CaseAssignmentService {
     private final MaskEmail maskEmail;
     private final ObjectMapper objectMapper;
     private final FeatureToggleService featureToggleService;
-    private final CaseHelper casehelper;
+    private final BarristerHelper casehelper;
     private final BarristerRemoveService barristerRemoveService;
 
     private InvalidPartyException getInvalidPartyException(CaseData caseData,

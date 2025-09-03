@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
-import uk.gov.hmcts.reform.prl.utils.CaseHelper;
+import uk.gov.hmcts.reform.prl.utils.BarristerHelper;
 
 @Slf4j
 @Service
@@ -20,7 +20,7 @@ public class BarristerAddService extends AbstractBarristerService {
     public BarristerAddService(UserService userService,
                                OrganisationService organisationService,
                                EventService eventPublisher,
-                               CaseHelper caseHelper) {
+                               BarristerHelper caseHelper) {
         super(userService, organisationService, eventPublisher, caseHelper);
     }
 

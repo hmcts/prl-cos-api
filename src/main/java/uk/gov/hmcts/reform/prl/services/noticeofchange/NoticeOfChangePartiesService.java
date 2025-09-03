@@ -57,7 +57,7 @@ import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelec
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
-import uk.gov.hmcts.reform.prl.utils.CaseHelper;
+import uk.gov.hmcts.reform.prl.utils.BarristerHelper;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.noticeofchange.NoticeOfChangePartiesConverter;
@@ -118,7 +118,7 @@ public class NoticeOfChangePartiesService {
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     private final ServiceOfApplicationService serviceOfApplicationService;
     private final CaseAssignmentService caseAssignmentService;
-    private final CaseHelper caseHelper;
+    private final BarristerHelper caseHelper;
     private final BarristerRemoveService barristerRemoveService;
 
     public static final String REPRESENTATIVE_REMOVED_LABEL = "# Representative removed";

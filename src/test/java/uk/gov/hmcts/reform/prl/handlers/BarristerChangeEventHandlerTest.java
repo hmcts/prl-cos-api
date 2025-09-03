@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -24,13 +24,20 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.enums.barrister.TypeOfBarristerEventEnum.removeBarrister;
+import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.CA_DA_ADD_BARRISTER_SELF;
+import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.CA_DA_ADD_BARRISTER_TO_SOLICITOR;
+import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.CA_DA_REMOVE_BARRISTER_SELF;
+import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.CA_DA_REMOVE_BARRISTER_TO_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(SpringExtension.class)
@@ -41,7 +48,7 @@ class BarristerChangeEventHandlerTest {
     private EmailService emailService;
     @Mock
     private FeatureToggleService featureToggleService;
-    @Mock
+    @Spy
     private MaskEmail maskEmail;
 
     @InjectMocks
@@ -100,17 +107,17 @@ class BarristerChangeEventHandlerTest {
             .typeOfEvent(TypeOfBarristerEventEnum.addBarrister)
             .caseData(caseData)
             .build();
-        when(maskEmail.mask(anyString()))
-            .thenReturn("mask@email.com");
     }
 
     @Test
     void shouldNotifyAddBarristerWhenCaseTypeIsC100() {
         barristerChangeEventHandler.notifyAddBarrister(barristerChangeEvent);
 
-        verify(emailService,times(3)).send(Mockito.anyString(),
-                                           Mockito.any(),
-                                           Mockito.any(), Mockito.any());
+        verify(emailService, times(2)).send(
+            anyString(),
+            eq(CA_DA_ADD_BARRISTER_TO_SOLICITOR),
+            any(),
+            any());
 
     }
 
@@ -128,10 +135,11 @@ class BarristerChangeEventHandlerTest {
             .build();
         barristerChangeEventHandler.notifyAddBarrister(barristerChangeEvent);
 
-        verify(emailService,times(2)).send(Mockito.anyString(),
-                                           Mockito.any(),
-                                           Mockito.any(), Mockito.any());
-
+        verify(emailService, times(2)).send(
+            anyString(),
+            eq(CA_DA_ADD_BARRISTER_TO_SOLICITOR),
+            any(),
+            any());
     }
 
     @Test
@@ -148,10 +156,17 @@ class BarristerChangeEventHandlerTest {
 
         barristerChangeEventHandler.notifyAddBarrister(barristerChangeEvent);
 
-        verify(emailService,times(1)).send(Mockito.anyString(),
-                                           Mockito.any(),
-                                           Mockito.any(), Mockito.any());
+        verify(emailService).send(
+            anyString(),
+            eq(CA_DA_ADD_BARRISTER_SELF),
+            any(),
+            any());
 
+        verify(emailService, never()).send(
+            anyString(),
+            eq(CA_DA_ADD_BARRISTER_TO_SOLICITOR),
+            any(),
+            any());
     }
 
     @Test
@@ -169,9 +184,18 @@ class BarristerChangeEventHandlerTest {
             .build();
         barristerChangeEventHandler.notifyAddBarrister(barristerChangeEvent);
 
-        verify(emailService,times(1)).send(Mockito.anyString(),
-                                           Mockito.any(),
-                                           Mockito.any(), Mockito.any());
+        verify(emailService).send(
+            anyString(),
+            eq(CA_DA_ADD_BARRISTER_SELF),
+            any(),
+            any());
+
+        verify(emailService, never()).send(
+            anyString(),
+            eq(CA_DA_ADD_BARRISTER_TO_SOLICITOR),
+            any(),
+            any());
+
 
     }
 
@@ -180,13 +204,21 @@ class BarristerChangeEventHandlerTest {
         when(featureToggleService.isBarristerFeatureEnabled())
             .thenReturn(true);
         BarristerChangeEvent barristerRemoveEvent = barristerChangeEvent.toBuilder()
-            .typeOfEvent(TypeOfBarristerEventEnum.addBarrister)
+            .typeOfEvent(removeBarrister)
             .build();
         barristerChangeEventHandler.notifyWhenBarristerRemoved(barristerRemoveEvent);
 
-        verify(emailService,times(3)).send(Mockito.anyString(),
-                                           Mockito.any(),
-                                           Mockito.any(), Mockito.any());
+        verify(emailService).send(
+            anyString(),
+            eq(CA_DA_REMOVE_BARRISTER_SELF),
+            any(),
+            any());
+        verify(emailService,times(2)).send(
+            anyString(),
+            eq(CA_DA_REMOVE_BARRISTER_TO_SOLICITOR),
+            any(),
+            any());
+
 
     }
 
@@ -196,9 +228,11 @@ class BarristerChangeEventHandlerTest {
             .thenReturn(false);
         barristerChangeEventHandler.notifyWhenBarristerRemoved(barristerChangeEvent);
 
-        verify(emailService, never()).send(Mockito.anyString(),
-                                           Mockito.any(),
-                                           Mockito.any(), Mockito.any());
+        verify(emailService, never()).send(
+            anyString(),
+            any(),
+            any(),
+            any());
 
     }
 
@@ -214,15 +248,22 @@ class BarristerChangeEventHandlerTest {
             .respondents(Arrays.asList(element(respondent1), element(respondent2)))
             .build();
         barristerChangeEvent = barristerChangeEvent.toBuilder()
-            .typeOfEvent(TypeOfBarristerEventEnum.removeBarrister)
+            .typeOfEvent(removeBarrister)
             .caseData(caseData)
             .build();
         barristerChangeEventHandler.notifyWhenBarristerRemoved(barristerChangeEvent);
 
-        verify(emailService,times(2)).send(Mockito.anyString(),
-                                           Mockito.any(),
-                                           Mockito.any(), Mockito.any());
+        verify(emailService, never()).send(
+            anyString(),
+            eq(CA_DA_REMOVE_BARRISTER_SELF),
+            any(),
+            any());
 
+        verify(emailService,times(2)).send(
+            anyString(),
+            eq(CA_DA_REMOVE_BARRISTER_TO_SOLICITOR),
+            any(),
+            any());
     }
 
     @Test
@@ -235,15 +276,17 @@ class BarristerChangeEventHandlerTest {
             .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
         barristerChangeEvent = barristerChangeEvent.toBuilder()
-            .typeOfEvent(TypeOfBarristerEventEnum.removeBarrister)
+            .typeOfEvent(removeBarrister)
             .caseData(caseData)
             .build();
 
         barristerChangeEventHandler.notifyWhenBarristerRemoved(barristerChangeEvent);
 
-        verify(emailService,times(1)).send(Mockito.anyString(),
-                                           Mockito.any(),
-                                           Mockito.any(), Mockito.any());
+        verify(emailService).send(
+            anyString(),
+            eq(CA_DA_REMOVE_BARRISTER_SELF),
+            any(),
+            any());
 
     }
 
@@ -260,15 +303,16 @@ class BarristerChangeEventHandlerTest {
             .build();
 
         barristerChangeEvent = barristerChangeEvent.toBuilder()
-            .typeOfEvent(TypeOfBarristerEventEnum.removeBarrister)
+            .typeOfEvent(removeBarrister)
             .caseData(caseData)
             .build();
         barristerChangeEventHandler.notifyWhenBarristerRemoved(barristerChangeEvent);
 
-        verify(emailService,times(1)).send(Mockito.anyString(),
-                                           Mockito.any(),
-                                           Mockito.any(), Mockito.any());
-
+        verify(emailService).send(
+            anyString(),
+            eq(CA_DA_REMOVE_BARRISTER_SELF),
+            any(),
+            any());
     }
 
 }

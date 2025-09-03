@@ -21,7 +21,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
-import uk.gov.hmcts.reform.prl.utils.CaseHelper;
+import uk.gov.hmcts.reform.prl.utils.BarristerHelper;
 
 import java.util.List;
 import java.util.Optional;
@@ -52,7 +52,7 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
     @Mock
     private UserDetails userDetails;
     @Spy
-    private CaseHelper caseHelper;
+    private BarristerHelper caseHelper;
 
 
     @BeforeEach

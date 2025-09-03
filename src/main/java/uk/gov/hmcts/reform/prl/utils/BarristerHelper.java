@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @Slf4j
 @Component
-public class CaseHelper {
+public class BarristerHelper {
 
     public void setAllocatedBarrister(PartyDetails partyDetails,
                                       CaseData caseData,

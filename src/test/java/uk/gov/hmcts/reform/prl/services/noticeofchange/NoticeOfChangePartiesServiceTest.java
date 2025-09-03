@@ -67,7 +67,7 @@ import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelec
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
-import uk.gov.hmcts.reform.prl.utils.CaseHelper;
+import uk.gov.hmcts.reform.prl.utils.BarristerHelper;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.noticeofchange.NoticeOfChangePartiesConverter;
 import uk.gov.hmcts.reform.prl.utils.noticeofchange.RespondentPolicyConverter;
@@ -169,7 +169,7 @@ public class NoticeOfChangePartiesServiceTest {
     @Mock
     private CaseAssignmentService caseAssignmentService;
     @Mock
-    private CaseHelper caseHelper;
+    private BarristerHelper caseHelper;
     @Mock
     private BarristerRemoveService barristerRemoveService;
 
