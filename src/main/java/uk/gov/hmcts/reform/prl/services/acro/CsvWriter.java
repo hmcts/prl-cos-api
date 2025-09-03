@@ -6,7 +6,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseData;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -89,7 +89,7 @@ public class CsvWriter {
      * @return the created CSV file
      * @throws IOException if file creation fails
      */
-    public static File writeCcdOrderDataToCsv(CaseData ccdOrderData, boolean confidentialAllowed) throws IOException {
+    public File writeCcdOrderDataToCsv(AcroCaseData ccdOrderData, boolean confidentialAllowed) throws IOException {
         Path path = Files.createTempFile("AcroReport", ".csv", ATTRIBUTE);
         File file = path.toFile();
         String[] headers = Arrays.stream(COLUMNS).map(CsvColumn::getHeader).toArray(String[]::new);
@@ -115,23 +115,54 @@ public class CsvWriter {
         return file;
     }
 
-    private static boolean isConfidentialField(CaseData caseData, CsvColumn column) {
+    /**
+     * Writes a list of case data to a CSV file with configurable confidential data handling.
+     *
+     * @param cases the list of case data to write
+     * @param confidentialAllowed toggle to include confidential data or replace with "-"
+     * @return the created CSV file
+     * @throws IOException if file creation fails
+     */
+    public File writeCcdOrderDataToCsv(List<AcroCaseData> cases, boolean confidentialAllowed) throws IOException {
+        Path path = Files.createTempFile("AcroReport", ".csv", ATTRIBUTE);
+        File file = path.toFile();
+        String[] headers = Arrays.stream(COLUMNS).map(CsvColumn::getHeader).toArray(String[]::new);
+        CSVFormat csvFileHeader = CSVFormat.DEFAULT.builder().setHeader(headers).build();
+
+        try (FileWriter fileWriter = new FileWriter(file);
+             CSVPrinter printer = new CSVPrinter(fileWriter, csvFileHeader)) {
+            for (AcroCaseData ccdOrderData : cases) {
+                List<String> record = new ArrayList<>();
+                for (CsvColumn column : COLUMNS) {
+                    Object value = extractPropertyValues(ccdOrderData, column.getProperty());
+                    if (!confidentialAllowed && isConfidentialField(ccdOrderData, column)) {
+                        value = "-";
+                    }
+                    record.add(value != null ? value.toString() : "");
+                }
+                printer.printRecord(record);
+            }
+        }
+        return file;
+    }
+
+    private boolean isConfidentialField(AcroCaseData caseData, CsvColumn column) {
         return switch (column) {
             case APPLICANT_PHONE -> isConfidential(caseData, "applicantsFL401.isPhoneNumberConfidential");
             case APPLICANT_EMAIL -> isConfidential(caseData, "applicantsFL401.isEmailAddressConfidential");
             case APPLICANT_SAFE_TIME_TO_CALL -> true; // Always blank when confidentialAllowed is false
             case APPLICANT_ADDRESS1, APPLICANT_ADDRESS2, APPLICANT_POSTCODE ->
-                isConfidential(caseData, "applicantsFL401.isAddressConfidential");
+                    isConfidential(caseData, "applicantsFL401.isAddressConfidential");
 
             case RESPONDENT_PHONE -> isConfidential(caseData, "respondentsFL401.isPhoneNumberConfidential");
             case RESPONDENT_EMAIL -> isConfidential(caseData, "respondentsFL401.isEmailAddressConfidential");
             case RESPONDENT_ADDRESS1, RESPONDENT_ADDRESS2, RESPONDENT_POSTCODE ->
-                isConfidential(caseData, "respondentsFL401.isAddressConfidential");
+                    isConfidential(caseData, "respondentsFL401.isAddressConfidential");
             default -> false;
         };
     }
 
-    private static boolean isConfidential(CaseData caseData, String confidentialityProperty) {
+    private boolean isConfidential(AcroCaseData caseData, String confidentialityProperty) {
         Object value = extractPropertyValues(caseData, confidentialityProperty);
         if (value instanceof YesOrNo) {
             return YesOrNo.Yes.equals(value);
@@ -142,7 +173,7 @@ public class CsvWriter {
         return "Yes".equalsIgnoreCase(String.valueOf(value)) || "true".equalsIgnoreCase(String.valueOf(value));
     }
 
-    public static Object extractPropertyValues(Object obj, String propertyPath) {
+    public Object extractPropertyValues(Object obj, String propertyPath) {
         if (obj == null || propertyPath == null || propertyPath.trim().isEmpty()) {
             return "";
         }
@@ -160,7 +191,7 @@ public class CsvWriter {
         return currentValue;
     }
 
-    private static Object getPropertyValue(Object obj, String propertyName) {
+    private Object getPropertyValue(Object obj, String propertyName) {
         if (obj == null) {
             return "";
         }
@@ -169,24 +200,24 @@ public class CsvWriter {
             Object value = getter.invoke(obj);
 
             return isWrappedListProperty(propertyName)
-                ? extractFromWrappedList(value) : value;
+                    ? extractFromWrappedList(value) : value;
 
         } catch (Exception e) {
             return "";
         }
     }
 
-    private static Method createGetter(Class<?> clazz, String propertyName) throws NoSuchMethodException {
+    private Method createGetter(Class<?> clazz, String propertyName) throws NoSuchMethodException {
         String getterName = "get" + propertyName.substring(0, 1).toUpperCase() + propertyName.substring(1);
         return clazz.getMethod(getterName);
     }
 
-    private static boolean isWrappedListProperty(String propertyName) {
+    private boolean isWrappedListProperty(String propertyName) {
         Set<String> wrappedListProperties = Set.of("respondents", "applicants");
         return wrappedListProperties.contains(propertyName.toLowerCase());
     }
 
-    private static Object extractFromWrappedList(Object value) {
+    private Object extractFromWrappedList(Object value) {
         if (!(value instanceof List)) {
             return value;
         }
@@ -205,7 +236,7 @@ public class CsvWriter {
         }
     }
 
-    private static boolean isEmpty(Object value) {
+    private boolean isEmpty(Object value) {
         return value == null || "".equals(value);
     }
 }
