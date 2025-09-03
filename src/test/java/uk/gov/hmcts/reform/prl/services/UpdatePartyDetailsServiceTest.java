@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.beust.jcommander.internal.Lists;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -55,11 +56,13 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
@@ -2451,6 +2454,38 @@ public class UpdatePartyDetailsServiceTest {
 
         assertNotNull(updatedCaseData);
         verify(documentGenService, Mockito.times(times)).createUpdatedCaseDataWithDocuments(anyString(), any(CaseData.class));
+    }
+
+    @Test
+    public void shouldNotReturnAnyValidationErrors() {
+        PartyDetails applicant = PartyDetails.builder().firstName("App").build();
+        PartyDetails respondent = PartyDetails.builder().firstName("Resp").build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(Lists.newArrayList(Element.<PartyDetails>builder().value(applicant).build()))
+            .respondents(Lists.newArrayList(Element.<PartyDetails>builder().value(respondent).build()))
+            .build();
+
+        Map<String,Object> caseDataMap = new HashMap<>();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetailsBefore(CaseDetails.builder()
+                                   .id(12345L)
+                                   .data(caseDataMap)
+                                   .build())
+            .caseDetails(CaseDetails.builder()
+                             .id(12345L)
+                             .data(caseDataMap)
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+
+        List<String> validationErrorList = updatePartyDetailsService.validateUpdatePartyDetails(callbackRequest);
+
+        assertTrue(validationErrorList.isEmpty());
+
     }
 
 }
