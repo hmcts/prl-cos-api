@@ -6655,7 +6655,7 @@ public class ManageOrderServiceTest {
 
         Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid).value(OrderDetails
                                                                                           .builder()
-                                                                                          .tierOfJudiciaryType(
+                                                                                          .finalisationJudgeDetails(
                                                                                               new FinalisationJudgeDetails(
                                                                                                  manageOrders.getJudgeOrMagistrateTitle()
                                                                                                   ))
@@ -6698,6 +6698,7 @@ public class ManageOrderServiceTest {
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
         assertNotNull(manageOrderService.serveOrder(caseData,orderList));
-        assertEquals(caseData.getManageOrders().getJudgeOrMagistrateTitle(), orders.getValue().getTierOfJudiciaryType().getJudgeOrMagistrateTitle());
+        assertEquals(caseData.getManageOrders().getJudgeOrMagistrateTitle(),
+                     orders.getValue().getFinalisationJudgeDetails().getJudgeOrMagistrateTitle());
     }
 }
