@@ -1331,6 +1331,8 @@ public class NoticeOfChangePartiesServiceTest {
 
         Map<String, Object> caseDataUpdated = noticeOfChangePartiesService
             .aboutToSubmitAdminRemoveLegalRepresentative(authToken,callbackRequest);
+        verify(caseAssignmentService).removeAmBarristerCaseRole(isA(CaseData.class),
+                                                                ArgumentMatchers.<Map<Optional<SolicitorRole>, Element<PartyDetails>>>any());
         assertNotNull(caseDataUpdated);
     }
 
