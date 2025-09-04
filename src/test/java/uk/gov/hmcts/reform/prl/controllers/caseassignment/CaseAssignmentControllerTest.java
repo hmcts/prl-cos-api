@@ -67,7 +67,7 @@ class CaseAssignmentControllerTest {
     @Mock
     private AuthorisationService authorisationService;
     @Mock
-    private BarristerHelper caseHelper;
+    private BarristerHelper barristerHelper;
     @Mock
     private ApplicationsTabService applicationsTabService;
     @Spy
@@ -85,7 +85,7 @@ class CaseAssignmentControllerTest {
             objectMapper,
             organisationService,
             authorisationService,
-            caseHelper,
+            barristerHelper,
             applicationsTabService);
         Barrister barrister = Barrister.builder()
             .barristerEmail("barristerEmail@gmail.com")
@@ -403,7 +403,7 @@ class CaseAssignmentControllerTest {
                                                             anyList());
         verify(caseAssignmentService).removeBarrister(isA(CaseData.class),
                                                       eq(partyDetails));
-        verify(caseHelper).setAllocatedBarrister(eq(partyDetails),
+        verify(barristerHelper).setAllocatedBarrister(eq(partyDetails),
                                                  isA(CaseData.class),
                                                  eq(UUID.fromString(selectedPartyId)));
         verify(applicationsTabService).updateTab(isA(CaseData.class));
@@ -452,7 +452,7 @@ class CaseAssignmentControllerTest {
                                                          anyList());
         verify(caseAssignmentService, never()).removeBarrister(isA(CaseData.class),
                                                                any(PartyDetails.class));
-        verify(caseHelper, never()).setAllocatedBarrister(any(PartyDetails.class),
+        verify(barristerHelper, never()).setAllocatedBarrister(any(PartyDetails.class),
                                                  any(CaseData.class),
                                                  any(UUID.class));
     }

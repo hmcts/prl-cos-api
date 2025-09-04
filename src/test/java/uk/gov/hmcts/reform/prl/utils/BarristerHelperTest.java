@@ -17,19 +17,19 @@ import static org.mockito.Mockito.verify;
 
 
 @RunWith(MockitoJUnitRunner.class)
-public class CaseHelperTest {
+public class BarristerHelperTest {
 
-    private BarristerHelper caseHelper;
+    private BarristerHelper barristerHelper;
 
     @Before
     public void setUp() {
-        caseHelper = new BarristerHelper();
+        barristerHelper = new BarristerHelper();
     }
 
     @Test
     public void testAllocatedBarristerDetailsNotSet() {
         CaseData spyCaseData = spy(CaseData.builder().build());
-        caseHelper.setAllocatedBarrister(null, spyCaseData, UUID.randomUUID());
+        barristerHelper.setAllocatedBarrister(null, spyCaseData, UUID.randomUUID());
         verify(spyCaseData).setAllocatedBarrister(null);
     }
 
@@ -38,7 +38,7 @@ public class CaseHelperTest {
         CaseData spyCaseData = spy(CaseData.builder()
                                        .allocatedBarrister(AllocatedBarrister.builder().build())
                                        .build());
-        caseHelper.setAllocatedBarrister(PartyDetails.builder()
+        barristerHelper.setAllocatedBarrister(PartyDetails.builder()
                                              .barrister(Barrister.builder()
                                                             .barristerId(UUID.randomUUID().toString())
                                                             .build())
@@ -53,7 +53,7 @@ public class CaseHelperTest {
         CaseData spyCaseData = spy(CaseData.builder()
                                        .allocatedBarrister(AllocatedBarrister.builder().build())
                                        .build());
-        caseHelper.setAllocatedBarrister(PartyDetails.builder()
+        barristerHelper.setAllocatedBarrister(PartyDetails.builder()
                                              .build(),
                                          spyCaseData,
                                          UUID.randomUUID());

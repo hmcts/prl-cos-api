@@ -20,8 +20,8 @@ public class BarristerRemoveService extends AbstractBarristerService {
     public BarristerRemoveService(UserService userService,
                                   OrganisationService organisationService,
                                   EventService eventPublisher,
-                                  BarristerHelper caseHelper) {
-        super(userService, organisationService, eventPublisher, caseHelper);
+                                  BarristerHelper barristerHelper) {
+        super(userService, organisationService, eventPublisher, barristerHelper);
     }
 
     public AllocatedBarrister getBarristerListToRemove(CaseData caseData, String authorisation) {

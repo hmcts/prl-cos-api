@@ -52,7 +52,7 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
     @Mock
     private UserDetails userDetails;
     @Spy
-    private BarristerHelper caseHelper;
+    private BarristerHelper barristerHelper;
 
 
     @BeforeEach
@@ -92,7 +92,7 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
         assertPartyToAdd(partiesDynamicList, applicant, PARTY_ID_PREFIX, 1, 2, 2);
         assertPartyToAdd(partiesDynamicList, respondent, PARTY_ID_PREFIX, 2, 5, 5);
         assertPartyToAdd(partiesDynamicList, respondent, PARTY_ID_PREFIX, 3, 6, 6);
-        verify(caseHelper, times(8)).hasBarrister(isA(PartyDetails.class));
+        verify(barristerHelper, times(8)).hasBarrister(isA(PartyDetails.class));
     }
 
     @Test
@@ -187,7 +187,7 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
 
         assertPartyToAdd(partiesDynamicList, respondent, PARTY_ID_PREFIX, 0, 5, 5);
         assertPartyToAdd(partiesDynamicList, respondent, PARTY_ID_PREFIX, 1, 6, 6);
-        verify(caseHelper, times(4)).hasBarrister(isA(PartyDetails.class));
+        verify(barristerHelper, times(4)).hasBarrister(isA(PartyDetails.class));
     }
 
     @Test
@@ -211,7 +211,7 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
         assertEquals(2, partiesDynamicList.getListItems().size());
         assertPartyToAdd(partiesDynamicList, applicant, PARTY_ID_PREFIX, 0, 1, 1);
         assertPartyToAdd(partiesDynamicList, applicant, PARTY_ID_PREFIX, 1, 2, 2);
-        verify(caseHelper, times(4)).hasBarrister(isA(PartyDetails.class));
+        verify(barristerHelper, times(4)).hasBarrister(isA(PartyDetails.class));
     }
 
     @Test
@@ -295,7 +295,7 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
         assertEquals(2, partiesDynamicList.getListItems().size());
         assertPartyToAdd(partiesDynamicList, applicant, PARTY_ID_PREFIX, 0, 1, 1);
         assertPartyToAdd(partiesDynamicList, applicant, PARTY_ID_PREFIX, 1, 2, 1);
-        verify(caseHelper, times(4)).hasBarrister(isA(PartyDetails.class));
+        verify(barristerHelper, times(4)).hasBarrister(isA(PartyDetails.class));
     }
 
     @Test
@@ -364,7 +364,7 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
         assertEquals(2, partiesDynamicList.getListItems().size());
         assertPartyToAdd(partiesDynamicList, respondent, PARTY_ID_PREFIX, 0, 5, 5);
         assertPartyToAdd(partiesDynamicList, respondent, PARTY_ID_PREFIX, 1, 6, 5);
-        verify(caseHelper, times(4)).hasBarrister(isA(PartyDetails.class));
+        verify(barristerHelper, times(4)).hasBarrister(isA(PartyDetails.class));
     }
 
     @Test
@@ -394,7 +394,7 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
         assertPartyToAdd(partiesDynamicList, applicant, PARTY_ID_PREFIX, 1, 2, 2);
         assertPartyToAdd(partiesDynamicList, respondent, PARTY_ID_PREFIX, 2, 5, 5);
         assertPartyToAdd(partiesDynamicList, respondent, PARTY_ID_PREFIX, 3, 6, 6);
-        verify(caseHelper, times(8)).hasBarrister(isA(PartyDetails.class));
+        verify(barristerHelper, times(8)).hasBarrister(isA(PartyDetails.class));
     }
 
     @Test
@@ -470,7 +470,7 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
         assertNull(partiesDynamicList.getValue());
         assertEquals(1, partiesDynamicList.getListItems().size());
         assertPartyToAdd(partiesDynamicList, applicant, PARTY_ID_PREFIX, 0, 2, 1);
-        verify(caseHelper, times(4)).hasBarrister(isA(PartyDetails.class));
+        verify(barristerHelper, times(4)).hasBarrister(isA(PartyDetails.class));
     }
 
     @Test

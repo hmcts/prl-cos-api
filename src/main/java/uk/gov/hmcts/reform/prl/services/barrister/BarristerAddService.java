@@ -20,8 +20,8 @@ public class BarristerAddService extends AbstractBarristerService {
     public BarristerAddService(UserService userService,
                                OrganisationService organisationService,
                                EventService eventPublisher,
-                               BarristerHelper caseHelper) {
-        super(userService, organisationService, eventPublisher, caseHelper);
+                               BarristerHelper barristerHelper) {
+        super(userService, organisationService, eventPublisher, barristerHelper);
     }
 
     public AllocatedBarrister getAllocatedBarrister(CaseData caseData, String authorisation) {

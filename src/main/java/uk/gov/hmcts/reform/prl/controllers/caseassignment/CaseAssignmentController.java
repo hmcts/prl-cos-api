@@ -55,7 +55,7 @@ public class CaseAssignmentController {
     private final ObjectMapper objectMapper;
     private final OrganisationService organisationService;
     private final AuthorisationService authorisationService;
-    private final BarristerHelper caseHelper;
+    private final BarristerHelper barristerHelper;
     private final ApplicationsTabService applicationsTabService;
 
     @PostMapping(path = "/barrister/add/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -134,7 +134,7 @@ public class CaseAssignmentController {
             if (errorList.isEmpty()) {
                 PartyDetails partyDetails = caseAssignmentService
                     .getSelectedParty(caseData, allocatedBarrister.getPartyList().getValueCode());
-                caseHelper.setAllocatedBarrister(partyDetails,
+                barristerHelper.setAllocatedBarrister(partyDetails,
                                                  caseData,
                                                  UUID.fromString(allocatedBarrister.getPartyList().getValueCode()));
                 caseAssignmentService.removeBarrister(caseData, partyDetails);

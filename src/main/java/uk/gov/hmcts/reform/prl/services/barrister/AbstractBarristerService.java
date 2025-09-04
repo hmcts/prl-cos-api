@@ -35,14 +35,14 @@ public abstract class AbstractBarristerService {
     protected final UserService userService;
     protected final OrganisationService organisationService;
     protected final EventService eventPublisher;
-    protected final BarristerHelper caseHelper;
+    protected final BarristerHelper barristerHelper;
 
     protected DynamicList getPartiesToList(CaseData caseData, String authorisation) {
         return getPartiesToListForC100OrFL401(caseData, populateBarristerFilter(caseData, authorisation));
     }
 
     protected boolean hasBarrister(PartyDetails partyDetails) {
-        return caseHelper.hasBarrister(partyDetails);
+        return barristerHelper.hasBarrister(partyDetails);
     }
 
     protected boolean partyHasSolicitorOrg(PartyDetails partyDetails) {

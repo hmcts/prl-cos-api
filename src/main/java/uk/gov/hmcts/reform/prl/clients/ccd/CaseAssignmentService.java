@@ -67,7 +67,7 @@ public class CaseAssignmentService {
     private final MaskEmail maskEmail;
     private final ObjectMapper objectMapper;
     private final FeatureToggleService featureToggleService;
-    private final BarristerHelper casehelper;
+    private final BarristerHelper barristerHelper;
     private final BarristerRemoveService barristerRemoveService;
 
     private InvalidPartyException getInvalidPartyException(CaseData caseData,
@@ -470,7 +470,7 @@ public class CaseAssignmentService {
             removeBarristerIfPresent(caseData,
                                      changeOrganisationRequest,
                                      caPartyDetailsElement -> {
-                                         casehelper.setAllocatedBarrister(
+                                         barristerHelper.setAllocatedBarrister(
                                              caPartyDetailsElement.getValue(),
                                              caseData,
                                              caPartyDetailsElement.getId());
@@ -478,7 +478,7 @@ public class CaseAssignmentService {
                                          caPartyDetailsElement.getValue().setBarrister(null);
                                      },
                                      daPartyDetails -> {
-                                         casehelper.setAllocatedBarrister(daPartyDetails,
+                                         barristerHelper.setAllocatedBarrister(daPartyDetails,
                                                                           caseData,
                                                                           daPartyDetails.getPartyId());
                                          barristerRemoveService.notifyBarrister(caseData);

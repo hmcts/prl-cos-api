@@ -169,7 +169,7 @@ public class NoticeOfChangePartiesServiceTest {
     @Mock
     private CaseAssignmentService caseAssignmentService;
     @Mock
-    private BarristerHelper caseHelper;
+    private BarristerHelper barristerHelper;
     @Mock
     private BarristerRemoveService barristerRemoveService;
 
@@ -1239,7 +1239,7 @@ public class NoticeOfChangePartiesServiceTest {
             .isNull();
         assertThat(party.getSolicitorOrg())
             .isEqualTo(Organisation.builder().build());
-        verify(caseHelper).setAllocatedBarrister(isA(PartyDetails.class),
+        verify(barristerHelper).setAllocatedBarrister(isA(PartyDetails.class),
                                                  isA(CaseData.class),
                                                  isA(UUID.class));
         verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
@@ -1496,7 +1496,7 @@ public class NoticeOfChangePartiesServiceTest {
         SubmittedCallbackResponse submittedCallbackResponse = noticeOfChangePartiesService
             .submittedAdminRemoveLegalRepresentative(callbackRequest);
         assertNotNull(submittedCallbackResponse);
-        verify(caseHelper).setAllocatedBarrister(isA(PartyDetails.class),
+        verify(barristerHelper).setAllocatedBarrister(isA(PartyDetails.class),
                                                  isA(CaseData.class),
                                                  isA(UUID.class));
         verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
@@ -1588,7 +1588,7 @@ public class NoticeOfChangePartiesServiceTest {
 
         noticeOfChangePartiesService.submittedStopRepresenting(callbackRequest);
         verify(eventPublisher, times(1)).publishEvent(any(NoticeOfChangeEvent.class));
-        verify(caseHelper).setAllocatedBarrister(isA(PartyDetails.class),
+        verify(barristerHelper).setAllocatedBarrister(isA(PartyDetails.class),
                                                  isA(CaseData.class),
                                                  isA(UUID.class));
         verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
@@ -1651,7 +1651,7 @@ public class NoticeOfChangePartiesServiceTest {
             eq(role),
             eq(caseData)
         );
-        verify(caseHelper).setAllocatedBarrister(isA(PartyDetails.class),
+        verify(barristerHelper).setAllocatedBarrister(isA(PartyDetails.class),
                                                  isA(CaseData.class),
                                                  isA(UUID.class));
         verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));

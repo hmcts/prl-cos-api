@@ -118,7 +118,7 @@ public class NoticeOfChangePartiesService {
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     private final ServiceOfApplicationService serviceOfApplicationService;
     private final CaseAssignmentService caseAssignmentService;
-    private final BarristerHelper caseHelper;
+    private final BarristerHelper barristerHelper;
     private final BarristerRemoveService barristerRemoveService;
 
     public static final String REPRESENTATIVE_REMOVED_LABEL = "# Representative removed";
@@ -935,7 +935,7 @@ public class NoticeOfChangePartiesService {
             TypeOfNocEventEnum.removeLegalRepresentation.getDisplayedValue()
         );
         eventPublisher.publishEvent(noticeOfChangeEvent);
-        caseHelper.setAllocatedBarrister(Optional.ofNullable(oldPartyDetails)
+        barristerHelper.setAllocatedBarrister(Optional.ofNullable(oldPartyDetails)
                                              .map(Element::getValue)
                                              .orElseGet(newPartyDetails::getValue),
                                          caseData,

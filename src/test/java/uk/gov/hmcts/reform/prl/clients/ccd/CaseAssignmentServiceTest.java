@@ -104,7 +104,7 @@ class CaseAssignmentServiceTest {
     @Mock
     private FeatureToggleService featureToggleService;
     @Mock
-    private BarristerHelper casehelper;
+    private BarristerHelper barristerHelper;
     @Mock
     private BarristerRemoveService barristerRemoveService;
 
@@ -297,7 +297,7 @@ class CaseAssignmentServiceTest {
             maskEmail,
             objectMapper,
             featureToggleService,
-            casehelper,
+            barristerHelper,
             barristerRemoveService
         );
         AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder()
@@ -1015,7 +1015,7 @@ class CaseAssignmentServiceTest {
             maskEmail,
             objectMapper,
             featureToggleService,
-            casehelper,
+            barristerHelper,
             barristerRemoveService
         );
 
@@ -1045,7 +1045,7 @@ class CaseAssignmentServiceTest {
             maskEmail,
             objectMapper,
             featureToggleService,
-            casehelper,
+            barristerHelper,
             barristerRemoveService
         );
 
@@ -1075,7 +1075,7 @@ class CaseAssignmentServiceTest {
         verify(caseAssignmentApi, never()).removeCaseUserRoles(anyString(),
                                                       anyString(),
                                                       isA(CaseAssignmentUserRolesRequest.class));
-        verify(casehelper).setAllocatedBarrister(eq(partyDetails),
+        verify(barristerHelper).setAllocatedBarrister(eq(partyDetails),
                                                  isA(CaseData.class),
                                                  isA(UUID.class));
     }
@@ -1140,7 +1140,7 @@ class CaseAssignmentServiceTest {
             maskEmail,
             objectMapper,
             featureToggleService,
-            casehelper,
+            barristerHelper,
             barristerRemoveService
         );
         when(featureToggleService.isBarristerFeatureEnabled())
@@ -1171,7 +1171,7 @@ class CaseAssignmentServiceTest {
             maskEmail,
             objectMapper,
             featureToggleService,
-            casehelper,
+            barristerHelper,
             barristerRemoveService
         );
 
@@ -1200,7 +1200,7 @@ class CaseAssignmentServiceTest {
         verify(caseAssignmentApi, never()).removeCaseUserRoles(anyString(),
                                                       anyString(),
                                                       isA(CaseAssignmentUserRolesRequest.class));
-        verify(casehelper).setAllocatedBarrister(eq(partyDetails),
+        verify(barristerHelper).setAllocatedBarrister(eq(partyDetails),
                                                  isA(CaseData.class),
                                                  isA(UUID.class));
     }
