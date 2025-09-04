@@ -162,6 +162,7 @@ public class AcroCaseDataService {
 
     private List<String> fetchFieldsRequiredForAcro() {
         return List.of(
+            "data.id",
             "data.caseTypeOfApplication",
             "data.courtName",
             "data.courtEpimsId",
@@ -173,7 +174,8 @@ public class AcroCaseDataService {
             "data.applicantsConfidentialDetails",
             "data.orderCollection",
             "data.caseManagementLocation",
-            "data.stmtOfServiceForOrder"
+            "data.stmtOfServiceForOrder",
+            "data.daApplicantContactInstructions"
         );
     }
 
@@ -185,6 +187,7 @@ public class AcroCaseDataService {
             .build();
         Map<String, String> caseIdWithRegionIdMap = new HashMap<>();
         for (AcroCaseDetail caseDetails : acroResponse.getCases()) {
+            updatePartyDetails(caseDetails);
             updateCourtEpmisId(caseDetails, caseIdWithRegionIdMap);
             extractOrderSpecificForSearchCrieteria(caseDetails, startDateForSearch, endDateForSearch);
             extractedAcroResponse.getCases().add(caseDetails);
@@ -199,6 +202,18 @@ public class AcroCaseDataService {
         extractHearingData(extractedAcroResponse, listOfHearingDetails);
 
         return extractedAcroResponse;
+    }
+
+    private void updatePartyDetails(AcroCaseDetail caseDetails) {
+
+        AcroCaseData caseData = caseDetails.getCaseData();
+        if (caseData.getCaseTypeOfApplication().equals("C100")) {
+            caseData.setApplicant(caseData.getApplicants().getFirst().getValue());
+            caseData.setRespondent(caseData.getRespondents().getFirst().getValue());
+        } else {
+            caseData.setApplicant(caseData.getApplicantsFL401());
+            caseData.setRespondent(caseData.getRespondentsFL401());
+        }
     }
 
     private void updateCourtEpmisId(AcroCaseDetail caseDetails, Map<String, String> caseIdWithRegionIdMap) {

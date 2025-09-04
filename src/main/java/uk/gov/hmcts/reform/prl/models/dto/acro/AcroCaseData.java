@@ -40,7 +40,6 @@ public class AcroCaseData {
 
     @Setter(AccessLevel.NONE)
     private PartyDetails applicantsFL401;
-
     @Setter(AccessLevel.NONE)
     private PartyDetails respondentsFL401;
     @Setter(AccessLevel.NONE)
@@ -54,6 +53,8 @@ public class AcroCaseData {
     private String courtEpimsId;
     private String courtTypeId;
     private String courtName;
+    private PartyDetails applicant;
+    private PartyDetails respondent;
 
     @Setter(AccessLevel.NONE)
     private CaseManagementLocation caseManagementLocation;

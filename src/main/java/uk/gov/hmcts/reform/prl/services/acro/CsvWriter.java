@@ -44,32 +44,32 @@ public class CsvWriter {
         ORDER_NAME("Order Name", "caseTypeOfApplication"),
         COURT_DATE("Court Date", "dateOrderMade"),
         ORDER_EXPIRY_DATE("Order Expiry Date", "finalCaseClosedDate"), // Assuming this is a date field
-        RESPONDENT_SURNAME("Respondent Surname", "respondentsFL401.lastName"),
-        RESPONDENT_FORENAMES("Respondent Forename(s)", "respondentsFL401.firstName"),
-        RESPONDENT_DOB("Respondent DOB", "respondentsFL401.dateOfBirth"),
-        RESPONDENT_ADDRESS1("Respondent 1st Line of Address", "respondentsFL401.address.addressLine1"),
-        RESPONDENT_ADDRESS2("Respondent 2nd Line of Address", "respondentsFL401.address.addressLine2"),
-        RESPONDENT_POSTCODE("Respondent Postcode", "respondentsFL401.address.postCode"),
-        RESPONDENT_PHONE("Respondent Phone", "respondentsFL401.phoneNumber"),
-        RESPONDENT_EMAIL("Respondent Email", "respondentsFL401.email"),
-        RESPONDENT_ADDRESS_CONFIDENTIAL("Is Respondent Address Confidential", "respondentsFL401.isAddressConfidential"),
-        RESPONDENT_PHONE_CONFIDENTIAL("Is Respondent Phone Confidential", "respondentsFL401.isPhoneNumberConfidential"),
+        RESPONDENT_SURNAME("Respondent Surname", "respondent.lastName"),
+        RESPONDENT_FORENAMES("Respondent Forename(s)", "respondent.firstName"),
+        RESPONDENT_DOB("Respondent DOB", "respondent.dateOfBirth"),
+        RESPONDENT_ADDRESS1("Respondent 1st Line of Address", "respondent.address.addressLine1"),
+        RESPONDENT_ADDRESS2("Respondent 2nd Line of Address", "respondent.address.addressLine2"),
+        RESPONDENT_POSTCODE("Respondent Postcode", "respondent.address.postCode"),
+        RESPONDENT_PHONE("Respondent Phone", "respondent.phoneNumber"),
+        RESPONDENT_EMAIL("Respondent Email", "respondent.email"),
+        RESPONDENT_ADDRESS_CONFIDENTIAL("Is Respondent Address Confidential", "respondent.isAddressConfidential"),
+        RESPONDENT_PHONE_CONFIDENTIAL("Is Respondent Phone Confidential", "respondent.isPhoneNumberConfidential"),
         RESPONDENT_EMAIL_CONFIDENTIAL(
             "Is Respondent Email Confidential",
-            "respondentsFL401.isEmailAddressConfidential"
+            "respondent.isEmailAddressConfidential"
         ),
-        APPLICANT_SURNAME("Applicant Surname", "applicantsFL401.lastName"),
-        APPLICANT_FORENAMES("Applicant Forename(s)", "applicantsFL401.firstName"),
-        APPLICANT_DOB("Applicant DOB", "applicantsFL401.dateOfBirth"),
-        APPLICANT_ADDRESS1("Applicant 1st Line of Address", "applicantsFL401.address.addressLine1"),
-        APPLICANT_ADDRESS2("Applicant 2nd Line of Address", "applicantsFL401.address.addressLine2"),
-        APPLICANT_POSTCODE("Applicant Postcode", "applicantsFL401.address.postCode"),
-        APPLICANT_PHONE("Applicant Phone", "applicantsFL401.phoneNumber"),
+        APPLICANT_SURNAME("Applicant Surname", "applicant.lastName"),
+        APPLICANT_FORENAMES("Applicant Forename(s)", "applicant.firstName"),
+        APPLICANT_DOB("Applicant DOB", "applicant.dateOfBirth"),
+        APPLICANT_ADDRESS1("Applicant 1st Line of Address", "applicant.address.addressLine1"),
+        APPLICANT_ADDRESS2("Applicant 2nd Line of Address", "applicant.address.addressLine2"),
+        APPLICANT_POSTCODE("Applicant Postcode", "applicant.address.postCode"),
+        APPLICANT_PHONE("Applicant Phone", "applicant.phoneNumber"),
         APPLICANT_SAFE_TIME_TO_CALL("Applicant Safe Time to Call", "daApplicantContactInstructions"),
-        APPLICANT_EMAIL("Applicant Email", "applicantsFL401.email"),
-        APPLICANT_ADDRESS_CONFIDENTIAL("Is Applicant Address Confidential", "applicantsFL401.isAddressConfidential"),
-        APPLICANT_PHONE_CONFIDENTIAL("Is Applicant Phone Confidential", "applicantsFL401.isPhoneNumberConfidential"),
-        APPLICANT_EMAIL_CONFIDENTIAL("Is Applicant Email Confidential", "applicantsFL401.isEmailAddressConfidential"),
+        APPLICANT_EMAIL("Applicant Email", "applicant.email"),
+        APPLICANT_ADDRESS_CONFIDENTIAL("Is Applicant Address Confidential", "applicant.isAddressConfidential"),
+        APPLICANT_PHONE_CONFIDENTIAL("Is Applicant Phone Confidential", "applicant.isPhoneNumberConfidential"),
+        APPLICANT_EMAIL_CONFIDENTIAL("Is Applicant Email Confidential", "applicant.isEmailAddressConfidential"),
         PDF_IDENTIFIER("Order File Name", "PdfIdentifier");
 
         private final String header;
@@ -187,16 +187,16 @@ public class CsvWriter {
 
     private boolean isConfidentialField(AcroCaseData caseData, CsvColumn column) {
         return switch (column) {
-            case APPLICANT_PHONE -> isConfidential(caseData, "applicantsFL401.isPhoneNumberConfidential");
-            case APPLICANT_EMAIL -> isConfidential(caseData, "applicantsFL401.isEmailAddressConfidential");
+            case APPLICANT_PHONE -> isConfidential(caseData, "applicant.isPhoneNumberConfidential");
+            case APPLICANT_EMAIL -> isConfidential(caseData, "applicant.isEmailAddressConfidential");
             case APPLICANT_SAFE_TIME_TO_CALL -> true; // Always blank when confidentialAllowed is false
             case APPLICANT_ADDRESS1, APPLICANT_ADDRESS2, APPLICANT_POSTCODE ->
-                isConfidential(caseData, "applicantsFL401.isAddressConfidential");
+                isConfidential(caseData, "applicant.isAddressConfidential");
 
-            case RESPONDENT_PHONE -> isConfidential(caseData, "respondentsFL401.isPhoneNumberConfidential");
-            case RESPONDENT_EMAIL -> isConfidential(caseData, "respondentsFL401.isEmailAddressConfidential");
+            case RESPONDENT_PHONE -> isConfidential(caseData, "respondent.isPhoneNumberConfidential");
+            case RESPONDENT_EMAIL -> isConfidential(caseData, "respondent.isEmailAddressConfidential");
             case RESPONDENT_ADDRESS1, RESPONDENT_ADDRESS2, RESPONDENT_POSTCODE ->
-                isConfidential(caseData, "respondentsFL401.isAddressConfidential");
+                isConfidential(caseData, "respondent.isAddressConfidential");
             default -> false;
         };
     }

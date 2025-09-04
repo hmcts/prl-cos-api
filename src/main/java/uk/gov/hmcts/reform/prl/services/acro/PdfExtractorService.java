@@ -31,11 +31,11 @@ public class PdfExtractorService {
     )
     public File downloadPdf(String fileName, String caseId, Document document, String sysUserToken) {
         if (document == null || document.getDocumentBinaryUrl() == null) {
-            log.debug("Skipping download for case {} - document is null or has no URL", caseId);
+            log.info("Skipping download for case {} - document is null or has no URL", caseId);
             return null;
         }
 
-        log.debug("Attempting to download {} FL404a PDF for case {}", fileName, caseId);
+        log.info("Attempting to download {} FL404a PDF for case {}", fileName, caseId);
 
         String serviceToken = authTokenGenerator.generate();
         try {
@@ -54,14 +54,14 @@ public class PdfExtractorService {
                     StandardCopyOption.REPLACE_EXISTING
                 );
 
-                log.debug("Successfully downloaded {} PDF for case {} to output directory", fileName, caseId);
+                log.info("Successfully downloaded {} PDF for case {} to output directory", fileName, caseId);
                 return outputFile;
             } else {
                 log.warn("No response body received for FL404a document download for case {}", caseId);
                 throw new RuntimeException("Empty response body for document download");
             }
         } catch (Exception e) {
-            log.warn("Failed to download {} PDF for case {} - will retry if attempts remaining", fileName, caseId);
+            log.error("Failed to download {} PDF for case {} - will retry if attempts remaining", fileName, caseId);
             throw new RuntimeException("Failed to download FL404a document for case " + caseId);
         }
     }

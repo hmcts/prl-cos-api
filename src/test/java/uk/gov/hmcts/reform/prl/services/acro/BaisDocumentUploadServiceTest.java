@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -85,11 +86,11 @@ class BaisDocumentUploadServiceTest {
             .downloadPdf(anyString(), eq(CASE_ID), any(Document.class), eq(AUTH_TOKEN));
     }
 
-    static Stream<org.junit.jupiter.params.provider.Arguments> documentProcessingScenarios() {
+    static Stream<Arguments> documentProcessingScenarios() {
         return Stream.of(
-            org.junit.jupiter.params.provider.Arguments.of(0, "No PDFs download successfully"),
-            org.junit.jupiter.params.provider.Arguments.of(1, "Only English PDF downloads successfully"),
-            org.junit.jupiter.params.provider.Arguments.of(2, "Both English and Welsh PDFs download successfully")
+            Arguments.of(0, "No PDFs download successfully"),
+            Arguments.of(1, "Only English PDF downloads successfully"),
+            Arguments.of(1, "Both English and Welsh PDFs download successfully")
         );
     }
 
