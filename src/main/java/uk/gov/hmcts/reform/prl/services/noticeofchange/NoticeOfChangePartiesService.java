@@ -1016,6 +1016,9 @@ public class NoticeOfChangePartiesService {
             selectedPartyDetailsMap
         );
 
+        caseAssignmentService.removeAmBarristerCaseRole(caseData,
+                                                        selectedPartyDetailsMap);
+
         caseDataUpdated = createChangeOrgReqAndRemoveRepresentative(
             authorisation,
             caseDetails,
