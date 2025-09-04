@@ -178,6 +178,7 @@ class CsvWriterTest {
             csvWriter.appendCsvRowToFile(csvFile, caseData, true, filename);
 
             List<String> lines = Files.readAllLines(csvFile.toPath());
+
             assertAll(
                 "Single row append validation",
                 () -> assertEquals(2, lines.size(), "Should have header + 1 data row"),
@@ -242,12 +243,12 @@ class CsvWriterTest {
             AcroCaseData standardCase = TestDataFactory.createStandardCaseData();
 
             return Stream.of(
-                arguments("respondentsFL401.lastName", "Doe", standardCase),
-                arguments("respondentsFL401.firstName", "John", standardCase),
-                arguments("applicantsFL401.lastName", "Smith", standardCase),
-                arguments("applicantsFL401.firstName", "Jane", standardCase),
-                arguments("applicantsFL401.phoneNumber", APPLICANT_PHONE, standardCase),
-                arguments("applicantsFL401.email", APPLICANT_EMAIL, standardCase)
+                arguments("respondent.lastName", "Doe", standardCase),
+                arguments("respondent.firstName", "John", standardCase),
+                arguments("applicant.lastName", "Smith", standardCase),
+                arguments("applicant.firstName", "Jane", standardCase),
+                arguments("applicant.phoneNumber", APPLICANT_PHONE, standardCase),
+                arguments("applicant.email", APPLICANT_EMAIL, standardCase)
             );
         }
     }
@@ -259,7 +260,6 @@ class CsvWriterTest {
                 RESPONDENT_ADDRESS_LINE1, RESPONDENT_ADDRESS_LINE2, RESPONDENT_POSTCODE,
                 RESPONDENT_PHONE, RESPONDENT_EMAIL, YesOrNo.No, YesOrNo.No, YesOrNo.No
             );
-
             PartyDetails applicant = createPartyDetails(
                 "Jane", "Smith", "1990-12-11",
                 APPLICANT_ADDRESS_LINE1, APPLICANT_ADDRESS_LINE2, APPLICANT_POSTCODE,
@@ -315,8 +315,8 @@ class CsvWriterTest {
                 .courtName("test")
                 .courtEpimsId("Manchester")
                 .caseTypeOfApplication("FL401")
-                .respondentsFL401(respondent)
-                .applicantsFL401(applicant)
+                .respondent(respondent)
+                .applicant(applicant)
                 .respondents(List.of(respondentElement))
                 .applicants(List.of(applicantElement))
                 .daApplicantContactInstructions(contactInstructions)
