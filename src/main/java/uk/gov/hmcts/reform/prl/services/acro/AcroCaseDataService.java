@@ -10,6 +10,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -23,16 +25,14 @@ import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseDetail;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroResponse;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CaseManagementLocation;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Bool;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Filter;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.request.LastModified;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Match;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Must;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Query;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.request.QueryParam;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Range;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Should;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.request.StateFilter;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.acro.Bool;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.acro.Filter;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.acro.LastModified;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.acro.Must;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.acro.Query;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.acro.QueryParam;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.acro.Range;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.acro.Term;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 
@@ -61,6 +61,11 @@ public class AcroCaseDataService {
     private final HearingService hearingService;
     private final AcroDatesService acroDatesService;
 
+    @Retryable(
+        value = {Exception.class},
+        maxAttempts = 3,
+        backoff = @Backoff(delay = 2000, multiplier = 2)
+    )
     public AcroResponse getCaseData(String authorisation) throws IOException {
 
         AcroResponse acroResponse = AcroResponse.builder().cases(new ArrayList<>()).build();
@@ -83,9 +88,9 @@ public class AcroCaseDataService {
             log.info("Invoking search cases");
             SearchResult searchResult = coreCaseDataApi.searchCases(
                 userToken,
-                searchString,
                 s2sToken,
-                searchCaseTypeId
+                searchCaseTypeId,
+                searchString
             );
             acroResponse = objectMapper.convertValue(
                 searchResult,
@@ -96,8 +101,9 @@ public class AcroCaseDataService {
                 log.info("Extracting data needed for ACRO --> {}", acroResponse.getTotal());
 
                 List<AcroCaseDetail> validCases = acroResponse.getCases().stream()
-                    .filter(c -> isValidForCaseTypeOfApplication(
-                        c.getCaseData())).toList();
+                    .filter(c -> isValidForCaseTypeOfApplication(c.getCaseData()))
+                    .toList();
+
                 AcroResponse filteredResponse = acroResponse.toBuilder().cases(validCases).build();
                 AcroResponse updatedAcroData = extractCaseDetailsForAllCases(
                     authorisation,
@@ -119,7 +125,7 @@ public class AcroCaseDataService {
             }
         } catch (Exception e) {
             log.error("Error in search cases {}", e.getMessage());
-            throw e;
+            throw new RuntimeException("Failed search query", e);
         }
         return acroResponse;
     }
@@ -141,24 +147,17 @@ public class AcroCaseDataService {
             .lte(String.valueOf(endDateForSearch))
             .build();
 
-        List<Should> mustQuery = populateMustQuery(lastModified);
+
         Range range = Range.builder().lastModified(lastModified).build();
         Bool bool = Bool.builder()
             .filter(Filter.builder().range(range).build())
-            .must(Must.builder().stateFilter(StateFilter.builder().should(mustQuery).build()).build())
+            .must(List.of(
+                Must.builder().term(Term.builder().orderTypeId(NON_MOLESTATION_ORDER_FL_404_A).build()).build(),
+                Must.builder().range(Range.builder().dateCreated(lastModified).build()).build()
+            ))
             .build();
         Query query = Query.builder().bool(bool).build();
         return QueryParam.builder().query(query).dataToReturn(fetchFieldsRequiredForAcro()).build();
-    }
-
-    private List<Should> populateMustQuery(LastModified dateCreatedRange) {
-        List<Should> should = new ArrayList<>();
-        should.add(Should.builder().match(Match.builder().orderType(NON_MOLESTATION).build()).build());
-        should.add(Should.builder().match(Match.builder().orderTypeId(NON_MOLESTATION_ORDER_FL_404_A).build()).build());
-        should.add(Should.builder().range(Range.builder().dateCreated(dateCreatedRange).build()).build());
-        should.add(Should.builder().match(Match.builder().typeOfOrder(FINAL).build()).build());
-
-        return should;
     }
 
     private List<String> fetchFieldsRequiredForAcro() {
@@ -186,7 +185,7 @@ public class AcroCaseDataService {
             .build();
         Map<String, String> caseIdWithRegionIdMap = new HashMap<>();
         for (AcroCaseDetail caseDetails : acroResponse.getCases()) {
-            updateCourtEpmisId(caseDetails, caseIdWithRegionIdMap, extractedAcroResponse);
+            updateCourtEpmisId(caseDetails, caseIdWithRegionIdMap);
             extractOrderSpecificForSearchCrieteria(caseDetails, startDateForSearch, endDateForSearch);
             extractedAcroResponse.getCases().add(caseDetails);
         }
@@ -197,14 +196,12 @@ public class AcroCaseDataService {
 
         filterCancelledHearingsBeforeListing(listOfHearingDetails);
 
-        extractHearingData(acroResponse, listOfHearingDetails);
+        extractHearingData(extractedAcroResponse, listOfHearingDetails);
 
         return extractedAcroResponse;
     }
 
-    private void updateCourtEpmisId(AcroCaseDetail caseDetails,
-                                    Map<String, String> caseIdWithRegionIdMap,
-                                    AcroResponse filteredAcroResponse) {
+    private void updateCourtEpmisId(AcroCaseDetail caseDetails, Map<String, String> caseIdWithRegionIdMap) {
         CaseManagementLocation caseManagementLocation = caseDetails.getCaseData().getCaseManagementLocation();
         if (caseManagementLocation != null) {
             if (caseManagementLocation.getRegionId() != null) {
@@ -213,14 +210,12 @@ public class AcroCaseDataService {
                         + "-" + caseManagementLocation.getBaseLocationId()
                 );
                 caseDetails.getCaseData().setCourtEpimsId(caseManagementLocation.getBaseLocationId());
-                filteredAcroResponse.getCases().add(caseDetails);
             } else if (caseManagementLocation.getRegion() != null) {
                 caseIdWithRegionIdMap.put(
                     String.valueOf(caseDetails.getId()),
                     caseManagementLocation.getRegion() + "-" + caseManagementLocation.getBaseLocation()
                 );
                 caseDetails.getCaseData().setCourtEpimsId(caseManagementLocation.getBaseLocation());
-                filteredAcroResponse.getCases().add(caseDetails);
             }
         }
     }
@@ -230,9 +225,7 @@ public class AcroCaseDataService {
                                                         LocalDateTime endDateForSearch) {
         AcroCaseData caseData = acroCaseDetail.getCaseData();
         caseData.getOrderCollection().stream().map(Element::getValue)
-            .filter(o -> o.getOrderType().equals(NON_MOLESTATION)
-                && o.getOrderTypeId().equals(NON_MOLESTATION_ORDER_FL_404_A)
-                && o.getTypeOfOrder().equals(FINAL)
+            .filter(o -> o.getOrderTypeId().equals(NON_MOLESTATION_ORDER_FL_404_A)
                 && o.getDateCreated().isAfter(startDateForSearch)
                 && o.getDateCreated().isBefore(endDateForSearch)
             )
