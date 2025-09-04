@@ -13,12 +13,12 @@ import uk.gov.hmcts.reform.prl.models.dto.acro.AcroResponse;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -72,11 +72,12 @@ public class BaisDocumentUploadService {
         }
     }
 
-    private void processCasesAndCreateCsvRows(File csvFile, AcroResponse acroResponse, String sysUserToken) {
-        log.info(
-            "Processing {} cases for FL404a document extraction and CSV generation",
-            acroResponse.getCases().size()
-        );
+    private void processCasesAndCreateCsvRows(File csvFile, AcroResponse acroResponse, String sysUserToken) throws IOException {
+        log.info("Processing {} cases for FL404a document extraction and CSV generation", acroResponse.getCases().size());
+        int totalDocumentsProcessed = 0;
+        int successfullyProcessed = 0;
+        int casesWithoutFl404Orders = 0;
+        int documentsWithNullContent = 0;
 
         for (var acroCase : acroResponse.getCases()) {
             AcroCaseData caseData = acroCase.getCaseData();
@@ -88,43 +89,76 @@ public class BaisDocumentUploadService {
                 for (var order : caseData.getFl404Orders()) {
                     LocalDateTime orderCreatedDate = order.getDateCreated();
                     String filePrefix = getFilePrefix(caseId, orderCreatedDate);
-                    String englishFileName = filePrefix + ".pdf";
-                    String welshFileName = filePrefix + "-welsh.pdf";
 
                     // Process English PDF
+                    if (order.getOrderDocument() != null) {
+                        totalDocumentsProcessed++;
+                        String englishFileName = filePrefix + ".pdf";
 
-                    try {
+                        try {
+                            File englishFile = pdfExtractorService.downloadPdf(
+                                englishFileName,
+                                caseId,
+                                order.getOrderDocument(),
+                                sysUserToken
+                            );
 
-                        File englishFile = pdfExtractorService.downloadPdf(
-                            englishFileName,
-                            caseId,
-                            order.getOrderDocument(),
-                            sysUserToken
-                        );
-                        File welshFile = pdfExtractorService.downloadPdf(
-                            welshFileName,
-                            caseId,
-                            order.getOrderDocumentWelsh(),
-                            sysUserToken
-                        );
-
-                        if (Optional.ofNullable(englishFile).isPresent() && Optional.ofNullable(welshFile).isPresent()) {
-                            csvWriter.appendCsvRowToFile(csvFile, caseData, true, englishFile.getName());
+                            if (englishFile != null) {
+                                csvWriter.appendCsvRowToFile(csvFile, caseData, true, englishFile.getName());
+                                successfullyProcessed++;
+                                log.debug("Successfully processed English FL404a document for case {}: {}",
+                                         caseId, englishFile.getName());
+                            } else {
+                                log.warn("Failed to download English FL404a document for case {}", caseId);
+                            }
+                        } catch (Exception e) {
+                            log.error("Error processing English FL404a document for case {}: {}",
+                                     caseId, e.getMessage(), e);
                         }
-                        log.info(
-                            "FL404a document processing completed. Successfully processed {}/{} documents",
-                            englishFileName,
-                            welshFileName
-                        );
-                    } catch (Exception e) {
-                        log.warn("Failed to download FL404a document for case {}", caseId);
+                    } else {
+                        documentsWithNullContent++;
+                        log.info("Case {} has FL404 order but English document is null - not processing", caseId);
+                    }
+
+                    // Process Welsh PDF
+                    if (order.getOrderDocumentWelsh() != null) {
+                        totalDocumentsProcessed++;
+                        String welshFileName = filePrefix + "-Welsh.pdf";
+
+                        try {
+                            File welshFile = pdfExtractorService.downloadPdf(
+                                welshFileName,
+                                caseId,
+                                order.getOrderDocumentWelsh(),
+                                sysUserToken
+                            );
+
+                            if (welshFile != null) {
+                                csvWriter.appendCsvRowToFile(csvFile, caseData, true, welshFile.getName());
+                                successfullyProcessed++;
+                                log.debug("Successfully processed Welsh FL404a document for case {}: {}",
+                                         caseId, welshFile.getName());
+                            } else {
+                                log.warn("Failed to download Welsh FL404a document for case {}", caseId);
+                            }
+                        } catch (Exception e) {
+                            log.error("Error processing Welsh FL404a document for case {}: {}",
+                                     caseId, e.getMessage(), e);
+                        }
+                    } else {
+                        documentsWithNullContent++;
+                        log.info("Case {} has FL404 order but Welsh document is null - not processing", caseId);
                     }
                 }
             } else {
-                log.debug("Skipping case {} - no FL404 orders found", caseId);
+                casesWithoutFl404Orders++;
+                log.info("Case {} has no FL404 orders - skipping case entirely", caseId);
             }
         }
 
+        log.info("FL404a document processing completed. Successfully processed {}/{} documents. "
+                        + "Cases without FL404 orders: {}. Documents with null content: {}",
+                successfullyProcessed, totalDocumentsProcessed, casesWithoutFl404Orders, documentsWithNullContent);
     }
 
     private String getFilePrefix(String caseId, LocalDateTime orderCreatedDate) {
