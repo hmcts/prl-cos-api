@@ -139,6 +139,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -3609,10 +3610,15 @@ public class CallbackControllerTest {
         when(updatePartyDetailsService.validateUpdatePartyDetails(callbackRequest)).thenReturn(new ArrayList<>());
 
         AboutToStartOrSubmitCallbackResponse response = callbackController
-            .handleUpdatePartyDetailsMidEvent(authToken, s2sToken, callbackRequest);
+            .updatePartyDetails(authToken, s2sToken, callbackRequest);
 
         assertNotNull(response);
         assertTrue(response.getErrors().isEmpty());
+        verify(updatePartyDetailsService).validateUpdatePartyDetails(callbackRequest);
+        verify(updatePartyDetailsService).updateApplicantRespondentAndChildData(
+            callbackRequest,
+            authToken
+        );
 
     }
 
@@ -3627,10 +3633,15 @@ public class CallbackControllerTest {
         when(updatePartyDetailsService.validateUpdatePartyDetails(callbackRequest)).thenReturn(List.of("Barrister"));
 
         AboutToStartOrSubmitCallbackResponse response = callbackController
-            .handleUpdatePartyDetailsMidEvent(authToken, s2sToken, callbackRequest);
+            .updatePartyDetails(authToken, s2sToken, callbackRequest);
 
         assertNotNull(response);
         assertTrue(response.getErrors().contains("Barrister"));
+        verify(updatePartyDetailsService).validateUpdatePartyDetails(callbackRequest);
+        verify(updatePartyDetailsService, never()).updateApplicantRespondentAndChildData(
+            callbackRequest,
+            authToken
+        );
 
     }
 }
