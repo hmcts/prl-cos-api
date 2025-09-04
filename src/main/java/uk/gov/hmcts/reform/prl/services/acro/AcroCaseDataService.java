@@ -62,8 +62,8 @@ public class AcroCaseDataService {
     private final AcroDatesService acroDatesService;
 
     @Retryable(
-        value = {Exception.class},
-        maxAttempts = 3,
+        retryFor = {Exception.class},
+        maxAttempts = 4,
         backoff = @Backoff(delay = 2000, multiplier = 2)
     )
     public AcroResponse getCaseData(String authorisation) throws IOException {
