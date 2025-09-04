@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
@@ -12,11 +14,6 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
 
 
 @Service
@@ -27,29 +24,23 @@ public class PdfExtractorService {
     private final AuthTokenGenerator authTokenGenerator;
     private final CaseDocumentClient caseDocumentClient;
 
-    public Optional<List<File>> downloadFl404aDocuments(String caseId, String userToken,
-                                                        String fileName, Document orderDocument,
-                                                        Document orderDocumentWelsh) {
-        List<Document> documents = Arrays.asList(orderDocument, orderDocumentWelsh);
-        List<File> downloadedFiles = new ArrayList<>();
 
-        for (Document document : documents) {
-            Optional<File> downloadedFile = downloadFl404aDocument(caseId, userToken, fileName, document);
-            downloadedFile.ifPresent(downloadedFiles::add);
-        }
-
-        return downloadedFiles.isEmpty() ? Optional.empty() : Optional.of(downloadedFiles);
-    }
-
-    public Optional<File> downloadFl404aDocument(String caseId, String userToken, String fileName, Document document) {
+    @Retryable(
+        retryFor = {Exception.class},
+        backoff = @Backoff(delay = 1000, multiplier = 2)
+    )
+    public File downloadPdf(String fileName, String caseId, Document document, String sysUserToken) {
         if (document == null || document.getDocumentBinaryUrl() == null) {
-            return Optional.empty();
+            log.debug("Skipping download for case {} - document is null or has no URL", caseId);
+            return null;
         }
 
+        log.debug("Attempting to download {} FL404a PDF for case {}", fileName, caseId);
+
+        String serviceToken = authTokenGenerator.generate();
         try {
-            String serviceToken = authTokenGenerator.generate();
             ResponseEntity<Resource> response = caseDocumentClient.getDocumentBinary(
-                userToken,
+                sysUserToken,
                 serviceToken,
                 document.getDocumentBinaryUrl()
             );
@@ -57,17 +48,21 @@ public class PdfExtractorService {
             if (response.getBody() != null) {
                 File outputFile = new File(fileName);
 
-                Files.copy(response.getBody().getInputStream(),
-                           outputFile.toPath(),
-                           StandardCopyOption.REPLACE_EXISTING);
+                Files.copy(
+                    response.getBody().getInputStream(),
+                    outputFile.toPath(),
+                    StandardCopyOption.REPLACE_EXISTING
+                );
 
-                log.info("Downloaded FL404a PDF for case {}: {}", caseId, fileName);
-                return Optional.of(outputFile);
+                log.debug("Successfully downloaded {} PDF for case {} to output directory", fileName, caseId);
+                return outputFile;
+            } else {
+                log.warn("No response body received for FL404a document download for case {}", caseId);
+                throw new RuntimeException("Empty response body for document download");
             }
         } catch (Exception e) {
-            log.error("Failed to download FL404a document for case {}: {}", caseId, e.getMessage());
+            log.warn("Failed to download {} PDF for case {} - will retry if attempts remaining", fileName, caseId);
+            throw new RuntimeException("Failed to download FL404a document for case " + caseId);
         }
-
-        return Optional.empty();
     }
 }
