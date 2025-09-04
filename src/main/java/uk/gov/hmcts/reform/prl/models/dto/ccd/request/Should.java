@@ -14,5 +14,4 @@ import lombok.NoArgsConstructor;
 public class Should {
 
     private Match match;
-    private Range range;
 }

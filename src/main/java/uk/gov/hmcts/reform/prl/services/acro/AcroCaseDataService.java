@@ -51,8 +51,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CANCELLED;
 public class AcroCaseDataService {
 
     public static final String NON_MOLESTATION_ORDER_FL_404_A = "Non-molestation order (FL404A)";
-    public static final String NON_MOLESTATION = "nonMolestation";
-    public static final String FINAL = "Final";
     private final CoreCaseDataApi coreCaseDataApi;
     private final AuthTokenGenerator authTokenGenerator;
     @Value("${acro.search-case-type-id}")
@@ -68,7 +66,7 @@ public class AcroCaseDataService {
     )
     public AcroResponse getCaseData(String authorisation) throws IOException {
 
-        AcroResponse acroResponse = AcroResponse.builder().cases(new ArrayList<>()).build();
+        AcroResponse acroResponse;
 
         try {
 
@@ -107,7 +105,6 @@ public class AcroCaseDataService {
                 AcroResponse filteredResponse = acroResponse.toBuilder().cases(validCases).build();
                 AcroResponse updatedAcroData = extractCaseDetailsForAllCases(
                     authorisation,
-                    s2sToken,
                     filteredResponse,
                     startDateForSearch,
                     endDateForSearch
@@ -162,6 +159,7 @@ public class AcroCaseDataService {
 
     private List<String> fetchFieldsRequiredForAcro() {
         return List.of(
+            "data.id",
             "data.caseTypeOfApplication",
             "data.courtName",
             "data.courtEpimsId",
@@ -173,18 +171,20 @@ public class AcroCaseDataService {
             "data.applicantsConfidentialDetails",
             "data.orderCollection",
             "data.caseManagementLocation",
-            "data.stmtOfServiceForOrder"
+            "data.stmtOfServiceForOrder",
+            "data.daApplicantContactInstructions"
         );
     }
 
     private AcroResponse extractCaseDetailsForAllCases(
-        String authorisation, String s2sToken, AcroResponse acroResponse,
+        String authorisation, AcroResponse acroResponse,
         LocalDateTime startDateForSearch, LocalDateTime endDateForSearch) {
         AcroResponse extractedAcroResponse = AcroResponse.builder()
             .cases(new ArrayList<>())
             .build();
         Map<String, String> caseIdWithRegionIdMap = new HashMap<>();
         for (AcroCaseDetail caseDetails : acroResponse.getCases()) {
+            updatePartyDetails(caseDetails);
             updateCourtEpmisId(caseDetails, caseIdWithRegionIdMap);
             extractOrderSpecificForSearchCrieteria(caseDetails, startDateForSearch, endDateForSearch);
             extractedAcroResponse.getCases().add(caseDetails);
@@ -199,6 +199,18 @@ public class AcroCaseDataService {
         extractHearingData(extractedAcroResponse, listOfHearingDetails);
 
         return extractedAcroResponse;
+    }
+
+    private void updatePartyDetails(AcroCaseDetail caseDetails) {
+
+        AcroCaseData caseData = caseDetails.getCaseData();
+        if (caseData.getCaseTypeOfApplication().equals("C100")) {
+            caseData.setApplicant(caseData.getApplicants().getFirst().getValue());
+            caseData.setRespondent(caseData.getRespondents().getFirst().getValue());
+        } else {
+            caseData.setApplicant(caseData.getApplicantsFL401());
+            caseData.setRespondent(caseData.getRespondentsFL401());
+        }
     }
 
     private void updateCourtEpmisId(AcroCaseDetail caseDetails, Map<String, String> caseIdWithRegionIdMap) {
@@ -270,9 +282,10 @@ public class AcroCaseDataService {
                         .findFirst().orElse(null);
 
                 if (filteredHearing != null && CollectionUtils.isNotEmpty(filteredHearing.getCaseHearings())) {
-                    acroCaseDetail.getCaseData().setCaseHearings(filteredHearing.getCaseHearings());
-                    acroCaseDetail.getCaseData().setCourtName(filteredHearing.getCourtName());
-                    acroCaseDetail.getCaseData().setCourtTypeId(filteredHearing.getCourtTypeId());
+                    AcroCaseData caseData = acroCaseDetail.getCaseData();
+                    caseData.setCaseHearings(filteredHearing.getCaseHearings());
+                    caseData.setCourtName(filteredHearing.getCourtName());
+                    caseData.setCourtTypeId(filteredHearing.getCourtTypeId());
                     filteredHearing.setCourtName(null);
                     filteredHearing.setCourtTypeId(null);
                     filteredHearing.getCaseHearings().forEach(
