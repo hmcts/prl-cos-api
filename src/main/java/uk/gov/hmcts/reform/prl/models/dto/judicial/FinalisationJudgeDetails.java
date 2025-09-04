@@ -13,8 +13,6 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FinalisationJudgeDetails {
 
-    // @JsonProperty("tierOfJudiciary")
-    // private final TierOfJudiciaryEnum tierOfJudiciary;
 
     private final JudgeOrMagistrateTitleEnum judgeOrMagistrateTitle;
 }
