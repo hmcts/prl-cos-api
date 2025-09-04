@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.acro;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -9,6 +10,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -22,11 +24,11 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -43,12 +45,12 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 class CsvWriterTest {
 
     private static final String[] EXPECTED_CSV_HEADERS = {
-        "Case No.", "Court Name/Location", "Court Code", "Order Name", "Court Date DD/MM/YYYY", "Order Expiry Date",
+        "Case No.", "Court Name/Location", "Court Code", "Order Name", "Court Date", "Order Expiry Date",
         "Respondent Surname", "Respondent Forename(s)", "Respondent DOB", "Respondent 1st Line of Address",
         "Respondent 2nd Line of Address", "Respondent Postcode", "Respondent Phone", "Respondent Email",
         "Is Respondent Address Confidential", "Is Respondent Phone Confidential", "Is Respondent Email Confidential",
-        "Applicant Surname", "Applicant Forename(s)", "Applicant DOB", "Applicant First Line of Address",
-        "Applicant Second Line of Address", "Applicant Postcode", "Applicant Phone", "Applicant Safe Time to Call", "Applicant Email",
+        "Applicant Surname", "Applicant Forename(s)", "Applicant DOB", "Applicant 1st Line of Address",
+        "Applicant 2nd Line of Address", "Applicant Postcode", "Applicant Phone", "Applicant Safe Time to Call", "Applicant Email",
         "Is Applicant Address Confidential", "Is Applicant Phone Confidential", "Is Applicant Email Confidential", "Order File Name"
     };
 
@@ -62,120 +64,397 @@ class CsvWriterTest {
     private static final String RESPONDENT_POSTCODE = "SW1H 9EX";
     private static final String RESPONDENT_PHONE = "07700900123";
     private static final String RESPONDENT_EMAIL = "respondent@example.com";
-    private static final String BLANK_VALUE = "-";
 
     @InjectMocks
     private CsvWriter csvWriter;
 
-    @Nested
-    @DisplayName("CSV File Creation Tests")
-    class CsvFileCreationTests {
-        @Test
-        @DisplayName("Should create a valid CSV file")
-        void shouldCreateValidCsvFile() throws Exception {
-            List<AcroCaseData> caseDataList = List.of(
-                TestDataFactory.createStandardCaseData(),
-                TestDataFactory.createCaseDataWithAllConfidentialFields()
-            );
-            File csvFile = csvWriter.writeCcdOrderDataToCsv(caseDataList, true);
-
-            // Quick save for colleague review
-            // File savedCsv = new File("test-output.csv");
-            // Files.copy(csvFile.toPath(), savedCsv.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-
-            // System.out.println("CSV saved to: " + savedCsv.getAbsolutePath());
-            // System.out.println("\nCSV Content:");
-            // Files.lines(savedCsv.toPath()).forEach(System.out::println);
-
-            assertNotNull(csvFile);
-            assertTrue(csvFile.exists());
-            assertTrue(csvFile.getName().endsWith(".csv"));
-            List<String> lines = Files.readAllLines(csvFile.toPath());
-            assertEquals(3, lines.size(), "CSV should have header and two data lines");
-        }
-
-        @Test
-        @DisplayName("Should have correct file permissions")
-        void shouldHaveCorrectFilePermissions() throws Exception {
-            AcroCaseData caseData = TestDataFactory.createStandardCaseData();
-            File csvFile = csvWriter.writeCcdOrderDataToCsv(List.of(caseData), true);
-            Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(csvFile.toPath());
-            assertAll(
-                "File permissions validation",
-                () -> assertTrue(
-                    permissions.contains(PosixFilePermission.OWNER_READ),
-                    "Owner should have read permission"
-                ),
-                () -> assertTrue(
-                    permissions.contains(PosixFilePermission.OWNER_WRITE),
-                    "Owner should have write permission"
-                ),
-                () -> assertTrue(
-                    permissions.contains(PosixFilePermission.OWNER_EXECUTE),
-                    "Owner should have execute permission"
-                )
-            );
-        }
-
-        @Test
-        @DisplayName("Should create a valid CSV file with output verification")
-        void shouldCreateValidCsvFileWithOutputVerification() throws Exception {
-            AcroCaseData caseData = TestDataFactory.createStandardCaseData();
-            File csvFile = csvWriter.writeCcdOrderDataToCsv(List.of(caseData), true);
-
-            System.out.println("\nCSV Content:");
-
-            assertAll(
-                "CSV file validation",
-                () -> assertNotNull(csvFile, "CSV file should not be null"),
-                () -> assertTrue(csvFile.exists(), "CSV file should exist"),
-                () -> assertTrue(csvFile.getName().endsWith(".csv"), "File should have .csv extension")
-            );
-        }
-
-        @Test
-        @DisplayName("Should create a valid CSV file for multiple case data")
-        void shouldCreateValidCsvFileForMultipleCases() throws Exception {
-            List<AcroCaseData> caseDataList = List.of(
-                TestDataFactory.createStandardCaseData(),
-                TestDataFactory.createCaseDataWithAllConfidentialFields()
-            );
-            File csvFile = csvWriter.writeCcdOrderDataToCsv(caseDataList, true);
-            assertNotNull(csvFile);
-            assertTrue(csvFile.exists());
-            assertTrue(csvFile.getName().endsWith(".csv"));
-        }
+    @BeforeEach
+    void setUp() throws IOException {
+        Path testOutputDir = Files.createTempDirectory("csvwriter-test");
+        ReflectionTestUtils.setField(csvWriter, "outputDirectory", testOutputDir.toString());
     }
 
     @Nested
-    @DisplayName("CSV Header Tests")
-    class CsvHeaderTests {
+    @DisplayName("CSV File Creation Tests")
+    class CsvFileCreationTests {
+
         @Test
-        @DisplayName("Should contain all expected headers")
-        void shouldContainAllExpectedHeaders() throws Exception {
-            AcroCaseData caseData = TestDataFactory.createStandardCaseData();
-            File csvFile = csvWriter.writeCcdOrderDataToCsv(List.of(caseData), true);
-            String headerLine = readFirstLine(csvFile);
-            assertNotNull(headerLine, "Header line should not be null");
+        @DisplayName("Should create CSV file with headers only")
+        void shouldCreateCsvFileWithHeaders() throws IOException {
+            File csvFile = csvWriter.createCsvFileWithHeaders();
+
+            assertAll(
+                    "CSV file with headers validation",
+                    () -> assertNotNull(csvFile, "CSV file should not be null"),
+                    () -> assertTrue(csvFile.exists(), "CSV file should exist"),
+                    () -> assertTrue(csvFile.getName().startsWith("manifest-"), "File should start with 'manifest-'"),
+                    () -> assertTrue(csvFile.getName().endsWith(".csv"), "File should have .csv extension")
+            );
+
+            List<String> lines = Files.readAllLines(csvFile.toPath());
+            assertEquals(1, lines.size(), "CSV should have only header line");
+
+            String headerLine = lines.get(0);
             for (String expectedHeader : EXPECTED_CSV_HEADERS) {
                 assertTrue(headerLine.contains(expectedHeader), "Header line should contain: " + expectedHeader);
             }
         }
 
         @Test
-        @DisplayName("Should have headers in correct order")
-        void shouldHaveHeadersInCorrectOrder() throws Exception {
-            AcroCaseData caseData = TestDataFactory.createStandardCaseData();
-            File csvFile = csvWriter.writeCcdOrderDataToCsv(List.of(caseData), true);
+        @DisplayName("Should generate correct filename format")
+        void shouldGenerateCorrectFilenameFormat() throws IOException {
+            File csvFile = csvWriter.createCsvFileWithHeaders();
+
+            String expectedDateFormat = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+            String expectedFilename = "manifest-" + expectedDateFormat + ".csv";
+
+            assertEquals(expectedFilename, csvFile.getName(), "Filename should match expected format");
+        }
+
+        @Test
+        @DisplayName("Should create headers in correct order")
+        void shouldCreateHeadersInCorrectOrder() throws IOException {
+            File csvFile = csvWriter.createCsvFileWithHeaders();
             String headerLine = readFirstLine(csvFile);
             String[] actualHeaders = headerLine.split(",");
+
             assertArrayEquals(EXPECTED_CSV_HEADERS, actualHeaders, "Headers should be in the expected order");
+        }
+    }
+
+    @Nested
+    @DisplayName("CSV Row Data Creation Tests")
+    class CsvRowDataCreationTests {
+
+        @Test
+        @DisplayName("Should create CSV row data with filename")
+        void shouldCreateCsvRowDataWithFilename() {
+            AcroCaseData caseData = TestDataFactory.createStandardCaseData();
+            String filename = "test-order.pdf";
+
+            List<String> rowData = csvWriter.createCsvRowData(caseData, true, filename);
+
+            assertAll(
+                    "CSV row data validation",
+                    () -> assertNotNull(rowData, "Row data should not be null"),
+                    () -> assertEquals(EXPECTED_CSV_HEADERS.length, rowData.size(), "Row data should have correct number of columns"),
+                    () -> assertEquals(filename, rowData.get(rowData.size() - 1), "Last column should contain the filename")
+            );
+        }
+
+        @Test
+        @DisplayName("Should create CSV row data without filename")
+        void shouldCreateCsvRowDataWithoutFilename() {
+            AcroCaseData caseData = TestDataFactory.createStandardCaseData();
+
+            List<String> rowData = csvWriter.createCsvRowData(caseData, true, null);
+
+            assertAll(
+                    "CSV row data validation",
+                    () -> assertNotNull(rowData, "Row data should not be null"),
+                    () -> assertEquals(EXPECTED_CSV_HEADERS.length, rowData.size(), "Row data should have correct number of columns"),
+                    () -> assertEquals("", rowData.get(rowData.size() - 1), "Last column should be empty when no filename provided")
+            );
+        }
+
+        @Test
+        @DisplayName("Should handle confidential data in row creation")
+        void shouldHandleConfidentialDataInRowCreation() {
+            AcroCaseData caseData = TestDataFactory.createCaseDataWithAllConfidentialFields();
+
+            List<String> confidentialNotAllowed = csvWriter.createCsvRowData(caseData, false, "order.pdf");
+            List<String> confidentialAllowed = csvWriter.createCsvRowData(caseData, true, "order.pdf");
+
+            assertAll(
+                    "Confidential data handling in row creation",
+                    () -> assertTrue(confidentialNotAllowed.contains("-"), "Should contain dash for confidential fields when not allowed"),
+                    () -> assertFalse(confidentialNotAllowed.contains(APPLICANT_PHONE), "Should not contain phone when confidential not allowed"),
+                    () -> assertTrue(confidentialAllowed.contains(APPLICANT_PHONE), "Should contain phone when confidential allowed")
+            );
+        }
+
+        @Test
+        @DisplayName("Should extract all expected case data fields")
+        void shouldExtractAllExpectedCaseDataFields() {
+            AcroCaseData caseData = TestDataFactory.createStandardCaseData();
+
+            List<String> rowData = csvWriter.createCsvRowData(caseData, true, "test-order.pdf");
+
+            assertAll(
+                    "Case data extraction validation",
+                    () -> assertTrue(rowData.contains("John"), "Should contain respondent first name"),
+                    () -> assertTrue(rowData.contains("Doe"), "Should contain respondent last name"),
+                    () -> assertTrue(rowData.contains("Jane"), "Should contain applicant first name"),
+                    () -> assertTrue(rowData.contains("Smith"), "Should contain applicant last name"),
+                    () -> assertTrue(rowData.contains(APPLICANT_PHONE), "Should contain applicant phone"),
+                    () -> assertTrue(rowData.contains(APPLICANT_EMAIL), "Should contain applicant email"),
+                    () -> assertTrue(rowData.contains("test-order.pdf"), "Should contain filename")
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("CSV Row Appending Tests")
+    class CsvRowAppendingTests {
+
+        @Test
+        @DisplayName("Should append single CSV row to file")
+        void shouldAppendSingleCsvRowToFile() throws IOException {
+            File csvFile = csvWriter.createCsvFileWithHeaders();
+            AcroCaseData caseData = TestDataFactory.createStandardCaseData();
+            String filename = "test-order.pdf";
+
+            csvWriter.appendCsvRowToFile(csvFile, caseData, true, filename);
+
+            List<String> lines = Files.readAllLines(csvFile.toPath());
+            assertAll(
+                    "Single row append validation",
+                    () -> assertEquals(2, lines.size(), "Should have header + 1 data row"),
+                    () -> assertTrue(lines.get(1).contains("John"), "Should contain respondent first name"),
+                    () -> assertTrue(lines.get(1).contains("Jane"), "Should contain applicant first name"),
+                    () -> assertTrue(lines.get(1).contains(filename), "Should contain the filename")
+            );
+        }
+
+        @Test
+        @DisplayName("Should append multiple CSV rows to file")
+        void shouldAppendMultipleCsvRowsToFile() throws IOException {
+            File csvFile = csvWriter.createCsvFileWithHeaders();
+
+            List<AcroCaseData> cases = List.of(
+                    TestDataFactory.createStandardCaseData(),
+                    TestDataFactory.createCaseDataWithAllConfidentialFields()
+            );
+
+            for (int i = 0; i < cases.size(); i++) {
+                csvWriter.appendCsvRowToFile(csvFile, cases.get(i), true, "order-" + (i + 1) + ".pdf");
+            }
+
+            List<String> lines = Files.readAllLines(csvFile.toPath());
+            assertAll(
+                    "Multiple rows append validation",
+                    () -> assertEquals(3, lines.size(), "Should have header + 2 data rows"),
+                    () -> assertTrue(lines.get(1).contains("order-1.pdf"), "First row should contain first filename"),
+                    () -> assertTrue(lines.get(2).contains("order-2.pdf"), "Second row should contain second filename"),
+                    () -> assertTrue(lines.get(1).contains("John"), "First row should contain respondent data"),
+                    () -> assertTrue(lines.get(1).contains("Jane"), "First row should contain applicant data")
+            );
+        }
+
+        @Test
+        @DisplayName("Should append row with confidential data when allowed")
+        void shouldAppendRowWithConfidentialDataWhenAllowed() throws IOException {
+            File csvFile = csvWriter.createCsvFileWithHeaders();
+            AcroCaseData caseData = TestDataFactory.createCaseDataWithAllConfidentialFields();
+
+            csvWriter.appendCsvRowToFile(csvFile, caseData, true, "confidential-order.pdf");
+
+            List<String> lines = Files.readAllLines(csvFile.toPath());
+            String dataRow = lines.get(1);
+
+            assertAll(
+                    "Confidential data append validation",
+                    () -> assertEquals(2, lines.size(), "Should have header + 1 data row"),
+                    () -> assertTrue(dataRow.contains(APPLICANT_PHONE), "Should contain applicant phone"),
+                    () -> assertTrue(dataRow.contains(APPLICANT_EMAIL), "Should contain applicant email"),
+                    () -> assertTrue(dataRow.contains("confidential-order.pdf"), "Should contain filename")
+            );
+        }
+
+        @Test
+        @DisplayName("Should append row with blanked confidential data when not allowed")
+        void shouldAppendRowWithBlankedConfidentialDataWhenNotAllowed() throws IOException {
+            File csvFile = csvWriter.createCsvFileWithHeaders();
+            AcroCaseData caseData = TestDataFactory.createCaseDataWithAllConfidentialFields();
+
+            csvWriter.appendCsvRowToFile(csvFile, caseData, false, "public-order.pdf");
+
+            List<String> lines = Files.readAllLines(csvFile.toPath());
+            String dataRow = lines.get(1);
+
+            assertAll(
+                    "Blanked confidential data append validation",
+                    () -> assertEquals(2, lines.size(), "Should have header + 1 data row"),
+                    () -> assertTrue(dataRow.contains("-"), "Should contain blanked values"),
+                    () -> assertFalse(dataRow.contains(APPLICANT_PHONE), "Should not contain applicant phone"),
+                    () -> assertFalse(dataRow.contains(APPLICANT_EMAIL), "Should not contain applicant email"),
+                    () -> assertTrue(dataRow.contains("public-order.pdf"), "Should contain filename")
+            );
+        }
+
+        @Test
+        @DisplayName("Should append row without filename")
+        void shouldAppendRowWithoutFilename() throws IOException {
+            File csvFile = csvWriter.createCsvFileWithHeaders();
+            AcroCaseData caseData = TestDataFactory.createStandardCaseData();
+
+            csvWriter.appendCsvRowToFile(csvFile, caseData, true, null);
+
+            List<String> lines = Files.readAllLines(csvFile.toPath());
+            String dataRow = lines.get(1);
+
+            assertAll(
+                    "Row without filename validation",
+                    () -> assertEquals(2, lines.size(), "Should have header + 1 data row"),
+                    () -> assertTrue(dataRow.contains("John"), "Should contain respondent data"),
+                    () -> assertTrue(dataRow.contains("Jane"), "Should contain applicant data"),
+                    () -> assertTrue(dataRow.endsWith(","), "Should end with empty filename column")
+            );
+        }
+
+        @Test
+        @DisplayName("Should handle special characters in filename")
+        void shouldHandleSpecialCharactersInFilename() throws IOException {
+            File csvFile = csvWriter.createCsvFileWithHeaders();
+            AcroCaseData caseData = TestDataFactory.createStandardCaseData();
+            String specialFilename = "order-with,comma-and\"quote.pdf";
+
+            csvWriter.appendCsvRowToFile(csvFile, caseData, true, specialFilename);
+
+            List<String> expectedRowData = csvWriter.createCsvRowData(caseData, true, specialFilename);
+            String expectedFilenameColumn = expectedRowData.get(expectedRowData.size() - 1);
+
+            List<String> lines = Files.readAllLines(csvFile.toPath());
+            String dataRow = lines.get(1);
+
+            assertAll(
+                    "Special characters handling validation",
+                    () -> assertEquals(2, lines.size(), "Should have header + 1 data row"),
+                    () -> assertTrue(dataRow.contains("John"), "Should contain case data"),
+                    () -> assertEquals(specialFilename, expectedFilenameColumn, "Expected filename should match input"),
+                    () -> assertTrue(
+                            dataRow.contains(specialFilename)
+                                    || dataRow.contains("\"" + specialFilename.replace("\"", "\"\"") + "\"")
+                                    || dataRow.endsWith("\"" + specialFilename.replace("\"", "\"\"") + "\"")
+                                    || dataRow.endsWith(specialFilename.replace("\"", "\"\"")),
+                            "CSV should contain the filename with proper escaping. Row: " + dataRow
+                    )
+            );
+        }
+
+        @Test
+        @DisplayName("Should maintain CSV format when appending rows")
+        void shouldMaintainCsvFormatWhenAppendingRows() throws IOException {
+            File csvFile = csvWriter.createCsvFileWithHeaders();
+
+            List<AcroCaseData> cases = List.of(
+                    TestDataFactory.createStandardCaseData(),
+                    TestDataFactory.createCaseDataWithAllConfidentialFields(),
+                    TestDataFactory.createMixedConfidentialityCaseData()
+            );
+
+            for (int i = 0; i < cases.size(); i++) {
+                csvWriter.appendCsvRowToFile(csvFile, cases.get(i), true, "order-" + (i + 1) + ".pdf");
+            }
+
+            List<String> lines = Files.readAllLines(csvFile.toPath());
+            String[] headers = lines.get(0).split(",");
+
+            assertAll(
+                    "CSV format maintenance validation",
+                    () -> assertEquals(4, lines.size(), "Should have header + 3 data rows"),
+                    () -> {
+                        for (int i = 1; i < lines.size(); i++) {
+                            String[] rowData = lines.get(i).split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)"); // Split on commas not inside quotes
+                            assertEquals(headers.length, rowData.length,
+                                       "Row " + i + " should have same number of columns as headers");
+                        }
+                    }
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("Combined File and Row Data Tests")
+    class CombinedFileAndRowDataTests {
+
+        @Test
+        @DisplayName("Should work together to create complete CSV file")
+        void shouldWorkTogetherToCreateCompleteCsvFile() throws IOException {
+            File csvFile = csvWriter.createCsvFileWithHeaders();
+
+            List<AcroCaseData> cases = List.of(
+                    TestDataFactory.createStandardCaseData(),
+                    TestDataFactory.createCaseDataWithAllConfidentialFields()
+            );
+
+            for (int i = 0; i < cases.size(); i++) {
+                csvWriter.appendCsvRowToFile(csvFile, cases.get(i), true, "order-" + (i + 1) + ".pdf");
+            }
+
+            List<String> lines = Files.readAllLines(csvFile.toPath());
+            assertAll(
+                    "Combined file creation validation",
+                    () -> assertEquals(3, lines.size(), "Should have header + 2 data rows"),
+                    () -> assertTrue(lines.get(1).contains("order-1.pdf"), "First row should contain first filename"),
+                    () -> assertTrue(lines.get(2).contains("order-2.pdf"), "Second row should contain second filename"),
+                    () -> assertTrue(lines.get(1).contains("John"), "First row should contain respondent data"),
+                    () -> assertTrue(lines.get(1).contains("Jane"), "First row should contain applicant data")
+            );
+        }
+
+        @Test
+        @DisplayName("Should maintain header consistency between methods")
+        void shouldMaintainHeaderConsistencyBetweenMethods() throws IOException {
+            String[] headersFromMethod = csvWriter.getCsvHeaders();
+
+            File csvFile = csvWriter.createCsvFileWithHeaders();
+            String headerLineFromFile = readFirstLine(csvFile);
+            String[] headersFromFile = headerLineFromFile.split(",");
+
+            assertAll(
+                    "Header consistency validation",
+                    () -> assertArrayEquals(EXPECTED_CSV_HEADERS, headersFromMethod, "getCsvHeaders should return expected headers"),
+                    () -> assertArrayEquals(EXPECTED_CSV_HEADERS, headersFromFile, "File headers should match expected headers"),
+                    () -> assertArrayEquals(headersFromMethod, headersFromFile, "Method and file headers should be identical")
+            );
+        }
+
+        @Test
+        @DisplayName("Should handle empty case list gracefully")
+        void shouldHandleEmptyCaseListGracefully() throws IOException {
+            File csvFile = csvWriter.createCsvFileWithHeaders();
+
+            List<String> lines = Files.readAllLines(csvFile.toPath());
+            assertEquals(1, lines.size(), "Should have only header line for empty case list");
+
+            String headerLine = lines.get(0);
+            assertTrue(headerLine.contains("Case No."), "Header should contain expected columns");
+        }
+    }
+
+    @Nested
+    @DisplayName("CSV Header Tests")
+    class CsvHeaderTests {
+
+        @Test
+        @DisplayName("Should get headers from getCsvHeaders method")
+        void shouldGetHeadersFromGetCsvHeadersMethod() {
+            String[] headers = csvWriter.getCsvHeaders();
+
+            assertAll(
+                    "getCsvHeaders method validation",
+                    () -> assertNotNull(headers, "Headers should not be null"),
+                    () -> assertEquals(EXPECTED_CSV_HEADERS.length, headers.length, "Should have correct number of headers"),
+                    () -> assertArrayEquals(EXPECTED_CSV_HEADERS, headers, "Headers should match expected values")
+            );
+        }
+
+        @Test
+        @DisplayName("Should contain all expected headers")
+        void shouldContainAllExpectedHeaders() {
+            String[] headers = csvWriter.getCsvHeaders();
+
+            for (String expectedHeader : EXPECTED_CSV_HEADERS) {
+                assertTrue(List.of(headers).contains(expectedHeader), "Headers should contain: " + expectedHeader);
+            }
         }
     }
 
     @Nested
     @DisplayName("Property Extraction Tests")
     class PropertyExtractionTests {
+
         @ParameterizedTest(name = "Should extract {0} with value: {1}")
         @MethodSource("uk.gov.hmcts.reform.prl.services.acro.CsvWriterTest#propertyExtractionTestCases")
         @DisplayName("Should extract properties correctly")
@@ -183,13 +462,13 @@ class CsvWriterTest {
             Object actualValue = csvWriter.extractPropertyValues(caseData, propertyName);
 
             assertAll(
-                "Property extraction validation",
-                () -> assertNotNull(actualValue, "Property value should not be null for: " + propertyName),
-                () -> assertEquals(
-                    expectedValue,
-                    actualValue,
-                    "Property value should match expected for: " + propertyName
-                )
+                    "Property extraction validation",
+                    () -> assertNotNull(actualValue, "Property value should not be null for: " + propertyName),
+                    () -> assertEquals(
+                            expectedValue,
+                            actualValue,
+                            "Property value should match expected for: " + propertyName
+                    )
             );
         }
 
@@ -206,27 +485,27 @@ class CsvWriterTest {
             AcroCaseData caseData = TestDataFactory.createStandardCaseData();
 
             assertAll(
-                "Invalid property path handling",
-                () -> assertEquals(
-                    "",
-                    csvWriter.extractPropertyValues(caseData, null),
-                    "Should handle null property path"
-                ),
-                () -> assertEquals(
-                    "",
-                    csvWriter.extractPropertyValues(caseData, ""),
-                    "Should handle empty property path"
-                ),
-                () -> assertEquals(
-                    "",
-                    csvWriter.extractPropertyValues(caseData, "   "),
-                    "Should handle whitespace property path"
-                ),
-                () -> assertEquals(
-                    "",
-                    csvWriter.extractPropertyValues(caseData, "nonExistentProperty"),
-                    "Should handle non-existent property"
-                )
+                    "Invalid property path handling",
+                    () -> assertEquals(
+                            "",
+                            csvWriter.extractPropertyValues(caseData, null),
+                            "Should handle null property path"
+                    ),
+                    () -> assertEquals(
+                            "",
+                            csvWriter.extractPropertyValues(caseData, ""),
+                            "Should handle empty property path"
+                    ),
+                    () -> assertEquals(
+                            "",
+                            csvWriter.extractPropertyValues(caseData, "   "),
+                            "Should handle whitespace property path"
+                    ),
+                    () -> assertEquals(
+                            "",
+                            csvWriter.extractPropertyValues(caseData, "nonExistentProperty"),
+                            "Should handle non-existent property"
+                    )
             );
         }
     }
@@ -236,94 +515,94 @@ class CsvWriterTest {
     class ConfidentialDataHandlingTests {
 
         @Test
-        @DisplayName("Should create CSV file with all expected data when confidential data is allowed")
-        void shouldCreateCsvFileWithAllDataWhenConfidentialDataAllowed() throws Exception {
+        @DisplayName("Should include confidential data when allowed")
+        void shouldIncludeConfidentialDataWhenAllowed() {
             AcroCaseData caseData = TestDataFactory.createStandardCaseData();
-            File csvFile = csvWriter.writeCcdOrderDataToCsv(List.of(caseData), true);
-            String csvContent = Files.readString(csvFile.toPath());
+            List<String> rowData = csvWriter.createCsvRowData(caseData, true, "order.pdf");
+            String csvContent = String.join(",", rowData);
 
             assertAll(
-                "Confidential data should be included",
-                () -> assertTrue(csvContent.contains(APPLICANT_PHONE), "Phone number should be present"),
-                () -> assertTrue(csvContent.contains(APPLICANT_EMAIL), "Email should be present"),
-                () -> assertTrue(csvContent.contains(APPLICANT_ADDRESS_LINE1), "Address line 1 should be present"),
-                () -> assertTrue(csvContent.contains(APPLICANT_POSTCODE), "Postcode should be present")
+                    "Confidential data should be included",
+                    () -> assertTrue(csvContent.contains(APPLICANT_PHONE), "Phone number should be present"),
+                    () -> assertTrue(csvContent.contains(APPLICANT_EMAIL), "Email should be present"),
+                    () -> assertTrue(csvContent.contains(APPLICANT_ADDRESS_LINE1), "Address line 1 should be present"),
+                    () -> assertTrue(csvContent.contains(APPLICANT_POSTCODE), "Postcode should be present")
             );
         }
 
         @Test
-        @DisplayName("Should replace confidential fields with dash when confidential data is not allowed")
-        void shouldCreateCsvFileWithDashesWhenConfidfentialDataNotAllowed() throws Exception {
+        @DisplayName("Should replace confidential fields with dash when not allowed")
+        void shouldReplaceConfidentialFieldsWithDashWhenNotAllowed() {
             AcroCaseData caseData = TestDataFactory.createCaseDataWithAllConfidentialFields();
-            File csvFile = csvWriter.writeCcdOrderDataToCsv(List.of(caseData), false);
-            String csvContent = Files.readString(csvFile.toPath());
+            List<String> rowData = csvWriter.createCsvRowData(caseData, false, "order.pdf");
+            String csvContent = String.join(",", rowData);
 
             assertAll(
-                "Confidential data should be blanked",
-                () -> assertTrue(csvContent.contains(BLANK_VALUE), "Should contain blanked values"),
-                () -> assertFalse(csvContent.contains(APPLICANT_PHONE), "Phone number should be blanked"),
-                () -> assertFalse(csvContent.contains(APPLICANT_EMAIL), "Email should be blanked")
+                    "Confidential data should be blanked",
+                    () -> assertTrue(csvContent.contains("-"), "Should contain blanked values"),
+                    () -> assertFalse(csvContent.contains(APPLICANT_PHONE), "Phone number should be blanked"),
+                    () -> assertFalse(csvContent.contains(APPLICANT_EMAIL), "Email should be blanked")
             );
         }
 
         @ParameterizedTest(name = "Should handle {0} confidentiality correctly")
         @MethodSource("uk.gov.hmcts.reform.prl.services.acro.CsvWriterTest#confidentialityTestCases")
         @DisplayName("Should handle field confidentiality correctly")
-        void shouldHandleFieldConfidentialityCorrectly(String fieldType, AcroCaseData caseData, String expectedValue) throws Exception {
-            File csvFileBlank = csvWriter.writeCcdOrderDataToCsv(caseData, false);
-            File csvFileInclude = csvWriter.writeCcdOrderDataToCsv(caseData, true);
+        void shouldHandleFieldConfidentialityCorrectly(String fieldType, AcroCaseData caseData, String expectedValue) {
+            List<String> blankRowData = csvWriter.createCsvRowData(caseData, false, "order.pdf");
+            List<String> includeRowData = csvWriter.createCsvRowData(caseData, true, "order.pdf");
 
-            String blankContent = Files.readString(csvFileBlank.toPath());
-            String includeContent = Files.readString(csvFileInclude.toPath());
+            String blankContent = String.join(",", blankRowData);
+            String includeContent = String.join(",", includeRowData);
 
             assertAll(
-                "Confidentiality handling",
-                () -> assertFalse(
-                    blankContent.contains(expectedValue),
-                    fieldType + " should be blanked when confidential and not allowed"
-                ),
-                () -> assertTrue(
-                    includeContent.contains(expectedValue),
-                    fieldType + " should be included when confidential but allowed"
-                )
+                    "Confidentiality handling",
+                    () -> assertFalse(
+                            blankContent.contains(expectedValue),
+                            fieldType + " should be blanked when confidential and not allowed"
+                    ),
+                    () -> assertTrue(
+                            includeContent.contains(expectedValue),
+                            fieldType + " should be included when confidential but allowed"
+                    )
             );
         }
 
         @Test
         @DisplayName("Should not blank non-confidential columns")
-        void shouldNotBlankNonConfidentialColumns() throws Exception {
+        void shouldNotBlankNonConfidentialColumns() {
             AcroCaseData caseData = TestDataFactory.createMixedConfidentialityCaseData();
-            File csvFile = csvWriter.writeCcdOrderDataToCsv(caseData, false);
-            String csvContent = Files.readString(csvFile.toPath());
+            List<String> rowData = csvWriter.createCsvRowData(caseData, false, "order.pdf");
+            String csvContent = String.join(",", rowData);
 
             assertAll(
-                "Non-confidential columns should not be blanked",
-                () -> assertTrue(csvContent.contains("John"), "Respondent first name should not be blanked"),
-                () -> assertTrue(csvContent.contains("Doe"), "Respondent last name should not be blanked"),
-                () -> assertTrue(csvContent.contains("Jane"), "Applicant first name should not be blanked"),
-                () -> assertTrue(csvContent.contains("Smith"), "Applicant last name should not be blanked")
+                    "Non-confidential columns should not be blanked",
+                    () -> assertTrue(csvContent.contains("John"), "Respondent first name should not be blanked"),
+                    () -> assertTrue(csvContent.contains("Doe"), "Respondent last name should not be blanked"),
+                    () -> assertTrue(csvContent.contains("Jane"), "Applicant first name should not be blanked"),
+                    () -> assertTrue(csvContent.contains("Smith"), "Applicant last name should not be blanked")
             );
         }
 
         @ParameterizedTest(name = "Should correctly identify confidential flag: {0}")
         @MethodSource("uk.gov.hmcts.reform.prl.services.acro.CsvWriterTest#confidentialFlagTestCases")
         @DisplayName("Should handle different confidential flag types")
-        void shouldHandleConfidentialFlagTypes(String flagType, YesOrNo flagValue, boolean expectedConfidential) throws Exception {
+        void shouldHandleConfidentialFlagTypes(String flagType, YesOrNo flagValue, boolean expectedConfidential) {
             AcroCaseData caseData = expectedConfidential
-                ? TestDataFactory.createCaseDataWithAllConfidentialFields()
-                : TestDataFactory.createStandardCaseData();
-            File csvFile = csvWriter.writeCcdOrderDataToCsv(caseData, false);
-            String csvContent = Files.readString(csvFile.toPath());
+                    ? TestDataFactory.createCaseDataWithAllConfidentialFields()
+                    : TestDataFactory.createStandardCaseData();
+            List<String> rowData = csvWriter.createCsvRowData(caseData, false, "order.pdf");
+            String csvContent = String.join(",", rowData);
 
             if (expectedConfidential) {
                 assertFalse(
-                    csvContent.contains(APPLICANT_PHONE),
-                    "Phone should be blanked when " + flagType + " indicates confidential"
+                        csvContent.contains(APPLICANT_PHONE),
+                        "Phone should be blanked when " + flagType + " indicates confidential"
                 );
             } else {
                 assertTrue(
-                    csvContent.contains(APPLICANT_PHONE),
-                    "Phone should be included when " + flagType + " indicates not confidential"
+                        csvContent.contains(APPLICANT_PHONE),
+                        "Phone should be included when " + flagType + " indicates not confidential"
                 );
             }
         }
@@ -355,90 +634,90 @@ class CsvWriterTest {
         AcroCaseData nullValuesCase = TestDataFactory.createCaseDataWithNullValues();
 
         return Stream.of(
-            arguments("respondentsFL401.lastName", "Doe", standardCase),
-            arguments("respondentsFL401.firstName", "John", standardCase),
-            arguments("respondentsFL401.phoneNumber", RESPONDENT_PHONE, standardCase),
-            arguments("respondentsFL401.email", RESPONDENT_EMAIL, standardCase),
-            arguments("applicantsFL401.lastName", "Smith", standardCase),
-            arguments("applicantsFL401.firstName", "Jane", standardCase),
-            arguments("applicantsFL401.phoneNumber", APPLICANT_PHONE, standardCase),
-            arguments("applicantsFL401.email", APPLICANT_EMAIL, standardCase),
+                arguments("respondentsFL401.lastName", "Doe", standardCase),
+                arguments("respondentsFL401.firstName", "John", standardCase),
+                arguments("respondentsFL401.phoneNumber", RESPONDENT_PHONE, standardCase),
+                arguments("respondentsFL401.email", RESPONDENT_EMAIL, standardCase),
+                arguments("applicantsFL401.lastName", "Smith", standardCase),
+                arguments("applicantsFL401.firstName", "Jane", standardCase),
+                arguments("applicantsFL401.phoneNumber", APPLICANT_PHONE, standardCase),
+                arguments("applicantsFL401.email", APPLICANT_EMAIL, standardCase),
 
-            arguments("respondentsFL401.dateOfBirth", "", nullValuesCase),
-            arguments("respondentsFL401.address.addressLine2", "", nullValuesCase)
+                arguments("respondentsFL401.dateOfBirth", "", nullValuesCase),
+                arguments("respondentsFL401.address.addressLine2", "", nullValuesCase)
         );
     }
 
     static Stream<Arguments> confidentialityTestCases() {
         return Stream.of(
-            arguments("Applicant Phone", TestDataFactory.createCaseDataWithAllConfidentialFields(), APPLICANT_PHONE),
-            arguments("Applicant Email", TestDataFactory.createCaseDataWithAllConfidentialFields(), APPLICANT_EMAIL),
-            arguments(
-                "Applicant Address",
-                TestDataFactory.createCaseDataWithAllConfidentialFields(),
-                APPLICANT_ADDRESS_LINE1
-            ),
-            arguments("Respondent Phone", TestDataFactory.createCaseDataWithAllConfidentialFields(), RESPONDENT_PHONE),
-            arguments("Respondent Email", TestDataFactory.createCaseDataWithAllConfidentialFields(), RESPONDENT_EMAIL),
-            arguments(
-                "Respondent Address",
-                TestDataFactory.createCaseDataWithAllConfidentialFields(),
-                RESPONDENT_ADDRESS_LINE1
-            )
+                arguments("Applicant Phone", TestDataFactory.createCaseDataWithAllConfidentialFields(), APPLICANT_PHONE),
+                arguments("Applicant Email", TestDataFactory.createCaseDataWithAllConfidentialFields(), APPLICANT_EMAIL),
+                arguments(
+                        "Applicant Address",
+                        TestDataFactory.createCaseDataWithAllConfidentialFields(),
+                        APPLICANT_ADDRESS_LINE1
+                ),
+                arguments("Respondent Phone", TestDataFactory.createCaseDataWithAllConfidentialFields(), RESPONDENT_PHONE),
+                arguments("Respondent Email", TestDataFactory.createCaseDataWithAllConfidentialFields(), RESPONDENT_EMAIL),
+                arguments(
+                        "Respondent Address",
+                        TestDataFactory.createCaseDataWithAllConfidentialFields(),
+                        RESPONDENT_ADDRESS_LINE1
+                )
         );
     }
 
     static Stream<Arguments> confidentialFlagTestCases() {
         return Stream.of(
-            arguments("YesOrNo.Yes", YesOrNo.Yes, true),
-            arguments("YesOrNo.No", YesOrNo.No, false),
-            arguments("null value", null, false)
+                arguments("YesOrNo.Yes", YesOrNo.Yes, true),
+                arguments("YesOrNo.No", YesOrNo.No, false),
+                arguments("null value", null, false)
         );
     }
 
     static Stream<Arguments> wrappedListExtractionTestCases() {
         return Stream.of(
-            arguments(
-                "firstName from basic wrapped list",
-                TestDataFactory.createStandardCaseData(),
-                "respondents.firstName",
-                "John"
-            ),
-            arguments(
-                "nested address property from wrapped list",
-                TestDataFactory.createStandardCaseData(),
-                "applicants.address.addressLine1",
-                APPLICANT_ADDRESS_LINE1
-            ),
-            arguments(
-                "first element from multiple item list",
-                TestDataFactory.createStandardCaseData(),
-                "applicants.firstName",
-                "Jane"
-            )
+                arguments(
+                        "firstName from basic wrapped list",
+                        TestDataFactory.createStandardCaseData(),
+                        "respondents.firstName",
+                        "John"
+                ),
+                arguments(
+                        "nested address property from wrapped list",
+                        TestDataFactory.createStandardCaseData(),
+                        "applicants.address.addressLine1",
+                        APPLICANT_ADDRESS_LINE1
+                ),
+                arguments(
+                        "first element from multiple item list",
+                        TestDataFactory.createStandardCaseData(),
+                        "applicants.firstName",
+                        "Jane"
+                )
         );
     }
 
     static Stream<Arguments> wrappedListEdgeCaseTestCases() {
         return Stream.of(
-            arguments(
-                "empty wrapped list",
-                TestDataFactory.createCaseDataWithNullValues(),
-                "respondents.firstName",
-                ""
-            ),
-            arguments(
-                "null wrapped list",
-                TestDataFactory.createCaseDataWithNullValues(),
-                "respondents.firstName",
-                ""
-            ),
-            arguments(
-                "null elements in list",
-                TestDataFactory.createCaseDataWithNullValues(),
-                "applicants.firstName",
-                ""
-            )
+                arguments(
+                        "empty wrapped list",
+                        TestDataFactory.createCaseDataWithNullValues(),
+                        "respondents.firstName",
+                        ""
+                ),
+                arguments(
+                        "null wrapped list",
+                        TestDataFactory.createCaseDataWithNullValues(),
+                        "respondents.firstName",
+                        ""
+                ),
+                arguments(
+                        "null elements in list",
+                        TestDataFactory.createCaseDataWithNullValues(),
+                        "applicants.firstName",
+                        ""
+                )
         );
     }
 
@@ -451,16 +730,16 @@ class CsvWriterTest {
     static class TestDataFactory {
         static AcroCaseData createStandardCaseData() {
             PartyDetails respondent = createPartyDetails(
-                "John", "Doe", "1994-07-05",
-                RESPONDENT_ADDRESS_LINE1, RESPONDENT_ADDRESS_LINE2, RESPONDENT_POSTCODE,
-                RESPONDENT_PHONE, RESPONDENT_EMAIL, YesOrNo.No, YesOrNo.No, YesOrNo.No
+                    "John", "Doe", "1994-07-05",
+                    RESPONDENT_ADDRESS_LINE1, RESPONDENT_ADDRESS_LINE2, RESPONDENT_POSTCODE,
+                    RESPONDENT_PHONE, RESPONDENT_EMAIL, YesOrNo.No, YesOrNo.No, YesOrNo.No
             );
 
             PartyDetails applicant = createPartyDetails(
-                "Jane", "Smith", "1990-12-11",
-                APPLICANT_ADDRESS_LINE1, APPLICANT_ADDRESS_LINE2, APPLICANT_POSTCODE,
-                APPLICANT_PHONE,
-                APPLICANT_EMAIL, YesOrNo.No, YesOrNo.No, YesOrNo.No
+                    "Jane", "Smith", "1990-12-11",
+                    APPLICANT_ADDRESS_LINE1, APPLICANT_ADDRESS_LINE2, APPLICANT_POSTCODE,
+                    APPLICANT_PHONE,
+                    APPLICANT_EMAIL, YesOrNo.No, YesOrNo.No, YesOrNo.No
             );
 
             String contactInstructions = "9am-5pm weekdays";
@@ -470,16 +749,16 @@ class CsvWriterTest {
 
         static AcroCaseData createCaseDataWithAllConfidentialFields() {
             PartyDetails respondent = createPartyDetails(
-                "John", "Doe", "1994-07-05",
-                RESPONDENT_ADDRESS_LINE1, RESPONDENT_ADDRESS_LINE2, RESPONDENT_POSTCODE,
-                RESPONDENT_PHONE, RESPONDENT_EMAIL, YesOrNo.Yes, YesOrNo.Yes, YesOrNo.Yes
+                    "John", "Doe", "1994-07-05",
+                    RESPONDENT_ADDRESS_LINE1, RESPONDENT_ADDRESS_LINE2, RESPONDENT_POSTCODE,
+                    RESPONDENT_PHONE, RESPONDENT_EMAIL, YesOrNo.Yes, YesOrNo.Yes, YesOrNo.Yes
             );
 
             PartyDetails applicant = createPartyDetails(
-                "Jane", "Smith", "1990-12-11",
-                APPLICANT_ADDRESS_LINE1, APPLICANT_ADDRESS_LINE2, APPLICANT_POSTCODE,
-                APPLICANT_PHONE,
-                APPLICANT_EMAIL, YesOrNo.Yes, YesOrNo.Yes, YesOrNo.Yes
+                    "Jane", "Smith", "1990-12-11",
+                    APPLICANT_ADDRESS_LINE1, APPLICANT_ADDRESS_LINE2, APPLICANT_POSTCODE,
+                    APPLICANT_PHONE,
+                    APPLICANT_EMAIL, YesOrNo.Yes, YesOrNo.Yes, YesOrNo.Yes
             );
 
             return createCaseData(respondent, applicant, "9am-5pm weekdays");
@@ -487,35 +766,35 @@ class CsvWriterTest {
 
         static AcroCaseData createCaseDataWithNullValues() {
             PartyDetails respondent = PartyDetails.builder()
-                .firstName("John")
-                .lastName("Doe")
-                .dateOfBirth(null)
-                .address(Address.builder()
-                             .addressLine1(RESPONDENT_ADDRESS_LINE1)
-                             .addressLine2(null)
-                             .postCode(RESPONDENT_POSTCODE)
-                             .build())
-                .phoneNumber("")
-                .email("")
-                .build();
+                    .firstName("John")
+                    .lastName("Doe")
+                    .dateOfBirth(null)
+                    .address(Address.builder()
+                            .addressLine1(RESPONDENT_ADDRESS_LINE1)
+                            .addressLine2(null)
+                            .postCode(RESPONDENT_POSTCODE)
+                            .build())
+                    .phoneNumber("")
+                    .email("")
+                    .build();
 
             return AcroCaseData.builder()
-                .respondentsFL401(respondent)
-                .build();
+                    .respondentsFL401(respondent)
+                    .build();
         }
 
         static AcroCaseData createMixedConfidentialityCaseData() {
             PartyDetails respondent = createPartyDetails(
-                "John", "Doe", "1994-07-05",
-                RESPONDENT_ADDRESS_LINE1, RESPONDENT_ADDRESS_LINE2, RESPONDENT_POSTCODE,
-                RESPONDENT_PHONE, RESPONDENT_EMAIL, YesOrNo.No, YesOrNo.No, YesOrNo.No
+                    "John", "Doe", "1994-07-05",
+                    RESPONDENT_ADDRESS_LINE1, RESPONDENT_ADDRESS_LINE2, RESPONDENT_POSTCODE,
+                    RESPONDENT_PHONE, RESPONDENT_EMAIL, YesOrNo.No, YesOrNo.No, YesOrNo.No
             );
 
             PartyDetails applicant = createPartyDetails(
-                "Jane", "Smith", "1990-12-11",
-                APPLICANT_ADDRESS_LINE1, APPLICANT_ADDRESS_LINE2, APPLICANT_POSTCODE,
-                APPLICANT_PHONE,
-                APPLICANT_EMAIL, YesOrNo.No, YesOrNo.Yes, YesOrNo.No
+                    "Jane", "Smith", "1990-12-11",
+                    APPLICANT_ADDRESS_LINE1, APPLICANT_ADDRESS_LINE2, APPLICANT_POSTCODE,
+                    APPLICANT_PHONE,
+                    APPLICANT_EMAIL, YesOrNo.No, YesOrNo.Yes, YesOrNo.No
             );
 
             return createCaseData(respondent, applicant, "9am-5pm weekdays");
@@ -527,24 +806,24 @@ class CsvWriterTest {
                                                        String phoneNumber, String email,
                                                        YesOrNo isAddressConfidential, YesOrNo isPhoneConfidential, YesOrNo isEmailConfidential) {
             return PartyDetails.builder()
-                .firstName(firstName)
-                .lastName(lastName)
-                .dateOfBirth(dateOfBirth != null ? LocalDate.parse(dateOfBirth) : null)
-                .address(createAddress(addressLine1, addressLine2, postCode))
-                .phoneNumber(phoneNumber)
-                .email(email)
-                .isAddressConfidential(isAddressConfidential)
-                .isPhoneNumberConfidential(isPhoneConfidential)
-                .isEmailAddressConfidential(isEmailConfidential)
-                .build();
+                    .firstName(firstName)
+                    .lastName(lastName)
+                    .dateOfBirth(dateOfBirth != null ? LocalDate.parse(dateOfBirth) : null)
+                    .address(createAddress(addressLine1, addressLine2, postCode))
+                    .phoneNumber(phoneNumber)
+                    .email(email)
+                    .isAddressConfidential(isAddressConfidential)
+                    .isPhoneNumberConfidential(isPhoneConfidential)
+                    .isEmailAddressConfidential(isEmailConfidential)
+                    .build();
         }
 
         private static Address createAddress(String addressLine1, String addressLine2, String postCode) {
             return Address.builder()
-                .addressLine1(addressLine1)
-                .addressLine2(addressLine2)
-                .postCode(postCode)
-                .build();
+                    .addressLine1(addressLine1)
+                    .addressLine2(addressLine2)
+                    .postCode(postCode)
+                    .build();
         }
 
         private static AcroCaseData createCaseData(PartyDetails respondent, PartyDetails applicant, String contactInstructions) {
@@ -552,18 +831,18 @@ class CsvWriterTest {
             Element<PartyDetails> applicantElement = Element.<PartyDetails>builder().value(applicant).build();
 
             return AcroCaseData.builder()
-                .id(1234567891234567L)
-                .courtName("test")
-                .courtEpimsId("Manchester")
-                .caseTypeOfApplication("FL401")
-                .fl404Orders(List.of(OrderDetails.builder().fl404CustomFields(FL404.builder().orderSpecifiedDateTime(
-                    LocalDateTime.now()).build()).build()))
-                .respondentsFL401(respondent)
-                .applicantsFL401(applicant)
-                .respondents(List.of(respondentElement))
-                .applicants(List.of(applicantElement))
-                .daApplicantContactInstructions(contactInstructions)
-                .build();
+                    .id(1234567891234567L)
+                    .courtName("test")
+                    .courtEpimsId("Manchester")
+                    .caseTypeOfApplication("FL401")
+                    .fl404Orders(List.of(OrderDetails.builder().fl404CustomFields(FL404.builder().orderSpecifiedDateTime(
+                            LocalDateTime.now()).build()).build()))
+                    .respondentsFL401(respondent)
+                    .applicantsFL401(applicant)
+                    .respondents(List.of(respondentElement))
+                    .applicants(List.of(applicantElement))
+                    .daApplicantContactInstructions(contactInstructions)
+                    .build();
         }
     }
 }

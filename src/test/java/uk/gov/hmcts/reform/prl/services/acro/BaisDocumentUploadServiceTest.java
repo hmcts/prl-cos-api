@@ -23,8 +23,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -61,7 +59,7 @@ class BaisDocumentUploadServiceTest {
         AcroResponse acroResponse = AcroResponse.builder().total(0).cases(null).build();
         when(acroCaseDataService.getCaseData(AUTHORISATION)).thenReturn(acroResponse);
         File tempCsv = File.createTempFile("test", ".csv");
-        when(csvWriter.writeCcdOrderDataToCsv(anyList(), anyBoolean())).thenReturn(tempCsv);
+        when(csvWriter.createCsvFileWithHeaders()).thenReturn(tempCsv);
         when(acroZipService.zip()).thenReturn("/path/to/archive.7z");
 
         baisDocumentUploadService.uploadFL404Orders();
@@ -69,7 +67,8 @@ class BaisDocumentUploadServiceTest {
         verify(systemUserService, Mockito.times(1)).getSysUserToken();
         verify(acroCaseDataService, Mockito.times(1)).getCaseData(eq(AUTHORISATION));
         verify(acroZipService, Mockito.times(1)).zip();
-        verify(csvWriter, Mockito.times(1)).writeCcdOrderDataToCsv(anyList(), anyBoolean());
+        verify(csvWriter, Mockito.times(1)).createCsvFileWithHeaders();
+        verify(csvWriter, Mockito.times(1)).appendCsvRowToFile(eq(tempCsv), any(AcroCaseData.class), eq(false), eq(null));
     }
 
     @Test
@@ -86,24 +85,30 @@ class BaisDocumentUploadServiceTest {
         AcroCaseDetail case1 = AcroCaseDetail.builder().id(1L).caseData(acroCaseData).build();
         AcroResponse acroResponse = AcroResponse.builder().total(1).cases(List.of(case1)).build();
         when(acroCaseDataService.getCaseData(AUTHORISATION)).thenReturn(acroResponse);
-        when(csvWriter.writeCcdOrderDataToCsv(anyList(), anyBoolean())).thenReturn(new File("test.csv"));
+        File tempCsv = File.createTempFile("test", ".csv");
+        when(csvWriter.createCsvFileWithHeaders()).thenReturn(tempCsv);
         when(acroZipService.zip()).thenReturn("/path/to/archive.7z");
+
+        when(pdfExtractorService.downloadPdf(anyString(), any(LocalDateTime.class), any(Document.class),
+            any(Boolean.class), eq(AUTHORISATION), anyString()))
+            .thenReturn(java.util.Optional.empty());
 
         baisDocumentUploadService.uploadFL404Orders();
 
         verify(systemUserService, Mockito.times(1)).getSysUserToken();
         verify(acroCaseDataService, Mockito.times(1)).getCaseData(eq(AUTHORISATION));
         verify(acroZipService, Mockito.times(1)).zip();
-        verify(csvWriter, Mockito.times(1)).writeCcdOrderDataToCsv(anyList(), anyBoolean());
-        verify(pdfExtractorService, Mockito.times(2)).downloadFl404aDocument(
-            anyString(), eq(AUTHORISATION), anyString(), any(Document.class));
+        verify(csvWriter, Mockito.times(1)).createCsvFileWithHeaders();
+        verify(csvWriter, Mockito.times(1)).appendCsvRowToFile(eq(tempCsv), eq(acroCaseData), eq(true), eq(null));
+        verify(pdfExtractorService, Mockito.times(2)).downloadPdf(
+            anyString(), any(LocalDateTime.class), any(Document.class), any(Boolean.class), eq(AUTHORISATION), anyString());
     }
 
     @Test
     void shouldCopyDownloadedFilesWhenPresentAndExists() throws Exception {
         when(systemUserService.getSysUserToken()).thenReturn(AUTHORISATION);
         File tempCsv = File.createTempFile("test", ".csv");
-        when(csvWriter.writeCcdOrderDataToCsv(anyList(), anyBoolean())).thenReturn(tempCsv);
+        when(csvWriter.createCsvFileWithHeaders()).thenReturn(tempCsv);
         when(acroZipService.zip()).thenReturn("/path/to/archive.7z");
 
         File englishFile = File.createTempFile("english", ".pdf");
@@ -117,20 +122,23 @@ class BaisDocumentUploadServiceTest {
         AcroCaseDetail case1 = AcroCaseDetail.builder().id(1L).caseData(acroCaseData).build();
         AcroResponse acroResponse = AcroResponse.builder().total(1).cases(List.of(case1)).build();
         when(acroCaseDataService.getCaseData(AUTHORISATION)).thenReturn(acroResponse);
-        when(pdfExtractorService.downloadFl404aDocument(anyString(), eq(AUTHORISATION), anyString(), any(Document.class)))
+        when(pdfExtractorService.downloadPdf(anyString(), any(LocalDateTime.class), any(Document.class),
+            any(Boolean.class), eq(AUTHORISATION), anyString()))
             .thenReturn(java.util.Optional.of(englishFile))
             .thenReturn(java.util.Optional.of(welshFile));
 
         baisDocumentUploadService.uploadFL404Orders();
 
-        verify(pdfExtractorService, Mockito.times(2)).downloadFl404aDocument(anyString(), eq(AUTHORISATION), anyString(), any(Document.class));
+        verify(csvWriter, Mockito.times(1)).createCsvFileWithHeaders();
+        verify(csvWriter, Mockito.times(2)).appendCsvRowToFile(eq(tempCsv), eq(acroCaseData), eq(true), anyString());
+        verify(pdfExtractorService, Mockito.times(2)).downloadPdf(anyString(), any(LocalDateTime.class), any(Document.class), any(Boolean.class), eq(AUTHORISATION), anyString());
     }
 
     @Test
     void shouldLogErrorWhenFileCopyThrowsIoException() throws Exception {
         when(systemUserService.getSysUserToken()).thenReturn(AUTHORISATION);
         File tempCsv = File.createTempFile("test", ".csv");
-        when(csvWriter.writeCcdOrderDataToCsv(anyList(), anyBoolean())).thenReturn(tempCsv);
+        when(csvWriter.createCsvFileWithHeaders()).thenReturn(tempCsv);
         when(acroZipService.zip()).thenReturn("/path/to/archive.7z");
 
         File englishFile = File.createTempFile("english", ".pdf");
@@ -143,14 +151,15 @@ class BaisDocumentUploadServiceTest {
         AcroCaseDetail case1 = AcroCaseDetail.builder().id(1L).caseData(acroCaseData).build();
         AcroResponse acroResponse = AcroResponse.builder().total(1).cases(List.of(case1)).build();
         when(acroCaseDataService.getCaseData(AUTHORISATION)).thenReturn(acroResponse);
-        when(pdfExtractorService.downloadFl404aDocument(anyString(), eq(AUTHORISATION), anyString(), any(Document.class)))
+        when(pdfExtractorService.downloadPdf(anyString(), any(LocalDateTime.class), any(Document.class),
+            any(Boolean.class), eq(AUTHORISATION), anyString()))
             .thenReturn(java.util.Optional.of(englishFile))
             .thenReturn(java.util.Optional.empty());
 
-        try (org.mockito.MockedStatic<Files> filesMock = Mockito.mockStatic(Files.class)) {
-            filesMock.when(() -> Files.copy(any(Path.class), any(Path.class), any(java.nio.file.CopyOption.class)))
-                .thenThrow(new IOException("Simulated IO error"));
-            assertThrows(RuntimeException.class, () -> baisDocumentUploadService.uploadFL404Orders());
-        }
+        baisDocumentUploadService.uploadFL404Orders();
+
+        verify(csvWriter, Mockito.times(1)).createCsvFileWithHeaders();
+        verify(csvWriter, Mockito.times(1)).appendCsvRowToFile(eq(tempCsv), eq(acroCaseData), eq(true), anyString());
+        verify(pdfExtractorService, Mockito.times(2)).downloadPdf(anyString(), any(LocalDateTime.class), any(Document.class), any(Boolean.class), eq(AUTHORISATION), anyString());
     }
 }
