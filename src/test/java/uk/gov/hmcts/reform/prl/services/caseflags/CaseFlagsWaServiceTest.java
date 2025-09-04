@@ -255,19 +255,42 @@ public class CaseFlagsWaServiceTest {
     }
 
     @Test
-    public void testSetSelectedFlagsForCaseLevelFlagsWithNoDetails() throws IOException {
+    public void testSetSelectedFlagsForAllPartyFlagsWithNoDetails() throws IOException {
 
-        Flags caseLevelFlags = getCaseLevelFlagsNoDetails();
+        Flags caseLevelFlags = Flags.builder().build();
+        when(objectMapper.writeValueAsString(any(Flags.class))).thenReturn("1");
+        when(objectMapper.readValue(any(String.class), any(Class.class))).thenReturn(caseLevelFlags);
+        List<Element<FlagDetail>> partyLevelFlagDetails = new ArrayList<>();
+        Flags flags = Flags.builder().details(partyLevelFlagDetails).build();
+
         CaseData caseData = CaseData.builder()
             .id(123)
-            .allPartyFlags(AllPartyFlags.builder().build())
+            .allPartyFlags(AllPartyFlags.builder().caApplicant1ExternalFlags(flags).build())
             .reviewRaRequestWrapper(ReviewRaRequestWrapper.builder().selectedFlags(new ArrayList<>()).build())
-            .caseFlags(caseLevelFlags)
             .build();
 
         caseFlagsWaService.setSelectedFlags(caseData);
 
         assertEquals(0, caseData.getReviewRaRequestWrapper().getSelectedFlags().size());
+    }
+
+    @Test
+    public void testSetSelectedFlagsForAllPartyFlagsWithDetails() throws IOException {
+
+        when(objectMapper.writeValueAsString(any(Flags.class))).thenReturn("1");
+        when(objectMapper.readValue(any(String.class), any(Class.class))).thenReturn(getApplicant1ExternalFlag1());
+        List<Element<FlagDetail>> partyLevelFlagDetails = new ArrayList<>();
+        Flags flags = Flags.builder().details(partyLevelFlagDetails).build();
+
+        CaseData caseData = CaseData.builder()
+            .id(123)
+            .allPartyFlags(AllPartyFlags.builder().caApplicant1ExternalFlags(flags).build())
+            .reviewRaRequestWrapper(ReviewRaRequestWrapper.builder().selectedFlags(new ArrayList<>()).build())
+            .build();
+
+        caseFlagsWaService.setSelectedFlags(caseData);
+
+        assertEquals(1, caseData.getReviewRaRequestWrapper().getSelectedFlags().size());
     }
 
     @Test
@@ -345,10 +368,6 @@ public class CaseFlagsWaServiceTest {
         List<Element<FlagDetail>> caseLevelFlagDetails = new ArrayList<>();
         caseLevelFlagDetails.add(ElementUtils.element(caseLevelDetail));
         return Flags.builder().details(caseLevelFlagDetails).build();
-    }
-
-    private Flags getCaseLevelFlagsNoDetails() {
-        return Flags.builder().build();
     }
 
     private Flags getApplicant1ExternalFlag1() {
