@@ -56,14 +56,12 @@ class AcroZipServiceTest {
 
     @Test
     void testZipCreatesZipFormat() throws Exception {
-        // Create test file
         Path file1 = Files.createFile(tempSourceDir.resolve("file1.txt"));
         Files.writeString(file1, "Test content");
 
         String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile(), null);
         File archiveFile = new File(archivePath);
 
-        // Verify ZIP signature
         byte[] header = new byte[4];
         try (var fis = Files.newInputStream(archiveFile.toPath())) {
             int bytesRead = fis.read(header);
@@ -77,14 +75,12 @@ class AcroZipServiceTest {
 
     @Test
     void testZipMultipleFiles() throws Exception {
-        // Create multiple test files
         Files.writeString(Files.createFile(tempSourceDir.resolve("file1.txt")), "Content 1");
         Files.writeString(Files.createFile(tempSourceDir.resolve("file2.txt")), "Content 2");
         Files.writeString(Files.createFile(tempSourceDir.resolve("file3.txt")), "Content 3");
 
         String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile(), null);
 
-        // Verify archive exists and contains all files
         assertTrue(Files.exists(Path.of(archivePath)));
 
         int fileCount = 0;
@@ -100,14 +96,12 @@ class AcroZipServiceTest {
 
     @Test
     void testZipWithSubdirectories() throws Exception {
-        // Create nested directory structure
         Path subDir = Files.createDirectory(tempSourceDir.resolve("subdir"));
         Files.writeString(Files.createFile(tempSourceDir.resolve("root.txt")), "Root content");
         Files.writeString(Files.createFile(subDir.resolve("nested.txt")), "Nested content");
 
         String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile(), null);
 
-        // Verify nested structure is preserved
         try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(Path.of(archivePath)))) {
             ZipEntry entry;
             boolean foundRoot = false;
@@ -151,7 +145,6 @@ class AcroZipServiceTest {
 
     @Test
     void testZipThrowsExceptionForNonDirectorySource() {
-        // Create a file instead of directory
         Path tempFile = tempSourceDir.resolve("notadirectory.txt");
 
         assertThrows(IllegalArgumentException.class, () ->
@@ -170,7 +163,6 @@ class AcroZipServiceTest {
 
         String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile(), null);
 
-        // Verify file was compressed
         assertTrue(Files.exists(Path.of(archivePath)));
         assertTrue(Files.size(Path.of(archivePath)) < Files.size(largeFile),
             "Archive should be smaller than original file");
