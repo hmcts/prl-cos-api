@@ -30,6 +30,12 @@ public class BaisDocumentUploadTask implements Runnable {
         //Invoke Bais document upload service to upload FL404a orders
         baisDocumentUploadService.uploadFL404Orders();
 
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
         log.info("*** Uploading FL404A order to Bais task is completed ***");
     }
 }
