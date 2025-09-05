@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.caseflags;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
@@ -33,6 +34,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyMap;
@@ -361,6 +363,41 @@ public class CaseFlagsWaServiceTest {
         boolean actual = caseFlagsWaService.isCaseHasNoRequestedFlags(caseData);
 
         assertTrue(actual);
+    }
+
+    @Test
+    public void testSetSelectedFlagsForCaseLevelFlagsWithDeepCopyExceptionOnWrite() throws JsonProcessingException {
+
+        Flags caseLevelFlags = getCaseLevelFlags(ACTIVE);
+        CaseData caseData = CaseData.builder()
+            .id(123)
+            .allPartyFlags(AllPartyFlags.builder().build())
+            .reviewRaRequestWrapper(ReviewRaRequestWrapper.builder().selectedFlags(new ArrayList<>()).build())
+            .caseFlags(caseLevelFlags)
+            .build();
+
+        Assert.assertTrue(caseData.getReviewRaRequestWrapper().getSelectedFlags().isEmpty());
+        when(objectMapper.writeValueAsString(caseLevelFlags)).thenThrow(JsonProcessingException.class);
+
+        assertThrows(IllegalStateException.class, () -> caseFlagsWaService.setSelectedFlags(caseData));
+    }
+
+    @Test
+    public void testSetSelectedFlagsForCaseLevelFlagsWithDeepCopyExceptionOnRead() throws JsonProcessingException {
+
+        Flags caseLevelFlags = getCaseLevelFlags(ACTIVE);
+        CaseData caseData = CaseData.builder()
+            .id(123)
+            .allPartyFlags(AllPartyFlags.builder().build())
+            .reviewRaRequestWrapper(ReviewRaRequestWrapper.builder().selectedFlags(new ArrayList<>()).build())
+            .caseFlags(caseLevelFlags)
+            .build();
+
+        Assert.assertTrue(caseData.getReviewRaRequestWrapper().getSelectedFlags().isEmpty());
+        when(objectMapper.writeValueAsString(caseLevelFlags)).thenReturn("dummyObjectString");
+        when(objectMapper.readValue("dummyObjectString", Flags.class)).thenThrow(JsonProcessingException.class);
+
+        assertThrows(IllegalStateException.class, () -> caseFlagsWaService.setSelectedFlags(caseData));
     }
 
     private Flags getCaseLevelFlags(String status) {
