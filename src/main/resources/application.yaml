@@ -801,3 +801,8 @@ hearing:
   preview:
     bypass:
       enabled: ${HEARING_PREVIEW_BYPASS_ENABLED:false}
+
+acro:
+  search-case-type-id: PRLAPPS
+  source-directory: /secure/acro/source
+  output-directory: /secure/acro/export
