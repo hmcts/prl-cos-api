@@ -1,7 +1,10 @@
 package uk.gov.hmcts.reform.prl.services.acro;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import net.lingala.zip4j.ZipFile;
+import net.lingala.zip4j.model.ZipParameters;
+import net.lingala.zip4j.model.enums.EncryptionMethod;
+import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,8 +20,9 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+@Service
+@Slf4j
 public class AcroZipService {
-    private static final Logger log = LoggerFactory.getLogger(AcroZipService.class);
 
     public String zip(File sourceFolder, File exportFolder, String password) throws Exception {
         Path sourcePath = sourceFolder.toPath();
@@ -29,53 +33,28 @@ public class AcroZipService {
 
         String archivePath = exportFolder + "/" + createZipFileName(sourcePath);
 
+        ZipFile zipFile = password == null || password.isEmpty()
+                ? new ZipFile(archivePath)
+                : new ZipFile(archivePath, password.toCharArray());
+
         List<Path> filesToCompress = collectFiles(sourcePath);
 
         if (filesToCompress.isEmpty()) {
             log.warn("No files found in source folder: {}", sourceFolder);
+            new File(archivePath).createNewFile();
             return archivePath;
         }
 
-        try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(archivePath))) {
-            Files.walkFileTree(sourcePath, new SimpleFileVisitor<>() {
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) {
-                    if (attributes.isSymbolicLink()) {
-                        return FileVisitResult.CONTINUE;
-                    }
-
-                    try (FileInputStream fis = new FileInputStream(file.toFile())) {
-                        Path targetFile = sourcePath.relativize(file);
-
-                        log.debug("File targeted : {}", file);
-
-                            zos.putNextEntry(new ZipEntry(targetFile.toString()));
-
-                            byte[] buffer = new byte[1024];
-                            int len;
-                            while ((len = fis.read(buffer)) > 0) {
-                                zos.write(buffer, 0, len);
-                            }
-                            zos.closeEntry();
-
-                            log.debug("File zipped : {}", file);
-
-
-                    } catch (IOException e) {
-                        log.error("Error:", e);
-                    }
-                    return FileVisitResult.CONTINUE;
-                }
-
-                @Override
-                public FileVisitResult visitFileFailed(Path file, IOException exc) {
-                    log.error("Unable to zip : {}", file, exc);
-                    return FileVisitResult.CONTINUE;
-                }
-            });
-
-            return archivePath;
+        for (Path file : filesToCompress) {
+            ZipParameters parameters = new ZipParameters();
+            parameters.setFileNameInZip(sourcePath.relativize(file).toString());
+            if (password != null && !password.isEmpty()) {
+                parameters.setEncryptFiles(true);
+                parameters.setEncryptionMethod(EncryptionMethod.ZIP_STANDARD);
+            }
+            zipFile.addFile(file.toFile(), parameters);
         }
+        return archivePath;
     }
 
     private String createZipFileName(Path sourcePath) {

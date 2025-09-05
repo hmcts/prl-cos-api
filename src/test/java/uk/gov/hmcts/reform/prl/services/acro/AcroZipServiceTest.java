@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.acro;
 
+import net.lingala.zip4j.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,7 +60,7 @@ class AcroZipServiceTest {
         Path file1 = Files.createFile(tempSourceDir.resolve("file1.txt"));
         Files.writeString(file1, "Test content");
 
-        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile());
+        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile(), null);
         File archiveFile = new File(archivePath);
 
         // Verify ZIP signature
@@ -80,7 +82,7 @@ class AcroZipServiceTest {
         Files.writeString(Files.createFile(tempSourceDir.resolve("file2.txt")), "Content 2");
         Files.writeString(Files.createFile(tempSourceDir.resolve("file3.txt")), "Content 3");
 
-        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile());
+        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile(), null);
 
         // Verify archive exists and contains all files
         assertTrue(Files.exists(Path.of(archivePath)));
@@ -103,7 +105,7 @@ class AcroZipServiceTest {
         Files.writeString(Files.createFile(tempSourceDir.resolve("root.txt")), "Root content");
         Files.writeString(Files.createFile(subDir.resolve("nested.txt")), "Nested content");
 
-        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile());
+        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile(), null);
 
         // Verify nested structure is preserved
         try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(Path.of(archivePath)))) {
@@ -126,12 +128,10 @@ class AcroZipServiceTest {
 
     @Test
     void testZipEmptyFolder() throws Exception {
-        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile());
+        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile(), null);
 
-        // Archive should be created even for empty folder
         assertTrue(Files.exists(Path.of(archivePath)));
 
-        // Verify archive is valid but empty
         try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(Path.of(archivePath)))) {
             ZipEntry entry = zis.getNextEntry();
             assertNull(entry, "Empty folder should create empty archive");
@@ -142,7 +142,7 @@ class AcroZipServiceTest {
     void testZipFileNameGeneration() throws Exception {
         Files.writeString(Files.createFile(tempSourceDir.resolve("test.txt")), "content");
 
-        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile());
+        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile(), null);
         String expectedFileName = tempSourceDir.getFileName().toString() + ".zip";
 
         assertTrue(archivePath.endsWith(expectedFileName),
@@ -155,13 +155,12 @@ class AcroZipServiceTest {
         Path tempFile = tempSourceDir.resolve("notadirectory.txt");
 
         assertThrows(IllegalArgumentException.class, () ->
-            acroZipService.zip(tempFile.toFile(), tempExportDir.toFile()),
+            acroZipService.zip(tempFile.toFile(), tempExportDir.toFile(), null),
             "Should throw exception when source is not a directory");
     }
 
     @Test
     void testZipLargeFile() throws Exception {
-        // Create a larger file to test buffering
         Path largeFile = Files.createFile(tempSourceDir.resolve("large.txt"));
         StringBuilder content = new StringBuilder();
         for (int i = 0; i < 10000; i++) {
@@ -169,7 +168,7 @@ class AcroZipServiceTest {
         }
         Files.writeString(largeFile, content.toString());
 
-        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile());
+        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile(), null);
 
         // Verify file was compressed
         assertTrue(Files.exists(Path.of(archivePath)));
@@ -183,9 +182,8 @@ class AcroZipServiceTest {
         Path testFile = Files.createFile(tempSourceDir.resolve("content.txt"));
         Files.writeString(testFile, originalContent);
 
-        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile());
+        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile(), null);
 
-        // Extract and verify content
         try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(Path.of(archivePath)))) {
             ZipEntry entry = zis.getNextEntry();
             assertNotNull(entry);
@@ -197,4 +195,33 @@ class AcroZipServiceTest {
             assertEquals(originalContent, extractedContent);
         }
     }
+
+    @Test
+    void testZipWithPasswordProtection() throws Exception {
+        Files.writeString(Files.createFile(tempSourceDir.resolve("secret.txt")), "Sensitive data");
+        String password = "TestPassword123";
+        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile(), password);
+
+        ZipFile zipFile = new ZipFile(archivePath);
+        assertTrue(zipFile.isEncrypted(), "Archive should be encrypted");
+
+        assertThrows(ZipException.class, () -> {
+            zipFile.extractAll(tempExportDir.toString());
+        });
+
+        ZipFile zipFileWithPassword = new ZipFile(archivePath, password.toCharArray());
+        zipFileWithPassword.extractAll(tempExportDir.toString());
+        assertTrue(Files.exists(tempExportDir.resolve("secret.txt")), "File should be extracted with password");
+    }
+
+//    @Test
+//    void manualReviewZipFile() throws Exception {
+//        Files.writeString(Files.createFile(tempSourceDir.resolve("manual.txt")), "Manual review content");
+//        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile(), "ReviewPassword123");
+//
+//        Path reviewPath = Path.of(System.getProperty("user.home"), "Desktop", "manual-review.zip");
+//        Files.copy(Path.of(archivePath), reviewPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+//        System.out.println("ZIP file saved for review at: " + reviewPath);
+//        System.out.println("password: ReviewPassword123");
+//    }
 }
