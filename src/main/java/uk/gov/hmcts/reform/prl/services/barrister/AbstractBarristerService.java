@@ -1,15 +1,20 @@
 package uk.gov.hmcts.reform.prl.services.barrister;
 
+import lombok.AllArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
+import uk.gov.hmcts.reform.prl.enums.barrister.TypeOfBarristerEventEnum;
+import uk.gov.hmcts.reform.prl.events.BarristerChangeEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.utils.BarristerHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,23 +27,22 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 import static uk.gov.hmcts.reform.prl.enums.PartyEnum.applicant;
 import static uk.gov.hmcts.reform.prl.enums.PartyEnum.respondent;
 
+
+@AllArgsConstructor
 public abstract class AbstractBarristerService {
     protected static final String APPLICANT = "Applicant";
     protected static final String RESPONDENT = "Respondent";
-    private final UserService userService;
-    private final OrganisationService organisationService;
-
-    protected AbstractBarristerService(UserService userService, OrganisationService organisationService) {
-        this.userService = userService;
-        this.organisationService = organisationService;
-    }
+    protected final UserService userService;
+    protected final OrganisationService organisationService;
+    protected final EventService eventPublisher;
+    protected final BarristerHelper barristerHelper;
 
     protected DynamicList getPartiesToList(CaseData caseData, String authorisation) {
         return getPartiesToListForC100OrFL401(caseData, populateBarristerFilter(caseData, authorisation));
     }
 
     protected boolean hasBarrister(PartyDetails partyDetails) {
-        return (partyDetails.getBarrister() != null && partyDetails.getBarrister().getBarristerId() != null);
+        return barristerHelper.hasBarrister(partyDetails);
     }
 
     protected boolean partyHasSolicitorOrg(PartyDetails partyDetails) {
@@ -54,6 +58,18 @@ public abstract class AbstractBarristerService {
             .caseTypeC100OrFL401(isC100CaseType(caseData))
             .build();
 
+    }
+
+    protected BarristerChangeEvent prepareAndPublishBarristerChangeEvent(CaseData caseData,
+                                                              TypeOfBarristerEventEnum typeOfEvent) {
+        if (caseData.getAllocatedBarrister() != null) {
+            BarristerChangeEvent barristerChangeEvent = BarristerChangeEvent.builder()
+                .caseData(caseData)
+                .typeOfEvent(typeOfEvent)
+                .build();
+            eventPublisher.publishEvent(barristerChangeEvent);
+        }
+        return null;
     }
 
     private String getUserOrgId(String usersAuthorisation) {
@@ -197,4 +213,6 @@ public abstract class AbstractBarristerService {
     protected abstract String getLabelForAction(boolean applicantOrRespondent, BarristerFilter barristerFilter, PartyDetails partyDetails);
 
     protected abstract String getCodeForAction(Element<PartyDetails> partyDetailsElement);
+
+    public abstract void notifyBarrister(CaseData caseData);
 }
