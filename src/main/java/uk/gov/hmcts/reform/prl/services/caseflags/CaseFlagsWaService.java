@@ -119,7 +119,8 @@ public class CaseFlagsWaService {
         if (caseData.getCaseFlags() != null && caseData.getCaseFlags().getDetails() != null) {
             caseData.getCaseFlags().getDetails().forEach(flagDetail -> {
                 if (!REQUESTED.equals(flagDetail.getValue().getStatus())) {
-                    selectedFlagsList.forEach(selectedFlag -> selectedFlag.getValue().getDetails().remove(flagDetail));
+                    selectedFlagsList.stream().filter(selectedFlag -> selectedFlag.getValue().getDetails() != null)
+                        .forEach(selectedFlag -> selectedFlag.getValue().getDetails().remove(flagDetail));
                 }
             });
         }

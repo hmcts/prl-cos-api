@@ -238,7 +238,8 @@ public class CaseFlagsWaServiceTest {
     @Test
     public void testSetSelectedFlagsForCaseLevelFlags() throws IOException {
 
-        Flags caseLevelFlags = getCaseLevelFlags(REQUESTED);
+        Flags caseLevelFlags = getCaseLevelFlags(ACTIVE);
+        Flags caseLevelFlagsCopy = getCaseLevelFlags(ACTIVE);
         CaseData caseData = CaseData.builder()
             .id(123)
             .allPartyFlags(AllPartyFlags.builder().build())
@@ -248,7 +249,7 @@ public class CaseFlagsWaServiceTest {
 
         Assert.assertTrue(caseData.getReviewRaRequestWrapper().getSelectedFlags().isEmpty());
         when(objectMapper.writeValueAsString(caseLevelFlags)).thenReturn("dummyObjectString");
-        when(objectMapper.readValue("dummyObjectString", Flags.class)).thenReturn(caseLevelFlags);
+        when(objectMapper.readValue("dummyObjectString", Flags.class)).thenReturn(caseLevelFlagsCopy);
         caseFlagsWaService.setSelectedFlags(caseData);
 
         assertEquals(1, caseData.getReviewRaRequestWrapper().getSelectedFlags().size());
