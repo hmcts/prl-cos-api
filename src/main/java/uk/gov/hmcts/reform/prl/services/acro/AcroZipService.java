@@ -34,7 +34,8 @@ public class AcroZipService {
 
         if (filesToCompress.isEmpty()) {
             log.warn("No files found in source folder: {}", sourceFolder);
-            new File(archivePath).createNewFile();
+            boolean created = new File(archivePath).createNewFile();
+            log.info("Empty archive file {}: {}", created ? "created" : "already exists", archivePath);
             return archivePath;
         }
 
