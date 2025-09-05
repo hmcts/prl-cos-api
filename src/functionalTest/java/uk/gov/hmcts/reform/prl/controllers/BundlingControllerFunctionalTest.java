@@ -18,8 +18,7 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-public class BundlingControllerFuntctionalTest {
-    private final String userToken = "Bearer testToken";
+public class BundlingControllerFunctionalTest {
 
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;
