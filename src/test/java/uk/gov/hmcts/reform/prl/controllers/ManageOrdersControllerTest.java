@@ -1853,6 +1853,36 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
+    public void testManageOrderMidEventWithNullDoYouWantToServeOrder() throws Exception {
+
+        caseData = CaseData.builder()
+            .id(12345L)
+            .serveOrderData(ServeOrderData.builder().build())
+            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap.put("isTheOrderAboutAllChildren", Yes);
+        stringObjectMap.put("isTheOrderAboutChildren", No);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.manageOrderMidEvent(
+            authToken,
+            s2sToken,
+            callbackRequest
+        );
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
+    }
+
+    @Test
     public void testManageOrderMidEvent() throws Exception {
 
         caseData = CaseData.builder()
