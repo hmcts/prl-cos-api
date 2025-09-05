@@ -31,6 +31,9 @@ public class AllocatedBarrister {
     @JsonProperty("barristerOrg")
     private final Organisation barristerOrg;
 
+    @JsonProperty("solicitorEmail")
+    private final String solicitorEmail;
+
     @JsonIgnore
     public String getBarristerFullName() {
         return String.format(

@@ -91,10 +91,12 @@ public class CaseAssignmentController {
 
             if (errorList.isEmpty() && userId.isPresent() && barristerRole.isPresent()) {
                 try {
-                    caseAssignmentService.addBarrister(caseData,
-                                                       userId.get(),
-                                                       barristerRole.get(),
-                                                       allocatedBarrister);
+                    caseAssignmentService.addBarrister(
+                        caseData,
+                        userId.get(),
+                        barristerRole.get(),
+                        allocatedBarrister
+                    );
                     updateCaseDetails(caseDetails, caseData);
                 } catch (GrantCaseAccessException grantCaseAccessException) {
                     errorList.add(grantCaseAccessException.getMessage());

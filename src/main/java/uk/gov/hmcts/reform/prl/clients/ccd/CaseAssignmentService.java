@@ -115,6 +115,15 @@ public class CaseAssignmentService {
             barristerRole,
             allocatedBarrister
         );
+        setSolicitorEmail(allocatedBarrister, caseData);
+    }
+
+    private void setSolicitorEmail(AllocatedBarrister allocatedBarrister, CaseData caseData) {
+        PartyDetails selectedParty = getSelectedParty(caseData, allocatedBarrister.getPartyList().getValueCode());
+        AllocatedBarrister updatedAllocatedBarrister = allocatedBarrister.toBuilder()
+            .solicitorEmail(selectedParty.getSolicitorEmail())
+            .build();
+        caseData.setAllocatedBarrister(updatedAllocatedBarrister);
     }
 
     private void grantBarristerCaseAccess(final CaseData caseData,
@@ -443,8 +452,8 @@ public class CaseAssignmentService {
                                                       String userId,
                                                       AllocatedBarrister allocatedBarrister,
                                                       Supplier<PartyDetails> partyDetailsSupplier) {
-        PartyDetails c100Party = partyDetailsSupplier.get();
-        updateBarrister(barristerRole, c100Party, allocatedBarrister, userId);
+        PartyDetails partyDetails = partyDetailsSupplier.get();
+        updateBarrister(barristerRole, partyDetails, allocatedBarrister, userId);
     }
 
     public void removeAmBarristerIfPresent(CaseDetails caseDetails) {

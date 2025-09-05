@@ -426,7 +426,9 @@ class CaseAssignmentServiceTest {
                 .barristerRole(barristerRole)
                 .barristerId(userId)
                 .build());
-
+        assertThat(c100CaseData.getAllocatedBarrister())
+            .extracting(AllocatedBarrister::getSolicitorEmail)
+            .isEqualTo(partyDetails.get(index).getSolicitorEmail());
     }
 
     @Test
@@ -545,6 +547,9 @@ class CaseAssignmentServiceTest {
                            .barristerRole(barristerRole)
                            .barristerId(userId)
                            .build());
+        assertThat(fl401CaseData.getAllocatedBarrister())
+            .extracting(AllocatedBarrister::getSolicitorEmail)
+            .isEqualTo(partyDetails.getSolicitorEmail());
     }
 
     @Test

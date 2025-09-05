@@ -23,10 +23,16 @@ import uk.gov.hmcts.reform.prl.utils.MaskEmail;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
+import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.getPreferenceLanguage;
+import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.CA_DA_ADD_BARRISTER_SELF;
+import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.CA_DA_ADD_BARRISTER_TO_SOLICITOR;
+import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.CA_DA_REMOVE_BARRISTER_SELF;
+import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.CA_DA_REMOVE_BARRISTER_TO_SOLICITOR;
 
 @Slf4j
 @Component
@@ -42,61 +48,35 @@ public class BarristerChangeEventHandler {
     @Async
     @EventListener(condition = "#event.typeOfEvent.displayedValue eq 'Add Barrister'")
     public void notifyAddBarrister(final BarristerChangeEvent event) {
-
         // notify - barrister
-        sendEmailToBarrister(event, EmailTemplateNames.CA_DA_ADD_BARRISTER_SELF);
+        sendEmail(event, CA_DA_ADD_BARRISTER_SELF, AllocatedBarrister::getBarristerEmail);
 
-        // notify applicants/respondents Solicitors
-        sendEmailToAppRespSolicitors(event, EmailTemplateNames.CA_DA_ADD_BARRISTER_TO_SOLICITOR);
-
+        // notify - solicitor
+        sendEmail(event, CA_DA_ADD_BARRISTER_TO_SOLICITOR, AllocatedBarrister::getSolicitorEmail);
     }
 
-    private void sendEmailToBarrister(BarristerChangeEvent event, EmailTemplateNames emailTemplateName) {
+    private void sendEmail(BarristerChangeEvent event,
+                           EmailTemplateNames emailTemplateName,
+                           Function<AllocatedBarrister, String> emailToSend) {
         CaseData caseData = event.getCaseData();
-        AllocatedBarrister barrister = caseData.getAllocatedBarrister();
-        if (null != barrister.getBarristerEmail()) {
+        String email = emailToSend.apply(caseData.getAllocatedBarrister());
+        if (email != null) {
             log.info("Event: {} - For case id {}, sending email to barrister {}",
                      event.getTypeOfEvent().getDisplayedValue(),
                      caseData.getId(),
-                     maskEmail.mask(barrister.getBarristerEmail()));
+                     maskEmail.mask(email));
 
             ignoreAndLogNotificationFailures(() -> emailService.send(
-                barrister.getBarristerEmail(),
+                email,
                 emailTemplateName,
                 buildEmailBarrister(caseData, EMPTY_STRING),
-                LanguagePreference.getPreferenceLanguage(caseData)
+                getPreferenceLanguage(caseData)
             ));
         } else {
             log.info(
-                "Unable to send email to Barrister as the they don't have any email address for case id {}",
+                "Unable to send email to {} as the they don't have any email address for case id {}",
+                emailTemplateName,
                 caseData.getId()
-            );
-        }
-    }
-
-    private void sendEmailToAppRespSolicitors(BarristerChangeEvent event, EmailTemplateNames emailTemplateNames) {
-        CaseData caseData = event.getCaseData();
-        Map<String, String> solicitorsToNotify = new HashMap<>();
-        solicitorsToNotify.putAll(CaseUtils.getApplicantSolicitorsToNotify(caseData));
-        solicitorsToNotify.putAll(CaseUtils.getRespondentSolicitorsToNotify(caseData));
-        if (!solicitorsToNotify.isEmpty()) {
-            solicitorsToNotify.forEach(
-                (key, value) -> {
-                    if (key != null) {
-                        ignoreAndLogNotificationFailures(() -> {
-                            log.info("Event: {} - For case id {}, sending email to solicitor {}",
-                                     event.getTypeOfEvent().getDisplayedValue(),
-                                     caseData.getId(),
-                                     maskEmail.mask(key));
-                            emailService.send(
-                                key,
-                                emailTemplateNames,
-                                buildEmailBarrister(caseData, value),
-                                LanguagePreference.getPreferenceLanguage(caseData)
-                            );
-                        });
-                    }
-                }
             );
         }
     }
@@ -106,10 +86,10 @@ public class BarristerChangeEventHandler {
     public void notifyWhenBarristerRemoved(final BarristerChangeEvent event) {
         if (featureToggleService.isBarristerFeatureEnabled()) {
             // notify - barrister
-            sendEmailToBarrister(event, EmailTemplateNames.CA_DA_REMOVE_BARRISTER_SELF);
+            sendEmail(event, CA_DA_REMOVE_BARRISTER_SELF, AllocatedBarrister::getBarristerEmail);
 
-            // notify applicants/respondents Solicitors
-            sendEmailToAppRespSolicitors(event, EmailTemplateNames.CA_DA_REMOVE_BARRISTER_TO_SOLICITOR);
+            // notify - solicitor
+            sendEmail(event, CA_DA_REMOVE_BARRISTER_TO_SOLICITOR, AllocatedBarrister::getSolicitorEmail);
         }
     }
 

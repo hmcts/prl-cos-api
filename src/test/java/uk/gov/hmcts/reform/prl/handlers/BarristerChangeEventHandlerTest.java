@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.events.BarristerChangeEvent;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 import uk.gov.hmcts.reform.prl.utils.MaskEmail;
@@ -27,8 +28,8 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -97,6 +98,7 @@ class BarristerChangeEventHandlerTest {
                                     .barristerFirstName("barristerFirstName")
                                     .barristerLastName("barristerLastName")
                                     .barristerEmail("testbarristeremail@test.com")
+                                    .solicitorEmail("solicitorEmail@gmail.com")
                                     .build())
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(Arrays.asList(element(applicant1), element(applicant2)))
@@ -113,12 +115,17 @@ class BarristerChangeEventHandlerTest {
     void shouldNotifyAddBarristerWhenCaseTypeIsC100() {
         barristerChangeEventHandler.notifyAddBarrister(barristerChangeEvent);
 
-        verify(emailService, times(2)).send(
+        verify(emailService).send(
             anyString(),
             eq(CA_DA_ADD_BARRISTER_TO_SOLICITOR),
             any(),
             any());
 
+        verify(emailService).send(
+            anyString(),
+            eq(CA_DA_ADD_BARRISTER_SELF),
+            any(),
+            any());
     }
 
     @Test
@@ -135,9 +142,9 @@ class BarristerChangeEventHandlerTest {
             .build();
         barristerChangeEventHandler.notifyAddBarrister(barristerChangeEvent);
 
-        verify(emailService, times(2)).send(
+        verify(emailService, never()).send(
             anyString(),
-            eq(CA_DA_ADD_BARRISTER_TO_SOLICITOR),
+            isA(EmailTemplateNames.class),
             any(),
             any());
     }
@@ -146,6 +153,9 @@ class BarristerChangeEventHandlerTest {
     void shouldNotifyAddBarristerWhenCaseTypeIsC100AndHasOneSolicitor() {
 
         caseData = caseData.toBuilder()
+            .allocatedBarrister(caseData.getAllocatedBarrister().toBuilder()
+                                    .solicitorEmail(null)
+                                    .build())
             .applicants(Arrays.asList(element(applicant1)))
             .respondents(Arrays.asList(element(respondent1)))
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -172,6 +182,9 @@ class BarristerChangeEventHandlerTest {
     @Test
     void shouldNotifyAddBarristerWhenCaseTypeIsFL401() {
         caseData = caseData.toBuilder()
+            .allocatedBarrister(caseData.getAllocatedBarrister().toBuilder()
+                                    .solicitorEmail(null)
+                                    .build())
             .applicants(Collections.emptyList())
             .respondents(Collections.emptyList())
             .applicantsFL401(applicant1)
@@ -213,7 +226,7 @@ class BarristerChangeEventHandlerTest {
             eq(CA_DA_REMOVE_BARRISTER_SELF),
             any(),
             any());
-        verify(emailService,times(2)).send(
+        verify(emailService).send(
             anyString(),
             eq(CA_DA_REMOVE_BARRISTER_TO_SOLICITOR),
             any(),
@@ -242,7 +255,9 @@ class BarristerChangeEventHandlerTest {
             .thenReturn(true);
         caseData = CaseData.builder()
             .id(123L)
-            .allocatedBarrister(AllocatedBarrister.builder().build())
+            .allocatedBarrister(AllocatedBarrister.builder()
+                                    .solicitorEmail("solicitorEmail@gmail.com")
+                                    .build())
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(Arrays.asList(element(applicant1), element(applicant2)))
             .respondents(Arrays.asList(element(respondent1), element(respondent2)))
@@ -259,7 +274,7 @@ class BarristerChangeEventHandlerTest {
             any(),
             any());
 
-        verify(emailService,times(2)).send(
+        verify(emailService).send(
             anyString(),
             eq(CA_DA_REMOVE_BARRISTER_TO_SOLICITOR),
             any(),
