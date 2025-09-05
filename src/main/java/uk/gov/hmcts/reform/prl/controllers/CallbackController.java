@@ -657,7 +657,6 @@ public class CallbackController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-
     @PostMapping(path = "/update-party-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Update Applicants, Children and Respondents details for future processing")
     @ApiResponses(value = {
@@ -671,9 +670,20 @@ public class CallbackController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            List<String> validationErrors = updatePartyDetailsService.validateUpdatePartyDetails(callbackRequest);
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+            if (validationErrors.isEmpty()) {
+                caseDataUpdated = updatePartyDetailsService.updateApplicantRespondentAndChildData(
+                    callbackRequest,
+                    authorisation
+                );
+            }
+
             return AboutToStartOrSubmitCallbackResponse
                 .builder()
-                .data(updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, authorisation))
+                .data(caseDataUpdated)
+                .errors(validationErrors)
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

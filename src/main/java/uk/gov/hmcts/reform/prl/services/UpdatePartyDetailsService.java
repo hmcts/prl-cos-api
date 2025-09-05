@@ -941,6 +941,44 @@ public class UpdatePartyDetailsService {
         return updatedCaseData;
     }
 
+    public List<String> validateUpdatePartyDetails(CallbackRequest callbackRequest) {
+        List<String> validationErrors = new ArrayList<>();
+        Map<String, Object> caseDataMapBefore = callbackRequest.getCaseDetailsBefore().getData();
+        Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+
+        CaseData caseDataBefore = objectMapper.convertValue(caseDataMapBefore, CaseData.class);
+        CaseData caseData = objectMapper.convertValue(caseDataMap, CaseData.class);
+
+        if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
+            log.info("CaseDataBefore applicant count: {}", caseDataBefore.getApplicants().size());
+            log.info("CaseData applicant count: {}", caseData.getApplicants().size());
+
+            log.info("CaseDataBefore applicant: {}", caseDataBefore.getApplicants());
+            log.info("CaseData applicant: {}", caseData.getApplicants());
+            List<Element<PartyDetails>> removeParty = new ArrayList<>();
+            removeParty.addAll(caseDataBefore.getApplicants().stream()
+                .filter(appBefore -> caseData.getApplicants().stream()
+                    .noneMatch(app -> app.equals(appBefore)))
+                .toList());
+
+            removeParty.addAll(caseDataBefore.getRespondents().stream()
+                .filter(respBefore -> caseData.getRespondents().stream()
+                    .noneMatch(resp -> resp.equals(respBefore)))
+                .toList());
+
+            if (!removeParty.isEmpty()) {
+                PartyDetails partyDetails = removeParty.getFirst().getValue();
+                if (partyDetails.getBarrister() != null && partyDetails.getBarrister().getBarristerEmail() != null) {
+                    validationErrors.add("Barrister is associated with the party,"
+                                             + " please remove the barrister first then remove the party");
+                }
+            }
+        }
+
+
+        return validationErrors;
+    }
+
     private void findAndListRefugeDocsForC100(CallbackRequest callbackRequest, CaseData caseData, Map<String, Object> updatedCaseData) {
         CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
         boolean eligibleForDocumentProcessing
