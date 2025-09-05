@@ -81,6 +81,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.FinalisationJudgeDetails;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
@@ -2383,7 +2384,9 @@ public class ManageOrderService {
                            .c21OrderOptions(caseData.getManageOrders().getC21OrderOptions())
                            .selectChildArrangementsOrder(caseData.getManageOrders().getSelectChildArrangementsOrder())
                            .childArrangementsOrdersToIssue(caseData.getManageOrders().getChildArrangementsOrdersToIssue())
-                           .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
+                           .finalisationJudgeDetails(FinalisationJudgeDetails.builder()
+                                                         .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
+                                                         .build())
                            .childOption(getChildOption(caseData))
                            .isOrderUploaded(No)
                            //PRL-6046 - persist FL404 data
