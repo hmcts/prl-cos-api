@@ -400,10 +400,38 @@ public class CaseFlagsWaServiceTest {
         assertThrows(IllegalStateException.class, () -> caseFlagsWaService.setSelectedFlags(caseData));
     }
 
+    @Test
+    public void testSetSelectedFlagsForCaseLevelFlagsWithIllegalAccessException() throws JsonProcessingException {
+        Flags caseLevelFlags = getCaseLevelFlagsMultipleDetails(REQUESTED, ACTIVE);
+        Flags caseLevelFlagsCopy = getCaseLevelFlagsMultipleDetails(REQUESTED, ACTIVE);
+        CaseData caseData = CaseData.builder()
+            .id(123)
+            .allPartyFlags(AllPartyFlags.builder().caApplicant1ExternalFlags(caseLevelFlags).build())
+            .reviewRaRequestWrapper(ReviewRaRequestWrapper.builder().selectedFlags(new ArrayList<>()).build())
+            .caseFlags(caseLevelFlags)
+            .build();
+
+        Assert.assertTrue(caseData.getReviewRaRequestWrapper().getSelectedFlags().isEmpty());
+        when(objectMapper.writeValueAsString(caseLevelFlags)).thenReturn("dummyObjectString");
+        when(objectMapper.readValue("dummyObjectString", Flags.class)).thenReturn(caseLevelFlagsCopy);
+        caseFlagsWaService.setSelectedFlags(caseData);
+
+        assertEquals(2, caseData.getReviewRaRequestWrapper().getSelectedFlags().size());
+    }
+
     private Flags getCaseLevelFlags(String status) {
         FlagDetail caseLevelDetail = FlagDetail.builder().status(status).build();
         List<Element<FlagDetail>> caseLevelFlagDetails = new ArrayList<>();
         caseLevelFlagDetails.add(ElementUtils.element(caseLevelDetail));
+        return Flags.builder().details(caseLevelFlagDetails).build();
+    }
+
+    private Flags getCaseLevelFlagsMultipleDetails(String... statuses) {
+        List<Element<FlagDetail>> caseLevelFlagDetails = new ArrayList<>();
+        for (String status : statuses) {
+            FlagDetail caseLevelDetail = FlagDetail.builder().status(status).build();
+            caseLevelFlagDetails.add(ElementUtils.element(caseLevelDetail));
+        }
         return Flags.builder().details(caseLevelFlagDetails).build();
     }
 
