@@ -202,6 +202,23 @@ public class CaseFlagsWaServiceTest {
     }
 
     @Test
+    public void testCheckCaseFlagsToCreateTaskWhenNewAndPreviousCaseFlags() {
+        Flags caseLevelFlagsBefore = getCaseLevelFlags(ACTIVE);
+        CaseData caseDataBefore = CaseData.builder()
+            .id(123)
+            .caseFlags(caseLevelFlagsBefore)
+            .build();
+
+        Flags caseLevelFlags = getCaseLevelFlags(ACTIVE);
+        CaseData caseData = CaseData.builder()
+            .id(123)
+            .caseFlags(caseLevelFlags)
+            .build();
+        caseFlagsWaService.checkCaseFlagsToCreateTask(caseData, caseDataBefore);
+        verifyNoInteractions(allTabService);
+    }
+
+    @Test
     public void testCheckCaseFlagsToCreateTaskWhenNoNewCaseFlags() {
         Flags caseLevelFlagsBefore = getCaseLevelFlags(REQUESTED);
         CaseData caseDataBefore = CaseData.builder()
@@ -223,6 +240,25 @@ public class CaseFlagsWaServiceTest {
         CaseData caseDataBefore = CaseData.builder()
             .id(123)
             .caseFlags(Flags.builder().details(new ArrayList<>()).build())
+            .build();
+
+        Flags caseLevelFlags = getCaseLevelFlags(REQUESTED);
+        CaseData caseData = CaseData.builder()
+            .id(123)
+            .reviewRaRequestWrapper(ReviewRaRequestWrapper.builder().isCaseFlagsTaskCreated(YesOrNo.No).build())
+            .caseFlags(caseLevelFlags)
+            .build();
+
+        caseFlagsWaService.checkCaseFlagsToCreateTask(caseData, caseDataBefore);
+
+        assertEquals(YesOrNo.No, caseData.getReviewRaRequestWrapper().getIsCaseFlagsTaskCreated());
+    }
+
+    @Test
+    public void testCheckCaseFlagsToCreateTaskWhenExistingAndNewCaseFlags() {
+        CaseData caseDataBefore = CaseData.builder()
+            .id(123)
+            .caseFlags(getCaseLevelFlags(REQUESTED))
             .build();
 
         Flags caseLevelFlags = getCaseLevelFlags(REQUESTED);
