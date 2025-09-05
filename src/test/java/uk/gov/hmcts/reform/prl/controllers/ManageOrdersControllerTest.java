@@ -1883,36 +1883,6 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testManageOrderMidEvent() throws Exception {
-
-        caseData = CaseData.builder()
-            .id(12345L)
-            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(Yes).build())
-            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
-            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
-            .build();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        stringObjectMap.put("isTheOrderAboutAllChildren", Yes);
-        stringObjectMap.put("isTheOrderAboutChildren", No);
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(12345L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.manageOrderMidEvent(
-            authToken,
-            s2sToken,
-            callbackRequest
-        );
-        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
-    }
-
-    @Test
     public void testManageOrderMidEventForAmendOrderSelection() throws Exception {
 
         caseData = CaseData.builder()
@@ -1990,6 +1960,63 @@ public class ManageOrdersControllerTest {
             callbackRequest
         );
         assertEquals(Yes.getDisplayedValue(), responseResponseEntity.getBody().getData().get("doYouWantToServeOrder"));
+        assertThat(responseResponseEntity.getHeaders())
+            .doesNotContainKey(CLIENT_CONTEXT_HEADER_PARAMETER);
+    }
+
+    @Test
+    public void testAddUploadOrderWithNullDoYouWantToServeOrder() throws Exception {
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(Yes)
+            .build();
+
+        caseData = CaseData.builder()
+            .id(12345L)
+            .courtName("testcourt")
+            .manageOrders(manageOrders)
+            .previewOrderDoc(Document.builder()
+                                 .documentUrl(generatedDocumentInfo.getUrl())
+                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                 .documentHash(generatedDocumentInfo.getHashToken())
+                                 .documentFileName("PRL-ORDER-C21-COMMON.docx")
+                                 .build())
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .previewOrderDoc(Document.builder().build())
+            .manageOrdersOptions(ManageOrdersOptionsEnum.amendOrderUnderSlipRule)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(null).build())
+            .build();
+
+        List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
+            OrderDetails.builder().build()).build());
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap.put(IS_INVOKED_FROM_TASK, No);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
+            .thenReturn(Map.of("orderCollection", orderDetailsList));
+        when(manageOrderService.populateHeader(caseData))
+            .thenReturn(stringObjectMap);
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
+            .thenReturn(caseData);
+        when(objectMapper.convertValue(eq(No),
+                                       ArgumentMatchers.<TypeReference<YesOrNo>>any())).thenReturn(No);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        ResponseEntity<AboutToStartOrSubmitCallbackResponse> responseResponseEntity = manageOrdersController.whenToServeOrder(
+            authToken,
+            s2sToken,
+            null,
+            callbackRequest
+        );
+        assertNull(responseResponseEntity.getBody().getData().get("doYouWantToServeOrder"));
         assertThat(responseResponseEntity.getHeaders())
             .doesNotContainKey(CLIENT_CONTEXT_HEADER_PARAMETER);
     }
