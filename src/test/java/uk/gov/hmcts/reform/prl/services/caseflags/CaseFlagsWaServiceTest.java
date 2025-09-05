@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.caseflags;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
@@ -33,6 +34,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyMap;
@@ -200,6 +202,23 @@ public class CaseFlagsWaServiceTest {
     }
 
     @Test
+    public void testCheckCaseFlagsToCreateTaskWhenNewAndPreviousCaseFlags() {
+        Flags caseLevelFlagsBefore = getCaseLevelFlags(ACTIVE);
+        CaseData caseDataBefore = CaseData.builder()
+            .id(123)
+            .caseFlags(caseLevelFlagsBefore)
+            .build();
+
+        Flags caseLevelFlags = getCaseLevelFlags(ACTIVE);
+        CaseData caseData = CaseData.builder()
+            .id(123)
+            .caseFlags(caseLevelFlags)
+            .build();
+        caseFlagsWaService.checkCaseFlagsToCreateTask(caseData, caseDataBefore);
+        verifyNoInteractions(allTabService);
+    }
+
+    @Test
     public void testCheckCaseFlagsToCreateTaskWhenNoNewCaseFlags() {
         Flags caseLevelFlagsBefore = getCaseLevelFlags(REQUESTED);
         CaseData caseDataBefore = CaseData.builder()
@@ -236,9 +255,29 @@ public class CaseFlagsWaServiceTest {
     }
 
     @Test
-    public void testSetSelectedFlagsForCaseLevelFlags() throws IOException {
+    public void testCheckCaseFlagsToCreateTaskWhenExistingAndNewCaseFlags() {
+        CaseData caseDataBefore = CaseData.builder()
+            .id(123)
+            .caseFlags(getCaseLevelFlags(REQUESTED))
+            .build();
 
         Flags caseLevelFlags = getCaseLevelFlags(REQUESTED);
+        CaseData caseData = CaseData.builder()
+            .id(123)
+            .reviewRaRequestWrapper(ReviewRaRequestWrapper.builder().isCaseFlagsTaskCreated(YesOrNo.No).build())
+            .caseFlags(caseLevelFlags)
+            .build();
+
+        caseFlagsWaService.checkCaseFlagsToCreateTask(caseData, caseDataBefore);
+
+        assertEquals(YesOrNo.No, caseData.getReviewRaRequestWrapper().getIsCaseFlagsTaskCreated());
+    }
+
+    @Test
+    public void testSetSelectedFlagsForCaseLevelFlags() throws IOException {
+
+        Flags caseLevelFlags = getCaseLevelFlags(ACTIVE);
+        Flags caseLevelFlagsCopy = getCaseLevelFlags(ACTIVE);
         CaseData caseData = CaseData.builder()
             .id(123)
             .allPartyFlags(AllPartyFlags.builder().build())
@@ -248,7 +287,45 @@ public class CaseFlagsWaServiceTest {
 
         Assert.assertTrue(caseData.getReviewRaRequestWrapper().getSelectedFlags().isEmpty());
         when(objectMapper.writeValueAsString(caseLevelFlags)).thenReturn("dummyObjectString");
-        when(objectMapper.readValue("dummyObjectString", Flags.class)).thenReturn(caseLevelFlags);
+        when(objectMapper.readValue("dummyObjectString", Flags.class)).thenReturn(caseLevelFlagsCopy);
+        caseFlagsWaService.setSelectedFlags(caseData);
+
+        assertEquals(1, caseData.getReviewRaRequestWrapper().getSelectedFlags().size());
+    }
+
+    @Test
+    public void testSetSelectedFlagsForAllPartyFlagsWithNoDetails() throws IOException {
+
+        Flags caseLevelFlags = Flags.builder().build();
+        when(objectMapper.writeValueAsString(any(Flags.class))).thenReturn("1");
+        when(objectMapper.readValue(any(String.class), any(Class.class))).thenReturn(caseLevelFlags);
+        Flags flags = getApplicant1ExternalFlag1Active();
+
+        CaseData caseData = CaseData.builder()
+            .id(123)
+            .allPartyFlags(AllPartyFlags.builder().caApplicant1ExternalFlags(flags).build())
+            .reviewRaRequestWrapper(ReviewRaRequestWrapper.builder().selectedFlags(new ArrayList<>()).build())
+            .build();
+
+        caseFlagsWaService.setSelectedFlags(caseData);
+
+        assertEquals(0, caseData.getReviewRaRequestWrapper().getSelectedFlags().size());
+    }
+
+    @Test
+    public void testSetSelectedFlagsForAllPartyFlagsWithDetails() throws IOException {
+
+        when(objectMapper.writeValueAsString(any(Flags.class))).thenReturn("1");
+        when(objectMapper.readValue(any(String.class), any(Class.class))).thenReturn(getApplicant1ExternalFlag1());
+        List<Element<FlagDetail>> partyLevelFlagDetails = new ArrayList<>();
+        Flags flags = Flags.builder().details(partyLevelFlagDetails).build();
+
+        CaseData caseData = CaseData.builder()
+            .id(123)
+            .allPartyFlags(AllPartyFlags.builder().caApplicant1ExternalFlags(flags).build())
+            .reviewRaRequestWrapper(ReviewRaRequestWrapper.builder().selectedFlags(new ArrayList<>()).build())
+            .build();
+
         caseFlagsWaService.setSelectedFlags(caseData);
 
         assertEquals(1, caseData.getReviewRaRequestWrapper().getSelectedFlags().size());
@@ -324,10 +401,73 @@ public class CaseFlagsWaServiceTest {
         assertTrue(actual);
     }
 
+    @Test
+    public void testSetSelectedFlagsForCaseLevelFlagsWithDeepCopyExceptionOnWrite() throws JsonProcessingException {
+
+        Flags caseLevelFlags = getCaseLevelFlags(ACTIVE);
+        CaseData caseData = CaseData.builder()
+            .id(123)
+            .allPartyFlags(AllPartyFlags.builder().build())
+            .reviewRaRequestWrapper(ReviewRaRequestWrapper.builder().selectedFlags(new ArrayList<>()).build())
+            .caseFlags(caseLevelFlags)
+            .build();
+
+        Assert.assertTrue(caseData.getReviewRaRequestWrapper().getSelectedFlags().isEmpty());
+        when(objectMapper.writeValueAsString(caseLevelFlags)).thenThrow(JsonProcessingException.class);
+
+        assertThrows(IllegalStateException.class, () -> caseFlagsWaService.setSelectedFlags(caseData));
+    }
+
+    @Test
+    public void testSetSelectedFlagsForCaseLevelFlagsWithDeepCopyExceptionOnRead() throws JsonProcessingException {
+
+        Flags caseLevelFlags = getCaseLevelFlags(ACTIVE);
+        CaseData caseData = CaseData.builder()
+            .id(123)
+            .allPartyFlags(AllPartyFlags.builder().build())
+            .reviewRaRequestWrapper(ReviewRaRequestWrapper.builder().selectedFlags(new ArrayList<>()).build())
+            .caseFlags(caseLevelFlags)
+            .build();
+
+        Assert.assertTrue(caseData.getReviewRaRequestWrapper().getSelectedFlags().isEmpty());
+        when(objectMapper.writeValueAsString(caseLevelFlags)).thenReturn("dummyObjectString");
+        when(objectMapper.readValue("dummyObjectString", Flags.class)).thenThrow(JsonProcessingException.class);
+
+        assertThrows(IllegalStateException.class, () -> caseFlagsWaService.setSelectedFlags(caseData));
+    }
+
+    @Test
+    public void testSetSelectedFlagsForCaseLevelFlagsWithIllegalAccessException() throws JsonProcessingException {
+        Flags caseLevelFlags = getCaseLevelFlagsMultipleDetails(REQUESTED, ACTIVE);
+        Flags caseLevelFlagsCopy = getCaseLevelFlagsMultipleDetails(REQUESTED, ACTIVE);
+        CaseData caseData = CaseData.builder()
+            .id(123)
+            .allPartyFlags(AllPartyFlags.builder().caApplicant1ExternalFlags(caseLevelFlags).build())
+            .reviewRaRequestWrapper(ReviewRaRequestWrapper.builder().selectedFlags(new ArrayList<>()).build())
+            .caseFlags(caseLevelFlags)
+            .build();
+
+        Assert.assertTrue(caseData.getReviewRaRequestWrapper().getSelectedFlags().isEmpty());
+        when(objectMapper.writeValueAsString(caseLevelFlags)).thenReturn("dummyObjectString");
+        when(objectMapper.readValue("dummyObjectString", Flags.class)).thenReturn(caseLevelFlagsCopy);
+        caseFlagsWaService.setSelectedFlags(caseData);
+
+        assertEquals(2, caseData.getReviewRaRequestWrapper().getSelectedFlags().size());
+    }
+
     private Flags getCaseLevelFlags(String status) {
         FlagDetail caseLevelDetail = FlagDetail.builder().status(status).build();
         List<Element<FlagDetail>> caseLevelFlagDetails = new ArrayList<>();
         caseLevelFlagDetails.add(ElementUtils.element(caseLevelDetail));
+        return Flags.builder().details(caseLevelFlagDetails).build();
+    }
+
+    private Flags getCaseLevelFlagsMultipleDetails(String... statuses) {
+        List<Element<FlagDetail>> caseLevelFlagDetails = new ArrayList<>();
+        for (String status : statuses) {
+            FlagDetail caseLevelDetail = FlagDetail.builder().status(status).build();
+            caseLevelFlagDetails.add(ElementUtils.element(caseLevelDetail));
+        }
         return Flags.builder().details(caseLevelFlagDetails).build();
     }
 
@@ -339,6 +479,14 @@ public class CaseFlagsWaServiceTest {
         List<Element<FlagDetail>> partyLevelFlagDetails = new ArrayList<>();
         partyLevelFlagDetails.add(ElementUtils.element(applicant1ExternalFlag1));
         partyLevelFlagDetails.add(ElementUtils.element(applicant1ExternalFlag2));
+        return Flags.builder().details(partyLevelFlagDetails).build();
+    }
+
+    private Flags getApplicant1ExternalFlag1Active() {
+        FlagDetail applicant1ExternalFlag1 = FlagDetail.builder().status(ACTIVE)
+            .dateTimeModified(LocalDateTime.now().minusDays(2)).build();
+        List<Element<FlagDetail>> partyLevelFlagDetails = new ArrayList<>();
+        partyLevelFlagDetails.add(ElementUtils.element(applicant1ExternalFlag1));
         return Flags.builder().details(partyLevelFlagDetails).build();
     }
 }
