@@ -214,14 +214,14 @@ class AcroZipServiceTest {
         assertTrue(Files.exists(tempExportDir.resolve("secret.txt")), "File should be extracted with password");
     }
 
-//    @Test
-//    void manualReviewZipFile() throws Exception {
-//        Files.writeString(Files.createFile(tempSourceDir.resolve("manual.txt")), "Manual review content");
-//        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile(), "ReviewPassword123");
-//
-//        Path reviewPath = Path.of(System.getProperty("user.home"), "Desktop", "manual-review.zip");
-//        Files.copy(Path.of(archivePath), reviewPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-//        System.out.println("ZIP file saved for review at: " + reviewPath);
-//        System.out.println("password: ReviewPassword123");
-//    }
+    //@Test
+    void manualReviewZipFile() throws Exception {
+        Files.writeString(Files.createFile(tempSourceDir.resolve("manual.txt")), "Manual review content");
+        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile(), "ReviewPassword123");
+
+        Path reviewPath = Path.of(System.getProperty("user.home"), "Desktop", "manual-review.zip");
+        Files.copy(Path.of(archivePath), reviewPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+        System.out.println("ZIP file saved for review at: " + reviewPath);
+        System.out.println("password: ReviewPassword123");
+    }
 }
