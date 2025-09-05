@@ -127,13 +127,8 @@ public class CaseFlagsWaService {
 
         allFlagsDetails.forEach(flagDetail -> {
             if (!REQUESTED.equals(flagDetail.getValue().getStatus())) {
-                List<Element<FlagDetail>> detailsToRemove = new ArrayList<>();
-                for (Element<Flags> selectedFlag : selectedFlagsList) {
-                    if (selectedFlag.getValue().getDetails() != null) {
-                        detailsToRemove.add(flagDetail);
-                    }
-                }
-                selectedFlagsList.removeAll(detailsToRemove);
+                selectedFlagsList.stream().filter(selectedFlag -> selectedFlag.getValue().getDetails() != null)
+                    .forEach(selectedFlag -> selectedFlag.getValue().getDetails().remove(flagDetail));
             }
         });
 

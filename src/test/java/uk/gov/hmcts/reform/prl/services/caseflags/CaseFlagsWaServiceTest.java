@@ -260,8 +260,7 @@ public class CaseFlagsWaServiceTest {
         Flags caseLevelFlags = Flags.builder().build();
         when(objectMapper.writeValueAsString(any(Flags.class))).thenReturn("1");
         when(objectMapper.readValue(any(String.class), any(Class.class))).thenReturn(caseLevelFlags);
-        List<Element<FlagDetail>> partyLevelFlagDetails = new ArrayList<>();
-        Flags flags = Flags.builder().details(partyLevelFlagDetails).build();
+        Flags flags = getApplicant1ExternalFlag1Active();
 
         CaseData caseData = CaseData.builder()
             .id(123)
@@ -378,6 +377,14 @@ public class CaseFlagsWaServiceTest {
         List<Element<FlagDetail>> partyLevelFlagDetails = new ArrayList<>();
         partyLevelFlagDetails.add(ElementUtils.element(applicant1ExternalFlag1));
         partyLevelFlagDetails.add(ElementUtils.element(applicant1ExternalFlag2));
+        return Flags.builder().details(partyLevelFlagDetails).build();
+    }
+
+    private Flags getApplicant1ExternalFlag1Active() {
+        FlagDetail applicant1ExternalFlag1 = FlagDetail.builder().status(ACTIVE)
+            .dateTimeModified(LocalDateTime.now().minusDays(2)).build();
+        List<Element<FlagDetail>> partyLevelFlagDetails = new ArrayList<>();
+        partyLevelFlagDetails.add(ElementUtils.element(applicant1ExternalFlag1));
         return Flags.builder().details(partyLevelFlagDetails).build();
     }
 }
