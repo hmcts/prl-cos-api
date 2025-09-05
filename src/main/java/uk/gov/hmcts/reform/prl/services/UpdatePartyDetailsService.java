@@ -950,18 +950,20 @@ public class UpdatePartyDetailsService {
         CaseData caseData = objectMapper.convertValue(caseDataMap, CaseData.class);
 
         if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
-            List<Element<PartyDetails>> removeParty = new ArrayList<>();
             log.info("CaseDataBefore applicant count: {}", caseDataBefore.getApplicants().size());
             log.info("CaseData applicant count: {}", caseData.getApplicants().size());
 
             log.info("CaseDataBefore applicant: {}", caseDataBefore.getApplicants());
             log.info("CaseData applicant: {}", caseData.getApplicants());
+            List<Element<PartyDetails>> removeParty = new ArrayList<>();
             removeParty.addAll(caseDataBefore.getApplicants().stream()
-                .filter(applicant -> !caseData.getApplicants().contains(applicant))
+                .filter(appBefore -> caseData.getApplicants().stream()
+                    .noneMatch(app -> app.equals(appBefore)))
                 .toList());
 
             removeParty.addAll(caseDataBefore.getRespondents().stream()
-                .filter(respondent -> !caseData.getRespondents().contains(respondent))
+                .filter(respBefore -> caseData.getRespondents().stream()
+                    .noneMatch(resp -> resp.equals(respBefore)))
                 .toList());
 
             if (!removeParty.isEmpty()) {
