@@ -15,11 +15,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
+import uk.gov.hmcts.reform.prl.services.UserService;
 
 import java.util.List;
 
@@ -52,6 +54,9 @@ public class ResubmitControllerIntegrationTest {
     @MockBean
     CaseEventService caseEventService;
 
+    @MockBean
+    UserService userService;
+
     @Autowired
     ObjectMapper objectMapper;
 
@@ -66,6 +71,8 @@ public class ResubmitControllerIntegrationTest {
         String url = "/resubmit-application";
         String jsonRequest = ResourceLoader.loadJson("requests/C100-case-data.json");
 
+        when(userService.getUserDetails(anyString()))
+            .thenReturn(UserDetails.builder().forename("John").surname("Smith").build());
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
         when(courtFinderService.getNearestFamilyCourt(any())).thenReturn(null);
         when(caseEventService.findEventsForCase(anyString())).thenReturn(List.of(CaseEventDetail.builder()

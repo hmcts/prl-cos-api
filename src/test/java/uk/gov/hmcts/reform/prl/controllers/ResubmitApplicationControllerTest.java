@@ -152,6 +152,8 @@ public class ResubmitApplicationControllerTest {
 
     @Before
     public void init() throws Exception {
+        when(userService.getUserDetails(any()))
+            .thenReturn(UserDetails.builder().forename("John").surname("Smith").build());
         List<MiamExemptionsChecklistEnum> listMiamExemptionsChecklistEnum = new ArrayList<>();
         listMiamExemptionsChecklistEnum.add(MiamExemptionsChecklistEnum.mpuDomesticAbuse);
         listMiamExemptionsChecklistEnum.add(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance);
