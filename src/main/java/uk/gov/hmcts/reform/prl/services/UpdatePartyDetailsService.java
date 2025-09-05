@@ -951,6 +951,11 @@ public class UpdatePartyDetailsService {
 
         if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             List<Element<PartyDetails>> removeParty = new ArrayList<>();
+            log.info("CaseDataBefore applicant count: {}", caseDataBefore.getApplicants().size());
+            log.info("CaseData applicant count: {}", caseData.getApplicants().size());
+
+            log.info("CaseDataBefore applicant: {}", caseDataBefore.getApplicants());
+            log.info("CaseData applicant: {}", caseData.getApplicants());
             removeParty.addAll(caseDataBefore.getApplicants().stream()
                 .filter(applicant -> !caseData.getApplicants().contains(applicant))
                 .toList());
