@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.schedule;
 
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.services.acro.BaisDocumentUploadService;
@@ -24,17 +25,14 @@ public class BaisDocumentUploadTask implements Runnable {
      *
      * @see Thread#run()
      */
+    @SneakyThrows
     @Override
     public void run() {
         log.info("*** Uploading FL404A order to Bais ***");
         //Invoke Bais document upload service to upload FL404a orders
         baisDocumentUploadService.uploadFL404Orders();
 
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        Thread.sleep(1000);
 
         log.info("*** Uploading FL404A order to Bais task is completed ***");
     }
