@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
@@ -53,6 +54,7 @@ public class CaseAssignmentController {
     private final ObjectMapper objectMapper;
     private final OrganisationService organisationService;
     private final AuthorisationService authorisationService;
+    private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     private final ApplicationsTabService applicationsTabService;
 
     @PostMapping(path = "/barrister/add/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -160,5 +162,6 @@ public class CaseAssignmentController {
             caseDetails.getData().put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
             caseDetails.getData().putAll(applicationsTabService.updateTab(caseData));
         }
+        caseDetails.getData().putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(caseData));
     }
 }

@@ -1765,10 +1765,7 @@
           "phoneNumber": null,
           "placeOfBirth": "London",
           "previousName": null,
-          "solicitorOrg": {
-            "OrganisationID": "QO4A1Q8",
-            "OrganisationName": "FPRL-test-organisation"
-          },
+          "solicitorOrg": {},
           "partyLevelFlag": {
             "details": [],
             "partyName": "Mary Richards",
