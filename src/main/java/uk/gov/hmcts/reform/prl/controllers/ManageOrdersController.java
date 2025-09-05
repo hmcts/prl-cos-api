@@ -506,7 +506,7 @@ public class ManageOrdersController {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            if (caseData.getServeOrderData().getDoYouWantToServeOrder().equals(Yes)) {
+            if (Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
                 caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, Yes);
                 if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
                     caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
