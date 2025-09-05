@@ -32,41 +32,44 @@ import java.util.Set;
 public class CsvWriter {
 
     private static final FileAttribute<Set<PosixFilePermission>> ATTRIBUTE = PosixFilePermissions
-        .asFileAttribute(PosixFilePermissions.fromString("rwx------"));
+            .asFileAttribute(PosixFilePermissions.fromString("rwx------"));
 
-    @Value("${acro.output-directory}")
-    private String outputDirectory;
+    @Value("${acro.source-directory}")
+    private String sourceDirectory;
 
     public enum CsvColumn {
         CASE_NUMBER("Case No.", "id"),
-        COURT_NAME("Court Name/Location", "CourtName"),
-        COURT_ID("Court Code", "CourtId"),
+        COURT_NAME("Court Name/Location", "courtName"),
+        COURT_ID("Court Code", "courtEpimsId"),
         ORDER_NAME("Order Name", "caseTypeOfApplication"),
         COURT_DATE("Court Date", "dateOrderMade"),
         ORDER_EXPIRY_DATE("Order Expiry Date", "finalCaseClosedDate"), // Assuming this is a date field
-        RESPONDENT_SURNAME("Respondent Surname", "respondentsFL401.lastName"),
-        RESPONDENT_FORENAMES("Respondent Forename(s)", "respondentsFL401.firstName"),
-        RESPONDENT_DOB("Respondent DOB", "respondentsFL401.dateOfBirth"),
-        RESPONDENT_ADDRESS1("Respondent 1st Line of Address", "respondentsFL401.address.addressLine1"),
-        RESPONDENT_ADDRESS2("Respondent 2nd Line of Address", "respondentsFL401.address.addressLine2"),
-        RESPONDENT_POSTCODE("Respondent Postcode", "respondentsFL401.address.postCode"),
-        RESPONDENT_PHONE("Respondent Phone", "respondentsFL401.phoneNumber"),
-        RESPONDENT_EMAIL("Respondent Email", "respondentsFL401.email"),
-        RESPONDENT_ADDRESS_CONFIDENTIAL("Is Respondent Address Confidential", "respondentsFL401.isAddressConfidential"),
-        RESPONDENT_PHONE_CONFIDENTIAL("Is Respondent Phone Confidential", "respondentsFL401.isPhoneNumberConfidential"),
-        RESPONDENT_EMAIL_CONFIDENTIAL("Is Respondent Email Confidential", "respondentsFL401.isEmailAddressConfidential"),
-        APPLICANT_SURNAME("Applicant Surname", "applicantsFL401.lastName"),
-        APPLICANT_FORENAMES("Applicant Forename(s)", "applicantsFL401.firstName"),
-        APPLICANT_DOB("Applicant DOB", "applicantsFL401.dateOfBirth"),
-        APPLICANT_ADDRESS1("Applicant 1st Line of Address", "applicantsFL401.address.addressLine1"),
-        APPLICANT_ADDRESS2("Applicant 2nd Line of Address", "applicantsFL401.address.addressLine2"),
-        APPLICANT_POSTCODE("Applicant Postcode", "applicantsFL401.address.postCode"),
-        APPLICANT_PHONE("Applicant Phone", "applicantsFL401.phoneNumber"),
+        RESPONDENT_SURNAME("Respondent Surname", "respondent.lastName"),
+        RESPONDENT_FORENAMES("Respondent Forename(s)", "respondent.firstName"),
+        RESPONDENT_DOB("Respondent DOB", "respondent.dateOfBirth"),
+        RESPONDENT_ADDRESS1("Respondent 1st Line of Address", "respondent.address.addressLine1"),
+        RESPONDENT_ADDRESS2("Respondent 2nd Line of Address", "respondent.address.addressLine2"),
+        RESPONDENT_POSTCODE("Respondent Postcode", "respondent.address.postCode"),
+        RESPONDENT_PHONE("Respondent Phone", "respondent.phoneNumber"),
+        RESPONDENT_EMAIL("Respondent Email", "respondent.email"),
+        RESPONDENT_ADDRESS_CONFIDENTIAL("Is Respondent Address Confidential", "respondent.isAddressConfidential"),
+        RESPONDENT_PHONE_CONFIDENTIAL("Is Respondent Phone Confidential", "respondent.isPhoneNumberConfidential"),
+        RESPONDENT_EMAIL_CONFIDENTIAL(
+                "Is Respondent Email Confidential",
+                "respondent.isEmailAddressConfidential"
+        ),
+        APPLICANT_SURNAME("Applicant Surname", "applicant.lastName"),
+        APPLICANT_FORENAMES("Applicant Forename(s)", "applicant.firstName"),
+        APPLICANT_DOB("Applicant DOB", "applicant.dateOfBirth"),
+        APPLICANT_ADDRESS1("Applicant 1st Line of Address", "applicant.address.addressLine1"),
+        APPLICANT_ADDRESS2("Applicant 2nd Line of Address", "applicant.address.addressLine2"),
+        APPLICANT_POSTCODE("Applicant Postcode", "applicant.address.postCode"),
+        APPLICANT_PHONE("Applicant Phone", "applicant.phoneNumber"),
         APPLICANT_SAFE_TIME_TO_CALL("Applicant Safe Time to Call", "daApplicantContactInstructions"),
-        APPLICANT_EMAIL("Applicant Email", "applicantsFL401.email"),
-        APPLICANT_ADDRESS_CONFIDENTIAL("Is Applicant Address Confidential", "applicantsFL401.isAddressConfidential"),
-        APPLICANT_PHONE_CONFIDENTIAL("Is Applicant Phone Confidential", "applicantsFL401.isPhoneNumberConfidential"),
-        APPLICANT_EMAIL_CONFIDENTIAL("Is Applicant Email Confidential", "applicantsFL401.isEmailAddressConfidential"),
+        APPLICANT_EMAIL("Applicant Email", "applicant.email"),
+        APPLICANT_ADDRESS_CONFIDENTIAL("Is Applicant Address Confidential", "applicant.isAddressConfidential"),
+        APPLICANT_PHONE_CONFIDENTIAL("Is Applicant Phone Confidential", "applicant.isPhoneNumberConfidential"),
+        APPLICANT_EMAIL_CONFIDENTIAL("Is Applicant Email Confidential", "applicant.isEmailAddressConfidential"),
         PDF_IDENTIFIER("Order File Name", "PdfIdentifier");
 
         private final String header;
@@ -86,7 +89,7 @@ public class CsvWriter {
         }
     }
 
-    private static final CsvColumn[] COLUMNS = CsvColumn.values();
+    public static final CsvColumn[] COLUMNS = CsvColumn.values();
 
     /**
      * Creates a new CSV file with headers in the configured output directory.
@@ -101,7 +104,7 @@ public class CsvWriter {
         CSVFormat csvFileHeader = CSVFormat.DEFAULT.builder().setHeader(headers).build();
 
         try (FileWriter fileWriter = new FileWriter(csvFile);
-             CSVPrinter printer = new CSVPrinter(fileWriter, csvFileHeader)) {
+             CSVPrinter ignored = new CSVPrinter(fileWriter, csvFileHeader)) {
             log.info("Created CSV file with headers: {}", csvFile.getAbsolutePath());
         }
         return csvFile;
@@ -111,18 +114,18 @@ public class CsvWriter {
      * Creates CSV row data for a single case.
      * Returns a list of strings that can be written to a CSV file by another service.
      *
-     * @param ccdOrderData the case data to convert to CSV row
+     * @param ccdOrderData        the case data to convert to CSV row
      * @param confidentialAllowed toggle to include confidential data or replace with "-"
-     * @param filename the filename to be added to the Order File Name column
+     * @param orderFilename       the filename to be added to the Order File Name column
      * @return list of strings representing the CSV row data
      */
-    public List<String> createCsvRowData(AcroCaseData ccdOrderData, boolean confidentialAllowed, String filename) {
+    public List<String> createCsvRowData(AcroCaseData ccdOrderData, boolean confidentialAllowed, String orderFilename) {
         List<String> record = new ArrayList<>();
         for (CsvColumn column : COLUMNS) {
             Object value;
 
             if (column == CsvColumn.PDF_IDENTIFIER) {
-                value = filename != null ? filename : "";
+                value = orderFilename;
             } else {
                 value = extractPropertyValues(ccdOrderData, column.getProperty());
             }
@@ -140,15 +143,24 @@ public class CsvWriter {
     }
 
     /**
-     * Gets the CSV headers as an array of strings.
-     * This can be used by other services to create CSV files with proper headers.
+     * Appends a CSV row to an existing CSV file.
+     * Uses the createCsvRowData method to generate the row data and writes it to the file.
      *
-     * @return array of CSV header strings
+     * @param csvFile             the CSV file to append to
+     * @param caseData            the case data to convert to CSV row
+     * @param confidentialAllowed toggle to include confidential data or replace with "-"
+     * @param filename            the filename to be added to the Order File Name column
+     * @throws IOException if writing to the file fails
      */
-    public String[] getCsvHeaders() {
-        return Arrays.stream(COLUMNS).map(CsvColumn::getHeader).toArray(String[]::new);
-    }
+    public void appendCsvRowToFile(File csvFile, AcroCaseData caseData, boolean confidentialAllowed, String filename) throws IOException {
+        List<String> rowData = createCsvRowData(caseData, confidentialAllowed, filename);
 
+        CSVFormat csvFormat = CSVFormat.DEFAULT;
+        try (FileWriter fileWriter = new FileWriter(csvFile, true);
+             CSVPrinter printer = new CSVPrinter(fileWriter, csvFormat)) {
+            printer.printRecord(rowData);
+        }
+    }
 
     /**
      * Creates a CSV file in the configured output directory with a date-stamped filename.
@@ -157,12 +169,12 @@ public class CsvWriter {
      * @throws IOException if directory creation or file creation fails
      */
     private File createCsvFile() throws IOException {
-        Path outputPath = Paths.get(outputDirectory);
+        Path outputPath = Paths.get(sourceDirectory);
         if (!Files.exists(outputPath)) {
             Files.createDirectories(outputPath);
         }
 
-        return new File(outputDirectory, generateCsvFilename());
+        return new File(sourceDirectory, generateCsvFilename());
     }
 
     private String generateCsvFilename() {
@@ -175,16 +187,16 @@ public class CsvWriter {
 
     private boolean isConfidentialField(AcroCaseData caseData, CsvColumn column) {
         return switch (column) {
-            case APPLICANT_PHONE -> isConfidential(caseData, "applicantsFL401.isPhoneNumberConfidential");
-            case APPLICANT_EMAIL -> isConfidential(caseData, "applicantsFL401.isEmailAddressConfidential");
+            case APPLICANT_PHONE -> isConfidential(caseData, "applicant.isPhoneNumberConfidential");
+            case APPLICANT_EMAIL -> isConfidential(caseData, "applicant.isEmailAddressConfidential");
             case APPLICANT_SAFE_TIME_TO_CALL -> true; // Always blank when confidentialAllowed is false
             case APPLICANT_ADDRESS1, APPLICANT_ADDRESS2, APPLICANT_POSTCODE ->
-                    isConfidential(caseData, "applicantsFL401.isAddressConfidential");
+                    isConfidential(caseData, "applicant.isAddressConfidential");
 
-            case RESPONDENT_PHONE -> isConfidential(caseData, "respondentsFL401.isPhoneNumberConfidential");
-            case RESPONDENT_EMAIL -> isConfidential(caseData, "respondentsFL401.isEmailAddressConfidential");
+            case RESPONDENT_PHONE -> isConfidential(caseData, "respondent.isPhoneNumberConfidential");
+            case RESPONDENT_EMAIL -> isConfidential(caseData, "respondent.isEmailAddressConfidential");
             case RESPONDENT_ADDRESS1, RESPONDENT_ADDRESS2, RESPONDENT_POSTCODE ->
-                    isConfidential(caseData, "respondentsFL401.isAddressConfidential");
+                    isConfidential(caseData, "respondent.isAddressConfidential");
             default -> false;
         };
     }
