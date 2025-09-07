@@ -958,20 +958,23 @@ public class UpdatePartyDetailsService {
             List<Element<PartyDetails>> removeParty = new ArrayList<>();
             removeParty.addAll(caseDataBefore.getApplicants().stream()
                 .filter(appBefore -> caseData.getApplicants().stream()
-                    .noneMatch(app -> app.equals(appBefore)))
+                    .noneMatch(app -> app.getId().equals(appBefore.getId())))
                 .toList());
 
             removeParty.addAll(caseDataBefore.getRespondents().stream()
                 .filter(respBefore -> caseData.getRespondents().stream()
-                    .noneMatch(resp -> resp.equals(respBefore)))
+                    .noneMatch(resp -> resp.getId().equals(respBefore.getId())))
                 .toList());
 
             if (!removeParty.isEmpty()) {
-                PartyDetails partyDetails = removeParty.getFirst().getValue();
-                if (partyDetails.getBarrister() != null && partyDetails.getBarrister().getBarristerEmail() != null) {
-                    validationErrors.add("Barrister is associated with the party,"
-                                             + " please remove the barrister first then remove the party");
-                }
+                StringBuilder validationMsg = new StringBuilder("Barrister is associated with the party ");
+                removeParty.stream().forEach(party -> {
+                    if (party.getValue().getBarrister() != null && party.getValue().getBarrister().getBarristerEmail() != null) {
+                        validationMsg.append(party.getValue().getFirstName() + " " + party.getValue().getLastName() + "\n");
+                    }
+                });
+                validationMsg.append("Please use 'remove legal rep/remove barrister' to remove barrister from the party\n");
+                validationErrors.add(validationMsg.toString());
             }
         }
 

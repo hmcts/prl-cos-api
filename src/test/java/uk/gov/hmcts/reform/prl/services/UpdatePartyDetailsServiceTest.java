@@ -2614,8 +2614,7 @@ public class UpdatePartyDetailsServiceTest {
         List<String> validationErrorList = updatePartyDetailsService.validateUpdatePartyDetails(callbackRequest);
 
         assertTrue(!validationErrorList.isEmpty());
-        assertEquals("Barrister is associated with the party,"
-            + " please remove the barrister first then remove the party", validationErrorList.getFirst());
+        assertTrue(validationErrorList.getFirst().contains("Barrister is associated with the party"));
 
     }
 
@@ -2671,8 +2670,7 @@ public class UpdatePartyDetailsServiceTest {
         List<String> validationErrorList = updatePartyDetailsService.validateUpdatePartyDetails(callbackRequest);
 
         assertTrue(!validationErrorList.isEmpty());
-        assertEquals("Barrister is associated with the party,"
-                         + " please remove the barrister first then remove the party", validationErrorList.getFirst());
+        assertTrue(validationErrorList.getFirst().contains("Barrister is associated with the party"));
 
     }
 
