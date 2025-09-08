@@ -88,7 +88,6 @@ import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Represe
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Service
 @Slf4j
