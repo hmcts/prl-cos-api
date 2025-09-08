@@ -1162,6 +1162,7 @@ public class ManageOrderServiceTest {
         manageOrders = ManageOrders.builder()
             .withdrawnOrRefusedOrder(WithDrawTypeOfOrderEnum.withdrawnApplication)
             .isCaseWithdrawn(No)
+            .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
             .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
             .childOption(
                 dynamicMultiSelectList
@@ -6236,6 +6237,7 @@ public class ManageOrderServiceTest {
             .withdrawnOrRefusedOrder(WithDrawTypeOfOrderEnum.withdrawnApplication)
             .isCaseWithdrawn(No)
             .isTheOrderAboutAllChildren(Yes)
+            .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
             .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
             .childArrangementsOrdersToIssue(List.of(OrderTypeEnum.childArrangementsOrder))
             .selectChildArrangementsOrder(ChildArrangementOrderTypeEnum.spendTimeWithOrder)
@@ -6657,7 +6659,9 @@ public class ManageOrderServiceTest {
                                                                                           .builder()
                                                                                           .finalisationJudgeDetails(
                                                                                               new FinalisationJudgeDetails(
-                                                                                                 manageOrders.getJudgeOrMagistrateTitle()
+                                                                                                 manageOrders
+                                                                                                     .getJudgeOrMagistrateTitle()
+                                                                                                     .getDisplayedValue()
                                                                                                   ))
                                                                                           .orderDocument(Document
                                                                                                              .builder()
@@ -6698,7 +6702,7 @@ public class ManageOrderServiceTest {
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
         assertNotNull(manageOrderService.serveOrder(caseData,orderList));
-        assertEquals(caseData.getManageOrders().getJudgeOrMagistrateTitle(),
+        assertEquals(caseData.getManageOrders().getJudgeOrMagistrateTitle().getDisplayedValue(),
                      orders.getValue().getFinalisationJudgeDetails().getJudgeOrMagistrateTitle());
     }
 }
