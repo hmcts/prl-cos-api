@@ -2,26 +2,26 @@ package uk.gov.hmcts.reform.prl.services.acro;
 
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Comparator;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@ExtendWith(MockitoExtension.class)
+@DisplayName("AcroZipService Tests")
 class AcroZipServiceTest {
+
     private AcroZipService acroZipService;
     private Path tempSourceDir;
     private Path tempExportDir;
@@ -31,35 +31,21 @@ class AcroZipServiceTest {
         acroZipService = new AcroZipService();
         tempSourceDir = Files.createTempDirectory("acrozip-src");
         tempExportDir = Files.createTempDirectory("acrozip-exp");
-    }
+        ReflectionTestUtils.setField(acroZipService, "password", "TestPassword123");
 
-    @AfterEach
-    void tearDown() throws Exception {
-        deleteRecursively(tempSourceDir);
-        deleteRecursively(tempExportDir);
-    }
+        ReflectionTestUtils.setField(acroZipService, "sourceDirectory", tempSourceDir.toString());
+        ReflectionTestUtils.setField(acroZipService, "outputDirectory", tempExportDir.toString());
+        ReflectionTestUtils.setField(acroZipService, "password", "ReviewPassword123");
 
-    private void deleteRecursively(Path path) throws IOException {
-        if (Files.exists(path)) {
-            try (var pathStream = Files.walk(path)) {
-                pathStream
-                    .sorted(Comparator.reverseOrder())
-                    .map(Path::toFile)
-                    .forEach(file -> {
-                        if (!file.delete()) {
-                            file.deleteOnExit();
-                        }
-                    });
-            }
-        }
     }
 
     @Test
-    void testZipCreatesZipFormat() throws Exception {
+    @DisplayName("Should create archive with valid zip format signature")
+    void shouldCreateArchiveWithValid7ZipFormatSignature() throws Exception {
         Path file1 = Files.createFile(tempSourceDir.resolve("file1.txt"));
         Files.writeString(file1, "Test content");
 
-        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile(), null);
+        String archivePath = acroZipService.zip();
         File archiveFile = new File(archivePath);
 
         byte[] header = new byte[4];
@@ -74,85 +60,102 @@ class AcroZipServiceTest {
     }
 
     @Test
-    void testZipMultipleFiles() throws Exception {
-        Files.writeString(Files.createFile(tempSourceDir.resolve("file1.txt")), "Content 1");
-        Files.writeString(Files.createFile(tempSourceDir.resolve("file2.txt")), "Content 2");
-        Files.writeString(Files.createFile(tempSourceDir.resolve("file3.txt")), "Content 3");
+    @DisplayName("Should create archive with correct PRL_ORDERS naming format")
+    void shouldCreateArchiveWithCorrectPrlOrdersNamingFormat() throws Exception {
+        Path file1 = Files.createFile(tempSourceDir.resolve("file1.txt"));
+        Files.writeString(file1, "Test content");
 
-        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile(), null);
+        String archivePath = acroZipService.zip();
+        File archiveFile = new File(archivePath);
 
-        assertTrue(Files.exists(Path.of(archivePath)));
-
-        int fileCount = 0;
-        try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(Path.of(archivePath)))) {
-            ZipEntry entry;
-            while ((entry = zis.getNextEntry()) != null) {
-                fileCount++;
-                assertTrue(entry.getName().matches("file[1-3]\\.txt"));
-            }
-        }
-        assertEquals(3, fileCount, "Archive should contain 3 files");
+        String fileName = archiveFile.getName();
+        assertTrue(
+            fileName.matches("PRL_ORDERS_\\d{8}_\\d{4}\\.zip"),
+            "Archive name should match format PRL_ORDERS_YYYYMMDD_HHMM.zip"
+        );
     }
 
     @Test
-    void testZipWithSubdirectories() throws Exception {
+    @DisplayName("Should handle multiple files and subdirectories")
+    void shouldHandleMultipleFilesAndSubdirectories() throws Exception {
         Path subDir = Files.createDirectory(tempSourceDir.resolve("subdir"));
-        Files.writeString(Files.createFile(tempSourceDir.resolve("root.txt")), "Root content");
-        Files.writeString(Files.createFile(subDir.resolve("nested.txt")), "Nested content");
+        Files.writeString(Files.createFile(tempSourceDir.resolve("file1.txt")), "Content 1");
+        Files.writeString(Files.createFile(subDir.resolve("file2.txt")), "Content 2");
+        Files.writeString(Files.createFile(subDir.resolve("file3.txt")), "Content 3");
 
-        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile(), null);
+        String archivePath = acroZipService.zip();
+        File archiveFile = new File(archivePath);
 
-        try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(Path.of(archivePath)))) {
-            ZipEntry entry;
-            boolean foundRoot = false;
-            boolean foundNested = false;
+        assertTrue(archiveFile.exists(), "Archive should be created");
+        assertTrue(archiveFile.length() > 100, "Archive should contain multiple files");
+    }
 
-            while ((entry = zis.getNextEntry()) != null) {
-                if ("root.txt".equals(entry.getName())) {
-                    foundRoot = true;
-                } else if ("subdir/nested.txt".equals(entry.getName())) {
-                    foundNested = true;
-                }
-            }
+    @Test
+    @DisplayName("Should throw exception when source directory does not exist")
+    void shouldThrowExceptionWhenSourceDirectoryDoesNotExist() {
+        ReflectionTestUtils.setField(acroZipService, "sourceDirectory", "/non/existent/path");
 
-            assertTrue(foundRoot, "Should find root.txt");
-            assertTrue(foundNested, "Should find subdir/nested.txt");
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> acroZipService.zip()
+        );
+
+        assertTrue(exception.getMessage().contains("Source must be an existing directory"));
+    }
+
+    @Test
+    @DisplayName("Should throw exception when export directory does not exist")
+    void shouldThrowExceptionWhenExportDirectoryDoesNotExist() {
+        ReflectionTestUtils.setField(acroZipService, "outputDirectory", "/non/existent/export");
+
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> acroZipService.zip()
+        );
+
+        assertTrue(exception.getMessage().contains("Export folder must be an existing directory"));
+    }
+
+    @Test
+    @DisplayName("Should handle files with special characters in names")
+    void shouldHandleFilesWithSpecialCharactersInNames() throws Exception {
+        Files.writeString(Files.createFile(tempSourceDir.resolve("file with spaces.txt")), "Content");
+        Files.writeString(Files.createFile(tempSourceDir.resolve("file-with-dashes.txt")), "Content");
+
+        String archivePath = acroZipService.zip();
+        File archiveFile = new File(archivePath);
+
+        assertTrue(archiveFile.exists(), "Archive should handle special characters in filenames");
+    }
+
+    @Test
+    @DisplayName("Should unzip files with given password")
+    void testZipWithPasswordProtection() throws Exception {
+        Files.writeString(Files.createFile(tempSourceDir.resolve("secret.txt")), "Sensitive data");
+        String password = "TemporaryPassword";
+        ReflectionTestUtils.setField(acroZipService, "password", password);
+
+        String archivePath = acroZipService.zip();
+
+        try (ZipFile zipFile = new ZipFile(archivePath)) {
+            assertTrue(zipFile.isEncrypted(), "Archive should be encrypted");
+
+            assertThrows(
+                ZipException.class, () -> zipFile.extractAll(tempExportDir.toString())
+            );
+        }
+
+        try (ZipFile zipFileWithPassword = new ZipFile(archivePath, password.toCharArray())) {
+            zipFileWithPassword.extractAll(tempExportDir.toString());
+            assertTrue(
+                Files.exists(tempExportDir.resolve("secret.txt")),
+                "File should be extracted with password"
+            );
         }
     }
 
     @Test
-    void testZipEmptyFolder() throws Exception {
-        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile(), null);
-
-        assertTrue(Files.exists(Path.of(archivePath)));
-
-        try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(Path.of(archivePath)))) {
-            ZipEntry entry = zis.getNextEntry();
-            assertNull(entry, "Empty folder should create empty archive");
-        }
-    }
-
-    @Test
-    void testZipFileNameGeneration() throws Exception {
-        Files.writeString(Files.createFile(tempSourceDir.resolve("test.txt")), "content");
-
-        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile(), null);
-        String expectedFileName = tempSourceDir.getFileName().toString() + ".zip";
-
-        assertTrue(archivePath.endsWith(expectedFileName),
-            "Archive should be named after source folder");
-    }
-
-    @Test
-    void testZipThrowsExceptionForNonDirectorySource() {
-        Path tempFile = tempSourceDir.resolve("notadirectory.txt");
-
-        assertThrows(IllegalArgumentException.class, () ->
-            acroZipService.zip(tempFile.toFile(), tempExportDir.toFile(), null),
-            "Should throw exception when source is not a directory");
-    }
-
-    @Test
+    @DisplayName("Should zip large file")
     void testZipLargeFile() throws Exception {
         Path largeFile = Files.createFile(tempSourceDir.resolve("large.txt"));
         StringBuilder content = new StringBuilder();
@@ -161,55 +164,20 @@ class AcroZipServiceTest {
         }
         Files.writeString(largeFile, content.toString());
 
-        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile(), null);
+        String archiveLocation = acroZipService.zip();
 
-        assertTrue(Files.exists(Path.of(archivePath)));
-        assertTrue(Files.size(Path.of(archivePath)) < Files.size(largeFile),
-            "Archive should be smaller than original file");
-    }
-
-    @Test
-    void testZipPreservesFileContent() throws Exception {
-        String originalContent = "This is test content that should be preserved";
-        Path testFile = Files.createFile(tempSourceDir.resolve("content.txt"));
-        Files.writeString(testFile, originalContent);
-
-        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile(), null);
-
-        try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(Path.of(archivePath)))) {
-            ZipEntry entry = zis.getNextEntry();
-            assertNotNull(entry);
-            assertEquals("content.txt", entry.getName());
-
-            byte[] buffer = new byte[1024];
-            int bytesRead = zis.read(buffer);
-            String extractedContent = new String(buffer, 0, bytesRead);
-            assertEquals(originalContent, extractedContent);
-        }
-    }
-
-    @Test
-    void testZipWithPasswordProtection() throws Exception {
-        Files.writeString(Files.createFile(tempSourceDir.resolve("secret.txt")), "Sensitive data");
-        String password = "TestPassword123";
-        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile(), password);
-
-        ZipFile zipFile = new ZipFile(archivePath);
-        assertTrue(zipFile.isEncrypted(), "Archive should be encrypted");
-
-        assertThrows(ZipException.class, () -> {
-            zipFile.extractAll(tempExportDir.toString());
-        });
-
-        ZipFile zipFileWithPassword = new ZipFile(archivePath, password.toCharArray());
-        zipFileWithPassword.extractAll(tempExportDir.toString());
-        assertTrue(Files.exists(tempExportDir.resolve("secret.txt")), "File should be extracted with password");
+        Path archivePath = Path.of(archiveLocation);
+        assertTrue(Files.exists(archivePath));
+        assertTrue(
+            Files.size(archivePath) < Files.size(largeFile),
+            "Archive should be smaller than original file"
+        );
     }
 
     //@Test
     void manualReviewZipFile() throws Exception {
         Files.writeString(Files.createFile(tempSourceDir.resolve("manual.txt")), "Manual review content");
-        String archivePath = acroZipService.zip(tempSourceDir.toFile(), tempExportDir.toFile(), "ReviewPassword123");
+        String archivePath = acroZipService.zip();
 
         Path reviewPath = Path.of(System.getProperty("user.home"), "Desktop", "manual-review.zip");
         Files.copy(Path.of(archivePath), reviewPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);

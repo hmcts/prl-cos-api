@@ -801,3 +801,8 @@ hearing:
   preview:
     bypass:
       enabled: ${HEARING_PREVIEW_BYPASS_ENABLED:false}
+
+acro:
+  output-directory: /tmp/acro/output
+  source-directory: /tmp/acro/source
+  zip-password: ${ACRO_ZIP_PASSWORD:test1234}

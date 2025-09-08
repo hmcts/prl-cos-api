@@ -4,12 +4,15 @@ import lombok.extern.slf4j.Slf4j;
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.model.enums.EncryptionMethod;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -17,51 +20,65 @@ import java.util.stream.Stream;
 @Slf4j
 public class AcroZipService {
 
-    public String zip(File sourceFolder, File exportFolder, String password) throws Exception {
+    @Value("${acro.source-directory}")
+    private String sourceDirectory;
+
+    @Value("${acro.output-directory}")
+    private String outputDirectory;
+
+    @Value("${acro.zip-password}")
+    private String password;
+
+    public String zip() throws Exception {
+        File sourceFolder = new File(sourceDirectory);
+        File exportFolder = new File(outputDirectory);
+        validateInputs(sourceFolder, exportFolder);
+
         Path sourcePath = sourceFolder.toPath();
-
-        if (!Files.isDirectory(sourcePath)) {
-            throw new IllegalArgumentException("Please provide a folder. Source : " + sourceFolder);
-        }
-
-        String archivePath = exportFolder + "/" + createZipFileName(sourcePath);
-
-        ZipFile zipFile = password == null || password.isEmpty()
-                ? new ZipFile(archivePath)
-                : new ZipFile(archivePath, password.toCharArray());
+        String archivePath = exportFolder + "/" + createZipFileName();
 
         List<Path> filesToCompress = collectFiles(sourcePath);
 
-        if (filesToCompress.isEmpty()) {
-            log.warn("No files found in source folder: {}", sourceFolder);
-            boolean created = new File(archivePath).createNewFile();
-            log.info("Empty archive file {}: {}", created ? "created" : "already exists", archivePath);
-            return archivePath;
-        }
+        createArchive(archivePath, sourcePath, filesToCompress);
 
-        for (Path file : filesToCompress) {
-            ZipParameters parameters = new ZipParameters();
-            parameters.setFileNameInZip(sourcePath.relativize(file).toString());
-            if (password != null && !password.isEmpty()) {
-                parameters.setEncryptFiles(true);
-                parameters.setEncryptionMethod(EncryptionMethod.ZIP_STANDARD);
-            }
-            zipFile.addFile(file.toFile(), parameters);
-        }
+        log.info("Successfully created zip archive: {} with {} files", archivePath, filesToCompress.size());
         return archivePath;
     }
 
-    private String createZipFileName(Path sourcePath) {
-        return sourcePath.getFileName().toString() + ".zip";
+    private void validateInputs(File sourceFolder, File exportFolder) {
+        if (!sourceFolder.exists() || !sourceFolder.isDirectory()) {
+            throw new IllegalArgumentException("Source must be an existing directory: " + sourceFolder);
+        }
+        if (!exportFolder.exists() || !exportFolder.isDirectory()) {
+            throw new IllegalArgumentException("Export folder must be an existing directory: " + exportFolder);
+        }
     }
 
     private List<Path> collectFiles(Path sourcePath) throws IOException {
-        try (Stream<java.nio.file.Path> files = Files.walk(sourcePath)) {
+        try (Stream<Path> files = Files.walk(sourcePath)) {
             return files
                 .filter(Files::isRegularFile)
                 .toList();
         }
     }
 
+    private void createArchive(String archivePath, Path sourcePath, List<Path> filesToCompress) throws IOException {
+        try (ZipFile zipFile = new ZipFile(archivePath, password.toCharArray())) {
+            for (Path fileToCompress : filesToCompress) {
+                Path relativePath = sourcePath.relativize(fileToCompress);
+                ZipParameters parameters = new ZipParameters();
+                parameters.setFileNameInZip(relativePath.toString().replace('\\', '/'));
+                parameters.setEncryptFiles(true);
+                parameters.setEncryptionMethod(EncryptionMethod.ZIP_STANDARD);
 
+                zipFile.addFile(fileToCompress.toFile(), parameters);
+            }
+        }
+    }
+
+    private String createZipFileName() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmm");
+        String timestamp = LocalDateTime.now().format(formatter);
+        return "PRL_ORDERS_" + timestamp + ".zip";
+    }
 }
