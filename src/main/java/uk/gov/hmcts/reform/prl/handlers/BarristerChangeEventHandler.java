@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.prl.utils.MaskEmail;
 import java.util.function.Function;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.getPreferenceLanguage;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.CA_DA_ADD_BARRISTER_SELF;
@@ -55,7 +54,8 @@ public class BarristerChangeEventHandler {
                            EmailTemplateNames emailTemplateName,
                            Function<AllocatedBarrister, String> emailToSend) {
         CaseData caseData = event.getCaseData();
-        String email = emailToSend.apply(caseData.getAllocatedBarrister());
+        AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
+        String email = emailToSend.apply(allocatedBarrister);
         if (email != null) {
             log.info("Event: {} - For case id {}, sending email to {}",
                      event.getTypeOfEvent().getDisplayedValue(),
@@ -65,7 +65,7 @@ public class BarristerChangeEventHandler {
             ignoreAndLogNotificationFailures(() -> emailService.send(
                 email,
                 emailTemplateName,
-                buildEmailBarrister(caseData, EMPTY_STRING),
+                buildEmailBarrister(caseData, allocatedBarrister.getSolicitorFullName()),
                 getPreferenceLanguage(caseData)
             ));
         } else {
@@ -89,13 +89,13 @@ public class BarristerChangeEventHandler {
         }
     }
 
-    private EmailTemplateVars buildEmailBarrister(CaseData caseData, String solicitorName) {
+    private EmailTemplateVars buildEmailBarrister(CaseData caseData, String solicitorFullName) {
         AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
         return BarristerEmail.builder()
             .caseReference(String.valueOf(caseData.getId()))
             .caseName(caseData.getApplicantCaseName())
             .barristerName(allocatedBarrister.getBarristerFullName())
-            .solicitorName(solicitorName)
+            .solicitorName(solicitorFullName)
             .caseLink(manageCaseUrl + URL_STRING + caseData.getId())
             .issueDate(CommonUtils.formatDate(D_MMM_YYYY, caseData.getIssueDate()))
             .build();

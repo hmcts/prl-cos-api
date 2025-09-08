@@ -34,6 +34,9 @@ public class AllocatedBarrister {
     @JsonProperty("solicitorEmail")
     private final String solicitorEmail;
 
+    @JsonProperty("solicitorFullName")
+    private final String solicitorFullName;
+
     @JsonIgnore
     public String getBarristerFullName() {
         return String.format(

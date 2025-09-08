@@ -30,6 +30,7 @@ public class BarristerHelper {
                                                .barristerFirstName(partyDetails.getBarrister().getBarristerFirstName())
                                                .barristerLastName(partyDetails.getBarrister().getBarristerLastName())
                                                .solicitorEmail(partyDetails.getSolicitorEmail())
+                                               .solicitorFullName(partyDetails.getRepresentativeFullName())
                                                .build());
         } else {
             caseData.setAllocatedBarrister(null);

@@ -53,6 +53,8 @@ public class BarristerHelperTest {
                            .barristerLastName("barristerLastName")
                            .build())
             .solicitorEmail("solicitorEmail@test.com")
+            .representativeFirstName("representativeFirstName")
+            .representativeLastName("representativeLastName")
             .build();
         UUID partyId = UUID.randomUUID();
         AllocatedBarrister expectedAllocatedBarrister = AllocatedBarrister.builder()
@@ -67,6 +69,7 @@ public class BarristerHelperTest {
             .barristerFirstName(partyDetails.getBarrister().getBarristerFirstName())
             .barristerLastName(partyDetails.getBarrister().getBarristerLastName())
             .solicitorEmail(partyDetails.getSolicitorEmail())
+            .solicitorFullName(partyDetails.getRepresentativeFullName())
             .build();
 
 

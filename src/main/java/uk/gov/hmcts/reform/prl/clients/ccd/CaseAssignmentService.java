@@ -115,13 +115,14 @@ public class CaseAssignmentService {
             barristerRole,
             allocatedBarrister
         );
-        setSolicitorEmail(allocatedBarrister, caseData);
+        setSolicitorDetails(allocatedBarrister, caseData);
     }
 
-    private void setSolicitorEmail(AllocatedBarrister allocatedBarrister, CaseData caseData) {
+    private void setSolicitorDetails(AllocatedBarrister allocatedBarrister, CaseData caseData) {
         PartyDetails selectedParty = getSelectedParty(caseData, allocatedBarrister.getPartyList().getValueCode());
         AllocatedBarrister updatedAllocatedBarrister = allocatedBarrister.toBuilder()
             .solicitorEmail(selectedParty.getSolicitorEmail())
+            .solicitorFullName(selectedParty.getRepresentativeFullName())
             .build();
         caseData.setAllocatedBarrister(updatedAllocatedBarrister);
     }

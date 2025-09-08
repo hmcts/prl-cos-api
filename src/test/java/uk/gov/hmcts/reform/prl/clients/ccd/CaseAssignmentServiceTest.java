@@ -159,30 +159,40 @@ class CaseAssignmentServiceTest {
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("afl11@test.com")
             .contactPreferences(ContactPreferences.email)
+            .representativeFirstName("af1Solicitor")
+            .representativeLastName("al1Solicitor")
             .build();
         PartyDetails applicant2 = PartyDetails.builder()
             .firstName("af2").lastName("al2")
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .representativeFirstName("asf2").representativeLastName("asl2")
             .solicitorEmail("asl22@test.com")
+            .representativeFirstName("af2Solicitor")
+            .representativeLastName("al2Solicitor")
             .build();
         PartyDetails applicant3 = PartyDetails.builder()
             .firstName("af3").lastName("al3")
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .representativeFirstName("asf3").representativeLastName("asl3")
             .solicitorEmail("asl33@test.com")
+            .representativeFirstName("af3Solicitor")
+            .representativeLastName("al3Solicitor")
             .build();
         PartyDetails applicant4 = PartyDetails.builder()
             .firstName("af4").lastName("al4")
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .representativeFirstName("asf4").representativeLastName("asl4")
             .solicitorEmail("asl44@test.com")
+            .representativeFirstName("af4Solicitor")
+            .representativeLastName("al4Solicitor")
             .build();
         PartyDetails applicant5 = PartyDetails.builder()
             .firstName("af5").lastName("al5")
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .representativeFirstName("asf5").representativeLastName("asl5")
             .solicitorEmail("asl55@test.com")
+            .representativeFirstName("af5Solicitor")
+            .representativeLastName("al5Solicitor")
             .build();
         PartyDetails respondent1 = PartyDetails.builder()
             .firstName("rf1").lastName("rl1")
@@ -190,6 +200,8 @@ class CaseAssignmentServiceTest {
             .email("rfl11@test.com")
             .partyId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
             .contactPreferences(ContactPreferences.email)
+            .representativeFirstName("rf1Solicitor")
+            .representativeLastName("rl1Solicitor")
             .build();
         PartyDetails respondent2 = PartyDetails.builder()
             .firstName("rf2").lastName("rl2")
@@ -198,6 +210,8 @@ class CaseAssignmentServiceTest {
             .email("rfl11@test.com")
             .representativeFirstName("rsf2").representativeLastName("rsl2")
             .solicitorEmail("rsl22@test.com")
+            .representativeFirstName("rf2Solicitor")
+            .representativeLastName("rl2Solicitor")
             .build();
         PartyDetails respondent3 = PartyDetails.builder()
             .firstName("rf3").lastName("rl3")
@@ -206,6 +220,8 @@ class CaseAssignmentServiceTest {
             .address(Address.builder().addressLine1("test").build())
             .partyId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
             .contactPreferences(ContactPreferences.post)
+            .representativeFirstName("rf3Solicitor")
+            .representativeLastName("rl3Solicitor")
             .build();
         PartyDetails respondent4 = PartyDetails.builder()
             .firstName("rf4").lastName("rl4")
@@ -214,6 +230,8 @@ class CaseAssignmentServiceTest {
             .address(Address.builder().addressLine1("test").build())
             .partyId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
             .contactPreferences(ContactPreferences.post)
+            .representativeFirstName("rf4Solicitor")
+            .representativeLastName("rl4Solicitor")
             .build();
         PartyDetails respondent5 = PartyDetails.builder()
             .firstName("rf5").lastName("rl5")
@@ -222,6 +240,8 @@ class CaseAssignmentServiceTest {
             .address(Address.builder().addressLine1("test").build())
             .partyId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
             .contactPreferences(ContactPreferences.post)
+            .representativeFirstName("rf5Solicitor")
+            .representativeLastName("rl5Solicitor")
             .build();
         PartyDetails otherPerson = PartyDetails.builder()
             .firstName("of").lastName("ol")
@@ -429,6 +449,9 @@ class CaseAssignmentServiceTest {
         assertThat(c100CaseData.getAllocatedBarrister())
             .extracting(AllocatedBarrister::getSolicitorEmail)
             .isEqualTo(partyDetails.get(index).getSolicitorEmail());
+        assertThat(c100CaseData.getAllocatedBarrister())
+            .extracting(AllocatedBarrister::getSolicitorFullName)
+            .isEqualTo(partyDetails.get(index).getRepresentativeFullName());
     }
 
     @Test
@@ -550,6 +573,11 @@ class CaseAssignmentServiceTest {
         assertThat(fl401CaseData.getAllocatedBarrister())
             .extracting(AllocatedBarrister::getSolicitorEmail)
             .isEqualTo(partyDetails.getSolicitorEmail());
+
+        assertThat(fl401CaseData.getAllocatedBarrister())
+            .extracting(AllocatedBarrister::getSolicitorFullName)
+            .isEqualTo(partyDetails.getRepresentativeFullName());
+
     }
 
     @Test

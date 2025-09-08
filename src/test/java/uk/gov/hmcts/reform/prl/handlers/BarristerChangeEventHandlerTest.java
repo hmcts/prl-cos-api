@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -16,15 +18,18 @@ import uk.gov.hmcts.reform.prl.events.BarristerChangeEvent;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.notify.BarristerEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
+import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.MaskEmail;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -33,6 +38,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.barrister.TypeOfBarristerEventEnum.removeBarrister;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.CA_DA_ADD_BARRISTER_SELF;
@@ -51,7 +57,8 @@ class BarristerChangeEventHandlerTest {
     private FeatureToggleService featureToggleService;
     @Spy
     private MaskEmail maskEmail;
-
+    @Captor
+    private ArgumentCaptor<BarristerEmail> barristerEmailTemplateVarsArgumentCaptor;
     @InjectMocks
     private BarristerChangeEventHandler barristerChangeEventHandler;
 
@@ -61,6 +68,7 @@ class BarristerChangeEventHandlerTest {
     private PartyDetails respondent1;
     private PartyDetails respondent2;
     private CaseData caseData;
+    private AllocatedBarrister allocatedBarrister;
 
     @BeforeEach
     void init() {
@@ -92,14 +100,16 @@ class BarristerChangeEventHandlerTest {
             .solicitorEmail("rsl22@test.com")
             .build();
 
+        allocatedBarrister = AllocatedBarrister.builder()
+            .barristerFirstName("barristerFirstName")
+            .barristerLastName("barristerLastName")
+            .barristerEmail("testbarristeremail@test.com")
+            .solicitorEmail("solicitorEmail@gmail.com")
+            .solicitorFullName("Solfirst Sollast")
+            .build();
         caseData = CaseData.builder()
             .id(123L)
-            .allocatedBarrister(AllocatedBarrister.builder()
-                                    .barristerFirstName("barristerFirstName")
-                                    .barristerLastName("barristerLastName")
-                                    .barristerEmail("testbarristeremail@test.com")
-                                    .solicitorEmail("solicitorEmail@gmail.com")
-                                    .build())
+            .allocatedBarrister(allocatedBarrister)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(Arrays.asList(element(applicant1), element(applicant2)))
             .respondents(Arrays.asList(element(respondent1), element(respondent2)))
@@ -115,17 +125,35 @@ class BarristerChangeEventHandlerTest {
     void shouldNotifyAddBarristerWhenCaseTypeIsC100() {
         barristerChangeEventHandler.notifyAddBarrister(barristerChangeEvent);
 
+        BarristerEmail expectedBarristerEmailVars = BarristerEmail.builder()
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .barristerName(allocatedBarrister.getBarristerFullName())
+            .solicitorName(allocatedBarrister.getSolicitorFullName())
+            .issueDate(CommonUtils.formatDate(D_MMM_YYYY, caseData.getIssueDate()))
+            .caseLink("null/123")
+            .build();
+
         verify(emailService).send(
             anyString(),
             eq(CA_DA_ADD_BARRISTER_TO_SOLICITOR),
-            any(),
+            barristerEmailTemplateVarsArgumentCaptor.capture(),
             any());
+
+
+        BarristerEmail barristerEmailVars = barristerEmailTemplateVarsArgumentCaptor.getValue();
+        assertThat(barristerEmailVars)
+            .isEqualTo(expectedBarristerEmailVars);
 
         verify(emailService).send(
             anyString(),
             eq(CA_DA_ADD_BARRISTER_SELF),
-            any(),
+            barristerEmailTemplateVarsArgumentCaptor.capture(),
             any());
+
+        barristerEmailVars = barristerEmailTemplateVarsArgumentCaptor.getValue();
+        assertThat(barristerEmailVars)
+            .isEqualTo(expectedBarristerEmailVars);
     }
 
     @Test
@@ -219,20 +247,36 @@ class BarristerChangeEventHandlerTest {
         BarristerChangeEvent barristerRemoveEvent = barristerChangeEvent.toBuilder()
             .typeOfEvent(removeBarrister)
             .build();
+        BarristerEmail expectedBarristerEmailVars = BarristerEmail.builder()
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .barristerName(allocatedBarrister.getBarristerFullName())
+            .solicitorName(allocatedBarrister.getSolicitorFullName())
+            .issueDate(CommonUtils.formatDate(D_MMM_YYYY, caseData.getIssueDate()))
+            .caseLink("null/123")
+            .build();
+
         barristerChangeEventHandler.notifyWhenBarristerRemoved(barristerRemoveEvent);
 
         verify(emailService).send(
             anyString(),
             eq(CA_DA_REMOVE_BARRISTER_SELF),
-            any(),
+            barristerEmailTemplateVarsArgumentCaptor.capture(),
             any());
+
+        BarristerEmail barristerEmailVars = barristerEmailTemplateVarsArgumentCaptor.getValue();
+        assertThat(barristerEmailVars)
+            .isEqualTo(expectedBarristerEmailVars);
+
         verify(emailService).send(
             anyString(),
             eq(CA_DA_REMOVE_BARRISTER_TO_SOLICITOR),
-            any(),
+            barristerEmailTemplateVarsArgumentCaptor.capture(),
             any());
 
-
+        barristerEmailVars = barristerEmailTemplateVarsArgumentCaptor.getValue();
+        assertThat(barristerEmailVars)
+            .isEqualTo(expectedBarristerEmailVars);
     }
 
     @Test
