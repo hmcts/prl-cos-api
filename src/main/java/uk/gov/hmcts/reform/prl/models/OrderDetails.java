@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -72,6 +73,7 @@ public class OrderDetails {
     private YesOrNo isAutoHearingReqPending;
 
     private final FinalisationJudgeDetails finalisationJudgeDetails;
+    private final JudgeOrMagistrateTitleEnum judgeOrMagistrateTitle;
     //PRL-4225 - serve order & additional docs to other person
     @JsonProperty("bulkPrintOrderDetails")
     private List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails;
