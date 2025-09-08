@@ -10,8 +10,9 @@ import com.sendgrid.helpers.mail.objects.Content;
 import com.sendgrid.helpers.mail.objects.Email;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
-import org.apache.commons.compress.archivers.sevenz.SevenZOutputFile;
+import net.lingala.zip4j.ZipFile;
+import net.lingala.zip4j.model.ZipParameters;
+import net.lingala.zip4j.model.enums.EncryptionMethod;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +39,9 @@ public class AcroZipService {
     @Value("${acro.output-directory}")
     private String outputDirectory;
 
+    @Value("${acro.zip-password}")
+    private String password;
+
     @Value("${send-grid.rpa.email.from}")
     private String fromEmail;
 
@@ -49,22 +53,21 @@ public class AcroZipService {
         validateInputs(sourceFolder, exportFolder);
 
         Path sourcePath = sourceFolder.toPath();
-        String archivePath = exportFolder + "/" + createSevenZipFileName();
-        File archiveFile = new File(archivePath);
+        String archivePath = exportFolder + "/" + createZipFileName();
 
         List<Path> filesToCompress = collectFiles(sourcePath);
 
-        if (filesToCompress.isEmpty()) {
-            log.warn("No files found in source folder: {}", sourceFolder);
-            createEmptyArchive(archiveFile);
-            return archivePath;
-        }
+        //if (filesToCompress.isEmpty()) {
+        //   log.warn("No files found in source folder: {}", sourceFolder);
+        //    createEmptyArchive(archiveFile);
+        //    return archivePath;
+        //}
 
-        createSevenZipArchive(archiveFile, sourcePath, filesToCompress);
+        createArchive(archivePath, sourcePath, filesToCompress);
 
         sendEmail(archivePath);
 
-        log.info("Successfully created 7zip archive: {} with {} files", archivePath, filesToCompress.size());
+        log.info("Successfully created zip archive: {} with {} files", archivePath, filesToCompress.size());
         return archivePath;
     }
 
@@ -115,31 +118,23 @@ public class AcroZipService {
         }
     }
 
-    private void createSevenZipArchive(File archiveFile, Path sourcePath, List<Path> filesToCompress) throws IOException {
-        try (SevenZOutputFile sevenZOutput = new SevenZOutputFile(archiveFile)) {
+    private void createArchive(String archivePath, Path sourcePath, List<Path> filesToCompress) throws IOException {
+        try (ZipFile zipFile = new ZipFile(archivePath, password.toCharArray())) {
             for (Path fileToCompress : filesToCompress) {
                 Path relativePath = sourcePath.relativize(fileToCompress);
+                ZipParameters parameters = new ZipParameters();
+                parameters.setFileNameInZip(relativePath.toString().replace('\\', '/'));
+                parameters.setEncryptFiles(true);
+                parameters.setEncryptionMethod(EncryptionMethod.ZIP_STANDARD);
 
-                SevenZArchiveEntry entry = new SevenZArchiveEntry();
-                entry.setName(relativePath.toString().replace('\\', '/'));
-                entry.setSize(Files.size(fileToCompress));
-
-                sevenZOutput.putArchiveEntry(entry);
-                sevenZOutput.write(Files.readAllBytes(fileToCompress));
-                sevenZOutput.closeArchiveEntry();
+                zipFile.addFile(fileToCompress.toFile(), parameters);
             }
         }
     }
 
-    private void createEmptyArchive(File archiveFile) throws IOException {
-        try (SevenZOutputFile sevenZOutput = new SevenZOutputFile(archiveFile)) {
-            // Create empty archive - no entries added
-        }
-    }
-
-    private String createSevenZipFileName() {
+    private String createZipFileName() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmm");
         String timestamp = LocalDateTime.now().format(formatter);
-        return "PRL_ORDERS_" + timestamp + ".7z";
+        return "PRL_ORDERS_" + timestamp + ".zip";
     }
 }

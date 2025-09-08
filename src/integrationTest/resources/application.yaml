@@ -800,4 +800,5 @@ closing_case:
 acro:
   search-case-type-id: PRLAPPS
   source-directory: /tmp/acro/source
-  output-directory: /tmp/acro/output
+  output-directory: /tmp/acro/export
+  zip-password: ${ACRO_ZIP_PASSWORD:test1234}
