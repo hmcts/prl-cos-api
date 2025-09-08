@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers.caseassignment;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -22,6 +21,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
@@ -72,10 +72,7 @@ public class CaseAssignmentController {
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
             List<String> errorList = new ArrayList<>();
-            AllocatedBarrister allocatedBarrister = objectMapper.convertValue(
-                caseDetails.getData().get(ALLOCATED_BARRISTER),
-                new TypeReference<>() { }
-            );
+            AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
 
             Optional<String> userId = organisationService
                 .findUserByEmail(allocatedBarrister.getBarristerEmail());
@@ -125,10 +122,7 @@ public class CaseAssignmentController {
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             List<String> errorList = new ArrayList<>();
-            AllocatedBarrister allocatedBarrister = objectMapper.convertValue(
-                caseDetails.getData().get(ALLOCATED_BARRISTER),
-                new TypeReference<>() { }
-            );
+            AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
 
             caseAssignmentService.validateRemoveRequest(caseData,
                                                         allocatedBarrister.getPartyList().getValueCode(),
@@ -137,6 +131,19 @@ public class CaseAssignmentController {
             if (errorList.isEmpty()) {
                 caseAssignmentService.removeBarrister(caseData,
                                                       allocatedBarrister.getPartyList().getValueCode());
+                PartyDetails selectedParty = caseAssignmentService.getSelectedParty(
+                    caseData,
+                    allocatedBarrister.getPartyList().getValueCode()
+                );
+                if (selectedParty != null) {
+                    caseData.setAllocatedBarrister(AllocatedBarrister.builder()
+                        .partyList(allocatedBarrister.getPartyList())
+                        .barristerOrg(selectedParty.getBarrister().getBarristerOrg())
+                        .barristerEmail(selectedParty.getBarrister().getBarristerEmail())
+                        .barristerFirstName(selectedParty.getBarrister().getBarristerFirstName())
+                        .barristerLastName(selectedParty.getBarrister().getBarristerLastName())
+                        .build());
+                }
                 updateCaseDetails(caseDetails, caseData);
             }
 
@@ -150,7 +157,7 @@ public class CaseAssignmentController {
     }
 
     private void updateCaseDetails(CaseDetails caseDetails, CaseData caseData) {
-        caseDetails.getData().put(ALLOCATED_BARRISTER, null);
+        caseDetails.getData().put(ALLOCATED_BARRISTER, caseData.getAllocatedBarrister());
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseDetails.getData().put(APPLICANTS, caseData.getApplicants());
             caseDetails.getData().put(RESPONDENTS, caseData.getRespondents());
