@@ -137,12 +137,6 @@ public class UploadAdditionalApplicationService {
         return doc == null ? null : doc.toBuilder().categoryId(categoryId).build();
     }
 
-    private static List<Element<Document>> toDocElementsWithCategory(List<Document> docs, String categoryId) {
-        return nullSafeCollection(docs).stream()
-            .map(doc -> element(withCategory(doc, categoryId)))
-            .toList();
-    }
-
     public void getAdditionalApplicationElements(String authorisation, String userAuthorisation, CaseData caseData,
                                                  List<Element<AdditionalApplicationsBundle>> additionalApplicationElements) {
         String author;
@@ -443,7 +437,8 @@ public class UploadAdditionalApplicationService {
                 .author(author)
                 .uploadedDateTime(currentDateTime)
                 .applicantName(partyName)
-                .finalDocument(toDocElementsWithCategory(List.of(temporaryC2Document.getDocument()), cat))
+                //withCategory(doc, categoryId)
+                .finalDocument(List.of(element(withCategory(temporaryC2Document.getDocument(), cat))))
                 .documentRelatedToCase(CollectionUtils.isNotEmpty(temporaryC2Document.getDocumentAcknowledge())
                                            ? Yes : No)
                 .combinedReasonsForC2Application(getReasonsForApplication(temporaryC2Document))
