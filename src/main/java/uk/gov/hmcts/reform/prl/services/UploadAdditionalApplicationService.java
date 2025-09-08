@@ -437,7 +437,6 @@ public class UploadAdditionalApplicationService {
                 .author(author)
                 .uploadedDateTime(currentDateTime)
                 .applicantName(partyName)
-                //withCategory(doc, categoryId)
                 .finalDocument(List.of(element(withCategory(temporaryC2Document.getDocument(), cat))))
                 .documentRelatedToCase(CollectionUtils.isNotEmpty(temporaryC2Document.getDocumentAcknowledge())
                                            ? Yes : No)
