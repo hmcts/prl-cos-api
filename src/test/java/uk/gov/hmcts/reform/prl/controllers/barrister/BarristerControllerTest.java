@@ -18,7 +18,9 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.barrister.BarristerAddService;
 import uk.gov.hmcts.reform.prl.services.barrister.BarristerRemoveService;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -51,7 +53,7 @@ public class BarristerControllerTest {
     private static final String SERVICE_TOKEN = "service-token";
 
     @Test
-    public void shouldHandleMidEvent() {
+    public void shouldHandleAboutToStartEvent() {
         Map caseData = new HashMap<>();
         caseData.put("id", 12345L);
         caseData.put("caseTypeOfApplication", "C100");
@@ -71,11 +73,14 @@ public class BarristerControllerTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
         when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
 
-        AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder().build();
-        when(barristerAddService.getAllocatedBarrister(
-            eq(caseData1), eq(AUTH_TOKEN), any(Function.class))).thenReturn(allocatedBarrister);
+        AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder()
+            .partyList(DynamicList.builder()
+                    .listItems(List.of(DynamicListElement.builder().code("code").label("label").build()))
+                    .build())
+            .build();
+        when(barristerAddService.getAllocatedBarrister(eq(caseData1), eq(AUTH_TOKEN), any(Function.class))).thenReturn(allocatedBarrister);
         AboutToStartOrSubmitCallbackResponse callbackResponse = barristerController
-            .handleMidEvent(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
+            .handleAddAboutToStartEvent(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
 
         assertEquals(allocatedBarrister, callbackResponse.getData().get("allocatedBarrister"));
 
@@ -84,7 +89,7 @@ public class BarristerControllerTest {
     }
 
     @Test
-    public void handleRemoveAboutToStart() {
+    public void shouldReturnErrorsOnAboutToStartEvent() {
         Map caseData = new HashMap<>();
         caseData.put("id", 12345L);
         caseData.put("caseTypeOfApplication", "C100");
@@ -101,24 +106,23 @@ public class BarristerControllerTest {
                              .build())
             .build();
 
-        DynamicListElement dynamicListElement = DynamicListElement.builder().code("12345:").label("test")
-            .build();
-
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
         when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
 
         AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder()
-            .partyList(DynamicList.builder().listItems(Lists.newArrayList(dynamicListElement)).build()).build();
-        when(barristerRemoveService.getBarristerListToRemove(
-            eq(caseData1), eq(AUTH_TOKEN), any(Function.class)))
-            .thenReturn(allocatedBarrister);
+            .partyList(DynamicList.builder()
+                           .listItems(new ArrayList<DynamicListElement>())
+                           .build())
+            .build();
+        when(barristerAddService.getAllocatedBarrister(eq(caseData1), eq(AUTH_TOKEN), any(Function.class))).thenReturn(allocatedBarrister);
         AboutToStartOrSubmitCallbackResponse callbackResponse = barristerController
-            .handleRemoveAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
+            .handleAddAboutToStartEvent(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
 
-        assertEquals(allocatedBarrister, callbackResponse.getData().get("allocatedBarrister"));
+        assertEquals(1, callbackResponse.getErrors().size());
+        assertEquals("There are no solicitors currently assigned to any party on this case", callbackResponse
+            .getErrors().get(0));
 
-        verify(barristerRemoveService, times(1))
-            .getBarristerListToRemove(eq(caseData1), eq(AUTH_TOKEN), any(Function.class));
+        verify(barristerAddService, times(1)).getAllocatedBarrister(eq(caseData1), eq(AUTH_TOKEN), any(Function.class));
     }
 
     @Test
@@ -157,7 +161,7 @@ public class BarristerControllerTest {
     }
 
     @Test
-    public void shouldNotHandleMidEventWhenNotAuthorised() {
+    public void shouldNotHandleAddAboutToStartEventWhenNotAuthorised() {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
                              .id(1L)
@@ -169,7 +173,7 @@ public class BarristerControllerTest {
         assertThrows(
             RuntimeException.class,
             () -> barristerController
-                .handleMidEvent(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest));
+                .handleAddAboutToStartEvent(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest));
     }
 
     @Test
@@ -186,6 +190,53 @@ public class BarristerControllerTest {
             RuntimeException.class,
             () -> barristerController
                 .handleRemoveAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest));
+    }
+
+    @Test
+    public void handleAddSubmittedSuccess() {
+        Map caseDataMap = new HashMap<>();
+        caseDataMap.put("id", 12345L);
+        caseDataMap.put("caseTypeOfApplication", "C100");
+
+        AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder()
+            .partyList(DynamicList.builder()
+                           .listItems(Lists.newArrayList()).build()).build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .allocatedBarrister(allocatedBarrister)
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .data(caseDataMap)
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
+
+        barristerController.handleAddSubmitted(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
+
+        verify(barristerAddService).notifyBarrister(caseData);
+    }
+
+    @Test
+    public void shouldNothandleAddSubmittedWhenNotAuthorised() {
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .build())
+            .build();
+
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(false);
+
+        assertThrows(
+            RuntimeException.class,
+            () -> barristerController
+                .handleAddSubmitted(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest));
     }
 
     @Test
