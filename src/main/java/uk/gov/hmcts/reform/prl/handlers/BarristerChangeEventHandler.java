@@ -57,7 +57,7 @@ public class BarristerChangeEventHandler {
         CaseData caseData = event.getCaseData();
         String email = emailToSend.apply(caseData.getAllocatedBarrister());
         if (email != null) {
-            log.info("Event: {} - For case id {}, sending email to barrister {}",
+            log.info("Event: {} - For case id {}, sending email to {}",
                      event.getTypeOfEvent().getDisplayedValue(),
                      caseData.getId(),
                      maskEmail.mask(email));
