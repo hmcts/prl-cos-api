@@ -29,6 +29,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -268,6 +269,37 @@ public class BarristerControllerTest {
         verify(barristerRemoveService)
             .notifyBarrister(isA(CaseData.class));
     }
+
+    @Test
+    public void testNotificationIsNotInvokedIfBarristerNotPresent() {
+        when(authorisationService.isAuthorized(any(), any()))
+            .thenReturn(true);
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("id", 12345L);
+        caseDataMap.put("caseTypeOfApplication", "C100");
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .data(caseDataMap)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(caseDataMap, CaseData.class))
+            .thenReturn(caseData);
+
+        barristerController.handleRemoveSubmitted(AUTH_TOKEN,
+                                                  SERVICE_TOKEN,
+                                                  callbackRequest);
+        verify(barristerRemoveService, never())
+            .notifyBarrister(isA(CaseData.class));
+    }
+
 
 
     @Test
