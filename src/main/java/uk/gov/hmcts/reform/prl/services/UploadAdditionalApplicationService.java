@@ -44,6 +44,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.S
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.SupportingEvidenceBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.UploadApplicationDraftOrder;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.Urgency;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UploadAdditionalApplicationData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
@@ -87,6 +88,7 @@ import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Represe
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Service
 @Slf4j
@@ -111,6 +113,35 @@ public class UploadAdditionalApplicationService {
     private final SendAndReplyService sendAndReplyService;
     private final AuthTokenGenerator authTokenGenerator;
     private final UploadAdditionalApplicationUtils uploadAdditionalApplicationUtils;
+
+
+    private static final String CAT_AWP_APPLICANT   = "applicationsWithinProceedings";
+    private static final String CAT_AWP_RESPONDENT = "applicationsWithinProceedingsRespondent";
+
+    private String categoryForParty(String raw) {
+        if (raw == null) {
+            return null;
+        }
+
+        return switch (raw.toLowerCase(Locale.ENGLISH)) {
+            case "applicant" -> CAT_AWP_APPLICANT;
+            case "respondent" -> CAT_AWP_RESPONDENT;
+            default -> null;
+        };
+    }
+
+    private static Document withCategory(Document doc, String categoryId) {
+        if (StringUtils.isBlank(categoryId)) {
+            return doc; // if no category play safe and don't add a default
+        }
+        return doc == null ? null : doc.toBuilder().categoryId(categoryId).build();
+    }
+
+    private static List<Element<Document>> toDocElementsWithCategory(List<Document> docs, String categoryId) {
+        return nullSafeCollection(docs).stream()
+            .map(doc -> element(withCategory(doc, categoryId)))
+            .toList();
+    }
 
     public void getAdditionalApplicationElements(String authorisation, String userAuthorisation, CaseData caseData,
                                                  List<Element<AdditionalApplicationsBundle>> additionalApplicationElements) {
@@ -395,12 +426,24 @@ public class UploadAdditionalApplicationService {
     private C2DocumentBundle getC2DocumentBundle(CaseData caseData, String author, String currentDateTime, String partyName) {
         C2DocumentBundle c2DocumentBundle = null;
         if (caseData.getUploadAdditionalApplicationData().getTemporaryC2Document() != null) {
+
+            String category = "";
+            if (StringUtils.isNotEmpty(caseData.getUploadAdditionalApplicationData().getRepresentedPartyType())) {
+                switch (caseData.getUploadAdditionalApplicationData().getRepresentedPartyType()) {
+                    case CA_APPLICANT, DA_APPLICANT -> category = "applicant";
+                    case CA_RESPONDENT, DA_RESPONDENT -> category = "respondent";
+                    default -> category = "";
+                }
+            }
+            String cat = categoryForParty(category);
+            log.info("Inside mapping solicitor journey C2 upload, partytype is {}", cat);
+
             C2DocumentBundle temporaryC2Document = caseData.getUploadAdditionalApplicationData().getTemporaryC2Document();
             c2DocumentBundle = C2DocumentBundle.builder()
                 .author(author)
                 .uploadedDateTime(currentDateTime)
                 .applicantName(partyName)
-                .finalDocument(List.of(element(temporaryC2Document.getDocument())))
+                .finalDocument(toDocElementsWithCategory(List.of(temporaryC2Document.getDocument()), cat))
                 .documentRelatedToCase(CollectionUtils.isNotEmpty(temporaryC2Document.getDocumentAcknowledge())
                                            ? Yes : No)
                 .combinedReasonsForC2Application(getReasonsForApplication(temporaryC2Document))
