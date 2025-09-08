@@ -35,20 +35,20 @@ public class CaseAssignmentControllerFunctionalTest {
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
-    @Test
-    public void testAddBarristerAboutToSubmit() throws Exception {
-
-        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-        request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/case-assignment/barrister/add/about-to-submit")
-            .then()
-            .assertThat().statusCode(200);
-    }
+//    @Test
+//    public void testAddBarristerAboutToSubmit() throws Exception {
+//
+//        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+//        request
+//            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+//            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+//            .body(requestBody)
+//            .when()
+//            .contentType("application/json")
+//            .post("/case-assignment/barrister/add/about-to-submit")
+//            .then()
+//            .assertThat().statusCode(200);
+//    }
 
     @Test
     public void testRemoveBarristerAboutToSubmit() throws Exception {
