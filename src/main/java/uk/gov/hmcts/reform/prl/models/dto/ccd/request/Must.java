@@ -17,3 +17,4 @@ public class Must {
     @JsonProperty("bool")
     private StateFilter stateFilter;
 }
+
