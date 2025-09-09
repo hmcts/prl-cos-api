@@ -6660,7 +6660,8 @@ public class ManageOrderServiceTest {
                                                                                           .finalisationJudgeDetails(
                                                                                               FinalisationJudgeDetails.builder()
                                                                                                   .judgeOrMagistrateTitle(
-                                                                                                      JudgeOrMagistrateTitleEnum.circuitJudge)
+                                                                                                      JudgeOrMagistrateTitleEnum
+                                                                                                          .circuitJudge.name())
                                                                                                   .build())
                                                                                           .orderDocument(Document
                                                                                                              .builder()
@@ -6701,7 +6702,7 @@ public class ManageOrderServiceTest {
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
         assertNotNull(manageOrderService.serveOrder(caseData,orderList));
-        assertEquals(caseData.getManageOrders().getJudgeOrMagistrateTitle(),
+        assertEquals(caseData.getManageOrders().getJudgeOrMagistrateTitle().name(),
                      orders.getValue().getFinalisationJudgeDetails().getJudgeOrMagistrateTitle());
     }
 }
