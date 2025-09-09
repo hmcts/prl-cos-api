@@ -2572,6 +2572,7 @@ public class ManageOrderService {
                 caseDataUpdated.put("cafcassCymruEmail", courtEmail);
             }
         }
+        caseDataUpdated.put("finalisationJudgeDetails", caseData.getManageOrders().getJudgeOrMagistrateTitle().name());
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         populateOtherServeOrderDetails(caseData, caseDataUpdated);
         caseDataUpdated.put(DISPLAY_LEGAL_REP_OPTION, "No");
