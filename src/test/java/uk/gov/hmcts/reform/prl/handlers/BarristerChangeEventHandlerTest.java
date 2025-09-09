@@ -123,6 +123,8 @@ class BarristerChangeEventHandlerTest {
 
     @Test
     void shouldNotifyAddBarristerWhenCaseTypeIsC100() {
+        when(featureToggleService.isBarristerFeatureEnabled())
+            .thenReturn(true);
         barristerChangeEventHandler.notifyAddBarrister(barristerChangeEvent);
 
         BarristerEmail expectedBarristerEmailVars = BarristerEmail.builder()
@@ -179,7 +181,8 @@ class BarristerChangeEventHandlerTest {
 
     @Test
     void shouldNotifyAddBarristerWhenCaseTypeIsC100AndHasOneSolicitor() {
-
+        when(featureToggleService.isBarristerFeatureEnabled())
+            .thenReturn(true);
         caseData = caseData.toBuilder()
             .allocatedBarrister(caseData.getAllocatedBarrister().toBuilder()
                                     .solicitorEmail(null)
@@ -209,6 +212,8 @@ class BarristerChangeEventHandlerTest {
 
     @Test
     void shouldNotifyAddBarristerWhenCaseTypeIsFL401() {
+        when(featureToggleService.isBarristerFeatureEnabled())
+            .thenReturn(true);
         caseData = caseData.toBuilder()
             .allocatedBarrister(caseData.getAllocatedBarrister().toBuilder()
                                     .solicitorEmail(null)
