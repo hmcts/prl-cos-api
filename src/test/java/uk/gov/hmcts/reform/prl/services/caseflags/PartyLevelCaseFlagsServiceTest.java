@@ -392,10 +392,14 @@ public class PartyLevelCaseFlagsServiceTest {
                            .barristerFirstName("BarrRespFN").barristerLastName("BarrRespLN").build())
             .build();
 
+        FlagDetail flagDetail = FlagDetail.builder().flagCode("test").flagComment("test comment").name("test flag").build();
+        Flags caApplicantSolicitor1ExternalFlags = generateCaseFlag("ApplicantSolicitor1", "caApplicant1", flagDetail);
+        AllPartyFlags allPartyFlags = AllPartyFlags.builder().caApplicantSolicitor1ExternalFlags(caApplicantSolicitor1ExternalFlags).build();
         CaseData caseDataSolicitorBarristerRepresent = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(List.of(Element.<PartyDetails>builder().value(partyDetailsApplicantSolicitorBarrister).build()))
             .respondents(List.of(Element.<PartyDetails>builder().value(partyDetailsRespondentSolicitorBarrister).build()))
+            .allPartyFlags(allPartyFlags)
             .build();
 
         when(partyLevelCaseFlagsGenerator.generateExternalPartyFlags(any(), any(), any()))

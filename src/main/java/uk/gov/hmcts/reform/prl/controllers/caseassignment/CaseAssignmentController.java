@@ -168,6 +168,8 @@ public class CaseAssignmentController {
             caseDetails.getData().put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
             caseDetails.getData().putAll(applicationsTabService.updateTab(caseData));
         }
-        caseDetails.getData().putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(caseData));
+        log.info("**BEFORE:", caseDetails.getData());
+        caseDetails.getData().putAll(partyLevelCaseFlagsService.generatePartyCaseFlagsForBarristerOnly(caseData));
+        log.info("**AFTER:", caseDetails.getData());
     }
 }
