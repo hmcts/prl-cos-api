@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
+import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -74,8 +75,30 @@ public class BarristerController extends AbstractCallbackController {
                     .data(caseDataUpdated);
             return builder.build();
         } else {
-            throw (new RuntimeException(INVALID_CLIENT));
+            throw (new InvalidClientException(INVALID_CLIENT));
         }
+    }
+
+    @PostMapping(path = "/add/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to add a barrister on submitted")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse handleAddSubmitted(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) {
+
+        log.info("Inside barrister/add/submitted for case {}", callbackRequest.getCaseDetails().getId());
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            if (caseData.getAllocatedBarrister() != null) {
+                barristerAddService.notifyBarrister(caseData);
+            }
+        } else {
+            throw new InvalidClientException(INVALID_CLIENT);
+        }
+
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .build();
     }
 
     @PostMapping(path = "/remove/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -103,7 +126,7 @@ public class BarristerController extends AbstractCallbackController {
                 builder = AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).data(caseDataUpdated);
             return builder.build();
         } else {
-            throw (new RuntimeException(INVALID_CLIENT));
+            throw new InvalidClientException(INVALID_CLIENT);
         }
     }
 }
