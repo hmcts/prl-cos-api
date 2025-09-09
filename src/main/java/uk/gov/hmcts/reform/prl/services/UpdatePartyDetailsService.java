@@ -51,6 +51,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import static java.util.Optional.ofNullable;
@@ -950,11 +951,6 @@ public class UpdatePartyDetailsService {
         CaseData caseData = objectMapper.convertValue(caseDataMap, CaseData.class);
 
         if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
-            log.info("CaseDataBefore applicant count: {}", caseDataBefore.getApplicants().size());
-            log.info("CaseData applicant count: {}", caseData.getApplicants().size());
-
-            log.info("CaseDataBefore applicant: {}", caseDataBefore.getApplicants());
-            log.info("CaseData applicant: {}", caseData.getApplicants());
             List<Element<PartyDetails>> removeParty = new ArrayList<>();
             removeParty.addAll(caseDataBefore.getApplicants().stream()
                 .filter(appBefore -> caseData.getApplicants().stream()
@@ -968,13 +964,17 @@ public class UpdatePartyDetailsService {
 
             if (!removeParty.isEmpty()) {
                 StringBuilder validationMsg = new StringBuilder("Barrister is associated with the party ");
+                AtomicBoolean isBarristerExists = new AtomicBoolean(false);
                 removeParty.stream().forEach(party -> {
                     if (party.getValue().getBarrister() != null && party.getValue().getBarrister().getBarristerEmail() != null) {
                         validationMsg.append(party.getValue().getFirstName() + " " + party.getValue().getLastName() + "\n");
+                        isBarristerExists.set(true);
                     }
                 });
                 validationMsg.append("Please use 'remove legal rep/remove barrister' to remove barrister from the party\n");
-                validationErrors.add(validationMsg.toString());
+                if (isBarristerExists.get()) {
+                    validationErrors.add(validationMsg.toString());
+                }
             }
         }
 
