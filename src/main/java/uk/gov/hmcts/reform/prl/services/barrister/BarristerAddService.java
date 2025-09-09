@@ -12,6 +12,8 @@ import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
+import java.util.function.Function;
+
 @Slf4j
 @Service
 public class BarristerAddService extends AbstractBarristerService {
@@ -22,9 +24,11 @@ public class BarristerAddService extends AbstractBarristerService {
         super(userService, organisationService, eventPublisher);
     }
 
-    public AllocatedBarrister getAllocatedBarrister(CaseData caseData, String authorisation) {
+    public AllocatedBarrister getAllocatedBarrister(CaseData caseData,
+                                                    String authorisation,
+                                                    Function<PartyDetails, String> legalRepOrganisation) {
         return AllocatedBarrister.builder()
-            .partyList(getPartiesToList(caseData, authorisation))
+            .partyList(getPartiesToList(caseData, authorisation, legalRepOrganisation))
             .barristerOrg(Organisation.builder().build())
             .build();
     }
@@ -33,8 +37,7 @@ public class BarristerAddService extends AbstractBarristerService {
     protected boolean isPartyApplicableForFiltering(boolean applicantOrRespondent, BarristerFilter barristerFilter, PartyDetails partyDetails) {
         boolean isApplicable = (!hasBarrister(partyDetails)) && (partyHasSolicitorOrg(partyDetails));
 
-        return isPartyApplicableForFiltering(applicantOrRespondent,
-                                             barristerFilter,
+        return isPartyApplicableForFiltering(barristerFilter,
                                              partyDetails,
                                              isApplicable,
                                              partyId -> log.info("Barrister Add Service - This party {} has an empty solicitor org or "
@@ -46,7 +49,7 @@ public class BarristerAddService extends AbstractBarristerService {
     protected String getLabelForAction(boolean applicantOrRespondent, BarristerFilter barristerFilter, PartyDetails partyDetails) {
         String partyDetailsInfo = partyDetails.getSolicitorOrg().getOrganisationName();
 
-        return getLabelForAction(applicantOrRespondent, barristerFilter, partyDetails, partyDetailsInfo);
+        return getLabelForAction(applicantOrRespondent, partyDetails, partyDetailsInfo);
     }
 
     @Override

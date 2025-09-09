@@ -63,7 +63,11 @@ public class BarristerController extends AbstractCallbackController {
 
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             List<String> errorList = new ArrayList<>();
-            AllocatedBarrister barristerList = barristerAddService.getAllocatedBarrister(caseData, authorisation);
+            AllocatedBarrister barristerList = barristerAddService.getAllocatedBarrister(
+                caseData,
+                authorisation,
+                partyDetails -> partyDetails.getSolicitorOrg().getOrganisationID()
+            );
             if (!barristerList.getPartyList().getListItems().isEmpty()) {
                 caseDataUpdated.put(ALLOCATED_BARRISTER, barristerList);
             } else {
@@ -115,11 +119,51 @@ public class BarristerController extends AbstractCallbackController {
             List<String> errorList = new ArrayList<>();
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-            AllocatedBarrister barristerList = barristerRemoveService.getBarristerListToRemove(caseData, authorisation);
+            AllocatedBarrister barristerList =
+                barristerRemoveService.getBarristerListToRemove(
+                    caseData,
+                    authorisation,
+                    partyDetails -> partyDetails.getSolicitorOrg().getOrganisationID()
+                );
             if (!barristerList.getPartyList().getListItems().isEmpty()) {
                 caseDataUpdated.put(ALLOCATED_BARRISTER, barristerList);
             } else {
                 errorList.add("No barrister currently assigned to any party");
+            }
+
+            AboutToStartOrSubmitCallbackResponse.AboutToStartOrSubmitCallbackResponseBuilder
+                builder = AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).data(caseDataUpdated);
+            return builder.build();
+        } else {
+            throw new InvalidClientException(INVALID_CLIENT);
+        }
+    }
+
+    @PostMapping(path = "/stop-representing/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to remove a barrister on about-to-start")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse handleStopRepresentingAboutToStart(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) {
+
+        log.info("Inside barrister/stop-representing/about-to-start for case {}", callbackRequest.getCaseDetails().getId());
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            List<String> errorList = new ArrayList<>();
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+            AllocatedBarrister barristerList =
+                barristerRemoveService.getBarristerListToRemove(
+                    caseData,
+                    authorisation,
+                    partyDetails -> partyDetails.getBarrister().getBarristerOrg().getOrganisationID()
+                );
+
+            if (!barristerList.getPartyList().getListItems().isEmpty()) {
+                caseDataUpdated.put(ALLOCATED_BARRISTER, barristerList);
+            } else {
+                throw (new RuntimeException("You're not currently assigned to any party"));
             }
 
             AboutToStartOrSubmitCallbackResponse.AboutToStartOrSubmitCallbackResponseBuilder

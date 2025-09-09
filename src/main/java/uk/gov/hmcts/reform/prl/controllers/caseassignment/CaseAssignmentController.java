@@ -131,21 +131,20 @@ public class CaseAssignmentController {
                                                         errorList);
 
             if (errorList.isEmpty()) {
-                caseAssignmentService.removeBarrister(caseData,
-                                                      allocatedBarrister.getPartyList().getValueCode());
                 PartyDetails selectedParty = caseAssignmentService.getSelectedParty(
                     caseData,
                     allocatedBarrister.getPartyList().getValueCode()
                 );
                 if (selectedParty != null) {
                     caseData.setAllocatedBarrister(AllocatedBarrister.builder()
-                        .partyList(allocatedBarrister.getPartyList())
-                        .barristerOrg(selectedParty.getBarrister().getBarristerOrg())
-                        .barristerEmail(selectedParty.getBarrister().getBarristerEmail())
-                        .barristerFirstName(selectedParty.getBarrister().getBarristerFirstName())
-                        .barristerLastName(selectedParty.getBarrister().getBarristerLastName())
-                        .build());
+                                                       .partyList(allocatedBarrister.getPartyList())
+                                                       .barristerOrg(selectedParty.getBarrister().getBarristerOrg())
+                                                       .barristerEmail(selectedParty.getBarrister().getBarristerEmail())
+                                                       .barristerFirstName(selectedParty.getBarrister().getBarristerFirstName())
+                                                       .barristerLastName(selectedParty.getBarrister().getBarristerLastName())
+                                                       .build());
                 }
+                caseAssignmentService.removeBarrister(caseData, allocatedBarrister.getPartyList().getValueCode());
                 updateCaseDetails(caseDetails, caseData);
             }
 
