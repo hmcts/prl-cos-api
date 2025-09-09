@@ -89,6 +89,20 @@ public class PartyLevelCaseFlagsService {
         );
     }
 
+    public Map<String, Object> generatePartyCaseFlagsForBarristerOnly(CaseData caseData) {
+        Map<String, Object> data = new HashMap<>();
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
+                data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.CAAPPLICANTBARRISTER));
+                data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.CARESPONDENTBARRISTER));
+            }
+        } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DAAPPLICANTBARRISTER));
+            data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DARESPONDENTBARRISTER));
+        }
+        return data;
+    }
+
     public Map<String, Object> generatePartyCaseFlags(CaseData caseData) {
         Map<String, Object> data = new HashMap<>();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
