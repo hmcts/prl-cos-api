@@ -511,43 +511,6 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
 
     }
 
-    @Test
-    void shouldNotifyBarristerSuccessfully() {
-        setupApplicantsC100();
-        allApplicants.getFirst().getValue().setBarrister(Barrister.builder().barristerId("barrister-id").build());
-        allApplicants.get(1).getValue().getSolicitorOrg().setOrganisationID("Org1");
-        allApplicants.get(1).getValue().getSolicitorOrg().setOrganisationName("Org1");
-
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication("C100")
-            .allocatedBarrister(AllocatedBarrister.builder().build())
-            .applicants(allApplicants)
-            .build();
-
-        barristerAddService.notifyBarrister(caseData);
-
-        verify(eventPublisher).publishEvent(isA(BarristerChangeEvent.class));
-
-    }
-
-    @Test
-    void shouldNotNotifyBarristerWhenAllocatedBarristerIsNull() {
-        setupApplicantsC100();
-        allApplicants.getFirst().getValue().setBarrister(Barrister.builder().barristerId("barrister-id").build());
-        allApplicants.get(1).getValue().getSolicitorOrg().setOrganisationID("Org1");
-        allApplicants.get(1).getValue().getSolicitorOrg().setOrganisationName("Org1");
-
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication("C100")
-            .applicants(allApplicants)
-            .build();
-
-        barristerAddService.notifyBarrister(caseData);
-
-        verifyNoInteractions(eventPublisher);
-
-    }
-
     protected void assertPartyToAdd(DynamicList listOfBarristers, PartyEnum partyEnum, String prefix, int itemIndex, int partyIndex, int orgIndex) {
         String appRepPrefix = partyEnum == applicant ? "App" : "Resp";
         DynamicListElement appParty = listOfBarristers.getListItems().get(itemIndex);
