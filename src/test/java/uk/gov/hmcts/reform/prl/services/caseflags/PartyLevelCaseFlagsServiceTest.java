@@ -509,7 +509,7 @@ public class PartyLevelCaseFlagsServiceTest {
             .thenReturn(Flags.builder().partyName("int").build());
 
         Map<String, Object> caseData =  partyLevelCaseFlagsService
-            .generatePartyCaseFlags(caseDataFl401SolicitorBarristerRepresent);
+            .generatePartyCaseFlagsForBarristerOnly(caseDataFl401SolicitorBarristerRepresent);
         Assert.assertNotNull(caseData);
         Assert.assertEquals("ext", ((Flags)(caseData.get("daApplicantBarristerExternalFlags"))).getPartyName());
         Assert.assertEquals("ext", ((Flags)(caseData.get("daRespondentBarristerExternalFlags"))).getPartyName());
