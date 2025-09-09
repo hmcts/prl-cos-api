@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 
 
 @Data
@@ -14,6 +15,5 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FinalisationJudgeDetails {
 
-    // private  JudgeOrMagistrateTitleEnum judgeOrMagistrateTitle;
-    private String judgeOrMagistrateTitle;
+    private JudgeOrMagistrateTitleEnum judgeOrMagistrateTitle;
 }

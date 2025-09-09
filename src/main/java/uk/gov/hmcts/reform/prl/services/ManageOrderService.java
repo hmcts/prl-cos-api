@@ -2387,8 +2387,7 @@ public class ManageOrderService {
                            .finalisationJudgeDetails(FinalisationJudgeDetails.builder()
                                                          .judgeOrMagistrateTitle(
                                                              caseData.getManageOrders()
-                                                                 .getJudgeOrMagistrateTitle()
-                                                                 .getDisplayedValue())
+                                                                 .getJudgeOrMagistrateTitle())
                                                          .build())
                            .childOption(getChildOption(caseData))
                            .isOrderUploaded(No)
