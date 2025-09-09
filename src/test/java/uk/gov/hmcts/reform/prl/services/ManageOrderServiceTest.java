@@ -3012,6 +3012,7 @@ public class ManageOrderServiceTest {
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassCymruServedOptions(No)
             .serveOrderDynamicList(dynamicMultiSelectList)
+            .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
             .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
@@ -3073,6 +3074,7 @@ public class ManageOrderServiceTest {
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassCymruServedOptions(No)
             .serveOrderDynamicList(dynamicMultiSelectList)
+            .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.magistrate)
             .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
