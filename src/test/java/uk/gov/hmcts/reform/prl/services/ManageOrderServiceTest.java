@@ -6658,11 +6658,10 @@ public class ManageOrderServiceTest {
         Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid).value(OrderDetails
                                                                                           .builder()
                                                                                           .finalisationJudgeDetails(
-                                                                                              new FinalisationJudgeDetails(
-                                                                                                 manageOrders
-                                                                                                     .getJudgeOrMagistrateTitle()
-                                                                                                     .getDisplayedValue()
-                                                                                                  ))
+                                                                                              FinalisationJudgeDetails.builder()
+                                                                                                  .judgeOrMagistrateTitle(
+                                                                                                      JudgeOrMagistrateTitleEnum.circuitJudge)
+                                                                                                  .build())
                                                                                           .orderDocument(Document
                                                                                                              .builder()
                                                                                                              .build())
@@ -6702,7 +6701,7 @@ public class ManageOrderServiceTest {
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
         assertNotNull(manageOrderService.serveOrder(caseData,orderList));
-        assertEquals(caseData.getManageOrders().getJudgeOrMagistrateTitle().getDisplayedValue(),
+        assertEquals(caseData.getManageOrders().getJudgeOrMagistrateTitle(),
                      orders.getValue().getFinalisationJudgeDetails().getJudgeOrMagistrateTitle());
     }
 }
