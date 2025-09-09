@@ -74,7 +74,6 @@ class CaseAssignmentControllerTest {
     private ObjectMapper objectMapper;
 
     private CaseAssignmentController caseAssignmentController;
-
     private AllocatedBarrister allocatedBarrister;
 
     @BeforeEach
@@ -143,6 +142,9 @@ class CaseAssignmentControllerTest {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
+
+        CaseData caseData = CaseData.builder().caseTypeOfApplication(C100_CASE_TYPE).allocatedBarrister(allocatedBarrister).build();
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
 
         AboutToStartOrSubmitCallbackResponse response = caseAssignmentController.submitAddBarrister(
             "auth",

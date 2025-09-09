@@ -43,11 +43,13 @@ public class BarristerChangeEventHandler {
     @Async
     @EventListener(condition = "#event.typeOfEvent.displayedValue eq 'Add Barrister'")
     public void notifyAddBarrister(final BarristerChangeEvent event) {
-        // notify - barrister
-        sendEmail(event, CA_DA_ADD_BARRISTER_SELF, AllocatedBarrister::getBarristerEmail);
+        if (featureToggleService.isBarristerFeatureEnabled()) {
+            // notify - barrister
+            sendEmail(event, CA_DA_ADD_BARRISTER_SELF, AllocatedBarrister::getBarristerEmail);
 
-        // notify - solicitor
-        sendEmail(event, CA_DA_ADD_BARRISTER_TO_SOLICITOR, AllocatedBarrister::getSolicitorEmail);
+            // notify applicants/respondents Solicitors
+            sendEmail(event, CA_DA_ADD_BARRISTER_TO_SOLICITOR, AllocatedBarrister::getSolicitorEmail);
+        }
     }
 
     private void sendEmail(BarristerChangeEvent event,

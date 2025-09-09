@@ -55,6 +55,7 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
     private BarristerHelper barristerHelper;
 
 
+
     @BeforeEach
     void setup() {
         UserDetails userDetails = UserDetails.builder()
@@ -471,6 +472,43 @@ class BarristerAddServiceTest extends BarristerTestAbstract {
         assertEquals(1, partiesDynamicList.getListItems().size());
         assertPartyToAdd(partiesDynamicList, applicant, PARTY_ID_PREFIX, 0, 2, 1);
         verify(barristerHelper, times(4)).hasBarrister(isA(PartyDetails.class));
+    }
+
+    @Test
+    void shouldNotifyBarristerSuccessfully() {
+        setupApplicantsC100();
+        allApplicants.getFirst().getValue().setBarrister(Barrister.builder().barristerId("barrister-id").build());
+        allApplicants.get(1).getValue().getSolicitorOrg().setOrganisationID("Org1");
+        allApplicants.get(1).getValue().getSolicitorOrg().setOrganisationName("Org1");
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .allocatedBarrister(AllocatedBarrister.builder().build())
+            .applicants(allApplicants)
+            .build();
+
+        barristerAddService.notifyBarrister(caseData);
+
+        verify(eventPublisher).publishEvent(isA(BarristerChangeEvent.class));
+
+    }
+
+    @Test
+    void shouldNotNotifyBarristerWhenAllocatedBarristerIsNull() {
+        setupApplicantsC100();
+        allApplicants.getFirst().getValue().setBarrister(Barrister.builder().barristerId("barrister-id").build());
+        allApplicants.get(1).getValue().getSolicitorOrg().setOrganisationID("Org1");
+        allApplicants.get(1).getValue().getSolicitorOrg().setOrganisationName("Org1");
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .applicants(allApplicants)
+            .build();
+
+        barristerAddService.notifyBarrister(caseData);
+
+        verifyNoInteractions(eventPublisher);
+
     }
 
     @Test

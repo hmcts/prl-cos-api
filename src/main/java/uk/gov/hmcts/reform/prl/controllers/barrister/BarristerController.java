@@ -69,11 +69,10 @@ public class BarristerController extends AbstractCallbackController {
             } else {
                 errorList.add("There are no solicitors currently assigned to any party on this case");
             }
-            AboutToStartOrSubmitCallbackResponse.AboutToStartOrSubmitCallbackResponseBuilder
-                builder = AboutToStartOrSubmitCallbackResponse.builder()
-                    .errors(errorList)
-                    .data(caseDataUpdated);
-            return builder.build();
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .errors(errorList)
+                .data(caseDataUpdated)
+                .build();
         } else {
             throw (new InvalidClientException(INVALID_CLIENT));
         }
@@ -94,7 +93,7 @@ public class BarristerController extends AbstractCallbackController {
                 barristerAddService.notifyBarrister(caseData);
             }
         } else {
-            throw (new InvalidClientException(INVALID_CLIENT));
+            throw new InvalidClientException(INVALID_CLIENT);
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder()

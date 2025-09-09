@@ -146,5 +146,4 @@ public class BarristerControllerIntegrationTest {
             .andExpect(status().isOk())
             .andReturn();
     }
-
 }
