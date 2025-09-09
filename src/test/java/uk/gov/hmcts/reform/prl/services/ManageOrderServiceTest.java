@@ -6661,7 +6661,6 @@ public class ManageOrderServiceTest {
                                                                                               new FinalisationJudgeDetails(
                                                                                                  manageOrders
                                                                                                      .getJudgeOrMagistrateTitle()
-                                                                                                     .getDisplayedValue()
                                                                                                   ))
                                                                                           .orderDocument(Document
                                                                                                              .builder()
@@ -6702,7 +6701,7 @@ public class ManageOrderServiceTest {
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
         assertNotNull(manageOrderService.serveOrder(caseData,orderList));
-        assertEquals(caseData.getManageOrders().getJudgeOrMagistrateTitle().getDisplayedValue(),
+        assertEquals(caseData.getManageOrders().getJudgeOrMagistrateTitle(),
                      orders.getValue().getFinalisationJudgeDetails().getJudgeOrMagistrateTitle());
     }
 }
