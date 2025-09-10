@@ -511,6 +511,7 @@ public class PartyLevelCaseFlagsServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .representativeFirstName("resp first name")
             .lastName("resp last name")
+            .partyId(respPartyUuid)
             .barrister(respondentBarrister)
             .build();
 

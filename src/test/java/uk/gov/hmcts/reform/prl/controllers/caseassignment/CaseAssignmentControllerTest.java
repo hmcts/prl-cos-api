@@ -87,8 +87,8 @@ class CaseAssignmentControllerTest {
             objectMapper,
             organisationService,
             authorisationService,
-            barristerHelper,
             partyLevelCaseFlagsService,
+            barristerHelper,
             applicationsTabService);
         Barrister barrister = Barrister.builder()
             .barristerEmail("barristerEmail@gmail.com")

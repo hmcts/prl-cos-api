@@ -133,7 +133,7 @@ public class PartyLevelCaseFlagsService {
         PartyDetails partyDetails = representing.getDaTarget().apply(caseData);
         for (int i = 0; i < partyRoles.size(); i++) {
             PartyRole partyRole = partyRoles.get(i);
-            if (partyDetails.getPartyId()
+            if (partyDetails.getPartyId() != null && partyDetails.getPartyId()
                 .equals(caseData.getAllocatedBarrister().getPartyList().getValueCodeAsUuid())) {
                 findAndGeneratePartyFlagsForBarristerOnly(representing, i, barristerFullName, data, partyRole);
             }
