@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 @RequiredArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AllocatedBarrister {
@@ -30,6 +30,12 @@ public class AllocatedBarrister {
 
     @JsonProperty("barristerOrg")
     private final Organisation barristerOrg;
+
+    @JsonProperty("solicitorEmail")
+    private final String solicitorEmail;
+
+    @JsonProperty("solicitorFullName")
+    private final String solicitorFullName;
 
     @JsonIgnore
     public String getBarristerFullName() {

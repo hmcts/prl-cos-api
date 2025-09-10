@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
@@ -13,12 +14,14 @@ import uk.gov.hmcts.reform.prl.events.BarristerChangeEvent;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Barrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.utils.BarristerHelper;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +30,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -46,10 +50,11 @@ class BarristerRemoveServiceTest extends BarristerTestAbstract {
     protected EventService eventPublisher;
     @Mock
     private UserDetails userDetails;
+    @Spy
+    private BarristerHelper barristerHelper;
 
     @BeforeEach
-    public void setup() {
-        barristerRemoveService = new BarristerRemoveService(userService, organisationService, eventPublisher);
+    void setup() {
         UserDetails userDetails = UserDetails.builder()
             .id("1")
             .roles(List.of(COURT_ADMIN))
@@ -82,6 +87,7 @@ class BarristerRemoveServiceTest extends BarristerTestAbstract {
 
         assertPartyToRemove(listOfBarristersToRemove, applicant, PARTY_ID_PREFIX, 0, 3);
         assertPartyToRemove(listOfBarristersToRemove, respondent, PARTY_ID_PREFIX, 1, 7);
+        verify(barristerHelper, times(8)).hasBarrister(isA(PartyDetails.class));
     }
 
     @Test
@@ -107,6 +113,7 @@ class BarristerRemoveServiceTest extends BarristerTestAbstract {
         assertNull(partiesDynamicList.getValue());
         assertEquals(1, partiesDynamicList.getListItems().size());
         assertPartyToRemove(partiesDynamicList, applicant, PARTY_ID_PREFIX, 0, 3);
+        verify(barristerHelper, times(4)).hasBarrister(isA(PartyDetails.class));
     }
 
     @Test
@@ -144,6 +151,7 @@ class BarristerRemoveServiceTest extends BarristerTestAbstract {
         assertNull(partiesDynamicList.getValue());
         assertEquals(1, partiesDynamicList.getListItems().size());
         assertPartyToRemove(partiesDynamicList, applicant, PARTY_ID_PREFIX, 0, 1);
+        verify(barristerHelper).hasBarrister(isA(PartyDetails.class));
     }
 
     @Test
@@ -170,6 +178,7 @@ class BarristerRemoveServiceTest extends BarristerTestAbstract {
         assertNull(partiesDynamicList.getValue());
         assertEquals(1, partiesDynamicList.getListItems().size());
         assertPartyToRemove(partiesDynamicList, applicant, PARTY_ID_PREFIX, 0, 3);
+        verify(barristerHelper, times(4)).hasBarrister(isA(PartyDetails.class));
     }
 
     @Test
@@ -223,6 +232,7 @@ class BarristerRemoveServiceTest extends BarristerTestAbstract {
         assertNull(partiesDynamicList.getValue());
         assertEquals(1, partiesDynamicList.getListItems().size());
         assertPartyToRemove(partiesDynamicList, respondent, PARTY_ID_PREFIX, 0, 1);
+        verify(barristerHelper).hasBarrister(isA(PartyDetails.class));
     }
 
     @Test
@@ -250,6 +260,7 @@ class BarristerRemoveServiceTest extends BarristerTestAbstract {
         assertEquals(2, partiesDynamicList.getListItems().size());
         assertPartyToRemove(partiesDynamicList, respondent, PARTY_ID_PREFIX, 0, 7);
         assertPartyToRemove(partiesDynamicList, respondent, PARTY_ID_PREFIX, 1, 6);
+        verify(barristerHelper, times(5)).hasBarrister(isA(PartyDetails.class));
     }
 
 
