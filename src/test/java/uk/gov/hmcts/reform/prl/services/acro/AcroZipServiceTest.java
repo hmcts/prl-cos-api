@@ -44,7 +44,7 @@ class AcroZipServiceTest {
 
     @Test
     @DisplayName("Should create archive with valid zip format signature")
-    void shouldCreateArchiveWithValid7ZipFormatSignature() throws Exception {
+    void shouldCreateArchiveWithValidZipFormatSignature() throws Exception {
         Path file1 = Files.createFile(tempSourceDir.resolve("file1.txt"));
         Files.writeString(file1, "Test content");
 
@@ -76,16 +76,6 @@ class AcroZipServiceTest {
             fileName.matches("PRL_ORDERS_\\d{8}_\\d{4}\\.zip"),
             "Archive name should match format PRL_ORDERS_YYYYMMDD_HHMM.zip"
         );
-    }
-
-    //@Test
-    @DisplayName("Should create empty archive when source directory is empty")
-    void shouldCreateEmptyArchiveWhenSourceDirectoryIsEmpty() throws Exception {
-        String archivePath = acroZipService.zip();
-        File archiveFile = new File(archivePath);
-
-        assertTrue(archiveFile.exists(), "Archive should be created even for empty directory");
-        assertTrue(archiveFile.length() > 0, "Archive should have minimal 7z structure");
     }
 
     @Test

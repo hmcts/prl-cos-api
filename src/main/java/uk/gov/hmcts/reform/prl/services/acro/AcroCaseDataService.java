@@ -57,6 +57,8 @@ public class AcroCaseDataService {
     private final AuthTokenGenerator authTokenGenerator;
     @Value("${acro.search-case-type-id}")
     private String searchCaseTypeId;
+    @Value("${ccd.elastic-search-api.result-size}")
+    private String ccdElasticSearchApiResultSize;
     private final SystemUserService systemUserService;
     private final HearingService hearingService;
     private final AcroDatesService acroDatesService;
@@ -157,7 +159,8 @@ public class AcroCaseDataService {
             ))
             .build();
         Query query = Query.builder().bool(bool).build();
-        return QueryParam.builder().query(query).dataToReturn(fetchFieldsRequiredForAcro()).build();
+        return QueryParam.builder().query(query).size(ccdElasticSearchApiResultSize)
+            .dataToReturn(fetchFieldsRequiredForAcro()).build();
     }
 
     private List<String> fetchFieldsRequiredForAcro() {
