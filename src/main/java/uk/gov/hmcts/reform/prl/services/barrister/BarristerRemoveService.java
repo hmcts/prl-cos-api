@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.utils.BarristerHelper;
 
 import java.util.function.Function;
 
@@ -20,8 +21,9 @@ public class BarristerRemoveService extends AbstractBarristerService {
 
     public BarristerRemoveService(UserService userService,
                                   OrganisationService organisationService,
-                                  EventService eventPublisher) {
-        super(userService, organisationService, eventPublisher);
+                                  EventService eventPublisher,
+                                  BarristerHelper barristerHelper) {
+        super(userService, organisationService, eventPublisher, barristerHelper);
     }
 
     public AllocatedBarrister getBarristerListToRemove(CaseData caseData,
