@@ -17,6 +17,7 @@ import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -112,7 +113,7 @@ public class CaseAssignmentControllerIntegrationTest {
     }
 
     @Test
-    public void testRemoveBarrister() throws Exception {
+    public void testRemoveBarristerAboutToSubmit() throws Exception {
         String url = "/case-assignment/barrister/remove/about-to-submit";
         String jsonRequest = ResourceLoader.loadJson("requests/barristerRequest.json");
         when(applicationsTabService.updateTab(any())).thenReturn(new HashMap());
@@ -123,7 +124,7 @@ public class CaseAssignmentControllerIntegrationTest {
             .when(caseAssignmentService).validateRemoveRequest(any(), any(), any());
 
         doNothing()
-            .when(caseAssignmentService).removeBarrister(isA(CaseData.class), anyString());
+            .when(caseAssignmentService).removeBarrister(isA(CaseData.class), isA(PartyDetails.class));
 
         mockMvc.perform(
                 post(url)
@@ -136,7 +137,7 @@ public class CaseAssignmentControllerIntegrationTest {
             .andExpect(jsonPath("$.errors").isEmpty())
             .andReturn();
         verify(caseAssignmentService).validateRemoveRequest(any(), any(), any());
-        verify(caseAssignmentService).removeBarrister(isA(CaseData.class), anyString());
+        verify(caseAssignmentService).removeBarrister(isA(CaseData.class), isA(PartyDetails.class));
         verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(any());
     }
 }
