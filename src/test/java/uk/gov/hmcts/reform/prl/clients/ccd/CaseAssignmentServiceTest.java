@@ -48,6 +48,7 @@ import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.barrister.BarristerRemoveService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.utils.BarristerHelper;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.MaskEmail;
@@ -107,6 +108,8 @@ class CaseAssignmentServiceTest {
     private BarristerHelper barristerHelper;
     @Mock
     private BarristerRemoveService barristerRemoveService;
+    @Mock
+    private PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     @InjectMocks
     private CaseAssignmentService caseAssignmentService;
@@ -318,7 +321,8 @@ class CaseAssignmentServiceTest {
             objectMapper,
             featureToggleService,
             barristerHelper,
-            barristerRemoveService
+            barristerRemoveService,
+            partyLevelCaseFlagsService
         );
         AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder()
             .partyList(DynamicList.builder()
@@ -1049,7 +1053,8 @@ class CaseAssignmentServiceTest {
             objectMapper,
             featureToggleService,
             barristerHelper,
-            barristerRemoveService
+            barristerRemoveService,
+            partyLevelCaseFlagsService
         );
 
         localCaseAssignmentService.removeAmBarristerIfPresent(localCaseDetails);
@@ -1079,7 +1084,8 @@ class CaseAssignmentServiceTest {
             objectMapper,
             featureToggleService,
             barristerHelper,
-            barristerRemoveService
+            barristerRemoveService,
+            partyLevelCaseFlagsService
         );
 
         Barrister updatedBarrister = barrister.toBuilder()
@@ -1111,6 +1117,7 @@ class CaseAssignmentServiceTest {
         verify(barristerHelper).setAllocatedBarrister(eq(partyDetails),
                                                  isA(CaseData.class),
                                                  isA(UUID.class));
+        verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(isA(CaseData.class));
     }
 
     static Stream<Arguments> parameterC100SolicitorParties() {
@@ -1174,7 +1181,8 @@ class CaseAssignmentServiceTest {
             objectMapper,
             featureToggleService,
             barristerHelper,
-            barristerRemoveService
+            barristerRemoveService,
+            partyLevelCaseFlagsService
         );
         when(featureToggleService.isBarristerFeatureEnabled())
             .thenReturn(true);
@@ -1205,7 +1213,8 @@ class CaseAssignmentServiceTest {
             objectMapper,
             featureToggleService,
             barristerHelper,
-            barristerRemoveService
+            barristerRemoveService,
+            partyLevelCaseFlagsService
         );
 
         Barrister updatedBarrister = barrister.toBuilder()
@@ -1236,6 +1245,7 @@ class CaseAssignmentServiceTest {
         verify(barristerHelper).setAllocatedBarrister(eq(partyDetails),
                                                  isA(CaseData.class),
                                                  isA(UUID.class));
+        verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(isA(CaseData.class));
     }
 
     @Test

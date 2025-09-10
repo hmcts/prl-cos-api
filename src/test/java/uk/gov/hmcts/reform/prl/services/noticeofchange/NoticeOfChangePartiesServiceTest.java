@@ -1243,6 +1243,7 @@ public class NoticeOfChangePartiesServiceTest {
                                                  isA(CaseData.class),
                                                  isA(UUID.class));
         verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
+        verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(isA(CaseData.class));
     }
 
     @Test
@@ -1500,6 +1501,7 @@ public class NoticeOfChangePartiesServiceTest {
                                                  isA(CaseData.class),
                                                  isA(UUID.class));
         verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
+        verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(isA(CaseData.class));
     }
 
     private static PartyDetails updatePartyDetails(SolicitorUser legalRepresentativeSolicitorDetails,
@@ -1592,7 +1594,9 @@ public class NoticeOfChangePartiesServiceTest {
                                                  isA(CaseData.class),
                                                  isA(UUID.class));
         verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
+        verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(isA(CaseData.class));
     }
+
 
     @Test
     public void testSendEmailAndUpdateCaseData_VerifiesSendEmailOnRemovalOfLegalRepresentation() throws Exception {
@@ -1655,5 +1659,6 @@ public class NoticeOfChangePartiesServiceTest {
                                                  isA(CaseData.class),
                                                  isA(UUID.class));
         verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
+        verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(isA(CaseData.class));
     }
 }

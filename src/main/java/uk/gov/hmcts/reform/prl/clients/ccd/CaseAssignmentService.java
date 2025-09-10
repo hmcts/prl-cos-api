@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.barrister.BarristerRemoveService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.utils.BarristerHelper;
 import uk.gov.hmcts.reform.prl.utils.MaskEmail;
 
@@ -69,6 +70,7 @@ public class CaseAssignmentService {
     private final FeatureToggleService featureToggleService;
     private final BarristerHelper barristerHelper;
     private final BarristerRemoveService barristerRemoveService;
+    private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     private InvalidPartyException getInvalidPartyException(CaseData caseData,
                                                                   String selectedPartyId) {
@@ -484,7 +486,9 @@ public class CaseAssignmentService {
                                              caPartyDetailsElement.getValue(),
                                              caseData,
                                              caPartyDetailsElement.getId());
+
                                          barristerRemoveService.notifyBarrister(caseData);
+                                         partyLevelCaseFlagsService.generatePartyCaseFlagsForBarristerOnly(caseData);
                                          caPartyDetailsElement.getValue().setBarrister(null);
                                      },
                                      daPartyDetails -> {
@@ -492,6 +496,7 @@ public class CaseAssignmentService {
                                                                           caseData,
                                                                           daPartyDetails.getPartyId());
                                          barristerRemoveService.notifyBarrister(caseData);
+                                         partyLevelCaseFlagsService.generatePartyCaseFlagsForBarristerOnly(caseData);
                                          daPartyDetails.setBarrister(null);
                                      }
 
