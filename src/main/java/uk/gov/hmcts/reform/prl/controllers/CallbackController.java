@@ -397,7 +397,8 @@ public class CallbackController {
                 caseDataUpdated,
                 caseData
             );
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+            throw new Exception(); // todo, revert this
+            // return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
