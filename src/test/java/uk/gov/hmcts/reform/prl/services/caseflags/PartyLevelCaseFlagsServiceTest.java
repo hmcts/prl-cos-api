@@ -384,7 +384,6 @@ public class PartyLevelCaseFlagsServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .representativeFirstName("first name")
             .lastName("last name")
-            .partyId(appPartyUuid)
             .barrister(applicantBarrister)
             .build();
 
@@ -398,7 +397,6 @@ public class PartyLevelCaseFlagsServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .representativeFirstName("resp first name")
             .lastName("resp last name")
-            .partyId(respPartyUuid)
             .barrister(respondentBarrister)
             .build();
 
@@ -411,8 +409,10 @@ public class PartyLevelCaseFlagsServiceTest {
 
         CaseData caseDataSolicitorBarristerRepresent = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
-            .applicants(List.of(Element.<PartyDetails>builder().value(partyDetailsApplicantSolicitorBarrister).build()))
-            .respondents(List.of(Element.<PartyDetails>builder().value(partyDetailsRespondentSolicitorBarrister).build()))
+            .applicants(List.of(Element.<PartyDetails>builder().value(partyDetailsApplicantSolicitorBarrister)
+                .id(appPartyUuid).build()))
+            .respondents(List.of(Element.<PartyDetails>builder().value(partyDetailsRespondentSolicitorBarrister)
+                .id(respPartyUuid).build()))
             .allPartyFlags(allPartyFlags)
             .allocatedBarrister(allocatedBarrister)
             .build();
@@ -511,7 +511,6 @@ public class PartyLevelCaseFlagsServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .representativeFirstName("resp first name")
             .lastName("resp last name")
-            .partyId(respPartyUuid)
             .barrister(respondentBarrister)
             .build();
 
