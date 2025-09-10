@@ -28,6 +28,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -39,7 +40,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.util.TestConstants.AUTHORISATION_HEADER;
 
 @Slf4j
-@SpringBootTest
+@SpringBootTest(properties = {
+    "feature.toggle.barristerFeatureEnabled=true"
+})
 @RunWith(SpringRunner.class)
 @ContextConfiguration
 public class BarristerControllerIntegrationTest {
@@ -65,12 +68,11 @@ public class BarristerControllerIntegrationTest {
     @Before
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
-
+        objectMapper.findAndRegisterModules();
     }
 
     @Test
     public void testBarristerControllerAboutToStart() throws Exception {
-        objectMapper.registerModule(new ParameterNamesModule());
         String url = "/barrister/add/about-to-start";
         String jsonRequest = ResourceLoader.loadJson("controller/barristerAboutToStartCallBackRequest.json");
 
@@ -93,7 +95,6 @@ public class BarristerControllerIntegrationTest {
 
     @Test
     public void testBarristerControllerRemoveAboutToStart() throws Exception {
-        objectMapper.registerModule(new ParameterNamesModule());
         String url = "/barrister/remove/about-to-start";
         String jsonRequest = ResourceLoader.loadJson("controller/barristerAboutToStartCallBackRequest.json");
 
@@ -145,13 +146,30 @@ public class BarristerControllerIntegrationTest {
 
     @Test
     public void testBarristerControllerAddSubmitted() throws Exception {
-        objectMapper.registerModule(new ParameterNamesModule());
         String url = "/barrister/add/submitted";
         String jsonRequest = ResourceLoader.loadJson("controller/barristerSubmittedCallBackRequest.json");
 
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
 
         when(userService.getUserDetails(any())).thenReturn(UserDetails.builder().roles(List.of(CASEWORKER)).build());
+
+        mockMvc.perform(
+                post(url)
+                    .header(AUTHORISATION_HEADER, AUTH_TOKEN)
+                    .header(SERVICE_AUTHORIZATION_HEADER, SERVICE_TOKEN)
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
+
+    @Test
+    public void testRemoveBarristerSubmitted() throws Exception {
+        String url = "/barrister/remove/submitted";
+        String jsonRequest = ResourceLoader.loadJson("controller/barristerSubmittedCallBackRequest.json");
+        when(authorisationService.isAuthorized(anyString(), anyString()))
+            .thenReturn(true);
 
         mockMvc.perform(
                 post(url)
