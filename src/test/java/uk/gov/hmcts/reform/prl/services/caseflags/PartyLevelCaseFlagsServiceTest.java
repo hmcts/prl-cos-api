@@ -22,14 +22,18 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseflags.AllPartyFlags;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
+import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Barrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.caseflags.PartyLevelCaseFlagsGenerator;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -368,7 +372,9 @@ public class PartyLevelCaseFlagsServiceTest {
 
     @Test
     public void testPartyCaseFlagForC100CaseWhenRepresentAndBarristerOnly() {
-        Barrister applicantBarrister = Barrister.builder().barristerId("1")
+        UUID appPartyUuid = UUID.fromString("fbd63138-6396-4879-ac62-7f1c915f0111");
+        UUID respPartyUuid = UUID.fromString("fbd63138-6396-4879-ac62-7f1c915f0222");
+        Barrister applicantBarrister = Barrister.builder().barristerId("UUID3")
             .barristerFirstName("BarrFN").barristerLastName("BarrLN").build();
         PartyDetails partyDetailsApplicantSolicitorBarrister = PartyDetails.builder()
             .firstName("")
@@ -378,10 +384,11 @@ public class PartyLevelCaseFlagsServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .representativeFirstName("first name")
             .lastName("last name")
+            .partyId(appPartyUuid)
             .barrister(applicantBarrister)
             .build();
 
-        Barrister respondentBarrister = Barrister.builder().barristerId("1")
+        Barrister respondentBarrister = Barrister.builder().barristerId("UUID4")
             .barristerFirstName("RespBarrFN").barristerLastName("RespBarrLN").build();
         PartyDetails partyDetailsRespondentSolicitorBarrister = PartyDetails.builder()
             .firstName("")
@@ -391,17 +398,23 @@ public class PartyLevelCaseFlagsServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .representativeFirstName("resp first name")
             .lastName("resp last name")
+            .partyId(respPartyUuid)
             .barrister(respondentBarrister)
             .build();
 
         FlagDetail flagDetail = FlagDetail.builder().flagCode("test").flagComment("test comment").name("test flag").build();
         Flags caApplicantSolicitor1ExternalFlags = generateCaseFlag("ApplicantSolicitor1", "caApplicant1", flagDetail);
         AllPartyFlags allPartyFlags = AllPartyFlags.builder().caApplicantSolicitor1ExternalFlags(caApplicantSolicitor1ExternalFlags).build();
+        DynamicListElement abp = DynamicListElement.builder().code(appPartyUuid.toString()).label(appPartyUuid.toString()).build();
+        DynamicList abpl = DynamicList.builder().value(abp).listItems(Arrays.asList(abp)).build();
+        AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder().partyList(abpl).build();
+
         CaseData caseDataSolicitorBarristerRepresent = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(List.of(Element.<PartyDetails>builder().value(partyDetailsApplicantSolicitorBarrister).build()))
             .respondents(List.of(Element.<PartyDetails>builder().value(partyDetailsRespondentSolicitorBarrister).build()))
             .allPartyFlags(allPartyFlags)
+            .allocatedBarrister(allocatedBarrister)
             .build();
 
         when(partyLevelCaseFlagsGenerator.generateExternalPartyFlags(any(), any(), any()))
@@ -472,7 +485,9 @@ public class PartyLevelCaseFlagsServiceTest {
 
     @Test
     public void testPartyCaseFlagForFl401CaseWhenSolicitorBarristerRepresent() {
-        Barrister applicantBarrister = Barrister.builder().barristerId("1")
+        UUID appPartyUuid = UUID.fromString("fbd63138-6396-4879-ac62-7f1c915f0111");
+        UUID respPartyUuid = UUID.fromString("fbd63138-6396-4879-ac62-7f1c915f0222");
+        Barrister applicantBarrister = Barrister.builder().barristerId("UUID3")
             .barristerFirstName("BarrFN").barristerLastName("BarrLN").build();
         PartyDetails partyDetailsApplicantSolicitorBarrister = PartyDetails.builder()
             .firstName("")
@@ -482,10 +497,11 @@ public class PartyLevelCaseFlagsServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .representativeFirstName("first name")
             .lastName("last name")
+            .partyId(appPartyUuid)
             .barrister(applicantBarrister)
             .build();
 
-        Barrister respondentBarrister = Barrister.builder().barristerId("1")
+        Barrister respondentBarrister = Barrister.builder().barristerId("UUID4")
             .barristerFirstName("RespBarrFN").barristerLastName("RespBarrLN").build();
         PartyDetails partyDetailsRespondentSolicitorBarrister = PartyDetails.builder()
             .firstName("")
@@ -495,13 +511,18 @@ public class PartyLevelCaseFlagsServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .representativeFirstName("resp first name")
             .lastName("resp last name")
+            .partyId(respPartyUuid)
             .barrister(respondentBarrister)
             .build();
 
+        DynamicListElement abp = DynamicListElement.builder().code(respPartyUuid.toString()).label(respPartyUuid.toString()).build();
+        DynamicList abpl = DynamicList.builder().value(abp).listItems(Arrays.asList(abp)).build();
+        AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder().partyList(abpl).build();
         CaseData caseDataFl401SolicitorBarristerRepresent = CaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .applicantsFL401(partyDetailsApplicantSolicitorBarrister)
             .respondentsFL401(partyDetailsRespondentSolicitorBarrister)
+            .allocatedBarrister(allocatedBarrister)
             .build();
 
         when(partyLevelCaseFlagsGenerator.generateExternalPartyFlags(any(), any(), any()))

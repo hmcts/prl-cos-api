@@ -133,8 +133,8 @@ public class PartyLevelCaseFlagsService {
         PartyDetails partyDetails = representing.getDaTarget().apply(caseData);
         for (int i = 0; i < partyRoles.size(); i++) {
             PartyRole partyRole = partyRoles.get(i);
-            if (partyDetails.getBarristerFullNameForCaseFlags()
-                .equals(barristerFullName)) {
+            if (partyDetails.getPartyId()
+                .equals(caseData.getAllocatedBarrister().getPartyList().getValueCodeAsUuid())) {
                 findAndGeneratePartyFlagsForBarristerOnly(representing, i, barristerFullName, data, partyRole);
             }
         }
@@ -151,8 +151,8 @@ public class PartyLevelCaseFlagsService {
             PartyRole partyRole = partyRoles.get(i);
             if (null != caElements) {
                 Optional<Element<PartyDetails>> partyDetailsF = i < numElements ? Optional.of(caElements.get(i)) : Optional.empty();
-                if (partyDetailsF.isPresent() && partyDetailsF.get().getValue().getBarristerFullNameForCaseFlags()
-                    .equals(barristerFullName)) {
+                if (partyDetailsF.isPresent() && partyDetailsF.get().getValue().getPartyId()
+                    .equals(caseData.getAllocatedBarrister().getPartyList().getValueCodeAsUuid())) {
                     findAndGeneratePartyFlagsForBarristerOnly(representing, i, barristerFullName, data, partyRole);
                 }
             }
