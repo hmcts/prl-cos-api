@@ -68,6 +68,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.FinalisationJudgeDetails;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.roleassignment.RoleAssignmentDto;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
@@ -559,6 +560,9 @@ public class DraftAnOrderService {
                     );
                 }
                 orderDetails = orderDetails.toBuilder()
+                    .finalisationJudgeDetails(FinalisationJudgeDetails.builder()
+                                                  .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle().name())
+                                                  .build())
                     .orderDocument(manageOrderService.getGeneratedDocument(generatedDocumentInfo, false, fieldMap))
                     .orderDocumentWelsh(manageOrderService.getGeneratedDocument(
                         generatedDocumentInfoWelsh,
