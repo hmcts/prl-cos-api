@@ -109,7 +109,7 @@ public class CaseAssignmentControllerIntegrationTest {
                                                    eq(C100APPLICANTBARRISTER1.getCaseRoleLabel()),
                                                    any());
         verify(applicationsTabService).updateTab(any());
-        verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(any());
+        verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(any(), any());
     }
 
     @Test
@@ -139,5 +139,6 @@ public class CaseAssignmentControllerIntegrationTest {
         verify(caseAssignmentService).validateRemoveRequest(any(), any(), any());
         verify(caseAssignmentService).removeBarrister(isA(CaseData.class), isA(PartyDetails.class));
         verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(any());
+        verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(any(), any());
     }
 }

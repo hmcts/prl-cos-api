@@ -51,6 +51,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import static java.util.Optional.ofNullable;
@@ -939,6 +940,46 @@ public class UpdatePartyDetailsService {
         }
         cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
         return updatedCaseData;
+    }
+
+    public List<String> validateUpdatePartyDetails(CallbackRequest callbackRequest) {
+        List<String> validationErrors = new ArrayList<>();
+        Map<String, Object> caseDataMapBefore = callbackRequest.getCaseDetailsBefore().getData();
+        Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+
+        CaseData caseDataBefore = objectMapper.convertValue(caseDataMapBefore, CaseData.class);
+        CaseData caseData = objectMapper.convertValue(caseDataMap, CaseData.class);
+
+        if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
+            List<Element<PartyDetails>> removeParty = new ArrayList<>();
+            removeParty.addAll(caseDataBefore.getApplicants().stream()
+                .filter(appBefore -> caseData.getApplicants().stream()
+                    .noneMatch(app -> app.getId().equals(appBefore.getId())))
+                .toList());
+
+            removeParty.addAll(caseDataBefore.getRespondents().stream()
+                .filter(respBefore -> caseData.getRespondents().stream()
+                    .noneMatch(resp -> resp.getId().equals(respBefore.getId())))
+                .toList());
+
+            if (!removeParty.isEmpty()) {
+                StringBuilder validationMsg = new StringBuilder("Barrister is associated with the party ");
+                AtomicBoolean isBarristerExists = new AtomicBoolean(false);
+                removeParty.stream().forEach(party -> {
+                    if (party.getValue().getBarrister() != null && party.getValue().getBarrister().getBarristerEmail() != null) {
+                        validationMsg.append(party.getValue().getFirstName() + " " + party.getValue().getLastName() + "\n");
+                        isBarristerExists.set(true);
+                    }
+                });
+                validationMsg.append("Please use 'remove legal rep/remove barrister' to remove barrister from the party\n");
+                if (isBarristerExists.get()) {
+                    validationErrors.add(validationMsg.toString());
+                }
+            }
+        }
+
+
+        return validationErrors;
     }
 
     private void findAndListRefugeDocsForC100(CallbackRequest callbackRequest, CaseData caseData, Map<String, Object> updatedCaseData) {
