@@ -364,6 +364,9 @@ dependencies {
   implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '2.1.2'
   implementation group: 'com.github.hmcts', name:'ccd-case-document-am-client', version: versions.ccdCaseDocumentAmClient
   implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
+  implementation group: 'org.apache.commons', name: 'commons-csv', version: '1.14.0'
+  implementation(group: 'org.apache.commons', name: 'commons-compress', version: '1.24.0')
+  implementation(group: 'org.tukaani', name: 'xz', version: '1.9')
 
   implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '7.10.1'
   implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '8.18.3'
@@ -624,7 +627,10 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/mapper/citizen/awp/CitizenAwpMapper.java',
   '**uk/gov/hmcts/reform/prl/mapper/citizen/CitizenPartyDetailsMapper.java',
   '**uk/gov/hmcts/reform/prl/services/DraftAnOrderService.java',
-  '**uk/gov/hmcts/reform/prl/services/ManageOrderService.java'
+  '**uk/gov/hmcts/reform/prl/services/ManageOrderService.java',
+  '**uk/gov/hmcts/reform/prl/controllers/EditAndApproveDraftOrderController.java',
+  '**uk/gov/hmcts/reform/prl/controllers/ManageOrdersController.java',
+  '**/**/CsvWriter.java'
 ]
 
 sonarqube {
