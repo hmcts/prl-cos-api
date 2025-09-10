@@ -368,6 +368,8 @@ public class PartyLevelCaseFlagsServiceTest {
 
     @Test
     public void testPartyCaseFlagForC100CaseWhenRepresentAndBarristerOnly() {
+        Barrister applicantBarrister = Barrister.builder().barristerId("1")
+            .barristerFirstName("BarrFN").barristerLastName("BarrLN").build();
         PartyDetails partyDetailsApplicantSolicitorBarrister = PartyDetails.builder()
             .firstName("")
             .lastName("")
@@ -376,10 +378,11 @@ public class PartyLevelCaseFlagsServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .representativeFirstName("first name")
             .lastName("last name")
-            .barrister(Barrister.builder().barristerId("1")
-                           .barristerFirstName("BarrFN").barristerLastName("BarrLN").build())
+            .barrister(applicantBarrister)
             .build();
 
+        Barrister respondentBarrister = Barrister.builder().barristerId("1")
+            .barristerFirstName("RespBarrFN").barristerLastName("RespBarrLN").build();
         PartyDetails partyDetailsRespondentSolicitorBarrister = PartyDetails.builder()
             .firstName("")
             .lastName("")
@@ -388,8 +391,7 @@ public class PartyLevelCaseFlagsServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .representativeFirstName("resp first name")
             .lastName("resp last name")
-            .barrister(Barrister.builder().barristerId("2")
-                           .barristerFirstName("BarrRespFN").barristerLastName("BarrRespLN").build())
+            .barrister(respondentBarrister)
             .build();
 
         FlagDetail flagDetail = FlagDetail.builder().flagCode("test").flagComment("test comment").name("test flag").build();
@@ -407,22 +409,20 @@ public class PartyLevelCaseFlagsServiceTest {
         when(partyLevelCaseFlagsGenerator.generateInternalPartyFlags(any(), any(), any()))
             .thenReturn(Flags.builder().partyName("int").build());
         Map<String, Object> caseData =  partyLevelCaseFlagsService
-            .generatePartyCaseFlagsForBarristerOnly(caseDataSolicitorBarristerRepresent);
+            .generatePartyCaseFlagsForBarristerOnly(caseDataSolicitorBarristerRepresent, applicantBarrister.getBarristerFullName());
 
         Assert.assertNotNull(caseData);
         Assert.assertNull(caseData.get("caApplicantSolicitor1ExternalFlags"));
         Assert.assertNull(caseData.get("caRespondentSolicitor1ExternalFlags"));
         Assert.assertNull(caseData.get("caApplicantSolicitor1InternalFlags"));
         Assert.assertNull(caseData.get("caRespondentSolicitor1InternalFlags"));
-
         Assert.assertNotNull(caseData.get("caApplicantBarrister1ExternalFlags"));
-        Assert.assertNotNull(caseData.get("caRespondentBarrister1ExternalFlags"));
         Assert.assertNotNull(caseData.get("caApplicantBarrister1InternalFlags"));
-        Assert.assertNotNull(caseData.get("caRespondentBarrister1InternalFlags"));
+        Assert.assertNull(caseData.get("caRespondentBarrister1InternalFlags"));
+        Assert.assertNull(caseData.get("caRespondentBarrister1ExternalFlags"));
+
         Assert.assertEquals("ext", ((Flags)(caseData.get("caApplicantBarrister1ExternalFlags"))).getPartyName());
-        Assert.assertEquals("ext", ((Flags)(caseData.get("caRespondentBarrister1ExternalFlags"))).getPartyName());
         Assert.assertEquals("int", ((Flags)(caseData.get("caApplicantBarrister1InternalFlags"))).getPartyName());
-        Assert.assertEquals("int", ((Flags)(caseData.get("caRespondentBarrister1InternalFlags"))).getPartyName());
     }
 
     @Test
@@ -472,7 +472,8 @@ public class PartyLevelCaseFlagsServiceTest {
 
     @Test
     public void testPartyCaseFlagForFl401CaseWhenSolicitorBarristerRepresent() {
-
+        Barrister applicantBarrister = Barrister.builder().barristerId("1")
+            .barristerFirstName("BarrFN").barristerLastName("BarrLN").build();
         PartyDetails partyDetailsApplicantSolicitorBarrister = PartyDetails.builder()
             .firstName("")
             .lastName("")
@@ -481,10 +482,11 @@ public class PartyLevelCaseFlagsServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .representativeFirstName("first name")
             .lastName("last name")
-            .barrister(Barrister.builder().barristerId("1")
-                           .barristerFirstName("BarrFN").barristerLastName("BarrLN").build())
+            .barrister(applicantBarrister)
             .build();
 
+        Barrister respondentBarrister = Barrister.builder().barristerId("1")
+            .barristerFirstName("RespBarrFN").barristerLastName("RespBarrLN").build();
         PartyDetails partyDetailsRespondentSolicitorBarrister = PartyDetails.builder()
             .firstName("")
             .lastName("")
@@ -493,8 +495,7 @@ public class PartyLevelCaseFlagsServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .representativeFirstName("resp first name")
             .lastName("resp last name")
-            .barrister(Barrister.builder().barristerId("2")
-                           .barristerFirstName("BarrRespFN").barristerLastName("BarrRespLN").build())
+            .barrister(respondentBarrister)
             .build();
 
         CaseData caseDataFl401SolicitorBarristerRepresent = CaseData.builder()
@@ -509,11 +510,11 @@ public class PartyLevelCaseFlagsServiceTest {
             .thenReturn(Flags.builder().partyName("int").build());
 
         Map<String, Object> caseData =  partyLevelCaseFlagsService
-            .generatePartyCaseFlagsForBarristerOnly(caseDataFl401SolicitorBarristerRepresent);
+            .generatePartyCaseFlagsForBarristerOnly(caseDataFl401SolicitorBarristerRepresent, respondentBarrister.getBarristerFullName());
         Assert.assertNotNull(caseData);
-        Assert.assertEquals("ext", ((Flags)(caseData.get("daApplicantBarristerExternalFlags"))).getPartyName());
+        Assert.assertNull((caseData.get("daApplicantBarristerExternalFlags")));
+        Assert.assertNull((caseData.get("daApplicantBarristerInternalFlags")));
         Assert.assertEquals("ext", ((Flags)(caseData.get("daRespondentBarristerExternalFlags"))).getPartyName());
-        Assert.assertEquals("int", ((Flags)(caseData.get("daApplicantBarristerInternalFlags"))).getPartyName());
         Assert.assertEquals("int", ((Flags)(caseData.get("daRespondentBarristerInternalFlags"))).getPartyName());
     }
 

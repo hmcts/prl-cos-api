@@ -89,16 +89,16 @@ public class PartyLevelCaseFlagsService {
         );
     }
 
-    public Map<String, Object> generatePartyCaseFlagsForBarristerOnly(CaseData caseData) {
+    public Map<String, Object> generatePartyCaseFlagsForBarristerOnly(CaseData caseData, String barristerFullName) {
         Map<String, Object> data = new HashMap<>();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
-                data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.CAAPPLICANTBARRISTER));
-                data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.CARESPONDENTBARRISTER));
+                data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.CAAPPLICANTBARRISTER, barristerFullName));
+                data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.CARESPONDENTBARRISTER, barristerFullName));
             }
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DAAPPLICANTBARRISTER));
-            data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DARESPONDENTBARRISTER));
+            data.putAll(generateFL401PartyCaseFlags(caseData, PartyRole.Representing.DAAPPLICANTBARRISTER, barristerFullName));
+            data.putAll(generateFL401PartyCaseFlags(caseData, PartyRole.Representing.DARESPONDENTBARRISTER, barristerFullName));
         }
         return data;
     }
@@ -122,6 +122,40 @@ public class PartyLevelCaseFlagsService {
             data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DARESPONDENT));
             data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DARESPONDENTSOLICITOR));
             data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DARESPONDENTBARRISTER));
+        }
+        return data;
+    }
+
+    private Map<String, Object> generateFL401PartyCaseFlags(CaseData caseData, PartyRole.Representing representing,
+                                                          String barristerFullName) {
+        Map<String, Object> data = new HashMap<>();
+        List<PartyRole> partyRoles = PartyRole.matchingRoles(representing);
+        PartyDetails partyDetails = representing.getDaTarget().apply(caseData);
+        for (int i = 0; i < partyRoles.size(); i++) {
+            PartyRole partyRole = partyRoles.get(i);
+            if (partyDetails.getBarristerFullNameForCaseFlags()
+                .equals(barristerFullName)) {
+                findAndGeneratePartyFlagsForBarristerOnly(representing, i, barristerFullName, data, partyRole);
+            }
+        }
+        return data;
+    }
+
+    private Map<String, Object> generateC100PartyCaseFlags(CaseData caseData, PartyRole.Representing representing,
+                                                          String barristerFullName) {
+        Map<String, Object> data = new HashMap<>();
+        List<Element<PartyDetails>> caElements = representing.getCaTarget().apply(caseData);
+        int numElements = null != caElements ? caElements.size() : 0;
+        List<PartyRole> partyRoles = PartyRole.matchingRoles(representing);
+        for (int i = 0; i < partyRoles.size(); i++) {
+            PartyRole partyRole = partyRoles.get(i);
+            if (null != caElements) {
+                Optional<Element<PartyDetails>> partyDetailsF = i < numElements ? Optional.of(caElements.get(i)) : Optional.empty();
+                if (partyDetailsF.isPresent() && partyDetailsF.get().getValue().getBarristerFullNameForCaseFlags()
+                    .equals(barristerFullName)) {
+                    findAndGeneratePartyFlagsForBarristerOnly(representing, i, barristerFullName, data, partyRole);
+                }
+            }
         }
         return data;
     }
@@ -227,6 +261,81 @@ public class PartyLevelCaseFlagsService {
                         caseDataInternalField,
                         partyLevelCaseFlagsGenerator.generateInternalPartyFlags(
                             partyDetails.get().getValue().getBarristerFullNameForCaseFlags(),
+                            partyRole.getCaseRoleLabel(),
+                            groupId
+                        )
+                    );
+                } else {
+                    data.put(
+                        caseDataExternalField,
+                        Optional.empty()
+                    );
+                    data.put(
+                        caseDataInternalField,
+                        Optional.empty()
+                    );
+                }
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    }
+
+    private void findAndGeneratePartyFlagsForBarristerOnly(PartyRole.Representing representing,
+                                           int partyIndex,
+                                           String barristerFullName,
+                                           Map<String, Object> data,
+                                           PartyRole partyRole) {
+        String caseDataExternalField = String.format(representing.getCaseDataExternalField(), partyIndex + 1);
+        String caseDataInternalField = String.format(representing.getCaseDataInternalField(), partyIndex + 1);
+        String groupId = String.format(representing.getGroupId(), partyIndex + 1);
+        switch (representing) {
+            case CAAPPLICANTBARRISTER, CARESPONDENTBARRISTER: {
+                if (!StringUtils.isEmpty(barristerFullName)) {
+                    data.put(
+                        caseDataExternalField,
+                        partyLevelCaseFlagsGenerator.generateExternalPartyFlags(
+                            barristerFullName,
+                            partyRole.getCaseRoleLabel(),
+                            groupId
+                        )
+                    );
+                    data.put(
+                        caseDataInternalField,
+                        partyLevelCaseFlagsGenerator.generateInternalPartyFlags(
+                            barristerFullName,
+                            partyRole.getCaseRoleLabel(),
+                            groupId
+                        )
+                    );
+                } else {
+                    data.put(
+                        caseDataExternalField,
+                        Optional.empty()
+                    );
+                    data.put(
+                        caseDataInternalField,
+                        Optional.empty()
+                    );
+                }
+                break;
+            }
+            case DAAPPLICANTBARRISTER, DARESPONDENTBARRISTER: {
+                if (!StringUtils.isEmpty(barristerFullName)) {
+                    data.put(
+                        caseDataExternalField,
+                        partyLevelCaseFlagsGenerator.generateExternalPartyFlags(
+                            barristerFullName,
+                            partyRole.getCaseRoleLabel(),
+                            groupId
+                        )
+                    );
+                    data.put(
+                        caseDataInternalField,
+                        partyLevelCaseFlagsGenerator.generateInternalPartyFlags(
+                            barristerFullName,
                             partyRole.getCaseRoleLabel(),
                             groupId
                         )
