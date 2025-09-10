@@ -9,12 +9,14 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
+import uk.gov.hmcts.reform.prl.events.BarristerChangeEvent;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Barrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
@@ -24,6 +26,9 @@ import java.util.Optional;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.enums.PartyEnum.applicant;
@@ -38,11 +43,13 @@ class BarristerRemoveServiceTest extends BarristerTestAbstract {
     @Mock
     protected OrganisationService organisationService;
     @Mock
+    protected EventService eventPublisher;
+    @Mock
     private UserDetails userDetails;
 
     @BeforeEach
     public void setup() {
-        barristerRemoveService = new BarristerRemoveService(userService, organisationService);
+        barristerRemoveService = new BarristerRemoveService(userService, organisationService, eventPublisher);
         UserDetails userDetails = UserDetails.builder()
             .id("1")
             .roles(List.of(COURT_ADMIN))
@@ -63,7 +70,11 @@ class BarristerRemoveServiceTest extends BarristerTestAbstract {
             .respondents(allRespondents)
             .build();
 
-        AllocatedBarrister allocatedBarrister = barristerRemoveService.getBarristerListToRemove(caseData, AUTHORISATION);
+        AllocatedBarrister allocatedBarrister = barristerRemoveService.getBarristerListToRemove(
+            caseData,
+            AUTHORISATION,
+            partyDetails -> null
+        );
         DynamicList listOfBarristersToRemove = allocatedBarrister.getPartyList();
 
         assertEquals(listOfBarristersToRemove.getValue(), null);
@@ -83,7 +94,11 @@ class BarristerRemoveServiceTest extends BarristerTestAbstract {
         when(userDetails.getRoles()).thenReturn(List.of(Roles.SOLICITOR.getValue()));
         when(organisationService.findUserOrganisation(AUTHORISATION)).thenReturn(mockOrg);
 
-        AllocatedBarrister allocatedBarrister = barristerRemoveService.getBarristerListToRemove(caseData, AUTHORISATION);
+        AllocatedBarrister allocatedBarrister = barristerRemoveService.getBarristerListToRemove(
+            caseData,
+            AUTHORISATION,
+            partyDetails -> partyDetails.getSolicitorOrg().getOrganisationID()
+        );
 
         DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
 
@@ -116,7 +131,11 @@ class BarristerRemoveServiceTest extends BarristerTestAbstract {
         when(userService.getUserDetails(AUTHORISATION)).thenReturn(userDetails);
         when(userDetails.getRoles()).thenReturn(List.of(Roles.SOLICITOR.getValue()));
 
-        AllocatedBarrister allocatedBarrister = barristerRemoveService.getBarristerListToRemove(caseData, AUTHORISATION);
+        AllocatedBarrister allocatedBarrister = barristerRemoveService.getBarristerListToRemove(
+            caseData,
+            AUTHORISATION,
+            partyDetails -> partyDetails.getSolicitorOrg().getOrganisationID()
+        );
 
         DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
 
@@ -141,7 +160,8 @@ class BarristerRemoveServiceTest extends BarristerTestAbstract {
 
         AllocatedBarrister allocatedBarrister = barristerRemoveService.getBarristerListToRemove(
             caseData,
-            AUTHORISATION
+            AUTHORISATION,
+            partyDetails -> partyDetails.getSolicitorOrg().getOrganisationID()
         );
         DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
 
@@ -163,7 +183,8 @@ class BarristerRemoveServiceTest extends BarristerTestAbstract {
 
         AllocatedBarrister allocatedBarrister = barristerRemoveService.getBarristerListToRemove(
             caseData,
-            AUTHORISATION
+            AUTHORISATION,
+            partyDetails -> partyDetails.getSolicitorOrg().getOrganisationID()
         );
         DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
 
@@ -192,7 +213,8 @@ class BarristerRemoveServiceTest extends BarristerTestAbstract {
 
         AllocatedBarrister allocatedBarrister = barristerRemoveService.getBarristerListToRemove(
             caseData,
-            AUTHORISATION
+            AUTHORISATION,
+            partyDetails -> partyDetails.getSolicitorOrg().getOrganisationID()
         );
         DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
 
@@ -217,7 +239,8 @@ class BarristerRemoveServiceTest extends BarristerTestAbstract {
 
         AllocatedBarrister allocatedBarrister = barristerRemoveService.getBarristerListToRemove(
             caseData,
-            AUTHORISATION
+            AUTHORISATION,
+            partyDetails -> partyDetails.getSolicitorOrg().getOrganisationID()
         );
         DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
 
@@ -246,7 +269,9 @@ class BarristerRemoveServiceTest extends BarristerTestAbstract {
         when(organisationService.findUserOrganisation(AUTHORISATION)).thenReturn(Optional.empty());
 
         AllocatedBarrister allocatedBarrister = barristerRemoveService.getBarristerListToRemove(
-            caseData, AUTHORISATION
+            caseData,
+            AUTHORISATION,
+            partyDetails -> partyDetails.getSolicitorOrg().getOrganisationID()
         );
 
         assertEquals(0, allocatedBarrister.getPartyList().getListItems().size());
@@ -270,12 +295,184 @@ class BarristerRemoveServiceTest extends BarristerTestAbstract {
         when(organisationService.findUserOrganisation(AUTHORISATION)).thenReturn(mockOrg);
 
         AllocatedBarrister allocatedBarrister = barristerRemoveService.getBarristerListToRemove(
-            caseData, AUTHORISATION
+            caseData,
+            AUTHORISATION,
+            partyDetails -> partyDetails.getSolicitorOrg().getOrganisationID()
         );
 
         assertEquals(0, allocatedBarrister.getPartyList().getListItems().size());
     }
 
+    @Test
+    void shouldNotifyBarristerSuccessfully() {
+        setupApplicantsC100();
+        allApplicants.getFirst().getValue().setBarrister(Barrister.builder().barristerId("barrister-id").build());
+        allApplicants.get(1).getValue().getSolicitorOrg().setOrganisationID("Org1");
+        allApplicants.get(1).getValue().getSolicitorOrg().setOrganisationName("Org1");
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .allocatedBarrister(AllocatedBarrister.builder().build())
+            .applicants(allApplicants)
+            .build();
+
+        barristerRemoveService.notifyBarrister(caseData);
+
+        verify(eventPublisher).publishEvent(isA(BarristerChangeEvent.class));
+
+    }
+
+    @Test
+    void shouldNotNotifyBarristerWhenAllocatedBarristerIsNull() {
+        setupApplicantsC100();
+        allApplicants.getFirst().getValue().setBarrister(Barrister.builder().barristerId("barrister-id").build());
+        allApplicants.get(1).getValue().getSolicitorOrg().setOrganisationID("Org1");
+        allApplicants.get(1).getValue().getSolicitorOrg().setOrganisationName("Org1");
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .applicants(allApplicants)
+            .build();
+
+        barristerRemoveService.notifyBarrister(caseData);
+
+        verifyNoInteractions(eventPublisher);
+
+    }
+
+    @Test
+    void shouldGetRemovalBarristerPartyForApplicantC100() {
+        setupApplicantsC100();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .applicants(allApplicants)
+            .build();
+
+        Optional<Organisations> mockOrg = Optional.of(Organisations.builder().organisationIdentifier(BARRISTER_ORG_ID_PREFIX + "3").build());
+        when(organisationService.findUserOrganisation(AUTHORISATION)).thenReturn(mockOrg);
+        when(userService.getUserDetails(AUTHORISATION)).thenReturn(userDetails);
+        when(userDetails.getRoles()).thenReturn(List.of(Roles.SOLICITOR.getValue()));
+
+        AllocatedBarrister allocatedBarrister = barristerRemoveService.getBarristerListToRemove(
+            caseData,
+            AUTHORISATION,
+            partyDetails -> partyDetails.getBarrister().getBarristerOrg().getOrganisationID()
+        );
+
+        DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
+
+        assertNotNull(allocatedBarrister.getBarristerOrg());
+
+        assertNull(partiesDynamicList.getValue());
+        assertEquals(1, partiesDynamicList.getListItems().size());
+        assertPartyToRemove(partiesDynamicList, applicant, PARTY_ID_PREFIX, 0, 3);
+    }
+
+    @Test
+    void shouldGetRemovalBarristerPartyForRespondentC100() {
+        setupRespondentsC100();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .respondents(allRespondents)
+            .build();
+
+        Optional<Organisations> mockOrg = Optional.of(Organisations.builder().organisationIdentifier(BARRISTER_ORG_ID_PREFIX + "7").build());
+        when(organisationService.findUserOrganisation(AUTHORISATION)).thenReturn(mockOrg);
+        when(userService.getUserDetails(AUTHORISATION)).thenReturn(userDetails);
+        when(userDetails.getRoles()).thenReturn(List.of(Roles.SOLICITOR.getValue()));
+
+        AllocatedBarrister allocatedBarrister = barristerRemoveService.getBarristerListToRemove(
+            caseData,
+            AUTHORISATION,
+            partyDetails -> partyDetails.getBarrister().getBarristerOrg().getOrganisationID()
+        );
+
+        DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
+
+        assertNotNull(allocatedBarrister.getBarristerOrg());
+
+        assertNull(partiesDynamicList.getValue());
+        assertEquals(1, partiesDynamicList.getListItems().size());
+        assertPartyToRemove(partiesDynamicList, respondent, PARTY_ID_PREFIX, 0, 7);
+    }
+
+    @Test
+    void shouldGetRemovalBarristerPartyForApplicantFL401() {
+        applicantFL401 = buildPartyDetails(0, "App", "App", "Bar", "Org", true, true);
+        CaseData caseData = CaseData.builder().caseTypeOfApplication("FL401").applicantsFL401(applicantFL401)
+            .respondentsFL401(respondentFL401).build();
+        Optional<Organisations> mockOrg = Optional.of(Organisations.builder().organisationIdentifier(BARRISTER_ORG_ID_PREFIX + "0").build());
+        when(organisationService.findUserOrganisation(AUTHORISATION)).thenReturn(mockOrg);
+        when(userService.getUserDetails(AUTHORISATION)).thenReturn(userDetails);
+        when(userDetails.getRoles()).thenReturn(List.of(Roles.SOLICITOR.getValue()));
+
+        AllocatedBarrister allocatedBarrister = barristerRemoveService.getBarristerListToRemove(
+            caseData,
+            AUTHORISATION,
+            partyDetails -> partyDetails.getBarrister().getBarristerOrg().getOrganisationID()
+        );
+        DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
+
+        assertNotNull(allocatedBarrister.getBarristerOrg());
+
+        assertNull(partiesDynamicList.getValue());
+        assertEquals(1, partiesDynamicList.getListItems().size());
+        assertPartyToRemove(partiesDynamicList, applicant, PARTY_ID_PREFIX, 0, 0);
+    }
+
+    @Test
+    void shouldGetRemovalBarristerPartyForRespondentFL401() {
+        respondentFL401 = buildPartyDetails(1, "Resp", "Resp", "Bar", "Org", true, true);
+        CaseData caseData = CaseData.builder().caseTypeOfApplication("FL401").applicantsFL401(applicantFL401)
+            .respondentsFL401(respondentFL401).build();
+        Optional<Organisations> mockOrg = Optional.of(Organisations.builder().organisationIdentifier(BARRISTER_ORG_ID_PREFIX + "1").build());
+        when(organisationService.findUserOrganisation(AUTHORISATION)).thenReturn(mockOrg);
+        when(userService.getUserDetails(AUTHORISATION)).thenReturn(userDetails);
+        when(userDetails.getRoles()).thenReturn(List.of(Roles.SOLICITOR.getValue()));
+
+        AllocatedBarrister allocatedBarrister = barristerRemoveService.getBarristerListToRemove(
+            caseData,
+            AUTHORISATION,
+            partyDetails -> partyDetails.getBarrister().getBarristerOrg().getOrganisationID()
+        );
+        DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
+
+        assertNotNull(allocatedBarrister.getBarristerOrg());
+
+        assertNull(partiesDynamicList.getValue());
+        assertEquals(1, partiesDynamicList.getListItems().size());
+        assertPartyToRemove(partiesDynamicList, respondent, PARTY_ID_PREFIX, 0, 1);
+    }
+
+    @Test
+    void shouldGetEmptyRemovalBarristerPartyWhenNoAssociatedCase() {
+        setupRespondentsC100();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .respondents(allRespondents)
+            .build();
+
+        Optional<Organisations> mockOrg = Optional.of(Organisations.builder().organisationIdentifier("some org").build());
+        when(organisationService.findUserOrganisation(AUTHORISATION)).thenReturn(mockOrg);
+        when(userService.getUserDetails(AUTHORISATION)).thenReturn(userDetails);
+        when(userDetails.getRoles()).thenReturn(List.of(Roles.SOLICITOR.getValue()));
+
+        AllocatedBarrister allocatedBarrister = barristerRemoveService.getBarristerListToRemove(
+            caseData,
+            AUTHORISATION,
+            partyDetails -> partyDetails.getBarrister().getBarristerOrg().getOrganisationID()
+        );
+
+        DynamicList partiesDynamicList = allocatedBarrister.getPartyList();
+
+        assertNotNull(allocatedBarrister.getBarristerOrg());
+
+        assertNull(partiesDynamicList.getValue());
+        assertEquals(0, partiesDynamicList.getListItems().size());
+    }
 
     protected void assertPartyToRemove(DynamicList listOfBarristersToRemove, PartyEnum partyEnum, String prefix, int itemIndex, int partyIndex) {
         String appRepPrefix = partyEnum == applicant ? "App" : "Resp";

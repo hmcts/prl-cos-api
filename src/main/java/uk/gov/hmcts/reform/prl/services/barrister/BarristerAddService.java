@@ -2,25 +2,33 @@ package uk.gov.hmcts.reform.prl.services.barrister;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.enums.barrister.TypeOfBarristerEventEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+
+import java.util.function.Function;
 
 @Slf4j
 @Service
 public class BarristerAddService extends AbstractBarristerService {
 
-    public BarristerAddService(UserService userService, OrganisationService organisationService) {
-        super(userService, organisationService);
+    public BarristerAddService(UserService userService,
+                               OrganisationService organisationService,
+                               EventService eventPublisher) {
+        super(userService, organisationService, eventPublisher);
     }
 
-    public AllocatedBarrister getAllocatedBarrister(CaseData caseData, String authorisation) {
+    public AllocatedBarrister getAllocatedBarrister(CaseData caseData,
+                                                    String authorisation,
+                                                    Function<PartyDetails, String> legalRepOrganisation) {
         return AllocatedBarrister.builder()
-            .partyList(getPartiesToList(caseData, authorisation))
+            .partyList(getPartiesToList(caseData, authorisation, legalRepOrganisation))
             .barristerOrg(Organisation.builder().build())
             .build();
     }
@@ -29,8 +37,7 @@ public class BarristerAddService extends AbstractBarristerService {
     protected boolean isPartyApplicableForFiltering(boolean applicantOrRespondent, BarristerFilter barristerFilter, PartyDetails partyDetails) {
         boolean isApplicable = (!hasBarrister(partyDetails)) && (partyHasSolicitorOrg(partyDetails));
 
-        return isPartyApplicableForFiltering(applicantOrRespondent,
-                                             barristerFilter,
+        return isPartyApplicableForFiltering(barristerFilter,
                                              partyDetails,
                                              isApplicable,
                                              partyId -> log.info("Barrister Add Service - This party {} has an empty solicitor org or "
@@ -42,12 +49,17 @@ public class BarristerAddService extends AbstractBarristerService {
     protected String getLabelForAction(boolean applicantOrRespondent, BarristerFilter barristerFilter, PartyDetails partyDetails) {
         String partyDetailsInfo = partyDetails.getSolicitorOrg().getOrganisationName();
 
-        return getLabelForAction(applicantOrRespondent, barristerFilter, partyDetails, partyDetailsInfo);
+        return getLabelForAction(applicantOrRespondent, partyDetails, partyDetailsInfo);
     }
 
     @Override
     protected String getCodeForAction(Element<PartyDetails> partyDetailsElement) {
         return partyDetailsElement.getId().toString();
+    }
+
+    @Override
+    public void notifyBarrister(CaseData caseData) {
+        prepareAndPublishBarristerChangeEvent(caseData, TypeOfBarristerEventEnum.addBarrister);
     }
 
 }
