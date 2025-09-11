@@ -1413,7 +1413,7 @@ public class CallbackControllerTest {
         assertNotNull(callbackController.caseWithdrawAboutToSubmit(authToken,s2sToken, callbackRequest));
     }
 
-    // @Test todo
+    @Test
     public void testGenerateDocumentSubmitApplicationWithC8() throws Exception {
         Address address = Address.builder()
             .addressLine1("address")
@@ -1580,7 +1580,7 @@ public class CallbackControllerTest {
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("dateSubmitted"));
     }
 
-    // @Test todo
+    @Test
     public void testGenerateDocumentSubmitApplicationWithC8ForAllegationOfHarmRevised() throws Exception {
         Address address = Address.builder()
             .addressLine1("address")
@@ -1746,7 +1746,7 @@ public class CallbackControllerTest {
     }
 
 
-    // @Test todo renenable after test exception
+    @Test
     public void testGenerateDocumentSubmitApplicationConditionalFailures() throws Exception {
 
         PartyDetails applicant = PartyDetails.builder().representativeFirstName("Abc")
@@ -1857,7 +1857,7 @@ public class CallbackControllerTest {
         verifyNoMoreInteractions(organisationService);
     }
 
-    // @Test todo renenable after test exception
+    @Test
     public void testGenerateDocumentSubmitApplicationWithC8EmptyList() throws Exception {
         Address address = Address.builder()
             .addressLine1("address")
@@ -2051,7 +2051,7 @@ public class CallbackControllerTest {
     }
 
 
-    // @Test todo reenable
+    @Test
     public void testGenerateDocumentSubmitApplicationWithC8EmptyListForAllegationOfHarmRevised() throws Exception {
         Address address = Address.builder()
             .addressLine1("address")
@@ -3033,7 +3033,7 @@ public class CallbackControllerTest {
     }
 
 
-    // @Test todo
+    @Test
     public void testGenerateDocumentSubmitApplicationWithC8CourtAdmin() throws Exception {
         Address address = Address.builder()
             .addressLine1("address")
