@@ -6616,57 +6616,32 @@ public class ManageOrderServiceTest {
             .hashToken("testHashToken")
             .build();
 
-
         List<DynamicMultiselectListElement> elements = new ArrayList<>();
         DynamicMultiselectListElement element = DynamicMultiselectListElement.builder()
             .code("1234")
             .label("test label").build();
         elements.add(element);
         ManageOrders manageOrders = ManageOrders.builder()
-            .cafcassCymruServedOptions(No)
-            .childArrangementsOrdersToIssue(List.of(childArrangementsOrder,prohibitedStepsOrder))
-            .selectChildArrangementsOrder(ChildArrangementOrderTypeEnum.liveWithOrder)
-            .serveOrderDynamicList(dynamicMultiSelectList)
-            .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
-                                                     .emailInformation(EmailInformation.builder().emailName("").build())
-                                                     .build())))
-            .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
-                                                       .value(Document.builder().documentFileName(
-                                                           "abc.pdf").build())
-                                                       .build()))
-            .recipientsOptions(DynamicMultiSelectList.builder()
-                                   .listItems(elements)
-                                   .build())
-            .childOption(DynamicMultiSelectList.builder()
-                             .listItems(elements)
-                             .build())
-            .otherParties(DynamicMultiSelectList.builder()
-                              .listItems(elements)
-                              .build())
-            .serveToRespondentOptions(YesNoNotApplicable.Yes)
-            .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
-            .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
-            .cafcassCymruEmail("test")
-            .deliveryByOptionsCA(DeliveryByEnum.post)
-            .emailInformationCA(List.of(Element.<EmailInformation>builder()
-                                            .value(EmailInformation.builder().emailAddress("test").build()).build()))
-            .postalInformationCA(List.of(Element.<PostalInformation>builder()
-                                             .value(PostalInformation.builder().postalAddress(
-                                                 Address.builder().postCode("NE65LA").build()).build()).build()))
+            .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
             .build();
 
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .manageOrders(manageOrders)
+            .build();
 
         when(finalisationDetailsService.buildFinalisationDetails(any(CaseData.class)))
             .thenReturn(FinalisationDetails.builder()
-                    .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge.name())
-                    .build()
+                            .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge.name())
+                            .build()
             );
-
         Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid).value(OrderDetails
                                                                                           .builder()
                                                                                           .finalisationDetails(
                                                                                               finalisationDetailsService
-                                                                                                  .buildFinalisationDetails()
+                                                                                                  .buildFinalisationDetails(caseData)
                                                                                           )
                                                                                           .orderDocument(Document
                                                                                                              .builder()
@@ -6686,19 +6661,6 @@ public class ManageOrderServiceTest {
         Element<PartyDetails> partyDetailsElement = element(details);
         partyDetails.add(partyDetailsElement);
 
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .applicants(partyDetails)
-            .caseTypeOfApplication("C100")
-            .applicantCaseName("Test Case 45678")
-            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
-            .fl401FamilymanCaseNumber("familyman12345")
-            .orderCollection(orderList)
-            .dateOrderMade(LocalDate.now())
-            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
-            .manageOrders(manageOrders)
-            .build();
 
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -6708,6 +6670,6 @@ public class ManageOrderServiceTest {
 
         assertNotNull(manageOrderService.serveOrder(caseData,orderList));
         assertEquals(caseData.getManageOrders().getJudgeOrMagistrateTitle().name(),
-                     orders.getValue().getFinalisationJudgeDetails().getJudgeOrMagistrateTitle());
+                     orders.getValue().getFinalisationDetails().getJudgeOrMagistrateTitle());
     }
 }

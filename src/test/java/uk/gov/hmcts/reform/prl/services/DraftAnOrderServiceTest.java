@@ -83,7 +83,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
-import uk.gov.hmcts.reform.prl.models.dto.judicial.FinalisationJudgeDetails;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.FinalisationDetails;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.languagecontext.UserLanguage;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
@@ -200,6 +200,9 @@ public class DraftAnOrderServiceTest {
 
     @Mock
     private DocumentSealingService documentSealingService;
+
+    @Mock
+    private FinalisationDetailsService finalisationDetailsService;
 
     private DynamicList dynamicList;
     private DynamicMultiSelectList dynamicMultiSelectList;
@@ -6142,18 +6145,10 @@ public class DraftAnOrderServiceTest {
         dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(List.of(dynamicMultiselectListElement))
             .value(List.of(dynamicMultiselectListElement))
             .build();
-        List<Element<OrderDetails>> elementList = new ArrayList<>();
-        OrderDetails order = OrderDetails.builder().dateCreated(LocalDateTime.now()).finalisationJudgeDetails(
-            FinalisationJudgeDetails.builder()
-                .judgeOrMagistrateTitle(
-                    JudgeOrMagistrateTitleEnum
-                        .circuitJudge.name())
-                .build()).build();
-        elementList.add(element(order));
+
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
-            .orderCollection(elementList)
             .draftOrderCollection(draftOrderCollection)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.nonMolestation)
             .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
@@ -6168,6 +6163,21 @@ public class DraftAnOrderServiceTest {
             .serveOrderData(ServeOrderData.builder()
                                 .doYouWantToServeOrder(Yes).build())
             .build();
+
+        when(finalisationDetailsService.buildFinalisationDetails(any(CaseData.class)))
+            .thenReturn(FinalisationDetails.builder()
+                            .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge.name())
+                            .build());
+
+        OrderDetails order = OrderDetails.builder()
+            .dateCreated(LocalDateTime.now())
+            .finalisationDetails(finalisationDetailsService.buildFinalisationDetails(caseData))
+            .build();
+
+        List<Element<OrderDetails>> elementList = new ArrayList<>();
+        elementList.add(element(order));
+        caseData = caseData.toBuilder().orderCollection(elementList).build();
+
         when(dateTime.now()).thenReturn(LocalDateTime.now());
         when(elementUtils.getDynamicListSelectedValue(caseData.getDraftOrdersDynamicList(), objectMapper))
             .thenReturn(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"));
@@ -6178,6 +6188,7 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> caseDataMap = new HashMap<>();
         when(objectMapper.convertValue(caseData, Map.class)).thenReturn(caseDataMap);
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+
         caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
             "test token",
             caseData,
@@ -6187,6 +6198,6 @@ public class DraftAnOrderServiceTest {
 
         assertEquals(0, ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).size());
         assertEquals(caseData.getManageOrders().getJudgeOrMagistrateTitle().name(),
-                     order.getFinalisationJudgeDetails().getJudgeOrMagistrateTitle());
+                     order.getFinalisationDetails().getJudgeOrMagistrateTitle());
     }
 }
