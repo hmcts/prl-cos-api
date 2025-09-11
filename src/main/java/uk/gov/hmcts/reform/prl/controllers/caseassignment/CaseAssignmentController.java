@@ -99,7 +99,7 @@ public class CaseAssignmentController {
                         barristerRole.get(),
                         allocatedBarrister
                     );
-                    updateCaseDetails(caseDetails, caseData);
+                    updateCaseDetails(caseDetails, caseData, true);
                 } catch (GrantCaseAccessException grantCaseAccessException) {
                     errorList.add(grantCaseAccessException.getMessage());
                 }
@@ -142,7 +142,7 @@ public class CaseAssignmentController {
                                                  caseData,
                                                  UUID.fromString(allocatedBarrister.getPartyList().getValueCode()));
                 caseAssignmentService.removeBarrister(caseData, partyDetails);
-                updateCaseDetails(caseDetails, caseData);
+                updateCaseDetails(caseDetails, caseData, false);
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder()
@@ -157,7 +157,7 @@ public class CaseAssignmentController {
 
 
 
-    private void updateCaseDetails(CaseDetails caseDetails, CaseData caseData) {
+    private void updateCaseDetails(CaseDetails caseDetails, CaseData caseData, boolean addOrRemove) {
         caseDetails.getData().put(ALLOCATED_BARRISTER, caseData.getAllocatedBarrister());
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseDetails.getData().put(APPLICANTS, caseData.getApplicants());
@@ -168,7 +168,7 @@ public class CaseAssignmentController {
             caseDetails.getData().put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
             caseDetails.getData().putAll(applicationsTabService.updateTab(caseData));
         }
-        String barristerFullName = caseData.getAllocatedBarrister().getBarristerFullName();
+        String barristerFullName = addOrRemove ? caseData.getAllocatedBarrister().getBarristerFullName() : "";
         caseDetails.getData().putAll(partyLevelCaseFlagsService
                                          .generatePartyCaseFlagsForBarristerOnly(caseData, barristerFullName));
     }
