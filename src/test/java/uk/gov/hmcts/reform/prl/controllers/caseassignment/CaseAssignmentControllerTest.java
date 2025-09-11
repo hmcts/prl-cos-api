@@ -173,7 +173,7 @@ class CaseAssignmentControllerTest {
                                                    isA(AllocatedBarrister.class));
 
         verify(applicationsTabService).updateTab(isA(CaseData.class));
-        verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(any(), any());
+        verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(any());
     }
 
     @Test
@@ -415,7 +415,7 @@ class CaseAssignmentControllerTest {
                                                  isA(CaseData.class),
                                                  eq(UUID.fromString(selectedPartyId)));
         verify(applicationsTabService).updateTab(isA(CaseData.class));
-        verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(any(), any());
+        verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(any());
 
     }
 

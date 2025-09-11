@@ -36,7 +36,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATED_BARRISTER;
@@ -101,8 +100,7 @@ public class CaseAssignmentController {
                         allocatedBarrister
                     );
                     updateCaseDetails(caseDetails,
-                                      caseData,
-                                      () -> caseData.getAllocatedBarrister().getBarristerFullName());
+                                      caseData);
                 } catch (GrantCaseAccessException grantCaseAccessException) {
                     errorList.add(grantCaseAccessException.getMessage());
                 }
@@ -145,7 +143,7 @@ public class CaseAssignmentController {
                                                  caseData,
                                                  UUID.fromString(allocatedBarrister.getPartyList().getValueCode()));
                 caseAssignmentService.removeBarrister(caseData, partyDetails);
-                updateCaseDetails(caseDetails, caseData, () -> null);
+                updateCaseDetails(caseDetails, caseData);
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder()
@@ -158,20 +156,17 @@ public class CaseAssignmentController {
     }
 
     private void updateCaseDetails(CaseDetails caseDetails,
-                                   CaseData caseData,
-                                   Supplier<String> barristerFullName) {
+                                   CaseData caseData) {
         caseDetails.getData().put(ALLOCATED_BARRISTER, caseData.getAllocatedBarrister());
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseDetails.getData().put(APPLICANTS, caseData.getApplicants());
             caseDetails.getData().put(RESPONDENTS, caseData.getRespondents());
-            caseDetails.getData().putAll(applicationsTabService.updateTab(caseData));
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseDetails.getData().put(FL401_APPLICANTS, caseData.getApplicantsFL401());
             caseDetails.getData().put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
-            caseDetails.getData().putAll(applicationsTabService.updateTab(caseData));
         }
-
+        caseDetails.getData().putAll(applicationsTabService.updateTab(caseData));
         caseDetails.getData().putAll(partyLevelCaseFlagsService
-                                         .generatePartyCaseFlagsForBarristerOnly(caseData, barristerFullName.get()));
+                                         .generatePartyCaseFlagsForBarristerOnly(caseData));
     }
 }

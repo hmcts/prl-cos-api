@@ -488,7 +488,7 @@ public class CaseAssignmentService {
                                              caPartyDetailsElement.getId());
 
                                          barristerRemoveService.notifyBarrister(caseData);
-                                         partyLevelCaseFlagsService.generatePartyCaseFlagsForBarristerOnly(caseData, null);
+                                         partyLevelCaseFlagsService.generatePartyCaseFlagsForBarristerOnly(caseData);
                                          caPartyDetailsElement.getValue().setBarrister(null);
                                      },
                                      daPartyDetails -> {
@@ -496,7 +496,7 @@ public class CaseAssignmentService {
                                                                           caseData,
                                                                           daPartyDetails.getPartyId());
                                          barristerRemoveService.notifyBarrister(caseData);
-                                         partyLevelCaseFlagsService.generatePartyCaseFlagsForBarristerOnly(caseData, null);
+                                         partyLevelCaseFlagsService.generatePartyCaseFlagsForBarristerOnly(caseData);
                                          daPartyDetails.setBarrister(null);
                                      }
 

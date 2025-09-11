@@ -37,9 +37,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
+import static java.util.Map.entry;
+import static java.util.Optional.empty;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -418,33 +420,52 @@ public class PartyLevelCaseFlagsServiceTest {
             .allocatedBarrister(allocatedBarrister)
             .build();
 
-        when(partyLevelCaseFlagsGenerator.generateExternalPartyFlags(any(), any(), any()))
-            .thenReturn(Flags.builder().partyName("ext").build());
-        when(partyLevelCaseFlagsGenerator.generateInternalPartyFlags(any(), any(), any()))
-            .thenReturn(Flags.builder().partyName("int").build());
-        Map<String, Object> caseData =  partyLevelCaseFlagsService
-            .generatePartyCaseFlagsForBarristerOnly(caseDataSolicitorBarristerRepresent, applicantBarrister.getBarristerFullName());
+        PartyLevelCaseFlagsService localPartyLevelCaseFlagsService = new PartyLevelCaseFlagsService(
+            objectMapper,
+            new PartyLevelCaseFlagsGenerator(),
+            systemUserService,
+            coreCaseDataService
+        );
+        Map<String, Object> caseData =  localPartyLevelCaseFlagsService
+            .generatePartyCaseFlagsForBarristerOnly(caseDataSolicitorBarristerRepresent);
 
         Assert.assertNotNull(caseData);
-        Assert.assertNull(caseData.get("caApplicantSolicitor1ExternalFlags"));
-        Assert.assertNull(caseData.get("caRespondentSolicitor1ExternalFlags"));
-        Assert.assertNull(caseData.get("caApplicantSolicitor1InternalFlags"));
-        Assert.assertNull(caseData.get("caRespondentSolicitor1InternalFlags"));
-        Assert.assertNotNull(caseData.get("caApplicantBarrister1ExternalFlags"));
-        Assert.assertNotNull(caseData.get("caApplicantBarrister1InternalFlags"));
-        Assert.assertNull(caseData.get("caRespondentBarrister1InternalFlags"));
-        Assert.assertNull(caseData.get("caRespondentBarrister1ExternalFlags"));
+        Flags externalFlag = Flags.builder()
+            .partyName("BarrFN BarrLN")
+            .roleOnCase("Applicant barrister 1")
+            .groupId("caApplicantBarrister1")
+            .visibility("External")
+            .details(List.of())
+            .build();
+        Flags internalFlag = Flags.builder()
+            .partyName("BarrFN BarrLN")
+            .roleOnCase("Applicant barrister 1")
+            .groupId("caApplicantBarrister1")
+            .visibility("Internal")
+            .details(List.of())
+            .build();
 
-        Assert.assertEquals("ext", ((Flags)(caseData.get("caApplicantBarrister1ExternalFlags"))).getPartyName());
-        Assert.assertEquals("int", ((Flags)(caseData.get("caApplicantBarrister1InternalFlags"))).getPartyName());
+        Assert.assertNotNull(caseData);
+        assertThat(caseData)
+            .contains(entry("caApplicantBarrister1ExternalFlags", externalFlag),
+                      entry("caApplicantBarrister1InternalFlags", internalFlag));
+
+        assertThat(caseData)
+            .doesNotContainKeys("caApplicantSolicitor1ExternalFlags",
+                                "caRespondentSolicitor1ExternalFlags",
+                                "caApplicantSolicitor1InternalFlags",
+                                "caRespondentSolicitor1InternalFlags",
+                                "caRespondentBarrister1InternalFlags",
+                                "caRespondentBarrister1ExternalFlags");
     }
 
     @Test
     public void testPartyCaseFlagForC100CaseWhenRepresentAndBarristerOnlyRemove() {
+
+
         UUID appPartyUuid = UUID.fromString("fbd63138-6396-4879-ac62-7f1c915f0111");
         UUID respPartyUuid = UUID.fromString("fbd63138-6396-4879-ac62-7f1c915f0222");
-        Barrister applicantBarrister = Barrister.builder().barristerId("UUID3")
-            .barristerFirstName("BarrFN").barristerLastName("BarrLN").build();
+
         PartyDetails partyDetailsApplicantSolicitorBarrister = PartyDetails.builder()
             .firstName("")
             .lastName("")
@@ -453,7 +474,6 @@ public class PartyLevelCaseFlagsServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .representativeFirstName("first name")
             .lastName("last name")
-            .barrister(applicantBarrister)
             .build();
 
         Barrister respondentBarrister = Barrister.builder().barristerId("UUID4")
@@ -486,18 +506,28 @@ public class PartyLevelCaseFlagsServiceTest {
             .allocatedBarrister(allocatedBarrister)
             .build();
 
-        Map<String, Object> caseData =  partyLevelCaseFlagsService
-            .generatePartyCaseFlagsForBarristerOnly(caseDataSolicitorBarristerRepresent, "");
+        PartyLevelCaseFlagsService localPartyLevelCaseFlagsService = new PartyLevelCaseFlagsService(
+            objectMapper,
+            new PartyLevelCaseFlagsGenerator(),
+            systemUserService,
+            coreCaseDataService
+        );
 
-        Assert.assertNotNull(caseData);
-        Assert.assertNull(caseData.get("caApplicantSolicitor1ExternalFlags"));
-        Assert.assertNull(caseData.get("caRespondentSolicitor1ExternalFlags"));
-        Assert.assertNull(caseData.get("caApplicantSolicitor1InternalFlags"));
-        Assert.assertNull(caseData.get("caRespondentSolicitor1InternalFlags"));
-        Assert.assertNull(caseData.get("caRespondentBarrister1InternalFlags"));
-        Assert.assertNull(caseData.get("caRespondentBarrister1ExternalFlags"));
-        Assert.assertTrue(((Optional)caseData.get("caApplicantBarrister1ExternalFlags")).isEmpty());
-        Assert.assertTrue(((Optional)caseData.get("caApplicantBarrister1InternalFlags")).isEmpty());
+        Map<String, Object> localCaseData =  localPartyLevelCaseFlagsService
+            .generatePartyCaseFlagsForBarristerOnly(caseDataSolicitorBarristerRepresent);
+
+        Assert.assertNotNull(localCaseData);
+        assertThat(localCaseData)
+            .contains(entry("caApplicantBarrister1ExternalFlags", empty()),
+                      entry("caApplicantBarrister1InternalFlags", empty()));
+
+        assertThat(localCaseData)
+            .doesNotContainKeys("caApplicantSolicitor1ExternalFlags",
+                            "caRespondentSolicitor1ExternalFlags",
+                            "caApplicantSolicitor1InternalFlags",
+                            "caRespondentSolicitor1InternalFlags",
+                            "caRespondentBarrister1InternalFlags",
+                            "caRespondentBarrister1ExternalFlags");
     }
 
     @Test
@@ -593,7 +623,7 @@ public class PartyLevelCaseFlagsServiceTest {
             .thenReturn(Flags.builder().partyName("int").build());
 
         Map<String, Object> caseData =  partyLevelCaseFlagsService
-            .generatePartyCaseFlagsForBarristerOnly(caseDataFl401SolicitorBarristerRepresent, respondentBarrister.getBarristerFullName());
+            .generatePartyCaseFlagsForBarristerOnly(caseDataFl401SolicitorBarristerRepresent);
         Assert.assertNotNull(caseData);
         Assert.assertNull((caseData.get("daApplicantBarristerExternalFlags")));
         Assert.assertNull((caseData.get("daApplicantBarristerInternalFlags")));

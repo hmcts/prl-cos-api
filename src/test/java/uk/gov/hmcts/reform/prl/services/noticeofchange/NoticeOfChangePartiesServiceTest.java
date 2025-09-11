@@ -92,7 +92,6 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -1244,7 +1243,7 @@ public class NoticeOfChangePartiesServiceTest {
                                                  isA(CaseData.class),
                                                  isA(UUID.class));
         verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
-        verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(isA(CaseData.class), isNull());
+        verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(isA(CaseData.class));
     }
 
     @Test
@@ -1502,7 +1501,7 @@ public class NoticeOfChangePartiesServiceTest {
                                                  isA(CaseData.class),
                                                  isA(UUID.class));
         verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
-        verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(isA(CaseData.class), isNull());
+        verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(isA(CaseData.class));
     }
 
     private static PartyDetails updatePartyDetails(SolicitorUser legalRepresentativeSolicitorDetails,
@@ -1595,7 +1594,7 @@ public class NoticeOfChangePartiesServiceTest {
                                                  isA(CaseData.class),
                                                  isA(UUID.class));
         verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
-        verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(isA(CaseData.class), isNull());
+        verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(isA(CaseData.class));
     }
 
 
@@ -1660,6 +1659,6 @@ public class NoticeOfChangePartiesServiceTest {
                                                  isA(CaseData.class),
                                                  isA(UUID.class));
         verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
-        verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(isA(CaseData.class), isNull());
+        verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(isA(CaseData.class));
     }
 }

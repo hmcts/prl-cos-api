@@ -943,7 +943,7 @@ public class NoticeOfChangePartiesService {
                                              .map(Element::getId)
                                              .orElseGet(newPartyDetails::getId));
         barristerRemoveService.notifyBarrister(caseData);
-        partyLevelCaseFlagsService.generatePartyCaseFlagsForBarristerOnly(caseData, null);
+        partyLevelCaseFlagsService.generatePartyCaseFlagsForBarristerOnly(caseData);
     }
 
     private List<Element<PartyDetails>> findSolicitorRepresentedParties(CaseData caseData, String authorisation) {
