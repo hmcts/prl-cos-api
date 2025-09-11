@@ -97,7 +97,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingDataFromTabTo
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
-import uk.gov.hmcts.reform.prl.models.dto.judicial.FinalisationJudgeDetails;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.FinalisationDetails;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
@@ -227,6 +227,8 @@ public class ManageOrderServiceTest {
     @Mock
     private DocumentSealingService documentSealingService;
 
+    @Mock
+    private FinalisationDetailsService finalisationDetailsService;
 
     public static final String authToken = "Bearer TestAuthToken";
 
@@ -6625,7 +6627,6 @@ public class ManageOrderServiceTest {
         elements.add(element);
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassCymruServedOptions(No)
-            .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
             .childArrangementsOrdersToIssue(List.of(childArrangementsOrder,prohibitedStepsOrder))
             .selectChildArrangementsOrder(ChildArrangementOrderTypeEnum.liveWithOrder)
             .serveOrderDynamicList(dynamicMultiSelectList)
@@ -6657,14 +6658,19 @@ public class ManageOrderServiceTest {
                                                  Address.builder().postCode("NE65LA").build()).build()).build()))
             .build();
 
+
+        when(finalisationDetailsService.buildFinalisationDetails(any(CaseData.class)))
+            .thenReturn(FinalisationDetails.builder()
+                    .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge.name())
+                    .build()
+            );
+
         Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid).value(OrderDetails
                                                                                           .builder()
-                                                                                          .finalisationJudgeDetails(
-                                                                                              FinalisationJudgeDetails.builder()
-                                                                                                  .judgeOrMagistrateTitle(
-                                                                                                      JudgeOrMagistrateTitleEnum
-                                                                                                          .circuitJudge.name())
-                                                                                                  .build())
+                                                                                          .finalisationDetails(
+                                                                                              finalisationDetailsService
+                                                                                                  .buildFinalisationDetails()
+                                                                                          )
                                                                                           .orderDocument(Document
                                                                                                              .builder()
                                                                                                              .build())

@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class FinalisationJudgeDetails {
+public class FinalisationDetails {
 
     private String judgeOrMagistrateTitle;
 }

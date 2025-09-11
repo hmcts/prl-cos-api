@@ -68,7 +68,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
-import uk.gov.hmcts.reform.prl.models.dto.judicial.FinalisationJudgeDetails;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.roleassignment.RoleAssignmentDto;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
@@ -233,6 +232,7 @@ public class DraftAnOrderService {
     private static final String BOLD_END = "</span>";
 
     private final WelshCourtEmail welshCourtEmail;
+    private final FinalisationDetailsService finalisationDetailsService;
 
     public List<Element<DraftOrder>> generateDraftOrderCollection(CaseData caseData, String authorisation) {
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
@@ -560,9 +560,7 @@ public class DraftAnOrderService {
                     );
                 }
                 orderDetails = orderDetails.toBuilder()
-                    .finalisationJudgeDetails(FinalisationJudgeDetails.builder()
-                                                  .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle().name())
-                                                  .build())
+                    .finalisationDetails(finalisationDetailsService.buildFinalisationDetails(caseData))
                     .orderDocument(manageOrderService.getGeneratedDocument(generatedDocumentInfo, false, fieldMap))
                     .orderDocumentWelsh(manageOrderService.getGeneratedDocument(
                         generatedDocumentInfoWelsh,
