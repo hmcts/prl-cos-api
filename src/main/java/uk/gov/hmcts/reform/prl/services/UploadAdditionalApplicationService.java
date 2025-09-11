@@ -421,15 +421,18 @@ public class UploadAdditionalApplicationService {
         if (caseData.getUploadAdditionalApplicationData().getTemporaryC2Document() != null) {
 
             String category = "";
+            log.info("Inside mapping solicitor journey C2 category before if {}", category);
             if (StringUtils.isNotEmpty(caseData.getUploadAdditionalApplicationData().getRepresentedPartyType())) {
+                log.info("Inside mapping solicitor journey C2 inside if representedPartyType {}", caseData.getUploadAdditionalApplicationData().getRepresentedPartyType());
                 switch (caseData.getUploadAdditionalApplicationData().getRepresentedPartyType()) {
                     case CA_APPLICANT, DA_APPLICANT -> category = "applicant";
                     case CA_RESPONDENT, DA_RESPONDENT -> category = "respondent";
                     default -> category = "";
                 }
             }
+            log.info("Inside mapping solicitor journey C2 category after if {}", category);
             String cat = categoryForParty(category);
-            log.info("Inside mapping solicitor journey C2 upload, partytype is {}", cat);
+            log.info("Inside mapping solicitor journey C2 upload, final value for category is {}", cat);
 
             C2DocumentBundle temporaryC2Document = caseData.getUploadAdditionalApplicationData().getTemporaryC2Document();
             c2DocumentBundle = C2DocumentBundle.builder()
