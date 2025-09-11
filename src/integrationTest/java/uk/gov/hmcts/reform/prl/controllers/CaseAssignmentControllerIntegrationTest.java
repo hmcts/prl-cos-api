@@ -138,7 +138,6 @@ public class CaseAssignmentControllerIntegrationTest {
             .andReturn();
         verify(caseAssignmentService).validateRemoveRequest(any(), any(), any());
         verify(caseAssignmentService).removeBarrister(isA(CaseData.class), isA(PartyDetails.class));
-        verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(any());
         verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(any(), any());
     }
 }
