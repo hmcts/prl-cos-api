@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -139,7 +140,7 @@ public class BaisDocumentUploadService {
 
     }
 
-    private boolean isOrderServedViaStatementOfService(StatementOfService statementOfService) {
+    private boolean isOrderServedViaStatementOfService(OrderDetails order, StatementOfService statementOfService) {
         // Check statement of service exists
         if (statementOfService == null) {
             return false;
@@ -154,12 +155,11 @@ public class BaisDocumentUploadService {
         }
 
         // Confirm statement of service event has been completed
-        // return true
+       return true;
     }
 
     private String getFilePrefix(String caseId, LocalDateTime orderCreatedDate) {
         ZonedDateTime zdt = ZonedDateTime.of(orderCreatedDate, ZoneId.systemDefault());
         return sourceDirectory + "/FL404A-" + caseId + "-" + zdt.toEpochSecond();
     }
-
 }
