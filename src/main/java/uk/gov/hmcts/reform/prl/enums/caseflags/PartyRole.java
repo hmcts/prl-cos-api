@@ -54,6 +54,7 @@ public enum PartyRole {
     FL401APPLICANTSOLICITOR("Applicant solicitor", 1, Representing.DAAPPLICANTSOLICITOR),
     FL401APPLICANTBARRISTER("Applicant barrister", 1, Representing.DAAPPLICANTBARRISTER),
     FL401RESPONDENT("Respondent", 1, Representing.DARESPONDENT),
+    FL401RESPONDENTSOLICITOR("Respondent solicitor", 1, Representing.DARESPONDENTSOLICITOR),
     FL401RESPONDENTBARRISTER("Respondent barrister", 1, Representing.DARESPONDENTBARRISTER);
 
     private final String caseRoleLabel;
