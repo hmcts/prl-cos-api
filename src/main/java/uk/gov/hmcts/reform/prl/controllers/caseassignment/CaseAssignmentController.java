@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATED_BARRISTER;
@@ -56,7 +57,6 @@ public class CaseAssignmentController {
     private final ObjectMapper objectMapper;
     private final OrganisationService organisationService;
     private final AuthorisationService authorisationService;
-    private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     private final BarristerHelper barristerHelper;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     private final ApplicationsTabService applicationsTabService;
@@ -100,7 +100,9 @@ public class CaseAssignmentController {
                         barristerRole.get(),
                         allocatedBarrister
                     );
-                    updateCaseDetails(caseDetails, caseData, true);
+                    updateCaseDetails(caseDetails,
+                                      caseData,
+                                      () -> caseData.getAllocatedBarrister().getBarristerFullName());
                 } catch (GrantCaseAccessException grantCaseAccessException) {
                     errorList.add(grantCaseAccessException.getMessage());
                 }
@@ -143,7 +145,7 @@ public class CaseAssignmentController {
                                                  caseData,
                                                  UUID.fromString(allocatedBarrister.getPartyList().getValueCode()));
                 caseAssignmentService.removeBarrister(caseData, partyDetails);
-                updateCaseDetails(caseDetails, caseData, false);
+                updateCaseDetails(caseDetails, caseData, () -> null);
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder()
@@ -155,10 +157,9 @@ public class CaseAssignmentController {
 
     }
 
-
-
-
-    private void updateCaseDetails(CaseDetails caseDetails, CaseData caseData, boolean addOrRemove) {
+    private void updateCaseDetails(CaseDetails caseDetails,
+                                   CaseData caseData,
+                                   Supplier<String> barristerFullName) {
         caseDetails.getData().put(ALLOCATED_BARRISTER, caseData.getAllocatedBarrister());
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseDetails.getData().put(APPLICANTS, caseData.getApplicants());
@@ -169,8 +170,8 @@ public class CaseAssignmentController {
             caseDetails.getData().put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
             caseDetails.getData().putAll(applicationsTabService.updateTab(caseData));
         }
-        String barristerFullName = addOrRemove ? caseData.getAllocatedBarrister().getBarristerFullName() : "";
+
         caseDetails.getData().putAll(partyLevelCaseFlagsService
-                                         .generatePartyCaseFlagsForBarristerOnly(caseData, barristerFullName));
+                                         .generatePartyCaseFlagsForBarristerOnly(caseData, barristerFullName.get()));
     }
 }

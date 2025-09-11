@@ -72,8 +72,6 @@ class CaseAssignmentControllerTest {
     @Mock
     private BarristerHelper barristerHelper;
     @Mock
-    private PartyLevelCaseFlagsService partyLevelCaseFlagsService;
-    @Mock
     private ApplicationsTabService applicationsTabService;
     @Spy
     private ObjectMapper objectMapper;
@@ -89,7 +87,6 @@ class CaseAssignmentControllerTest {
             objectMapper,
             organisationService,
             authorisationService,
-            partyLevelCaseFlagsService,
             barristerHelper,
             partyLevelCaseFlagsService,
             applicationsTabService);
