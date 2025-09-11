@@ -28,7 +28,7 @@ public enum DocTypeOtherDocumentsEnum {
     @JsonProperty("approvedOrders")
     approvedOrders("approvedOrders", "Finalised order"),
     @JsonProperty("transcriptsOfJudgements")
-    transcriptsOfJudgements("transcriptsOfJudgements","Transcripts of judgements"),
+    transcriptsOfJudgements("transcriptsOfJudgements","Transcripts and judgments"),
     @JsonProperty("magistratesFactsAndReasons")
     magistratesFactsAndReasons("magistratesFactsAndReasons", "Magistrates facts and reasons"),
     @JsonProperty("judgeNotesFromHearing")
