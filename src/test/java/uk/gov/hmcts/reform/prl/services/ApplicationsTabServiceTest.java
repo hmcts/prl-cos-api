@@ -2141,10 +2141,6 @@ public class ApplicationsTabServiceTest {
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("test@test.com")
-            .barristerFirstName("BarFN")
-            .barristerLastName("BarLN")
-            .barristerEmail("bar@email.com")
-            .barristerOrg(Organisation.builder().organisationName("BarOrgName").organisationID("OrgId").build())
             .build();
 
         CaseData caseData = caseDataWithParties.toBuilder().applicants(null).applicantsFL401(partyDetails).build();
