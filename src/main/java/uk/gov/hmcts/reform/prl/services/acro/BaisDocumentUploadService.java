@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroResponse;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
 import java.io.File;
@@ -83,6 +85,7 @@ public class BaisDocumentUploadService {
                 log.debug("Processing case {} with {} FL404 orders", caseId, caseData.getFl404Orders().size());
 
                 for (var order : caseData.getFl404Orders()) {
+                    // Put this in Acro method
                     LocalDateTime orderCreatedDate = order.getDateCreated();
                     String filePrefix = getFilePrefix(caseId, orderCreatedDate);
                     String englishFileName = filePrefix + ".pdf";
@@ -114,12 +117,44 @@ public class BaisDocumentUploadService {
                     } catch (Exception e) {
                         log.warn("Failed to download FL404a document for case {}", caseId);
                     }
+                    // Add Statement of Service document processing here
+                    if (isOrderServedViaStatementOfService(order, caseData.getStatementOfService())) {
+                        String StatementofServiceFileName = filePrefix + "_served.pdf";
+                        String servedFileName = filePrefix + "_served.pdf";
+                        pdfExtractorService.downloadPdf(
+                            servedFileName,
+                            caseId,
+                            order.getOrderDocument(),
+                            sysUserToken
+                        );
+
+                    } else {
+                        log.debug("Order not served via statement of service for case {}", caseId);
+                    }
                 }
             } else {
                 log.debug("Skipping case {} - no FL404 orders found", caseId);
             }
         }
 
+    }
+
+    private boolean isOrderServedViaStatementOfService(StatementOfService statementOfService) {
+        // Check statement of service exists
+        if (statementOfService == null) {
+            return false;
+        }
+
+        // Probably don't need done in downloadPdf
+        String orderDocumentUrl = order.getOrderDocument() != null ?
+            order.getOrderDocument().getDocumentUrl() : null;
+
+        if (orderDocumentUrl == null) {
+            return false;
+        }
+
+        // Confirm statement of service event has been completed
+        // return true
     }
 
     private String getFilePrefix(String caseId, LocalDateTime orderCreatedDate) {
