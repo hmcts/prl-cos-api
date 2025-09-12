@@ -81,6 +81,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
@@ -1243,7 +1244,8 @@ public class NoticeOfChangePartiesServiceTest {
                                                  isA(CaseData.class),
                                                  isA(UUID.class));
         verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
-        verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(isA(CaseData.class));
+        verify(partyLevelCaseFlagsService).updateCaseDataWithGeneratePartyCaseFlags(isA(CaseData.class),
+                                                                                    any(Function.class));
     }
 
     @Test
@@ -1501,7 +1503,8 @@ public class NoticeOfChangePartiesServiceTest {
                                                  isA(CaseData.class),
                                                  isA(UUID.class));
         verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
-        verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(isA(CaseData.class));
+        verify(partyLevelCaseFlagsService).updateCaseDataWithGeneratePartyCaseFlags(isA(CaseData.class),
+                                                                                    any(Function.class));
     }
 
     private static PartyDetails updatePartyDetails(SolicitorUser legalRepresentativeSolicitorDetails,
@@ -1594,7 +1597,8 @@ public class NoticeOfChangePartiesServiceTest {
                                                  isA(CaseData.class),
                                                  isA(UUID.class));
         verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
-        verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(isA(CaseData.class));
+        verify(partyLevelCaseFlagsService).updateCaseDataWithGeneratePartyCaseFlags(isA(CaseData.class),
+                                                                                    any(Function.class));
     }
 
 

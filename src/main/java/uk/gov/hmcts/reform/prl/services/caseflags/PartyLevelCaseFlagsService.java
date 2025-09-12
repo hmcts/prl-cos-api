@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.caseflags;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caseflags.AllPartyFlags;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -31,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -88,6 +91,20 @@ public class PartyLevelCaseFlagsService {
             true
         );
     }
+
+    public void updateCaseDataWithGeneratePartyCaseFlags(CaseData caseData,
+                                                         Function<CaseData, Map<String, Object>> flagUpdater) {
+        Map<String, Object> existingPartyFlags = objectMapper.convertValue(caseData.getAllPartyFlags(),
+                                                                           new TypeReference<>() {});
+
+        Map<String, Object> updatedFlags = flagUpdater.apply(caseData);
+        existingPartyFlags.putAll(updatedFlags);
+
+        AllPartyFlags allPartyFlags = objectMapper.convertValue(existingPartyFlags,
+                                                               new TypeReference<>() {});
+        caseData.setAllPartyFlags(allPartyFlags);
+    }
+
 
     public Map<String, Object> generatePartyCaseFlagsForBarristerOnly(CaseData caseData) {
         Map<String, Object> data = new HashMap<>();

@@ -1117,7 +1117,8 @@ class CaseAssignmentServiceTest {
         verify(barristerHelper).setAllocatedBarrister(eq(partyDetails),
                                                  isA(CaseData.class),
                                                  isA(UUID.class));
-        verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(isA(CaseData.class));
+        verify(partyLevelCaseFlagsService).updateCaseDataWithGeneratePartyCaseFlags(isA(CaseData.class),
+                                                                                    any(Function.class));
     }
 
     static Stream<Arguments> parameterC100SolicitorParties() {
@@ -1245,7 +1246,8 @@ class CaseAssignmentServiceTest {
         verify(barristerHelper).setAllocatedBarrister(eq(partyDetails),
                                                  isA(CaseData.class),
                                                  isA(UUID.class));
-        verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(isA(CaseData.class));
+        verify(partyLevelCaseFlagsService).updateCaseDataWithGeneratePartyCaseFlags(isA(CaseData.class),
+                                                                                    any(Function.class));
     }
 
     @Test

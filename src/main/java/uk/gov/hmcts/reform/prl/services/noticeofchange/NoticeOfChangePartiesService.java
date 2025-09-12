@@ -929,7 +929,8 @@ public class NoticeOfChangePartiesService {
                                               Optional.ofNullable(oldPartyDetails)
                                                   .map(Element::getId)
                                                   .orElseGet(newPartyDetails::getId));
-        partyLevelCaseFlagsService.generatePartyCaseFlagsForBarristerOnly(caseData);
+        partyLevelCaseFlagsService.updateCaseDataWithGeneratePartyCaseFlags(caseData,
+                                                                            partyLevelCaseFlagsService::generatePartyCaseFlagsForBarristerOnly);
     }
 
     void sendEmailOnRemovalOfLegalRepresentation(Element<PartyDetails> oldPartyDetails,
