@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroResponse;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
@@ -120,10 +119,9 @@ public class BaisDocumentUploadService {
                     }
                     // Add Statement of Service document processing here
                     if (isOrderServedViaStatementOfService(order, caseData.getStatementOfService())) {
-                        String StatementofServiceFileName = filePrefix + "_served.pdf";
-                        String servedFileName = filePrefix + "_served.pdf";
+                        String statementOfServiceFileName = filePrefix + "_served.pdf";
                         pdfExtractorService.downloadPdf(
-                            servedFileName,
+                            statementOfServiceFileName,
                             caseId,
                             order.getOrderDocument(),
                             sysUserToken
@@ -147,15 +145,15 @@ public class BaisDocumentUploadService {
         }
 
         // Probably don't need done in downloadPdf
-        String orderDocumentUrl = order.getOrderDocument() != null ?
-            order.getOrderDocument().getDocumentUrl() : null;
+        String orderDocumentUrl = order.getOrderDocument() != null
+            ? order.getOrderDocument().getDocumentUrl()
+            : null;
 
         if (orderDocumentUrl == null) {
             return false;
         }
-
         // Confirm statement of service event has been completed
-       return true;
+        return true;
     }
 
     private String getFilePrefix(String caseId, LocalDateTime orderCreatedDate) {
