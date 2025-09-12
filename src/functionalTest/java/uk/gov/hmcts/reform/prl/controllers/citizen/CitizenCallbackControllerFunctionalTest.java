@@ -67,7 +67,7 @@ public class CitizenCallbackControllerFunctionalTest {
             .header("Accepts", APPLICATION_JSON_VALUE)
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(CallbackRequest.builder().caseDetails(caseDetails).build())
+            .body(CallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build())
             .when()
             .contentType(APPLICATION_JSON_VALUE)
             .post("/update-citizen-application")
