@@ -175,6 +175,7 @@ public class AcroCaseDataService {
             "data.respondentsFL401",
             "data.respondents",
             "data.applicantsConfidentialDetails",
+            "data.respondentConfidentialDetails",
             "data.orderCollection",
             "data.caseManagementLocation",
             "data.stmtOfServiceForOrder",

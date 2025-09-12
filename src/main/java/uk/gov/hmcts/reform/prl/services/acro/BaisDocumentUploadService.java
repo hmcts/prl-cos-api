@@ -104,7 +104,7 @@ public class BaisDocumentUploadService {
                         );
 
                         if (Optional.ofNullable(englishFile).isPresent()) {
-                            csvWriter.appendCsvRowToFile(csvFile, caseData, true, englishFile.getName());
+                            csvWriter.appendCsvRowToFile(csvFile, caseData, false, englishFile.getName());
                         }
                         log.info(
                             "FL404a document processing completed. Successfully processed {}/{} documents",
