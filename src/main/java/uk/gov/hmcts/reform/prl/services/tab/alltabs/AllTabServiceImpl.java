@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.tab.alltabs;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -247,6 +248,10 @@ public class AllTabServiceImpl implements AllTabsService {
                 dataMap.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
                 dataMap.put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
             }
+            Map<String, Object> allFlags = objectMapper.convertValue(caseData.getAllPartyFlags(),
+                                                                     new TypeReference<>() {});
+            dataMap.putAll(allFlags);
+
             combinedFieldsMap = findCaseDataMap(caseData);
             combinedFieldsMap.putAll(dataMap);
         }
