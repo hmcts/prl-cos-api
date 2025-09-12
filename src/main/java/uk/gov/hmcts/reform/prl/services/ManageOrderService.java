@@ -630,6 +630,7 @@ public class ManageOrderService {
     private final AuthTokenGenerator authTokenGenerator;
     private final LaunchDarklyClient launchDarklyClient;
     private final DocumentSealingService documentSealingService;
+    private final FinalisationDetailsService finalisationDetailsService;
 
     public boolean isSaveAsDraft(CaseData caseData) {
         return isNotEmpty(caseData.getServeOrderData()) && No.equals(
@@ -2335,6 +2336,7 @@ public class ManageOrderService {
             }
         }
 
+
         UserDetails userDetails = userService.getUserDetails(authorisation);
 
         return element(orderDetails.toBuilder()
@@ -2382,6 +2384,7 @@ public class ManageOrderService {
                            .c21OrderOptions(caseData.getManageOrders().getC21OrderOptions())
                            .selectChildArrangementsOrder(caseData.getManageOrders().getSelectChildArrangementsOrder())
                            .childArrangementsOrdersToIssue(caseData.getManageOrders().getChildArrangementsOrdersToIssue())
+                           .finalisationDetails(finalisationDetailsService.buildFinalisationDetails(caseData))
                            .childOption(getChildOption(caseData))
                            .isOrderUploaded(No)
                            //PRL-6046 - persist FL404 data
