@@ -772,6 +772,9 @@ public class NoticeOfChangePartiesService {
                     TypeOfNocEventEnum.removeLegalRepresentation,
                     null
                 );
+                removeBarristerFlags(oldDetailsMap.get(removeSolicitorRole),
+                                     newPartyDetailsElement,
+                                     allTabsUpdateCaseData);
             }
         }
 
@@ -916,6 +919,19 @@ public class NoticeOfChangePartiesService {
         }
     }
 
+    void removeBarristerFlags(Element<PartyDetails> oldPartyDetails,
+                              Element<PartyDetails> newPartyDetails,
+                              CaseData caseData) {
+        barristerHelper.setAllocatedBarrister(Optional.ofNullable(oldPartyDetails)
+                                                  .map(Element::getValue)
+                                                  .orElseGet(newPartyDetails::getValue),
+                                              caseData,
+                                              Optional.ofNullable(oldPartyDetails)
+                                                  .map(Element::getId)
+                                                  .orElseGet(newPartyDetails::getId));
+        partyLevelCaseFlagsService.generatePartyCaseFlagsForBarristerOnly(caseData);
+    }
+
     void sendEmailOnRemovalOfLegalRepresentation(Element<PartyDetails> oldPartyDetails,
                                                          Element<PartyDetails> newPartyDetails,
                                                          Optional<SolicitorRole> solicitorRole,
@@ -943,7 +959,6 @@ public class NoticeOfChangePartiesService {
                                              .map(Element::getId)
                                              .orElseGet(newPartyDetails::getId));
         barristerRemoveService.notifyBarrister(caseData);
-        partyLevelCaseFlagsService.generatePartyCaseFlagsForBarristerOnly(caseData);
     }
 
     private List<Element<PartyDetails>> findSolicitorRepresentedParties(CaseData caseData, String authorisation) {
