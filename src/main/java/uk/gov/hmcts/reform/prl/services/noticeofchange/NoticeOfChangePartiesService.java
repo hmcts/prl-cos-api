@@ -772,6 +772,9 @@ public class NoticeOfChangePartiesService {
                     TypeOfNocEventEnum.removeLegalRepresentation,
                     null
                 );
+                removeBarristerFlags(oldDetailsMap.get(removeSolicitorRole),
+                                     newPartyDetailsElement,
+                                     allTabsUpdateCaseData);
             }
         }
 
@@ -914,6 +917,20 @@ public class NoticeOfChangePartiesService {
                 }
             });
         }
+    }
+
+    void removeBarristerFlags(Element<PartyDetails> oldPartyDetails,
+                              Element<PartyDetails> newPartyDetails,
+                              CaseData caseData) {
+        barristerHelper.setAllocatedBarrister(Optional.ofNullable(oldPartyDetails)
+                                                  .map(Element::getValue)
+                                                  .orElseGet(newPartyDetails::getValue),
+                                              caseData,
+                                              Optional.ofNullable(oldPartyDetails)
+                                                  .map(Element::getId)
+                                                  .orElseGet(newPartyDetails::getId));
+        partyLevelCaseFlagsService.updateCaseDataWithGeneratePartyCaseFlags(caseData,
+                                                                            partyLevelCaseFlagsService::generatePartyCaseFlagsForBarristerOnly);
     }
 
     void sendEmailOnRemovalOfLegalRepresentation(Element<PartyDetails> oldPartyDetails,

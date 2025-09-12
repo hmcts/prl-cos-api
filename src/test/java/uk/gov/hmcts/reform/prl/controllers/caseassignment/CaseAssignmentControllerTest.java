@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.utils.BarristerHelper;
 
 import java.time.LocalDateTime;
@@ -67,6 +68,8 @@ class CaseAssignmentControllerTest {
     @Mock
     private AuthorisationService authorisationService;
     @Mock
+    private PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+    @Mock
     private BarristerHelper barristerHelper;
     @Mock
     private ApplicationsTabService applicationsTabService;
@@ -85,7 +88,9 @@ class CaseAssignmentControllerTest {
             organisationService,
             authorisationService,
             barristerHelper,
+            partyLevelCaseFlagsService,
             applicationsTabService);
+
         Barrister barrister = Barrister.builder()
             .barristerEmail("barristerEmail@gmail.com")
             .barristerFirstName("barristerName")
@@ -168,6 +173,7 @@ class CaseAssignmentControllerTest {
                                                    isA(AllocatedBarrister.class));
 
         verify(applicationsTabService).updateTab(isA(CaseData.class));
+        verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(any());
     }
 
     @Test
@@ -409,6 +415,8 @@ class CaseAssignmentControllerTest {
                                                  isA(CaseData.class),
                                                  eq(UUID.fromString(selectedPartyId)));
         verify(applicationsTabService).updateTab(isA(CaseData.class));
+        verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(any());
+
     }
 
     @Test
