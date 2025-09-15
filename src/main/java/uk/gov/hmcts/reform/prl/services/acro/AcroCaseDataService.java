@@ -68,7 +68,7 @@ public class AcroCaseDataService {
         maxAttempts = 3,
         backoff = @Backoff(delay = 2000, multiplier = 2)
     )
-    public AcroResponse getCaseData(String authorisation) throws IOException {
+    public AcroResponse getNonMolestationData(String authorisation) throws IOException {
 
         AcroResponse acroResponse = AcroResponse.builder().cases(new ArrayList<>()).build();
 

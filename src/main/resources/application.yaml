@@ -803,6 +803,8 @@ hearing:
       enabled: ${HEARING_PREVIEW_BYPASS_ENABLED:false}
 
 acro:
+  cronjob:
+    enabled: false
   search-case-type-id: PRLAPPS
   source-directory: /tmp/acro/source
   output-directory: /tmp/acro/export

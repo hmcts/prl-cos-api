@@ -60,7 +60,7 @@ class BaisDocumentUploadServiceTest {
 
     @Test
     void shouldCreateEmptyCsvWhenNoCasesFound() throws Exception {
-        when(acroCaseDataService.getCaseData(AUTH_TOKEN)).thenReturn(emptyResponse());
+        when(acroCaseDataService.getNonMolestationData(AUTH_TOKEN)).thenReturn(emptyResponse());
 
         service.uploadFL404Orders();
 
@@ -70,7 +70,7 @@ class BaisDocumentUploadServiceTest {
     @ParameterizedTest(name = "{1}")
     @MethodSource("documentProcessingScenarios")
     void shouldProcessDocumentsBasedOnAvailability(int successfulDownloads, String scenarioDescription) throws Exception {
-        when(acroCaseDataService.getCaseData(AUTH_TOKEN)).thenReturn(responseWithOneCase());
+        when(acroCaseDataService.getNonMolestationData(AUTH_TOKEN)).thenReturn(responseWithOneCase());
 
         File englishFile = successfulDownloads >= 1 ? File.createTempFile("english", ".pdf") : null;
         File welshFile = successfulDownloads >= 2 ? File.createTempFile("welsh", ".pdf") : null;

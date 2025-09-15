@@ -4,12 +4,14 @@ package uk.gov.hmcts.reform.prl.schedule;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.services.acro.BaisDocumentUploadService;
 
 @Component
 @Slf4j
 @RequiredArgsConstructor
+@ConditionalOnProperty(prefix = "acro", name = "cronjob.enabled")
 public class BaisDocumentUploadTask implements Runnable {
 
     private final BaisDocumentUploadService baisDocumentUploadService;

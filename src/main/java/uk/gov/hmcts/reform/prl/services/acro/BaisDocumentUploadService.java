@@ -46,7 +46,7 @@ public class BaisDocumentUploadService {
             Files.createDirectories(Path.of(sourceDirectory));
             Files.createDirectories(Path.of(outputDirectory));
 
-            AcroResponse acroResponse = acroCaseDataService.getCaseData(sysUserToken);
+            AcroResponse acroResponse = acroCaseDataService.getNonMolestationData(sysUserToken);
 
             File csvFile = csvWriter.createCsvFileWithHeaders();
 
