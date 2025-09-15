@@ -81,7 +81,7 @@ class BaisDocumentUploadServiceTest {
         service.uploadFL404Orders();
 
         verify(csvWriter, Mockito.times(successfulDownloads))
-            .appendCsvRowToFile(eq(tempCsv), any(AcroCaseData.class), eq(true), anyString());
+            .appendCsvRowToFile(eq(tempCsv), any(AcroCaseData.class), eq(false), anyString());
         verify(pdfExtractorService, Mockito.times(2))
             .downloadPdf(anyString(), eq(CASE_ID), any(Document.class), eq(AUTH_TOKEN));
     }
