@@ -64,6 +64,20 @@ public class BarristerControllerFunctionalTest {
     }
 
     @Test
+    public void testBarristerStopRepresentingAboutToStartCallback() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/barrister/stop-representing/about-to-start")
+            .then()
+            .assertThat().statusCode(500);
+    }
+
+    @Test
     public void testBarristerAddSubmittedCallback() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request
@@ -73,6 +87,20 @@ public class BarristerControllerFunctionalTest {
             .when()
             .contentType("application/json")
             .post("/barrister/add/submitted")
+            .then()
+            .assertThat().statusCode(200);
+    }
+
+    @Test
+    public void testBarristerRemoveSubmittedCallback() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/barrister/remove/submitted")
             .then()
             .assertThat().statusCode(200);
     }
