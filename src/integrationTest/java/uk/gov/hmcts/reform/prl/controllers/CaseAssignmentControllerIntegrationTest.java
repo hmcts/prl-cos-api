@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 
 import java.util.HashMap;
 import java.util.Optional;
@@ -61,10 +62,11 @@ public class CaseAssignmentControllerIntegrationTest {
     @MockBean
     private ApplicationsTabService applicationsTabService;
 
+    @MockBean
+    private PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+
     @SpyBean
     private CaseAssignmentService caseAssignmentService;
-
-
 
     @Autowired
     ObjectMapper objectMapper;
@@ -79,7 +81,7 @@ public class CaseAssignmentControllerIntegrationTest {
     public void testAddBarrister() throws Exception {
         String url = "/case-assignment/barrister/add/about-to-submit";
         String jsonRequest = ResourceLoader.loadJson("requests/barristerRequest.json");
-        when(applicationsTabService.updateTab(any())).thenReturn(new HashMap());
+        when(applicationsTabService.updateTab(any())).thenReturn(new HashMap<>());
         when(organisationService.findUserByEmail(anyString()))
             .thenReturn(Optional.of(UUID.randomUUID().toString()));
         when(authorisationService.isAuthorized(anyString(), anyString()))
@@ -107,13 +109,14 @@ public class CaseAssignmentControllerIntegrationTest {
                                                    eq(C100APPLICANTBARRISTER1.getCaseRoleLabel()),
                                                    any());
         verify(applicationsTabService).updateTab(any());
+        verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(any());
     }
 
     @Test
     public void testRemoveBarristerAboutToSubmit() throws Exception {
         String url = "/case-assignment/barrister/remove/about-to-submit";
         String jsonRequest = ResourceLoader.loadJson("requests/barristerRequest.json");
-        when(applicationsTabService.updateTab(any())).thenReturn(new HashMap());
+        when(applicationsTabService.updateTab(any())).thenReturn(new HashMap<>());
         when(authorisationService.isAuthorized(anyString(), anyString()))
             .thenReturn(true);
 
@@ -135,5 +138,6 @@ public class CaseAssignmentControllerIntegrationTest {
             .andReturn();
         verify(caseAssignmentService).validateRemoveRequest(any(), any(), any());
         verify(caseAssignmentService).removeBarrister(isA(CaseData.class), isA(PartyDetails.class));
+        verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(any());
     }
 }
