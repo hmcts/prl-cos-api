@@ -170,7 +170,7 @@ public class PartyLevelCaseFlagsService {
             PartyRole partyRole = partyRoles.get(i);
             if (null != caElements) {
                 Optional<Element<PartyDetails>> partyDetailsElement = i < numElements ? Optional.of(caElements.get(i)) : Optional.empty();
-                if (partyDetailsElement.isPresent() && partyDetailsElement.get().getId()
+                if (caseData.getAllocatedBarrister() != null && partyDetailsElement.isPresent() && partyDetailsElement.get().getId()
                     .equals(caseData.getAllocatedBarrister().getPartyList().getValueCodeAsUuid())) {
                     findAndGeneratePartyFlagsForBarristerOnly(representing,
                                                               i,
