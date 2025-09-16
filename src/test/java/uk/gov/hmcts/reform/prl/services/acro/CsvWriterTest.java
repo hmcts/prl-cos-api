@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseData;
 
 import java.io.File;
@@ -253,6 +254,108 @@ class CsvWriterTest {
         }
     }
 
+    @Nested
+    @DisplayName("Confidential Details Collections Tests")
+    class ConfidentialDetailsCollectionsTests {
+
+        @Test
+        @DisplayName("Should handle applicantsConfidentialDetails when present")
+        void shouldHandleApplicantsConfidentialDetailsWhenPresent() {
+            AcroCaseData caseData = TestDataFactory.createCaseDataWithConfidentialDetailsCollections();
+
+            List<String> rowData = csvWriter.createCsvRowData(caseData, true, "order.pdf");
+
+            // When confidential details are allowed, the regular fields should still be used
+            int applicantPhoneIndex = getColumnIndex("Applicant Phone");
+            int applicantEmailIndex = getColumnIndex("Applicant Email");
+
+            assertAll(
+                "Applicant confidential details should not override regular fields when allowed",
+                () -> assertEquals(APPLICANT_PHONE, rowData.get(applicantPhoneIndex), "Should use regular applicant phone"),
+                () -> assertEquals(APPLICANT_EMAIL, rowData.get(applicantEmailIndex), "Should use regular applicant email")
+            );
+        }
+
+        @Test
+        @DisplayName("Should handle respondentConfidentialDetails when present")
+        void shouldHandleRespondentConfidentialDetailsWhenPresent() {
+            AcroCaseData caseData = TestDataFactory.createCaseDataWithConfidentialDetailsCollections();
+
+            List<String> rowData = csvWriter.createCsvRowData(caseData, true, "order.pdf");
+
+            // When confidential details are allowed, the regular fields should still be used
+            int respondentPhoneIndex = getColumnIndex("Respondent Phone");
+            int respondentEmailIndex = getColumnIndex("Respondent Email");
+
+            assertAll(
+                "Respondent confidential details should not override regular fields when allowed",
+                () -> assertEquals(RESPONDENT_PHONE, rowData.get(respondentPhoneIndex), "Should use regular respondent phone"),
+                () -> assertEquals(RESPONDENT_EMAIL, rowData.get(respondentEmailIndex), "Should use regular respondent email")
+            );
+        }
+
+        @Test
+        @DisplayName("Should hide confidential fields when confidentialAllowed is false and confidential details exist")
+        void shouldHideConfidentialFieldsWhenNotAllowedAndConfidentialDetailsExist() {
+            AcroCaseData caseData = TestDataFactory.createCaseDataWithConfidentialDetailsCollections();
+
+            List<String> rowData = csvWriter.createCsvRowData(caseData, false, "order.pdf");
+
+            // Find indices for confidential fields
+            int applicantPhoneIndex = getColumnIndex("Applicant Phone");
+            int applicantEmailIndex = getColumnIndex("Applicant Email");
+            int respondentPhoneIndex = getColumnIndex("Respondent Phone");
+            int respondentEmailIndex = getColumnIndex("Respondent Email");
+
+            assertAll(
+                "Confidential fields should be hidden when not allowed",
+                () -> assertEquals("-", rowData.get(applicantPhoneIndex), "Applicant phone should be '-'"),
+                () -> assertEquals("-", rowData.get(applicantEmailIndex), "Applicant email should be '-'"),
+                () -> assertEquals("-", rowData.get(respondentPhoneIndex), "Respondent phone should be '-'"),
+                () -> assertEquals("-", rowData.get(respondentEmailIndex), "Respondent email should be '-'")
+            );
+        }
+
+        @Test
+        @DisplayName("Should write confidential details correctly to CSV file")
+        void shouldWriteConfidentialDetailsCorrectlyToCsvFile() throws IOException {
+            File csvFile = csvWriter.createCsvFileWithHeaders();
+            AcroCaseData caseDataWithDetails = TestDataFactory.createCaseDataWithConfidentialDetailsCollections();
+            AcroCaseData caseDataWithoutDetails = TestDataFactory.createStandardCaseData();
+
+            // Write both cases to CSV
+            csvWriter.appendCsvRowToFile(csvFile, caseDataWithDetails, false, "with-details.pdf");
+            csvWriter.appendCsvRowToFile(csvFile, caseDataWithoutDetails, false, "without-details.pdf");
+
+            List<String> lines = Files.readAllLines(csvFile.toPath());
+            assertEquals(3, lines.size(), "Should have header + 2 data rows");
+
+            String[] fieldsWithDetails = lines.get(1).split(",", -1);
+            String[] fieldsWithoutDetails = lines.get(2).split(",", -1);
+
+            // Both should hide confidential fields when confidentialAllowed is false
+            int applicantPhoneIndex = getColumnIndex("Applicant Phone");
+            int respondentPhoneIndex = getColumnIndex("Respondent Phone");
+
+            assertAll(
+                "Both cases should hide confidential fields consistently",
+                () -> assertEquals("-", fieldsWithDetails[applicantPhoneIndex], "Case with details should hide applicant phone"),
+                () -> assertEquals("-", fieldsWithDetails[respondentPhoneIndex], "Case with details should hide respondent phone"),
+                () -> assertEquals(APPLICANT_PHONE, fieldsWithoutDetails[applicantPhoneIndex], "Case without confidential flags should show applicant phone"),
+                () -> assertEquals(RESPONDENT_PHONE, fieldsWithoutDetails[respondentPhoneIndex], "Case without confidential flags should show respondent phone")
+            );
+        }
+
+        private int getColumnIndex(String columnHeader) {
+            for (int i = 0; i < EXPECTED_CSV_HEADERS.length; i++) {
+                if (EXPECTED_CSV_HEADERS[i].equals(columnHeader)) {
+                    return i;
+                }
+            }
+            throw new IllegalArgumentException("Column header not found: " + columnHeader);
+        }
+    }
+
     static class TestDataFactory {
         static AcroCaseData createStandardCaseData() {
             PartyDetails respondent = createPartyDetails(
@@ -283,6 +386,67 @@ class CsvWriterTest {
             );
 
             return createCaseData(respondent, applicant, "9am-5pm weekdays");
+        }
+
+        static AcroCaseData createCaseDataWithConfidentialDetailsCollections() {
+            // Create parties with confidential flags set
+            PartyDetails respondent = createPartyDetails(
+                    "John", "Doe", "1994-07-05",
+                    RESPONDENT_ADDRESS_LINE1, RESPONDENT_ADDRESS_LINE2, RESPONDENT_POSTCODE,
+                    RESPONDENT_PHONE, RESPONDENT_EMAIL, YesOrNo.Yes, YesOrNo.Yes, YesOrNo.Yes
+            );
+            PartyDetails applicant = createPartyDetails(
+                    "Jane", "Smith", "1990-12-11",
+                    APPLICANT_ADDRESS_LINE1, APPLICANT_ADDRESS_LINE2, APPLICANT_POSTCODE,
+                    APPLICANT_PHONE, APPLICANT_EMAIL, YesOrNo.Yes, YesOrNo.Yes, YesOrNo.Yes
+            );
+
+            // Create confidential details collections
+            ApplicantConfidentialityDetails applicantConfDetails = ApplicantConfidentialityDetails.builder()
+                    .firstName("Jane")
+                    .lastName("Smith")
+                    .phoneNumber(APPLICANT_PHONE)
+                    .email(APPLICANT_EMAIL)
+                    .address(Address.builder()
+                            .addressLine1(APPLICANT_ADDRESS_LINE1)
+                            .addressLine2(APPLICANT_ADDRESS_LINE2)
+                            .postCode(APPLICANT_POSTCODE)
+                            .build())
+                    .build();
+
+            ApplicantConfidentialityDetails respondentConfDetails = ApplicantConfidentialityDetails.builder()
+                    .firstName("John")
+                    .lastName("Doe")
+                    .phoneNumber(RESPONDENT_PHONE)
+                    .email(RESPONDENT_EMAIL)
+                    .address(Address.builder()
+                            .addressLine1(RESPONDENT_ADDRESS_LINE1)
+                            .addressLine2(RESPONDENT_ADDRESS_LINE2)
+                            .postCode(RESPONDENT_POSTCODE)
+                            .build())
+                    .build();
+
+            Element<ApplicantConfidentialityDetails> applicantConfElement = Element.<ApplicantConfidentialityDetails>builder()
+                    .value(applicantConfDetails)
+                    .build();
+
+            Element<ApplicantConfidentialityDetails> respondentConfElement = Element.<ApplicantConfidentialityDetails>builder()
+                    .value(respondentConfDetails)
+                    .build();
+
+            return AcroCaseData.builder()
+                    .id(1234567891234567L)
+                    .courtName("test")
+                    .courtEpimsId("Manchester")
+                    .caseTypeOfApplication("FL401")
+                    .respondent(respondent)
+                    .applicant(applicant)
+                    .respondents(List.of(Element.<PartyDetails>builder().value(respondent).build()))
+                    .applicants(List.of(Element.<PartyDetails>builder().value(applicant).build()))
+                    .applicantsConfidentialDetails(List.of(applicantConfElement))
+                    .respondentConfidentialDetails(List.of(respondentConfElement))
+                    .daApplicantContactInstructions("9am-5pm weekdays")
+                    .build();
         }
 
         private static PartyDetails createPartyDetails(String firstName, String lastName, String dateOfBirth,
