@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,17 +11,24 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum;
+import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamPolicyUpgradeDetails;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenCaseSubmissionEmail;
 import uk.gov.hmcts.reform.prl.services.EventService;
+import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeFileUploadService;
+import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenEmailService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -29,16 +37,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_1;
 
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -46,6 +58,9 @@ public class CitizenCallbackControllerTest {
 
     @Mock
     private AllTabServiceImpl allTabsService;
+
+    @Mock
+    private MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
 
     @Mock
     private CoreCaseDataApi coreCaseDataApi;
@@ -64,6 +79,12 @@ public class CitizenCallbackControllerTest {
 
     @Mock
     private CitizenEmailService citizenEmailService;
+
+    @Mock
+    private MiamPolicyUpgradeService miamPolicyUpgradeService;
+
+    @Mock
+    private CitizenPartyDetailsMapper citizenPartyDetailsMapper;
 
     @Mock
     private EventService eventService;
@@ -114,6 +135,14 @@ public class CitizenCallbackControllerTest {
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         caseData = CaseData.builder().children(listOfChildren)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .taskListVersion(TASK_LIST_VERSION_V3)
+            .miamPolicyUpgradeDetails(
+                MiamPolicyUpgradeDetails.builder()
+                    .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
+                    .mpuPreviousMiamAttendanceReason(miamPolicyUpgradePreviousAttendance_Value_1)
+                    .mpuDocFromDisputeResolutionProvider(Document.builder().build())
+                    .build())
             .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
             .childrenKnownToLocalAuthorityTextArea("Test")
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
@@ -122,18 +151,21 @@ public class CitizenCallbackControllerTest {
     }
 
     @Test
-    public void updateCitizenApplicationTest() {
+    public void updateCitizenApplicationTest() throws JsonProcessingException {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
+            .data(stringObjectMap).build();
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
-                                                       .data(stringObjectMap).build()).build();
+            .CallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build();
         when(allTabsService.updateAllTabsIncludingConfTab(anyString())).thenReturn(callbackRequest.getCaseDetails());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
+        when(systemUserService.getSysUserToken()).thenReturn("sysToken");
+        when(miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(any(), any())).thenReturn(caseData);
         citizenCallbackController.updateCitizenApplication(authToken, callbackRequest);
 
         verify(allTabsService, times(1)).updateAllTabsIncludingConfTab(anyString());
+        verify(miamPolicyUpgradeFileUploadService).deleteOldMiamPolicyUpgradeDocuments(caseData, "sysToken");
     }
 
     @Test
