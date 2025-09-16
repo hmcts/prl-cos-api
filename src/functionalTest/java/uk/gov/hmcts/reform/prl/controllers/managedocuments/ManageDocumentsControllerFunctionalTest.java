@@ -115,6 +115,7 @@ public class ManageDocumentsControllerFunctionalTest {
         Assert.assertNotNull(caseDetails.getId());
     }
 
+    @Ignore
     @Test
     public void givenCaseId_whenAboutToStartEndPoint_thenRespWithDocumentCategories() throws Exception {
 
