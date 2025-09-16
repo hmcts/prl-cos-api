@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CaseManagementLocation;
-import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 
 import java.util.ArrayList;
@@ -62,7 +61,6 @@ public class AcroCaseData {
     private List<OrderDetails> fl404Orders = new ArrayList<>();
     private List<CaseHearing> caseHearings;
     private List<Element<StmtOfServiceAddRecipient>> stmtOfServiceForOrder;
-    private StatementOfService statementOfService;
     @JsonProperty("daApplicantContactInstructions")
     private String daApplicantContactInstructions;
 }
