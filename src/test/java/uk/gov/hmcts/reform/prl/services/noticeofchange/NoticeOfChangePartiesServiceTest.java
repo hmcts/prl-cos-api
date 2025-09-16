@@ -59,6 +59,7 @@ import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.barrister.BarristerRemoveService;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessClient;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
@@ -66,6 +67,7 @@ import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelec
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
+import uk.gov.hmcts.reform.prl.utils.BarristerHelper;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.noticeofchange.NoticeOfChangePartiesConverter;
 import uk.gov.hmcts.reform.prl.utils.noticeofchange.RespondentPolicyConverter;
@@ -166,6 +168,10 @@ public class NoticeOfChangePartiesServiceTest {
     PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     @Mock
     private CaseAssignmentService caseAssignmentService;
+    @Mock
+    private BarristerHelper barristerHelper;
+    @Mock
+    private BarristerRemoveService barristerRemoveService;
 
     private StartEventResponse startEventResponse;
 
@@ -1233,6 +1239,10 @@ public class NoticeOfChangePartiesServiceTest {
             .isNull();
         assertThat(party.getSolicitorOrg())
             .isEqualTo(Organisation.builder().build());
+        verify(barristerHelper).setAllocatedBarrister(isA(PartyDetails.class),
+                                                 isA(CaseData.class),
+                                                 isA(UUID.class));
+        verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
     }
 
     @Test
@@ -1331,6 +1341,8 @@ public class NoticeOfChangePartiesServiceTest {
 
         Map<String, Object> caseDataUpdated = noticeOfChangePartiesService
             .aboutToSubmitAdminRemoveLegalRepresentative(authToken,callbackRequest);
+        verify(caseAssignmentService).removeAmBarristerCaseRole(isA(CaseData.class),
+                                                                ArgumentMatchers.<Map<Optional<SolicitorRole>, Element<PartyDetails>>>any());
         assertNotNull(caseDataUpdated);
     }
 
@@ -1484,6 +1496,10 @@ public class NoticeOfChangePartiesServiceTest {
         SubmittedCallbackResponse submittedCallbackResponse = noticeOfChangePartiesService
             .submittedAdminRemoveLegalRepresentative(callbackRequest);
         assertNotNull(submittedCallbackResponse);
+        verify(barristerHelper).setAllocatedBarrister(isA(PartyDetails.class),
+                                                 isA(CaseData.class),
+                                                 isA(UUID.class));
+        verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
     }
 
     private static PartyDetails updatePartyDetails(SolicitorUser legalRepresentativeSolicitorDetails,
@@ -1564,6 +1580,7 @@ public class NoticeOfChangePartiesServiceTest {
             any(),
             anyBoolean()
         )).thenReturn(caseData);
+
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .caseDetailsBefore(caseDetails)
@@ -1571,6 +1588,10 @@ public class NoticeOfChangePartiesServiceTest {
 
         noticeOfChangePartiesService.submittedStopRepresenting(callbackRequest);
         verify(eventPublisher, times(1)).publishEvent(any(NoticeOfChangeEvent.class));
+        verify(barristerHelper).setAllocatedBarrister(isA(PartyDetails.class),
+                                                 isA(CaseData.class),
+                                                 isA(UUID.class));
+        verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
     }
 
     @Test
@@ -1630,5 +1651,9 @@ public class NoticeOfChangePartiesServiceTest {
             eq(role),
             eq(caseData)
         );
+        verify(barristerHelper).setAllocatedBarrister(isA(PartyDetails.class),
+                                                 isA(CaseData.class),
+                                                 isA(UUID.class));
+        verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
     }
 }
