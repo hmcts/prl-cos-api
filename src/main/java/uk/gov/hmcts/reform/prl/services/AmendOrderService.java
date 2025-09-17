@@ -47,6 +47,7 @@ public class AmendOrderService {
     private final Time time;
     private final ManageOrderService manageOrderService;
     private final UserService userService;
+    private final FinalisationDetailsService finalisationDetailsService;
 
     public Map<String, Object> updateOrder(CaseData caseData, String authorisation) {
         ManageOrders eventData = caseData.getManageOrders();
@@ -80,6 +81,7 @@ public class AmendOrderService {
         List<Element<OrderDetails>> orders = caseData.getOrderCollection();
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         List<Element<OrderDetails>> updatedOrders;
+        log.info("-- We are in updateAmendedOrderDetails --");
         if (YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
             || WhatToDoWithOrderEnum.finalizeSaveToServeLater
                 .equals(caseData.getServeOrderData().getWhatDoWithOrder())) {
@@ -91,6 +93,7 @@ public class AmendOrderService {
                         .orderDocument(amendedDocument)
                         .dateCreated(caseData.getManageOrders().getCurrentOrderCreatedDateTime() != null
                                          ? caseData.getManageOrders().getCurrentOrderCreatedDateTime() : LocalDateTime.now())
+                        .finalisationDetails(finalisationDetailsService.buildFinalisationDetails(caseData))
                         .otherDetails(order.getValue().getOtherDetails().toBuilder()
                                           .orderServedDate(null)
                                           .createdBy(order.getValue().getOtherDetails().getCreatedBy())
