@@ -76,7 +76,6 @@ pba:
 feature:
   toggle:
     barristerFeatureEnabled: ${BARRISTER_FEATURE_ENABLED:false}
-    acroConfidentialDataAllowed: ${ACRO_CONFIDENTIAL_DATA_ALLOWED:false}
 
 xui:
   url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}

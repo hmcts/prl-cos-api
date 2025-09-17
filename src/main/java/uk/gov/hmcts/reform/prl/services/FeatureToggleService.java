@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.prl.models.Features.ACRO_CONFIDENTIAL_DATA_ALLOWED;
 import static uk.gov.hmcts.reform.prl.models.Features.IS_BARRISTER_FEATURE_ENABLED;
 
 
@@ -45,9 +44,5 @@ public class FeatureToggleService {
      */
     public boolean isBarristerFeatureEnabled() {
         return isFeatureEnabled(IS_BARRISTER_FEATURE_ENABLED);
-    }
-
-    public boolean isAcroConfidentialDataAllowed() {
-        return isFeatureEnabled(ACRO_CONFIDENTIAL_DATA_ALLOWED);
     }
 }

@@ -7,8 +7,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public enum Features {
 
-    IS_BARRISTER_FEATURE_ENABLED("barristerFeatureEnabled"),
-    ACRO_CONFIDENTIAL_DATA_ALLOWED("acroConfidentialDataAllowed");
+    IS_BARRISTER_FEATURE_ENABLED("barristerFeatureEnabled");
 
     private final String name;
 }

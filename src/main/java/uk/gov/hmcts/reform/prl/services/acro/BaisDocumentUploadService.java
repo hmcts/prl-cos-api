@@ -7,9 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroResponse;
-import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
 import java.io.File;
@@ -32,7 +32,7 @@ public class BaisDocumentUploadService {
     private final AcroZipService acroZipService;
     private final CsvWriter csvWriter;
     private final PdfExtractorService pdfExtractorService;
-    private final FeatureToggleService featureToggleService;
+    private final LaunchDarklyClient launchDarklyClient;
 
     @Value("${acro.source-directory}")
     private String sourceDirectory;
@@ -106,7 +106,7 @@ public class BaisDocumentUploadService {
                         );
 
                         if (Optional.ofNullable(englishFile).isPresent()) {
-                            csvWriter.appendCsvRowToFile(csvFile, caseData, featureToggleService.isAcroConfidentialDataAllowed(), englishFile.getName());
+                            csvWriter.appendCsvRowToFile(csvFile, caseData, launchDarklyClient.isFeatureEnabled("acro-confidential-data-allowed"), englishFile.getName());
                         }
                         log.info(
                             "FL404a document processing completed. Successfully processed {}/{} documents",
