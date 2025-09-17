@@ -425,11 +425,10 @@ public class UploadAdditionalApplicationService {
             if (StringUtils.isNotEmpty(caseData.getUploadAdditionalApplicationData().getRepresentedPartyType())) {
                 log.info("Inside mapping solicitor journey C2 inside if representedPartyType {}",
                          caseData.getUploadAdditionalApplicationData().getRepresentedPartyType());
-                log.info("partyName {}", partyName);
-                switch (caseData.getUploadAdditionalApplicationData().getRepresentedPartyType()) {
-                    case CA_APPLICANT, DA_APPLICANT -> category = "applicant";
-                    case CA_RESPONDENT, DA_RESPONDENT -> category = "respondent";
-                    default -> category = "";
+                if (StringUtils.isNotEmpty(partyName) && partyName.toLowerCase().contains("applicant")) {
+                    category = "applicant";
+                } else if (StringUtils.isNotEmpty(partyName) && partyName.toLowerCase().contains("respondent")) {
+                    category = "respondent";
                 }
             }
             log.info("Inside mapping solicitor journey C2 category after if {}", category);
