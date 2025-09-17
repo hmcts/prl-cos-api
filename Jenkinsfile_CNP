@@ -1,5 +1,6 @@
 #!groovy
 import uk.gov.hmcts.contino.AppPipelineDsl
+import uk.gov.hmcts.contino.GithubAPI
 
 properties([
   [$class: 'GithubProjectProperty', projectUrlStr: 'https://github.com/hmcts/prl-cos-api.git'],
@@ -23,6 +24,23 @@ static Map<String, Object> secret(String secretName, String envVariable) {
   envVariable: envVariable
  ]
 }
+
+def setPreviewEnvVars() {
+  def githubApi = new GithubAPI(this)
+
+  env.CORE_CASE_DATA_API_URL = "http://ccd-data-store-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
+  env.CCD_CASE_DOCS_AM_API = "http://ccd-case-document-am-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
+  env.ACA_SERVICE_API_BASEURL = "http://aac-manage-case-assignment-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
+  env.BUNDLE_URL = "http://em-ccd-orchestrator-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
+
+  if (githubApi.checkForLabel(env.BRANCH_NAME, 'pr-values:def')) {
+    env.CORE_CASE_DATA_API_URL = "http://prl-ccd-definitions-pr-2871-ccd-data-store-api"
+    env.CCD_CASE_DOCS_AM_API = "http://prl-ccd-definitions-pr-2871-cdam"
+    env.ACA_SERVICE_API_BASEURL = "http://prl-ccd-definitions-pr-2871-aac-manage-case-assignment"
+    env.BUNDLE_URL = "http://prl-ccd-definitions-pr-2871-em-ccdorc"
+  }
+}
+
 
 def secrets = [
    'prl-${env}':[
@@ -116,6 +134,7 @@ withPipeline(type, product, component) {
   }
   onPR() {
     env.ENV = 'preview'
+    setPreviewEnvVars();
     enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
   }
 }
