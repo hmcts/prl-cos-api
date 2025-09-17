@@ -31,7 +31,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
-class BaisDocumentUploadServiceTest {
+class BaisDocumentUplgitoadServiceTest {
 
     private static final String AUTH_TOKEN = "AuthToken";
     private static final String CASE_ID = "1";
@@ -67,7 +67,7 @@ class BaisDocumentUploadServiceTest {
 
         service.uploadFL404Orders();
 
-        verify(csvWriter).appendCsvRowToFile(eq(tempCsv), any(AcroCaseData.class), eq(false), eq(null));
+        verify(csvWriter).appendCsvRowToFile(eq(tempCsv), any(AcroCaseData.class), eq(null));
     }
 
     @ParameterizedTest(name = "{1}")
@@ -84,7 +84,7 @@ class BaisDocumentUploadServiceTest {
         service.uploadFL404Orders();
 
         verify(csvWriter, Mockito.times(successfulDownloads))
-            .appendCsvRowToFile(eq(tempCsv), any(AcroCaseData.class), eq(false), anyString());
+            .appendCsvRowToFile(eq(tempCsv), any(AcroCaseData.class), anyString());
         verify(pdfExtractorService, Mockito.times(2))
             .downloadPdf(anyString(), eq(CASE_ID), any(Document.class), eq(AUTH_TOKEN));
     }

@@ -6,6 +6,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseData;
 
@@ -36,6 +37,8 @@ public class CsvWriter {
 
     @Value("${acro.source-directory}")
     private String sourceDirectory;
+
+    private final LaunchDarklyClient launchDarklyClient;
 
     public enum CsvColumn {
         CASE_NUMBER("Case No.", "id"),
@@ -114,12 +117,12 @@ public class CsvWriter {
      * Creates CSV row data for a single case.
      * Returns a list of strings that can be written to a CSV file by another service.
      *
-     * @param ccdOrderData        the case data to convert to CSV row
-     * @param confidentialAllowed toggle to include confidential data or replace with "-"
-     * @param orderFilename       the filename to be added to the Order File Name column
+     * @param ccdOrderData  the case data to convert to CSV row
+     * @param orderFilename the filename to be added to the Order File Name column
      * @return list of strings representing the CSV row data
      */
-    public List<String> createCsvRowData(AcroCaseData ccdOrderData, boolean confidentialAllowed, String orderFilename) {
+    public List<String> createCsvRowData(AcroCaseData ccdOrderData, String orderFilename) {
+        boolean confidentialAllowed = launchDarklyClient.isFeatureEnabled("acro-confidential-data-allowed");
         List<String> record = new ArrayList<>();
         for (CsvColumn column : COLUMNS) {
             Object value;
@@ -146,14 +149,13 @@ public class CsvWriter {
      * Appends a CSV row to an existing CSV file.
      * Uses the createCsvRowData method to generate the row data and writes it to the file.
      *
-     * @param csvFile             the CSV file to append to
-     * @param caseData            the case data to convert to CSV row
-     * @param confidentialAllowed toggle to include confidential data or replace with "-"
-     * @param filename            the filename to be added to the Order File Name column
+     * @param csvFile   the CSV file to append to
+     * @param caseData  the case data to convert to CSV row
+     * @param filename  the filename to be added to the Order File Name column
      * @throws IOException if writing to the file fails
      */
-    public void appendCsvRowToFile(File csvFile, AcroCaseData caseData, boolean confidentialAllowed, String filename) throws IOException {
-        List<String> rowData = createCsvRowData(caseData, confidentialAllowed, filename);
+    public void appendCsvRowToFile(File csvFile, AcroCaseData caseData, String filename) throws IOException {
+        List<String> rowData = createCsvRowData(caseData, filename);
 
         CSVFormat csvFormat = CSVFormat.DEFAULT;
         try (FileWriter fileWriter = new FileWriter(csvFile, true);

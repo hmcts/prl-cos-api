@@ -54,7 +54,7 @@ public class BaisDocumentUploadService {
 
             if (acroResponse.getTotal() == 0 || acroResponse.getCases() == null || acroResponse.getCases().isEmpty()) {
                 log.info("Search has resulted empty cases with Final FL404a orders, creating empty CSV file");
-                csvWriter.appendCsvRowToFile(csvFile, AcroCaseData.builder().build(), false, null);
+                csvWriter.appendCsvRowToFile(csvFile, AcroCaseData.builder().build(), null);
             } else {
                 processCasesAndCreateCsvRows(csvFile, acroResponse, sysUserToken);
             }
@@ -106,8 +106,7 @@ public class BaisDocumentUploadService {
                         );
 
                         if (Optional.ofNullable(englishFile).isPresent()) {
-                            csvWriter.appendCsvRowToFile(csvFile, caseData,
-                                    launchDarklyClient.isFeatureEnabled("acro-confidential-data-allowed"), englishFile.getName());
+                            csvWriter.appendCsvRowToFile(csvFile, caseData, englishFile.getName());
                         }
                         log.info(
                             "FL404a document processing completed. Successfully processed {}/{} documents",

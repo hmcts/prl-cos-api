@@ -9,8 +9,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -32,10 +34,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("CSV Writer Tests")
 class CsvWriterTest {
+
+    private static final String ACRO_CONFIDENTIAL_DATA_FEATURE_FLAG = "acro-confidential-data-allowed";
+    private static final String TEST_ORDER_FILENAME = "test-order.pdf";
 
     private static final String[] EXPECTED_CSV_HEADERS = {
         "Case No.", "Court Name/Location", "Court Code", "Order Name", "Court Date", "Order Expiry Date",
@@ -60,6 +66,9 @@ class CsvWriterTest {
 
     @InjectMocks
     private CsvWriter csvWriter;
+
+    @Mock
+    private LaunchDarklyClient launchDarklyClient;
 
     @BeforeEach
     void setUp() throws IOException {
@@ -106,13 +115,18 @@ class CsvWriterTest {
     @DisplayName("CSV Row Data Creation Tests")
     class CsvRowDataCreationTests {
 
+        @BeforeEach
+        void setUpLaunchDarkly() {
+            when(launchDarklyClient.isFeatureEnabled(ACRO_CONFIDENTIAL_DATA_FEATURE_FLAG)).thenReturn(false);
+        }
+
         @Test
         @DisplayName("Should create CSV row data with filename")
         void shouldCreateCsvRowDataWithFilename() {
             AcroCaseData caseData = TestDataFactory.createStandardCaseData();
-            String filename = "test-order.pdf";
+            String filename = TEST_ORDER_FILENAME;
 
-            List<String> rowData = csvWriter.createCsvRowData(caseData, true, filename);
+            List<String> rowData = csvWriter.createCsvRowData(caseData, filename);
 
             assertAll(
                 "CSV row data validation",
@@ -127,7 +141,7 @@ class CsvWriterTest {
         void shouldCreateCsvRowDataWithoutFilename() {
             AcroCaseData caseData = TestDataFactory.createStandardCaseData();
 
-            List<String> rowData = csvWriter.createCsvRowData(caseData, true, null);
+            List<String> rowData = csvWriter.createCsvRowData(caseData, null);
 
             assertAll(
                 "CSV row data validation",
@@ -141,16 +155,24 @@ class CsvWriterTest {
         @MethodSource("confidentialityTestCases")
         @DisplayName("Should handle field confidentiality correctly")
         void shouldHandleFieldConfidentialityCorrectly(String fieldType, AcroCaseData caseData, String expectedValue) {
-            List<String> blankRowData = csvWriter.createCsvRowData(caseData, false, "order.pdf");
-            List<String> includeRowData = csvWriter.createCsvRowData(caseData, true, "order.pdf");
+            // Test with feature flag disabled (confidential data should be masked)
+            when(launchDarklyClient.isFeatureEnabled(ACRO_CONFIDENTIAL_DATA_FEATURE_FLAG)).thenReturn(false);
+            List<String> maskedRowData = csvWriter.createCsvRowData(caseData, TEST_ORDER_FILENAME);
+            String maskedContent = String.join(",", maskedRowData);
 
-            String blankContent = String.join(",", blankRowData);
-            String includeContent = String.join(",", includeRowData);
+            // Test with feature flag enabled (confidential data should be included)
+            when(launchDarklyClient.isFeatureEnabled(ACRO_CONFIDENTIAL_DATA_FEATURE_FLAG)).thenReturn(true);
+            List<String> unmaskedRowData = csvWriter.createCsvRowData(caseData, TEST_ORDER_FILENAME);
+            String unmaskedContent = String.join(",", unmaskedRowData);
 
             assertAll(
-                "Confidentiality handling",
-                () -> assertFalse(blankContent.contains(expectedValue), fieldType + " should be blanked when confidential and not allowed"),
-                () -> assertTrue(includeContent.contains(expectedValue), fieldType + " should be included when confidential but allowed")
+                "Confidentiality handling for " + fieldType,
+                () -> assertFalse(maskedContent.contains(expectedValue),
+                    fieldType + " should be masked when feature flag is disabled"),
+                () -> assertTrue(unmaskedContent.contains(expectedValue),
+                    fieldType + " should be included when feature flag is enabled"),
+                () -> assertTrue(maskedContent.contains("-"),
+                    "Masked content should contain '-' replacement")
             );
         }
 
@@ -168,14 +190,19 @@ class CsvWriterTest {
     @DisplayName("CSV File Writing Tests")
     class CsvFileWritingTests {
 
+        @BeforeEach
+        void setUpLaunchDarkly() {
+            when(launchDarklyClient.isFeatureEnabled(ACRO_CONFIDENTIAL_DATA_FEATURE_FLAG)).thenReturn(false);
+        }
+
         @Test
         @DisplayName("Should append single CSV row to file")
         void shouldAppendSingleCsvRowToFile() throws IOException {
             File csvFile = csvWriter.createCsvFileWithHeaders();
             AcroCaseData caseData = TestDataFactory.createStandardCaseData();
-            String filename = "test-order.pdf";
+            String filename = TEST_ORDER_FILENAME;
 
-            csvWriter.appendCsvRowToFile(csvFile, caseData, true, filename);
+            csvWriter.appendCsvRowToFile(csvFile, caseData, filename);
 
             List<String> lines = Files.readAllLines(csvFile.toPath());
 
@@ -199,7 +226,7 @@ class CsvWriterTest {
             );
 
             for (int i = 0; i < cases.size(); i++) {
-                csvWriter.appendCsvRowToFile(csvFile, cases.get(i), true, "order-" + (i + 1) + ".pdf");
+                csvWriter.appendCsvRowToFile(csvFile, cases.get(i), "order-" + (i + 1) + ".pdf");
             }
 
             List<String> lines = Files.readAllLines(csvFile.toPath());
