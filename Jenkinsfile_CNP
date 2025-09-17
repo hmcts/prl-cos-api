@@ -35,6 +35,7 @@ def setPreviewEnvVars() {
   env.BUNDLE_URL = "http://em-ccd-orchestrator-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
 
   echo '111 CORE_CASE_DATA_API_URL is ${env.CORE_CASE_DATA_API_URL}'
+  echo "111 CORE_CASE_DATA_API_URL is ${env.CORE_CASE_DATA_API_URL}"
   echo '222 CCD_CASE_DOCS_AM_API is ${env.CCD_CASE_DOCS_AM_API}'
   echo '333 ACA_SERVICE_API_BASEURL is ${env.ACA_SERVICE_API_BASEURL}'
   echo '444 BUNDLE_URL is ${env.BUNDLE_URL}'
@@ -46,6 +47,7 @@ def setPreviewEnvVars() {
     env.BUNDLE_URL = "http://prl-ccd-definitions-pr-2871-em-ccdorc"
   }
   echo 'CORE_CASE_DATA_API_URL is ${env.CORE_CASE_DATA_API_URL}'
+  echo "222 CORE_CASE_DATA_API_URL is ${env.CORE_CASE_DATA_API_URL}"
   echo 'CCD_CASE_DOCS_AM_API is ${env.CCD_CASE_DOCS_AM_API}'
   echo 'ACA_SERVICE_API_BASEURL is ${env.ACA_SERVICE_API_BASEURL}'
   echo 'BUNDLE_URL is ${env.BUNDLE_URL}'
