@@ -419,17 +419,12 @@ public class UploadAdditionalApplicationService {
     private C2DocumentBundle getC2DocumentBundle(CaseData caseData, String author, String currentDateTime, String partyName) {
         C2DocumentBundle c2DocumentBundle = null;
         if (caseData.getUploadAdditionalApplicationData().getTemporaryC2Document() != null) {
-
             String category = "";
             log.info("Inside mapping solicitor journey C2 category before if {}", category);
-            if (StringUtils.isNotEmpty(caseData.getUploadAdditionalApplicationData().getRepresentedPartyType())) {
-                log.info("Inside mapping solicitor journey C2 inside if representedPartyType {}",
-                         caseData.getUploadAdditionalApplicationData().getRepresentedPartyType());
-                if (StringUtils.isNotEmpty(partyName) && partyName.toLowerCase().contains("applicant")) {
-                    category = "applicant";
-                } else if (StringUtils.isNotEmpty(partyName) && partyName.toLowerCase().contains("respondent")) {
-                    category = "respondent";
-                }
+            if (StringUtils.isNotEmpty(partyName) && partyName.toLowerCase().contains("applicant")) {
+                category = "applicant";
+            } else if (StringUtils.isNotEmpty(partyName) && partyName.toLowerCase().contains("respondent")) {
+                category = "respondent";
             }
             log.info("Inside mapping solicitor journey C2 category after if {}", category);
             String cat = categoryForParty(category);

@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +22,7 @@ import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalAppli
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2AdditionalOrdersRequestedCa;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2ApplicationTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.UrgencyTimeFrameType;
+import uk.gov.hmcts.reform.prl.mapper.citizen.awp.CitizenAwpMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
@@ -45,6 +47,7 @@ import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelec
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.UploadAdditionalApplicationUtils;
 
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -104,8 +107,22 @@ class UploadAdditionalApplicationServiceTest {
 
     PartyDetails party;
 
+    // reflect: private String categoryForParty(String)
+    private Method categoryForParty;
+
+    // reflect: private static Document withCategory(Document, String)
+    private Method withCategory;
+
     @BeforeEach
     public void setUp() throws Exception {
+
+        categoryForParty = UploadAdditionalApplicationService.class.getDeclaredMethod("categoryForParty", String.class);
+        categoryForParty.setAccessible(true);
+
+        withCategory = UploadAdditionalApplicationService.class
+            .getDeclaredMethod("withCategory", Document.class, String.class);
+        withCategory.setAccessible(true);
+
         List<DynamicMultiselectListElement> dynamicMultiselectListElements = new ArrayList<>();
         DynamicMultiselectListElement partyDynamicMultiselectListElement = DynamicMultiselectListElement.builder()
             .code("f2847b15-dbb8-4df0-868a-420d9de11d29")
@@ -299,6 +316,14 @@ class UploadAdditionalApplicationServiceTest {
         assertNotNull(additionalApplicationsBundle);
         assertEquals(2, additionalApplicationsBundle.size());
     }
+
+    @Test
+    void testGetAdditionalApplicationElementsMappingC2() throws Exception {
+
+
+
+    }
+
 
     @Test
     void testGetAdditionalApplicationElementsWithoutAuthor() throws Exception {
@@ -732,4 +757,80 @@ class UploadAdditionalApplicationServiceTest {
         assertTrue(uploadAdditionalApplicationService.populateHearingList("testAuth", callbackRequest).containsKey(
             TEMPORARY_C_2_DOCUMENT));
     }
+
+    @Test
+    void applicantParty_setsApplicantCategoryOnDocs() throws Exception {
+        String party = "applicant";
+        String category = (String) categoryForParty.invoke(uploadAdditionalApplicationService, party);
+        Document inputDoc = Document.builder()
+            .documentUrl("doc-url")
+            .documentBinaryUrl("bin-url")
+            .documentFileName("c2.pdf")
+            .build();
+
+        @SuppressWarnings("unchecked")
+        Document result =
+            (Document) withCategory.invoke(null, inputDoc, category);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("applicationsWithinProceedings", result.getCategoryId());
+        // sanity: other fields preserved
+        Assertions.assertEquals("c2.pdf", result.getDocumentFileName());
+    }
+
+    @Test
+    void respondentParty_setsRespondentCategoryOnDocs() throws Exception {
+        String party = "respondent";
+        String category = (String) categoryForParty.invoke(uploadAdditionalApplicationService, party);
+        Document inputDoc = Document.builder()
+            .documentUrl("doc-url")
+            .documentBinaryUrl("bin-url")
+            .documentFileName("c2.pdf")
+            .build();
+
+        @SuppressWarnings("unchecked")
+        Document result =
+            (Document) withCategory.invoke(null, inputDoc, category);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("applicationsWithinProceedingsRespondent", result.getCategoryId());
+    }
+
+    @Test
+    void unknownParty_leavesCategoryUnset() throws Exception {
+        String category = (String) categoryForParty.invoke(uploadAdditionalApplicationService, "some-random-party");
+        Assertions.assertNull(category, "Unknown party should yield null category");
+        Document inputDoc = Document.builder()
+            .documentUrl("doc-url")
+            .documentBinaryUrl("bin-url")
+            .documentFileName("c2.pdf")
+            .build();
+
+        @SuppressWarnings("unchecked")
+        Document result =
+            (Document) withCategory.invoke(null, inputDoc, category);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertNull(result.getCategoryId(), "Category must not be defaulted when party is unknown");
+    }
+
+    @Test
+    void nullParty_leavesCategoryUnset() throws Exception {
+        String category = (String) categoryForParty.invoke(uploadAdditionalApplicationService, new Object[]{null});
+        Assertions.assertNull(category, "Null party should yield null category");
+        Document inputDoc = Document.builder()
+            .documentUrl("doc-url")
+            .documentBinaryUrl("bin-url")
+            .documentFileName("c2.pdf")
+            .build();
+
+        @SuppressWarnings("unchecked")
+        Document result =
+            (Document) withCategory.invoke(null, inputDoc, category);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertNull(result.getCategoryId(), "Category must not be defaulted when party is null");
+    }
+
+
 }
