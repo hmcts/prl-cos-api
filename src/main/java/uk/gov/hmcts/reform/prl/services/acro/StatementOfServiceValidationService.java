@@ -131,8 +131,6 @@ public class StatementOfServiceValidationService {
             return false;
         }
 
-        // Use regex word boundaries to ensure exact word matching
-        // \b represents word boundaries (between word and non-word characters)
         String regex = "\\b" + java.util.regex.Pattern.quote(target) + "\\b";
         return java.util.regex.Pattern.compile(regex).matcher(source).find();
     }
