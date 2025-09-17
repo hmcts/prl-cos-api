@@ -106,7 +106,8 @@ public class BaisDocumentUploadService {
                         );
 
                         if (Optional.ofNullable(englishFile).isPresent()) {
-                            csvWriter.appendCsvRowToFile(csvFile, caseData, launchDarklyClient.isFeatureEnabled("acro-confidential-data-allowed"), englishFile.getName());
+                            csvWriter.appendCsvRowToFile(csvFile, caseData,
+                                    launchDarklyClient.isFeatureEnabled("acro-confidential-data-allowed"), englishFile.getName());
                         }
                         log.info(
                             "FL404a document processing completed. Successfully processed {}/{} documents",
