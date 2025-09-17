@@ -7,11 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroResponse;
-import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
 import java.io.File;
@@ -20,7 +17,6 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -112,7 +108,8 @@ public class BaisDocumentUploadService {
                             csvWriter.appendCsvRowToFile(csvFile, caseData, true, englishFile.getName());
                         }
 
-                        if (statementOfServiceValidationService.isOrderServedViaStatementOfService(order, caseData.getStmtOfServiceForOrder(), caseData)) {
+                        if (statementOfServiceValidationService.isOrderServedViaStatementOfService(
+                                order, caseData.getStmtOfServiceForOrder(), caseData)) {
                             String statementOfServiceFileName = englishFileName.replace(".pdf", "_served.pdf");
                             pdfExtractorService.downloadPdf(
                                 statementOfServiceFileName,

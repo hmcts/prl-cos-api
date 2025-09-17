@@ -24,9 +24,9 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 @ExtendWith(MockitoExtension.class)
@@ -72,7 +72,7 @@ class StatementOfServiceValidationServiceTest {
                 .servedDateTimeOption(LocalDateTime.now())
                 .build();
 
-            boolean result = validationService.SoSHasServedSubmittedTime(sos);
+            boolean result = validationService.statementOfServiceHasServedSubmittedTime(sos);
 
             assertTrue(result, "Should return true when servedDateTimeOption is populated");
         }
@@ -84,7 +84,7 @@ class StatementOfServiceValidationServiceTest {
                 .submittedDateTime(LocalDateTime.now())
                 .build();
 
-            boolean result = validationService.SoSHasServedSubmittedTime(sos);
+            boolean result = validationService.statementOfServiceHasServedSubmittedTime(sos);
 
             assertTrue(result, "Should return true when submittedDateTime is populated");
         }
@@ -96,7 +96,7 @@ class StatementOfServiceValidationServiceTest {
                 .partiesServedDateTime("2024-01-15 10:30")
                 .build();
 
-            boolean result = validationService.SoSHasServedSubmittedTime(sos);
+            boolean result = validationService.statementOfServiceHasServedSubmittedTime(sos);
 
             assertTrue(result, "Should return true when partiesServedDateTime is populated");
         }
@@ -110,7 +110,7 @@ class StatementOfServiceValidationServiceTest {
                 .partiesServedDateTime("2024-01-15 10:30")
                 .build();
 
-            boolean result = validationService.SoSHasServedSubmittedTime(sos);
+            boolean result = validationService.statementOfServiceHasServedSubmittedTime(sos);
 
             assertTrue(result, "Should return true when multiple date fields are populated");
         }
@@ -122,7 +122,7 @@ class StatementOfServiceValidationServiceTest {
                 .selectedPartyName("John Doe")
                 .build();
 
-            boolean result = validationService.SoSHasServedSubmittedTime(sos);
+            boolean result = validationService.statementOfServiceHasServedSubmittedTime(sos);
 
             assertFalse(result, "Should return false when no date fields are populated");
         }
@@ -137,7 +137,7 @@ class StatementOfServiceValidationServiceTest {
                 .selectedPartyName("John Doe")
                 .build();
 
-            boolean result = validationService.SoSHasServedSubmittedTime(sos);
+            boolean result = validationService.statementOfServiceHasServedSubmittedTime(sos);
 
             assertFalse(result, "Should return false when all date fields are null");
         }
@@ -151,7 +151,7 @@ class StatementOfServiceValidationServiceTest {
                 .partiesServedDateTime(partiesServedDateTime)
                 .build();
 
-            boolean result = validationService.SoSHasServedSubmittedTime(sos);
+            boolean result = validationService.statementOfServiceHasServedSubmittedTime(sos);
 
             assertFalse(result, "Should return false when partiesServedDateTime is null, empty or whitespace");
         }
@@ -414,7 +414,7 @@ class StatementOfServiceValidationServiceTest {
 
             assertAll(
                 "Complete realistic scenario validation",
-                () -> assertTrue(validationService.SoSHasServedSubmittedTime(realisticSos),
+                () -> assertTrue(validationService.statementOfServiceHasServedSubmittedTime(realisticSos),
                     "Statement of service should be completed"),
                 () -> assertTrue(validationService.isRespondentIncludedInService(realisticSos, realisticCaseData),
                     "Respondent should be included in service"),

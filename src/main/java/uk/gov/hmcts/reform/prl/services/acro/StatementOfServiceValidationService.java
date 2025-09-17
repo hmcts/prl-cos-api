@@ -38,9 +38,9 @@ public class StatementOfServiceValidationService {
 
         boolean isServed = stmtOfServiceForOrder.stream()
             .map(Element::getValue)
-            .anyMatch(sos -> sos != null &&
-                SoSHasServedSubmittedTime(sos) &&
-                isRespondentIncludedInService(sos, caseData));
+            .anyMatch(sos -> sos != null
+                && statementOfServiceHasServedSubmittedTime(sos)
+                && isRespondentIncludedInService(sos, caseData));
 
         return isServed;
     }
@@ -52,14 +52,14 @@ public class StatementOfServiceValidationService {
      * @param sos the statement of service record to check
      * @return true if the statement of service has been completed
      */
-    public boolean SoSHasServedSubmittedTime(StmtOfServiceAddRecipient sos) {
-        return sos.getServedDateTimeOption() != null ||
-               sos.getSubmittedDateTime() != null ||
-               isPartiesServedDateTimeValid(sos.getPartiesServedDateTime());
+    public boolean statementOfServiceHasServedSubmittedTime(StmtOfServiceAddRecipient sos) {
+        return sos.getServedDateTimeOption() != null
+            || sos.getSubmittedDateTime() != null
+            || isPartiesServedDateTimeValid(sos.getPartiesServedDateTime());
     }
 
     /**
-     * Validates that partiesServedDateTime is not null, empty, or whitespace
+     * Validates that partiesServedDateTime is not null, empty, or whitespace.
      */
     private boolean isPartiesServedDateTimeValid(String partiesServedDateTime) {
         return partiesServedDateTime != null && !partiesServedDateTime.trim().isEmpty();
