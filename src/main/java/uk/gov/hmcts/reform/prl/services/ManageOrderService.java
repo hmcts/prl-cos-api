@@ -2301,7 +2301,7 @@ public class ManageOrderService {
             typeOfOrder,
             serveOrderData
         );
-        log.info("-- We are in getOrderDetailsElement (manage order) --");
+
         populateChildrenListForDocmosis(caseData);
         if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
             caseData = filterEmptyHearingDetails(caseData);

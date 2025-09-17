@@ -56,9 +56,6 @@ public class AmendOrderServiceTest {
     private UserService userService;
 
     @Mock
-    private FinalisationDetailsService finalisationDetailsService;
-
-    @Mock
     private Time time;
 
     private final String validAuth = "VALID";
