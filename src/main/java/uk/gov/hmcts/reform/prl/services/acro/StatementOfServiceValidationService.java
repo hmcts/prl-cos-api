@@ -10,8 +10,8 @@ import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecip
 import java.util.List;
 
 /**
- * Service responsible for validating statement of service data and determining
- * if orders have been properly served to respondents.
+ * Service responsible for determining if order is served via
+ * statement of service for ACRO cases.
  */
 @Service
 @Slf4j
@@ -21,7 +21,7 @@ public class StatementOfServiceValidationService {
      * Determines if an order has been served via statement of service to the respondent.
      *
      * @param order the order to check
-     * @param stmtOfServiceForOrder list of statement of service records
+     * @param stmtOfServiceForOrder statement of service records
      * @param caseData the case data containing respondent information
      * @return true if the order has been served to the respondent via statement of service
      */
@@ -30,39 +30,39 @@ public class StatementOfServiceValidationService {
             List<Element<StmtOfServiceAddRecipient>> stmtOfServiceForOrder,
             AcroCaseData caseData) {
 
-        log.debug("Checking if order has been served via statement of service for case {}", caseData.getId());
 
-        // Check if statement of service list exists and is not empty
         if (stmtOfServiceForOrder == null || stmtOfServiceForOrder.isEmpty()) {
             log.debug("No statement of service records found");
             return false;
         }
 
-        // Check if any statement of service has been completed and includes the respondent
         boolean isServed = stmtOfServiceForOrder.stream()
             .map(Element::getValue)
             .anyMatch(sos -> sos != null &&
-                isStatementOfServiceCompleted(sos) &&
+                SoSHasServedSubmittedTime(sos) &&
                 isRespondentIncludedInService(sos, caseData));
 
-        log.debug("Order served via statement of service: {}", isServed);
         return isServed;
     }
 
     /**
-     * Checks if a statement of service has been completed by verifying
-     * that at least one service date/time field is populated.
+     * Checks if a statement of service has at least one
+     * service date/time field is populated.
      *
      * @param sos the statement of service record to check
      * @return true if the statement of service has been completed
      */
-    public boolean isStatementOfServiceCompleted(StmtOfServiceAddRecipient sos) {
-        boolean isCompleted = sos.getServedDateTimeOption() != null ||
-                             sos.getSubmittedDateTime() != null ||
-                             sos.getPartiesServedDateTime() != null;
+    public boolean SoSHasServedSubmittedTime(StmtOfServiceAddRecipient sos) {
+        return sos.getServedDateTimeOption() != null ||
+               sos.getSubmittedDateTime() != null ||
+               isPartiesServedDateTimeValid(sos.getPartiesServedDateTime());
+    }
 
-        log.debug("Statement of service completed: {}", isCompleted);
-        return isCompleted;
+    /**
+     * Validates that partiesServedDateTime is not null, empty, or whitespace
+     */
+    private boolean isPartiesServedDateTimeValid(String partiesServedDateTime) {
+        return partiesServedDateTime != null && !partiesServedDateTime.trim().isEmpty();
     }
 
     /**
@@ -77,50 +77,63 @@ public class StatementOfServiceValidationService {
     public boolean isRespondentIncludedInService(StmtOfServiceAddRecipient sos, AcroCaseData caseData) {
         String selectedPartyName = sos.getSelectedPartyName();
 
-        // Validate input parameters
         if (selectedPartyName == null || selectedPartyName.trim().isEmpty()) {
-            log.debug("No selected party name found in statement of service");
             return false;
         }
 
         if (caseData.getRespondent() == null) {
-            log.debug("No respondent found in case data");
             return false;
         }
 
         String respondentFirstName = caseData.getRespondent().getFirstName();
         String respondentLastName = caseData.getRespondent().getLastName();
 
-        // If respondent names are missing, cannot verify
         if (respondentFirstName == null || respondentLastName == null) {
-            log.debug("Respondent first name or last name is missing");
             return false;
         }
 
-        // Perform case-insensitive name matching
         return isNameMatch(selectedPartyName, respondentFirstName, respondentLastName);
     }
 
     /**
      * Performs case-insensitive matching to check if the selected party name
-     * contains both the respondent's first and last names.
+     * contains both the respondent's first and last names as complete words.
      *
      * @param selectedPartyName the party name from statement of service
      * @param firstName the respondent's first name
      * @param lastName the respondent's last name
-     * @return true if both names are found in the selected party name
+     * @return true if both names are found as complete words in the selected party name
      */
     private boolean isNameMatch(String selectedPartyName, String firstName, String lastName) {
         String normalizedSelectedParty = selectedPartyName.toLowerCase().trim();
         String normalizedFirstName = firstName.toLowerCase().trim();
         String normalizedLastName = lastName.toLowerCase().trim();
 
-        boolean containsFirstName = normalizedSelectedParty.contains(normalizedFirstName);
-        boolean containsLastName = normalizedSelectedParty.contains(normalizedLastName);
+        boolean containsFirstName = containsAsWholeWord(normalizedSelectedParty, normalizedFirstName);
+        boolean containsLastName = containsAsWholeWord(normalizedSelectedParty, normalizedLastName);
 
         log.debug("Checking if selectedPartyName '{}' includes respondent '{} {}': firstName={}, lastName={}",
                   selectedPartyName, firstName, lastName, containsFirstName, containsLastName);
 
         return containsFirstName && containsLastName;
+    }
+
+    /**
+     * Checks if a target word exists as a complete word (with word boundaries) in the source text.
+     * This prevents partial matches like "doe" matching "doesmith".
+     *
+     * @param source the source text to search in
+     * @param target the target word to find
+     * @return true if target exists as a complete word in source
+     */
+    private boolean containsAsWholeWord(String source, String target) {
+        if (source == null || target == null || target.isEmpty()) {
+            return false;
+        }
+
+        // Use regex word boundaries to ensure exact word matching
+        // \b represents word boundaries (between word and non-word characters)
+        String regex = "\\b" + java.util.regex.Pattern.quote(target) + "\\b";
+        return java.util.regex.Pattern.compile(regex).matcher(source).find();
     }
 }
