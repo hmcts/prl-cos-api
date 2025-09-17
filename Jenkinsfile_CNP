@@ -1,6 +1,5 @@
 #!groovy
 import uk.gov.hmcts.contino.AppPipelineDsl
-import uk.gov.hmcts.contino.GithubAPI
 
 properties([
   [$class: 'GithubProjectProperty', projectUrlStr: 'https://github.com/hmcts/prl-cos-api.git'],
@@ -24,35 +23,6 @@ static Map<String, Object> secret(String secretName, String envVariable) {
   envVariable: envVariable
  ]
 }
-
-def setPreviewEnvVars() {
-  echo 'setPreviewEnvVars 111'
-  def githubApi = new GithubAPI(this)
-  echo 'setPreviewEnvVars 2222'
-  env.CORE_CASE_DATA_API_URL = "http://ccd-data-store-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
-  env.CCD_CASE_DOCS_AM_API = "http://ccd-case-document-am-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
-  env.ACA_SERVICE_API_BASEURL = "http://aac-manage-case-assignment-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
-  env.BUNDLE_URL = "http://em-ccd-orchestrator-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
-
-  echo '111 CORE_CASE_DATA_API_URL is ${env.CORE_CASE_DATA_API_URL}'
-  echo "111 CORE_CASE_DATA_API_URL is ${env.CORE_CASE_DATA_API_URL}"
-  echo '222 CCD_CASE_DOCS_AM_API is ${env.CCD_CASE_DOCS_AM_API}'
-  echo '333 ACA_SERVICE_API_BASEURL is ${env.ACA_SERVICE_API_BASEURL}'
-  echo '444 BUNDLE_URL is ${env.BUNDLE_URL}'
-
-  if (githubApi.checkForLabel(env.BRANCH_NAME, 'pr-values:def')) {
-    env.CORE_CASE_DATA_API_URL = "http://prl-ccd-definitions-pr-2871-ccd-data-store-api"
-    env.CCD_CASE_DOCS_AM_API = "http://prl-ccd-definitions-pr-2871-cdam"
-    env.ACA_SERVICE_API_BASEURL = "http://prl-ccd-definitions-pr-2871-aac-manage-case-assignment"
-    env.BUNDLE_URL = "http://prl-ccd-definitions-pr-2871-em-ccdorc"
-  }
-  echo 'CORE_CASE_DATA_API_URL is ${env.CORE_CASE_DATA_API_URL}'
-  echo "222 CORE_CASE_DATA_API_URL is ${env.CORE_CASE_DATA_API_URL}"
-  echo 'CCD_CASE_DOCS_AM_API is ${env.CCD_CASE_DOCS_AM_API}'
-  echo 'ACA_SERVICE_API_BASEURL is ${env.ACA_SERVICE_API_BASEURL}'
-  echo 'BUNDLE_URL is ${env.BUNDLE_URL}'
-}
-
 
 def secrets = [
    'prl-${env}':[
@@ -119,7 +89,6 @@ withPipeline(type, product, component) {
   }
 
   afterAlways('test') {
-    echo 'test'
     steps.junit '**/test-results/**/*.xml'
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: 'build/reports/**/*'
   }
@@ -134,7 +103,6 @@ withPipeline(type, product, component) {
 
   // Kubernetes does not retrieve variables from the output terraform
   before('functionalTest:preview') {
-    echo 'functionalTest:preview'
     env.test_environment = 'aat'
   }
   afterAlways('functionalTest:preview') {
@@ -147,9 +115,7 @@ withPipeline(type, product, component) {
     enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
   }
   onPR() {
-    echo 'onPR'
     env.ENV = 'preview'
-    // setPreviewEnvVars();
     enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
   }
 }
