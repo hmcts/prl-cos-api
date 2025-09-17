@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseData;
@@ -43,6 +44,7 @@ class BaisDocumentUploadServiceTest {
     @Mock private AcroZipService acroZipService;
     @Mock private CsvWriter csvWriter;
     @Mock private PdfExtractorService pdfExtractorService;
+    @Mock private LaunchDarklyClient launchDarklyClient;
 
     private File tempCsv;
 
@@ -56,6 +58,7 @@ class BaisDocumentUploadServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(csvWriter.createCsvFileWithHeaders()).thenReturn(tempCsv);
         when(acroZipService.zip()).thenReturn("/path/to/archive.7z");
+        when(launchDarklyClient.isFeatureEnabled("acro-confidential-data-allowed")).thenReturn(false);
     }
 
     @Test
