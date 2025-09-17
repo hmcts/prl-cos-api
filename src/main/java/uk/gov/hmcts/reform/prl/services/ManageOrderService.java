@@ -1036,6 +1036,7 @@ public class ManageOrderService {
                                    .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
                                    .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
                                    .childrenList(getSelectedChildInfoFromMangeOrder(caseData))
+                                   .finalisationDetails(finalisationDetailsService.buildFinalisationDetails(caseData))
                                    .otherDetails(OtherOrderDetails.builder()
                                                      .createdBy(caseData.getJudgeOrMagistratesLastName())
                                                      .orderCreatedBy(userDetails.getFullName())
