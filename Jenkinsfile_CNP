@@ -149,7 +149,7 @@ withPipeline(type, product, component) {
   onPR() {
     echo 'onPR'
     env.ENV = 'preview'
-    setPreviewEnvVars();
+    // setPreviewEnvVars();
     enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
   }
 }
