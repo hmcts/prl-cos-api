@@ -81,6 +81,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
@@ -1239,10 +1240,12 @@ public class NoticeOfChangePartiesServiceTest {
             .isNull();
         assertThat(party.getSolicitorOrg())
             .isEqualTo(Organisation.builder().build());
-        verify(barristerHelper).setAllocatedBarrister(isA(PartyDetails.class),
+        verify(barristerHelper, times(2)).setAllocatedBarrister(isA(PartyDetails.class),
                                                  isA(CaseData.class),
                                                  isA(UUID.class));
         verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
+        verify(partyLevelCaseFlagsService).updateCaseDataWithGeneratePartyCaseFlags(isA(CaseData.class),
+                                                                                    any(Function.class));
     }
 
     @Test
@@ -1496,10 +1499,12 @@ public class NoticeOfChangePartiesServiceTest {
         SubmittedCallbackResponse submittedCallbackResponse = noticeOfChangePartiesService
             .submittedAdminRemoveLegalRepresentative(callbackRequest);
         assertNotNull(submittedCallbackResponse);
-        verify(barristerHelper).setAllocatedBarrister(isA(PartyDetails.class),
+        verify(barristerHelper, times(2)).setAllocatedBarrister(isA(PartyDetails.class),
                                                  isA(CaseData.class),
                                                  isA(UUID.class));
         verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
+        verify(partyLevelCaseFlagsService).updateCaseDataWithGeneratePartyCaseFlags(isA(CaseData.class),
+                                                                                    any(Function.class));
     }
 
     private static PartyDetails updatePartyDetails(SolicitorUser legalRepresentativeSolicitorDetails,
@@ -1588,11 +1593,14 @@ public class NoticeOfChangePartiesServiceTest {
 
         noticeOfChangePartiesService.submittedStopRepresenting(callbackRequest);
         verify(eventPublisher, times(1)).publishEvent(any(NoticeOfChangeEvent.class));
-        verify(barristerHelper).setAllocatedBarrister(isA(PartyDetails.class),
+        verify(barristerHelper, times(2)).setAllocatedBarrister(isA(PartyDetails.class),
                                                  isA(CaseData.class),
                                                  isA(UUID.class));
         verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
+        verify(partyLevelCaseFlagsService).updateCaseDataWithGeneratePartyCaseFlags(isA(CaseData.class),
+                                                                                    any(Function.class));
     }
+
 
     @Test
     public void testSendEmailAndUpdateCaseData_VerifiesSendEmailOnRemovalOfLegalRepresentation() throws Exception {

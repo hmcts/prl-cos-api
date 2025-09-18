@@ -247,6 +247,7 @@ public class AllTabServiceImpl implements AllTabsService {
                 dataMap.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
                 dataMap.put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
             }
+
             combinedFieldsMap = findCaseDataMap(caseData);
             combinedFieldsMap.putAll(dataMap);
         }

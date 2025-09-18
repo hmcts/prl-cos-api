@@ -18,6 +18,9 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenEmailService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -46,6 +49,12 @@ public class CitizenCallbackControllerIntegrationTest {
 
     @MockBean
     AllTabServiceImpl allTabsService;
+
+    @MockBean
+    CitizenPartyDetailsMapper citizenPartyDetailsMapper;
+
+    @MockBean
+    MiamPolicyUpgradeService miamPolicyUpgradeService;
 
     @MockBean
     CoreCaseDataApi coreCaseDataApi;
@@ -95,6 +104,12 @@ public class CitizenCallbackControllerIntegrationTest {
                                                                                        .data(Map.of("caseId", 123L))
                                                                                        .id(123L)
                                                                                        .build());
+
+        CaseData mockData = CaseData.builder()
+                                .id(123L)
+                                .build();
+        when(miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(any(), any())).thenReturn(mockData);
+        when(citizenPartyDetailsMapper.buildUpdatedCaseData(any(), any())).thenReturn(mockData);
         doNothing().when(citizenEmailService).sendCitizenCaseSubmissionEmail(anyString(), any());
 
         mockMvc.perform(
