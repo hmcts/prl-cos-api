@@ -112,8 +112,8 @@ withPipeline(type, product, component) {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: 'build/reports/**/*'
   }
 
-  afterAlways('integrationTest:preview') {
-    echo 'integrationTest:preview'
+  before('akschartsinstall')  {
+    echo 'invoked -- akschartsinstall '
     setPreviewEnvVars();
   }
 
