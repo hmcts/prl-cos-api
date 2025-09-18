@@ -7,8 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroResponse;
+import uk.gov.hmcts.reform.prl.models.dto.acro.CsvData;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
 import java.io.File;
@@ -17,8 +21,13 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Slf4j
 @Service
@@ -52,7 +61,7 @@ public class BaisDocumentUploadService {
 
             if (acroResponse.getTotal() == 0 || acroResponse.getCases() == null || acroResponse.getCases().isEmpty()) {
                 log.info("Search has resulted empty cases with Final FL404a orders, creating empty CSV file");
-                csvWriter.appendCsvRowToFile(csvFile, AcroCaseData.builder().build(), false, null);
+                csvWriter.appendCsvRowToFile(csvFile, CsvData.builder().build(), false, null);
             } else {
                 processCasesAndCreateCsvRows(csvFile, acroResponse, sysUserToken);
             }
@@ -104,7 +113,8 @@ public class BaisDocumentUploadService {
                         );
 
                         if (Optional.ofNullable(englishFile).isPresent()) {
-                            csvWriter.appendCsvRowToFile(csvFile, caseData, false, englishFile.getName());
+                            CsvData csvData = prepareDataForCsv(caseData, order);
+                            csvWriter.appendCsvRowToFile(csvFile, csvData, false, englishFile.getName());
                         }
                         log.info(
                             "FL404a document processing completed. Successfully processed {}/{} documents",
@@ -124,9 +134,51 @@ public class BaisDocumentUploadService {
 
     }
 
+    private CsvData prepareDataForCsv(AcroCaseData caseData, OrderDetails order) {
+
+        return CsvData.builder()
+            .id(caseData.getId())
+            .caseTypeOfApplication(caseData.getCaseTypeOfApplication())
+            .applicant(caseData.getApplicant())
+            .respondent(caseData.getRespondent())
+            .courtName(caseData.getCourtName())
+            .courtEpimsId(caseData.getCourtEpimsId())
+            .courtTypeId(caseData.getCourtTypeId())
+            .currentHearingDate(getNextHearingDateWithInHearing(caseData.getCaseHearings()))
+            .orderExpiryDate(getOrderExpiryDate(order))
+            .build();
+    }
+
     private String getFilePrefix(String caseId, LocalDateTime orderCreatedDate) {
         ZonedDateTime zdt = ZonedDateTime.of(orderCreatedDate, ZoneId.systemDefault());
         return sourceDirectory + "/FL404A-" + caseId + "-" + zdt.toEpochSecond();
+    }
+
+    private LocalDateTime getNextHearingDateWithInHearing(List<CaseHearing> hearings) {
+        if (hearings == null || hearings.isEmpty()) {
+            return null;
+        }
+
+        AtomicReference<LocalDateTime> nextHearingDate = new AtomicReference<>();
+        hearings.stream().filter(h -> h.getHmcStatus().equals(LISTED)).forEach(hearing -> {
+            Optional<LocalDateTime> minDateOfHearingDaySche = nullSafeCollection(hearing.getHearingDaySchedule())
+                .stream()
+                .map(HearingDaySchedule::getHearingStartDateTime)
+                .filter(hearingStartDateTime -> hearingStartDateTime.isAfter(LocalDateTime.now()))
+                .min(LocalDateTime::compareTo);
+
+            minDateOfHearingDaySche.ifPresent(nextHearingDate::set);
+
+        });
+        return nextHearingDate.get();
+    }
+
+    private LocalDateTime getOrderExpiryDate(OrderDetails order) {
+
+        if (order.getFl404CustomFields() != null && order.getFl404CustomFields().getFl404bDateOrderEnd() != null) {
+            return order.getFl404CustomFields().getFl404bDateOrderEnd();
+        }
+        return null;
     }
 
 }
