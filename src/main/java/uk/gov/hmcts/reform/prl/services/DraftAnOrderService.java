@@ -232,6 +232,7 @@ public class DraftAnOrderService {
     private static final String BOLD_END = "</span>";
 
     private final WelshCourtEmail welshCourtEmail;
+    private final FinalisationDetailsService finalisationDetailsService;
 
     public List<Element<DraftOrder>> generateDraftOrderCollection(CaseData caseData, String authorisation) {
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
@@ -559,6 +560,7 @@ public class DraftAnOrderService {
                     );
                 }
                 orderDetails = orderDetails.toBuilder()
+                    .finalisationDetails(finalisationDetailsService.buildFinalisationDetails(caseData))
                     .orderDocument(manageOrderService.getGeneratedDocument(generatedDocumentInfo, false, fieldMap))
                     .orderDocumentWelsh(manageOrderService.getGeneratedDocument(
                         generatedDocumentInfoWelsh,
