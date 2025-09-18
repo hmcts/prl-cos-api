@@ -114,6 +114,12 @@ withPipeline(type, product, component) {
     }
   }
 
+  afterAlways('integrationTest:preview') {
+    onPR() {
+      setPreviewEnvVars();
+    }
+  }
+
   before('functionalTest:aat') {
     env.test_environment = 'aat'
   }
