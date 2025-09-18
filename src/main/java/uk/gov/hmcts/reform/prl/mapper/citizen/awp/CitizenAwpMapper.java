@@ -50,7 +50,7 @@ public class CitizenAwpMapper {
     private static final String DATE_FORMAT = "dd-MMM-yyyy hh:mm:ss a";
 
     private static final String CAT_AWP_APPLICANT   = "applicationsWithinProceedings";
-    private static final String CAT_AWP_RESPONDENT = "applicationsWithinProceedingsRespondent";
+    private static final String CAT_AWP_RESPONDENT = "applicationsWithinProceedingsRes";
 
     private String categoryForParty(String raw) {
         if (raw == null) {

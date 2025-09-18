@@ -792,7 +792,7 @@ class UploadAdditionalApplicationServiceTest {
             (Document) withCategory.invoke(null, inputDoc, category);
 
         Assertions.assertNotNull(result);
-        Assertions.assertEquals("applicationsWithinProceedingsRespondent", result.getCategoryId());
+        Assertions.assertEquals("applicationsWithinProceedingsRes", result.getCategoryId());
     }
 
     @Test

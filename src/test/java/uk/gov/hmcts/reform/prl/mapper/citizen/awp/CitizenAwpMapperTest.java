@@ -74,7 +74,7 @@ class CitizenAwpMapperTest {
         assertEquals(1, result.size());
         Document mapped = result.get(0).getValue();
         assertNotNull(mapped);
-        assertEquals("applicationsWithinProceedingsRespondent", mapped.getCategoryId());
+        assertEquals("applicationsWithinProceedingsRes", mapped.getCategoryId());
     }
 
     @Test
