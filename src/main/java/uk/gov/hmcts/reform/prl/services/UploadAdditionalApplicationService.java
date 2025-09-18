@@ -115,7 +115,7 @@ public class UploadAdditionalApplicationService {
 
 
     private static final String CAT_AWP_APPLICANT   = "applicationsWithinProceedings";
-    private static final String CAT_AWP_RESPONDENT = "applicationsWithinProceedingsRespondent";
+    private static final String CAT_AWP_RESPONDENT = "applicationsWithinProceedingsRes";
 
     private String categoryForParty(String raw) {
         if (raw == null) {
