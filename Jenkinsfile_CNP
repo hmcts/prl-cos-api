@@ -109,12 +109,9 @@ withPipeline(type, product, component) {
   afterAlways('test') {
     steps.junit '**/test-results/**/*.xml'
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: 'build/reports/**/*'
-    onPR() {
-      setPreviewEnvVars();
-    }
   }
 
-  before('aksDeploy:preview') {
+  afterAlways('integrationTest:preview') {
     onPR() {
       setPreviewEnvVars();
     }
