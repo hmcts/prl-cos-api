@@ -53,7 +53,7 @@ public class CosApiSmokeTests {
 
     @Test
     public void checkSolicitorCanAccessC100MiamExemptionEvent() throws Exception {
-        System.out.println(" targetInstance " +  targetInstance);
+
         String requestBody = ResourceLoader.loadJson(MIAM_VALIDATION_REQUEST_ERROR);
 
         request
@@ -75,7 +75,6 @@ public class CosApiSmokeTests {
 
     @Test
     public void checkSolicitorGetCorrectFeeForC100ApplicationEvent() throws Exception {
-        System.out.println(" targetInstance " +  targetInstance);
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
 
         request
@@ -95,7 +94,6 @@ public class CosApiSmokeTests {
 
     @Test
     public void checkSendAndReplyMessageMidEvent() throws Exception {
-        System.out.println(" targetInstance " +  targetInstance);
         String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST);
         request
             .header("Authorization", targetInstance.equalsIgnoreCase(LOCALHOST_4044)
@@ -111,7 +109,6 @@ public class CosApiSmokeTests {
 
     @Test
     public void checkSendAndReplyMessageAboutToSubmitEvent() throws Exception {
-        System.out.println(" targetInstance " +  targetInstance);
         String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST);
         request
             .header("Authorization", targetInstance.equalsIgnoreCase(LOCALHOST_4044)
