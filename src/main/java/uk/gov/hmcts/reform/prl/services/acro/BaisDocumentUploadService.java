@@ -175,8 +175,8 @@ public class BaisDocumentUploadService {
 
     private LocalDateTime getOrderExpiryDate(OrderDetails order) {
 
-        if (order.getFl404CustomFields() != null && order.getFl404CustomFields().getFl404bDateOrderEnd() != null) {
-            return order.getFl404CustomFields().getFl404bDateOrderEnd();
+        if (order.getFl404CustomFields() != null && order.getFl404CustomFields().getOrderSpecifiedDateTime() != null) {
+            return order.getFl404CustomFields().getOrderSpecifiedDateTime();
         }
         return null;
     }
