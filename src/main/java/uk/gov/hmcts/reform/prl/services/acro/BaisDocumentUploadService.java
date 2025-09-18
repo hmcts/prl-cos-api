@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.models.dto.acro.AcroResponse;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -105,19 +106,19 @@ public class BaisDocumentUploadService {
                         );
 
                         if (Optional.ofNullable(englishFile).isPresent()) {
-                            csvWriter.appendCsvRowToFile(csvFile, caseData, true, englishFile.getName());
-                        }
+                            csvWriter.appendCsvRowToFile(csvFile, caseData, false, englishFile.getName());
 
-                        if (statementOfServiceValidationService.isOrderServedViaStatementOfService(
-                                order, caseData.getStmtOfServiceForOrder(), caseData)) {
-                            String statementOfServiceFileName = englishFileName.replace(".pdf", "_served.pdf");
-                            pdfExtractorService.downloadPdf(
-                                statementOfServiceFileName,
-                                caseId,
-                                order.getOrderDocument(),
-                                sysUserToken
-                            );
-                            log.debug("Downloaded served version of FL404a document for case {}: {}", caseId, statementOfServiceFileName);
+                            // Copy the english file for Statement of Service version if needed
+                            if (statementOfServiceValidationService.isOrderServedViaStatementOfService(
+                                    order, caseData.getStmtOfServiceForOrder(), caseData)) {
+                                String statementOfServiceFileName = englishFileName.replace(".pdf", "_served.pdf");
+                                try {
+                                    Files.copy(englishFile.toPath(), Path.of(statementOfServiceFileName));
+                                    log.debug("Copied served version of FL404a document for case {}: {}", caseId, statementOfServiceFileName);
+                                } catch (IOException e) {
+                                    log.warn("Failed to copy served version of FL404a document for case {}: {}", caseId, e.getMessage());
+                                }
+                            }
                         }
 
                         log.info(

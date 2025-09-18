@@ -43,6 +43,7 @@ class BaisDocumentUploadServiceTest {
     @Mock private AcroZipService acroZipService;
     @Mock private CsvWriter csvWriter;
     @Mock private PdfExtractorService pdfExtractorService;
+    @Mock private StatementOfServiceValidationService statementOfServiceValidationService;
 
     private File tempCsv;
 
@@ -81,7 +82,7 @@ class BaisDocumentUploadServiceTest {
         service.uploadFL404Orders();
 
         verify(csvWriter, Mockito.times(successfulDownloads))
-            .appendCsvRowToFile(eq(tempCsv), any(AcroCaseData.class), eq(true), anyString());
+            .appendCsvRowToFile(eq(tempCsv), any(AcroCaseData.class), eq(false), anyString());
         verify(pdfExtractorService, Mockito.times(2))
             .downloadPdf(anyString(), eq(CASE_ID), any(Document.class), eq(AUTH_TOKEN));
     }
@@ -119,5 +120,98 @@ class BaisDocumentUploadServiceTest {
             .documentUrl("url")
             .documentBinaryUrl("binary")
             .build();
+    }
+
+    @Test
+    void shouldCreateServedVersionWhenStatementOfServiceValidationPasses() throws Exception {
+        when(acroCaseDataService.getCaseData(AUTH_TOKEN)).thenReturn(responseWithOneCase());
+
+        File englishFile = File.createTempFile("english", ".pdf");
+        File welshFile = File.createTempFile("welsh", ".pdf");
+
+        when(pdfExtractorService.downloadPdf(anyString(), eq(CASE_ID), any(Document.class), eq(AUTH_TOKEN)))
+            .thenReturn(englishFile, welshFile);
+
+        when(statementOfServiceValidationService.isOrderServedViaStatementOfService(
+            any(OrderDetails.class), any(), any(AcroCaseData.class))).thenReturn(true);
+
+        service.uploadFL404Orders();
+
+        verify(statementOfServiceValidationService).isOrderServedViaStatementOfService(
+            any(OrderDetails.class), any(), any(AcroCaseData.class));
+        verify(csvWriter).appendCsvRowToFile(eq(tempCsv), any(AcroCaseData.class), eq(false), anyString());
+
+        verify(pdfExtractorService, Mockito.times(2))
+            .downloadPdf(anyString(), eq(CASE_ID), any(Document.class), eq(AUTH_TOKEN));
+    }
+
+    @Test
+    void shouldNotCreateServedVersionWhenStatementOfServiceValidationFails() throws Exception {
+        // Given
+        when(acroCaseDataService.getCaseData(AUTH_TOKEN)).thenReturn(responseWithOneCase());
+
+        File englishFile = File.createTempFile("english", ".pdf");
+        File welshFile = File.createTempFile("welsh", ".pdf");
+
+        when(pdfExtractorService.downloadPdf(anyString(), eq(CASE_ID), any(Document.class), eq(AUTH_TOKEN)))
+            .thenReturn(englishFile, welshFile);
+
+        when(statementOfServiceValidationService.isOrderServedViaStatementOfService(
+            any(OrderDetails.class), any(), any(AcroCaseData.class))).thenReturn(false);
+
+        service.uploadFL404Orders();
+
+
+        verify(statementOfServiceValidationService).isOrderServedViaStatementOfService(
+            any(OrderDetails.class), any(), any(AcroCaseData.class));
+        verify(csvWriter).appendCsvRowToFile(eq(tempCsv), any(AcroCaseData.class), eq(false), anyString());
+
+        verify(pdfExtractorService, Mockito.times(2))
+            .downloadPdf(anyString(), eq(CASE_ID), any(Document.class), eq(AUTH_TOKEN));
+    }
+
+    @Test
+    void shouldHandleStatementOfServiceValidationWhenEnglishFileIsNull() throws Exception {
+        // Given
+        when(acroCaseDataService.getCaseData(AUTH_TOKEN)).thenReturn(responseWithOneCase());
+
+        // English file download fails (returns null)
+        when(pdfExtractorService.downloadPdf(anyString(), eq(CASE_ID), any(Document.class), eq(AUTH_TOKEN)))
+            .thenReturn(null, File.createTempFile("welsh", ".pdf"));
+
+        // When
+        service.uploadFL404Orders();
+
+        // Then
+        // Statement of Service validation should not be called when englishFile is null
+        verify(statementOfServiceValidationService, Mockito.never())
+            .isOrderServedViaStatementOfService(any(OrderDetails.class), any(), any(AcroCaseData.class));
+
+        // CSV should not be written when englishFile is null
+        verify(csvWriter, Mockito.never())
+            .appendCsvRowToFile(any(File.class), any(AcroCaseData.class), eq(false), anyString());
+    }
+
+    @Test
+    void shouldCreateServedVersionWithCorrectFileNaming() throws Exception {
+        // Given
+        String tempDir = System.getProperty("java.io.tmpdir") + "/acro-source";
+        ReflectionTestUtils.setField(service, "sourceDirectory", tempDir);
+
+        when(acroCaseDataService.getCaseData(AUTH_TOKEN)).thenReturn(responseWithOneCase());
+
+        File englishFile = File.createTempFile("FL404A-1-", ".pdf");
+        File welshFile = File.createTempFile("welsh", ".pdf");
+
+        when(pdfExtractorService.downloadPdf(anyString(), eq(CASE_ID), any(Document.class), eq(AUTH_TOKEN)))
+            .thenReturn(englishFile, welshFile);
+
+        when(statementOfServiceValidationService.isOrderServedViaStatementOfService(
+            any(OrderDetails.class), any(), any(AcroCaseData.class))).thenReturn(true);
+
+        service.uploadFL404Orders();
+
+        verify(statementOfServiceValidationService).isOrderServedViaStatementOfService(
+            any(OrderDetails.class), any(), any(AcroCaseData.class));
     }
 }
