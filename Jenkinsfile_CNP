@@ -28,10 +28,10 @@ static Map<String, Object> secret(String secretName, String envVariable) {
 def setPreviewEnvVars() {
   def githubApi = new GithubAPI(this)
 
-  env.CORE_CASE_DATA_API_URL = "http://ccd-data-store-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
-  env.CCD_CASE_DOCS_AM_API = "http://ccd-case-document-am-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
-  env.ACA_SERVICE_API_BASEURL = "http://aac-manage-case-assignment-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
-  env.BUNDLE_URL = "http://em-ccd-orchestrator-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
+  env.CORE_CASE_DATA_API_URL = "http://ccd-data-store-api-aat.service.core-compute-aat.internal"
+  env.CCD_CASE_DOCS_AM_API = "http://ccd-case-document-am-api-aat.service.core-compute-aat.internal"
+  env.ACA_SERVICE_API_BASEURL = "http://aac-manage-case-assignment-aat.service.core-compute-aat.internal"
+  env.BUNDLE_URL = "http://em-ccd-orchestrator-aat.service.core-compute-aat.internal"
 
   if (githubApi.checkForLabel(env.BRANCH_NAME, 'pr-values:def')) {
     env.CORE_CASE_DATA_API_URL = "http://prl-ccd-definitions-pr-2871-ccd-data-store-api"
@@ -39,7 +39,7 @@ def setPreviewEnvVars() {
     env.ACA_SERVICE_API_BASEURL = "http://prl-ccd-definitions-pr-2871-aac-manage-case-assignment"
     env.BUNDLE_URL = "http://prl-ccd-definitions-pr-2871-em-ccdorc"
   }
-  echo 'value of CORE_CASE_DATA_API_URL ${env.CORE_CASE_DATA_API_URL}'
+  echo "value of CORE_CASE_DATA_API_URL ${env.CORE_CASE_DATA_API_URL}"
 }
 
 
