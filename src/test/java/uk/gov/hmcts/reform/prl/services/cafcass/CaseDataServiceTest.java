@@ -40,6 +40,7 @@ import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.Element;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -521,7 +522,7 @@ public class CaseDataServiceTest {
     }
 
     @Test
-    public void testCheckRedactedDocumentsFromCaseFileViewBasedOnCategories() throws NoSuchMethodException,
+    public void testRedactedDocumentsOnAddSpecificDocumentsFromCaseFileViewBasedOnCategories() throws NoSuchMethodException,
         InvocationTargetException, IllegalAccessException {
         Document document = Document.builder().documentUrl(REDACTED_DOCUMENT_URL).documentFileName("*Redacted*").build();
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().categoryId("MIAMCertificate")
@@ -570,5 +571,38 @@ public class CaseDataServiceTest {
 
     }
 
+    @Test
+    public void testRedactedDocumentsOnAddInOtherDocuments() throws NoSuchMethodException,
+        InvocationTargetException, IllegalAccessException {
+        String category = "MIAMCertificate";
+        Document document = Document.builder().documentUrl(REDACTED_DOCUMENT_URL).documentFileName("*Redacted*").build();
+        List<Element<OtherDocuments>> otherDocsList = new ArrayList<>();
+        Method privateMethod = CaseDataService.class.getDeclaredMethod(
+            "addInOtherDocuments",
+            String.class, Document.class, List.class
+        );
+        privateMethod.setAccessible(true);
+        privateMethod.invoke(caseDataService, category, document, otherDocsList);
+
+        assertTrue(otherDocsList.isEmpty());
+
+    }
+
+    @Test
+    public void testAddInOtherDocuments() throws NoSuchMethodException,
+        InvocationTargetException, IllegalAccessException {
+        String category = "MIAMCertificate";
+        Document document = Document.builder().documentUrl("http://test").documentFileName("test").build();
+        List<Element<OtherDocuments>> otherDocsList = new ArrayList<>();
+        Method privateMethod = CaseDataService.class.getDeclaredMethod(
+            "addInOtherDocuments",
+            String.class, Document.class, List.class
+        );
+        privateMethod.setAccessible(true);
+        privateMethod.invoke(caseDataService, category, document, otherDocsList);
+
+        assertFalse(otherDocsList.isEmpty());
+        assertEquals("test", otherDocsList.get(0).getValue().getDocumentName());
+    }
 
 }
