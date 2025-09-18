@@ -113,9 +113,8 @@ withPipeline(type, product, component) {
   }
 
   afterAlways('integrationTest:preview') {
-    onPR() {
-      setPreviewEnvVars();
-    }
+    echo 'integrationTest:preview'
+    setPreviewEnvVars();
   }
 
   before('functionalTest:aat') {
