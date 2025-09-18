@@ -109,6 +109,9 @@ withPipeline(type, product, component) {
   afterAlways('test') {
     steps.junit '**/test-results/**/*.xml'
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: 'build/reports/**/*'
+    onPR() {
+      setPreviewEnvVars();
+    }
   }
 
   before('functionalTest:aat') {
@@ -134,7 +137,6 @@ withPipeline(type, product, component) {
   }
   onPR() {
     env.ENV = 'preview'
-    setPreviewEnvVars();
     enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
   }
 }
