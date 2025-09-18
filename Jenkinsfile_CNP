@@ -39,6 +39,7 @@ def setPreviewEnvVars() {
     env.ACA_SERVICE_API_BASEURL = "http://prl-ccd-definitions-pr-2871-aac-manage-case-assignment"
     env.BUNDLE_URL = "http://prl-ccd-definitions-pr-2871-em-ccdorc"
   }
+  echo 'value of CORE_CASE_DATA_API_URL ${env.CORE_CASE_DATA_API_URL}'
 }
 
 
