@@ -7,7 +7,7 @@ import org.apache.commons.csv.CSVPrinter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseData;
+import uk.gov.hmcts.reform.prl.models.dto.acro.CsvData;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -42,8 +42,8 @@ public class CsvWriter {
         COURT_NAME("Court Name/Location", "courtName"),
         COURT_ID("Court Code", "courtEpimsId"),
         ORDER_NAME("Order Name", "caseTypeOfApplication"),
-        COURT_DATE("Court Date", "dateOrderMade"),
-        ORDER_EXPIRY_DATE("Order Expiry Date", "finalCaseClosedDate"), // Assuming this is a date field
+        COURT_DATE("Court Date", "currentHearingDate"),
+        ORDER_EXPIRY_DATE("Order Expiry Date", "orderExpiryDate"), // Assuming this is a date field
         RESPONDENT_SURNAME("Respondent Surname", "respondent.lastName"),
         RESPONDENT_FORENAMES("Respondent Forename(s)", "respondent.firstName"),
         RESPONDENT_DOB("Respondent DOB", "respondent.dateOfBirth"),
@@ -119,7 +119,7 @@ public class CsvWriter {
      * @param orderFilename       the filename to be added to the Order File Name column
      * @return list of strings representing the CSV row data
      */
-    public List<String> createCsvRowData(AcroCaseData ccdOrderData, boolean confidentialAllowed, String orderFilename) {
+    public List<String> createCsvRowData(CsvData ccdOrderData, boolean confidentialAllowed, String orderFilename) {
         List<String> record = new ArrayList<>();
         for (CsvColumn column : COLUMNS) {
             Object value;
@@ -152,7 +152,7 @@ public class CsvWriter {
      * @param filename            the filename to be added to the Order File Name column
      * @throws IOException if writing to the file fails
      */
-    public void appendCsvRowToFile(File csvFile, AcroCaseData caseData, boolean confidentialAllowed, String filename) throws IOException {
+    public void appendCsvRowToFile(File csvFile, CsvData caseData, boolean confidentialAllowed, String filename) throws IOException {
         List<String> rowData = createCsvRowData(caseData, confidentialAllowed, filename);
 
         CSVFormat csvFormat = CSVFormat.DEFAULT;
@@ -185,7 +185,7 @@ public class CsvWriter {
         return "manifest-" + formattedDate + ".csv";
     }
 
-    private boolean isConfidentialField(AcroCaseData caseData, CsvColumn column) {
+    private boolean isConfidentialField(CsvData caseData, CsvColumn column) {
         return switch (column) {
             case APPLICANT_PHONE -> isConfidential(caseData, "applicant.isPhoneNumberConfidential");
             case APPLICANT_EMAIL -> isConfidential(caseData, "applicant.isEmailAddressConfidential");
@@ -201,7 +201,7 @@ public class CsvWriter {
         };
     }
 
-    private boolean isConfidential(AcroCaseData caseData, String confidentialityProperty) {
+    private boolean isConfidential(CsvData caseData, String confidentialityProperty) {
         Object value = extractPropertyValues(caseData, confidentialityProperty);
         if (value instanceof YesOrNo) {
             return YesOrNo.Yes.equals(value);
