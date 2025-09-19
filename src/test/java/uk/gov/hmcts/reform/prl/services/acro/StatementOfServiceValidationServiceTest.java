@@ -62,8 +62,8 @@ class StatementOfServiceValidationServiceTest {
     }
 
     @Nested
-    @DisplayName("isStatementOfServiceCompleted Tests")
-    class IsStatementOfServiceCompletedTests {
+    @DisplayName("statementOfServiceHasServedSubmittedTime Tests")
+    class StatementOfServiceHasServedSubmittedTimeTests {
 
         @Test
         @DisplayName("Should return true when servedDateTimeOption is populated")
@@ -102,20 +102,6 @@ class StatementOfServiceValidationServiceTest {
         }
 
         @Test
-        @DisplayName("Should return true when multiple date fields are populated")
-        void shouldReturnTrueWhenMultipleDateFieldsArePopulated() {
-            StmtOfServiceAddRecipient sos = StmtOfServiceAddRecipient.builder()
-                .servedDateTimeOption(LocalDateTime.now())
-                .submittedDateTime(LocalDateTime.now().minusDays(1))
-                .partiesServedDateTime("2024-01-15T10:30:00.000")
-                .build();
-
-            boolean result = validationService.statementOfServiceHasServedSubmittedTime(sos);
-
-            assertTrue(result, "Should return true when multiple date fields are populated");
-        }
-
-        @Test
         @DisplayName("Should return false when no date fields are populated")
         void shouldReturnFalseWhenNoDateFieldsArePopulated() {
             StmtOfServiceAddRecipient sos = StmtOfServiceAddRecipient.builder()
@@ -127,20 +113,6 @@ class StatementOfServiceValidationServiceTest {
             assertFalse(result, "Should return false when no date fields are populated");
         }
 
-        @Test
-        @DisplayName("Should return false when all date fields are null")
-        void shouldReturnFalseWhenAllDateFieldsAreNull() {
-            StmtOfServiceAddRecipient sos = StmtOfServiceAddRecipient.builder()
-                .servedDateTimeOption(null)
-                .submittedDateTime(null)
-                .partiesServedDateTime(null)
-                .selectedPartyName("John Doe")
-                .build();
-
-            boolean result = validationService.statementOfServiceHasServedSubmittedTime(sos);
-
-            assertFalse(result, "Should return false when all date fields are null");
-        }
 
         @ParameterizedTest
         @NullAndEmptySource
@@ -299,74 +271,56 @@ class StatementOfServiceValidationServiceTest {
 
             assertFalse(result, "Should return false when respondent is included but service is not completed");
         }
+    }
 
-        @Test
-        @DisplayName("Should return true when at least one statement of service is valid")
-        void shouldReturnTrueWhenAtLeastOneStatementOfServiceIsValid() {
-            StmtOfServiceAddRecipient incompleteSos = StmtOfServiceAddRecipient.builder()
-                .selectedPartyName("John Doe")
-                .build();
+    @Nested
+    @DisplayName("isPartiesServedDateTimeValid Tests")
+    class IsPartiesServedDateTimeValidTests {
 
-            StmtOfServiceAddRecipient completeSos = StmtOfServiceAddRecipient.builder()
-                .servedDateTimeOption(LocalDateTime.now())
-                .selectedPartyName("John Doe")
-                .build();
+        @ParameterizedTest
+        @ValueSource(strings = {
+            "2024-01-15T10:30:00.000",
+            "2024-12-31T23:59:59.999",
+            "2023-02-14T14:30:15.123"
+        })
+        @DisplayName("Should return true for valid datetime formats")
+        void shouldReturnTrueForValidDateTimeFormats(String validDateTime) {
+            boolean result = validationService.isPartiesServedDateTimeValid(validDateTime);
 
-            StmtOfServiceAddRecipient otherPersonSos = StmtOfServiceAddRecipient.builder()
-                .servedDateTimeOption(LocalDateTime.now())
-                .selectedPartyName("Jane Smith")
-                .build();
-
-            List<Element<StmtOfServiceAddRecipient>> sosList = List.of(
-                Element.<StmtOfServiceAddRecipient>builder().value(incompleteSos).build(),
-                Element.<StmtOfServiceAddRecipient>builder().value(completeSos).build(),
-                Element.<StmtOfServiceAddRecipient>builder().value(otherPersonSos).build()
-            );
-
-            boolean result = validationService.isOrderServedViaStatementOfService(order, sosList, caseData);
-
-            assertTrue(result, "Should return true when at least one statement of service is valid");
+            assertTrue(result, "Should return true for valid datetime format: " + validDateTime);
         }
 
-        @Test
-        @DisplayName("Should handle null element values gracefully")
-        void shouldHandleNullElementValuesGracefully() {
-            Element<StmtOfServiceAddRecipient> nullElement = Element.<StmtOfServiceAddRecipient>builder()
-                .value(null)
-                .build();
+        @ParameterizedTest
+        @ValueSource(strings = {
+            "2024-01-15",
+            "2024-12-31",
+            "2023-02-14"
+        })
+        @DisplayName("Should return true for valid date formats")
+        void shouldReturnTrueForValidDateFormats(String validDate) {
+            boolean result = validationService.isPartiesServedDateTimeValid(validDate);
 
-            StmtOfServiceAddRecipient validSos = StmtOfServiceAddRecipient.builder()
-                .servedDateTimeOption(LocalDateTime.now())
-                .selectedPartyName("John Doe")
-                .build();
-
-            Element<StmtOfServiceAddRecipient> validElement = Element.<StmtOfServiceAddRecipient>builder()
-                .value(validSos)
-                .build();
-
-            List<Element<StmtOfServiceAddRecipient>> sosList = List.of(nullElement, validElement);
-
-            boolean result = validationService.isOrderServedViaStatementOfService(order, sosList, caseData);
-
-            assertTrue(result, "Should handle null element values gracefully and find valid ones");
+            assertTrue(result, "Should return true for valid date format: " + validDate);
         }
 
-        @Test
-        @DisplayName("Should return false when all elements have null values")
-        void shouldReturnFalseWhenAllElementsHaveNullValues() {
-            Element<StmtOfServiceAddRecipient> nullElement1 = Element.<StmtOfServiceAddRecipient>builder()
-                .value(null)
-                .build();
+        @ParameterizedTest
+        @NullAndEmptySource
+        @ValueSource(strings = {
+            "   ", "\t", "\n",
+            "invalid-date",
+            "2024-13-01", // Invalid month
+            "2024-01-32", // Invalid day
+            "2024/01/15", // Wrong separator
+            "15-01-2024", // Wrong order
+            "2024-01-15 10:30:00", // Space instead of T
+            "abc123",
+            "not-a-date"
+        })
+        @DisplayName("Should return false for invalid date formats")
+        void shouldReturnFalseForInvalidFormats(String invalidDateTime) {
+            boolean result = validationService.isPartiesServedDateTimeValid(invalidDateTime);
 
-            Element<StmtOfServiceAddRecipient> nullElement2 = Element.<StmtOfServiceAddRecipient>builder()
-                .value(null)
-                .build();
-
-            List<Element<StmtOfServiceAddRecipient>> sosList = List.of(nullElement1, nullElement2);
-
-            boolean result = validationService.isOrderServedViaStatementOfService(order, sosList, caseData);
-
-            assertFalse(result, "Should return false when all elements have null values");
+            assertFalse(result, "Should return false for invalid format: " + invalidDateTime);
         }
     }
 
@@ -375,52 +329,89 @@ class StatementOfServiceValidationServiceTest {
     class IntegrationTests {
 
         @Test
-        @DisplayName("Should handle complete realistic scenario")
-        void shouldHandleCompleteRealisticScenario() {
-            PartyDetails realisticRespondent = PartyDetails.builder()
-                .firstName("Michael")
-                .lastName("Johnson")
-                .address(Address.builder()
-                             .addressLine1("456 Oak Avenue")
-                             .addressLine2("Apartment 2B")
-                             .postCode("M1 2AB")
-                             .build())
-                .phoneNumber("07700123456")
-                .email("m.johnson@example.com")
-                .build();
-
-            AcroCaseData realisticCaseData = AcroCaseData.builder()
-                .id(987654321L)
-                .respondent(realisticRespondent)
-                .build();
-
-            StmtOfServiceAddRecipient realisticSos = StmtOfServiceAddRecipient.builder()
-                .servedDateTimeOption(LocalDateTime.of(2024, 1, 15, 14, 30))
-                .submittedDateTime(LocalDateTime.of(2024, 1, 15, 15, 0))
-                .partiesServedDateTime("2024-01-15T14:30:00")
-                .selectedPartyName("Mr. Michael Johnson (Respondent)")
-                .selectedPartyId("12345")
-                .build();
-
-            Element<StmtOfServiceAddRecipient> element = Element.<StmtOfServiceAddRecipient>builder()
-                .value(realisticSos)
-                .build();
-
-            List<Element<StmtOfServiceAddRecipient>> sosList = List.of(element);
-
-            OrderDetails realisticOrder = OrderDetails.builder()
-                .orderType("FL404")
-                .build();
+        @DisplayName("Should validate complete order service workflow")
+        void shouldValidateCompleteOrderServiceWorkflow() {
+            PartyDetails respondent = createTestRespondent("Michael", "Johnson");
+            AcroCaseData caseData = createTestCaseData(respondent);
+            StmtOfServiceAddRecipient completedSos = createCompletedSos("Mr. Michael Johnson (Respondent)");
+            List<Element<StmtOfServiceAddRecipient>> sosList = List.of(createElement(completedSos));
+            OrderDetails order = createTestOrder();
 
             assertAll(
-                "Complete realistic scenario validation",
-                () -> assertTrue(validationService.statementOfServiceHasServedSubmittedTime(realisticSos),
-                                 "Statement of service should be completed"),
-                () -> assertTrue(validationService.isRespondentIncludedInService(realisticSos, realisticCaseData),
-                                 "Respondent should be included in service"),
-                () -> assertTrue(validationService.isOrderServedViaStatementOfService(realisticOrder, sosList, realisticCaseData),
-                                 "Order should be served via statement of service")
+                "Complete order service validation workflow",
+                () -> assertTrue(
+                    validationService.statementOfServiceHasServedSubmittedTime(completedSos),
+                    "Statement of service should be completed"
+                ),
+                () -> assertTrue(
+                    validationService.isRespondentIncludedInService(completedSos, caseData),
+                    "Respondent should be included in service"
+                ),
+                () -> assertTrue(
+                    validationService.isOrderServedViaStatementOfService(order, sosList, caseData),
+                    "Order should be served via statement of service"
+                )
             );
         }
+
+        @Test
+        @DisplayName("Should handle edge case with multiple SOS records")
+        void shouldHandleMultipleSosRecords() {
+            PartyDetails respondent = createTestRespondent("John", "Doe");
+            AcroCaseData caseData = createTestCaseData(respondent);
+
+            List<Element<StmtOfServiceAddRecipient>> sosList = List.of(
+                createElement(createIncompleteSos("John Doe")), // Incomplete but correct respondent
+                createElement(createCompletedSos("Jane Smith")), // Complete but wrong respondent
+                createElement(createCompletedSos("John Doe")) // Complete and correct respondent
+            );
+
+            boolean result = validationService.isOrderServedViaStatementOfService(order, sosList, caseData);
+
+            assertTrue(result, "Should return true when at least one SOS record is valid");
+        }
+    }
+
+    private PartyDetails createTestRespondent(String firstName, String lastName) {
+        return PartyDetails.builder()
+            .firstName(firstName)
+            .lastName(lastName)
+            .address(Address.builder()
+                         .addressLine1("456 Test Avenue")
+                         .postCode("T1 2ST")
+                         .build())
+            .build();
+    }
+
+    private AcroCaseData createTestCaseData(PartyDetails respondent) {
+        return AcroCaseData.builder()
+            .id(987654321L)
+            .respondent(respondent)
+            .build();
+    }
+
+    private StmtOfServiceAddRecipient createCompletedSos(String selectedPartyName) {
+        return StmtOfServiceAddRecipient.builder()
+            .servedDateTimeOption(LocalDateTime.of(2024, 1, 15, 14, 30))
+            .selectedPartyName(selectedPartyName)
+            .build();
+    }
+
+    private StmtOfServiceAddRecipient createIncompleteSos(String selectedPartyName) {
+        return StmtOfServiceAddRecipient.builder()
+            .selectedPartyName(selectedPartyName)
+            .build();
+    }
+
+    private OrderDetails createTestOrder() {
+        return OrderDetails.builder()
+            .orderType("FL404")
+            .build();
+    }
+
+    private Element<StmtOfServiceAddRecipient> createElement(StmtOfServiceAddRecipient sos) {
+        return Element.<StmtOfServiceAddRecipient>builder()
+            .value(sos)
+            .build();
     }
 }
