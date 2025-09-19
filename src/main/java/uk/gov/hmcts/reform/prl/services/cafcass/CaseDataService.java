@@ -473,7 +473,7 @@ public class CaseDataService {
                     uk.gov.hmcts.reform.prl.models.documents.Document.class
                 );
             }
-            if (null != document && document.getDocumentUrl() != null && !document.getDocumentUrl().endsWith(REDACTED_DOCUMENT_UUID)) {
+            if (null != document) {
                 log.info("Found document for category {}", quarantineLegalDocElement.getValue().getCategoryId());
                 parseCategoryAndCreateList(
                     quarantineLegalDocElement.getValue().getCategoryId(),
