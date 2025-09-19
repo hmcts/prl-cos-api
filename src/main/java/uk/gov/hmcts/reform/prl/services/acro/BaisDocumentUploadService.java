@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.dto.acro.CsvData;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -40,6 +41,7 @@ public class BaisDocumentUploadService {
     private final AcroZipService acroZipService;
     private final CsvWriter csvWriter;
     private final PdfExtractorService pdfExtractorService;
+    private final StatementOfServiceValidationService statementOfServiceValidationService;
 
     @Value("${acro.source-directory}")
     private String sourceDirectory;
@@ -115,7 +117,20 @@ public class BaisDocumentUploadService {
                         if (Optional.ofNullable(englishFile).isPresent()) {
                             CsvData csvData = prepareDataForCsv(caseData, order);
                             csvWriter.appendCsvRowToFile(csvFile, csvData, false, englishFile.getName());
+                          
+                            // Copy the english file for Statement of Service version if needed
+                            if (statementOfServiceValidationService.isOrderServedViaStatementOfService(
+                                order, caseData.getStmtOfServiceForOrder(), caseData)) {
+                                String statementOfServiceFileName = englishFileName.replace(".pdf", "_served.pdf");
+                                try {
+                                    Files.copy(englishFile.toPath(), Path.of(statementOfServiceFileName));
+                                    log.debug("Copied served version of FL404a document for case {}: {}", caseId, statementOfServiceFileName);
+                                } catch (IOException e) {
+                                    log.warn("Failed to copy served version of FL404a document for case {}: {}", caseId, e.getMessage());
+                                }
+                            }
                         }
+
                         log.info(
                             "FL404a document processing completed. Successfully processed {}/{} documents",
                             englishFileName,
@@ -128,8 +143,6 @@ public class BaisDocumentUploadService {
             } else {
                 log.debug("Skipping case {} - no FL404 orders found", caseId);
             }
-
-
         }
 
     }
