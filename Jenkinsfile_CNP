@@ -32,11 +32,17 @@ def setPreviewEnvVars() {
   env.CCD_CASE_DOCS_AM_API = "http://ccd-case-document-am-api-aat.service.core-compute-aat.internal"
   env.ACA_SERVICE_API_BASEURL = "http://aac-manage-case-assignment-aat.service.core-compute-aat.internal"
 
-  if (githubApi.checkForLabel(env.BRANCH_NAME, 'pr-values:def')) {
-    env.CORE_CASE_DATA_API_URL = "http://prl-ccd-definitions-pr-2878-ccd-data-store-api"
-    env.CCD_CASE_DOCS_AM_API = "http://prl-ccd-definitions-pr-2878-cdam"
-    env.ACA_SERVICE_API_BASEURL = "http://prl-ccd-definitions-pr-2878-aac-manage-case-assignment"
+  def defsPrefix = "pr-defs:pr-"
+  def label = githubApi
+    .getLabelsbyPattern(env.BRANCH_NAME, defsPrefix)
+    .find { it.startsWith(defsPrefix) }
+  if (label) {
+    def defsPrNumber = label - defsPrefix
+    env.CORE_CASE_DATA_API_URL = "http://prl-ccd-definitions-pr-${defsPrNumber}-ccd-data-store-api"
+    env.CCD_CASE_DOCS_AM_API = "http://prl-ccd-definitions-pr-${defsPrNumber}-cdam"
+    env.ACA_SERVICE_API_BASEURL = "http://prl-ccd-definitions-pr-${defsPrNumber}-aac-manage-case-assignment"
   }
+
   echo "CORE_CASE_DATA_API_URL ${env.CORE_CASE_DATA_API_URL}"
   echo "CCD_CASE_DOCS_AM_API ${env.CCD_CASE_DOCS_AM_API}"
   echo "ACA_SERVICE_API_BASEURL ${env.ACA_SERVICE_API_BASEURL}"
