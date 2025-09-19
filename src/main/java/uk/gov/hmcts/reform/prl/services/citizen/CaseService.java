@@ -823,7 +823,7 @@ public class CaseService {
             citizenOrders.addAll(getCitizenOrdersForParty(caseData, partyIdAndType, userDetails.getId()));
         }
 
-        //Transcripts of judgements
+        //Transcripts of judgments
         citizenOrders.addAll(citizenDocuments.stream()
                                  .filter(citDoc -> TRANSCRIPTS_OF_JUDGEMENTS.equals(citDoc.getCategoryId()))
                                  .toList());
