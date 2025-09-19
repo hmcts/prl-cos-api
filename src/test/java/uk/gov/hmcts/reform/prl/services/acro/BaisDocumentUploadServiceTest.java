@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.acro;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -23,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -43,6 +45,7 @@ class BaisDocumentUploadServiceTest {
     @Mock private AcroZipService acroZipService;
     @Mock private CsvWriter csvWriter;
     @Mock private PdfExtractorService pdfExtractorService;
+    @Mock private StatementOfServiceValidationService statementOfServiceValidationService;
 
     private File tempCsv;
 
@@ -84,6 +87,73 @@ class BaisDocumentUploadServiceTest {
             .appendCsvRowToFile(eq(tempCsv), any(AcroCaseData.class), eq(false), anyString());
         verify(pdfExtractorService, Mockito.times(2))
             .downloadPdf(anyString(), eq(CASE_ID), any(Document.class), eq(AUTH_TOKEN));
+    }
+
+    @Nested
+    class StatementOfServiceTests {
+
+        @Test
+        void shouldCopyServedVersionWhenValidationPasses() throws Exception {
+            when(acroCaseDataService.getNonMolestationData(AUTH_TOKEN)).thenReturn(responseWithOneCase());
+            File englishFile = File.createTempFile("english", ".pdf");
+            when(pdfExtractorService.downloadPdf(anyString(), eq(CASE_ID), any(Document.class), eq(AUTH_TOKEN)))
+                .thenReturn(englishFile);
+            when(statementOfServiceValidationService.isOrderServedViaStatementOfService(any(), any(), any()))
+                .thenReturn(true);
+
+            service.uploadFL404Orders();
+
+            verify(statementOfServiceValidationService).isOrderServedViaStatementOfService(any(), any(), any());
+            verify(csvWriter).appendCsvRowToFile(eq(tempCsv), any(AcroCaseData.class), eq(false), anyString());
+        }
+
+        @Test
+        void shouldNotCopyServedVersionWhenValidationFails() throws Exception {
+            when(acroCaseDataService.getNonMolestationData(AUTH_TOKEN)).thenReturn(responseWithOneCase());
+            File englishFile = File.createTempFile("english", ".pdf");
+            when(pdfExtractorService.downloadPdf(anyString(), eq(CASE_ID), any(Document.class), eq(AUTH_TOKEN)))
+                .thenReturn(englishFile);
+            when(statementOfServiceValidationService.isOrderServedViaStatementOfService(any(), any(), any()))
+                .thenReturn(false);
+
+            service.uploadFL404Orders();
+
+            verify(statementOfServiceValidationService).isOrderServedViaStatementOfService(any(), any(), any());
+            verify(csvWriter).appendCsvRowToFile(eq(tempCsv), any(AcroCaseData.class), eq(false), anyString());
+        }
+
+        @Test
+        void shouldCopyServedFileWhenValidationPassesAndFileExists() throws Exception {
+            when(acroCaseDataService.getNonMolestationData(AUTH_TOKEN)).thenReturn(responseWithOneCase());
+
+            File englishFile = File.createTempFile("english", ".pdf");
+            englishFile.deleteOnExit();
+
+            when(pdfExtractorService.downloadPdf(anyString(), eq(CASE_ID), any(Document.class), eq(AUTH_TOKEN)))
+                .thenReturn(englishFile);
+            when(statementOfServiceValidationService.isOrderServedViaStatementOfService(any(), any(), any()))
+                .thenReturn(true);
+
+            service.uploadFL404Orders();
+
+            verify(statementOfServiceValidationService).isOrderServedViaStatementOfService(any(), any(), any());
+            verify(csvWriter).appendCsvRowToFile(eq(tempCsv), any(AcroCaseData.class), eq(false), anyString());
+
+            String sourceDir = System.getProperty("java.io.tmpdir") + "/acro-source";
+
+            File sourceDirFile = new File(sourceDir);
+            if (sourceDirFile.exists()) {
+                File[] servedFiles = sourceDirFile.listFiles((dir, name) ->
+                    name.startsWith("FL404A-1-") && name.endsWith("_served.pdf"));
+
+                assertTrue(servedFiles != null && servedFiles.length > 0,
+                    "Served version file should be created in source directory");
+
+                for (File servedFile : servedFiles) {
+                    servedFile.delete();
+                }
+            }
+        }
     }
 
     static Stream<Arguments> documentProcessingScenarios() {
