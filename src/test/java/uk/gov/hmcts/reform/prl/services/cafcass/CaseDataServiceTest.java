@@ -291,11 +291,14 @@ public class CaseDataServiceTest {
         List<String> excludedDocumentList = new ArrayList<>();
         excludedDocumentList.add("Draft_C100_application");
         ReflectionTestUtils.setField(caseDataService, "excludedDocumentList", excludedDocumentList);
+        ReflectionTestUtils.setField(caseDataService, "objMapper", objectMapper);
         uk.gov.hmcts.reform.ccd.client.model.Document documents =
             new uk.gov.hmcts.reform.ccd.client.model
                 .Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
         Category subCategory = new Category("applicantC1AResponse", "categoryName", 2, List.of(documents), null);
         Category category = new Category("applicantC1AResponse", "categoryName", 2, List.of(documents), List.of(subCategory));
+
+
 
         CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(documents));
         when(coreCaseDataApi.getCategoriesAndDocuments(
@@ -308,6 +311,10 @@ public class CaseDataServiceTest {
                                                                           "start", "end"
         );
         assertNotNull(objectMapper.writeValueAsString(realCafCassResponse));
+        List<CafCassCaseDetail> realCafCassCaseDetail = realCafCassResponse.getCases().stream()
+            .filter(c -> c.getId().equals(1673970714366224L)).toList();
+        //it must filter the Redacted document
+        assertEquals(1, realCafCassCaseDetail.get(0).getCaseData().getOtherDocuments().size());
 
     }
 
