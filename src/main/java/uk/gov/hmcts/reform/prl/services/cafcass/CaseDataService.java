@@ -57,6 +57,7 @@ import java.util.UUID;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CANCELLED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REDACTED_DOCUMENT_UUID;
 
 @Slf4j
 @Service
@@ -501,7 +502,8 @@ public class CaseDataService {
                                      uk.gov.hmcts.reform.prl.models.documents.Document caseDocument,
                                      List<Element<OtherDocuments>> otherDocsList) {
         try {
-            if (null != caseDocument) {
+            if (null != caseDocument && caseDocument.getDocumentUrl() != null
+                && !caseDocument.getDocumentUrl().endsWith(REDACTED_DOCUMENT_UUID)) {
                 otherDocsList.add(Element.<OtherDocuments>builder().id(
                     UUID.randomUUID()).value(OtherDocuments.builder().documentOther(
                     buildFromCaseDocument(caseDocument)).documentName(caseDocument.getDocumentFileName()).documentTypeOther(
