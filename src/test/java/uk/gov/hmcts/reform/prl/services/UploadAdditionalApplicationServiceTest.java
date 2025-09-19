@@ -315,15 +315,7 @@ class UploadAdditionalApplicationServiceTest {
         assertNotNull(additionalApplicationsBundle);
         assertEquals(2, additionalApplicationsBundle.size());
     }
-
-    @Test
-    void testGetAdditionalApplicationElementsMappingC2() throws Exception {
-
-
-
-    }
-
-
+    
     @Test
     void testGetAdditionalApplicationElementsWithoutAuthor() throws Exception {
         when(applicationsFeeCalculator.getFeeTypes(any(CaseData.class))).thenReturn(List.of(
