@@ -89,16 +89,21 @@ class StatementOfServiceValidationServiceTest {
             assertTrue(result, "Should return true when submittedDateTime is populated");
         }
 
-        @Test
-        @DisplayName("Should return true when partiesServedDateTime is populated")
-        void shouldReturnTrueWhenPartiesServedDateTimeIsPopulated() {
+        @ParameterizedTest
+        @ValueSource(strings = {
+            "2024-01-15T10:30:00.000", // Valid datetime format
+            "2024-01-15", // Valid date format
+            "2024-12-31T23:59:59.999"
+        })
+        @DisplayName("Should return true when partiesServedDateTime has valid formats")
+        void shouldReturnTrueWhenPartiesServedDateTimeHasValidFormats(String validDateTime) {
             StmtOfServiceAddRecipient sos = StmtOfServiceAddRecipient.builder()
-                .partiesServedDateTime("2024-01-15T10:30:00.000")
+                .partiesServedDateTime(validDateTime)
                 .build();
 
             boolean result = validationService.statementOfServiceHasServedSubmittedTime(sos);
 
-            assertTrue(result, "Should return true when partiesServedDateTime is populated");
+            assertTrue(result, "Should return true for valid datetime format: " + validDateTime);
         }
 
         @Test
@@ -113,19 +118,24 @@ class StatementOfServiceValidationServiceTest {
             assertFalse(result, "Should return false when no date fields are populated");
         }
 
-
         @ParameterizedTest
         @NullAndEmptySource
-        @ValueSource(strings = {"   ", "\t", "\n"})
-        @DisplayName("Should return false when partiesServedDateTime is null, empty or whitespace")
-        void shouldReturnFalseWhenPartiesServedDateTimeIsNullEmptyOrWhitespace(String partiesServedDateTime) {
+        @ValueSource(strings = {
+            "   ", "\t", "\n",
+            "invalid-date",
+            "2024-13-01", // Invalid month
+            "2024/01/15", // Wrong separator
+            "2024-01-15 10:30:00" // Space instead of T
+        })
+        @DisplayName("Should return false when partiesServedDateTime has invalid formats")
+        void shouldReturnFalseWhenPartiesServedDateTimeHasInvalidFormats(String invalidDateTime) {
             StmtOfServiceAddRecipient sos = StmtOfServiceAddRecipient.builder()
-                .partiesServedDateTime(partiesServedDateTime)
+                .partiesServedDateTime(invalidDateTime)
                 .build();
 
             boolean result = validationService.statementOfServiceHasServedSubmittedTime(sos);
 
-            assertFalse(result, "Should return false when partiesServedDateTime is null, empty or whitespace");
+            assertFalse(result, "Should return false for invalid format: " + invalidDateTime);
         }
     }
 
@@ -270,57 +280,6 @@ class StatementOfServiceValidationServiceTest {
             boolean result = validationService.isOrderServedViaStatementOfService(order, sosList, caseData);
 
             assertFalse(result, "Should return false when respondent is included but service is not completed");
-        }
-    }
-
-    @Nested
-    @DisplayName("isPartiesServedDateTimeValid Tests")
-    class IsPartiesServedDateTimeValidTests {
-
-        @ParameterizedTest
-        @ValueSource(strings = {
-            "2024-01-15T10:30:00.000",
-            "2024-12-31T23:59:59.999",
-            "2023-02-14T14:30:15.123"
-        })
-        @DisplayName("Should return true for valid datetime formats")
-        void shouldReturnTrueForValidDateTimeFormats(String validDateTime) {
-            boolean result = validationService.isPartiesServedDateTimeValid(validDateTime);
-
-            assertTrue(result, "Should return true for valid datetime format: " + validDateTime);
-        }
-
-        @ParameterizedTest
-        @ValueSource(strings = {
-            "2024-01-15",
-            "2024-12-31",
-            "2023-02-14"
-        })
-        @DisplayName("Should return true for valid date formats")
-        void shouldReturnTrueForValidDateFormats(String validDate) {
-            boolean result = validationService.isPartiesServedDateTimeValid(validDate);
-
-            assertTrue(result, "Should return true for valid date format: " + validDate);
-        }
-
-        @ParameterizedTest
-        @NullAndEmptySource
-        @ValueSource(strings = {
-            "   ", "\t", "\n",
-            "invalid-date",
-            "2024-13-01", // Invalid month
-            "2024-01-32", // Invalid day
-            "2024/01/15", // Wrong separator
-            "15-01-2024", // Wrong order
-            "2024-01-15 10:30:00", // Space instead of T
-            "abc123",
-            "not-a-date"
-        })
-        @DisplayName("Should return false for invalid date formats")
-        void shouldReturnFalseForInvalidFormats(String invalidDateTime) {
-            boolean result = validationService.isPartiesServedDateTimeValid(invalidDateTime);
-
-            assertFalse(result, "Should return false for invalid format: " + invalidDateTime);
         }
     }
 
