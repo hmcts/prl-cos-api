@@ -15,7 +15,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseData;
+import uk.gov.hmcts.reform.prl.models.dto.acro.CsvData;
 
 import java.io.File;
 import java.io.IOException;
@@ -109,7 +109,7 @@ class CsvWriterTest {
         @Test
         @DisplayName("Should create CSV row data with filename")
         void shouldCreateCsvRowDataWithFilename() {
-            AcroCaseData caseData = TestDataFactory.createStandardCaseData();
+            CsvData caseData = TestDataFactory.createStandardCaseData();
             String filename = "test-order.pdf";
 
             List<String> rowData = csvWriter.createCsvRowData(caseData, true, filename);
@@ -125,7 +125,7 @@ class CsvWriterTest {
         @Test
         @DisplayName("Should create CSV row data without filename")
         void shouldCreateCsvRowDataWithoutFilename() {
-            AcroCaseData caseData = TestDataFactory.createStandardCaseData();
+            CsvData caseData = TestDataFactory.createStandardCaseData();
 
             List<String> rowData = csvWriter.createCsvRowData(caseData, true, null);
 
@@ -140,7 +140,7 @@ class CsvWriterTest {
         @ParameterizedTest(name = "Should handle {0} confidentiality correctly")
         @MethodSource("confidentialityTestCases")
         @DisplayName("Should handle field confidentiality correctly")
-        void shouldHandleFieldConfidentialityCorrectly(String fieldType, AcroCaseData caseData, String expectedValue) {
+        void shouldHandleFieldConfidentialityCorrectly(String fieldType, CsvData caseData, String expectedValue) {
             List<String> blankRowData = csvWriter.createCsvRowData(caseData, false, "order.pdf");
             List<String> includeRowData = csvWriter.createCsvRowData(caseData, true, "order.pdf");
 
@@ -172,7 +172,7 @@ class CsvWriterTest {
         @DisplayName("Should append single CSV row to file")
         void shouldAppendSingleCsvRowToFile() throws IOException {
             File csvFile = csvWriter.createCsvFileWithHeaders();
-            AcroCaseData caseData = TestDataFactory.createStandardCaseData();
+            CsvData caseData = TestDataFactory.createStandardCaseData();
             String filename = "test-order.pdf";
 
             csvWriter.appendCsvRowToFile(csvFile, caseData, true, filename);
@@ -193,7 +193,7 @@ class CsvWriterTest {
         void shouldAppendMultipleCsvRowsToFile() throws IOException {
             File csvFile = csvWriter.createCsvFileWithHeaders();
 
-            List<AcroCaseData> cases = List.of(
+            List<CsvData> cases = List.of(
                 TestDataFactory.createStandardCaseData(),
                 TestDataFactory.createCaseDataWithAllConfidentialFields()
             );
@@ -219,7 +219,7 @@ class CsvWriterTest {
         @ParameterizedTest(name = "Should extract {0} with value: {1}")
         @MethodSource("propertyExtractionTestCases")
         @DisplayName("Should extract properties correctly")
-        void shouldExtractPropertiesCorrectly(String propertyName, Object expectedValue, AcroCaseData caseData) {
+        void shouldExtractPropertiesCorrectly(String propertyName, Object expectedValue, CsvData caseData) {
             Object actualValue = csvWriter.extractPropertyValues(caseData, propertyName);
 
             assertEquals(expectedValue, actualValue, "Property value should match expected for: " + propertyName);
@@ -240,7 +240,7 @@ class CsvWriterTest {
         }
 
         static Stream<Arguments> propertyExtractionTestCases() {
-            AcroCaseData standardCase = TestDataFactory.createStandardCaseData();
+            CsvData standardCase = TestDataFactory.createStandardCaseData();
 
             return Stream.of(
                 arguments("respondent.lastName", "Doe", standardCase),
@@ -254,7 +254,7 @@ class CsvWriterTest {
     }
 
     static class TestDataFactory {
-        static AcroCaseData createStandardCaseData() {
+        static CsvData createStandardCaseData() {
             PartyDetails respondent = createPartyDetails(
                 "John", "Doe", "1994-07-05",
                 RESPONDENT_ADDRESS_LINE1, RESPONDENT_ADDRESS_LINE2, RESPONDENT_POSTCODE,
@@ -269,7 +269,7 @@ class CsvWriterTest {
             return createCaseData(respondent, applicant, "9am-5pm weekdays");
         }
 
-        static AcroCaseData createCaseDataWithAllConfidentialFields() {
+        static CsvData createCaseDataWithAllConfidentialFields() {
             PartyDetails respondent = createPartyDetails(
                 "John", "Doe", "1994-07-05",
                 RESPONDENT_ADDRESS_LINE1, RESPONDENT_ADDRESS_LINE2, RESPONDENT_POSTCODE,
@@ -306,19 +306,17 @@ class CsvWriterTest {
                 .build();
         }
 
-        private static AcroCaseData createCaseData(PartyDetails respondent, PartyDetails applicant, String contactInstructions) {
+        private static CsvData createCaseData(PartyDetails respondent, PartyDetails applicant, String contactInstructions) {
             Element<PartyDetails> respondentElement = Element.<PartyDetails>builder().value(respondent).build();
             Element<PartyDetails> applicantElement = Element.<PartyDetails>builder().value(applicant).build();
 
-            return AcroCaseData.builder()
+            return CsvData.builder()
                 .id(1234567891234567L)
                 .courtName("test")
                 .courtEpimsId("Manchester")
                 .caseTypeOfApplication("FL401")
                 .respondent(respondent)
                 .applicant(applicant)
-                .respondents(List.of(respondentElement))
-                .applicants(List.of(applicantElement))
                 .daApplicantContactInstructions(contactInstructions)
                 .build();
         }

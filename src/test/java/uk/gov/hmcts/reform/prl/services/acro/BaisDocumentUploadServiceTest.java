@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseDetail;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroResponse;
+import uk.gov.hmcts.reform.prl.models.dto.acro.CsvData;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
 import java.io.File;
@@ -67,7 +68,7 @@ class BaisDocumentUploadServiceTest {
 
         service.uploadFL404Orders();
 
-        verify(csvWriter).appendCsvRowToFile(eq(tempCsv), any(AcroCaseData.class), eq(false), eq(null));
+        verify(csvWriter).appendCsvRowToFile(eq(tempCsv), any(CsvData.class), eq(false), eq(null));
     }
 
     @ParameterizedTest(name = "{1}")
@@ -84,7 +85,7 @@ class BaisDocumentUploadServiceTest {
         service.uploadFL404Orders();
 
         verify(csvWriter, Mockito.times(successfulDownloads))
-            .appendCsvRowToFile(eq(tempCsv), any(AcroCaseData.class), eq(false), anyString());
+            .appendCsvRowToFile(eq(tempCsv), any(CsvData.class), eq(false), anyString());
         verify(pdfExtractorService, Mockito.times(2))
             .downloadPdf(anyString(), eq(CASE_ID), any(Document.class), eq(AUTH_TOKEN));
     }
