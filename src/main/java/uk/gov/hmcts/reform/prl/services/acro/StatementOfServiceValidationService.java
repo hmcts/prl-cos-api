@@ -7,6 +7,10 @@ import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseData;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 /**
@@ -59,10 +63,35 @@ public class StatementOfServiceValidationService {
     }
 
     /**
-     * Validates that partiesServedDateTime is not null, empty, or whitespace.
+     * Validates that partiesServedDateTime is a valid date/time string.
+     * Based on StmtOfServiceAddRecipient field specification:
+     * - Date format (yyyy-MM-dd) for citizen statement of service
+     * - Date & time format (yyyy-MM-dd'T'HH:mm:ss.SSS) for court staff/solicitor statement of service
+     * These match the patterns used by other DateTime fields in the same class.
      */
     public boolean isPartiesServedDateTimeValid(String partiesServedDateTime) {
-        return partiesServedDateTime != null && !partiesServedDateTime.trim().isEmpty();
+        if (partiesServedDateTime == null || partiesServedDateTime.trim().isEmpty()) {
+            return false;
+        }
+
+        String trimmedDateTime = partiesServedDateTime.trim();
+
+        try {
+            LocalDateTime.parse(trimmedDateTime, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS"));
+            return true;
+        } catch (DateTimeParseException e) {
+            // Continue to date-only format
+        }
+
+        try {
+            LocalDate.parse(trimmedDateTime, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            return true;
+        } catch (DateTimeParseException e) {
+            // Both formats failed - log the error now
+        }
+
+        log.debug("partiesServedDateTime received invalid format after trying both date and datetime patterns: {}", partiesServedDateTime);
+        return false;
     }
 
     /**

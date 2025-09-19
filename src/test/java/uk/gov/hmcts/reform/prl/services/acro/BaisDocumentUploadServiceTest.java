@@ -105,7 +105,7 @@ class BaisDocumentUploadServiceTest {
             service.uploadFL404Orders();
 
             verify(statementOfServiceValidationService).isOrderServedViaStatementOfService(any(), any(), any());
-            verify(csvWriter).appendCsvRowToFile(eq(tempCsv), any(AcroCaseData.class), eq(false), anyString());
+            verify(csvWriter).appendCsvRowToFile(eq(tempCsv), any(CsvData.class), eq(false), anyString());
         }
 
         @Test
@@ -120,7 +120,7 @@ class BaisDocumentUploadServiceTest {
             service.uploadFL404Orders();
 
             verify(statementOfServiceValidationService).isOrderServedViaStatementOfService(any(), any(), any());
-            verify(csvWriter).appendCsvRowToFile(eq(tempCsv), any(AcroCaseData.class), eq(false), anyString());
+            verify(csvWriter).appendCsvRowToFile(eq(tempCsv), any(CsvData.class), eq(false), anyString());
         }
 
         @Test
@@ -138,7 +138,7 @@ class BaisDocumentUploadServiceTest {
             service.uploadFL404Orders();
 
             verify(statementOfServiceValidationService).isOrderServedViaStatementOfService(any(), any(), any());
-            verify(csvWriter).appendCsvRowToFile(eq(tempCsv), any(AcroCaseData.class), eq(false), anyString());
+            verify(csvWriter).appendCsvRowToFile(eq(tempCsv), any(CsvData.class), eq(false), anyString());
 
             String sourceDir = System.getProperty("java.io.tmpdir") + "/acro-source";
 

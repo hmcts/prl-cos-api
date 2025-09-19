@@ -93,7 +93,7 @@ class StatementOfServiceValidationServiceTest {
         @DisplayName("Should return true when partiesServedDateTime is populated")
         void shouldReturnTrueWhenPartiesServedDateTimeIsPopulated() {
             StmtOfServiceAddRecipient sos = StmtOfServiceAddRecipient.builder()
-                .partiesServedDateTime("2024-01-15 10:30")
+                .partiesServedDateTime("2024-01-15T10:30:00.000")
                 .build();
 
             boolean result = validationService.statementOfServiceHasServedSubmittedTime(sos);
@@ -107,7 +107,7 @@ class StatementOfServiceValidationServiceTest {
             StmtOfServiceAddRecipient sos = StmtOfServiceAddRecipient.builder()
                 .servedDateTimeOption(LocalDateTime.now())
                 .submittedDateTime(LocalDateTime.now().minusDays(1))
-                .partiesServedDateTime("2024-01-15 10:30")
+                .partiesServedDateTime("2024-01-15T10:30:00.000")
                 .build();
 
             boolean result = validationService.statementOfServiceHasServedSubmittedTime(sos);
