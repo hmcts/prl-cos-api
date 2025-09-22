@@ -48,7 +48,6 @@ def setPreviewEnvVars() {
   echo "ACA_SERVICE_API_BASEURL ${env.ACA_SERVICE_API_BASEURL}"
 }
 
-
 def secrets = [
    'prl-${env}':[
       secret('prl-cos-idam-client-secret', 'IDAM_CLIENT_SECRET'),
@@ -120,7 +119,7 @@ withPipeline(type, product, component) {
 
   before('akschartsinstall')  {
     onPR() {
-      echo 'invoked -- akschartsinstall '
+      echo 'invoked -- akschartsinstall'
       setPreviewEnvVars()
     }
   }
@@ -140,7 +139,6 @@ withPipeline(type, product, component) {
   afterAlways('functionalTest:preview') {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: 'build/reports/**/*'
-    steps.archiveArtifacts allowEmptyArchive: true, artifacts: 'logs/*.log'
   }
 
   onMaster() {
@@ -149,7 +147,6 @@ withPipeline(type, product, component) {
   }
   onPR() {
     env.ENV = 'preview'
-    echo 'on preview'
     enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
   }
 }
