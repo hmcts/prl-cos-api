@@ -140,6 +140,7 @@ withPipeline(type, product, component) {
   afterAlways('functionalTest:preview') {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: 'build/reports/**/*'
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: 'logs/**/*.log'
   }
 
   onMaster() {
