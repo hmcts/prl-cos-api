@@ -38,9 +38,9 @@ def setPreviewEnvVars() {
     .find { it.startsWith(defsPrefix) }
   if (label) {
     def defsPrNumber = label - defsPrefix
-    env.CORE_CASE_DATA_API_URL = "http://prl-ccd-definitions-pr-${defsPrNumber}-ccd-data-store-api"
+    env.CORE_CASE_DATA_API_URL = "https://ccd-data-store-api-prl-ccd-definitions-pr-${defsPrNumber}.preview.platform.hmcts.net"
     env.CCD_CASE_DOCS_AM_API = "https://ccd-case-document-am-api-prl-ccd-definitions-pr-${defsPrNumber}.preview.platform.hmcts.net"
-    env.ACA_SERVICE_API_BASEURL = "http://prl-ccd-definitions-pr-${defsPrNumber}-aac-manage-case-assignment"
+    env.ACA_SERVICE_API_BASEURL = "https://aac-manage-case-assignment-prl-ccd-definitions-pr-${defsPrNumber}.preview.platform.hmcts.net"
   }
 
   echo "CORE_CASE_DATA_API_URL ${env.CORE_CASE_DATA_API_URL}"
