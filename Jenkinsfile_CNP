@@ -39,7 +39,7 @@ def setPreviewEnvVars() {
   if (label) {
     def defsPrNumber = label - defsPrefix
     env.CORE_CASE_DATA_API_URL = "http://prl-ccd-definitions-pr-${defsPrNumber}-ccd-data-store-api"
-    env.CCD_CASE_DOCS_AM_API = "http://prl-ccd-definitions-pr-${defsPrNumber}-cdam"
+    env.CCD_CASE_DOCS_AM_API = "https://ccd-case-document-am-api-prl-ccd-definitions-pr-${defsPrNumber}.preview.platform.hmcts.net"
     env.ACA_SERVICE_API_BASEURL = "http://prl-ccd-definitions-pr-${defsPrNumber}-aac-manage-case-assignment"
   }
 
