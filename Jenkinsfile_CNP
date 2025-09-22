@@ -121,7 +121,7 @@ withPipeline(type, product, component) {
   before('akschartsinstall')  {
     onPR() {
       echo 'invoked -- akschartsinstall '
-      setPreviewEnvVars()
+
     }
   }
 
@@ -148,6 +148,8 @@ withPipeline(type, product, component) {
   }
   onPR() {
     env.ENV = 'preview'
+    echo 'on preview'
+    setPreviewEnvVars()
     enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
   }
 }
