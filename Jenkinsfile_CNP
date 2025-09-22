@@ -46,7 +46,6 @@ def setPreviewEnvVars() {
   echo "CORE_CASE_DATA_API_URL ${env.CORE_CASE_DATA_API_URL}"
   echo "CCD_CASE_DOCS_AM_API ${env.CCD_CASE_DOCS_AM_API}"
   echo "ACA_SERVICE_API_BASEURL ${env.ACA_SERVICE_API_BASEURL}"
-  echo "TEST_URL ${env.TEST_URL}"
 }
 
 
@@ -122,7 +121,7 @@ withPipeline(type, product, component) {
   before('akschartsinstall')  {
     onPR() {
       echo 'invoked -- akschartsinstall '
-
+      setPreviewEnvVars()
     }
   }
 
@@ -150,7 +149,6 @@ withPipeline(type, product, component) {
   onPR() {
     env.ENV = 'preview'
     echo 'on preview'
-    setPreviewEnvVars()
     enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
   }
 }
