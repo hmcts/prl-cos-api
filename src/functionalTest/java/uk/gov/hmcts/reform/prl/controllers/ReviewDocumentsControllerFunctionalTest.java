@@ -97,6 +97,8 @@ public class ReviewDocumentsControllerFunctionalTest {
     public void givenReviewDocuments_whenOnlyRestrictedNotConfidentialForSol() throws Exception {
 
         DocumentResponse docRes = uploadDocumentIntoCdam(SOLICITOR);
+        System.out.println("docRes.getDocument().getDocumentUrl() "
+                               + docRes.getDocument().getDocumentUrl());
 
         String requestBodyRevised = requestBodyForSolitior
             .replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
