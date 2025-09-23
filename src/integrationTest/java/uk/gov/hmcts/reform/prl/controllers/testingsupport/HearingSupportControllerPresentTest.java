@@ -25,6 +25,8 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 public class HearingSupportControllerPresentTest {
 
     private MockMvc mockMvc;
+
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private WebApplicationContext webApplicationContext;
 
