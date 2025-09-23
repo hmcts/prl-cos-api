@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -149,8 +150,8 @@ public class PartyLevelCaseFlagsService {
         PartyDetails partyDetails = representing.getDaTarget().apply(caseData);
         for (int i = 0; i < partyRoles.size(); i++) {
             PartyRole partyRole = partyRoles.get(i);
-            if (partyDetails.getPartyId() != null && partyDetails.getPartyId()
-                .equals(caseData.getAllocatedBarrister().getPartyList().getValueCodeAsUuid())) {
+            if (partyDetails.getPartyId() != null
+                && isFlagUpdateRequired(caseData, partyDetails.getPartyId())) {
                 findAndGeneratePartyFlagsForBarristerOnly(representing,
                                                           i,
                                                           partyDetails.getBarristerFullNameForCaseFlags(),
@@ -170,8 +171,8 @@ public class PartyLevelCaseFlagsService {
             PartyRole partyRole = partyRoles.get(i);
             if (null != caElements) {
                 Optional<Element<PartyDetails>> partyDetailsElement = i < numElements ? Optional.of(caElements.get(i)) : Optional.empty();
-                if (caseData.getAllocatedBarrister() != null && partyDetailsElement.isPresent() && partyDetailsElement.get().getId()
-                    .equals(caseData.getAllocatedBarrister().getPartyList().getValueCodeAsUuid())) {
+                if (partyDetailsElement.isPresent()
+                    && isFlagUpdateRequired(caseData, partyDetailsElement.get().getId())) {
                     findAndGeneratePartyFlagsForBarristerOnly(representing,
                                                               i,
                                                               partyDetailsElement.get().getValue().getBarristerFullNameForCaseFlags(),
@@ -181,6 +182,11 @@ public class PartyLevelCaseFlagsService {
             }
         }
         return data;
+    }
+
+    private boolean isFlagUpdateRequired(CaseData caseData, UUID partyId) {
+        return  caseData.getAllocatedBarrister() != null
+            && partyId.equals(caseData.getAllocatedBarrister().getPartyList().getValueCodeAsUuid());
     }
 
     private Map<String, Object> generateC100PartyCaseFlags(CaseData caseData, PartyRole.Representing representing) {
