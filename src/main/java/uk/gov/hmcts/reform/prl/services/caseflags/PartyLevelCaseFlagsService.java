@@ -35,9 +35,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.CAAPPLICANT;
@@ -150,8 +152,7 @@ public class PartyLevelCaseFlagsService {
         PartyDetails partyDetails = representing.getDaTarget().apply(caseData);
         for (int i = 0; i < partyRoles.size(); i++) {
             PartyRole partyRole = partyRoles.get(i);
-            if (partyDetails.getPartyId() != null
-                && isFlagUpdateRequired(caseData, partyDetails.getPartyId())) {
+            if (isBarristerFlagUpdateRequired(caseData, partyDetails::getPartyId)) {
                 findAndGeneratePartyFlagsForBarristerOnly(representing,
                                                           i,
                                                           partyDetails.getBarristerFullNameForCaseFlags(),
@@ -171,8 +172,7 @@ public class PartyLevelCaseFlagsService {
             PartyRole partyRole = partyRoles.get(i);
             if (null != caElements) {
                 Optional<Element<PartyDetails>> partyDetailsElement = i < numElements ? Optional.of(caElements.get(i)) : Optional.empty();
-                if (partyDetailsElement.isPresent()
-                    && isFlagUpdateRequired(caseData, partyDetailsElement.get().getId())) {
+                if (isBarristerFlagUpdateRequired(caseData, () -> partyDetailsElement.map(Element::getId).orElse(null))) {
                     findAndGeneratePartyFlagsForBarristerOnly(representing,
                                                               i,
                                                               partyDetailsElement.get().getValue().getBarristerFullNameForCaseFlags(),
@@ -184,9 +184,9 @@ public class PartyLevelCaseFlagsService {
         return data;
     }
 
-    private boolean isFlagUpdateRequired(CaseData caseData, UUID partyId) {
-        return  caseData.getAllocatedBarrister() != null
-            && partyId.equals(caseData.getAllocatedBarrister().getPartyList().getValueCodeAsUuid());
+    private boolean isBarristerFlagUpdateRequired(CaseData caseData, Supplier<UUID> partyIdSupplier) {
+        return caseData.getAllocatedBarrister() != null
+            && caseData.getAllocatedBarrister().getPartyList().getValueCodeAsUuid().equals(partyIdSupplier.get());
     }
 
     private Map<String, Object> generateC100PartyCaseFlags(CaseData caseData, PartyRole.Representing representing) {
@@ -448,7 +448,7 @@ public class PartyLevelCaseFlagsService {
         switch (representing) {
             case CAAPPLICANTSOLICITOR, CARESPONDENTSOLICITOR: {
                 List<Element<PartyDetails>> caElements = representing.getCaTarget().apply(caseData);
-                Optional<Element<PartyDetails>> partyDetails = Optional.ofNullable(caElements.get(partyIndex));
+                Optional<Element<PartyDetails>> partyDetails = ofNullable(caElements.get(partyIndex));
                 if (partyDetails.isPresent()) {
                     caseData = regenerateSolicitorFlags(
                         caseData,
@@ -462,7 +462,7 @@ public class PartyLevelCaseFlagsService {
             }
             case CAAPPLICANTBARRISTER, CARESPONDENTBARRISTER: {
                 List<Element<PartyDetails>> caElements = representing.getCaTarget().apply(caseData);
-                Optional<Element<PartyDetails>> partyDetails = Optional.ofNullable(caElements.get(partyIndex));
+                Optional<Element<PartyDetails>> partyDetails = ofNullable(caElements.get(partyIndex));
                 if (partyDetails.isPresent()) {
                     caseData = regenerateBarristerFlags(
                         caseData,
@@ -474,7 +474,7 @@ public class PartyLevelCaseFlagsService {
                 break;
             }
             case DAAPPLICANTSOLICITOR, DARESPONDENTSOLICITOR: {
-                Optional<PartyDetails> partyDetails = Optional.ofNullable(representing.getDaTarget().apply(caseData));
+                Optional<PartyDetails> partyDetails = ofNullable(representing.getDaTarget().apply(caseData));
                 if (partyDetails.isPresent()) {
                     caseData = regenerateSolicitorFlags(
                         caseData,
@@ -487,7 +487,7 @@ public class PartyLevelCaseFlagsService {
                 break;
             }
             case DAAPPLICANTBARRISTER, DARESPONDENTBARRISTER: {
-                Optional<PartyDetails> partyDetails = Optional.ofNullable(representing.getDaTarget().apply(caseData));
+                Optional<PartyDetails> partyDetails = ofNullable(representing.getDaTarget().apply(caseData));
                 if (partyDetails.isPresent()) {
                     caseData = regenerateBarristerFlags(
                         caseData,
@@ -833,7 +833,7 @@ public class PartyLevelCaseFlagsService {
 
         if (MapUtils.isNotEmpty(applicantIdToIndex)) {
             applicantIdToIndex.forEach((key, index) -> {
-                Optional<Integer> oldIndex = Optional.ofNullable(oldApplicantIdToIndex.get(key));
+                Optional<Integer> oldIndex = ofNullable(oldApplicantIdToIndex.get(key));
                 if (oldIndex.isPresent() && !oldIndex.get().equals(index)) {
                     updateCaseFlagsData(oldIndex.get(), index, updatedCaseDataMap,
                                         representing, parties
@@ -861,7 +861,7 @@ public class PartyLevelCaseFlagsService {
                                   PartyRole.Representing representing, String externalCaseDataField, String visibilityExternal) {
         String caseDataKey = String.format(externalCaseDataField, index + 1);
         Optional<PartyRole> partyRole = getPartyRole(representing, index);
-        Optional<Element<PartyDetails>> partyDetailsElement = Optional.ofNullable(applicants.get(index));
+        Optional<Element<PartyDetails>> partyDetailsElement = ofNullable(applicants.get(index));
         if (partyDetailsElement.isPresent()) {
             int caseFlagsIndex = index + 1;
             Flags caseFlag = Flags
