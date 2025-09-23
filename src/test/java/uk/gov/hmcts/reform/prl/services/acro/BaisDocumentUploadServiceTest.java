@@ -31,7 +31,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
-class BaisDocumentUplgitoadServiceTest {
+class BaisDocumentUploadServiceTest {
 
     private static final String AUTH_TOKEN = "AuthToken";
     private static final String CASE_ID = "1";
