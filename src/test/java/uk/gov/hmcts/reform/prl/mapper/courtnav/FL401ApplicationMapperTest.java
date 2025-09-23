@@ -2,14 +2,26 @@ package uk.gov.hmcts.reform.prl.mapper.courtnav;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.prl.enums.ReasonForOrderWithoutGivingNoticeEnum;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.Home;
+import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.RelationshipDateComplex;
+import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
+import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationDateInfo;
+import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationObjectType;
+import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationOptionsInfo;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401Proceedings;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AttendHearing;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavApplicant;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavDate;
@@ -22,8 +34,12 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavRespondentBehavio
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtProceedings;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.Family;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.GoingToCourt;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherDetailsOfWithoutNoticeOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ProtectedChild;
+import uk.gov.hmcts.reform.prl.models.complextypes.ReasonForWithoutNoticeOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.Situation;
+import uk.gov.hmcts.reform.prl.models.complextypes.StatementOfTruth;
+import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -33,6 +49,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipEnum.noneOfTheAbove;
 import static uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipOptionsEnum.cousin;
 import static uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum.applicantStopFromRespondentEnum_Value_8;
@@ -43,25 +62,30 @@ import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.ReasonForOrderWithoutGivingNoticeEnum.harmToApplicantOrChild;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.mapper.courtnav.CourtNavTestDataFactory.buildApplicantAddress;
-import static uk.gov.hmcts.reform.prl.mapper.courtnav.CourtNavTestDataFactory.buildApplicantsDetails;
-import static uk.gov.hmcts.reform.prl.mapper.courtnav.CourtNavTestDataFactory.buildCourtNavFl401;
-import static uk.gov.hmcts.reform.prl.mapper.courtnav.CourtNavTestDataFactory.buildCourtNavHome;
-import static uk.gov.hmcts.reform.prl.mapper.courtnav.CourtNavTestDataFactory.buildSituation;
 import static uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantRelationshipDescriptionEnum.formerlyMarriedOrCivil;
 import static uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantRelationshipDescriptionEnum.noneOfAbove;
 import static uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicationCoverEnum.applicantAndChildren;
 import static uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicationCoverEnum.applicantOnly;
 import static uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.BehaviourTowardsApplicantEnum.comingNearHome;
 import static uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.BehaviourTowardsChildrenEnum.beingViolentOrThreatening;
-import static uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.SpecialMeasuresEnum.separateWaitingRoom;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-@SpringBootTest
-@Import(FL401ApplicationMapper.class)
+@ExtendWith(MockitoExtension.class)
 class FL401ApplicationMapperTest {
 
-    @Autowired
+    @InjectMocks
     private FL401ApplicationMapper fl401ApplicationMapper;
+
+    @Mock private CourtNavApplicantMapper courtNavApplicantMapper;
+    @Mock private CourtNavRespondentMapper courtNavRespondentMapper;
+    @Mock private CourtNavHomeMapper courtNavHomeMapper;
+    @Mock private ApplicantChildMapper applicantChildMapper;
+    @Mock private InterpreterNeedsMapper interpreterNeedsMapper;
+    @Mock private OrderWithoutNoticeMapper orderWithoutNoticeMapper;
+    @Mock private ApplicantRelationshipMapper applicantRelationshipMapper;
+    @Mock private RespondentBehaviourMapper respondentBehaviourMapper;
+    @Mock private StatementOfTruthMapper statementOfTruthMapper;
+    @Mock private AttendHearingMapper attendHearingMapper;
 
     private CourtNavFl401 courtNavFl401;
     private Situation situationWithOnlyNonMolestationOrder;
@@ -71,16 +95,40 @@ class FL401ApplicationMapperTest {
 
     @BeforeEach
     void setUp() {
-        CourtNavAddress applicantAddress = buildApplicantAddress();
-        situationWithOnlyNonMolestationOrder = buildSituation(List.of(nonMolestationOrder));
-        situationWithOnlyOccupationOrder = buildSituation(List.of(occupationOrder));
-        courtNavApplicant = buildApplicantsDetails(applicantAddress);
-        home = buildCourtNavHome(applicantAddress);
-        courtNavFl401 = buildCourtNavFl401(courtNavApplicant, applicantAddress);
+        // Your existing test data setup is perfect
+        CourtNavAddress applicantAddress = CourtNavTestDataFactory.buildApplicantAddress();
+        situationWithOnlyNonMolestationOrder = CourtNavTestDataFactory.buildSituation(List.of(nonMolestationOrder));
+        situationWithOnlyOccupationOrder = CourtNavTestDataFactory.buildSituation(List.of(occupationOrder));
+        courtNavApplicant = CourtNavTestDataFactory.buildApplicantsDetails(applicantAddress);
+        home = CourtNavTestDataFactory.buildCourtNavHome(applicantAddress);
+        courtNavFl401 = CourtNavTestDataFactory.buildCourtNavFl401(courtNavApplicant, applicantAddress);
+
+        lenient().when(courtNavApplicantMapper.map(any())).thenReturn(PartyDetails.builder().build());
+        when(courtNavRespondentMapper.map(any())).thenReturn(PartyDetails.builder().build());
+
+        lenient().when(respondentBehaviourMapper.map(any())).thenReturn(RespondentBehaviour.builder().build());
+        lenient().when(courtNavHomeMapper.map(any())).thenReturn(Home.builder().build());
+        lenient().when(statementOfTruthMapper.map(any())).thenReturn(StatementOfTruth.builder().build());
+        lenient().when(applicantRelationshipMapper.mapRelationType(any())).thenReturn(RespondentRelationObjectType.builder().build());
+        lenient().when(applicantRelationshipMapper.mapRelationDates(any())).thenReturn(RespondentRelationDateInfo.builder().build());
+        lenient().when(applicantRelationshipMapper.mapRelationOptions(any())).thenReturn(RespondentRelationOptionsInfo.builder().build());
+        lenient().when(attendHearingMapper.map(any())).thenReturn(AttendHearing.builder().build());
+        lenient().when(applicantChildMapper.map(any())).thenReturn(Collections.emptyList());
+        lenient().when(interpreterNeedsMapper.map(any())).thenReturn(Collections.emptyList());
+        lenient().when(orderWithoutNoticeMapper.map(any())).thenReturn(WithoutNoticeOrderDetails.builder().build());
+        lenient().when(orderWithoutNoticeMapper.mapReasonForWithoutNotice(any())).thenReturn(ReasonForWithoutNoticeOrder.builder().build());
+        lenient().when(orderWithoutNoticeMapper.mapOtherDetails(any())).thenReturn(OtherDetailsOfWithoutNoticeOrder.builder().build());
     }
 
     @Test
     void shouldMapSituationToOrderTypesAndWithoutNoticeReasonDetails() {
+        ReasonForWithoutNoticeOrder mockWithoutOrderObject = ReasonForWithoutNoticeOrder.builder()
+            .reasonForOrderWithoutGivingNotice(List.of(harmToApplicantOrChild))
+            .futherDetails("test1")
+            .build();
+
+        when(orderWithoutNoticeMapper.mapReasonForWithoutNotice(any())).thenReturn(mockWithoutOrderObject);
+
         courtNavFl401 = courtNavFl401.toBuilder()
             .fl401(courtNavFl401.getFl401().toBuilder()
                        .situation(situationWithOnlyNonMolestationOrder)
@@ -106,6 +154,12 @@ class FL401ApplicationMapperTest {
 
     @Test
     void shouldMapOccupationOrderAndPreserveWithoutNoticeReason() {
+        ReasonForWithoutNoticeOrder mockWithoutOrderObject = ReasonForWithoutNoticeOrder.builder()
+            .reasonForOrderWithoutGivingNotice(List.of(harmToApplicantOrChild))
+            .build();
+
+        when(orderWithoutNoticeMapper.mapReasonForWithoutNotice(any())).thenReturn(mockWithoutOrderObject);
+
         courtNavFl401 = courtNavFl401.toBuilder()
             .fl401(courtNavFl401.getFl401().toBuilder()
                        .situation(situationWithOnlyOccupationOrder)
@@ -152,6 +206,8 @@ class FL401ApplicationMapperTest {
 
     @Test
     void shouldMapOrdersAppliedWithoutNoticeAndBailConditionFlagsAsFalse() {
+        when(orderWithoutNoticeMapper.mapReasonForWithoutNotice(any())).thenReturn(null);
+
         Situation updatedSituation = situationWithOnlyNonMolestationOrder.toBuilder()
             .ordersAppliedWithoutNotice(false)
             .bailConditionsOnRespondent(false)
@@ -198,6 +254,18 @@ class FL401ApplicationMapperTest {
 
     @Test
     void shouldMapRelationshipDescriptionAsNoneOfTheAbove() {
+        RespondentRelationObjectType mockRelationObject = RespondentRelationObjectType.builder()
+            .applicantRelationship(noneOfTheAbove)
+            .build();
+        when(applicantRelationshipMapper.mapRelationType(any())).thenReturn(mockRelationObject);
+
+        RespondentRelationOptionsInfo mockRelationOptions = RespondentRelationOptionsInfo.builder()
+            .applicantRelationshipOptions(cousin)
+            .build();
+
+        when(applicantRelationshipMapper.mapRelationOptions(any())).thenReturn(mockRelationOptions);
+        when(applicantRelationshipMapper.mapRelationDates(any())).thenReturn(null);
+
         CourtNavRelationShipToRespondent updatedRelationship = CourtNavRelationShipToRespondent.builder()
             .relationshipDescription(noneOfAbove)
             .ceremonyDate(null)
@@ -233,13 +301,31 @@ class FL401ApplicationMapperTest {
 
     @Test
     void shouldMapInterpreterAndDisabilityNeedsFromGoingToCourt() {
+        InterpreterNeed need = InterpreterNeed.builder()
+            .language("language - dialect")
+            .build();
+
+        Element<InterpreterNeed> interpreterNeedElement = element(need);
+
+        List<Element<InterpreterNeed>> mockInterpreterNeedsList = List.of(interpreterNeedElement);
+
+        AttendHearing mockHearingData = AttendHearing.builder()
+            .isInterpreterNeeded(Yes)
+            .isDisabilityPresent(Yes)
+            .adjustmentsRequired("disability details")
+            .specialArrangementsRequired("A separate waiting room in the court building")
+            .interpreterNeeds(null)
+            .build();
+
+        when(attendHearingMapper.map(any())).thenReturn(mockHearingData);
+        when(interpreterNeedsMapper.map(any())).thenReturn(mockInterpreterNeedsList);
+
         GoingToCourt customGoingToCourt = GoingToCourt.builder()
             .isInterpreterRequired(true)
             .interpreterLanguage("language")
             .interpreterDialect("dialect")
             .anyDisabilityNeeds(true)
             .disabilityNeedsDetails("disability details")
-            .anySpecialMeasures(List.of(separateWaitingRoom))
             .build();
 
         courtNavFl401 = courtNavFl401.toBuilder()
@@ -317,6 +403,15 @@ class FL401ApplicationMapperTest {
 
     @Test
     void shouldMapHomeDetailsCorrectlyWhenAllFlagsAreFalse() {
+        Home mockHomeOutput = Home.builder()
+            .isPropertyRented(No)
+            .isThereMortgageOnProperty(No)
+            .doesApplicantHaveHomeRights(No)
+            .isPropertyAdapted(No)
+            .build();
+
+        when(courtNavHomeMapper.map(any())).thenReturn(mockHomeOutput);
+
         CourtNavHome updatedHome = home.toBuilder()
             .propertyIsRented(false)
             .propertyHasMortgage(false)
@@ -345,6 +440,12 @@ class FL401ApplicationMapperTest {
 
     @Test
     void shouldNotThrowWhenFamilyHomeListIsEmpty() {
+        Home mockHomeOutput = Home.builder()
+            .livingSituation(Collections.emptyList())
+            .build();
+
+        when(courtNavHomeMapper.map(any())).thenReturn(mockHomeOutput);
+
         home = home.toBuilder()
             .wantToHappenWithFamilyHome(Collections.emptyList())
             .build();
@@ -363,6 +464,18 @@ class FL401ApplicationMapperTest {
 
     @Test
     void shouldMarkApplicantContactDetailsAsNotConfidentialWhenShared() {
+        PartyDetails mockApplicantOutput = PartyDetails.builder()
+            .isAddressConfidential(No)
+            .isEmailAddressConfidential(No)
+            .isPhoneNumberConfidential(No)
+            .email(null)
+            .phoneNumber(null)
+            .address(null)
+            .build();
+
+        // 2. Tell the mock to return our specially crafted object for this test.
+        when(courtNavApplicantMapper.map(any())).thenReturn(mockApplicantOutput);
+
         courtNavApplicant.setGender(female);
         courtNavApplicant.setShareContactDetailsWithRespondent(true);
         courtNavApplicant.setAddress(CourtNavAddress.builder()
@@ -388,6 +501,17 @@ class FL401ApplicationMapperTest {
 
     @Test
     void shouldSetRespondentContactFlagsToNoWhenInfoIsMissing() {
+        PartyDetails mockRespondentOutput = PartyDetails.builder()
+            .canYouProvideEmailAddress(No)
+            .canYouProvidePhoneNumber(No)
+            .isCurrentAddressKnown(No)
+            .email(null)
+            .phoneNumber(null)
+            .address(null)
+            .build();
+
+        when(courtNavRespondentMapper.map(any())).thenReturn(mockRespondentOutput);
+
         CourtNavRespondent courtNavRespondent = CourtNavRespondent.builder()
             .firstName("resp test")
             .lastName("fl401")
@@ -419,6 +543,24 @@ class FL401ApplicationMapperTest {
 
     @Test
     void shouldMapRelationshipEndDateWhenPresent() {
+        RelationshipDateComplex expectedRelationDate = RelationshipDateComplex.builder()
+            .relationshipDateComplexEndDate(LocalDate.of(2011, 9, 10))
+            .build();
+
+        RespondentRelationDateInfo expectedDateInfo = RespondentRelationDateInfo.builder()
+            .relationStartAndEndComplexType(expectedRelationDate)
+            .build();
+
+        // 2. Tell the mock to return this specific object when called in this test
+        when(applicantRelationshipMapper.mapRelationDates(any())).thenReturn(expectedDateInfo);
+
+        List<ReasonForOrderWithoutGivingNoticeEnum> expectedReasons = List.of(harmToApplicantOrChild);
+        ReasonForWithoutNoticeOrder expectedNoticeReason = ReasonForWithoutNoticeOrder.builder()
+            .reasonForOrderWithoutGivingNotice(expectedReasons)
+            .build();
+
+        when(orderWithoutNoticeMapper.mapReasonForWithoutNotice(any())).thenReturn(expectedNoticeReason);
+
         CourtNavRelationShipToRespondent relationShipToRespondent = CourtNavRelationShipToRespondent.builder()
             .relationshipDescription(formerlyMarriedOrCivil)
             .relationshipStartDate(new CourtNavDate(10, 9, 1998))
@@ -444,6 +586,11 @@ class FL401ApplicationMapperTest {
             caseData.getRespondentRelationDateInfoObject()
                 .getRelationStartAndEndComplexType()
                 .getRelationshipDateComplexEndDate()
+        );
+
+        assertEquals(
+            List.of(harmToApplicantOrChild),
+            caseData.getReasonForOrderWithoutGivingNotice().getReasonForOrderWithoutGivingNotice()
         );
     }
 
@@ -479,6 +626,13 @@ class FL401ApplicationMapperTest {
 
     @Test
     void shouldNotMapBehaviourTowardsApplicantWhenNull() {
+        RespondentBehaviour mockBehaviourOutput = RespondentBehaviour.builder()
+            .applicantWantToStopFromRespondentDoing(null)
+            .applicantWantToStopFromRespondentDoingToChild(List.of(applicantStopFromRespondentDoingToChildEnum_Value_1))
+            .build();
+
+        when(respondentBehaviourMapper.map(any())).thenReturn(mockBehaviourOutput);
+
         CourtNavRespondentBehaviour respondentBehaviour = CourtNavRespondentBehaviour.builder()
             .applyingForMonMolestationOrder(true)
             .stopBehaviourAnythingElse("abc")
@@ -505,6 +659,13 @@ class FL401ApplicationMapperTest {
 
     @Test
     void shouldNotMapBehaviourTowardsChildrenWhenNull() {
+        RespondentBehaviour mockBehaviourOutput = RespondentBehaviour.builder()
+            .applicantWantToStopFromRespondentDoing(List.of(applicantStopFromRespondentEnum_Value_8))
+            .applicantWantToStopFromRespondentDoingToChild(null)
+            .build();
+
+        when(respondentBehaviourMapper.map(any())).thenReturn(mockBehaviourOutput);
+
         CourtNavRespondentBehaviour respondentBehaviour = CourtNavRespondentBehaviour.builder()
             .applyingForMonMolestationOrder(true)
             .stopBehaviourAnythingElse("abc")
@@ -531,6 +692,12 @@ class FL401ApplicationMapperTest {
 
     @Test
     void shouldMapApplicantContactInstructionsFromCourtNavDetails() {
+        PartyDetails mockApplicantDetails = PartyDetails.builder()
+            .applicantContactInstructions("Test")
+            .build();
+
+        when(courtNavApplicantMapper.map(any())).thenReturn(mockApplicantDetails);
+
         courtNavApplicant.setApplicantContactInstructions("Test");
 
         courtNavFl401 = courtNavFl401.toBuilder()
