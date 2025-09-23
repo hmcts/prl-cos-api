@@ -8,6 +8,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole;
 import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
+import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -25,6 +27,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
+import uk.gov.hmcts.reform.prl.utils.BarristerHelper;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -35,6 +39,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static java.util.Map.entry;
 import static java.util.Map.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -63,23 +68,30 @@ class CaseAssignmentControllerTest {
     @Mock
     private AuthorisationService authorisationService;
     @Mock
+    private PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+    @Mock
+    private BarristerHelper barristerHelper;
+    @Mock
     private ApplicationsTabService applicationsTabService;
+    @Spy
+    private ObjectMapper objectMapper;
 
     private CaseAssignmentController caseAssignmentController;
-    @Mock
-    private ObjectMapper objectMapper;
-    private Barrister barrister;
     private AllocatedBarrister allocatedBarrister;
 
     @BeforeEach
     void setUp() {
+        objectMapper.findAndRegisterModules();
         caseAssignmentController =  new CaseAssignmentController(
             caseAssignmentService,
             objectMapper,
             organisationService,
             authorisationService,
+            barristerHelper,
+            partyLevelCaseFlagsService,
             applicationsTabService);
-        barrister = Barrister.builder()
+
+        Barrister barrister = Barrister.builder()
             .barristerEmail("barristerEmail@gmail.com")
             .barristerFirstName("barristerName")
             .barristerLastName("barristerLastName")
@@ -161,6 +173,7 @@ class CaseAssignmentControllerTest {
                                                    isA(AllocatedBarrister.class));
 
         verify(applicationsTabService).updateTab(isA(CaseData.class));
+        verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(any());
     }
 
     @Test
@@ -345,7 +358,7 @@ class CaseAssignmentControllerTest {
             "auth",
             "s2sToken",
             callbackRequest
-        )).isInstanceOf(IllegalArgumentException.class)
+        )).isInstanceOf(InvalidClientException.class)
             .hasMessageContaining(INVALID_CLIENT);
     }
 
@@ -355,8 +368,8 @@ class CaseAssignmentControllerTest {
             .thenReturn(true);
 
         Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put(CASE_TYPE_OF_APPLICATION, FL401_CASE_TYPE);
         caseDataMap.put(ALLOCATED_BARRISTER, allocatedBarrister);
+        caseDataMap.put(CASE_TYPE_OF_APPLICATION, FL401_CASE_TYPE);
 
         CaseDetails caseDetails = CaseDetails.builder()
             .id(1234L)
@@ -376,9 +389,8 @@ class CaseAssignmentControllerTest {
                            .barristerLastName("barrister").build())
             .build();
 
-        CaseData caseData = CaseData.builder().caseTypeOfApplication(FL401_CASE_TYPE).allocatedBarrister(allocatedBarrister).build();
-        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(caseAssignmentService.getSelectedParty(caseData, allocatedBarrister.getPartyList().getValueCode()))
+        when(caseAssignmentService.getSelectedParty(isA(CaseData.class),
+                                                    eq(allocatedBarrister.getPartyList().getValueCode())))
             .thenReturn(partyDetails);
 
         AboutToStartOrSubmitCallbackResponse response = caseAssignmentController.submitRemoveBarrister(
@@ -387,8 +399,9 @@ class CaseAssignmentControllerTest {
             callbackRequest
         );
 
-        assertThat(response.getData().get(ALLOCATED_BARRISTER))
-            .isNotNull();
+        assertThat(response.getData())
+            .contains(entry(ALLOCATED_BARRISTER, allocatedBarrister));
+
 
         assertThat(response.getErrors()).isEmpty();
 
@@ -397,9 +410,13 @@ class CaseAssignmentControllerTest {
                                                             eq(selectedPartyId),
                                                             anyList());
         verify(caseAssignmentService).removeBarrister(isA(CaseData.class),
-                                                   eq(selectedPartyId));
-        verify(caseAssignmentService).getSelectedParty(isA(CaseData.class), eq(selectedPartyId));
+                                                      eq(partyDetails));
+        verify(barristerHelper).setAllocatedBarrister(eq(partyDetails),
+                                                 isA(CaseData.class),
+                                                 eq(UUID.fromString(selectedPartyId)));
         verify(applicationsTabService).updateTab(isA(CaseData.class));
+        verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(any());
+
     }
 
     @Test
@@ -444,7 +461,10 @@ class CaseAssignmentControllerTest {
                                                          eq(selectedPartyId),
                                                          anyList());
         verify(caseAssignmentService, never()).removeBarrister(isA(CaseData.class),
-                                                   eq(selectedPartyId));
+                                                               any(PartyDetails.class));
+        verify(barristerHelper, never()).setAllocatedBarrister(any(PartyDetails.class),
+                                                 any(CaseData.class),
+                                                 any(UUID.class));
     }
 
     @Test
@@ -459,7 +479,7 @@ class CaseAssignmentControllerTest {
             "auth",
             "s2sToken",
             callbackRequest
-        )).isInstanceOf(IllegalArgumentException.class)
+        )).isInstanceOf(InvalidClientException.class)
             .hasMessageContaining(INVALID_CLIENT);
     }
 }
