@@ -175,7 +175,10 @@ public class PartyLevelCaseFlagsService {
                 if (isBarristerFlagUpdateRequired(caseData, () -> partyDetailsElement.map(Element::getId).orElse(null))) {
                     findAndGeneratePartyFlagsForBarristerOnly(representing,
                                                               i,
-                                                              partyDetailsElement.get().getValue().getBarristerFullNameForCaseFlags(),
+                                                              partyDetailsElement
+                                                                  .map(Element::getValue)
+                                                                  .map(PartyDetails::getBarristerFullNameForCaseFlags)
+                                                                  .orElse(StringUtils.EMPTY),
                                                               data,
                                                               partyRole);
                 }
