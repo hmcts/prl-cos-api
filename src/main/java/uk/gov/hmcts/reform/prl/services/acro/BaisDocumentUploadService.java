@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroResponse;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -32,7 +31,6 @@ public class BaisDocumentUploadService {
     private final AcroZipService acroZipService;
     private final CsvWriter csvWriter;
     private final PdfExtractorService pdfExtractorService;
-    private final LaunchDarklyClient launchDarklyClient;
 
     @Value("${acro.source-directory}")
     private String sourceDirectory;
