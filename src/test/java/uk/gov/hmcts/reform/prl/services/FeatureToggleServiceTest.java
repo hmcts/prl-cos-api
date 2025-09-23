@@ -22,14 +22,14 @@ import static org.hamcrest.core.Is.is;
 })
 class FeatureToggleServiceTest {
     @EnableConfigurationProperties(FeatureToggleService.class)
-    public static class TestConfig {}
+    public static class TestConfig {
+    }
 
-        @Autowired
-        private FeatureToggleService featureToggleService;
+    @Autowired
+    private FeatureToggleService featureToggleService;
 
-        @Test
-        void isAddBarristerFlagReturnTrue() {
-            assertThat(featureToggleService.isBarristerFeatureEnabled(), is(true));
-        }
+    @Test
+    void isAddBarristerFlagReturnTrue() {
+        assertThat(featureToggleService.isBarristerFeatureEnabled(), is(true));
+    }
 }
-

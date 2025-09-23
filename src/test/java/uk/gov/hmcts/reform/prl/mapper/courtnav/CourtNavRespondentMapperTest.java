@@ -2,12 +2,9 @@ package uk.gov.hmcts.reform.prl.mapper.courtnav;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -32,7 +29,9 @@ public class CourtNavRespondentMapperTest {
     @Configuration
     // 4. Tell this mini-context to scan ONLY the package where our mappers live
     @ComponentScan(basePackages = "uk.gov.hmcts.reform.prl.mapper.courtnav")
-    public static class TestConfig {}
+    public static class TestConfig {
+
+    }
 
     @Autowired
     private CourtNavRespondentMapper courtNavRespondentMapper;
