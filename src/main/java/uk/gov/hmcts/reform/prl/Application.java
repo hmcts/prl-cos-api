@@ -6,11 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.openfeign.EnableFeignClients;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import uk.gov.hmcts.reform.prl.tasks.ScheduledTaskRunner;
@@ -30,18 +29,18 @@ import uk.gov.hmcts.reform.prl.tasks.ScheduledTaskRunner;
       }
     )
  */
+
+@SpringBootApplication
 @EnableAsync
-@SpringBootConfiguration
-@EnableAutoConfiguration
 @EnableCaching
 @EnableScheduling
-@ComponentScan(basePackages = {  "uk.gov.hmcts.reform.prl", "uk.gov.hmcts.reform.prl.services",
+@ConfigurationPropertiesScan(basePackages = {  "uk.gov.hmcts.reform.prl", "uk.gov.hmcts.reform.prl.services",
     "uk.gov.hmcts.reform.prl.config","uk.gov.hmcts.reform.ccd.document","uk.gov.hmcts.reform.prl.repositories",
     "uk.gov.hmcts.reform.prl.mapper","uk.gov.hmcts.reform.idam.client",
     "uk.gov.hmcts.reform.sendletter.api",
     "uk.gov.hmcts.reform.prl.clients",
     "uk.gov.hmcts.reform.prl.schedule",
-    "uk.gov.hmcts.reform.prl.tasks"})
+    "uk.gov.hmcts.reform.prl.tasks",})
 @Slf4j
 public class Application implements CommandLineRunner {
 

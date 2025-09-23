@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401Proceedings;
@@ -56,6 +57,7 @@ import static uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.BehaviourTow
 import static uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.SpecialMeasuresEnum.separateWaitingRoom;
 
 @SpringBootTest
+@Import(FL401ApplicationMapper.class)
 class FL401ApplicationMapperTest {
 
     @Autowired

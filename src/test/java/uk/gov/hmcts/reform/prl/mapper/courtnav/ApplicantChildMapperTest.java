@@ -1,8 +1,7 @@
 package uk.gov.hmcts.reform.prl.mapper.courtnav;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mapstruct.factory.Mappers;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
@@ -15,11 +14,9 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-@SpringBootTest
 class ApplicantChildMapperTest {
 
-    @Autowired
-    ApplicantChildMapper applicantChildMapper;
+    private final ApplicantChildMapper applicantChildMapper = Mappers.getMapper(ApplicantChildMapper.class);
 
     @Test
     void shouldMapChildCorrectly() {

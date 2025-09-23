@@ -1,8 +1,15 @@
 package uk.gov.hmcts.reform.prl.mapper.courtnav;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavAddress;
@@ -15,14 +22,23 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-@SpringBootTest
-class CourtNavRespondentMapperTest {
+// 1. Use SpringExtension to enable Spring testing features
+@ExtendWith(SpringExtension.class)
+// 2. Point to our custom, minimal configuration class
+@ContextConfiguration(classes = CourtNavRespondentMapperTest.TestConfig.class)
+public class CourtNavRespondentMapperTest {
+
+    // 3. Define a static nested configuration class for this test
+    @Configuration
+    // 4. Tell this mini-context to scan ONLY the package where our mappers live
+    @ComponentScan(basePackages = "uk.gov.hmcts.reform.prl.mapper.courtnav")
+    public static class TestConfig {}
 
     @Autowired
     private CourtNavRespondentMapper courtNavRespondentMapper;
 
     @Test
-    void shouldMapFullRespondentDetailsCorrectly() {
+    public void shouldMapFullRespondentDetailsCorrectly() {
         CourtNavRespondent input = CourtNavRespondent.builder()
             .firstName("John")
             .lastName("Smith")
@@ -55,7 +71,7 @@ class CourtNavRespondentMapperTest {
     }
 
     @Test
-    void shouldHandleNullContactDetailsSafely() {
+    public void shouldHandleNullContactDetailsSafely() {
         CourtNavRespondent input = CourtNavRespondent.builder()
             .firstName("Anon")
             .lastName("Unknown")
