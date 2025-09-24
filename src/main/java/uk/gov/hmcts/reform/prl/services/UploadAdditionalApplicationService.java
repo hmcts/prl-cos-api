@@ -131,17 +131,12 @@ public class UploadAdditionalApplicationService {
         if (categoryId.equals(CAT_AWP_UNDEFINED)) {
             return doc; // if no category play safe and don't add a default
         }
-
-        Document dummyDoc = new Document(
-            "http://dm-store-prod.service.core-compute-prod.internal/documents/00000000-0000-0000-0000-000000000000",
-            "http://dm-store-prod.service.core-compute-prod.internal/documents/00000000-0000-0000-0000-000000000000/binary",
-            "TemporaryC2DocumentWasNull.pdf",
-            "00000000-0000-0000-0000-000000000000",
-            categoryId,
-            new Date(),
-            LocalDateTime.now());
-
-        return doc == null ? dummyDoc : doc.toBuilder().categoryId(categoryId).build();
+        if (doc == null) {
+            throw new IllegalArgumentException(
+                "Document cannot be null");
+        } else {
+            return doc.toBuilder().categoryId(categoryId).build();
+        }
     }
 
     public void getAdditionalApplicationElements(String authorisation, String userAuthorisation, CaseData caseData,
@@ -442,6 +437,7 @@ public class UploadAdditionalApplicationService {
             log.info("Inside mapping solicitor journey C2 upload, final value for category is {}", cat);
 
             C2DocumentBundle temporaryC2Document = caseData.getUploadAdditionalApplicationData().getTemporaryC2Document();
+            try {
             c2DocumentBundle = C2DocumentBundle.builder()
                 .author(author)
                 .uploadedDateTime(currentDateTime)
@@ -471,6 +467,10 @@ public class UploadAdditionalApplicationService {
                 .requestedHearingToAdjourn(null != temporaryC2Document.getHearingList() && null != temporaryC2Document.getHearingList().getValue()
                                                ? temporaryC2Document.getHearingList().getValue().getLabel() : null)
                 .build();
+            } catch (IllegalArgumentException e) {
+                log.error(
+                    "Error while creating C2DocumentBundle, the C2 Temporary document is null, unable to create final C2 Document", e);
+            }
         }
         return c2DocumentBundle;
     }

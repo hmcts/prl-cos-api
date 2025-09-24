@@ -66,17 +66,12 @@ public class CitizenAwpMapper {
         if (categoryId.equals(CAT_AWP_UNDEFINED)) {
             return doc; // if no category play safe and don't add a default
         }
-
-        Document dummyDoc = new Document(
-            "http://dm-store-prod.service.core-compute-prod.internal/documents/00000000-0000-0000-0000-000000000000",
-            "http://dm-store-prod.service.core-compute-prod.internal/documents/00000000-0000-0000-0000-000000000000/binary",
-            "TemporaryC2DocumentWasNull.pdf",
-            "00000000-0000-0000-0000-000000000000",
-            categoryId,
-            new Date(),
-            LocalDateTime.now());
-
-        return doc == null ? dummyDoc : doc.toBuilder().categoryId(categoryId).build();
+        if (doc == null) {
+            throw new IllegalArgumentException(
+                "Document cannot be null");
+        } else {
+            return doc.toBuilder().categoryId(categoryId).build();
+        }
     }
 
     private static List<Element<Document>> toDocElementsWithCategory(List<Document> docs, String categoryId) {
@@ -193,30 +188,36 @@ public class CitizenAwpMapper {
     }
 
     private C2DocumentBundle getC2ApplicationBundle(CitizenAwpRequest citizenAwpRequest) {
+        C2DocumentBundle c2DocumentBundle = null;
         if ("C2".equals(citizenAwpRequest.getAwpType())) {
 
             String cat = categoryForParty(citizenAwpRequest.getPartyType());
             log.info("Inside mapping citizen awp C2, partytype is {}", cat);
-
-            return C2DocumentBundle.builder()
-                .applicantName(citizenAwpRequest.getPartyName())
-                .author(citizenAwpRequest.getPartyName())
-                .uploadedDateTime(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE))
-                                      .format(DateTimeFormatter.ofPattern(DATE_FORMAT)))
-                .documentRelatedToCase(YesOrNo.Yes)
-                .finalDocument(toDocElementsWithCategory(citizenAwpRequest.getUploadedApplicationForms(), cat))
-                .supportingEvidenceBundle(YesOrNo.Yes.equals(citizenAwpRequest.getHasSupportingDocuments())
-                                              ? getSupportingBundles(citizenAwpRequest) : null)
-                .combinedReasonsForC2Application(Arrays.asList(CombinedC2AdditionalOrdersRequested
-                                                                   .getValue(getApplicationKey(citizenAwpRequest)))) //REVISIT
-                //.otherReasonsFoC2Application(null) //REVISIT - NOT NEEDED FOR CITIZEN AS THERE IS OTHER OPTION
-                .urgency(YesOrNo.Yes.equals(citizenAwpRequest.getUrgencyInFiveDays())
-                             ? getUrgency(citizenAwpRequest) : null)
-                .c2ApplicationDetails(getC2ApplicationDetails(citizenAwpRequest))
-                .applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue())
-                .requestedHearingToAdjourn(citizenAwpRequest.getHearingToDelayCancel())
-                .applicationStatus(getApplicationStatus(citizenAwpRequest))
-                .build();
+            try {
+                c2DocumentBundle = C2DocumentBundle.builder()
+                    .applicantName(citizenAwpRequest.getPartyName())
+                    .author(citizenAwpRequest.getPartyName())
+                    .uploadedDateTime(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE))
+                                          .format(DateTimeFormatter.ofPattern(DATE_FORMAT)))
+                    .documentRelatedToCase(YesOrNo.Yes)
+                    .finalDocument(toDocElementsWithCategory(citizenAwpRequest.getUploadedApplicationForms(), cat))
+                    .supportingEvidenceBundle(YesOrNo.Yes.equals(citizenAwpRequest.getHasSupportingDocuments())
+                                                  ? getSupportingBundles(citizenAwpRequest) : null)
+                    .combinedReasonsForC2Application(Arrays.asList(CombinedC2AdditionalOrdersRequested
+                                                                       .getValue(getApplicationKey(citizenAwpRequest)))) //REVISIT
+                    //.otherReasonsFoC2Application(null) //REVISIT - NOT NEEDED FOR CITIZEN AS THERE IS OTHER OPTION
+                    .urgency(YesOrNo.Yes.equals(citizenAwpRequest.getUrgencyInFiveDays())
+                                 ? getUrgency(citizenAwpRequest) : null)
+                    .c2ApplicationDetails(getC2ApplicationDetails(citizenAwpRequest))
+                    .applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue())
+                    .requestedHearingToAdjourn(citizenAwpRequest.getHearingToDelayCancel())
+                    .applicationStatus(getApplicationStatus(citizenAwpRequest))
+                    .build();
+            } catch (IllegalArgumentException e) {
+                log.error(
+                    "Error while creating C2DocumentBundle, the C2 Temporary document is null, unable to create final C2 Document", e);
+            }
+            return c2DocumentBundle;
         }
         return null;
     }
