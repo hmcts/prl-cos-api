@@ -2,16 +2,14 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.config.FeesConfig;
 import uk.gov.hmcts.reform.prl.tasks.ScheduledTaskRunner;
 
 @TestConfiguration
 public class ControllerTestSupport {
 
-    // This is the new, important mock.
-    // It stops Spring from loading the real Application class and its dependencies.
     @MockBean
     private Application application;
 

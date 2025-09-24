@@ -102,8 +102,8 @@ public class ServiceOfDocumentsControllerIntegrationTest {
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(serviceOfDocumentsService.handleSubmitted(any(), any())).
-            thenReturn(ResponseEntity.ok(SubmittedCallbackResponse.builder().build()));
+        when(serviceOfDocumentsService.handleSubmitted(any(), any()))
+            .thenReturn(ResponseEntity.ok(SubmittedCallbackResponse.builder().build()));
 
         mockMvc.perform(
                 post(url)
