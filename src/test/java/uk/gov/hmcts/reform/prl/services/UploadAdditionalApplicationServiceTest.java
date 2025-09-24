@@ -315,7 +315,7 @@ class UploadAdditionalApplicationServiceTest {
         assertNotNull(additionalApplicationsBundle);
         assertEquals(2, additionalApplicationsBundle.size());
     }
-    
+
     @Test
     void testGetAdditionalApplicationElementsWithoutAuthor() throws Exception {
         when(applicationsFeeCalculator.getFeeTypes(any(CaseData.class))).thenReturn(List.of(
@@ -790,7 +790,7 @@ class UploadAdditionalApplicationServiceTest {
     @Test
     void unknownParty_leavesCategoryUnset() throws Exception {
         String category = (String) categoryForParty.invoke(uploadAdditionalApplicationService, "some-random-party");
-        Assertions.assertNull(category, "Unknown party should yield null category");
+        Assertions.assertEquals("undefined", category);
         Document inputDoc = Document.builder()
             .documentUrl("doc-url")
             .documentBinaryUrl("bin-url")
@@ -806,9 +806,9 @@ class UploadAdditionalApplicationServiceTest {
     }
 
     @Test
-    void nullParty_leavesCategoryUnset() throws Exception {
-        String category = (String) categoryForParty.invoke(uploadAdditionalApplicationService, new Object[]{null});
-        Assertions.assertNull(category, "Null party should yield null category");
+    void undefinedParty_leavesCategoryUnset() throws Exception {
+        String category = (String) categoryForParty.invoke(uploadAdditionalApplicationService, "undefined");
+        Assertions.assertEquals("undefined", category);
         Document inputDoc = Document.builder()
             .documentUrl("doc-url")
             .documentBinaryUrl("bin-url")

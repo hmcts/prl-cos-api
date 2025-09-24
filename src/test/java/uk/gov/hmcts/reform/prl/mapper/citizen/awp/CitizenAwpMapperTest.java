@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen.awp;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -80,7 +81,7 @@ class CitizenAwpMapperTest {
     @Test
     void unknownParty_leavesCategoryUnset() throws Exception {
         String category = (String) categoryForParty.invoke(mapper, "some-random-party");
-        assertNull(category, "Unknown party should yield null category");
+        Assertions.assertEquals("undefined", category);
         Document inputDoc = Document.builder()
             .documentUrl("doc-url")
             .documentBinaryUrl("bin-url")
@@ -97,9 +98,9 @@ class CitizenAwpMapperTest {
     }
 
     @Test
-    void nullParty_leavesCategoryUnset() throws Exception {
-        String category = (String) categoryForParty.invoke(mapper, new Object[]{null});
-        assertNull(category, "Null party should yield null category");
+    void undefinedParty_leavesCategoryUnset() throws Exception {
+        String category = (String) categoryForParty.invoke(mapper, "undefined");
+        Assertions.assertEquals("undefined", category);
         Document inputDoc = Document.builder()
             .documentUrl("doc-url")
             .documentBinaryUrl("bin-url")
@@ -112,6 +113,6 @@ class CitizenAwpMapperTest {
 
         Document mapped = result.get(0).getValue();
         assertNotNull(mapped);
-        assertNull(mapped.getCategoryId(), "Category must not be defaulted when party is null");
+        assertNull(mapped.getCategoryId(), "Category must not be defaulted when party is undefined");
     }
 }

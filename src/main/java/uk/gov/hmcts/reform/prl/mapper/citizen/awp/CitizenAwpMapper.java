@@ -33,6 +33,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -51,23 +52,31 @@ public class CitizenAwpMapper {
 
     private static final String CAT_AWP_APPLICANT   = "applicationsWithinProceedings";
     private static final String CAT_AWP_RESPONDENT = "applicationsWithinProceedingsRes";
+    private static final String CAT_AWP_UNDEFINED = "undefined";
 
     private String categoryForParty(String raw) {
-        if (raw == null) {
-            return null;
-        }
         return switch (raw.toLowerCase(Locale.ENGLISH)) {
             case "applicant" -> CAT_AWP_APPLICANT;
             case "respondent" -> CAT_AWP_RESPONDENT;
-            default -> null;
+            default -> CAT_AWP_UNDEFINED;
         };
     }
 
     private static Document withCategory(Document doc, String categoryId) {
-        if (StringUtils.isBlank(categoryId)) {
+        if (categoryId.equals(CAT_AWP_UNDEFINED)) {
             return doc; // if no category play safe and don't add a default
         }
-        return doc == null ? null : doc.toBuilder().categoryId(categoryId).build();
+
+        Document dummyDoc = new Document(
+            "http://dm-store-prod.service.core-compute-prod.internal/documents/00000000-0000-0000-0000-000000000000",
+            "http://dm-store-prod.service.core-compute-prod.internal/documents/00000000-0000-0000-0000-000000000000/binary",
+            "TemporaryC2DocumentWasNull.pdf",
+            "00000000-0000-0000-0000-000000000000",
+            categoryId,
+            new Date(),
+            LocalDateTime.now());
+
+        return doc == null ? dummyDoc : doc.toBuilder().categoryId(categoryId).build();
     }
 
     private static List<Element<Document>> toDocElementsWithCategory(List<Document> docs, String categoryId) {

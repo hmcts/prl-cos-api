@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.microsoft.applicationinsights.boot.dependencies.apachecommons.lang3.time.DateFormatUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -59,6 +60,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -116,24 +118,31 @@ public class UploadAdditionalApplicationService {
 
     private static final String CAT_AWP_APPLICANT   = "applicationsWithinProceedings";
     private static final String CAT_AWP_RESPONDENT = "applicationsWithinProceedingsRes";
+    private static final String CAT_AWP_UNDEFINED = "undefined";
 
     private String categoryForParty(String raw) {
-        if (raw == null) {
-            return null;
-        }
-
         return switch (raw.toLowerCase(Locale.ENGLISH)) {
             case "applicant" -> CAT_AWP_APPLICANT;
             case "respondent" -> CAT_AWP_RESPONDENT;
-            default -> null;
+            default -> CAT_AWP_UNDEFINED;
         };
     }
 
     private static Document withCategory(Document doc, String categoryId) {
-        if (StringUtils.isBlank(categoryId)) {
+        if (categoryId.equals(CAT_AWP_UNDEFINED)) {
             return doc; // if no category play safe and don't add a default
         }
-        return doc == null ? null : doc.toBuilder().categoryId(categoryId).build();
+
+        Document dummyDoc = new Document(
+            "http://dm-store-prod.service.core-compute-prod.internal/documents/00000000-0000-0000-0000-000000000000",
+            "http://dm-store-prod.service.core-compute-prod.internal/documents/00000000-0000-0000-0000-000000000000/binary",
+            "TemporaryC2DocumentWasNull.pdf",
+            "00000000-0000-0000-0000-000000000000",
+            categoryId,
+            new Date(),
+            LocalDateTime.now());
+
+        return doc == null ? dummyDoc : doc.toBuilder().categoryId(categoryId).build();
     }
 
     public void getAdditionalApplicationElements(String authorisation, String userAuthorisation, CaseData caseData,
@@ -425,7 +434,10 @@ public class UploadAdditionalApplicationService {
                 category = "applicant";
             } else if (StringUtils.isNotEmpty(partyName) && partyName.toLowerCase().contains("respondent")) {
                 category = "respondent";
+            } else {
+                category = "undefined";
             }
+
             log.info("Inside mapping solicitor journey C2 category after if {}", category);
             String cat = categoryForParty(category);
             log.info("Inside mapping solicitor journey C2 upload, final value for category is {}", cat);
