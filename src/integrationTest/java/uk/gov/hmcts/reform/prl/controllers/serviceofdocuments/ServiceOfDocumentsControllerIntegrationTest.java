@@ -1,37 +1,38 @@
 package uk.gov.hmcts.reform.prl.controllers.serviceofdocuments;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.context.WebApplicationContext;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.controllers.ControllerTestSupport;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.serviceofdocuments.ServiceOfDocumentsService;
 
+import java.util.Collections;
+import java.util.HashMap;
+
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @Slf4j
-@SpringBootTest
-@RunWith(SpringRunner.class)
-@ContextConfiguration
+@WebMvcTest(ServiceOfDocumentsController.class)
+@ExtendWith(SpringExtension.class)
+@Import(ControllerTestSupport.class)
 public class ServiceOfDocumentsControllerIntegrationTest {
 
-    private MockMvc mockMvc;
-
     @Autowired
-    private WebApplicationContext webApplicationContext;
+    private MockMvc mockMvc;
 
     @MockBean
     AuthorisationService authorisationService;
@@ -39,17 +40,13 @@ public class ServiceOfDocumentsControllerIntegrationTest {
     @MockBean
     ServiceOfDocumentsService serviceOfDocumentsService;
 
-    @Before
-    public void setUp() {
-        this.mockMvc = webAppContextSetup(webApplicationContext).build();
-    }
-
     @Test
     public void testServiceOfDocumentsAboutToStart() throws Exception {
         String url = "/service-of-documents/about-to-start";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
-        Mockito.when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(serviceOfDocumentsService.validateDocuments(any())).thenReturn(Collections.emptyList());
 
         mockMvc.perform(
                 post(url)
@@ -67,7 +64,7 @@ public class ServiceOfDocumentsControllerIntegrationTest {
         String url = "/service-of-documents/validate";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
-        Mockito.when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
 
         mockMvc.perform(
                 post(url)
@@ -85,7 +82,8 @@ public class ServiceOfDocumentsControllerIntegrationTest {
         String url = "/service-of-documents/about-to-submit";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
-        Mockito.when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(serviceOfDocumentsService.handleAboutToSubmit(any(), any())).thenReturn(new HashMap<>());
 
         mockMvc.perform(
                 post(url)
@@ -103,7 +101,9 @@ public class ServiceOfDocumentsControllerIntegrationTest {
         String url = "/service-of-documents/submitted";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
-        Mockito.when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(serviceOfDocumentsService.handleSubmitted(any(), any())).
+            thenReturn(ResponseEntity.ok(SubmittedCallbackResponse.builder().build()));
 
         mockMvc.perform(
                 post(url)
