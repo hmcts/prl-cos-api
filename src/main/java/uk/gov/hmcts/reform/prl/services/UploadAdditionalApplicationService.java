@@ -59,7 +59,6 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -438,35 +437,36 @@ public class UploadAdditionalApplicationService {
 
             C2DocumentBundle temporaryC2Document = caseData.getUploadAdditionalApplicationData().getTemporaryC2Document();
             try {
-            c2DocumentBundle = C2DocumentBundle.builder()
-                .author(author)
-                .uploadedDateTime(currentDateTime)
-                .applicantName(partyName)
-                .finalDocument(List.of(element(withCategory(temporaryC2Document.getDocument(), cat))))
-                .documentRelatedToCase(CollectionUtils.isNotEmpty(temporaryC2Document.getDocumentAcknowledge())
-                                           ? Yes : No)
-                .combinedReasonsForC2Application(getReasonsForApplication(temporaryC2Document))
-                .otherReasonsFoC2Application(StringUtils.isNotEmpty(temporaryC2Document.getOtherReasonsFoC2Application())
-                                                 ? temporaryC2Document.getOtherReasonsFoC2Application() : null)
-                .parentalResponsibilityType(
-                    temporaryC2Document.getParentalResponsibilityType())
-                .hearingList(temporaryC2Document.getHearingList())
-                .additionalDraftOrdersBundle(createAdditionalDraftOrdersBundle(temporaryC2Document.getAdditionalDraftOrdersBundle()))
-                .supplementsBundle(createSupplementsBundle(temporaryC2Document.getSupplementsBundle(), author))
-                .supportingEvidenceBundle(createSupportingEvidenceBundle(
-                    temporaryC2Document.getSupportingEvidenceBundle(),
-                    author
-                ))
-                .c2ApplicationDetails(C2ApplicationDetails.builder()
-                                          .consent(C2ApplicationTypeEnum.applicationWithNotice.equals(
-                                              caseData.getUploadAdditionalApplicationData().getTypeOfC2Application())
-                                                       ? C2Consent.withoutConsent : C2Consent.withConsent)
-                                          .build())
-                .urgency(null != temporaryC2Document.getUrgencyTimeFrameType()
-                             ? Urgency.builder().urgencyType(temporaryC2Document.getUrgencyTimeFrameType()).build() : null)
-                .requestedHearingToAdjourn(null != temporaryC2Document.getHearingList() && null != temporaryC2Document.getHearingList().getValue()
-                                               ? temporaryC2Document.getHearingList().getValue().getLabel() : null)
-                .build();
+                c2DocumentBundle = C2DocumentBundle.builder()
+                    .author(author)
+                    .uploadedDateTime(currentDateTime)
+                    .applicantName(partyName)
+                    .finalDocument(List.of(element(withCategory(temporaryC2Document.getDocument(), cat))))
+                    .documentRelatedToCase(CollectionUtils.isNotEmpty(temporaryC2Document.getDocumentAcknowledge())
+                                               ? Yes : No)
+                    .combinedReasonsForC2Application(getReasonsForApplication(temporaryC2Document))
+                    .otherReasonsFoC2Application(StringUtils.isNotEmpty(temporaryC2Document.getOtherReasonsFoC2Application())
+                                                     ? temporaryC2Document.getOtherReasonsFoC2Application() : null)
+                    .parentalResponsibilityType(
+                        temporaryC2Document.getParentalResponsibilityType())
+                    .hearingList(temporaryC2Document.getHearingList())
+                    .additionalDraftOrdersBundle(createAdditionalDraftOrdersBundle(temporaryC2Document.getAdditionalDraftOrdersBundle()))
+                    .supplementsBundle(createSupplementsBundle(temporaryC2Document.getSupplementsBundle(), author))
+                    .supportingEvidenceBundle(createSupportingEvidenceBundle(
+                        temporaryC2Document.getSupportingEvidenceBundle(),
+                        author
+                    ))
+                    .c2ApplicationDetails(C2ApplicationDetails.builder()
+                                              .consent(C2ApplicationTypeEnum.applicationWithNotice.equals(
+                                                  caseData.getUploadAdditionalApplicationData().getTypeOfC2Application())
+                                                           ? C2Consent.withoutConsent : C2Consent.withConsent)
+                                              .build())
+                    .urgency(null != temporaryC2Document.getUrgencyTimeFrameType()
+                                 ? Urgency.builder().urgencyType(temporaryC2Document.getUrgencyTimeFrameType()).build() : null)
+                    .requestedHearingToAdjourn(null != temporaryC2Document.getHearingList() &&
+                                                   null != temporaryC2Document.getHearingList().getValue()
+                                                   ? temporaryC2Document.getHearingList().getValue().getLabel() : null)
+                    .build();
             } catch (IllegalArgumentException e) {
                 log.error(
                     "Error while creating C2DocumentBundle, the C2 Temporary document is null, unable to create final C2 Document", e);
