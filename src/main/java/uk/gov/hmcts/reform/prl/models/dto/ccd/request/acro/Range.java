@@ -18,4 +18,7 @@ public class Range {
 
     @JsonProperty("data.orderCollection.value.dateCreated")
     private LastModified dateCreated;
+
+    @JsonProperty("data.stmtOfServiceForOrder.value.submittedDateTime")
+    private LastModified submittedDateTime;
 }

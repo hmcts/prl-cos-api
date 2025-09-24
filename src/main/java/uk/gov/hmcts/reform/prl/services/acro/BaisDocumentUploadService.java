@@ -66,6 +66,10 @@ public class BaisDocumentUploadService {
                 processCasesAndCreateCsvRows(csvFile, acroResponse, sysUserToken);
             }
 
+            AcroResponse statementOfServiceData = acroCaseDataService.getStatementOfServiceData();
+
+            downloadStatementOfServiceOrders(statementOfServiceData, sysUserToken);
+
             log.info("All FL404a documents and manifest files prepared. Creating zip archive...");
             acroZipService.zip();
 
@@ -75,6 +79,51 @@ public class BaisDocumentUploadService {
             );
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void downloadStatementOfServiceOrders(AcroResponse statementOfServiceData, String sysUserToken) {
+
+        log.info(
+            "Processing {} cases for Statement of service documents extraction and CSV generation",
+            statementOfServiceData.getCases().size()
+        );
+
+        for (var acroCase : statementOfServiceData.getCases()) {
+            AcroCaseData caseData = acroCase.getCaseData();
+            String caseId = String.valueOf(acroCase.getId());
+
+            if (caseData.getFl404Orders() != null && !caseData.getFl404Orders().isEmpty()) {
+                log.debug("Processing case {} with {} Statement of service orders",
+                          caseId, caseData.getFl404Orders().size());
+
+                for (var order : caseData.getFl404Orders()) {
+                    LocalDateTime orderCreatedDate = order.getDateCreated();
+                    String filePrefix = getFilePrefix(caseId, orderCreatedDate);
+                    String englishFileName = filePrefix + "_served.pdf";
+
+                    try {
+
+                        pdfExtractorService.downloadPdf(
+                            englishFileName,
+                            caseId,
+                            order.getOrderDocument(),
+                            sysUserToken
+                        );
+
+                        log.info(
+                            "Statement of services documents processing completed. Successfully processed {} document",
+                            englishFileName
+                        );
+                    } catch (Exception e) {
+                        log.warn("Failed to download Statement of services documents for case {}", caseId);
+                    }
+                }
+            } else {
+                log.debug("Skipping case {} - no Statement of services orders found", caseId);
+            }
+
+
         }
     }
 

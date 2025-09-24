@@ -132,6 +132,66 @@ public class AcroCaseDataService {
         return acroResponse;
     }
 
+    @Retryable(
+        value = {Exception.class},
+        maxAttempts = 3,
+        backoff = @Backoff(delay = 2000, multiplier = 2)
+    )
+    public AcroResponse getStatementOfServiceData() throws IOException {
+
+        AcroResponse acroResponse = AcroResponse.builder().cases(new ArrayList<>()).build();
+
+        try {
+
+            ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
+            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+            objectMapper.registerModule(new ParameterNamesModule());
+            objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+            LocalDateTime startDateForSearch = acroDatesService.getStartDateForSearch();
+            LocalDateTime endDateForSearch = acroDatesService.getEndDateForSearch();
+            QueryParam ccdQueryParam = buildStatementOfServiceQueryParam(startDateForSearch, endDateForSearch);
+            String searchString = objectMapper.writeValueAsString(ccdQueryParam);
+            log.info("Search string: {}", searchString);
+            String userToken = systemUserService.getSysUserToken();
+            final String s2sToken = authTokenGenerator.generate();
+            log.info("Invoking search cases");
+            SearchResult searchResult = coreCaseDataApi.searchCases(
+                userToken,
+                s2sToken,
+                searchCaseTypeId,
+                searchString
+            );
+            acroResponse = objectMapper.convertValue(
+                searchResult,
+                AcroResponse.class
+            );
+            if (acroResponse.getCases() != null && !acroResponse.getCases().isEmpty()) {
+                for (AcroCaseDetail acroCase : acroResponse.getCases()) {
+                    AcroCaseData caseData = acroCase.getCaseData();
+                    caseData.getOrderCollection().stream()
+                        .map(Element::getValue)
+                        .filter(o -> o.getOrderTypeId().equals(NON_MOLESTATION_ORDER_FL_404_A))
+                        .forEach(order -> caseData.getFl404Orders().add(order));
+
+                    log.info(
+                        "Found case with id {} with {} number of statement of service for order ",
+                        acroCase.getId(), caseData.getStmtOfServiceForOrder().size()
+                    );
+                }
+                return AcroResponse.builder()
+                    .cases(acroResponse.getCases())
+                    .total(acroResponse.getCases().size())
+                    .build();
+            }
+        } catch (Exception e) {
+            log.error("Error in search cases {}", e.getMessage());
+            throw new RuntimeException("Failed search query", e);
+        }
+        return acroResponse;
+    }
+
     private boolean isValidForCaseTypeOfApplication(AcroCaseData caseData) {
         String caseTypeOfApplication = caseData.getCaseTypeOfApplication();
         return (caseTypeOfApplication.equals("C100")
@@ -160,10 +220,34 @@ public class AcroCaseDataService {
             .build();
         Query query = Query.builder().bool(bool).build();
         return QueryParam.builder().query(query).size(ccdElasticSearchApiResultSize)
-            .dataToReturn(fetchFieldsRequiredForAcro()).build();
+            .dataToReturn(fetchFieldsRequiredForAcroFL404a()).build();
     }
 
-    private List<String> fetchFieldsRequiredForAcro() {
+    private QueryParam buildStatementOfServiceQueryParam(LocalDateTime startDateForSearch, LocalDateTime endDateForSearch) {
+        LastModified lastModified = LastModified.builder()
+            .gte(String.valueOf(startDateForSearch))
+            .lte(String.valueOf(endDateForSearch))
+            .build();
+
+
+        Range range = Range.builder().lastModified(lastModified).build();
+        Bool bool = Bool.builder()
+            .filter(Filter.builder().range(range).build())
+            .must(List.of(
+                Must.builder().range(Range.builder().submittedDateTime(lastModified).build()).build(),
+                Must.builder().term(Term.builder().orderTypeId(NON_MOLESTATION_ORDER_FL_404_A).build()).build()
+            ))
+            .build();
+        Query query = Query.builder().bool(bool).build();
+        return QueryParam.builder().query(query).size(ccdElasticSearchApiResultSize)
+            .dataToReturn(List.of(
+                "data.id",
+                "data.stmtOfServiceForOrder",
+                "data.orderCollection"
+                )).build();
+    }
+
+    private List<String> fetchFieldsRequiredForAcroFL404a() {
         return List.of(
             "data.id",
             "data.caseTypeOfApplication",
@@ -289,9 +373,10 @@ public class AcroCaseDataService {
                         .findFirst().orElse(null);
 
                 if (filteredHearing != null && CollectionUtils.isNotEmpty(filteredHearing.getCaseHearings())) {
-                    acroCaseDetail.getCaseData().setCaseHearings(filteredHearing.getCaseHearings());
-                    acroCaseDetail.getCaseData().setCourtName(filteredHearing.getCourtName());
-                    acroCaseDetail.getCaseData().setCourtTypeId(filteredHearing.getCourtTypeId());
+                    AcroCaseData caseData = acroCaseDetail.getCaseData();
+                    caseData.setCaseHearings(filteredHearing.getCaseHearings());
+                    caseData.setCourtName(filteredHearing.getCourtName());
+                    caseData.setCourtTypeId(filteredHearing.getCourtTypeId());
                     filteredHearing.setCourtName(null);
                     filteredHearing.setCourtTypeId(null);
                     filteredHearing.getCaseHearings().forEach(
