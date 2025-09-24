@@ -608,7 +608,7 @@ public class PrlAppsConstants {
     public static final String SOLICITOR_RESPONDENT_C1A_APPLCATION = "Respondent C1A Application";
     public static final String RESPONDENT_C1A_RESPONSE = "Respondent C1A response";
     public static final String CASE_SUMMARY = "Case summary";
-    public static final String TRANSCRIPTS_OF_JUDGEMENTS = "Transcripts of judgements";
+    public static final String TRANSCRIPTS_OF_JUDGEMENTS = "Transcripts and judgments";
     public static final String MAGISTRATES_FACTS_AND_REASONS = "Magistrates facts and reasons";
     public static final String SAFEGUARDING_LETTER = "Safeguarding letter/Safeguarding Enquiries Report (SER)";
     public static final String SECTION_7_REPORT = "Section 7 report/Child Impact Analysis";
