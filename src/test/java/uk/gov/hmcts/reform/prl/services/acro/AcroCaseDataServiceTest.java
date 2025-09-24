@@ -36,6 +36,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atMost;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 
@@ -191,6 +193,21 @@ public class AcroCaseDataServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
 
         assertThrows(RuntimeException.class, () -> acroCaseDataService.getNonMolestationData("authorisation"));
+    }
+
+    @Test
+    public void testRetryOnGetCaseDataThrowingException() {
+        Exception exception = new RuntimeException();
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), any(), any()))
+            .thenThrow(exception)
+            .thenThrow(exception)
+            .thenThrow(exception)
+            .thenThrow(exception);
+        when(systemUserService.getSysUserToken()).thenReturn(userToken);
+
+        assertThrows(RuntimeException.class, () -> acroCaseDataService.getNonMolestationData("authorisation"));
+
+        verify(coreCaseDataApi, atMost(4)).searchCases(anyString(), anyString(), any(), any());
     }
 
     @Test

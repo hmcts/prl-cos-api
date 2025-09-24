@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -46,6 +49,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListEleme
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.Barrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.DecisionRequest;
@@ -55,6 +59,7 @@ import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.barrister.BarristerRemoveService;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessClient;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
@@ -62,6 +67,7 @@ import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelec
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
+import uk.gov.hmcts.reform.prl.utils.BarristerHelper;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.noticeofchange.NoticeOfChangePartiesConverter;
 import uk.gov.hmcts.reform.prl.utils.noticeofchange.RespondentPolicyConverter;
@@ -75,7 +81,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -84,6 +92,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -160,9 +169,15 @@ public class NoticeOfChangePartiesServiceTest {
     PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     @Mock
     private CaseAssignmentService caseAssignmentService;
+    @Mock
+    private BarristerHelper barristerHelper;
+    @Mock
+    private BarristerRemoveService barristerRemoveService;
 
     private StartEventResponse startEventResponse;
 
+    @Captor
+    private ArgumentCaptor<CaseData> caseDataArgumentCaptor;
 
     @Before
     public void setUp() {
@@ -880,6 +895,7 @@ public class NoticeOfChangePartiesServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn("");
         when(assignCaseAccessClient.applyDecision(anyString(), anyString(), any(DecisionRequest.class))).thenReturn(
             AboutToStartOrSubmitCallbackResponse.builder().data(caseData.toMap(realObjectMapper)).build());
+
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
@@ -891,6 +907,8 @@ public class NoticeOfChangePartiesServiceTest {
             .build();
         noticeOfChangePartiesService.aboutToSubmitStopRepresenting("testAuth", callbackRequest);
         verify(assignCaseAccessClient, times(1)).applyDecision(any(), any(), any());
+        verify(caseAssignmentService).removeAmBarristerCaseRole(isA(CaseData.class),
+                                                                ArgumentMatchers.<Map<Optional<SolicitorRole>, Element<PartyDetails>>>any());
     }
 
     @Test
@@ -928,6 +946,7 @@ public class NoticeOfChangePartiesServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn("");
         when(assignCaseAccessClient.applyDecision(anyString(), anyString(), any(DecisionRequest.class))).thenReturn(
             AboutToStartOrSubmitCallbackResponse.builder().data(caseData.toMap(realObjectMapper)).build());
+
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
@@ -939,6 +958,8 @@ public class NoticeOfChangePartiesServiceTest {
             .build();
         noticeOfChangePartiesService.aboutToSubmitStopRepresenting("testAuth", callbackRequest);
         verify(assignCaseAccessClient, times(1)).applyDecision(any(), any(), any());
+        verify(caseAssignmentService).removeAmBarristerCaseRole(isA(CaseData.class),
+                                                                ArgumentMatchers.<Map<Optional<SolicitorRole>, Element<PartyDetails>>>any());
     }
 
     @Test
@@ -974,6 +995,7 @@ public class NoticeOfChangePartiesServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn("");
         when(assignCaseAccessClient.applyDecision(anyString(), anyString(), any(DecisionRequest.class))).thenReturn(
             AboutToStartOrSubmitCallbackResponse.builder().data(caseData.toMap(realObjectMapper)).build());
+
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
@@ -985,6 +1007,8 @@ public class NoticeOfChangePartiesServiceTest {
             .build();
         noticeOfChangePartiesService.aboutToSubmitStopRepresenting("testAuth", callbackRequest);
         verify(assignCaseAccessClient, times(1)).applyDecision(any(), any(), any());
+        verify(caseAssignmentService).removeAmBarristerCaseRole(isA(CaseData.class),
+                                                                ArgumentMatchers.<Map<Optional<SolicitorRole>, Element<PartyDetails>>>any());
     }
 
     @Test
@@ -1019,6 +1043,7 @@ public class NoticeOfChangePartiesServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn("");
         when(assignCaseAccessClient.applyDecision(anyString(), anyString(), any(DecisionRequest.class))).thenReturn(
             AboutToStartOrSubmitCallbackResponse.builder().data(caseData.toMap(realObjectMapper)).build());
+
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
@@ -1030,6 +1055,8 @@ public class NoticeOfChangePartiesServiceTest {
             .build();
         noticeOfChangePartiesService.aboutToSubmitStopRepresenting("testAuth", callbackRequest);
         verify(assignCaseAccessClient, times(1)).applyDecision(any(), any(), any());
+        verify(caseAssignmentService).removeAmBarristerCaseRole(isA(CaseData.class),
+                                                                ArgumentMatchers.<Map<Optional<SolicitorRole>, Element<PartyDetails>>>any());
     }
 
     @Test
@@ -1141,6 +1168,11 @@ public class NoticeOfChangePartiesServiceTest {
     @Test
     public void testSubmittedStopRepresenting() {
         List<Element<PartyDetails>> applicant = new ArrayList<>();
+        partyDetails.setBarrister(Barrister.builder()
+                                      .barristerEmail("barrister@gmail.com")
+                                      .barristerId(UUID.randomUUID().toString())
+                                      .build());
+
         Element partyDetailsElement = element(partyDetails);
         applicant.add(partyDetailsElement);
         DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
@@ -1193,6 +1225,27 @@ public class NoticeOfChangePartiesServiceTest {
 
         noticeOfChangePartiesService.submittedStopRepresenting(callbackRequest);
         verify(eventPublisher, times(1)).publishEvent(any(NoticeOfChangeEvent.class));
+        verify(tabService).updatePartyDetailsForNoc(anyString(),
+                                                   anyString(),
+                                                   isA(StartEventResponse.class),
+                                                   isA(EventRequestData.class),
+                                                   caseDataArgumentCaptor.capture());
+        CaseData updatedCaseData = caseDataArgumentCaptor.getValue();
+        PartyDetails party = updatedCaseData.getApplicants().getFirst().getValue();
+        assertThat(party.getBarrister())
+            .isNull();
+        assertThat(party.getSolicitorReference())
+            .isNull();
+        assertThat(party.getSolicitorTelephone())
+            .isNull();
+        assertThat(party.getSolicitorOrg())
+            .isEqualTo(Organisation.builder().build());
+        verify(barristerHelper, times(2)).setAllocatedBarrister(isA(PartyDetails.class),
+                                                 isA(CaseData.class),
+                                                 isA(UUID.class));
+        verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
+        verify(partyLevelCaseFlagsService).updateCaseDataWithGeneratePartyCaseFlags(isA(CaseData.class),
+                                                                                    any(Function.class));
     }
 
     @Test
@@ -1291,6 +1344,8 @@ public class NoticeOfChangePartiesServiceTest {
 
         Map<String, Object> caseDataUpdated = noticeOfChangePartiesService
             .aboutToSubmitAdminRemoveLegalRepresentative(authToken,callbackRequest);
+        verify(caseAssignmentService).removeAmBarristerCaseRole(isA(CaseData.class),
+                                                                ArgumentMatchers.<Map<Optional<SolicitorRole>, Element<PartyDetails>>>any());
         assertNotNull(caseDataUpdated);
     }
 
@@ -1444,6 +1499,12 @@ public class NoticeOfChangePartiesServiceTest {
         SubmittedCallbackResponse submittedCallbackResponse = noticeOfChangePartiesService
             .submittedAdminRemoveLegalRepresentative(callbackRequest);
         assertNotNull(submittedCallbackResponse);
+        verify(barristerHelper, times(2)).setAllocatedBarrister(isA(PartyDetails.class),
+                                                 isA(CaseData.class),
+                                                 isA(UUID.class));
+        verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
+        verify(partyLevelCaseFlagsService).updateCaseDataWithGeneratePartyCaseFlags(isA(CaseData.class),
+                                                                                    any(Function.class));
     }
 
     private static PartyDetails updatePartyDetails(SolicitorUser legalRepresentativeSolicitorDetails,
@@ -1524,6 +1585,7 @@ public class NoticeOfChangePartiesServiceTest {
             any(),
             anyBoolean()
         )).thenReturn(caseData);
+
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .caseDetailsBefore(caseDetails)
@@ -1531,7 +1593,14 @@ public class NoticeOfChangePartiesServiceTest {
 
         noticeOfChangePartiesService.submittedStopRepresenting(callbackRequest);
         verify(eventPublisher, times(1)).publishEvent(any(NoticeOfChangeEvent.class));
+        verify(barristerHelper, times(2)).setAllocatedBarrister(isA(PartyDetails.class),
+                                                 isA(CaseData.class),
+                                                 isA(UUID.class));
+        verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
+        verify(partyLevelCaseFlagsService).updateCaseDataWithGeneratePartyCaseFlags(isA(CaseData.class),
+                                                                                    any(Function.class));
     }
+
 
     @Test
     public void testSendEmailAndUpdateCaseData_VerifiesSendEmailOnRemovalOfLegalRepresentation() throws Exception {
@@ -1590,5 +1659,9 @@ public class NoticeOfChangePartiesServiceTest {
             eq(role),
             eq(caseData)
         );
+        verify(barristerHelper).setAllocatedBarrister(isA(PartyDetails.class),
+                                                 isA(CaseData.class),
+                                                 isA(UUID.class));
+        verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
     }
 }
