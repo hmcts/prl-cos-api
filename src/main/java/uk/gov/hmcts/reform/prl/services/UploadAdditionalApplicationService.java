@@ -463,8 +463,8 @@ public class UploadAdditionalApplicationService {
                                               .build())
                     .urgency(null != temporaryC2Document.getUrgencyTimeFrameType()
                                  ? Urgency.builder().urgencyType(temporaryC2Document.getUrgencyTimeFrameType()).build() : null)
-                    .requestedHearingToAdjourn(null != temporaryC2Document.getHearingList() &&
-                                                   null != temporaryC2Document.getHearingList().getValue()
+                    .requestedHearingToAdjourn(null != temporaryC2Document.getHearingList()
+                                                   && null != temporaryC2Document.getHearingList().getValue()
                                                    ? temporaryC2Document.getHearingList().getValue().getLabel() : null)
                     .build();
             } catch (IllegalArgumentException e) {
