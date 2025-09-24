@@ -823,5 +823,20 @@ class UploadAdditionalApplicationServiceTest {
         Assertions.assertNull(result.getCategoryId(), "Category must not be defaulted when party is null");
     }
 
+    @Test
+    void nullDocument_leavesCategoryUnset() throws Exception {
+        String category = (String) categoryForParty.invoke(uploadAdditionalApplicationService, "undefined");
+        Assertions.assertEquals("undefined", category);
+        Document result = null;
+        try {
+            result =
+                (Document) withCategory.invoke(null, null, category);
+        } catch (IllegalArgumentException e) {
+            Assertions.assertEquals("Document cannot be null", e.getMessage());// expected for null party
+        }
+
+        Assertions.assertNull(result, "Document must not be null");
+    }
+
 
 }
