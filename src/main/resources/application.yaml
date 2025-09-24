@@ -804,3 +804,6 @@ hearing:
   preview:
     bypass:
       enabled: ${HEARING_PREVIEW_BYPASS_ENABLED:false}
+
+acro:
+  search-case-type-id: PRLAPPS
