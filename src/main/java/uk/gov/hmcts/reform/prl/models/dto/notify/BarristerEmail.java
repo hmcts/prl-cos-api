@@ -1,0 +1,37 @@
+package uk.gov.hmcts.reform.prl.models.dto.notify;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class BarristerEmail extends EmailTemplateVars {
+
+    @JsonProperty("caseName")
+    private final String caseName;
+    @JsonProperty("issueDate")
+    private final String issueDate;
+    @JsonProperty("barristerName")
+    private final String barristerName;
+    @JsonProperty("solicitorName")
+    private final String solicitorName;
+    @JsonProperty("caseLink")
+    private final String caseLink;
+
+    @Builder
+    public BarristerEmail(String caseReference,
+                          String caseName,
+                          String issueDate,
+                          String barristerName,
+                          String solicitorName,
+                          String caseLink) {
+        super(caseReference);
+        this.caseName = caseName;
+        this.issueDate = issueDate;
+        this.barristerName = barristerName;
+        this.solicitorName = solicitorName;
+        this.caseLink = caseLink;
+    }
+}

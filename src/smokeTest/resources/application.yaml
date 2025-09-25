@@ -663,3 +663,4 @@ acro:
   output-directory: /tmp/acro/output
   source-directory: /tmp/acro/source
   zip-password: ${ACRO_ZIP_PASSWORD:test1234}
+  search-case-type-id: PRLAPPS

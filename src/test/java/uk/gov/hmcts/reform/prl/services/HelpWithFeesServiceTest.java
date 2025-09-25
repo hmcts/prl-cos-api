@@ -36,6 +36,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.services.HelpWithFeesService.APPLICATION_UPDATED;
@@ -94,10 +95,10 @@ public class HelpWithFeesServiceTest {
     }
 
     @Test
-    public void testAboutToSubmit() {
+    public void testAboutToSubmitWithoutDateSubmitted() {
         casedata = casedata.toBuilder()
-                .state(State.SUBMITTED_PAID)
-                    .build();
+            .state(State.SUBMITTED_PAID)
+            .build();
 
         caseDetails = caseDetails.toBuilder()
             .state(State.SUBMITTED_NOT_PAID.getValue())
@@ -110,7 +111,31 @@ public class HelpWithFeesServiceTest {
         assertNotNull(response);
         CaseStatus caseStatus = (CaseStatus) response.get("caseStatus");
         assertEquals("Submitted", caseStatus.getState());
+        assertNotNull(response.get("dateSubmitted"));
     }
+
+    @Test
+    public void testAboutToSubmitWithDateSubmitted() {
+        casedata = casedata.toBuilder()
+            .state(State.SUBMITTED_PAID)
+            .dateSubmitted("01 01 2024")
+            .build();
+
+        caseDetails = caseDetails.toBuilder()
+            .state(State.SUBMITTED_NOT_PAID.getValue())
+            .data(new HashMap<>())
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata);
+        Map<String, Object> response = helpWithFeesService
+            .setCaseStatus(CallbackRequest.builder().caseDetails(caseDetails).build(), "testAuth");
+        assertNotNull(response);
+        CaseStatus caseStatus = (CaseStatus) response.get("caseStatus");
+        assertEquals("Submitted", caseStatus.getState());
+        // confirm that the date submitted is not in the payload of fields to update
+        assertNull(response.get("dateSubmitted"));
+    }
+
 
     @Test
     public void testAboutToSubmitApplicationsWithinProceedingsProcessUrgentFeesIsNull() {
