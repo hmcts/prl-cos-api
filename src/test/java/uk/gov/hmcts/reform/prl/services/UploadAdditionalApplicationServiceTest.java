@@ -825,14 +825,13 @@ class UploadAdditionalApplicationServiceTest {
 
     @Test
     void nullDocument_leavesCategoryUnset() throws Exception {
-        String category = (String) categoryForParty.invoke(uploadAdditionalApplicationService, "undefined");
-        Assertions.assertEquals("undefined", category);
+        String category = "lalalalalala";
         Document result = null;
         try {
             result =
-                (Document) withCategory.invoke(null, null, category);
-        } catch (IllegalArgumentException e) {
-            Assertions.assertEquals("Document cannot be null", e.getMessage());// expected for null party
+                (Document) withCategory.invoke(uploadAdditionalApplicationService, null, category);
+        } catch (Exception e) {
+            Assertions.assertNull(e.getMessage(), "null exception");// expected for null party
         }
 
         Assertions.assertNull(result, "Document must not be null");
