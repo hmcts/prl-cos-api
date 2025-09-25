@@ -123,6 +123,7 @@ public class CaseDataService {
 
                 QueryParam ccdQueryParam = buildCcdQueryParam(startDate, endDate);
                 String searchString = objectMapper.writeValueAsString(ccdQueryParam);
+                log.info("Search string - {}", searchString);
                 String userToken = systemUserService.getSysUserToken();
                 final String s2sToken = authTokenGenerator.generate();
                 log.info("Invoking search cases");
