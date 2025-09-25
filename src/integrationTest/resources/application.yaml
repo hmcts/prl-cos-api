@@ -800,4 +800,4 @@ closing_case:
 acro:
   search-case-type-id: PRLAPPS
   source-directory: /tmp/acro/source
-  output-directory: /tmp/acro/exportg
+  output-directory: /tmp/acro/export
