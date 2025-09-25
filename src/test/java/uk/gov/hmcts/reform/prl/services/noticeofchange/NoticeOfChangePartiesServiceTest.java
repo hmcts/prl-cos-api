@@ -59,6 +59,7 @@ import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.barrister.BarristerRemoveService;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessClient;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
@@ -66,6 +67,7 @@ import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelec
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
+import uk.gov.hmcts.reform.prl.utils.BarristerHelper;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.noticeofchange.NoticeOfChangePartiesConverter;
 import uk.gov.hmcts.reform.prl.utils.noticeofchange.RespondentPolicyConverter;
@@ -79,6 +81,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
@@ -166,6 +169,10 @@ public class NoticeOfChangePartiesServiceTest {
     PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     @Mock
     private CaseAssignmentService caseAssignmentService;
+    @Mock
+    private BarristerHelper barristerHelper;
+    @Mock
+    private BarristerRemoveService barristerRemoveService;
 
     private StartEventResponse startEventResponse;
 
@@ -1233,6 +1240,12 @@ public class NoticeOfChangePartiesServiceTest {
             .isNull();
         assertThat(party.getSolicitorOrg())
             .isEqualTo(Organisation.builder().build());
+        verify(barristerHelper, times(2)).setAllocatedBarrister(isA(PartyDetails.class),
+                                                 isA(CaseData.class),
+                                                 isA(UUID.class));
+        verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
+        verify(partyLevelCaseFlagsService).updateCaseDataWithGeneratePartyCaseFlags(isA(CaseData.class),
+                                                                                    any(Function.class));
     }
 
     @Test
@@ -1486,6 +1499,12 @@ public class NoticeOfChangePartiesServiceTest {
         SubmittedCallbackResponse submittedCallbackResponse = noticeOfChangePartiesService
             .submittedAdminRemoveLegalRepresentative(callbackRequest);
         assertNotNull(submittedCallbackResponse);
+        verify(barristerHelper, times(2)).setAllocatedBarrister(isA(PartyDetails.class),
+                                                 isA(CaseData.class),
+                                                 isA(UUID.class));
+        verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
+        verify(partyLevelCaseFlagsService).updateCaseDataWithGeneratePartyCaseFlags(isA(CaseData.class),
+                                                                                    any(Function.class));
     }
 
     private static PartyDetails updatePartyDetails(SolicitorUser legalRepresentativeSolicitorDetails,
@@ -1566,6 +1585,7 @@ public class NoticeOfChangePartiesServiceTest {
             any(),
             anyBoolean()
         )).thenReturn(caseData);
+
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .caseDetailsBefore(caseDetails)
@@ -1573,7 +1593,14 @@ public class NoticeOfChangePartiesServiceTest {
 
         noticeOfChangePartiesService.submittedStopRepresenting(callbackRequest);
         verify(eventPublisher, times(1)).publishEvent(any(NoticeOfChangeEvent.class));
+        verify(barristerHelper, times(2)).setAllocatedBarrister(isA(PartyDetails.class),
+                                                 isA(CaseData.class),
+                                                 isA(UUID.class));
+        verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
+        verify(partyLevelCaseFlagsService).updateCaseDataWithGeneratePartyCaseFlags(isA(CaseData.class),
+                                                                                    any(Function.class));
     }
+
 
     @Test
     public void testSendEmailAndUpdateCaseData_VerifiesSendEmailOnRemovalOfLegalRepresentation() throws Exception {
@@ -1632,5 +1659,9 @@ public class NoticeOfChangePartiesServiceTest {
             eq(role),
             eq(caseData)
         );
+        verify(barristerHelper).setAllocatedBarrister(isA(PartyDetails.class),
+                                                 isA(CaseData.class),
+                                                 isA(UUID.class));
+        verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
     }
 }

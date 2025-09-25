@@ -2073,7 +2073,16 @@
 
             ],
             "isRemoveLegalRepresentativeRequested": null,
-            "isAtAddressLessThan5YearsWithDontKnow": null
+            "isAtAddressLessThan5YearsWithDontKnow": null,
+            "barristerId": "99c9f66f-6caa-47eb-a28d-81e75b0689af",
+            "barristerLastName": "Org2",
+            "barristerFirstName": "Bar2",
+            "barristerRole": "[C100APPLICANTBARRISTER1]",
+            "barristerEmail": "hmcts.privatelaw+org2bar2@gmail.com",
+            "barristerOrg": {
+              "OrganisationID": "9K1F6WC",
+              "OrganisationName": "PRL Barrister Org2"
+            }
           }
         },
         {
