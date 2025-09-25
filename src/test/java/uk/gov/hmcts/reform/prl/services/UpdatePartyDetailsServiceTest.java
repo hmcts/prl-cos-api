@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDoc
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.refuge.RefugeConfidentialDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.Barrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.RespondentC8Document;
@@ -55,11 +56,15 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
@@ -117,7 +122,7 @@ public class UpdatePartyDetailsServiceTest {
     C8ArchiveService c8ArchiveService;
 
     @Test
-    public void updateApplicantAndChildNames() {
+    void updateApplicantAndChildNames() {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("applicantName", "test1 test22");
@@ -202,7 +207,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void updateApplicantsAddressInCitizenResponseFl401() {
+    void updateApplicantsAddressInCitizenResponseFl401() {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("applicantName", "test1 test22");
@@ -300,7 +305,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void updateApplicantsAddressInCitizenResponse() {
+    void updateApplicantsAddressInCitizenResponse() {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("applicantName", "test1 test22");
@@ -406,7 +411,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void updateApplicantsPhoneInCitizenResponse() {
+    void updateApplicantsPhoneInCitizenResponse() {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("applicantName", "test1 test22");
@@ -513,7 +518,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void updateApplicantsEmailInCitizenResponse() {
+    void updateApplicantsEmailInCitizenResponse() {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("applicantName", "test1 test22");
@@ -619,7 +624,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void newApplicantAdded() {
+    void newApplicantAdded() {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("applicantName", "test1 test22");
@@ -734,7 +739,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void updateApplicantAndChildNamesC100withNoApplicants() {
+    void updateApplicantAndChildNamesC100withNoApplicants() {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("applicantName", "test1 test22");
@@ -775,7 +780,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void updateApplicantAndChildNamesFL401() {
+    void updateApplicantAndChildNamesFL401() {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("applicantName", "test1 test22");
@@ -832,7 +837,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void updateApplicantAndChildNamesFl401() {
+    void updateApplicantAndChildNamesFl401() {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("applicantName", "test1 test22");
@@ -887,7 +892,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void testCaseFlagFl401() {
+    void testCaseFlagFl401() {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("applicantsFL401", "test applicant");
@@ -991,7 +996,7 @@ public class UpdatePartyDetailsServiceTest {
 
 
     @Test
-    public void testCaseFlagApplicantsC100() {
+    void testCaseFlagApplicantsC100() {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("applicantName", "test1 test22");
@@ -1100,7 +1105,7 @@ public class UpdatePartyDetailsServiceTest {
 
 
     @Test
-    public void testCaseFlagRespondentsC100() {
+    void testCaseFlagRespondentsC100() {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("applicantName", "test1 test22");
@@ -1184,7 +1189,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void testC8GenerateForRespondentsC100() throws Exception {
+    void testC8GenerateForRespondentsC100() throws Exception {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("applicantName", "test1 test22");
@@ -1265,7 +1270,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void testC8GenerateForSixRespondentsC100() throws Exception {
+    void testC8GenerateForSixRespondentsC100() throws Exception {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("applicantName", "test1 test22");
@@ -1465,7 +1470,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void checkIfDetailsChangedFl401All() {
+    void checkIfDetailsChangedFl401All() {
         PartyDetails respondentBefore = PartyDetails.builder()
             .email("test")
             .address(Address.builder()
@@ -1502,7 +1507,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void checkIfDetailsChangedFl401EmailOnly() {
+    void checkIfDetailsChangedFl401EmailOnly() {
         PartyDetails respondentBefore = PartyDetails.builder()
             .email("test")
             .build();
@@ -1531,7 +1536,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void checkIfDetailsChangedFl401AddressOnly() {
+    void checkIfDetailsChangedFl401AddressOnly() {
         PartyDetails respondentBefore = PartyDetails.builder()
             .address(Address.builder()
                          .addressLine1("test")
@@ -1564,7 +1569,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void checkIfDetailsChangedPhoneOnly() {
+    void checkIfDetailsChangedPhoneOnly() {
         PartyDetails respondentBefore = PartyDetails.builder()
             .phoneNumber("01234")
             .build();
@@ -1593,7 +1598,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void checkIfDetailsChangedFl401NoChange() {
+    void checkIfDetailsChangedFl401NoChange() {
         PartyDetails respondentBefore = PartyDetails.builder()
             .build();
         CaseData caseDataBefore = CaseData.builder()
@@ -1620,7 +1625,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void checkIfDetailsChangedC100All() {
+    void checkIfDetailsChangedC100All() {
         UUID uuid = UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a");
         PartyDetails respondentBefore = PartyDetails.builder()
             .partyId(uuid)
@@ -1661,7 +1666,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void checkIfDetailsChangedC100EmailOnly() {
+    void checkIfDetailsChangedC100EmailOnly() {
         UUID uuid = UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a");
         PartyDetails respondentBefore = PartyDetails.builder()
             .partyId(uuid)
@@ -1694,7 +1699,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void checkIfDetailsChangedC100AddressOnly() {
+    void checkIfDetailsChangedC100AddressOnly() {
         UUID uuid = UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a");
         PartyDetails respondentBefore = PartyDetails.builder()
             .partyId(uuid)
@@ -1731,7 +1736,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void checkIfDetailsChangedC100PhoneOnly() {
+    void checkIfDetailsChangedC100PhoneOnly() {
         UUID uuid = UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a");
         PartyDetails respondentBefore = PartyDetails.builder()
             .partyId(uuid)
@@ -1764,7 +1769,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void checkIfDetailsChangedC100NoChange() {
+    void checkIfDetailsChangedC100NoChange() {
         UUID uuid = UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a");
         PartyDetails respondentBefore = PartyDetails.builder()
             .partyId(uuid)
@@ -1793,7 +1798,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void testUpdateApplicantRespondentAndChildDataCaseTypeEmpty() {
+    void testUpdateApplicantRespondentAndChildDataCaseTypeEmpty() {
         CaseData caseData = CaseData.builder().build();
         Map<String, Object> objectMap = new HashMap<>();
         CallbackRequest callbackRequest = CallbackRequest.builder()
@@ -1819,7 +1824,7 @@ public class UpdatePartyDetailsServiceTest {
 
 
     @Test
-    public void testAmendOtherPeopleInTheCase() {
+    void testAmendOtherPeopleInTheCase() {
         CaseData caseData = CaseData.builder().build();
         Map<String, Object> objectMap = new HashMap<>();
         objectMap.put("caseTypeOfApplication", "C100");
@@ -1840,7 +1845,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void testGenerateC8DocsAllRespondents() {
+    void testGenerateC8DocsAllRespondents() {
         UUID uuid = UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a");
         PartyDetails respondentBefore = PartyDetails.builder()
             .partyId(uuid)
@@ -1891,7 +1896,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void testSetApplicantDefaultApplicant() {
+    void testSetApplicantDefaultApplicant() {
 
 
         PartyDetails respondent1 = PartyDetails.builder()
@@ -1926,7 +1931,7 @@ public class UpdatePartyDetailsServiceTest {
 
 
     @Test
-    public void testSetApplicantDefaultApplicant_scenario2() {
+    void testSetApplicantDefaultApplicant_scenario2() {
         PartyDetails respondent1 = PartyDetails.builder()
             .firstName("respondent1")
             .lastName("lastname1")
@@ -1958,7 +1963,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void testSetRespondentsDefaultApplicant() {
+    void testSetRespondentsDefaultApplicant() {
 
 
         PartyDetails respondent1 = PartyDetails.builder()
@@ -1992,7 +1997,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void testSetRespondentsDefaultApplicant_scenario2() {
+    void testSetRespondentsDefaultApplicant_scenario2() {
         PartyDetails respondent1 = PartyDetails.builder()
             .firstName("respondent1")
             .lastName("lastname1")
@@ -2024,7 +2029,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void testSetDefaultEmptyForChildDetails_whenChildDetailsPresent() {
+    void testSetDefaultEmptyForChildDetails_whenChildDetailsPresent() {
         Child child1 = Child.builder()
             .firstName("Test")
             .lastName("Name1")
@@ -2063,7 +2068,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void testSetDefaultEmptyChildDetails_whenNoChildDetailsPresent() {
+    void testSetDefaultEmptyChildDetails_whenNoChildDetailsPresent() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .build();
@@ -2075,7 +2080,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void testSetDefaultEmptyForChildDetails_whenRevisedChildDetailsPresent() {
+    void testSetDefaultEmptyForChildDetails_whenRevisedChildDetailsPresent() {
         ChildDetailsRevised child1 = ChildDetailsRevised.builder()
             .firstName("Test")
             .lastName("Name1")
@@ -2112,7 +2117,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void testSetDefaultEmptyChildDetails_whenNoRevisedChildDetailsPresent() {
+    void testSetDefaultEmptyChildDetails_whenNoRevisedChildDetailsPresent() {
         PartyDetails applicant = PartyDetails.builder().firstName("test").build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> applicantList = new ArrayList<>();
@@ -2161,7 +2166,7 @@ public class UpdatePartyDetailsServiceTest {
 
 
     @Test
-    public void testUpdateOtherPeopleInTheCaseConfidentialityData() {
+    void testUpdateOtherPeopleInTheCaseConfidentialityData() {
         PartyDetails applicant = PartyDetails.builder().firstName("test").build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> applicantList = new ArrayList<>();
@@ -2251,7 +2256,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void testPopulateC8DocumentsWhenPartyIndexIsZero() throws Exception {
+    void testPopulateC8DocumentsWhenPartyIndexIsZero() throws Exception {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .respondentC8Document(RespondentC8Document.builder().respondentAc8Documents(new ArrayList<>(List.of(element(
@@ -2271,7 +2276,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void testPopulateC8DocumentsWhenPartyIndexIsOne() throws Exception {
+    void testPopulateC8DocumentsWhenPartyIndexIsOne() throws Exception {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .respondentC8Document(RespondentC8Document.builder().respondentBc8Documents(new ArrayList<>(List.of(element(
@@ -2291,7 +2296,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void testPopulateC8DocumentsWhenPartyIndexIsTwo() throws Exception {
+    void testPopulateC8DocumentsWhenPartyIndexIsTwo() throws Exception {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .respondentC8Document(RespondentC8Document.builder().respondentCc8Documents(new ArrayList<>(List.of(element(
@@ -2310,7 +2315,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void testPopulateC8DocumentsWhenPartyIndexIsThree() throws Exception {
+    void testPopulateC8DocumentsWhenPartyIndexIsThree() throws Exception {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .respondentC8Document(RespondentC8Document.builder().respondentDc8Documents(new ArrayList<>(List.of(element(
@@ -2330,7 +2335,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void testPopulateC8DocumentsWhenPartyIndexIsFour() throws Exception {
+    void testPopulateC8DocumentsWhenPartyIndexIsFour() throws Exception {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .respondentC8Document(RespondentC8Document.builder().respondentEc8Documents(new ArrayList<>(List.of(element(
@@ -2349,7 +2354,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void testPopulateC8DocumentsWhenPartyIndexIsNotValid() throws Exception {
+    void testPopulateC8DocumentsWhenPartyIndexIsNotValid() throws Exception {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .respondentC8Document(RespondentC8Document.builder().respondentEc8Documents(new ArrayList<>(List.of(element(
@@ -2373,7 +2378,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void testPopulateC8DocumentsWhenThereAreNoRespondentC8Documents() throws Exception {
+    void testPopulateC8DocumentsWhenThereAreNoRespondentC8Documents() throws Exception {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .respondentC8Document(RespondentC8Document.builder().build())
@@ -2393,7 +2398,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void testPopulateC8DocumentsWhenThereIsNoConfendentialData() throws Exception {
+    void testPopulateC8DocumentsWhenThereIsNoConfendentialData() throws Exception {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .respondentC8Document(RespondentC8Document.builder().build())
@@ -2411,7 +2416,7 @@ public class UpdatePartyDetailsServiceTest {
 
     @ParameterizedTest
     @CsvSource({"PREPARE_FOR_HEARING_CONDUCT_HEARING, 1", "DECISION_OUTCOME, 1", "SUBMITTED_PAID, 0", "CASE_ISSUED, 0", "JUDICIAL_REVIEW, 0" })
-    public void shouldInvokeGenerateC8DocumentsForApplicantOnlyInHearingStates(State state, int times) throws Exception {
+    void shouldInvokeGenerateC8DocumentsForApplicantOnlyInHearingStates(State state, int times) throws Exception {
         PartyDetails applicant = PartyDetails.builder().firstName("App").build();
         PartyDetails respondent = PartyDetails.builder().firstName("Resp").build();
         RespondentC8Document respondentC8Document = RespondentC8Document.builder().build();
@@ -2451,6 +2456,264 @@ public class UpdatePartyDetailsServiceTest {
 
         assertNotNull(updatedCaseData);
         verify(documentGenService, Mockito.times(times)).createUpdatedCaseDataWithDocuments(anyString(), any(CaseData.class));
+    }
+
+    @Test
+    void shouldReturnEmptyValidateUpdatePartyDetailsIfBarristerPresentAndApplicantIsNotRemoveForC100() {
+        Element<PartyDetails> applicant1 = getPartyDetails("App1", true);
+        Element<PartyDetails> applicant2 = getPartyDetails("App2", true);
+
+        Element<PartyDetails> respondent = getPartyDetails("Resp", true);
+
+        CaseData caseDataBefore = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(applicant1, applicant2))
+            .respondents(List.of(respondent))
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(applicant1, applicant2))
+            .respondents(List.of(respondent))
+            .build();
+
+
+        Map<String,Object> caseDataMapBefore = new HashMap<>();
+        Map<String,Object> caseDataMap = new HashMap<>();
+        caseDataMapBefore.put("before", true);
+        caseDataMap.put("before", false);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetailsBefore(CaseDetails.builder()
+                                   .id(12345L)
+                                   .data(caseDataMap)
+                                   .build())
+            .caseDetails(CaseDetails.builder()
+                             .id(12345L)
+                             .data(caseDataMap)
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class)))
+            .thenAnswer(invocation -> {
+                Map<String, Object> map = invocation.getArgument(0);
+                if (map.get("before").equals(true)) {
+                    return caseDataBefore;
+                } else if (map.get("before").equals(false)) {
+                    return caseData;
+                }
+                return null;
+            });
+
+        List<String> validationErrorList = updatePartyDetailsService.validateUpdatePartyDetails(callbackRequest);
+
+        assertTrue(validationErrorList.isEmpty());
+
+    }
+
+    @Test
+    void shouldReturnEmptyValidateUpdatePartyDetailsIfNoBarristerAndApplicantIsRemoveForC100() {
+        Element<PartyDetails> applicant1 = getPartyDetails("App1", false);
+        Element<PartyDetails> applicant2 = getPartyDetails("App2", false);
+
+        Element<PartyDetails> respondent = getPartyDetails("Resp", false);
+
+        CaseData caseDataBefore = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(applicant1, applicant2))
+            .respondents(List.of(respondent))
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(applicant1))
+            .respondents(List.of(respondent))
+            .build();
+
+
+        Map<String,Object> caseDataMapBefore = new HashMap<>();
+        Map<String,Object> caseDataMap = new HashMap<>();
+        caseDataMapBefore.put("before", true);
+        caseDataMap.put("before", false);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetailsBefore(CaseDetails.builder()
+                                   .id(12345L)
+                                   .data(caseDataMap)
+                                   .build())
+            .caseDetails(CaseDetails.builder()
+                             .id(12345L)
+                             .data(caseDataMap)
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class)))
+            .thenAnswer(invocation -> {
+                Map<String, Object> map = invocation.getArgument(0);
+                if (map.get("before").equals(true)) {
+                    return caseDataBefore;
+                } else if (map.get("before").equals(false)) {
+                    return caseData;
+                }
+                return null;
+            });
+
+        List<String> validationErrorList = updatePartyDetailsService.validateUpdatePartyDetails(callbackRequest);
+
+        assertTrue(validationErrorList.isEmpty());
+
+    }
+
+    @Test
+    void shouldReturnValidateUpdatePartyDetailsIfBarristerPresentAndApplicantIsRemovedForC100() {
+        Element<PartyDetails> applicant1 = getPartyDetails("App1", true);
+        Element<PartyDetails> applicant2 = getPartyDetails("App2", true);
+
+        Element<PartyDetails> respondent = getPartyDetails("Resp", true);
+
+        CaseData caseDataBefore = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(applicant1, applicant2))
+            .respondents(List.of(respondent))
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(applicant1))
+            .respondents(List.of(respondent))
+            .build();
+
+        Map<String,Object> caseDataMapBefore = new HashMap<>();
+        Map<String,Object> caseDataMap = new HashMap<>();
+        caseDataMapBefore.put("before", true);
+        caseDataMap.put("before", false);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetailsBefore(CaseDetails.builder()
+                                   .id(12345L)
+                                   .data(caseDataMapBefore)
+                                   .build())
+            .caseDetails(CaseDetails.builder()
+                             .id(12345L)
+                             .data(caseDataMap)
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class)))
+            .thenAnswer(invocation -> {
+                Map<String, Object> map = invocation.getArgument(0);
+                if (map.get("before").equals(true)) {
+                    return caseDataBefore;
+                } else if (map.get("before").equals(false)) {
+                    return caseData;
+                }
+                return null;
+            });
+
+
+        List<String> validationErrorList = updatePartyDetailsService.validateUpdatePartyDetails(callbackRequest);
+
+        assertTrue(!validationErrorList.isEmpty());
+        assertTrue(validationErrorList.getFirst().contains("Barrister is associated with the party"));
+
+    }
+
+
+    @Test
+    void shouldReturnValidateUpdatePartyDetailsIfBarristerPresentAndRespondentIsRemovedForC100() {
+        Element<PartyDetails> applicant1 = getPartyDetails("App1", true);
+        Element<PartyDetails> applicant2 = getPartyDetails("App2", true);
+
+        Element<PartyDetails> respondent1 = getPartyDetails("Resp1", true);
+        Element<PartyDetails> respondent2 = getPartyDetails("Resp2", true);
+
+        CaseData caseDataBefore = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(applicant1, applicant2))
+            .respondents(List.of(respondent1, respondent2))
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(applicant1, respondent2))
+            .respondents(List.of(respondent1))
+            .build();
+
+        Map<String,Object> caseDataMapBefore = new HashMap<>();
+        Map<String,Object> caseDataMap = new HashMap<>();
+        caseDataMapBefore.put("before", true);
+        caseDataMap.put("before", false);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetailsBefore(CaseDetails.builder()
+                                   .id(12345L)
+                                   .data(caseDataMapBefore)
+                                   .build())
+            .caseDetails(CaseDetails.builder()
+                             .id(12345L)
+                             .data(caseDataMap)
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class)))
+            .thenAnswer(invocation -> {
+                Map<String, Object> map = invocation.getArgument(0);
+                if (map.get("before").equals(true)) {
+                    return caseDataBefore;
+                } else if (map.get("before").equals(false)) {
+                    return caseData;
+                }
+                return null;
+            });
+
+
+        List<String> validationErrorList = updatePartyDetailsService.validateUpdatePartyDetails(callbackRequest);
+
+        assertTrue(!validationErrorList.isEmpty());
+        assertTrue(validationErrorList.getFirst().contains("Barrister is associated with the party"));
+
+    }
+
+    @Test
+    void shouldReturnEmptyValidateUpdatePartyDetailsForFL401() {
+        PartyDetails applicant = getPartyDetails("App1", true).getValue();
+        PartyDetails respondent = getPartyDetails("Resp", true).getValue();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(applicant)
+            .respondentsFL401(respondent)
+            .build();
+
+        Map<String,Object> caseDataMap = new HashMap<>();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetailsBefore(CaseDetails.builder()
+                                   .id(12345L)
+                                   .data(caseDataMap)
+                                   .build())
+            .caseDetails(CaseDetails.builder()
+                             .id(12345L)
+                             .data(caseDataMap)
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+
+        List<String> validationErrorList = updatePartyDetailsService.validateUpdatePartyDetails(callbackRequest);
+
+        assertTrue(validationErrorList.isEmpty());
+
+    }
+
+    private Element<PartyDetails> getPartyDetails(String partyName, boolean hasBarrister) {
+        return Element.<PartyDetails>builder().id(UUID.randomUUID())
+            .value(PartyDetails.builder()
+                       .barrister(hasBarrister ? Barrister.builder()
+                                      .barristerEmail("test1@test.com")
+                                      .build() : null)
+                       .firstName(partyName).build())
+            .build();
     }
 
 }

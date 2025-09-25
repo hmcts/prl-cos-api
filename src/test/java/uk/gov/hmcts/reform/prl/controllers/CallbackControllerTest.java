@@ -3597,4 +3597,42 @@ public class CallbackControllerTest {
             callbackController.updateOtherPeoplePartyDetails(authToken, s2sToken, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
+
+    @Test
+    public void testErrorsAreEmptyHandleUpdatePartyDetailsMidEvent() {
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().build())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().build())
+            .build();
+
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(updatePartyDetailsService.validateUpdatePartyDetails(callbackRequest)).thenReturn(new ArrayList<>());
+
+        AboutToStartOrSubmitCallbackResponse response = callbackController
+            .handleUpdatePartyDetailsMidEvent(authToken, s2sToken, callbackRequest);
+
+        assertNotNull(response);
+        assertTrue(response.getErrors().isEmpty());
+        verify(updatePartyDetailsService).validateUpdatePartyDetails(callbackRequest);
+
+    }
+
+    @Test
+    public void testErrorAreNotEmptyHandleUpdatePartyDetailsMidEvent() {
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().build())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().build())
+            .build();
+
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(updatePartyDetailsService.validateUpdatePartyDetails(callbackRequest)).thenReturn(List.of("Barrister"));
+
+        AboutToStartOrSubmitCallbackResponse response = callbackController
+            .handleUpdatePartyDetailsMidEvent(authToken, s2sToken, callbackRequest);
+
+        assertNotNull(response);
+        assertTrue(response.getErrors().contains("Barrister"));
+        verify(updatePartyDetailsService).validateUpdatePartyDetails(callbackRequest);
+
+    }
 }

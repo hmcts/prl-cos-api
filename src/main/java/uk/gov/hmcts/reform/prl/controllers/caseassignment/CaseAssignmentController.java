@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers.caseassignment;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -22,16 +21,21 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
+import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
+import uk.gov.hmcts.reform.prl.utils.BarristerHelper;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATED_BARRISTER;
@@ -40,7 +44,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
 
 @Slf4j
@@ -53,6 +56,8 @@ public class CaseAssignmentController {
     private final ObjectMapper objectMapper;
     private final OrganisationService organisationService;
     private final AuthorisationService authorisationService;
+    private final BarristerHelper barristerHelper;
+    private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     private final ApplicationsTabService applicationsTabService;
 
     @PostMapping(path = "/barrister/add/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -72,10 +77,7 @@ public class CaseAssignmentController {
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
             List<String> errorList = new ArrayList<>();
-            AllocatedBarrister allocatedBarrister = objectMapper.convertValue(
-                caseDetails.getData().get(ALLOCATED_BARRISTER),
-                new TypeReference<>() { }
-            );
+            AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
 
             Optional<String> userId = organisationService
                 .findUserByEmail(allocatedBarrister.getBarristerEmail());
@@ -91,11 +93,14 @@ public class CaseAssignmentController {
 
             if (errorList.isEmpty() && userId.isPresent() && barristerRole.isPresent()) {
                 try {
-                    caseAssignmentService.addBarrister(caseData,
-                                                       userId.get(),
-                                                       barristerRole.get(),
-                                                       allocatedBarrister);
-                    updateCaseDetails(caseDetails, caseData);
+                    caseAssignmentService.addBarrister(
+                        caseData,
+                        userId.get(),
+                        barristerRole.get(),
+                        allocatedBarrister
+                    );
+                    updateCaseDetails(caseDetails,
+                                      caseData);
                 } catch (GrantCaseAccessException grantCaseAccessException) {
                     errorList.add(grantCaseAccessException.getMessage());
                 }
@@ -105,7 +110,7 @@ public class CaseAssignmentController {
                 .data(caseDetails.getData())
                 .errors(errorList).build();
         } else {
-            throw new IllegalArgumentException(INVALID_CLIENT);
+            throw new InvalidClientException();
         }
     }
 
@@ -125,18 +130,19 @@ public class CaseAssignmentController {
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             List<String> errorList = new ArrayList<>();
-            AllocatedBarrister allocatedBarrister = objectMapper.convertValue(
-                caseDetails.getData().get(ALLOCATED_BARRISTER),
-                new TypeReference<>() { }
-            );
+            AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
 
             caseAssignmentService.validateRemoveRequest(caseData,
                                                         allocatedBarrister.getPartyList().getValueCode(),
                                                         errorList);
 
             if (errorList.isEmpty()) {
-                caseAssignmentService.removeBarrister(caseData,
-                                                      allocatedBarrister.getPartyList().getValueCode());
+                PartyDetails partyDetails = caseAssignmentService
+                    .getSelectedParty(caseData, allocatedBarrister.getPartyList().getValueCode());
+                barristerHelper.setAllocatedBarrister(partyDetails,
+                                                 caseData,
+                                                 UUID.fromString(allocatedBarrister.getPartyList().getValueCode()));
+                caseAssignmentService.removeBarrister(caseData, partyDetails);
                 updateCaseDetails(caseDetails, caseData);
             }
 
@@ -144,21 +150,23 @@ public class CaseAssignmentController {
                 .data(caseDetails.getData())
                 .errors(errorList).build();
         } else {
-            throw new IllegalArgumentException(INVALID_CLIENT);
+            throw new InvalidClientException();
         }
 
     }
 
-    private void updateCaseDetails(CaseDetails caseDetails, CaseData caseData) {
-        caseDetails.getData().put(ALLOCATED_BARRISTER, null);
+    private void updateCaseDetails(CaseDetails caseDetails,
+                                   CaseData caseData) {
+        caseDetails.getData().put(ALLOCATED_BARRISTER, caseData.getAllocatedBarrister());
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseDetails.getData().put(APPLICANTS, caseData.getApplicants());
             caseDetails.getData().put(RESPONDENTS, caseData.getRespondents());
-            caseDetails.getData().putAll(applicationsTabService.updateTab(caseData));
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseDetails.getData().put(FL401_APPLICANTS, caseData.getApplicantsFL401());
             caseDetails.getData().put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
-            caseDetails.getData().putAll(applicationsTabService.updateTab(caseData));
         }
+        caseDetails.getData().putAll(applicationsTabService.updateTab(caseData));
+        caseDetails.getData().putAll(partyLevelCaseFlagsService
+                                         .generatePartyCaseFlagsForBarristerOnly(caseData));
     }
 }
