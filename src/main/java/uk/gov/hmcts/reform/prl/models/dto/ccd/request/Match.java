@@ -41,4 +41,13 @@ public class Match {
     @JsonProperty("data.nextHearingDate")
     private LocalDate nextHearingDate;
 
+    @JsonProperty("data.orderCollection.value.orderTypeId")
+    private String orderTypeId;
+
+    @JsonProperty("data.orderCollection.value.typeOfOrder")
+    private String typeOfOrder;
+
+    @JsonProperty("data.orderCollection.value.orderType")
+    private String orderType;
+
 }
