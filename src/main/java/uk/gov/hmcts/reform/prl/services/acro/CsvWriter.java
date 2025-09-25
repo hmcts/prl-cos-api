@@ -138,10 +138,7 @@ public class CsvWriter {
             }
 
             if (value == null || value.toString().isEmpty()) {
-                log.warn("Value does not exist for {} in {} - CSV column '{}'",
-                         column.getProperty(),
-                         ccdOrderData.getId(),
-                         column.getHeader());
+                log.warn("Missing value for CSV column '{}' (property '{}')", column.getHeader(), column.getProperty());
             }
             record.add(value != null ? value.toString() : "");
         }
