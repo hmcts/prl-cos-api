@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +23,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2AdditionalOrdersRequestedCa;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2ApplicationTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2Consent;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.UrgencyTimeFrameType;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
@@ -32,11 +35,13 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2ApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.Supplement;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.SupportingEvidenceBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.UploadApplicationDraftOrder;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.Urgency;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UploadAdditionalApplicationData;
@@ -67,6 +72,8 @@ import static org.testng.AssertJUnit.assertNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CA_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CA_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationService.TEMPORARY_C_2_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -875,6 +882,11 @@ class UploadAdditionalApplicationServiceTest {
     @Test
     void exceptionHandling_getC2DocumentBundleTest() {
 
+        Document inputDoc = Document.builder()
+            .documentUrl("doc-url")
+            .documentBinaryUrl("bin-url")
+            .documentFileName("c2.pdf")
+            .build();
 
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(partyDynamicMultiSelectListC2)
@@ -882,7 +894,12 @@ class UploadAdditionalApplicationServiceTest {
                 AdditionalApplicationTypeEnum.otherOrder
             )
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
-            .temporaryC2Document(C2DocumentBundle.builder().build())
+            .temporaryC2Document(C2DocumentBundle.builder()
+                                     .author("Elise Lynn (respondent)")
+                                     .uploadedDateTime("2024-01-01")
+                                     .applicantName("Elise Lynn (respondent)")
+                                     .document(inputDoc)
+                                     .build())
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
             .representedPartyType(CA_APPLICANT)
             .build();
@@ -911,12 +928,6 @@ class UploadAdditionalApplicationServiceTest {
             additionalApplicationsElementListC2
         );
 
-        //Add the additional applications bundle to the caseData
-        caseData = CaseData.builder()
-            .id(123L)
-            .additionalApplicationsBundle(additionalApplicationsElementListC2)
-            .build();
-
         C2DocumentBundle result = null;
         try {
             //CaseData caseData, String author, String currentDateTime, String partyName
@@ -927,7 +938,7 @@ class UploadAdditionalApplicationServiceTest {
             Assertions.assertNull(e.getMessage(), "null exception");// expected for null party
         }
 
-        Assertions.assertNull(result, "Document must not be null");
+        Assertions.assertNotNull(result, "Document must not be null");
     }
 
 }
