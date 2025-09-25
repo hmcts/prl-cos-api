@@ -101,16 +101,22 @@ class UploadAdditionalApplicationServiceTest {
     private UploadAdditionalApplicationUtils uploadAdditionalApplicationUtils;
 
     DynamicMultiSelectList partyDynamicMultiSelectList;
+    DynamicMultiSelectList partyDynamicMultiSelectListC2;
 
     List<Element<PartyDetails>> partyDetails;
+    List<Element<PartyDetails>> partyDetailsC2;
 
     PartyDetails party;
+    PartyDetails partyC2;
 
     // reflect: private String categoryForParty(String)
     private Method categoryForParty;
 
     // reflect: private static Document withCategory(Document, String)
     private Method withCategory;
+
+    // reflect: private C2DocumentBundle getC2DocumentBundle(CaseData caseData, String author, String currentDateTime, String partyName)
+    private Method getC2DocumentBundle;
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -121,6 +127,10 @@ class UploadAdditionalApplicationServiceTest {
         withCategory = UploadAdditionalApplicationService.class
             .getDeclaredMethod("withCategory", Document.class, String.class);
         withCategory.setAccessible(true);
+
+        getC2DocumentBundle = UploadAdditionalApplicationService.class
+            .getDeclaredMethod("getC2DocumentBundle", CaseData.class, String.class, String.class, String.class);
+        getC2DocumentBundle.setAccessible(true);
 
         List<DynamicMultiselectListElement> dynamicMultiselectListElements = new ArrayList<>();
         DynamicMultiselectListElement partyDynamicMultiselectListElement = DynamicMultiselectListElement.builder()
@@ -144,6 +154,31 @@ class UploadAdditionalApplicationServiceTest {
         );
         partyDetails = new ArrayList<>();
         partyDetails.add(partyDetailsElement);
+
+
+        //Preparation for C2 tests
+        List<DynamicMultiselectListElement> dynamicMultiselectListElementsC2 = new ArrayList<>();
+        DynamicMultiselectListElement partyDynamicMultiselectListElementC2 = DynamicMultiselectListElement.builder()
+            .code("f2847b15-fff8-4df0-868a-420d9de11d29")
+            .label("Elise Lynn")
+            .build();
+        dynamicMultiselectListElementsC2.add(partyDynamicMultiselectListElementC2);
+        partyDynamicMultiSelectListC2 = DynamicMultiSelectList.builder()
+            .listItems(dynamicMultiselectListElementsC2)
+            .value(dynamicMultiselectListElementsC2)
+            .build();
+
+        partyC2 = PartyDetails.builder()
+            .firstName("Elise")
+            .lastName("Lynn Respondent")
+            .partyId(UUID.fromString("f2847b15-fff8-4df0-868a-420d9de11d29"))
+            .build();
+        Element<PartyDetails> partyDetailsElementC2 = element(
+            UUID.fromString("f2847b15-fff8-4df0-868a-420d9de11d29"),
+            party
+        );
+        partyDetailsC2 = new ArrayList<>();
+        partyDetailsC2.add(partyDetailsElementC2);
     }
 
     @Test
@@ -824,7 +859,7 @@ class UploadAdditionalApplicationServiceTest {
     }
 
     @Test
-    void nullDocument_leavesCategoryUnset() throws Exception {
+    void nullDocument_leavesCategoryUnset() {
         String category = "lalalalalala";
         Document result = null;
         try {
@@ -837,5 +872,104 @@ class UploadAdditionalApplicationServiceTest {
         Assertions.assertNull(result, "Document must not be null");
     }
 
+    @Test
+    void exceptionHandling_getC2DocumentBundleTest() {
+
+
+        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
+            .additionalApplicantsList(partyDynamicMultiSelectListC2)
+            .additionalApplicationsApplyingFor(
+                AdditionalApplicationTypeEnum.otherOrder
+            )
+            .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
+            .temporaryC2Document(C2DocumentBundle.builder().build())
+            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
+            .representedPartyType(CA_APPLICANT)
+            .build();
+        when(applicationsFeeCalculator.getFeeTypes(any(CaseData.class))).thenReturn(List.of(
+            FeeType.C2_WITH_NOTICE));
+        when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(FeeResponse.builder().amount(
+            BigDecimal.TEN).build());
+        when(paymentRequestService.getPaymentServiceResponse(anyString(), any(CaseData.class), any(FeeResponse.class)))
+            .thenReturn(PaymentServiceResponse.builder()
+                            .build());
+
+        CaseData caseData = CaseData.builder()
+            .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicants(partyDetailsC2)
+            .build();
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsElementListC2 = new ArrayList<>();
+        when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder().email("test@abc.com")
+                                                                    .roles(List.of(Roles.SOLICITOR.getValue()))
+                                                                    .build());
+
+        uploadAdditionalApplicationService.getAdditionalApplicationElements(
+            "auth",
+            "testAuth",
+            caseData,
+            additionalApplicationsElementListC2
+        );
+
+        //Add the additional applications bundle to the caseData
+        caseData = CaseData.builder()
+            .id(123L)
+            .additionalApplicationsBundle(additionalApplicationsElementListC2)
+            .build();
+
+        C2DocumentBundle result = null;
+        try {
+            //CaseData caseData, String author, String currentDateTime, String partyName
+            result =
+                (C2DocumentBundle) getC2DocumentBundle.invoke(uploadAdditionalApplicationService, caseData, "An Author",
+                    "2024-01-01", "Elise Lynn (respondent)");
+        } catch (Exception e) {
+            Assertions.assertNull(e.getMessage(), "null exception");// expected for null party
+        }
+
+        Assertions.assertNull(result, "Document must not be null");
+    }
 
 }
+
+
+
+/*
+
+ void testGetAdditionalApplicationElementsForBothC2AndOther() {
+        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
+            .additionalApplicantsList(partyDynamicMultiSelectList)
+            .additionalApplicationsApplyingFor(
+                AdditionalApplicationTypeEnum.otherOrder
+            )
+            .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
+            .temporaryC2Document(C2DocumentBundle.builder().build())
+            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
+            .representedPartyType(CA_APPLICANT)
+            .build();
+        when(applicationsFeeCalculator.getFeeTypes(any(CaseData.class))).thenReturn(List.of(
+            FeeType.C2_WITH_NOTICE));
+        when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(FeeResponse.builder().amount(
+            BigDecimal.TEN).build());
+        when(paymentRequestService.getPaymentServiceResponse(anyString(), any(CaseData.class), any(FeeResponse.class)))
+            .thenReturn(PaymentServiceResponse.builder()
+                          .build());
+        CaseData caseData = CaseData.builder()
+            .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicants(partyDetails)
+            .build();
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsElementList = new ArrayList<>();
+        when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder().email("test@abc.com")
+                .roles(List.of(Roles.SOLICITOR.getValue()))
+                .build());
+        uploadAdditionalApplicationService.getAdditionalApplicationElements(
+            "auth",
+            "testAuth",
+            caseData,
+            additionalApplicationsElementList
+        );
+        assertNotNull(additionalApplicationsElementList);
+    }
+
+ */
