@@ -35,6 +35,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -75,6 +76,7 @@ public class CitizenAwpMapper {
 
     private static List<Element<Document>> toDocElementsWithCategory(List<Document> docs, String categoryId) {
         return nullSafeCollection(docs).stream()
+            .filter(Objects::nonNull)
             .map(doc -> element(withCategory(doc, categoryId)))
             .toList();
     }
