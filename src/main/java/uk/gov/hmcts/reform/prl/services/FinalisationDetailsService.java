@@ -8,8 +8,12 @@ import uk.gov.hmcts.reform.prl.models.dto.judicial.FinalisationDetails;
 public class FinalisationDetailsService {
 
     public FinalisationDetails buildFinalisationDetails(CaseData caseData) {
-        return FinalisationDetails.builder()
-            .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle().name())
-            .build();
+        FinalisationDetails.FinalisationDetailsBuilder builder = FinalisationDetails.builder();
+
+        if (caseData.getManageOrders().getJudgeOrMagistrateTitle() != null) {
+            builder.judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle().name());
+        }
+
+        return builder.build();
     }
 }
