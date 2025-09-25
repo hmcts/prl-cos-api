@@ -96,6 +96,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingDataFromTabTo
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.FinalisationDetails;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
@@ -225,6 +226,8 @@ public class ManageOrderServiceTest {
     @Mock
     private DocumentSealingService documentSealingService;
 
+    @Mock
+    private FinalisationDetailsService finalisationDetailsService;
 
     public static final String authToken = "Bearer TestAuthToken";
 
@@ -1160,6 +1163,7 @@ public class ManageOrderServiceTest {
         manageOrders = ManageOrders.builder()
             .withdrawnOrRefusedOrder(WithDrawTypeOfOrderEnum.withdrawnApplication)
             .isCaseWithdrawn(No)
+            .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
             .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
             .childOption(
                 dynamicMultiSelectList
@@ -3008,6 +3012,7 @@ public class ManageOrderServiceTest {
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassCymruServedOptions(No)
             .serveOrderDynamicList(dynamicMultiSelectList)
+            .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
             .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
@@ -3069,6 +3074,7 @@ public class ManageOrderServiceTest {
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassCymruServedOptions(No)
             .serveOrderDynamicList(dynamicMultiSelectList)
+            .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.magistrate)
             .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
@@ -6233,6 +6239,7 @@ public class ManageOrderServiceTest {
             .withdrawnOrRefusedOrder(WithDrawTypeOfOrderEnum.withdrawnApplication)
             .isCaseWithdrawn(No)
             .isTheOrderAboutAllChildren(Yes)
+            .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
             .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
             .childArrangementsOrdersToIssue(List.of(OrderTypeEnum.childArrangementsOrder))
             .selectChildArrangementsOrder(ChildArrangementOrderTypeEnum.spendTimeWithOrder)
@@ -6599,5 +6606,70 @@ public class ManageOrderServiceTest {
         assertEquals(caseData.getJusticeLegalAdviserFullName(), draftOrder.getJusticeLegalAdviserFullName());
         assertEquals(caseData.getMagistrateLastName(), draftOrder.getMagistrateLastName());
         assertEquals(manageOrders.getIsTheOrderByConsent(), draftOrder.getIsTheOrderByConsent());
+    }
+
+    @Test
+    public void testShouldFinaliseOrderAndPopulateTierOfJudge() throws Exception {
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        List<DynamicMultiselectListElement> elements = new ArrayList<>();
+        DynamicMultiselectListElement element = DynamicMultiselectListElement.builder()
+            .code("1234")
+            .label("test label").build();
+        elements.add(element);
+        ManageOrders manageOrders = ManageOrders.builder()
+            .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .manageOrders(manageOrders)
+            .build();
+
+        when(finalisationDetailsService.buildFinalisationDetails(any(CaseData.class)))
+            .thenReturn(FinalisationDetails.builder()
+                            .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge.name())
+                            .build()
+            );
+        Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid).value(OrderDetails
+                                                                                          .builder()
+                                                                                          .finalisationDetails(
+                                                                                              finalisationDetailsService
+                                                                                                  .buildFinalisationDetails(caseData)
+                                                                                          )
+                                                                                          .orderDocument(Document
+                                                                                                             .builder()
+                                                                                                             .build())
+                                                                                          .dateCreated(now)
+                                                                                          .orderTypeId(TEST_UUID)
+                                                                                          .otherDetails(
+                                                                                              OtherOrderDetails.builder().build())
+                                                                                          .build()).build();
+        List<Element<OrderDetails>> orderList = new ArrayList<>();
+        orderList.add(orders);
+
+        List<Element<PartyDetails>> partyDetails = new ArrayList<>();
+        PartyDetails details = PartyDetails.builder().firstName("first").lastName("lastname")
+            .solicitorOrg(Organisation.builder().organisationName("test Org").build())
+            .build();
+        Element<PartyDetails> partyDetailsElement = element(details);
+        partyDetails.add(partyDetailsElement);
+
+
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+
+        assertNotNull(manageOrderService.serveOrder(caseData,orderList));
+        assertEquals(caseData.getManageOrders().getJudgeOrMagistrateTitle().name(),
+                     orders.getValue().getFinalisationDetails().getJudgeOrMagistrateTitle());
     }
 }
