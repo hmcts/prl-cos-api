@@ -94,11 +94,11 @@ java:
     SEND_LETTER_URL: http://rpe-send-letter-service-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     BARRISTER_FEATURE_ENABLED: true
     APP_ENV: "preview"
-    CORE_CASE_DATA_API_URL: http://ccd-data-store-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
-    CCD_CASE_DOCS_AM_API: http://ccd-case-document-am-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
-    ACA_SERVICE_API_BASEURL: http://aac-manage-case-assignment-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
-    BUNDLE_URL: http://em-ccd-orchestrator-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
-    #CORE_CASE_DATA_API_URL: http://prl-ccd-definitions-pr-2883-ccd-data-store-api
-    #CCD_CASE_DOCS_AM_API: http://prl-ccd-definitions-pr-2883-cdam
-    #ACA_SERVICE_API_BASEURL: http://prl-ccd-definitions-pr-2883-aac-manage-case-assignment
-    #BUNDLE_URL: http://prl-ccd-definitions-pr-2883-em-ccdorc
+#    CORE_CASE_DATA_API_URL: http://ccd-data-store-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+#    CCD_CASE_DOCS_AM_API: http://ccd-case-document-am-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+#    ACA_SERVICE_API_BASEURL: http://aac-manage-case-assignment-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+#    BUNDLE_URL: http://em-ccd-orchestrator-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    CORE_CASE_DATA_API_URL: http://prl-ccd-definitions-pr-2915-ccd-data-store-api
+    CCD_CASE_DOCS_AM_API: http://prl-ccd-definitions-pr-2915-cdam
+    ACA_SERVICE_API_BASEURL: http://prl-ccd-definitions-pr-2915-aac-manage-case-assignment
+    BUNDLE_URL: http://prl-ccd-definitions-pr-2915-em-ccdorc
