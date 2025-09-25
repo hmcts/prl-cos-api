@@ -6,8 +6,9 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseData;
+import uk.gov.hmcts.reform.prl.models.dto.acro.CsvData;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -32,18 +33,20 @@ import java.util.Set;
 public class CsvWriter {
 
     private static final FileAttribute<Set<PosixFilePermission>> ATTRIBUTE = PosixFilePermissions
-            .asFileAttribute(PosixFilePermissions.fromString("rwx------"));
+        .asFileAttribute(PosixFilePermissions.fromString("rwx------"));
 
     @Value("${acro.source-directory}")
     private String sourceDirectory;
+
+    private final LaunchDarklyClient launchDarklyClient;
 
     public enum CsvColumn {
         CASE_NUMBER("Case No.", "id"),
         COURT_NAME("Court Name/Location", "courtName"),
         COURT_ID("Court Code", "courtEpimsId"),
         ORDER_NAME("Order Name", "caseTypeOfApplication"),
-        COURT_DATE("Court Date", "dateOrderMade"),
-        ORDER_EXPIRY_DATE("Order Expiry Date", "finalCaseClosedDate"),
+        COURT_DATE("Court Date", "currentHearingDate"),
+        ORDER_EXPIRY_DATE("Order Expiry Date", "orderExpiryDate"), // Assuming this is a date field
         RESPONDENT_SURNAME("Respondent Surname", "respondent.lastName"),
         RESPONDENT_FORENAMES("Respondent Forename(s)", "respondent.firstName"),
         RESPONDENT_DOB("Respondent DOB", "respondent.dateOfBirth"),
@@ -55,8 +58,8 @@ public class CsvWriter {
         RESPONDENT_ADDRESS_CONFIDENTIAL("Is Respondent Address Confidential", "respondent.isAddressConfidential"),
         RESPONDENT_PHONE_CONFIDENTIAL("Is Respondent Phone Confidential", "respondent.isPhoneNumberConfidential"),
         RESPONDENT_EMAIL_CONFIDENTIAL(
-                "Is Respondent Email Confidential",
-                "respondent.isEmailAddressConfidential"
+            "Is Respondent Email Confidential",
+            "respondent.isEmailAddressConfidential"
         ),
         APPLICANT_SURNAME("Applicant Surname", "applicant.lastName"),
         APPLICANT_FORENAMES("Applicant Forename(s)", "applicant.firstName"),
@@ -114,12 +117,12 @@ public class CsvWriter {
      * Creates CSV row data for a single case.
      * Returns a list of strings that can be written to a CSV file by another service.
      *
-     * @param ccdOrderData        the case data to convert to CSV row
-     * @param confidentialAllowed toggle to include confidential data or replace with "-"
-     * @param orderFilename       the filename to be added to the Order File Name column
+     * @param ccdOrderData  the case data to convert to CSV row
+     * @param orderFilename the filename to be added to the Order File Name column
      * @return list of strings representing the CSV row data
      */
-    public List<String> createCsvRowData(AcroCaseData ccdOrderData, boolean confidentialAllowed, String orderFilename) {
+    public List<String> createCsvRowData(CsvData ccdOrderData, String orderFilename) {
+        boolean confidentialAllowed = launchDarklyClient.isFeatureEnabled("acro-confidential-data-allowed");
         List<String> record = new ArrayList<>();
         for (CsvColumn column : COLUMNS) {
             Object value;
@@ -135,7 +138,10 @@ public class CsvWriter {
             }
 
             if (value == null || value.toString().isEmpty()) {
-                log.warn("Missing value for CSV column '{}' (property '{}')", column.getHeader(), column.getProperty());
+                log.warn("Value does not exist for {} in {} - CSV column '{}'",
+                         column.getProperty(),
+                         ccdOrderData.getId(),
+                         column.getHeader());
             }
             record.add(value != null ? value.toString() : "");
         }
@@ -146,14 +152,13 @@ public class CsvWriter {
      * Appends a CSV row to an existing CSV file.
      * Uses the createCsvRowData method to generate the row data and writes it to the file.
      *
-     * @param csvFile             the CSV file to append to
-     * @param caseData            the case data to convert to CSV row
-     * @param confidentialAllowed toggle to include confidential data or replace with "-"
-     * @param filename            the filename to be added to the Order File Name column
+     * @param csvFile   the CSV file to append to
+     * @param caseData  the case data to convert to CSV row
+     * @param filename  the filename to be added to the Order File Name column
      * @throws IOException if writing to the file fails
      */
-    public void appendCsvRowToFile(File csvFile, AcroCaseData caseData, boolean confidentialAllowed, String filename) throws IOException {
-        List<String> rowData = createCsvRowData(caseData, confidentialAllowed, filename);
+    public void appendCsvRowToFile(File csvFile, CsvData caseData, String filename) throws IOException {
+        List<String> rowData = createCsvRowData(caseData, filename);
 
         CSVFormat csvFormat = CSVFormat.DEFAULT;
         try (FileWriter fileWriter = new FileWriter(csvFile, true);
@@ -185,23 +190,23 @@ public class CsvWriter {
         return "manifest-" + formattedDate + ".csv";
     }
 
-    private boolean isConfidentialField(AcroCaseData caseData, CsvColumn column) {
+    private boolean isConfidentialField(CsvData caseData, CsvColumn column) {
         return switch (column) {
             case APPLICANT_PHONE -> isConfidential(caseData, "applicant.isPhoneNumberConfidential");
             case APPLICANT_EMAIL -> isConfidential(caseData, "applicant.isEmailAddressConfidential");
             case APPLICANT_SAFE_TIME_TO_CALL -> true; // Always blank when confidentialAllowed is false
             case APPLICANT_ADDRESS1, APPLICANT_ADDRESS2, APPLICANT_POSTCODE ->
-                    isConfidential(caseData, "applicant.isAddressConfidential");
+                isConfidential(caseData, "applicant.isAddressConfidential");
 
             case RESPONDENT_PHONE -> isConfidential(caseData, "respondent.isPhoneNumberConfidential");
             case RESPONDENT_EMAIL -> isConfidential(caseData, "respondent.isEmailAddressConfidential");
             case RESPONDENT_ADDRESS1, RESPONDENT_ADDRESS2, RESPONDENT_POSTCODE ->
-                    isConfidential(caseData, "respondent.isAddressConfidential");
+                isConfidential(caseData, "respondent.isAddressConfidential");
             default -> false;
         };
     }
 
-    private boolean isConfidential(AcroCaseData caseData, String confidentialityProperty) {
+    private boolean isConfidential(CsvData caseData, String confidentialityProperty) {
         Object value = extractPropertyValues(caseData, confidentialityProperty);
         if (value instanceof YesOrNo) {
             return YesOrNo.Yes.equals(value);
@@ -239,7 +244,7 @@ public class CsvWriter {
             Object value = getter.invoke(obj);
 
             return isWrappedListProperty(propertyName)
-                    ? extractFromWrappedList(value) : value;
+                ? extractFromWrappedList(value) : value;
 
         } catch (Exception e) {
             return "";
