@@ -660,4 +660,7 @@ closing_case:
   unallocated_roleName: allocated-admin-caseworker,allocated-ctsc-caseworker,allocated-legal-adviser,gatekeeping-judge,hearing-judge,allocated-judge
 
 acro:
+  output-directory: /tmp/acro/output
+  source-directory: /tmp/acro/source
+  zip-password: ${ACRO_ZIP_PASSWORD:test1234}
   search-case-type-id: PRLAPPS
