@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,6 +46,7 @@ import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelec
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.UploadAdditionalApplicationUtils;
 
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -99,13 +101,37 @@ class UploadAdditionalApplicationServiceTest {
     private UploadAdditionalApplicationUtils uploadAdditionalApplicationUtils;
 
     DynamicMultiSelectList partyDynamicMultiSelectList;
+    DynamicMultiSelectList partyDynamicMultiSelectListC2;
 
     List<Element<PartyDetails>> partyDetails;
+    List<Element<PartyDetails>> partyDetailsC2;
 
     PartyDetails party;
+    PartyDetails partyC2;
+
+    // reflect: private String categoryForParty(String)
+    private Method categoryForParty;
+
+    // reflect: private static Document withCategory(Document, String)
+    private Method withCategory;
+
+    // reflect: private C2DocumentBundle getC2DocumentBundle(CaseData caseData, String author, String currentDateTime, String partyName)
+    private Method getC2DocumentBundle;
 
     @BeforeEach
     public void setUp() throws Exception {
+
+        categoryForParty = UploadAdditionalApplicationService.class.getDeclaredMethod("categoryForParty", String.class);
+        categoryForParty.setAccessible(true);
+
+        withCategory = UploadAdditionalApplicationService.class
+            .getDeclaredMethod("withCategory", Document.class, String.class);
+        withCategory.setAccessible(true);
+
+        getC2DocumentBundle = UploadAdditionalApplicationService.class
+            .getDeclaredMethod("getC2DocumentBundle", CaseData.class, String.class, String.class, String.class);
+        getC2DocumentBundle.setAccessible(true);
+
         List<DynamicMultiselectListElement> dynamicMultiselectListElements = new ArrayList<>();
         DynamicMultiselectListElement partyDynamicMultiselectListElement = DynamicMultiselectListElement.builder()
             .code("f2847b15-dbb8-4df0-868a-420d9de11d29")
@@ -128,6 +154,31 @@ class UploadAdditionalApplicationServiceTest {
         );
         partyDetails = new ArrayList<>();
         partyDetails.add(partyDetailsElement);
+
+
+        //Preparation for C2 tests
+        List<DynamicMultiselectListElement> dynamicMultiselectListElementsC2 = new ArrayList<>();
+        DynamicMultiselectListElement partyDynamicMultiselectListElementC2 = DynamicMultiselectListElement.builder()
+            .code("f2847b15-fff8-4df0-868a-420d9de11d29")
+            .label("Elise Lynn")
+            .build();
+        dynamicMultiselectListElementsC2.add(partyDynamicMultiselectListElementC2);
+        partyDynamicMultiSelectListC2 = DynamicMultiSelectList.builder()
+            .listItems(dynamicMultiselectListElementsC2)
+            .value(dynamicMultiselectListElementsC2)
+            .build();
+
+        partyC2 = PartyDetails.builder()
+            .firstName("Elise")
+            .lastName("Lynn Respondent")
+            .partyId(UUID.fromString("f2847b15-fff8-4df0-868a-420d9de11d29"))
+            .build();
+        Element<PartyDetails> partyDetailsElementC2 = element(
+            UUID.fromString("f2847b15-fff8-4df0-868a-420d9de11d29"),
+            party
+        );
+        partyDetailsC2 = new ArrayList<>();
+        partyDetailsC2.add(partyDetailsElementC2);
     }
 
     @Test
@@ -732,4 +783,197 @@ class UploadAdditionalApplicationServiceTest {
         assertTrue(uploadAdditionalApplicationService.populateHearingList("testAuth", callbackRequest).containsKey(
             TEMPORARY_C_2_DOCUMENT));
     }
+
+    @Test
+    void applicantParty_setsApplicantCategoryOnDocs() throws Exception {
+        String party = "applicant";
+        String category = (String) categoryForParty.invoke(uploadAdditionalApplicationService, party);
+        Document inputDoc = Document.builder()
+            .documentUrl("doc-url")
+            .documentBinaryUrl("bin-url")
+            .documentFileName("c2.pdf")
+            .build();
+
+        @SuppressWarnings("unchecked")
+        Document result =
+            (Document) withCategory.invoke(null, inputDoc, category);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("applicationsWithinProceedings", result.getCategoryId());
+        // sanity: other fields preserved
+        Assertions.assertEquals("c2.pdf", result.getDocumentFileName());
+    }
+
+    @Test
+    void respondentParty_setsRespondentCategoryOnDocs() throws Exception {
+        String party = "respondent";
+        String category = (String) categoryForParty.invoke(uploadAdditionalApplicationService, party);
+        Document inputDoc = Document.builder()
+            .documentUrl("doc-url")
+            .documentBinaryUrl("bin-url")
+            .documentFileName("c2.pdf")
+            .build();
+
+        @SuppressWarnings("unchecked")
+        Document result =
+            (Document) withCategory.invoke(null, inputDoc, category);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("applicationsWithinProceedingsRes", result.getCategoryId());
+    }
+
+    @Test
+    void unknownParty_leavesCategoryUnset() throws Exception {
+        String category = (String) categoryForParty.invoke(uploadAdditionalApplicationService, "some-random-party");
+        Assertions.assertEquals("undefined", category);
+        Document inputDoc = Document.builder()
+            .documentUrl("doc-url")
+            .documentBinaryUrl("bin-url")
+            .documentFileName("c2.pdf")
+            .build();
+
+        @SuppressWarnings("unchecked")
+        Document result =
+            (Document) withCategory.invoke(null, inputDoc, category);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertNull(result.getCategoryId(), "Category must not be defaulted when party is unknown");
+    }
+
+    @Test
+    void undefinedParty_leavesCategoryUnset() throws Exception {
+        String category = (String) categoryForParty.invoke(uploadAdditionalApplicationService, "undefined");
+        Assertions.assertEquals("undefined", category);
+        Document inputDoc = Document.builder()
+            .documentUrl("doc-url")
+            .documentBinaryUrl("bin-url")
+            .documentFileName("c2.pdf")
+            .build();
+
+        @SuppressWarnings("unchecked")
+        Document result =
+            (Document) withCategory.invoke(null, inputDoc, category);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertNull(result.getCategoryId(), "Category must not be defaulted when party is null");
+    }
+
+    @Test
+    void nullDocument_leavesCategoryUnset() {
+        String category = "lalalalalala";
+        Document result = null;
+        try {
+            result =
+                (Document) withCategory.invoke(uploadAdditionalApplicationService, null, category);
+        } catch (Exception e) {
+            Assertions.assertNull(e.getMessage(), "null exception");// expected for null party
+        }
+
+        Assertions.assertNull(result, "Document must not be null");
+    }
+
+    @Test
+    void exceptionHandling_getC2DocumentBundleTest() {
+
+        Document inputDoc = Document.builder()
+            .documentUrl("doc-url")
+            .documentBinaryUrl("bin-url")
+            .documentFileName("c2.pdf")
+            .build();
+
+        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
+            .additionalApplicantsList(partyDynamicMultiSelectListC2)
+            .additionalApplicationsApplyingFor(
+                AdditionalApplicationTypeEnum.otherOrder
+            )
+            .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
+            .temporaryC2Document(C2DocumentBundle.builder()
+                                     .author("Elise Lynn (respondent)")
+                                     .uploadedDateTime("2024-01-01")
+                                     .applicantName("Elise Lynn (respondent)")
+                                     .document(inputDoc)
+                                     .build())
+            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
+            .representedPartyType(CA_APPLICANT)
+            .build();
+        when(applicationsFeeCalculator.getFeeTypes(any(CaseData.class))).thenReturn(List.of(
+            FeeType.C2_WITH_NOTICE));
+        when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(FeeResponse.builder().amount(
+            BigDecimal.TEN).build());
+        when(paymentRequestService.getPaymentServiceResponse(anyString(), any(CaseData.class), any(FeeResponse.class)))
+            .thenReturn(PaymentServiceResponse.builder()
+                            .build());
+
+        CaseData caseData = CaseData.builder()
+            .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicants(partyDetailsC2)
+            .build();
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsElementListC2 = new ArrayList<>();
+        when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder().email("test@abc.com")
+                                                                    .roles(List.of(Roles.SOLICITOR.getValue()))
+                                                                    .build());
+
+        uploadAdditionalApplicationService.getAdditionalApplicationElements(
+            "auth",
+            "testAuth",
+            caseData,
+            additionalApplicationsElementListC2
+        );
+
+        C2DocumentBundle result = null;
+        try {
+            //CaseData caseData, String author, String currentDateTime, String partyName
+            result =
+                (C2DocumentBundle) getC2DocumentBundle.invoke(uploadAdditionalApplicationService, caseData, "An Author",
+                    "2024-01-01", "Elise Lynn (respondent)");
+        } catch (Exception e) {
+            Assertions.assertNull(e.getMessage(), "null exception");// expected for null party
+        }
+
+        Assertions.assertNotNull(result, "Document must not be null");
+    }
+
 }
+
+
+
+/*
+
+ void testGetAdditionalApplicationElementsForBothC2AndOther() {
+        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
+            .additionalApplicantsList(partyDynamicMultiSelectList)
+            .additionalApplicationsApplyingFor(
+                AdditionalApplicationTypeEnum.otherOrder
+            )
+            .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
+            .temporaryC2Document(C2DocumentBundle.builder().build())
+            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
+            .representedPartyType(CA_APPLICANT)
+            .build();
+        when(applicationsFeeCalculator.getFeeTypes(any(CaseData.class))).thenReturn(List.of(
+            FeeType.C2_WITH_NOTICE));
+        when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(FeeResponse.builder().amount(
+            BigDecimal.TEN).build());
+        when(paymentRequestService.getPaymentServiceResponse(anyString(), any(CaseData.class), any(FeeResponse.class)))
+            .thenReturn(PaymentServiceResponse.builder()
+                          .build());
+        CaseData caseData = CaseData.builder()
+            .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicants(partyDetails)
+            .build();
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsElementList = new ArrayList<>();
+        when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder().email("test@abc.com")
+                .roles(List.of(Roles.SOLICITOR.getValue()))
+                .build());
+        uploadAdditionalApplicationService.getAdditionalApplicationElements(
+            "auth",
+            "testAuth",
+            caseData,
+            additionalApplicationsElementList
+        );
+        assertNotNull(additionalApplicationsElementList);
+    }
+
+ */
