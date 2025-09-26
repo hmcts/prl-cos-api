@@ -1,19 +1,21 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.FinalisationDetails;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
+
+@ExtendWith(MockitoExtension.class)
 public class FinalisationDetailsServiceTest {
     @InjectMocks
     private FinalisationDetailsService finalisationDetailsService;
@@ -33,14 +35,14 @@ public class FinalisationDetailsServiceTest {
     }
 
     @Test
-    public void shouldThrowNullPointerWhenJudgeOrMagistrateTitleIsNull() {
+    public void shouldReturnNullWhenJudgeOrMagistrateTitleIsNull() {
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder().build())
             .build();
 
-        assertThrows(NullPointerException.class, () ->
-            finalisationDetailsService.buildFinalisationDetails(caseData)
-        );
+        FinalisationDetails result = finalisationDetailsService.buildFinalisationDetails(caseData);
+
+        assertNull(result);
     }
 
     @Test
