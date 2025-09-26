@@ -40,6 +40,8 @@ class AcroZipServiceTest {
 
         ReflectionTestUtils.setField(acroZipService, "sourceDirectory", tempSourceDir.toString());
         ReflectionTestUtils.setField(acroZipService, "outputDirectory", tempExportDir.toString());
+        ReflectionTestUtils.setField(acroZipService, "password", "ReviewPassword123");
+
     }
 
     @Test

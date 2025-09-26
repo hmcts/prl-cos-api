@@ -97,6 +97,14 @@ There is no need to remove postgres and java or similar core images.
 ### Managing Preview environment PODs
 Make sure you have added the label 'enable_keep_helm' while creating the PR. Otherwise, add the label and re-trigger the build.
 
+## Testing with prl-ccd-definition
+
+### If your ticket doesn’t require changes in the prl-ccd-definition
+No changes are needed in this repository, and everything will be set automatically.
+
+### If your ticket includes changes in the prl-ccd-definition
+Create a new label in lines of `"pr-defs:pr-2878` # Replace `2878` with the PR number of the prl-ccd-definition update you want to test against this repo
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
