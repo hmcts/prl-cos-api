@@ -1,5 +1,6 @@
 #!groovy
 import uk.gov.hmcts.contino.AppPipelineDsl
+import uk.gov.hmcts.contino.GithubAPI
 
 properties([
   [$class: 'GithubProjectProperty', projectUrlStr: 'https://github.com/hmcts/prl-cos-api.git'],
@@ -22,6 +23,29 @@ static Map<String, Object> secret(String secretName, String envVariable) {
   name       : secretName,
   envVariable: envVariable
  ]
+}
+
+def setPreviewEnvVars() {
+  def githubApi = new GithubAPI(this)
+
+  env.CORE_CASE_DATA_API_URL = "http://ccd-data-store-api-aat.service.core-compute-aat.internal"
+  env.CCD_CASE_DOCS_AM_API = "http://ccd-case-document-am-api-aat.service.core-compute-aat.internal"
+  env.ACA_SERVICE_API_BASEURL = "http://aac-manage-case-assignment-aat.service.core-compute-aat.internal"
+
+  def defsPrefix = "pr-defs:pr-"
+  def label = githubApi
+    .getLabelsbyPattern(env.BRANCH_NAME, defsPrefix)
+    .find { it.startsWith(defsPrefix) }
+  if (label) {
+    def defsPrNumber = label - defsPrefix
+    env.CORE_CASE_DATA_API_URL = "https://ccd-data-store-api-prl-ccd-definitions-pr-${defsPrNumber}.preview.platform.hmcts.net"
+    env.CCD_CASE_DOCS_AM_API = "https://ccd-case-document-am-api-prl-ccd-definitions-pr-${defsPrNumber}.preview.platform.hmcts.net"
+    env.ACA_SERVICE_API_BASEURL = "https://aac-manage-case-assignment-prl-ccd-definitions-pr-${defsPrNumber}.preview.platform.hmcts.net"
+  }
+
+  echo "CORE_CASE_DATA_API_URL ${env.CORE_CASE_DATA_API_URL}"
+  echo "CCD_CASE_DOCS_AM_API ${env.CCD_CASE_DOCS_AM_API}"
+  echo "ACA_SERVICE_API_BASEURL ${env.ACA_SERVICE_API_BASEURL}"
 }
 
 def secrets = [
@@ -91,6 +115,13 @@ withPipeline(type, product, component) {
   afterAlways('test') {
     steps.junit '**/test-results/**/*.xml'
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: 'build/reports/**/*'
+  }
+
+  before('akschartsinstall')  {
+    onPR() {
+      echo 'invoked -- akschartsinstall'
+      setPreviewEnvVars()
+    }
   }
 
   before('functionalTest:aat') {
