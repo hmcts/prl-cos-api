@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import uk.gov.hmcts.ccd.sdk.type.TTL;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.reopenclosedcases.ValidReopenClosedCasesStatusEnum;
@@ -150,4 +151,6 @@ public class BaseCaseData {
     private String documentsToBeRemoved;
 
     private AllocatedBarrister allocatedBarrister;
+
+    private TTL retainAndDisposeTimeToLive;
 }
