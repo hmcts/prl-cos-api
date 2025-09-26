@@ -42,8 +42,7 @@ public class FinalisationDetailsServiceTest {
 
         FinalisationDetails result = finalisationDetailsService.buildFinalisationDetails(caseData);
 
-        assertNotNull(result);
-        assertNull(result.getJudgeOrMagistrateTitle());
+        assertNull(result);
     }
 
     @Test
