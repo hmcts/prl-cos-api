@@ -49,6 +49,7 @@ public class AcroCaseData {
     private List<Element<PartyDetails>> respondents;
 
     private List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails;
+    private List<Element<ApplicantConfidentialityDetails>> respondentConfidentialDetails;
 
     private String courtEpimsId;
     private String courtTypeId;
