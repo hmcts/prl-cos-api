@@ -16,13 +16,15 @@ import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.cloud.openfeign.FeignAutoConfiguration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClientApi;
+import uk.gov.hmcts.reform.prl.clients.util.PactTestSupport;
 
 import java.util.UUID;
 
-@EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.ccd.client"})
+@EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.ccd.client", "uk.gov.hmcts.reform.ccd.document.am.feign"})
 @ExtendWith(PactConsumerTestExt.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(SpringExtension.class)
@@ -31,6 +33,7 @@ import java.util.UUID;
 @PactFolder("pacts")
 @SpringBootTest
 @ImportAutoConfiguration({FeignAutoConfiguration.class})
+@Import(PactTestSupport.class)
 public class DocumentDeleteConsumerTest {
 
     private static final String BEARER_TOKEN = "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre";
