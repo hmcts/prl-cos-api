@@ -23,7 +23,7 @@ public class SftpService {
             toSftpChannel.send(message);
         } catch (Exception e) {
             log.error("Error while uploading file to SFTP", e);
-            throw new RuntimeException(e);
+            return;
         }
         log.info("File {} uploaded to SFTP", file.getName());
     }
