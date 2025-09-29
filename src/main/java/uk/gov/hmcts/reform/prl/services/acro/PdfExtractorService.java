@@ -26,8 +26,8 @@ public class PdfExtractorService {
 
 
     @Retryable(
-        retryFor = {Exception.class},
-        backoff = @Backoff(delay = 1000, multiplier = 2)
+            retryFor = {Exception.class},
+            backoff = @Backoff(delay = 1000, multiplier = 2)
     )
     public File downloadPdf(String fileName, String caseId, Document document, String sysUserToken) {
         if (document == null || document.getDocumentBinaryUrl() == null) {
@@ -40,18 +40,18 @@ public class PdfExtractorService {
         String serviceToken = authTokenGenerator.generate();
         try {
             ResponseEntity<Resource> response = caseDocumentClient.getDocumentBinary(
-                sysUserToken,
-                serviceToken,
-                document.getDocumentBinaryUrl()
+                    sysUserToken,
+                    serviceToken,
+                    document.getDocumentBinaryUrl()
             );
 
             if (response.getBody() != null) {
                 File outputFile = new File(fileName);
 
                 Files.copy(
-                    response.getBody().getInputStream(),
-                    outputFile.toPath(),
-                    StandardCopyOption.REPLACE_EXISTING
+                        response.getBody().getInputStream(),
+                        outputFile.toPath(),
+                        StandardCopyOption.REPLACE_EXISTING
                 );
 
                 log.info("Successfully downloaded {} PDF for case {} to output directory", fileName, caseId);

@@ -72,11 +72,7 @@ class CsvWriterTest {
 
     @BeforeEach
     void setUp() throws IOException {
-        ReflectionTestUtils.setField(
-            csvWriter,
-            "sourceDirectory",
-            Files.createTempDirectory("csvwriter-test").toString()
-        );
+        ReflectionTestUtils.setField(csvWriter, "sourceDirectory", Files.createTempDirectory("csvwriter-test").toString());
     }
 
     @Nested
@@ -135,11 +131,7 @@ class CsvWriterTest {
             assertAll(
                 "CSV row data validation",
                 () -> assertNotNull(rowData, "Row data should not be null"),
-                () -> assertEquals(
-                    EXPECTED_CSV_HEADERS.length,
-                    rowData.size(),
-                    "Row data should have correct number of columns"
-                ),
+                () -> assertEquals(EXPECTED_CSV_HEADERS.length, rowData.size(), "Row data should have correct number of columns"),
                 () -> assertEquals(filename, rowData.get(rowData.size() - 1), "Last column should contain the filename")
             );
         }
@@ -154,16 +146,8 @@ class CsvWriterTest {
             assertAll(
                 "CSV row data validation",
                 () -> assertNotNull(rowData, "Row data should not be null"),
-                () -> assertEquals(
-                    EXPECTED_CSV_HEADERS.length,
-                    rowData.size(),
-                    "Row data should have correct number of columns"
-                ),
-                () -> assertEquals(
-                    "",
-                    rowData.get(rowData.size() - 1),
-                    "Last column should be empty when no filename provided"
-                )
+                () -> assertEquals(EXPECTED_CSV_HEADERS.length, rowData.size(), "Row data should have correct number of columns"),
+                () -> assertEquals("", rowData.get(rowData.size() - 1), "Last column should be empty when no filename provided")
             );
         }
 
@@ -183,43 +167,21 @@ class CsvWriterTest {
 
             assertAll(
                 "Confidentiality handling for " + fieldType,
-                () -> assertFalse(
-                    maskedContent.contains(expectedValue),
-                    fieldType + " should be masked when feature flag is disabled"
-                ),
-                () -> assertTrue(
-                    unmaskedContent.contains(expectedValue),
-                    fieldType + " should be included when feature flag is enabled"
-                ),
-                () -> assertTrue(
-                    maskedContent.contains("-"),
-                    "Masked content should contain '-' replacement"
-                )
+                () -> assertFalse(maskedContent.contains(expectedValue),
+                                  fieldType + " should be masked when feature flag is disabled"),
+                () -> assertTrue(unmaskedContent.contains(expectedValue),
+                                 fieldType + " should be included when feature flag is enabled"),
+                () -> assertTrue(maskedContent.contains("-"),
+                                 "Masked content should contain '-' replacement")
             );
         }
 
         static Stream<Arguments> confidentialityTestCases() {
             return Stream.of(
-                arguments(
-                    "Applicant Phone",
-                    TestDataFactory.createCaseDataWithAllConfidentialFields(),
-                    APPLICANT_PHONE
-                ),
-                arguments(
-                    "Applicant Email",
-                    TestDataFactory.createCaseDataWithAllConfidentialFields(),
-                    APPLICANT_EMAIL
-                ),
-                arguments(
-                    "Respondent Phone",
-                    TestDataFactory.createCaseDataWithAllConfidentialFields(),
-                    RESPONDENT_PHONE
-                ),
-                arguments(
-                    "Respondent Email",
-                    TestDataFactory.createCaseDataWithAllConfidentialFields(),
-                    RESPONDENT_EMAIL
-                )
+                arguments("Applicant Phone", TestDataFactory.createCaseDataWithAllConfidentialFields(), APPLICANT_PHONE),
+                arguments("Applicant Email", TestDataFactory.createCaseDataWithAllConfidentialFields(), APPLICANT_EMAIL),
+                arguments("Respondent Phone", TestDataFactory.createCaseDataWithAllConfidentialFields(), RESPONDENT_PHONE),
+                arguments("Respondent Email", TestDataFactory.createCaseDataWithAllConfidentialFields(), RESPONDENT_EMAIL)
             );
         }
     }
@@ -295,24 +257,12 @@ class CsvWriterTest {
         void shouldHandleNullInputsGracefully() {
             assertAll(
                 "Null input handling",
-                () -> assertEquals(
-                    "", csvWriter.extractPropertyValues(
-                        null,
-                        "someProperty"
-                    ), "Should handle null object"
-                ),
-                () -> assertEquals(
-                    "", csvWriter.extractPropertyValues(
-                        TestDataFactory.createStandardCaseData(),
-                        null
-                    ), "Should handle null property path"
-                ),
-                () -> assertEquals(
-                    "", csvWriter.extractPropertyValues(
-                        TestDataFactory.createStandardCaseData(),
-                        ""
-                    ), "Should handle empty property path"
-                )
+                () -> assertEquals("", csvWriter.extractPropertyValues(null,
+                                                                       "someProperty"), "Should handle null object"),
+                () -> assertEquals("", csvWriter.extractPropertyValues(TestDataFactory.createStandardCaseData(),
+                                                                       null), "Should handle null property path"),
+                () -> assertEquals("", csvWriter.extractPropertyValues(TestDataFactory.createStandardCaseData(),
+                                                                       ""), "Should handle empty property path")
             );
         }
 
@@ -365,8 +315,7 @@ class CsvWriterTest {
         private static PartyDetails createPartyDetails(String firstName, String lastName, String dateOfBirth,
                                                        String addressLine1, String addressLine2, String postCode,
                                                        String phoneNumber, String email,
-                                                       YesOrNo isAddressConfidential, YesOrNo isPhoneConfidential,
-                                                       YesOrNo isEmailConfidential) {
+                                                       YesOrNo isAddressConfidential, YesOrNo isPhoneConfidential, YesOrNo isEmailConfidential) {
             return PartyDetails.builder()
                 .firstName(firstName)
                 .lastName(lastName)
