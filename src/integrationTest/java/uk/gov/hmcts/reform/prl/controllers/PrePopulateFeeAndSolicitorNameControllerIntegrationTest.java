@@ -132,7 +132,7 @@ public class PrePopulateFeeAndSolicitorNameControllerIntegrationTest {
 
         mockMvc.perform(post("/getSolicitorAndFeeDetails")
                             .header("Authorization", "Bearer token")
-                            .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "s2sToken")
+                            .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "S2S_TOKEN")
                             .contentType(APPLICATION_JSON)
                             .content(new ObjectMapper().writeValueAsString(callbackRequest)))
             .andExpect(status().isOk())
