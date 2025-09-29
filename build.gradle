@@ -411,6 +411,7 @@ dependencies {
   implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.18')
   implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version:'7.4'
   implementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.5'
+  implementation 'org.springframework.integration:spring-integration-sftp:6.4.1'
 
   runtimeOnly('org.springframework.boot:spring-boot-devtools')
 
