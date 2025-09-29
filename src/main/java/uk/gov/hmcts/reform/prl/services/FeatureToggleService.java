@@ -45,4 +45,5 @@ public class FeatureToggleService {
     public boolean isBarristerFeatureEnabled() {
         return isFeatureEnabled(IS_BARRISTER_FEATURE_ENABLED);
     }
+
 }

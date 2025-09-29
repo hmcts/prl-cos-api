@@ -46,7 +46,7 @@ class AcroZipServiceTest {
 
     @Test
     @DisplayName("Should create archive with valid zip format signature")
-    void shouldCreateArchiveWithValidZipFormatSignature() throws Exception {
+    void shouldCreateArchiveWithValid7ZipFormatSignature() throws Exception {
         Path file1 = Files.createFile(tempSourceDir.resolve("file1.txt"));
         Files.writeString(file1, "Test content");
 

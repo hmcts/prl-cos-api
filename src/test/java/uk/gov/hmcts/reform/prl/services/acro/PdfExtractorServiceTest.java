@@ -79,19 +79,19 @@ class PdfExtractorServiceTest {
             try (MockedStatic<Files> filesMock = mockStatic(Files.class)) {
                 setupSuccessfulDownload();
                 filesMock.when(() -> Files.copy(
-                        any(InputStream.class),
-                        any(Path.class),
-                        eq(StandardCopyOption.REPLACE_EXISTING)
-                    ))
-                    .thenReturn(1L);
+                                any(InputStream.class),
+                                any(Path.class),
+                                eq(StandardCopyOption.REPLACE_EXISTING)
+                        ))
+                        .thenReturn(1L);
 
                 File result = service.downloadPdf(FILE_NAME, CASE_ID, orderDocument, USER_TOKEN);
 
                 assertAll(
-                    "Successful download validation",
-                    () -> assertTrue(Optional.ofNullable(result).isPresent(), "Result should not be null"),
-                    () -> assertEquals(FILE_NAME, result.getName(), "Filename should match what we passed in"),
-                    () -> verify(caseDocumentClient).getDocumentBinary(USER_TOKEN, SERVICE_TOKEN, DOCUMENT_URL)
+                        "Successful download validation",
+                        () -> assertTrue(Optional.ofNullable(result).isPresent(), "Result should not be null"),
+                        () -> assertEquals(FILE_NAME, result.getName(), "Filename should match what we passed in"),
+                        () -> verify(caseDocumentClient).getDocumentBinary(USER_TOKEN, SERVICE_TOKEN, DOCUMENT_URL)
                 );
             }
         }
@@ -106,19 +106,19 @@ class PdfExtractorServiceTest {
             try (MockedStatic<Files> filesMock = mockStatic(Files.class)) {
                 setupSuccessfulDownload();
                 filesMock.when(() -> Files.copy(
-                        any(InputStream.class),
-                        any(Path.class),
-                        eq(StandardCopyOption.REPLACE_EXISTING)
-                    ))
-                    .thenReturn(1L);
+                                any(InputStream.class),
+                                any(Path.class),
+                                eq(StandardCopyOption.REPLACE_EXISTING)
+                        ))
+                        .thenReturn(1L);
 
                 File result = service.downloadPdf(fileName, CASE_ID, document, USER_TOKEN);
 
                 assertAll(
-                    "File download validation for " + documentType,
-                    () -> assertTrue(Optional.ofNullable(result).isPresent(), "Result should not be null"),
-                    () -> assertEquals(fileName, result.getName(), "Filename should match what we passed in"),
-                    () -> verify(caseDocumentClient).getDocumentBinary(USER_TOKEN, SERVICE_TOKEN, DOCUMENT_URL)
+                        "File download validation for " + documentType,
+                        () -> assertTrue(Optional.ofNullable(result).isPresent(), "Result should not be null"),
+                        () -> assertEquals(fileName, result.getName(), "Filename should match what we passed in"),
+                        () -> verify(caseDocumentClient).getDocumentBinary(USER_TOKEN, SERVICE_TOKEN, DOCUMENT_URL)
                 );
             }
         }
@@ -134,9 +134,9 @@ class PdfExtractorServiceTest {
             File result = service.downloadPdf(FILE_NAME, CASE_ID, null, USER_TOKEN);
 
             assertAll(
-                "Null document handling",
-                () -> assertFalse(Optional.ofNullable(result).isPresent(), "Result should be null"),
-                () -> verify(caseDocumentClient, never()).getDocumentBinary(anyString(), anyString(), anyString())
+                    "Null document handling",
+                    () -> assertFalse(Optional.ofNullable(result).isPresent(), "Result should be null"),
+                    () -> verify(caseDocumentClient, never()).getDocumentBinary(anyString(), anyString(), anyString())
             );
         }
 
@@ -148,9 +148,9 @@ class PdfExtractorServiceTest {
             File result = service.downloadPdf(FILE_NAME, CASE_ID, orderDocument, USER_TOKEN);
 
             assertAll(
-                "Null document URL handling",
-                () -> assertFalse(Optional.ofNullable(result).isPresent(), "Result should be null"),
-                () -> verify(caseDocumentClient, never()).getDocumentBinary(anyString(), anyString(), anyString())
+                    "Null document URL handling",
+                    () -> assertFalse(Optional.ofNullable(result).isPresent(), "Result should be null"),
+                    () -> verify(caseDocumentClient, never()).getDocumentBinary(anyString(), anyString(), anyString())
             );
         }
 
@@ -160,12 +160,12 @@ class PdfExtractorServiceTest {
             when(authTokenGenerator.generate()).thenReturn(SERVICE_TOKEN);
             when(orderDocument.getDocumentBinaryUrl()).thenReturn(DOCUMENT_URL);
             when(caseDocumentClient.getDocumentBinary(USER_TOKEN, SERVICE_TOKEN, DOCUMENT_URL))
-                .thenThrow(new RuntimeException("Download failed"));
+                    .thenThrow(new RuntimeException("Download failed"));
 
             assertThrows(
-                RuntimeException.class,
-                () -> service.downloadPdf(FILE_NAME, CASE_ID, orderDocument, USER_TOKEN),
-                "Should throw RuntimeException when download fails"
+                    RuntimeException.class,
+                    () -> service.downloadPdf(FILE_NAME, CASE_ID, orderDocument, USER_TOKEN),
+                    "Should throw RuntimeException when download fails"
             );
 
             verify(caseDocumentClient).getDocumentBinary(USER_TOKEN, SERVICE_TOKEN, DOCUMENT_URL);
@@ -178,12 +178,12 @@ class PdfExtractorServiceTest {
             when(orderDocument.getDocumentBinaryUrl()).thenReturn(DOCUMENT_URL);
             ResponseEntity<Resource> response = ResponseEntity.ok().build();
             when(caseDocumentClient.getDocumentBinary(USER_TOKEN, SERVICE_TOKEN, DOCUMENT_URL))
-                .thenReturn(response);
+                    .thenReturn(response);
 
             assertThrows(
-                RuntimeException.class,
-                () -> service.downloadPdf(FILE_NAME, CASE_ID, orderDocument, USER_TOKEN),
-                "Should throw RuntimeException when response body is null"
+                    RuntimeException.class,
+                    () -> service.downloadPdf(FILE_NAME, CASE_ID, orderDocument, USER_TOKEN),
+                    "Should throw RuntimeException when response body is null"
             );
 
             verify(caseDocumentClient).getDocumentBinary(USER_TOKEN, SERVICE_TOKEN, DOCUMENT_URL);
@@ -192,15 +192,15 @@ class PdfExtractorServiceTest {
 
     static Stream<Arguments> downloadPdfTestCases() {
         return Stream.of(
-            Arguments.of("English document", "FL404A-1234567890-1693747200.pdf", mock(Document.class)),
-            Arguments.of("Welsh document", "FL404A-1234567890-1693747200-Welsh.pdf", mock(Document.class))
+                Arguments.of("English document", "FL404A-1234567890-1693747200.pdf", mock(Document.class)),
+                Arguments.of("Welsh document", "FL404A-1234567890-1693747200-Welsh.pdf", mock(Document.class))
         );
     }
 
     private void setupSuccessfulDownload() throws IOException {
         ResponseEntity<Resource> response = ResponseEntity.ok(resource);
         when(caseDocumentClient.getDocumentBinary(USER_TOKEN, SERVICE_TOKEN, DOCUMENT_URL))
-            .thenReturn(response);
+                .thenReturn(response);
         when(resource.getInputStream()).thenReturn(new ByteArrayInputStream("test content".getBytes()));
     }
 }
