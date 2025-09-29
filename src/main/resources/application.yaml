@@ -814,13 +814,15 @@ acro:
   cronjob:
     enabled: false
   sftp:
-    host: ${BAIS_HOST:localhost}
-    port: ${BAIS_PORT:2222}
-    user: ${BAIS_XEROX_USER:userName101}
+    host: ${ACRO_SFTP_HOST:some_host}
+    port: ${ACRO_SFTP_PORT:22}
+    user: ${ACRO_SFTP_USER:some_user}
     azure-deployment: true
     private-key: /mnt/secrets/private-law/bais-xerox-key
+    private-key-pass-phrase: ""
     session-wait-timeout: 10000
     pool-size: 10
     allow-unknown-keys: true
     remote-directory: /
+    password: ${BAIS_SFTP_USER_PASSWORD:some_password}
 

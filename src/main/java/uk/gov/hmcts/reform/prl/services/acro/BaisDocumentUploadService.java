@@ -40,6 +40,7 @@ public class BaisDocumentUploadService {
     private final AcroZipService acroZipService;
     private final CsvWriter csvWriter;
     private final PdfExtractorService pdfExtractorService;
+    private final SftpService sftpService;
 
     @Value("${acro.source-directory}")
     private String sourceDirectory;
@@ -67,8 +68,8 @@ public class BaisDocumentUploadService {
             }
 
             log.info("All FL404a documents and manifest files prepared. Creating zip archive...");
-            acroZipService.zip();
-
+            String archivePath = acroZipService.zip();
+            sftpService.uploadFile(new File(archivePath));
             log.info(
                 "*** Total time taken to run Bais Document upload task - {}s ***",
                 TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime)
