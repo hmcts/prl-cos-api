@@ -58,9 +58,21 @@ public class SftpConfig {
         factory.setUser(user);
         factory.setPassword(password);
         factory.setAllowUnknownKeys(allowUnknownKeys);
+
+        //Set custom SSH config
+        factory.setSshClientConfigurer(client -> {
+            client.setServerKeyVerifier((clientSession, remoteAddress, serverKey) -> {
+                return true;
+            });
+            client.setKeyExchangeFactories(client.getKeyExchangeFactories().stream().filter(f -> f.getName().equals(
+                "diffie-hellman-group14-sha1")).toList());
+            client.setSignatureFactories(client.getSignatureFactories().stream().filter(f -> f.getName().equals(
+                "ssh-rsa")).toList());
+        });
         CachingSessionFactory<SftpClient.DirEntry> cachingSessionFactory = new CachingSessionFactory<>(factory);
         cachingSessionFactory.setPoolSize(poolSize);
         cachingSessionFactory.setSessionWaitTimeout(sessionWaitTimeout);
+
         return cachingSessionFactory;
     }
 

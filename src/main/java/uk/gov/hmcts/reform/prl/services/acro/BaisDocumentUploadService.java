@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.exception.BaisDocumentUploadRuntimeException;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.HearingDaySchedule;
@@ -75,7 +76,8 @@ public class BaisDocumentUploadService {
                 TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime)
             );
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new BaisDocumentUploadRuntimeException("Document upload to Bais has failed for the run at "
+                                                             + LocalDateTime.now(), e);
         }
     }
 
