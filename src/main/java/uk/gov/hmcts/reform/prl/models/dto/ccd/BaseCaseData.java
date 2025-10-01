@@ -152,5 +152,6 @@ public class BaseCaseData {
 
     private AllocatedBarrister allocatedBarrister;
 
+    @JsonProperty("TTL")
     private TTL retainAndDisposeTimeToLive;
 }
