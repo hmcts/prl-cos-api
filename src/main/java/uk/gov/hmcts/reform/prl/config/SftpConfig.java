@@ -1,5 +1,10 @@
 package uk.gov.hmcts.reform.prl.config;
 
+import org.apache.sshd.client.ClientBuilder;
+import org.apache.sshd.client.keyverifier.AcceptAllServerKeyVerifier;
+import org.apache.sshd.common.NamedFactory;
+import org.apache.sshd.common.kex.BuiltinDHFactories;
+import org.apache.sshd.common.signature.BuiltinSignatures;
 import org.apache.sshd.sftp.client.SftpClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +18,8 @@ import org.springframework.integration.sftp.outbound.SftpMessageHandler;
 import org.springframework.integration.sftp.session.DefaultSftpSessionFactory;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
+
+import java.util.List;
 
 @Configuration
 public class SftpConfig {
@@ -61,13 +68,16 @@ public class SftpConfig {
 
         //Set custom SSH config
         factory.setSshClientConfigurer(client -> {
-            client.setServerKeyVerifier((clientSession, remoteAddress, serverKey) -> {
-                return true;
-            });
-            client.setKeyExchangeFactories(client.getKeyExchangeFactories().stream().filter(f -> f.getName().equals(
-                "diffie-hellman-group14-sha1")).toList());
-            client.setSignatureFactories(client.getSignatureFactories().stream().filter(f -> f.getName().equals(
-                "ssh-rsa")).toList());
+            // ✅ Set key exchange algorithms (required)
+            client.setKeyExchangeFactories(NamedFactory.setUpTransformedFactories(
+                false,
+                BuiltinDHFactories.VALUES,
+                ClientBuilder.DH2KEX
+            ));
+            // ✅ Set signature algorithms (ssh-rsa)
+            client.setSignatureFactories(List.of(BuiltinSignatures.rsa));
+            // ✅ Accept all server keys (or use known_hosts verifier)
+            client.setServerKeyVerifier(AcceptAllServerKeyVerifier.INSTANCE);
         });
         CachingSessionFactory<SftpClient.DirEntry> cachingSessionFactory = new CachingSessionFactory<>(factory);
         cachingSessionFactory.setPoolSize(poolSize);
