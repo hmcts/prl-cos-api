@@ -614,9 +614,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .caseId("123")
             .caseData(caseDataOld)
             .build();
-        CallbackRequest callbackRequestSols = CallbackRequest.builder()
-            .caseDetails(caseDetailsSols)
-            .build();
+
         UserDetails userDetailsSols = UserDetails.builder()
             .forename("New")
             .surname("Solicitor")
@@ -638,6 +636,9 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
         when(submitAndPayChecker.hasMandatoryCompleted(any(CaseData.class))).thenReturn(true);
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
 
+        CallbackRequest callbackRequestSols = CallbackRequest.builder()
+            .caseDetails(caseDetailsSols)
+            .build();
         prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(AUTH_TOKEN,
                                                                              S2S_TOKEN, callbackRequestSols);
 
