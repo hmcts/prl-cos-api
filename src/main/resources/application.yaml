@@ -817,9 +817,9 @@ acro:
   cronjob:
     enabled: false
   sftp:
-    host: ${ACRO_SFTP_HOST:some_host}
+    host: ${ACRO_SFTP_HOST:10.225.251.4}
     port: ${ACRO_SFTP_PORT:22}
-    user: ${ACRO_SFTP_USER:some_user}
+    user: ${ACRO_SFTP_USER:prl_archive_incoming}
     azure-deployment: false
     private-key: /mnt/secrets/private-law/bais-xerox-key
     private-key-pass-phrase: ""
