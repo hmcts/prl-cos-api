@@ -3,9 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.PaymentApi;
@@ -42,8 +40,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @Service
-@Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor
 public class PaymentRequestService {
 
     private final PaymentApi paymentApi;
@@ -53,7 +50,6 @@ public class PaymentRequestService {
     public static final String GBP_CURRENCY = "GBP";
     public static final String ENG_LANGUAGE = "English";
     private static final String PAYMENT_STATUS_SUCCESS = "Success";
-    private PaymentResponse paymentResponse;
     private final AllTabServiceImpl allTabService;
 
     @Value("${payments.api.callback-url}")
@@ -119,6 +115,7 @@ public class PaymentRequestService {
         createPaymentRequest = createPaymentRequest.toBuilder()
             .applicantCaseName(caseData.getApplicantCaseName()).build();
 
+        PaymentResponse paymentResponse;
         if (isApplicationNotAwp(createPaymentRequest)) {
             log.info("*** Citizen C100 and other applications case payment ***");
             paymentResponse = createPayment(
@@ -172,7 +169,7 @@ public class PaymentRequestService {
                 log.info("Help with fees is opted, first time submission -> creating only service request for the case id: {}", caseId);
                 //create service request
                 PaymentServiceResponse paymentServiceResponse = getPaymentServiceResponse(authorization, caseData, feeResponse);
-                paymentResponse = PaymentResponse.builder()
+                return PaymentResponse.builder()
                     .serviceRequestReference(paymentServiceResponse.getServiceRequestReference())
                     .build();
             } else {
@@ -180,28 +177,29 @@ public class PaymentRequestService {
                 log.info("Creating new service request and payment request for card payment 1st time for the case id: {}", caseId);
                 //create service request
                 PaymentServiceResponse paymentServiceResponse = getPaymentServiceResponse(authorization, caseData, feeResponse);
-                paymentResponse = createServicePayment(paymentServiceResponse.getServiceRequestReference(),
+                PaymentResponse paymentResponseObj  = createServicePayment(paymentServiceResponse.getServiceRequestReference(),
                                                        authorization, createPaymentRequest.getReturnUrl(), feeResponse.getAmount());
                 //set service request ref
-                paymentResponse.setServiceRequestReference(paymentServiceResponse.getServiceRequestReference());
+                paymentResponseObj.setServiceRequestReference(paymentServiceResponse.getServiceRequestReference());
+                return paymentResponseObj;
             }
-            return paymentResponse;
+
         } else if (null != paymentServiceReferenceNumber
             && null == paymentReferenceNumber) {
             if (null != createPaymentRequest.getHwfRefNumber()) {
                 log.info("Help with fees is opted, resubmit/retry scenario for the case id: {}", caseId);
-                paymentResponse = PaymentResponse.builder()
+                return PaymentResponse.builder()
                     .serviceRequestReference(paymentServiceReferenceNumber)
                     .build();
             } else {
                 log.info("Creating new payment ref, resubmission for card payments for the case id: {} ", caseId);
-                paymentResponse = createServicePayment(paymentServiceReferenceNumber,
+                PaymentResponse paymentResponseResubmission = createServicePayment(paymentServiceReferenceNumber,
                                                        authorization,
                                                        createPaymentRequest.getReturnUrl(),
                                                        feeResponse.getAmount());
-                paymentResponse.setServiceRequestReference(paymentServiceReferenceNumber);
+                paymentResponseResubmission.setServiceRequestReference(paymentServiceReferenceNumber);
+                return paymentResponseResubmission;
             }
-            return paymentResponse;
         } else {
             return getPaymentResponse(authorization,
                                       createPaymentRequest,
@@ -217,18 +215,18 @@ public class PaymentRequestService {
         String caseId = createPaymentRequest.getCaseId();
         if (null != createPaymentRequest.getHwfRefNumber()) {
             log.info("resubmit/retry with help with fees for the case id: {}", caseId);
-            paymentResponse = PaymentResponse.builder()
+            return PaymentResponse.builder()
                 .serviceRequestReference(paymentServiceReferenceNumber)
                 .build();
-            return paymentResponse;
         }
 
         log.info("retry for card payments, checking payment status for the case id: {} ", caseId);
         PaymentStatusResponse paymentStatus = fetchPaymentStatus(authorization, paymentReferenceNumber);
         String status = (null != paymentStatus && null != paymentStatus.getStatus()) ? paymentStatus.getStatus() : null;
         log.info("Payment Status : {} caseId: {} ", status, caseId);
+        PaymentResponse paymentResponseCard;
         if (PAYMENT_STATUS_SUCCESS.equalsIgnoreCase(status)) {
-            paymentResponse = PaymentResponse.builder()
+            paymentResponseCard = PaymentResponse.builder()
                 .paymentReference(paymentReferenceNumber)
                 .serviceRequestReference(paymentServiceReferenceNumber)
                 .paymentStatus(status)
@@ -237,12 +235,12 @@ public class PaymentRequestService {
             log.info("Payment is already successful for the case id: {} ", caseId);
         } else {
             log.info("Previous payment failed, creating new payment for the caseId: {}", caseId);
-            paymentResponse = createServicePayment(paymentServiceReferenceNumber, authorization,
+            paymentResponseCard = createServicePayment(paymentServiceReferenceNumber, authorization,
                                                    createPaymentRequest.getReturnUrl(), feeResponse.getAmount());
-            paymentResponse.setServiceRequestReference(paymentServiceReferenceNumber);
+            paymentResponseCard.setServiceRequestReference(paymentServiceReferenceNumber);
         }
 
-        return paymentResponse;
+        return paymentResponseCard;
     }
 
     public PaymentServiceResponse createServiceRequestFromCcdCallack(
@@ -289,7 +287,7 @@ public class PaymentRequestService {
             );
         Element<CitizenAwpPayment> citizenAwpPaymentElement = optionalCitizenAwpPaymentElement.orElse(null);
 
-        paymentResponse = createPayment(
+        PaymentResponse awpPaymentResponse = createPayment(
             authorization,
             createPaymentRequest,
             null != citizenAwpPaymentElement ? citizenAwpPaymentElement.getValue().getServiceReqRef() : null,
@@ -302,12 +300,12 @@ public class PaymentRequestService {
             caseData,
             caseDataMap,
             createPaymentRequest,
-            paymentResponse,
+            awpPaymentResponse,
             citizenAwpPaymentElement,
             feeResponse
         );
 
-        return paymentResponse;
+        return awpPaymentResponse;
     }
 
     private void updateCitizenAwpPayments(CaseData caseData,
