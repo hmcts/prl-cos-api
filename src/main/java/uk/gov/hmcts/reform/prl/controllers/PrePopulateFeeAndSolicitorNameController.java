@@ -96,7 +96,7 @@ public class PrePopulateFeeAndSolicitorNameController {
                 errorList.add(
                     "Submit and pay is not allowed for this case unless you finish all the mandatory events");
             } else {
-                FeeResponse feeResponse = null;
+                FeeResponse feeResponse;
                 try {
                     feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
                 } catch (Exception e) {
@@ -105,15 +105,18 @@ public class PrePopulateFeeAndSolicitorNameController {
                         .errors(errorList)
                         .build();
                 }
-                CaseData caseDataForOrgDetails = callbackRequest.getCaseDetails().getCaseData();
-                caseDataForOrgDetails = organisationService.getApplicantOrganisationDetails(caseDataForOrgDetails);
-                caseDataForOrgDetails = organisationService.getRespondentOrganisationDetails(caseDataForOrgDetails);
-
                 Court closestChildArrangementsCourt = courtLocatorService
                     .getNearestFamilyCourt(callbackRequest.getCaseDetails()
                                                .getCaseData());
+
+                CaseData baseCaseData = callbackRequest.getCaseDetails().getCaseData();
+                CaseData orgDetails = organisationService.getApplicantOrganisationDetails(baseCaseData);
+                orgDetails = organisationService.getRespondentOrganisationDetails(orgDetails);
+
                 UserDetails userDetails = userService.getUserDetails(authorisation);
-                caseData = CaseData.builder()
+
+                caseData = orgDetails.toBuilder()
+                    .caseSolicitorName(userDetails.getFullName()) //adding caseSolicitorName for SOT
                     .solicitorName(userDetails.getFullName())
                     .userInfo(wrapElements(userService.getUserInfo(authorisation, UserRoles.SOLICITOR)))
                     .applicantSolicitorEmailAddress(userDetails.getEmail())
@@ -121,20 +124,18 @@ public class PrePopulateFeeAndSolicitorNameController {
                     .feeAmount(CURRENCY_SIGN_POUND + feeResponse.getAmount().toString())
                     .courtName((closestChildArrangementsCourt != null) ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
                     .build();
-                // setting fee amount to populate in draft document
-                caseDataForOrgDetails = caseDataForOrgDetails.toBuilder().feeAmount(CURRENCY_SIGN_POUND + feeResponse.getAmount().toString()).build();
-                if (TASK_LIST_VERSION_V3.equalsIgnoreCase(caseDataForOrgDetails.getTaskListVersion())
-                    && isNotEmpty(caseDataForOrgDetails.getMiamPolicyUpgradeDetails())) {
-                    caseDataForOrgDetails = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(
-                        caseDataForOrgDetails,
+                if (TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())
+                    && isNotEmpty(caseData.getMiamPolicyUpgradeDetails())) {
+                    caseData = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(
+                        caseData,
                         new HashMap<>()
                     );
                 }
+                // Pass only the merged caseData to the document generation so new solicitor name is not lost
                 caseData = buildGeneratedDocumentCaseData(
                     authorisation,
                     callbackRequest,
-                    caseData,
-                    caseDataForOrgDetails
+                    caseData
                 );
             }
 
@@ -150,15 +151,13 @@ public class PrePopulateFeeAndSolicitorNameController {
     private CaseData buildGeneratedDocumentCaseData(
         @RequestHeader("Authorization") String authorisation,
         @RequestBody CallbackRequest callbackRequest,
-        CaseData caseData,
-        CaseData caseDataForOrgDetails)
-        throws Exception {
+        CaseData caseData) {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(callbackRequest.getCaseDetails().getCaseData());
         if (documentLanguage.isGenEng()) {
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
-                CaseDetails.builder().caseData(caseDataForOrgDetails).build(),
-                c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseDataForOrgDetails, false)
+                CaseDetails.builder().caseData(caseData).build(),
+                c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseData, false)
             );
 
             caseData = caseData.toBuilder().isEngDocGen(documentLanguage.isGenEng() ? Yes.toString() : No.toString())
@@ -172,8 +171,8 @@ public class PrePopulateFeeAndSolicitorNameController {
         if (documentLanguage.isGenWelsh()) {
             GeneratedDocumentInfo generatedWelshDocumentInfo = dgsService.generateWelshDocument(
                 authorisation,
-                CaseDetails.builder().caseData(caseDataForOrgDetails).build(),
-                c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseDataForOrgDetails, true)
+                CaseDetails.builder().caseData(caseData).build(),
+                c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseData, true)
             );
 
             caseData = caseData.toBuilder().isWelshDocGen(documentLanguage.isGenWelsh() ? Yes.toString() : No.toString())
