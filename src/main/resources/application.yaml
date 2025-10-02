@@ -820,12 +820,12 @@ acro:
     host: ${ACRO_SFTP_HOST:some_host}
     port: ${ACRO_SFTP_PORT:22}
     user: ${ACRO_SFTP_USER:some_user}
-    azure-deployment: true
+    azure-deployment: false
     private-key: /mnt/secrets/private-law/bais-xerox-key
     private-key-pass-phrase: ""
     session-wait-timeout: 10000
     pool-size: 10
     allow-unknown-keys: true
     remote-directory: /
-    password: ${BAIS_SFTP_USER_PASSWORD:some_password}
+    password: ${BAIS_SFTP_USER_PASSWORD:test_password}
 

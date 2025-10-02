@@ -1,14 +1,12 @@
 package uk.gov.hmcts.reform.prl.config;
 
-import org.apache.sshd.client.ClientBuilder;
-import org.apache.sshd.client.keyverifier.AcceptAllServerKeyVerifier;
-import org.apache.sshd.common.NamedFactory;
-import org.apache.sshd.common.kex.BuiltinDHFactories;
-import org.apache.sshd.common.signature.BuiltinSignatures;
+import lombok.Getter;
 import org.apache.sshd.sftp.client.SftpClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.expression.common.LiteralExpression;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.channel.DirectChannel;
@@ -19,9 +17,8 @@ import org.springframework.integration.sftp.session.DefaultSftpSessionFactory;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 
-import java.util.List;
-
 @Configuration
+@Getter
 public class SftpConfig {
 
     @Value("${acro.sftp.host}")
@@ -63,32 +60,26 @@ public class SftpConfig {
         factory.setHost(host);
         factory.setPort(port);
         factory.setUser(user);
-        factory.setPassword(password);
-        factory.setAllowUnknownKeys(allowUnknownKeys);
 
-        //Set custom SSH config
-        factory.setSshClientConfigurer(client -> {
-            // ✅ Set key exchange algorithms (required)
-            client.setKeyExchangeFactories(NamedFactory.setUpTransformedFactories(
-                false,
-                BuiltinDHFactories.VALUES,
-                ClientBuilder.DH2KEX
-            ));
-            // ✅ Set signature algorithms (ssh-rsa)
-            client.setSignatureFactories(List.of(BuiltinSignatures.rsa));
-            // ✅ Accept all server keys (or use known_hosts verifier)
-            client.setServerKeyVerifier(AcceptAllServerKeyVerifier.INSTANCE);
-        });
+
+        if (azureDeployment) {
+            Resource privateKeyResource = new FileSystemResource(privateKey);
+            factory.setPrivateKey(privateKeyResource);
+            factory.setPrivateKeyPassphrase(privateKeyPassPhrase);
+        } else {
+            factory.setPassword(password);
+        }
+
+        factory.setAllowUnknownKeys(allowUnknownKeys);
         CachingSessionFactory<SftpClient.DirEntry> cachingSessionFactory = new CachingSessionFactory<>(factory);
         cachingSessionFactory.setPoolSize(poolSize);
         cachingSessionFactory.setSessionWaitTimeout(sessionWaitTimeout);
-
         return cachingSessionFactory;
     }
 
     @Bean
     @ServiceActivator(inputChannel = "toSftpChannel")
-    public MessageHandler sftpMessageHandler() {
+    public MessageHandler toSftpChannelPrintDestinationHandler() {
         SftpMessageHandler handler = new SftpMessageHandler(sftpSessionFactory());
         handler.setRemoteDirectoryExpression(new LiteralExpression(""));
         handler.setUseTemporaryFileName(false);
@@ -96,8 +87,7 @@ public class SftpConfig {
         return handler;
     }
 
-
-    @Bean
+    @Bean(name = "toSftpChannel")
     public MessageChannel toSftpChannel() {
         return new DirectChannel();
     }
