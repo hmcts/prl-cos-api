@@ -12,7 +12,7 @@ public class AcroDatesService {
 
     public LocalDateTime getStartDateForSearch() {
         return LocalDateTime.of(
-            LocalDate.now(ZoneId.systemDefault()).minusDays(19L), LocalTime.of(20, 59, 59));
+            LocalDate.now(ZoneId.systemDefault()).minusDays(1L), LocalTime.of(20, 59, 59));
     }
 
     public LocalDateTime getEndDateForSearch() {
