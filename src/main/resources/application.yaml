@@ -828,4 +828,3 @@ acro:
     allow-unknown-keys: true
     remote-directory: /
     password: ${BAIS_SFTP_USER_PASSWORD:some-password}
-

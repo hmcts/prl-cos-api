@@ -1,26 +1,29 @@
 package uk.gov.hmcts.reform.prl.services.acro;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHandlingException;
 
 import java.io.File;
 
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.atMost;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
-class SftpServiceTest {
+@SpringBootTest(classes = {SftpService.class})
+public class SftpServiceTest {
 
-    @Mock
+    @MockBean
     private MessageChannel toSftpChannel;
-    @InjectMocks
+    @Autowired
     private SftpService sftpService;
 
     @Test
@@ -35,13 +38,18 @@ class SftpServiceTest {
     }
 
     @Test
-    public void testUploadFile_failure() {
-        // Arrange
+    public void testRetryOnGetCaseDataThrowingException() {
         File file = new File("test.txt");
-        when(toSftpChannel.send(any(Message.class))).thenThrow(new RuntimeException("SFTP error"));
-        // Act
-        sftpService.uploadFile(file);
-        // Assert
-        verify(toSftpChannel, times(1)).send(any(Message.class));
+        when(toSftpChannel.send(any(Message.class)))
+            .thenThrow(new MessageHandlingException(mock(Message.class), "Simulated failure"))
+            .thenThrow(new MessageHandlingException(mock(Message.class), "Simulated failure"))
+            .thenThrow(new MessageHandlingException(mock(Message.class), "Simulated failure"))
+            .thenThrow(new MessageHandlingException(mock(Message.class), "Simulated failure"))
+            .thenThrow(new MessageHandlingException(mock(Message.class), "Simulated failure"));
+
+
+        assertThrows(RuntimeException.class, () -> sftpService.uploadFile(file));
+
+        verify(toSftpChannel, atMost(5)).send(any(Message.class));
     }
 }
