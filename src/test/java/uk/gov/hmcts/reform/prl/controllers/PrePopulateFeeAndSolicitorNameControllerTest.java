@@ -478,10 +478,9 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .caseData(caseDataForCourt)
             .build();
 
-        CallbackRequest callbackRequest = CallbackRequest.builder()
+        return CallbackRequest.builder()
             .caseDetails(caseDetails1)
             .build();
-        return callbackRequest;
     }
 
 
