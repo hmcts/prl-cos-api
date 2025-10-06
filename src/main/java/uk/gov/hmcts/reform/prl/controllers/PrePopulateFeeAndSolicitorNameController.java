@@ -112,12 +112,10 @@ public class PrePopulateFeeAndSolicitorNameController {
                                                .getCaseData());
 
                 CaseData baseCaseData = callbackRequest.getCaseDetails().getCaseData();
-                CaseData orgDetails = organisationService.getApplicantOrganisationDetails(baseCaseData);
-                orgDetails = organisationService.getRespondentOrganisationDetails(orgDetails);
 
                 UserDetails userDetails = userService.getUserDetails(authorisation);
 
-                caseData = orgDetails.toBuilder()
+                caseData = baseCaseData.toBuilder()
                     .caseSolicitorName(userDetails.getFullName()) //adding caseSolicitorName for SOT
                     .solicitorName(userDetails.getFullName())
                     .userInfo(wrapElements(userService.getUserInfo(authorisation, UserRoles.SOLICITOR)))
