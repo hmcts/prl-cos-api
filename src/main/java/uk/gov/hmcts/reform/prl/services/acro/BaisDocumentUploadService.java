@@ -144,7 +144,7 @@ public class BaisDocumentUploadService {
             .courtName(caseData.getCourtName())
             .courtEpimsId(caseData.getCourtEpimsId())
             .courtTypeId(caseData.getCourtTypeId())
-            .currentHearingDate(getNextHearingDateWithInHearing(caseData.getCaseHearings()))
+            .dateOrderMade(caseData.getDateOrderMade())
             .orderExpiryDate(getOrderExpiryDate(order))
             .build();
     }

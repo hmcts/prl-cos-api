@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.dto.acro;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -17,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConf
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,4 +66,7 @@ public class AcroCaseData {
     private List<Element<StmtOfServiceAddRecipient>> stmtOfServiceForOrder;
     @JsonProperty("daApplicantContactInstructions")
     private String daApplicantContactInstructions;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate dateOrderMade;
 }
