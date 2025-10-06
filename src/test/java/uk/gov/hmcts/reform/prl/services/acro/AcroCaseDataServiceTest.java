@@ -73,7 +73,7 @@ public class AcroCaseDataServiceTest {
 
 
     @Test
-    public void getCaseData() throws IOException {
+    public void getNonMolestationData() throws IOException {
 
         final List<CaseHearing> caseHearings = new ArrayList();
 
@@ -118,7 +118,7 @@ public class AcroCaseDataServiceTest {
 
         ReflectionTestUtils.setField(acroCaseDataService, "searchCaseTypeId", "PRLAPPS");
 
-        AcroResponse realAcroResponse = acroCaseDataService.getCaseData("authorisation");
+        AcroResponse realAcroResponse = acroCaseDataService.getNonMolestationData("authorisation");
         AcroCaseData caseData = realAcroResponse.getCases().getFirst().getCaseData();
         assertEquals(1, caseData.getFl404Orders().size());
         assertEquals(1, caseData.getCaseHearings().size());
@@ -130,7 +130,7 @@ public class AcroCaseDataServiceTest {
     }
 
     @Test
-    public void testGetCaseDataWithRegion() throws IOException {
+    public void testGetNonMolestationDataWithRegion() throws IOException {
 
         final List<CaseHearing> caseHearings = new ArrayList();
 
@@ -175,7 +175,7 @@ public class AcroCaseDataServiceTest {
         when(acroDatesService.getEndDateForSearch()).thenReturn(LocalDateTime.of(2025, 8, 6, 21, 0, 0));
         ReflectionTestUtils.setField(acroCaseDataService, "searchCaseTypeId", "PRLAPPS");
 
-        AcroResponse realAcroResponse = acroCaseDataService.getCaseData("authorisation");
+        AcroResponse realAcroResponse = acroCaseDataService.getNonMolestationData("authorisation");
         AcroCaseData caseData = realAcroResponse.getCases().getFirst().getCaseData();
         assertEquals(1, caseData.getFl404Orders().size());
         assertEquals(1, caseData.getCaseHearings().size());
@@ -187,12 +187,12 @@ public class AcroCaseDataServiceTest {
     }
 
     @Test
-    public void testGetCaseDataThrowingException() {
+    public void testGetNonMolestationDataThrowingException() {
         Exception exception = new RuntimeException();
         when(coreCaseDataApi.searchCases(anyString(), anyString(), any(), any())).thenThrow(exception);
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
 
-        assertThrows(RuntimeException.class, () -> acroCaseDataService.getCaseData("authorisation"));
+        assertThrows(RuntimeException.class, () -> acroCaseDataService.getNonMolestationData("authorisation"));
     }
 
     @Test
@@ -205,7 +205,7 @@ public class AcroCaseDataServiceTest {
             .thenThrow(exception);
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
 
-        assertThrows(RuntimeException.class, () -> acroCaseDataService.getCaseData("authorisation"));
+        assertThrows(RuntimeException.class, () -> acroCaseDataService.getNonMolestationData("authorisation"));
 
         verify(coreCaseDataApi, atMost(4)).searchCases(anyString(), anyString(), any(), any());
     }
