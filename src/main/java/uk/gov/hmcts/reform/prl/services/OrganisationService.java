@@ -30,7 +30,6 @@ import static org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace;
 public class OrganisationService {
     public static final String ACTIVE = "Active";
     private final OrganisationApi organisationApi;
-    private Organisations organisations;
     private final AuthTokenGenerator authTokenGenerator;
     private final SystemUserService systemUserService;
     private final MaskEmail maskEmail;
@@ -78,7 +77,7 @@ public class OrganisationService {
             String organisationID = respondent.getSolicitorOrg().getOrganisationID();
             if (organisationID != null) {
                 try {
-                    organisations = getOrganisationDetails(userToken, organisationID);
+                    Organisations organisations = getOrganisationDetails(userToken, organisationID);
                     respondent = respondent.toBuilder()
                         .organisations(organisations)
                         .build();
@@ -123,7 +122,7 @@ public class OrganisationService {
             String organisationID = applicant.getSolicitorOrg().getOrganisationID();
             if (organisationID != null) {
                 try {
-                    organisations = getOrganisationDetails(userToken, organisationID);
+                    Organisations organisations = getOrganisationDetails(userToken, organisationID);
                     applicant = applicant.toBuilder()
                         .organisations(organisations)
                         .build();

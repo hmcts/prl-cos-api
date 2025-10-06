@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services;
 import feign.FeignException;
 import feign.Request;
 import feign.Response;
-import javassist.NotFoundException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,8 +64,7 @@ public class OrganisationServiceTest {
     }
 
     @Test
-    public void testApplicantOrganisationDetails() throws NotFoundException {
-
+    public void testApplicantOrganisationDetails() {
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -129,8 +127,7 @@ public class OrganisationServiceTest {
     }
 
     @Test
-    public void testRespondentOrganisationDetails() throws NotFoundException {
-
+    public void testRespondentOrganisationDetails() {
         PartyDetails respondent = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -194,8 +191,7 @@ public class OrganisationServiceTest {
     }
 
     @Test
-    public void testRespondentOrganisationDetailsNotFound() throws NotFoundException {
-
+    public void testRespondentOrganisationDetailsNotFound() {
         PartyDetails respondent = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -221,8 +217,7 @@ public class OrganisationServiceTest {
     }
 
     @Test
-    public void testApplicantOrganisationDetailsForFl401() throws NotFoundException {
-
+    public void testApplicantOrganisationDetailsForFl401() {
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -281,8 +276,7 @@ public class OrganisationServiceTest {
     }
 
     @Test
-    public void testApplicantOrganisationDetailsForFl401NotFound() throws NotFoundException {
-
+    public void testApplicantOrganisationDetailsForFl401NotFound() {
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -304,8 +298,7 @@ public class OrganisationServiceTest {
     }
 
     @Test
-    public void testRespondentOrganisationDetailsForFl401() throws NotFoundException {
-
+    public void testRespondentOrganisationDetailsForFl401() {
         PartyDetails respondent = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -364,8 +357,7 @@ public class OrganisationServiceTest {
     }
 
     @Test
-    public void testRespondentOrganisationDetailsForFl401NotFound() throws NotFoundException {
-
+    public void testRespondentOrganisationDetailsForFl401NotFound() {
         PartyDetails respondent = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -388,7 +380,6 @@ public class OrganisationServiceTest {
 
     @Test
     public void testRespondentOrganisationDetailsForFl401WhenRespondentNull() {
-
         CaseData caseData = CaseData.builder().respondentsFL401(null).build();
 
         CaseData orgData =  organisationService.getRespondentOrganisationDetailsForFL401(caseData);
@@ -494,6 +485,6 @@ public class OrganisationServiceTest {
             .thenThrow(feignException(500, "Internal Server Error"));
         assertThatThrownBy(() -> organisationService.findUserByEmail(email))
             .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Error while fetching user id by email");
+            .hasMessageContaining("Error while fetching user id by email");
     }
 }

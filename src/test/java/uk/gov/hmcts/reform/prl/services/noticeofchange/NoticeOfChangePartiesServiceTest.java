@@ -313,8 +313,8 @@ public class NoticeOfChangePartiesServiceTest {
         when(tokenGenerator.generate()).thenReturn("s2sToken");
         when(assignCaseAccessClient.applyDecision(
             anyString(), anyString(), any(
-            DecisionRequest.class))).thenReturn(
-                AboutToStartOrSubmitCallbackResponse.builder().data(new HashMap<>()).build()
+                DecisionRequest.class))).thenReturn(
+            AboutToStartOrSubmitCallbackResponse.builder().data(new HashMap<>()).build()
         );
 
         noticeOfChangePartiesService.applyDecision(CallbackRequest.builder()
@@ -324,7 +324,7 @@ public class NoticeOfChangePartiesServiceTest {
                                                    "testAuth");
         verify(assignCaseAccessClient, times(1)).applyDecision(
             anyString(), anyString(), any(
-            DecisionRequest.class));
+                DecisionRequest.class));
         verify(caseAssignmentService).removeAmBarristerIfPresent(any(CaseDetails.class));
     }
 
@@ -377,7 +377,7 @@ public class NoticeOfChangePartiesServiceTest {
             StartEventResponse.builder().caseDetails(caseDetails).build());
         when(organisationService.getOrganisationSolicitorDetails("test", changeOrganisationRequest
             .getOrganisationToAdd().getOrganisationID())).thenReturn(
-                OrgSolicitors.builder().organisationIdentifier("test").users(userList).build());
+            OrgSolicitors.builder().organisationIdentifier("test").users(userList).build());
         when(ccdCoreCaseDataService.findCaseById("test", "12345678")).thenReturn(caseDetails);
         when(partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
             caseData,
@@ -465,7 +465,7 @@ public class NoticeOfChangePartiesServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn("test");
         when(systemUserService.getUserId("test")).thenReturn("test");
         when(ccdCoreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, "test")).thenReturn(EventRequestData.builder().build());
-        when(ccdCoreCaseDataService.startUpdate("test", EventRequestData.builder().build(), "12345678", true)).thenReturn(
+        when(ccdCoreCaseDataService.startUpdate(anyString(), any(EventRequestData.class), anyString(), eq(true))).thenReturn(
             StartEventResponse.builder().caseDetails(caseDetails).build());
         when(organisationService.getOrganisationSolicitorDetails("test", changeOrganisationRequest
             .getOrganisationToAdd().getOrganisationID())).thenReturn(
@@ -540,11 +540,11 @@ public class NoticeOfChangePartiesServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn("test");
         when(systemUserService.getUserId("test")).thenReturn("test");
         when(ccdCoreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, "test")).thenReturn(EventRequestData.builder().build());
-        when(ccdCoreCaseDataService.startUpdate("test", EventRequestData.builder().build(), "12345678", true)).thenReturn(
+        when(ccdCoreCaseDataService.startUpdate(anyString(), any(EventRequestData.class), anyString(), eq(true))).thenReturn(
             StartEventResponse.builder().caseDetails(caseDetails).build());
         when(organisationService.getOrganisationSolicitorDetails("test", changeOrganisationRequest
             .getOrganisationToAdd().getOrganisationID())).thenReturn(
-                OrgSolicitors.builder().organisationIdentifier("test").users(userList).build());
+            OrgSolicitors.builder().organisationIdentifier("test").users(userList).build());
         when(ccdCoreCaseDataService.findCaseById("test", "12345678")).thenReturn(caseDetails);
         when(partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
             any(),
@@ -605,7 +605,7 @@ public class NoticeOfChangePartiesServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn("test");
         when(systemUserService.getUserId("test")).thenReturn("test");
         when(ccdCoreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, "test")).thenReturn(EventRequestData.builder().build());
-        when(ccdCoreCaseDataService.startUpdate("test", EventRequestData.builder().build(), "12345678", true)).thenReturn(
+        when(ccdCoreCaseDataService.startUpdate(anyString(), any(EventRequestData.class), anyString(), eq(true))).thenReturn(
             StartEventResponse.builder().caseDetails(caseDetails).build());
         when(ccdCoreCaseDataService.findCaseById("test", "12345678")).thenReturn(caseDetails);
         when(partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
@@ -677,11 +677,11 @@ public class NoticeOfChangePartiesServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn("test");
         when(systemUserService.getUserId("test")).thenReturn("test");
         when(ccdCoreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, "test")).thenReturn(EventRequestData.builder().build());
-        when(ccdCoreCaseDataService.startUpdate("test", EventRequestData.builder().build(), "12345678", true)).thenReturn(
+        when(ccdCoreCaseDataService.startUpdate(anyString(), any(EventRequestData.class), anyString(), eq(true))).thenReturn(
             StartEventResponse.builder().caseDetails(caseDetails).build());
         when(organisationService.getOrganisationSolicitorDetails("test", changeOrganisationRequest
             .getOrganisationToAdd().getOrganisationID())).thenReturn(
-                OrgSolicitors.builder().organisationIdentifier("test").users(userList).build());
+            OrgSolicitors.builder().organisationIdentifier("test").users(userList).build());
         when(organisationService.getOrganisationDetails("test", changeOrganisationRequest
             .getOrganisationToAdd().getOrganisationID())).thenReturn(
             Organisations.builder().organisationIdentifier("test").name("test").build());
@@ -755,11 +755,11 @@ public class NoticeOfChangePartiesServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn("test");
         when(systemUserService.getUserId("test")).thenReturn("test");
         when(ccdCoreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, "test")).thenReturn(EventRequestData.builder().build());
-        when(ccdCoreCaseDataService.startUpdate("test", EventRequestData.builder().build(), "12345678", true)).thenReturn(
+        when(ccdCoreCaseDataService.startUpdate(anyString(), any(EventRequestData.class), anyString(), eq(true))).thenReturn(
             StartEventResponse.builder().caseDetails(caseDetails).build());
         when(organisationService.getOrganisationSolicitorDetails("test", changeOrganisationRequest
             .getOrganisationToAdd().getOrganisationID())).thenReturn(
-                OrgSolicitors.builder().organisationIdentifier("test").users(userList).build());
+            OrgSolicitors.builder().organisationIdentifier("test").users(userList).build());
         when(ccdCoreCaseDataService.findCaseById("test", "12345678")).thenReturn(caseDetails);
         when(partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
             any(),
@@ -832,12 +832,6 @@ public class NoticeOfChangePartiesServiceTest {
                                                 .build())
             .build();
 
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(12345678L)
-            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-            .data(newRepresentedParty.toMap(realObjectMapper))
-            .build();
-
         CaseDetails caseDetailsBefore = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
@@ -850,6 +844,18 @@ public class NoticeOfChangePartiesServiceTest {
                                                                     .forename("solicitorResp")
                                                                     .surname("test").build());
 
+        // Return a small map from applyDecision that should be merged into the callbackRequest data
+        Map<String, Object> returned = new HashMap<>();
+        returned.put("caRespondent1Policy", organisationPolicy);
+        when(assignCaseAccessClient.applyDecision(any(), any(), any()))
+            .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().data(returned).build());
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(newRepresentedParty.toMap(realObjectMapper))
+            .build();
+
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .caseDetailsBefore(caseDetailsBefore)
@@ -858,6 +864,8 @@ public class NoticeOfChangePartiesServiceTest {
 
         noticeOfChangePartiesService.updateLegalRepresentation(callbackRequest, "testAuth", newRepresentedParty);
         verify(assignCaseAccessClient, times(1)).applyDecision(any(), any(), any());
+        // Verify merged data contains our sentinel key
+        assertThat(callbackRequest.getCaseDetails().getData()).containsKey("caRespondent1Policy");
     }
 
     @Test
@@ -1208,7 +1216,7 @@ public class NoticeOfChangePartiesServiceTest {
             .build();
 
 
-        when(ccdCoreCaseDataService.startUpdate("test", EventRequestData.builder().build(), "12345678", true)).thenReturn(
+        when(ccdCoreCaseDataService.startUpdate(anyString(), any(EventRequestData.class), anyString(), eq(true))).thenReturn(
             StartEventResponse.builder().caseDetails(caseDetails).build());
         when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
         when(ccdCoreCaseDataService.findCaseById("test", "12345678")).thenReturn(caseDetails);
@@ -1226,10 +1234,10 @@ public class NoticeOfChangePartiesServiceTest {
         noticeOfChangePartiesService.submittedStopRepresenting(callbackRequest);
         verify(eventPublisher, times(1)).publishEvent(any(NoticeOfChangeEvent.class));
         verify(tabService).updatePartyDetailsForNoc(anyString(),
-                                                   anyString(),
-                                                   isA(StartEventResponse.class),
-                                                   isA(EventRequestData.class),
-                                                   caseDataArgumentCaptor.capture());
+                                                    anyString(),
+                                                    isA(StartEventResponse.class),
+                                                    isA(EventRequestData.class),
+                                                    caseDataArgumentCaptor.capture());
         CaseData updatedCaseData = caseDataArgumentCaptor.getValue();
         PartyDetails party = updatedCaseData.getApplicants().getFirst().getValue();
         assertThat(party.getBarrister())
@@ -1241,8 +1249,8 @@ public class NoticeOfChangePartiesServiceTest {
         assertThat(party.getSolicitorOrg())
             .isEqualTo(Organisation.builder().build());
         verify(barristerHelper, times(2)).setAllocatedBarrister(isA(PartyDetails.class),
-                                                 isA(CaseData.class),
-                                                 isA(UUID.class));
+                                                                isA(CaseData.class),
+                                                                isA(UUID.class));
         verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
         verify(partyLevelCaseFlagsService).updateCaseDataWithGeneratePartyCaseFlags(isA(CaseData.class),
                                                                                     any(Function.class));
@@ -1486,7 +1494,7 @@ public class NoticeOfChangePartiesServiceTest {
         when(systemUserService.getUserId("test")).thenReturn("test");
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
         when(ccdCoreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, "test")).thenReturn(EventRequestData.builder().build());
-        when(ccdCoreCaseDataService.startUpdate("test", EventRequestData.builder().build(), "12345678", true)).thenReturn(
+        when(ccdCoreCaseDataService.startUpdate(anyString(), any(EventRequestData.class), anyString(), eq(true))).thenReturn(
             StartEventResponse.builder().caseDetails(caseDetails).build());
         when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
         when(ccdCoreCaseDataService.findCaseById("test", "12345678")).thenReturn(caseDetails);
@@ -1500,8 +1508,8 @@ public class NoticeOfChangePartiesServiceTest {
             .submittedAdminRemoveLegalRepresentative(callbackRequest);
         assertNotNull(submittedCallbackResponse);
         verify(barristerHelper, times(2)).setAllocatedBarrister(isA(PartyDetails.class),
-                                                 isA(CaseData.class),
-                                                 isA(UUID.class));
+                                                                isA(CaseData.class),
+                                                                isA(UUID.class));
         verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
         verify(partyLevelCaseFlagsService).updateCaseDataWithGeneratePartyCaseFlags(isA(CaseData.class),
                                                                                     any(Function.class));
@@ -1575,7 +1583,7 @@ public class NoticeOfChangePartiesServiceTest {
             .build();
 
 
-        when(ccdCoreCaseDataService.startUpdate("test", EventRequestData.builder().build(), "12345678", true)).thenReturn(
+        when(ccdCoreCaseDataService.startUpdate(anyString(), any(EventRequestData.class), anyString(), eq(true))).thenReturn(
             StartEventResponse.builder().caseDetails(caseDetails).build());
         when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
         when(ccdCoreCaseDataService.findCaseById("test", "12345678")).thenReturn(caseDetails);
@@ -1594,8 +1602,8 @@ public class NoticeOfChangePartiesServiceTest {
         noticeOfChangePartiesService.submittedStopRepresenting(callbackRequest);
         verify(eventPublisher, times(1)).publishEvent(any(NoticeOfChangeEvent.class));
         verify(barristerHelper, times(2)).setAllocatedBarrister(isA(PartyDetails.class),
-                                                 isA(CaseData.class),
-                                                 isA(UUID.class));
+                                                                isA(CaseData.class),
+                                                                isA(UUID.class));
         verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
         verify(partyLevelCaseFlagsService).updateCaseDataWithGeneratePartyCaseFlags(isA(CaseData.class),
                                                                                     any(Function.class));
@@ -1660,8 +1668,8 @@ public class NoticeOfChangePartiesServiceTest {
             eq(caseData)
         );
         verify(barristerHelper).setAllocatedBarrister(isA(PartyDetails.class),
-                                                 isA(CaseData.class),
-                                                 isA(UUID.class));
+                                                      isA(CaseData.class),
+                                                      isA(UUID.class));
         verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
     }
 }
