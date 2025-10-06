@@ -44,7 +44,9 @@ import java.util.List;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CURRENCY_SIGN_POUND;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -152,12 +154,31 @@ public class PrePopulateFeeAndSolicitorNameController {
         @RequestHeader("Authorization") String authorisation,
         @RequestBody CallbackRequest callbackRequest,
         CaseData caseData) {
+
+        // Clone for templating (do NOT mutate the original as we don't want transient orgs)
+        CaseData caseDataForDocs = caseData;
+
+        // Enrich with transient org info
+        try {
+            if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                caseDataForDocs = organisationService.getApplicantOrganisationDetails(caseDataForDocs);
+                caseDataForDocs = organisationService.getRespondentOrganisationDetails(caseDataForDocs);
+            } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                caseDataForDocs = organisationService.getApplicantOrganisationDetailsForFL401(caseDataForDocs);
+                caseDataForDocs = organisationService.getRespondentOrganisationDetailsForFL401(caseDataForDocs);
+            }
+            // caseDataForDocs now has PartyDetails.organisations populated for doc merge only
+        } catch (Exception e) {
+            log.warn("Unable to enrich organisation details for doc generation: {}", e.getMessage());
+        }
+
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(callbackRequest.getCaseDetails().getCaseData());
+
         if (documentLanguage.isGenEng()) {
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
-                CaseDetails.builder().caseData(caseData).build(),
-                c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseData, false)
+                CaseDetails.builder().caseData(caseDataForDocs).build(),
+                c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseDataForDocs, false)
             );
 
             caseData = caseData.toBuilder().isEngDocGen(documentLanguage.isGenEng() ? Yes.toString() : No.toString())
@@ -171,8 +192,8 @@ public class PrePopulateFeeAndSolicitorNameController {
         if (documentLanguage.isGenWelsh()) {
             GeneratedDocumentInfo generatedWelshDocumentInfo = dgsService.generateWelshDocument(
                 authorisation,
-                CaseDetails.builder().caseData(caseData).build(),
-                c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseData, true)
+                CaseDetails.builder().caseData(caseDataForDocs).build(),
+                c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseDataForDocs, true)
             );
 
             caseData = caseData.toBuilder().isWelshDocGen(documentLanguage.isGenWelsh() ? Yes.toString() : No.toString())
