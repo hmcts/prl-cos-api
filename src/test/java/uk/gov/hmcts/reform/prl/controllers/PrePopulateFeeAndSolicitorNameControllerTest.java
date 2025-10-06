@@ -712,7 +712,6 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .caseTypeOfApplication("fl401")
             .build();
         CaseDetails caseDetailsFL401 = CaseDetails.builder().caseId("789").caseData(fl401).build();
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetailsFL401).build();
 
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         when(submitAndPayChecker.hasMandatoryCompleted(any(CaseData.class))).thenReturn(true);
@@ -725,6 +724,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
         when(dgsService.generateWelshDocument(Mockito.anyString(), any(CaseDetails.class), any())).thenReturn(generatedDocumentInfoShared);
         UserDetails userDetails = UserDetails.builder().forename("userFirst").surname("userLast").email("solicitor@test.com").build();
         when(userService.getUserDetails(AUTH_TOKEN)).thenReturn(userDetails);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetailsFL401).build();
 
         prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
 
