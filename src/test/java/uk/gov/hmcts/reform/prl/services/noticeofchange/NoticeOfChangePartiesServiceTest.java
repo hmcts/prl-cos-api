@@ -796,24 +796,6 @@ public class NoticeOfChangePartiesServiceTest {
         List<Element<PartyDetails>> respondentRep = new ArrayList<>();
         respondentRep.add(element(partyDetails));
 
-        CaseData newRepresentedParty = CaseData.builder()
-            .id(12345678L)
-            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .caseTypeOfApplication(C100_CASE_TYPE)
-            .respondents(respondentsNoRep)
-            .changeOrganisationRequestField(ChangeOrganisationRequest.builder()
-                                                .createdBy("test_solicitor@mailinator.com")
-                                                .caseRoleId(DynamicList.builder()
-                                                                .value(dynamicListElement)
-                                                                .listItems(List.of(dynamicListElement))
-                                                                .build())
-                                                .organisationToAdd(Organisation.builder()
-                                                                       .organisationID("EOILU2A")
-                                                                       .organisationName("FPRL-test-organisation")
-                                                                       .build())
-                                                .build())
-            .build();
-
         CaseData oldRepresentedParty = CaseData.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
@@ -849,6 +831,24 @@ public class NoticeOfChangePartiesServiceTest {
         returned.put("caRespondent1Policy", organisationPolicy);
         when(assignCaseAccessClient.applyDecision(any(), any(), any()))
             .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().data(returned).build());
+
+        CaseData newRepresentedParty = CaseData.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .respondents(respondentsNoRep)
+            .changeOrganisationRequestField(ChangeOrganisationRequest.builder()
+                                                .createdBy("test_solicitor@mailinator.com")
+                                                .caseRoleId(DynamicList.builder()
+                                                                .value(dynamicListElement)
+                                                                .listItems(List.of(dynamicListElement))
+                                                                .build())
+                                                .organisationToAdd(Organisation.builder()
+                                                                       .organisationID("EOILU2A")
+                                                                       .organisationName("FPRL-test-organisation")
+                                                                       .build())
+                                                .build())
+            .build();
 
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
@@ -1614,7 +1614,7 @@ public class NoticeOfChangePartiesServiceTest {
     public void testSendEmailAndUpdateCaseData_VerifiesSendEmailOnRemovalOfLegalRepresentation() throws Exception {
 
         Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap = new HashMap<>();
-        Optional<SolicitorRole> role = Optional.of(SolicitorRole.C100RESPONDENTSOLICITOR1);
+        Optional<SolicitorRole> solicitorRole = Optional.of(SolicitorRole.C100RESPONDENTSOLICITOR1);
 
         PartyDetails oldPD = PartyDetails.builder()
             .representativeFirstName("Old")
@@ -1630,7 +1630,7 @@ public class NoticeOfChangePartiesServiceTest {
             .build();
         Element<PartyDetails> newElem = ElementUtils.element(oldElem.getId(), newPD);
 
-        selectedPartyDetailsMap.put(role, newElem);
+        selectedPartyDetailsMap.put(solicitorRole, newElem);
 
         // build a real data‐map so the static util sees non-null .data
         Map<String,Object> rawData = new HashMap<>();
@@ -1664,7 +1664,7 @@ public class NoticeOfChangePartiesServiceTest {
         verify(spyService).sendEmailOnRemovalOfLegalRepresentation(
             any(Element.class),
             eq(newElem),
-            eq(role),
+            eq(solicitorRole),
             eq(caseData)
         );
         verify(barristerHelper).setAllocatedBarrister(isA(PartyDetails.class),

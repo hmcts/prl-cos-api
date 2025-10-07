@@ -33,7 +33,6 @@ public class OrganisationService {
     private final AuthTokenGenerator authTokenGenerator;
     private final SystemUserService systemUserService;
     private final MaskEmail maskEmail;
-    private List<Element<PartyDetails>> applicantsWithOrganisationDetails = new ArrayList<>();
 
     public CaseData getApplicantOrganisationDetails(CaseData caseData) {
         if (Optional.ofNullable(caseData.getApplicants()).isPresent()) {
@@ -55,7 +54,6 @@ public class OrganisationService {
 
         if (Optional.ofNullable(caseData.getRespondents()).isPresent()) {
             String userToken = systemUserService.getSysUserToken();
-            applicantsWithOrganisationDetails.clear();
 
             List<Element<PartyDetails>> respondents = caseData.getRespondents()
                 .stream()
@@ -173,9 +171,12 @@ public class OrganisationService {
     public Optional<Organisations> findUserOrganisation(String authorization) {
         try {
             return ofNullable(organisationApi.findUserOrganisation(authorization, authTokenGenerator.generate()));
-        } catch (FeignException.NotFound | FeignException.Forbidden ex) {
-            log.error("Exception while getting org details of the logged in users ", ex);
+        } catch (FeignException.NotFound ex) {
+            log.warn("Could not find org details of the logged in users ", ex);
             return Optional.empty();
+        } catch (FeignException.Forbidden ex) {
+            log.error("Exception while getting org details of the logged in users ", ex);
+            throw ex; // rethrow to bubble up
         }
     }
 

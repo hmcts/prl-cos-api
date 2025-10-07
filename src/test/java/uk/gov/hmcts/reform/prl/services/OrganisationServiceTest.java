@@ -487,4 +487,13 @@ public class OrganisationServiceTest {
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Error while fetching user id by email");
     }
+
+    @Test
+    public void findUserOrganisationForbiddenRethrowsTest() {
+        when(organisationApi.findUserOrganisation(authToken, serviceAuthToken))
+            .thenThrow(feignException(403, "Forbidden"));
+
+        assertThatThrownBy(() -> organisationService.findUserOrganisation(authToken))
+            .isInstanceOf(FeignException.Forbidden.class);
+    }
 }
