@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.MaskEmail;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import javax.ws.rs.NotFoundException;
