@@ -79,7 +79,7 @@ public class OrganisationService {
                         .organisations(organisations)
                         .build();
                 } catch (NotFoundException e) {
-                    log.warn(
+                    log.error(
                         "OrganisationsAPi return 404, organisation not present for {} {} ",
                         organisationID,
                         e.getMessage(),
@@ -124,7 +124,7 @@ public class OrganisationService {
                         .organisations(organisations)
                         .build();
                 } catch (NotFoundException e) {
-                    log.warn(
+                    log.error(
                         "OrganisationsAPi return 404, organisation not present for {} {} ",
                         organisationID,
                         e.getMessage(),
@@ -171,7 +171,7 @@ public class OrganisationService {
         try {
             return ofNullable(organisationApi.findUserOrganisation(authorization, authTokenGenerator.generate()));
         } catch (FeignException.NotFound ex) {
-            log.warn("Could not find org details of the logged in users ", ex);
+            log.error("Could not find org details of the logged in users ", ex);
             return Optional.empty();
         } catch (FeignException.Forbidden ex) {
             log.error("Exception while getting org details of the logged in users ", ex);
