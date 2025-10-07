@@ -475,6 +475,7 @@ public class OrganisationServiceTest {
         assertThatThrownBy(() -> organisationService.findUserOrganisation(authToken))
             .isInstanceOf(FeignException.Forbidden.class);
     }
+
     @Test
     public void getApplicantOrganisationDetails_handlesNotFoundException() {
         when(systemUserService.getSysUserToken()).thenReturn("user-token");
