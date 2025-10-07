@@ -79,7 +79,7 @@ public class OrganisationService {
                         .organisations(organisations)
                         .build();
                 } catch (NotFoundException e) {
-                    log.error(
+                    log.warn(
                         "OrganisationsAPi return 404, organisation not present for {} {} ",
                         organisationID,
                         e.getMessage(),
@@ -124,7 +124,7 @@ public class OrganisationService {
                         .organisations(organisations)
                         .build();
                 } catch (NotFoundException e) {
-                    log.error(
+                    log.warn(
                         "OrganisationsAPi return 404, organisation not present for {} {} ",
                         organisationID,
                         e.getMessage(),

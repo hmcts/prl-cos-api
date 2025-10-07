@@ -31,6 +31,7 @@ import java.util.UUID;
 
 import static feign.Request.HttpMethod.GET;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static junit.framework.TestCase.assertNull;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -38,6 +39,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -74,7 +76,6 @@ public class OrganisationServiceTest {
                               .build())
             .build();
 
-        String applicantNames = "TestFirst TestLast";
 
         List<ContactInformation> contactInformationList = Collections.singletonList(ContactInformation.builder()
                                                                                         .addressLine1("29, SEATON DRIVE")
@@ -138,8 +139,6 @@ public class OrganisationServiceTest {
                               .build())
             .build();
 
-        String applicantNames = "TestFirst TestLast";
-
         List<ContactInformation> contactInformationList = Collections.singletonList(ContactInformation.builder()
                                                                                         .addressLine1("29, SEATON DRIVE")
                                                                                         .addressLine2("test line")
@@ -151,25 +150,6 @@ public class OrganisationServiceTest {
             .organisationIdentifier("79ZRSOU")
             .name("Civil - Organisation 2")
             .contactInformation(contactInformationList)
-            .build();
-
-        PartyDetails partyDetailsWithOrganisations = PartyDetails.builder()
-            .firstName("TestFirst")
-            .lastName("TestLast")
-            .solicitorOrg(Organisation.builder()
-                              .organisationID("79ZRSOU")
-                              .organisationName("Civil - Organisation 2")
-                              .build())
-            .organisations(organisations)
-            .build();
-
-        Element<PartyDetails> applicants = Element.<PartyDetails>builder().value(partyDetailsWithOrganisations).build();
-        List<Element<PartyDetails>> elementList = Collections.singletonList(applicants);
-
-        CaseData caseData1 = CaseData.builder()
-            .id(12345L)
-            .applicantCaseName("TestCaseName")
-            .applicants(elementList)
             .build();
 
         when(organisationApi.findOrganisation(authToken,
@@ -227,7 +207,6 @@ public class OrganisationServiceTest {
                               .build())
             .build();
 
-        String applicantNames = "TestFirst TestLast";
 
         List<ContactInformation> contactInformationList = Collections.singletonList(ContactInformation.builder()
                                                                                         .addressLine1("29, SEATON DRIVE")
@@ -495,5 +474,59 @@ public class OrganisationServiceTest {
 
         assertThatThrownBy(() -> organisationService.findUserOrganisation(authToken))
             .isInstanceOf(FeignException.Forbidden.class);
+    }
+    @Test
+    public void getApplicantOrganisationDetails_handlesNotFoundException() {
+        when(systemUserService.getSysUserToken()).thenReturn("user-token");
+        when(authTokenGenerator.generate()).thenReturn("svc-token");
+        when(organisationApi.findOrganisation(anyString(), anyString(), eq("ORG-404")))
+            .thenThrow(mock(javax.ws.rs.NotFoundException.class));
+
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("A")
+            .lastName("One")
+            .solicitorOrg(Organisation.builder().organisationID("ORG-404").build())
+            .build();
+
+        List<Element<PartyDetails>> applicants = Collections.singletonList(
+            Element.<PartyDetails>builder().value(applicant).build()
+        );
+
+        CaseData input = CaseData.builder().applicants(applicants).build();
+
+        CaseData out = organisationService.getApplicantOrganisationDetails(input);
+
+        assertNotNull(out);
+        assertNotNull(out.getApplicants());
+        PartyDetails enriched = out.getApplicants().get(0).getValue();
+        assertNull("organisations should not be set when org lookup 404s", enriched.getOrganisations());
+    }
+
+    @Test
+    public void getRespondentOrganisationDetails_handlesNotFoundException() {
+        when(systemUserService.getSysUserToken()).thenReturn("user-token");
+        when(authTokenGenerator.generate()).thenReturn("svc-token");
+        when(organisationApi.findOrganisation(anyString(), anyString(), eq("ORG-404")))
+            .thenThrow(mock(javax.ws.rs.NotFoundException.class));
+
+        PartyDetails respondent = PartyDetails.builder()
+            .firstName("R")
+            .lastName("One")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .solicitorOrg(Organisation.builder().organisationID("ORG-404").build())
+            .build();
+
+        List<Element<PartyDetails>> respondents = Collections.singletonList(
+            Element.<PartyDetails>builder().value(respondent).build()
+        );
+
+        CaseData input = CaseData.builder().respondents(respondents).build();
+
+        CaseData out = organisationService.getRespondentOrganisationDetails(input);
+
+        assertNotNull(out);
+        assertNotNull(out.getRespondents());
+        PartyDetails enriched = out.getRespondents().get(0).getValue();
+        assertNull("organisations should not be set when org lookup 404s", enriched.getOrganisations());
     }
 }
