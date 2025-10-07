@@ -146,7 +146,7 @@ public class BaisDocumentUploadService {
             .courtName(caseData.getCourtName())
             .courtEpimsId(caseData.getCourtEpimsId())
             .courtTypeId(caseData.getCourtTypeId())
-            .dateOrderMade(caseData.getDateOrderMade())
+            .dateOrderMade(order.getDateCreated())
             .orderExpiryDate(getOrderExpiryDate(order))
             .build();
     }

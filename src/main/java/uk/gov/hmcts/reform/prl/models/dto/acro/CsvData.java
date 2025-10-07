@@ -8,7 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -28,5 +27,5 @@ public class CsvData {
     private PartyDetails applicant;
     private PartyDetails respondent;
     private String daApplicantContactInstructions;
-    private LocalDate dateOrderMade;
+    private LocalDateTime dateOrderMade;
 }
