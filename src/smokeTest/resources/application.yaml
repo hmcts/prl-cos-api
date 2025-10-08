@@ -664,3 +664,15 @@ acro:
   source-directory: /tmp/acro/source
   zip-password: ${ACRO_ZIP_PASSWORD:test1234}
   search-case-type-id: PRLAPPS
+  sftp:
+    host: some_host
+    port: 22
+    user: some_user
+    azure-deployment: true
+    private-key: /mnt/secrets/private-law/bais-xerox-key
+    private-key-pass-phrase: ""
+    session-wait-timeout: 10000
+    pool-size: 10
+    allow-unknown-keys: true
+    remote-directory: /
+    password: some_password
