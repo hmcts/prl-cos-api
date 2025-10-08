@@ -1,5 +1,14 @@
 package uk.gov.hmcts.reform.prl.services.acro;
 
+import com.sendgrid.Method;
+import com.sendgrid.Request;
+import com.sendgrid.Response;
+import com.sendgrid.SendGrid;
+import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Attachments;
+import com.sendgrid.helpers.mail.objects.Content;
+import com.sendgrid.helpers.mail.objects.Email;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.model.ZipParameters;
@@ -13,11 +22,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static uk.gov.hmcts.reform.prl.services.SendgridService.MAIL_SEND;
+
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class AcroZipService {
 
     @Value("${acro.source-directory}")
@@ -28,6 +41,11 @@ public class AcroZipService {
 
     @Value("${acro.zip-password}")
     private String password;
+
+    @Value("${send-grid.rpa.email.from}")
+    private String fromEmail;
+
+    private final SendGrid sendGrid;
 
     public String zip() throws Exception {
         File sourceFolder = new File(sourceDirectory);
@@ -41,8 +59,40 @@ public class AcroZipService {
 
         createArchive(archivePath, sourcePath, filesToCompress);
 
+        sendEmail(archivePath);
+
         log.info("Successfully created zip archive: {} with {} files", archivePath, filesToCompress.size());
         return archivePath;
+    }
+
+    private void sendEmail(String filePath) throws IOException {
+        try {
+            File archiveFile = new File(filePath);
+            String subject = "Acro zip email" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+            Content content = new Content("text/plain", " ");
+            Attachments attachments = new Attachments();
+            String data = Base64.getEncoder().encodeToString(Files.readAllBytes(archiveFile.toPath()));
+            attachments.setContent(data);
+            attachments.setFilename(filePath.substring(17));
+            attachments.setType("application/x-7z-compressed");
+            attachments.setDisposition("attachment");
+            Mail mail = new Mail(
+                new Email(fromEmail),
+                subject,
+                new Email("poojitha.nagappa2@hmcts.net"),
+                content
+            );
+            mail.addAttachments(attachments);
+            Request request = new Request();
+            request.setMethod(Method.POST);
+            request.setEndpoint(MAIL_SEND);
+            request.setBody(mail.build());
+            log.info("Initiating email through sendgrid");
+            Response api = sendGrid.api(request);
+            log.info("Notification to RPA sent successfully");
+        } catch (IOException ex) {
+            throw new IOException(ex.getMessage());
+        }
     }
 
     private void validateInputs(File sourceFolder, File exportFolder) {

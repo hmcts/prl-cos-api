@@ -1,11 +1,13 @@
 package uk.gov.hmcts.reform.prl.services.acro;
 
+import com.sendgrid.SendGrid;
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -23,12 +25,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class AcroZipServiceTest {
 
     private AcroZipService acroZipService;
+    @Mock
+    private SendGrid sendGrid;
+
     private Path tempSourceDir;
     private Path tempExportDir;
 
     @BeforeEach
     void setUp() throws Exception {
-        acroZipService = new AcroZipService();
+        acroZipService = new AcroZipService(sendGrid);
         tempSourceDir = Files.createTempDirectory("acrozip-src");
         tempExportDir = Files.createTempDirectory("acrozip-exp");
         ReflectionTestUtils.setField(acroZipService, "password", "TestPassword123");
