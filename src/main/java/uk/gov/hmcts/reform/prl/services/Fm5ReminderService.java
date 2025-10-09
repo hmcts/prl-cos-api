@@ -80,7 +80,6 @@ public class Fm5ReminderService {
     private final ObjectMapper objectMapper;
 
 
-
     public void sendFm5ReminderNotifications(Long hearingAwayDays) {
         long startTime = System.currentTimeMillis();
         //Fetch all cases in Hearing state pending fm5 reminder notifications
@@ -91,23 +90,34 @@ public class Fm5ReminderService {
             //Iterate all cases to evaluate rules to trigger FM5 reminder
             Map<String, Fm5PendingParty> qualifiedCasesAndPartiesBeforeHearing =
                 getQualifiedCasesAndHearingsForNotifications(caseDetailsList, hearingAwayDays);
-            log.info("Final count of cases to process for FM5 notifications: {}",
-                     qualifiedCasesAndPartiesBeforeHearing.size());
+            log.info(
+                "Final count of cases to process for FM5 notifications: {}",
+                qualifiedCasesAndPartiesBeforeHearing.size()
+            );
             //Send FM5 reminders to cases meeting all system rules, else update not needed
             qualifiedCasesAndPartiesBeforeHearing.forEach(
                 (key, fm5PendingParty) -> {
-                    log.info("Processing FM5 notification for case {}",key);
+                    log.info("Processing FM5 notification for case {}", key);
                     StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
                     Map<String, Object> caseDataUpdated = new HashMap<>();
                     if (Fm5PendingParty.NOTIFICATION_NOT_REQUIRED.equals(fm5PendingParty)) {
-                        log.info("FM5 reminders are not needed for caseId {}, update the flag fm5RemindersSent->NOT_REQUIRED", key);
+                        log.info(
+                            "FM5 reminders are not needed for caseId {}, update the flag fm5RemindersSent->NOT_REQUIRED",
+                            key
+                        );
                         startAllTabsUpdateDataContent
-                            = allTabService.getStartUpdateForSpecificEvent(key, FM5_NOTIFICATION_NOT_REQUIRED_CASE_UPDATE.getValue());
+                            = allTabService.getStartUpdateForSpecificEvent(
+                            key,
+                            FM5_NOTIFICATION_NOT_REQUIRED_CASE_UPDATE.getValue()
+                        );
                         caseDataUpdated.put("fm5RemindersSent", "NOT_REQUIRED");
                     } else {
                         log.info("*** Sending FM5 reminders for caseId {}", key);
                         startAllTabsUpdateDataContent
-                            = allTabService.getStartUpdateForSpecificEvent(key, FM5_NOTIFICATION_CASE_UPDATE.getValue());
+                            = allTabService.getStartUpdateForSpecificEvent(
+                            key,
+                            FM5_NOTIFICATION_CASE_UPDATE.getValue()
+                        );
 
                         List<Element<NotificationDetails>> fm5ReminderNotifications = fm5NotificationService.sendFm5ReminderNotifications(
                             startAllTabsUpdateDataContent.caseData(),
@@ -115,7 +125,10 @@ public class Fm5ReminderService {
                         );
 
                         if (isNotEmpty(fm5ReminderNotifications)) {
-                            log.info("FM5 reminders are sent for caseId {}, update the flag fm5RemindersSent->YES", key);
+                            log.info(
+                                "FM5 reminders are sent for caseId {}, update the flag fm5RemindersSent->YES",
+                                key
+                            );
                             caseDataUpdated.put("fm5ReminderNotifications", fm5ReminderNotifications);
                             caseDataUpdated.put("fm5RemindersSent", "YES");
                         }
@@ -140,7 +153,7 @@ public class Fm5ReminderService {
 
 
     public Map<String, Fm5PendingParty> getQualifiedCasesAndHearingsForNotifications(List<CaseDetails> caseDetailsList,
-                                                                                          Long hearingAwayDays) {
+                                                                                     Long hearingAwayDays) {
         log.info("Running system rules on the cases");
         List<String> caseIdsForHearing = new ArrayList<>();
         Map<String, Fm5PendingParty> qualifiedCasesAndPartiesBeforeHearing = new HashMap<>();
@@ -169,29 +182,31 @@ public class Fm5ReminderService {
             String userToken = systemUserService.getSysUserToken();
             String authToken = authTokenGenerator.generate();
             int batchSize = 10;
+            List<Hearings> hearingsForBatch = new ArrayList<>();
             for (int i = 0; i < caseIdsForHearing.size(); i += batchSize) {
                 List<String> batch = caseIdsForHearing.subList(i, Math.min(i + batchSize, caseIdsForHearing.size()));
-                List<Hearings> hearingsForBatch = hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(
+                hearingsForBatch = hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(
                     userToken,
                     authToken,
                     batch
                 );
-                if (isNotEmpty(hearingsForBatch)) {
-                    hearingsForBatch.forEach(
-                        hearing -> {
-                            if (isFirstListedHearingAwayForDays(
-                                hearing,
-                                null != hearingAwayDays ? hearingAwayDays : 18
-                            )) {
-                                log.info("Putting qualified case before hearing for case {}", hearing.getCaseRef());
-                                qualifiedCasesAndPartiesBeforeHearing.put(
-                                    hearing.getCaseRef(),
-                                    filteredCaseAndParties.get(hearing.getCaseRef())
-                                );
-                            }
+            }
+            List<Hearings> hearingsToProcess = hearingsForBatch.stream().toList();
+            if (isNotEmpty(hearingsToProcess)) {
+                hearingsToProcess.forEach(
+                    hearing -> {
+                        if (isFirstListedHearingAwayForDays(
+                            hearing,
+                            null != hearingAwayDays ? hearingAwayDays : 18
+                        )) {
+                            log.info("Putting qualified case before hearing for case {}", hearing.getCaseRef());
+                            qualifiedCasesAndPartiesBeforeHearing.put(
+                                hearing.getCaseRef(),
+                                filteredCaseAndParties.get(hearing.getCaseRef())
+                            );
                         }
-                    );
-                }
+                    }
+                );
             }
         }
         return qualifiedCasesAndPartiesBeforeHearing;
@@ -255,12 +270,14 @@ public class Fm5ReminderService {
         }
 
         //check & evaluate whom to send fm5 reminders
-        caseIdPendingPartyMapping.put(String.valueOf(caseData.getId()), fetchFm5DocsSubmissionPendingParties(
-            caseData,
-            legalProfUploadedCaseDocsList,
-            courtStaffUploadedCaseDocsList,
-            citizenUploadedCaseDocsList
-        ));
+        caseIdPendingPartyMapping.put(
+            String.valueOf(caseData.getId()), fetchFm5DocsSubmissionPendingParties(
+                caseData,
+                legalProfUploadedCaseDocsList,
+                courtStaffUploadedCaseDocsList,
+                citizenUploadedCaseDocsList
+            )
+        );
         return caseIdPendingPartyMapping;
     }
 
@@ -303,16 +320,18 @@ public class Fm5ReminderService {
 
     private QueryParam buildCcdQueryParam() {
         //C100 cases where fm5 reminders are not sent already
-        List<Should> shoulds = List.of(Should.builder()
-                                             .match(Match.builder()
-                                                        .caseTypeOfApplication("C100")
-                                                        .build())
-                                             .build(),
-                                       Should.builder()
-                                           .match(Match.builder()
-                                                      .fm5RemindersSent("NO")
-                                                      .build())
-                                           .build());
+        List<Should> shoulds = List.of(
+            Should.builder()
+                .match(Match.builder()
+                           .caseTypeOfApplication("C100")
+                           .build())
+                .build(),
+            Should.builder()
+                .match(Match.builder()
+                           .fm5RemindersSent("NO")
+                           .build())
+                .build()
+        );
 
         //Hearing state
         StateFilter stateFilter = StateFilter.builder()
@@ -341,48 +360,47 @@ public class Fm5ReminderService {
             .build();
     }
 
-    public boolean isFirstListedHearingAwayForDays(Hearings hearings,
-                                                   long days) {
-        Hearings hearingsToProcess;
-        hearingsToProcess = hearings;
-        if (null != hearingsToProcess && CollectionUtils.isNotEmpty(hearingsToProcess.getCaseHearings())) {
-            log.info("hearingsToProcess is not null, checking for first hearing in date range for case {}",
-                     hearingsToProcess.getCaseRef());
-            log.info("sorting schedule for hearing {}", hearingsToProcess.getCaseHearings().getFirst().getHearingID());
-            List<HearingDaySchedule> sortedHearingDaySchedules = nullSafeCollection(hearingsToProcess
-                                                                                        .getCaseHearings()).stream()
-                .filter(eachHearing -> eachHearing.getHmcStatus().equals(LISTED)
-                    && null != eachHearing.getHearingDaySchedule())
-                .map(CaseHearing::getHearingDaySchedule)
-                .flatMap(Collection::stream)
-                .sorted(Comparator.comparing(
-                    HearingDaySchedule::getHearingStartDateTime,
-                    Comparator.nullsLast(Comparator.naturalOrder())
-                ))
-                .toList();
-            if (CollectionUtils.isNotEmpty(sortedHearingDaySchedules)) {
-                log.info("checking if {} days is equal or after {}", LocalDateTime.now().plusDays(days),
-                         sortedHearingDaySchedules.getFirst().getHearingStartDateTime());
-                log.info("returning {}", LocalDate.from(LocalDateTime.now()).plusDays(days)
-                    .isAfter(LocalDate.from(sortedHearingDaySchedules.getFirst().getHearingStartDateTime()))
-                    || LocalDate.from(LocalDateTime.now()).plusDays(days)
-                             .isEqual(LocalDate.from(sortedHearingDaySchedules.getFirst().getHearingStartDateTime())));
-                return LocalDate.from(LocalDateTime.now()).plusDays(days)
-                    .isAfter(LocalDate.from(sortedHearingDaySchedules.getFirst().getHearingStartDateTime()))
-                    || LocalDate.from(LocalDateTime.now()).plusDays(days)
-                    .isEqual(LocalDate.from(sortedHearingDaySchedules.getFirst().getHearingStartDateTime()));
-            }
-            log.info("First hearing outside of date range for case {}", hearingsToProcess.getCaseRef());
+
+    public boolean isFirstListedHearingAwayForDays(Hearings hearings, long days) {
+        if (hearings == null || CollectionUtils.isEmpty(hearings.getCaseHearings())) {
+            log.info("hearingsToProcess is null");
+            return false;
         }
-        log.info("hearingsToProcess is null");
+
+        log.info("Checking first hearing in date range for case {}", hearings.getCaseRef());
+        List<HearingDaySchedule> sortedSchedules = nullSafeCollection(hearings.getCaseHearings()).stream()
+            .filter(hearing -> LISTED.equals(hearing.getHmcStatus()) && hearing.getHearingDaySchedule() != null)
+            .flatMap(hearing -> hearing.getHearingDaySchedule().stream())
+            .sorted(Comparator.comparing(
+                HearingDaySchedule::getHearingStartDateTime,
+                Comparator.nullsLast(Comparator.naturalOrder())
+            ))
+            .toList();
+
+        if (CollectionUtils.isNotEmpty(sortedSchedules)) {
+            LocalDate today = LocalDate.now();
+            LocalDate targetDate = today.plusDays(days);
+            LocalDate firstHearingDate = LocalDate.from(sortedSchedules.get(0).getHearingStartDateTime());
+
+            if (firstHearingDate.isBefore(today)) {
+                log.info("First hearing date {} is in the past for case {}", firstHearingDate, hearings.getCaseRef());
+                return false;
+            }
+
+            boolean isWithinRange = !targetDate.isBefore(firstHearingDate);
+            log.info("Checking if {} days is equal or after {}: {}", targetDate, firstHearingDate, isWithinRange);
+            return isWithinRange;
+        }
+
+        log.info("First hearing outside of date range for case {}", hearings.getCaseRef());
         return false;
     }
 
-    private  boolean isPartyAohAvailable(List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList,
-                                         List<Element<QuarantineLegalDoc>> legalProfUploadedCaseDocsList,
-                                         List<Element<QuarantineLegalDoc>> citizenQuarantineDocsList,
-                                         List<Element<QuarantineLegalDoc>> citizenUploadedCaseDocsList,
-                                         List<Element<QuarantineLegalDoc>> restrictedDocumentsList) {
+    private boolean isPartyAohAvailable(List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList,
+                                        List<Element<QuarantineLegalDoc>> legalProfUploadedCaseDocsList,
+                                        List<Element<QuarantineLegalDoc>> citizenQuarantineDocsList,
+                                        List<Element<QuarantineLegalDoc>> citizenUploadedCaseDocsList,
+                                        List<Element<QuarantineLegalDoc>> restrictedDocumentsList) {
         if (isNotEmpty(legalProfQuarantineDocsList)
             && checkByCategoryRespondentC1AApplication(legalProfQuarantineDocsList)) {
             return true;
@@ -414,13 +432,13 @@ public class Fm5ReminderService {
     }
 
     private Fm5PendingParty fetchFm5DocsSubmissionPendingParties(CaseData caseData,
-                                                                List<Element<QuarantineLegalDoc>> legalProfUploadedCaseDocsList,
-                                                                List<Element<QuarantineLegalDoc>> courtStaffUploadedCaseDocsList,
-                                                                List<Element<QuarantineLegalDoc>> citizenUploadedCaseDocsList) {
+                                                                 List<Element<QuarantineLegalDoc>> legalProfUploadedCaseDocsList,
+                                                                 List<Element<QuarantineLegalDoc>> courtStaffUploadedCaseDocsList,
+                                                                 List<Element<QuarantineLegalDoc>> citizenUploadedCaseDocsList) {
 
-        Map<String,Long> countMap = new HashMap<>();
-        countMap.put(APPLICANT_FM5_COUNT,0L);
-        countMap.put(RESPONDENT_FM5_COUNT,0L);
+        Map<String, Long> countMap = new HashMap<>();
+        countMap.put(APPLICANT_FM5_COUNT, 0L);
+        countMap.put(RESPONDENT_FM5_COUNT, 0L);
 
         if (isNotEmpty(legalProfUploadedCaseDocsList)) {
             checkByCategoryFm5StatementsAndParty(legalProfUploadedCaseDocsList, countMap);
@@ -449,8 +467,8 @@ public class Fm5ReminderService {
     }
 
     private void checkByCategoryFm5StatementsAndParty(List<Element<QuarantineLegalDoc>> quarantineDocsElemList,
-                                                      Map<String,Long> countMap) {
-        long applicantCount =  quarantineDocsElemList.stream()
+                                                      Map<String, Long> countMap) {
+        long applicantCount = quarantineDocsElemList.stream()
             .map(Element::getValue)
             .filter(doc -> FM5_STATEMENTS.equalsIgnoreCase(doc.getCategoryId())
                 && DocumentPartyEnum.APPLICANT.getDisplayedValue().equals(doc.getDocumentParty()))

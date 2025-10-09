@@ -314,6 +314,26 @@ public class Fm5ReminderServiceTest {
     }
 
     @Test
+    public void testSendFm5ReminderNotificationsToNonePartiesWhenHearingWasYesterday() {
+        List<Hearings> hearings = List.of(Hearings.hearingsWith()
+                                              .caseRef("123")
+                                              .caseHearings(List.of(CaseHearing.caseHearingWith()
+                                                                        .hmcStatus("LISTED")
+                                                                        .hearingDaySchedule(List.of(HearingDaySchedule.hearingDayScheduleWith()
+                                                                                                        .hearingStartDateTime(
+                                                                                                            LocalDateTime.now().minusDays(1))
+                                                                                                        .build()))
+                                                                        .build()))
+                                              .build());
+        when(hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(any(), any(), anyList())).thenReturn(hearings);
+
+        fm5ReminderService.sendFm5ReminderNotifications(null);
+
+        //verify
+        verifyNoInteractions(fm5NotificationService);
+    }
+
+    @Test
     public void testSendFm5ReminderNotificationsToNonePartiesWhenC1AAvailable() {
 
         caseData = caseData.toBuilder()
