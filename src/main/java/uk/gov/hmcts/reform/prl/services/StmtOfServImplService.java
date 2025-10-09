@@ -20,6 +20,8 @@ import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
@@ -115,6 +117,7 @@ public class StmtOfServImplService {
                                                                                         .code(UUID.randomUUID())
                                                                                         .label(ALL_RESPONDENTS).build())
                                                                              .build())
+                                                  .orderList(getOrdersMultiSelectList(caseData))
                                                   .build()));
         caseDataUpdated.put("stmtOfServiceAddRecipient", stmtOfServiceAddRecipient);
         return caseDataUpdated;
@@ -309,9 +312,18 @@ public class StmtOfServImplService {
                                                    StmtOfServiceAddRecipient recipient,
                                                    String selectedPartyId,
                                                    String selectedPartyName) {
+        // Extract selected order IDs from the multi-select list if present
+        List<String> selectedOrderIds = null;
+        if (recipient.getOrderList() != null && CollectionUtils.isNotEmpty(recipient.getOrderList().getValue())) {
+            selectedOrderIds = recipient.getOrderList().getValue().stream()
+                .map(DynamicMultiselectListElement::getCode)
+                .toList();
+        }
+
         return recipient.toBuilder()
             .selectedPartyId(selectedPartyId)
             .selectedPartyName(selectedPartyName)
+            .selectedOrderIds(selectedOrderIds)
             .stmtOfServiceDocument(recipient.getStmtOfServiceDocument())
             .partiesServedDateTime(null != recipient.getServedDateTimeOption()
                                        ? recipient.getServedDateTimeOption().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN))
@@ -320,6 +332,8 @@ public class StmtOfServImplService {
             .submittedDateTime(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)).toLocalDateTime())
             //PRL-6478 - Reset to null as not to show duplicate date field in XUI
             .servedDateTimeOption(null)
+            // Clear order list after processing to avoid showing in UI
+            .orderList(null)
             .build();
     }
 
@@ -354,6 +368,32 @@ public class StmtOfServImplService {
                                         .label(name).build());
         }
         return respondentListItems;
+    }
+
+    private DynamicMultiSelectList getOrdersMultiSelectList(CaseData caseData) {
+        List<DynamicMultiselectListElement> orderListItems = new ArrayList<>();
+
+        if (CollectionUtils.isNotEmpty(caseData.getOrderCollection())) {
+            caseData.getOrderCollection().forEach(orderElement -> {
+                OrderDetails order = orderElement.getValue();
+                if (order != null && order.getOtherDetails() != null) {
+                    String orderLabel = String.format("%s - %s",
+                        order.getOrderTypeId() != null ? order.getOrderTypeId() : "Order",
+                        order.getOtherDetails().getOrderCreatedDate() != null
+                            ? order.getOtherDetails().getOrderCreatedDate()
+                            : "No date");
+
+                    orderListItems.add(DynamicMultiselectListElement.builder()
+                        .code(orderElement.getId().toString())
+                        .label(orderLabel)
+                        .build());
+                }
+            });
+        }
+
+        return DynamicMultiSelectList.builder()
+            .listItems(orderListItems)
+            .build();
     }
 
     public ServedApplicationDetails checkAndServeRespondentPacksPersonalService(CaseData caseData, String authorization) {
@@ -728,10 +768,9 @@ public class StmtOfServImplService {
                                                                      String template) {
         if (!CaseUtils.hasDashboardAccess(respondent)
             && !CaseUtils.hasLegalRepresentation(respondent.getValue())) {
-            List<Document> documents = null;
             try {
                 //cover sheets
-                documents = new ArrayList<>(serviceOfApplicationPostService
+                List<Document> documents = new ArrayList<>(serviceOfApplicationPostService
                                                 .getCoverSheets(caseData, authorization,
                                                                 respondent.getValue().getAddress(),
                                                                 respondent.getValue().getLabelForDynamicList(),
