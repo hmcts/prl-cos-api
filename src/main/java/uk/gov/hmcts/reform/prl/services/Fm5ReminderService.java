@@ -357,14 +357,14 @@ public class Fm5ReminderService {
                 ))
                 .toList();
             if (CollectionUtils.isNotEmpty(sortedHearingDaySchedules)) {
-                log.info("checking if {} days is equal or before {}", LocalDateTime.now().plusDays(days),
+                log.info("checking if {} days is equal or after {}", LocalDateTime.now().plusDays(days),
                          sortedHearingDaySchedules.getFirst().getHearingStartDateTime());
                 log.info("returning {}", LocalDate.from(LocalDateTime.now()).plusDays(days)
-                    .isBefore(LocalDate.from(sortedHearingDaySchedules.getFirst().getHearingStartDateTime())) ||
+                    .isAfter(LocalDate.from(sortedHearingDaySchedules.getFirst().getHearingStartDateTime())) ||
                          LocalDate.from(LocalDateTime.now()).plusDays(days)
                              .isEqual(LocalDate.from(sortedHearingDaySchedules.getFirst().getHearingStartDateTime())));
                 return LocalDate.from(LocalDateTime.now()).plusDays(days)
-                    .isBefore(LocalDate.from(sortedHearingDaySchedules.getFirst().getHearingStartDateTime()))
+                    .isAfter(LocalDate.from(sortedHearingDaySchedules.getFirst().getHearingStartDateTime()))
                     || LocalDate.from(LocalDateTime.now()).plusDays(days)
                     .isEqual(LocalDate.from(sortedHearingDaySchedules.getFirst().getHearingStartDateTime()));
             }

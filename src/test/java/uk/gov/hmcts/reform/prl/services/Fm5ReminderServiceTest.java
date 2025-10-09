@@ -240,6 +240,75 @@ public class Fm5ReminderServiceTest {
             .sendFm5ReminderNotifications(caseData, Fm5PendingParty.RESPONDENT);
     }
 
+    @Test
+    public void testSendFm5ReminderNotificationToBothPartiesWhenDatesAreAfterHearingAwayDays() {
+        List<Hearings> hearings = List.of(Hearings.hearingsWith()
+                                              .caseRef("123")
+                                              .caseHearings(List.of(CaseHearing.caseHearingWith()
+                                                                        .hmcStatus("LISTED")
+                                                                        .hearingDaySchedule(List.of(HearingDaySchedule.hearingDayScheduleWith()
+                                                                                                        .hearingStartDateTime(
+                                                                                                            LocalDateTime.now().plusDays(5))
+                                                                                                        .build()))
+                                                                        .build()))
+                                              .build());
+        when(hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(any(), any(), anyList())).thenReturn(hearings);
+
+        fm5ReminderService.sendFm5ReminderNotifications(18L);
+
+        //verify
+        verify(fm5NotificationService, times(1))
+            .sendFm5ReminderNotifications(caseData, Fm5PendingParty.BOTH);
+    }
+
+    @Test
+    public void testSendFm5ReminderNotificationToBothPartiesWhenBatchOfCases() {
+        List<CaseDetails> caseDetailsList = new ArrayList<>();
+        List<Hearings> hearings = new ArrayList<>();
+        for (int i = 0; i < 20; i++) {
+            caseData = CaseData.builder()
+                .id(i)
+                .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
+                .applicants(List.of(element(applicant)))
+                .respondents(List.of(element(respondent)))
+                .build();
+            caseDetailsList.add(CaseDetails.builder()
+                                    .id((long) i)
+                                    .data(caseData.toMap(objectMapper))
+                                    .build());
+            hearings.add(Hearings.hearingsWith()
+                                   .caseRef(String.valueOf(i))
+                                   .caseHearings(List.of(CaseHearing.caseHearingWith()
+                                                             .hmcStatus("LISTED")
+                                                             .hearingDaySchedule(List.of(
+                                                                 HearingDaySchedule.hearingDayScheduleWith()
+                                                                     .hearingStartDateTime(
+                                                                         LocalDateTime.now().plusDays(18))
+                                                                     .build()))
+                                                             .build()))
+                                   .build());
+        }
+
+        when(hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(any(), any(), anyList())).thenReturn(hearings);
+        SearchResult searchResult = SearchResult.builder()
+            .total(20)
+            .cases(caseDetailsList)
+            .build();
+        when(coreCaseDataApi.searchCases(authToken, s2sAuthToken, CASE_TYPE, null)).thenReturn(searchResult);
+
+        SearchResultResponse response = SearchResultResponse.builder()
+            .total(20)
+            .cases(caseDetailsList)
+            .build();
+        when(objectMapper.convertValue(searchResult, SearchResultResponse.class)).thenReturn(response);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        fm5ReminderService.sendFm5ReminderNotifications(null);
+
+        //verify
+        verify(fm5NotificationService, times(20))
+            .sendFm5ReminderNotifications(any(), any());
+    }
 
     @Test
     public void testSendFm5ReminderNotificationsToNonePartiesWhenC1AAvailable() {
