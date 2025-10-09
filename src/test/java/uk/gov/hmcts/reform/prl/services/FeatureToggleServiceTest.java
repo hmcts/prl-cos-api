@@ -17,7 +17,8 @@ class FeatureToggleServiceTest {
     @Nested
     @RunWith(SpringRunner.class)
     @SpringBootTest(properties = {
-        "feature.toggle.barristerFeatureEnabled=true"
+        "feature.toggle.barristerFeatureEnabled=true",
+        "feature.toggle.cafcassDateTimeFeatureEnabled=true"
     })
     class FeatureFlagSwitchOn {
 
@@ -27,6 +28,11 @@ class FeatureToggleServiceTest {
         @Test
         void isAddBarristerFlagReturnTrue() {
             assertThat(featureToggleService.isBarristerFeatureEnabled(), is(true));
+        }
+
+        @Test
+        void isCafcassDateTimeFeatureEnabledReturnTrue() {
+            assertThat(featureToggleService.isCafcassDateTimeFeatureEnabled(), is(true));
         }
     }
 }
