@@ -161,16 +161,21 @@ public class Fm5ReminderService {
             }
         }
 
+        //Batches of 10 case ids to fetch hearings
+        log.info("Total no. of cases to check for hearing dates {}", caseIdsForHearing.size());
+
         if (isNotEmpty(caseIdsForHearing)) {
             log.info("Fetching hearings for cases {}", caseIdsForHearing);
-            List<Hearings> hearingsForAllCaseIdsWithCourtVenue = hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(
+            int batchSize = 10;
+            for (int i = 0; i < caseIdsForHearing.size(); i += batchSize) {
+                List<String> batch = caseIdsForHearing.subList(i, Math.min(i + batchSize, caseIdsForHearing.size()));
+                List<Hearings> hearingsForBatch = hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(
                 systemUserService.getSysUserToken(),
                 authTokenGenerator.generate(),
-                caseIdsForHearing
+                    batch
             );
-
-            if (isNotEmpty(hearingsForAllCaseIdsWithCourtVenue)) {
-                hearingsForAllCaseIdsWithCourtVenue.forEach(
+                if (isNotEmpty(hearingsForBatch)) {
+                    hearingsForBatch.forEach(
                     hearing -> {
                         if (isFirstListedHearingAwayForDays(hearing,
                                                             null != hearingAwayDays ? hearingAwayDays : 18)) {
@@ -183,6 +188,7 @@ public class Fm5ReminderService {
                     }
                 );
             }
+        }
         }
         return qualifiedCasesAndPartiesBeforeHearing;
     }
@@ -351,12 +357,16 @@ public class Fm5ReminderService {
                 ))
                 .toList();
             if (CollectionUtils.isNotEmpty(sortedHearingDaySchedules)) {
-                log.info("checking if {} days is the same as {}", LocalDateTime.now().plusDays(days),
+                log.info("checking if {} days is equal or before {}", LocalDateTime.now().plusDays(days),
                          sortedHearingDaySchedules.getFirst().getHearingStartDateTime());
                 log.info("returning {}", LocalDate.from(LocalDateTime.now()).plusDays(days)
-                    .equals(LocalDate.from(sortedHearingDaySchedules.getFirst().getHearingStartDateTime())));
+                    .isBefore(LocalDate.from(sortedHearingDaySchedules.getFirst().getHearingStartDateTime())) ||
+                         LocalDate.from(LocalDateTime.now()).plusDays(days)
+                             .isEqual(LocalDate.from(sortedHearingDaySchedules.getFirst().getHearingStartDateTime())));
                 return LocalDate.from(LocalDateTime.now()).plusDays(days)
-                    .equals(LocalDate.from(sortedHearingDaySchedules.getFirst().getHearingStartDateTime()));
+                    .isBefore(LocalDate.from(sortedHearingDaySchedules.getFirst().getHearingStartDateTime()))
+                    || LocalDate.from(LocalDateTime.now()).plusDays(days)
+                    .isEqual(LocalDate.from(sortedHearingDaySchedules.getFirst().getHearingStartDateTime()));
             }
             log.info("First hearing outside of date range for case {}", hearingsToProcess.getCaseRef());
         }
