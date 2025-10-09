@@ -248,7 +248,8 @@ public class Fm5ReminderServiceTest {
                                                                         .hmcStatus("LISTED")
                                                                         .hearingDaySchedule(List.of(HearingDaySchedule.hearingDayScheduleWith()
                                                                                                         .hearingStartDateTime(
-                                                                                                            LocalDateTime.now().plusDays(5))
+                                                                                                            LocalDateTime.now().plusDays(
+                                                                                                                5))
                                                                                                         .build()))
                                                                         .build()))
                                               .build());
@@ -272,21 +273,23 @@ public class Fm5ReminderServiceTest {
                 .applicants(List.of(element(applicant)))
                 .respondents(List.of(element(respondent)))
                 .build();
+
             caseDetailsList.add(CaseDetails.builder()
                                     .id((long) i)
                                     .data(caseData.toMap(objectMapper))
                                     .build());
+
             hearings.add(Hearings.hearingsWith()
-                                   .caseRef(String.valueOf(i))
-                                   .caseHearings(List.of(CaseHearing.caseHearingWith()
-                                                             .hmcStatus("LISTED")
-                                                             .hearingDaySchedule(List.of(
-                                                                 HearingDaySchedule.hearingDayScheduleWith()
-                                                                     .hearingStartDateTime(
-                                                                         LocalDateTime.now().plusDays(18))
-                                                                     .build()))
-                                                             .build()))
-                                   .build());
+                             .caseRef(String.valueOf(i))
+                             .caseHearings(List.of(CaseHearing.caseHearingWith()
+                                                       .hmcStatus("LISTED")
+                                                       .hearingDaySchedule(List.of(
+                                                           HearingDaySchedule.hearingDayScheduleWith()
+                                                               .hearingStartDateTime(
+                                                                   LocalDateTime.now().plusDays(18))
+                                                               .build()))
+                                                       .build()))
+                             .build());
         }
 
         when(hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(any(), any(), anyList())).thenReturn(hearings);
