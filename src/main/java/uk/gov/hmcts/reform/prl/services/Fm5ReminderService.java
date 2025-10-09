@@ -170,25 +170,27 @@ public class Fm5ReminderService {
             for (int i = 0; i < caseIdsForHearing.size(); i += batchSize) {
                 List<String> batch = caseIdsForHearing.subList(i, Math.min(i + batchSize, caseIdsForHearing.size()));
                 List<Hearings> hearingsForBatch = hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(
-                systemUserService.getSysUserToken(),
-                authTokenGenerator.generate(),
+                    systemUserService.getSysUserToken(),
+                    authTokenGenerator.generate(),
                     batch
-            );
+                );
                 if (isNotEmpty(hearingsForBatch)) {
                     hearingsForBatch.forEach(
-                    hearing -> {
-                        if (isFirstListedHearingAwayForDays(hearing,
-                                                            null != hearingAwayDays ? hearingAwayDays : 18)) {
-                            log.info("Putting qualified case before hearing for case {}", hearing.getCaseRef());
-                            qualifiedCasesAndPartiesBeforeHearing.put(
-                                hearing.getCaseRef(),
-                                filteredCaseAndParties.get(hearing.getCaseRef())
-                            );
+                        hearing -> {
+                            if (isFirstListedHearingAwayForDays(
+                                hearing,
+                                null != hearingAwayDays ? hearingAwayDays : 18
+                            )) {
+                                log.info("Putting qualified case before hearing for case {}", hearing.getCaseRef());
+                                qualifiedCasesAndPartiesBeforeHearing.put(
+                                    hearing.getCaseRef(),
+                                    filteredCaseAndParties.get(hearing.getCaseRef())
+                                );
+                            }
                         }
-                    }
-                );
+                    );
+                }
             }
-        }
         }
         return qualifiedCasesAndPartiesBeforeHearing;
     }
@@ -360,8 +362,8 @@ public class Fm5ReminderService {
                 log.info("checking if {} days is equal or after {}", LocalDateTime.now().plusDays(days),
                          sortedHearingDaySchedules.getFirst().getHearingStartDateTime());
                 log.info("returning {}", LocalDate.from(LocalDateTime.now()).plusDays(days)
-                    .isAfter(LocalDate.from(sortedHearingDaySchedules.getFirst().getHearingStartDateTime())) ||
-                         LocalDate.from(LocalDateTime.now()).plusDays(days)
+                    .isAfter(LocalDate.from(sortedHearingDaySchedules.getFirst().getHearingStartDateTime()))
+                    || LocalDate.from(LocalDateTime.now()).plusDays(days)
                              .isEqual(LocalDate.from(sortedHearingDaySchedules.getFirst().getHearingStartDateTime())));
                 return LocalDate.from(LocalDateTime.now()).plusDays(days)
                     .isAfter(LocalDate.from(sortedHearingDaySchedules.getFirst().getHearingStartDateTime()))
