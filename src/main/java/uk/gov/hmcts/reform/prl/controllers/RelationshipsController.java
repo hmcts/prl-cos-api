@@ -257,6 +257,7 @@ public class RelationshipsController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put(PrlAppsConstants.BUFF_CHILD_AND_RESPONDENT_RELATIONS, null);
         caseDataUpdated.put("childAndRespondentRelations", updatedChildAndRespondentRelations);
+        cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -287,6 +288,7 @@ public class RelationshipsController {
                 })
         );
         caseDataUpdated.put(PrlAppsConstants.BUFF_CHILD_AND_OTHER_PEOPLE_RELATIONS, otherPeopleChildRelationsList);
+        cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
