@@ -8,7 +8,8 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -41,7 +42,7 @@ public class CafcassDateTimeService {
         if (featureToggleService.isCafcassDateTimeFeatureEnabled()
             && !excludedEventList.contains(eventId)
             && caseStateList.contains(state)) {
-            caseDataMap.put(CAFCASS_DATE_TIME, LocalDateTime.now());
+            caseDataMap.put(CAFCASS_DATE_TIME, ZonedDateTime.now(ZoneId.of("UTC")).toLocalDateTime());
         }
 
         return caseDataMap;
