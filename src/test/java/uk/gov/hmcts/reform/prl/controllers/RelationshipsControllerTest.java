@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.utils.ApplicantsListGenerator;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
@@ -71,6 +72,8 @@ public class RelationshipsControllerTest {
     @Mock
     private ConfidentialityTabService confidentialityTabService;
 
+    @Mock
+    private CafcassDateTimeService cafcassDateTimeService;
 
     public static final String authToken = "Bearer TestAuthToken";
 

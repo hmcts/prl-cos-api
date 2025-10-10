@@ -80,6 +80,7 @@ import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.GatekeepingDetailsService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
@@ -181,6 +182,7 @@ public class CallbackController {
     private final MiamPolicyUpgradeService miamPolicyUpgradeService;
     private final MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
     private final SystemUserService systemUserService;
+    private final CafcassDateTimeService cafcassDateTimeService;
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(summary = "Callback to validate application consideration timetable. Returns error messages if validation fails.")
@@ -693,9 +695,11 @@ public class CallbackController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            Map<String, Object> caseDataMap = updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, authorisation);
+            cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
             return AboutToStartOrSubmitCallbackResponse
                 .builder()
-                .data(updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, authorisation))
+                .data(caseDataMap)
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -1085,9 +1089,11 @@ public class CallbackController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            Map<String, Object> caseDataMap = updatePartyDetailsService.updateOtherPeopleInTheCaseConfidentialityData(callbackRequest);
+            cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
             return AboutToStartOrSubmitCallbackResponse
                 .builder()
-                .data(updatePartyDetailsService.updateOtherPeopleInTheCaseConfidentialityData(callbackRequest))
+                .data(caseDataMap)
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

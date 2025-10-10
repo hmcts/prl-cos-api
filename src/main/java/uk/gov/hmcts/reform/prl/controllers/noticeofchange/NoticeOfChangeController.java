@@ -24,10 +24,12 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
@@ -39,14 +41,17 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 public class NoticeOfChangeController extends AbstractCallbackController {
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
     private final AuthorisationService authorisationService;
+    private final CafcassDateTimeService cafcassDateTimeService;
 
     @Autowired
     protected NoticeOfChangeController(ObjectMapper objectMapper, EventService eventPublisher,
-                                       NoticeOfChangePartiesService
-        noticeOfChangePartiesService, AuthorisationService authorisationService) {
+                                       NoticeOfChangePartiesService noticeOfChangePartiesService,
+                                       AuthorisationService authorisationService,
+                                       CafcassDateTimeService cafcassDateTimeService) {
         super(objectMapper, eventPublisher);
         this.noticeOfChangePartiesService = noticeOfChangePartiesService;
         this.authorisationService = authorisationService;
+        this.cafcassDateTimeService = cafcassDateTimeService;
     }
 
     @PostMapping(path = "/aboutToSubmitNoCRequest", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -164,10 +169,11 @@ public class NoticeOfChangeController extends AbstractCallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
         List<String> errorList = new ArrayList<>();
+        Map<String, Object> caseDataMap = noticeOfChangePartiesService.aboutToSubmitAdminRemoveLegalRepresentative(authorisation, callbackRequest);
+        cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
         return AboutToStartOrSubmitCallbackResponse
             .builder()
-            .data(noticeOfChangePartiesService.aboutToSubmitAdminRemoveLegalRepresentative(authorisation, callbackRequest
-            )).errors(errorList).build();
+            .data(caseDataMap).errors(errorList).build();
     }
 
     @PostMapping(path = "/submittedAdminRemoveLegalRepresentative", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
