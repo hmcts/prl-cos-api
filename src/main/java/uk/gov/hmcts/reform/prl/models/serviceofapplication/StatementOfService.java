@@ -23,4 +23,6 @@ public class StatementOfService {
     private List<Element<StmtOfServiceAddRecipient>> stmtOfServiceForOrder;
     @JsonProperty("stmtOfServiceForApplication")
     private List<Element<StmtOfServiceAddRecipient>> stmtOfServiceForApplication;
+    @JsonProperty("servedOrderIds")
+    private List<String> servedOrderIds;
 }

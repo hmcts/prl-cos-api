@@ -127,6 +127,10 @@ public class StmtOfServImplService {
         Map<String, Object> caseDataUpdateMap = caseDetails.getData();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         log.info("*** Statement of service, about-to-submit callback ***");
+
+        // Collect all served order IDs from recipients
+        List<String> allServedOrderIds = collectServedOrderIds(caseData);
+
         if (StatementOfServiceWhatWasServed.statementOfServiceApplicationPack
             .equals(caseData.getStatementOfService().getStmtOfServiceWhatWasServed())) {
             //Application packs
@@ -136,6 +140,9 @@ public class StmtOfServImplService {
             //Orders
             handleSosForOrders(authorisation, caseData, caseDataUpdateMap);
         }
+
+        // Update the statement of service with served order IDs
+        updateStatementOfServiceWithServedOrderIds(caseData, caseDataUpdateMap, allServedOrderIds);
 
         caseDataUpdateMap.put("stmtOfServiceAddRecipient", null);
         caseDataUpdateMap.put("stmtOfServiceWhatWasServed", null);
@@ -853,5 +860,62 @@ public class StmtOfServImplService {
                            .build());
     }
 
-}
+    private List<String> collectServedOrderIds(CaseData caseData) {
+        List<String> allServedOrderIds = new ArrayList<>();
 
+        if (caseData.getStatementOfService() != null
+            && CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceAddRecipient())) {
+
+            caseData.getStatementOfService().getStmtOfServiceAddRecipient()
+                .stream()
+                .map(Element::getValue)
+                .forEach(recipient -> {
+                    // Extract order IDs directly from the orderList (before it gets processed)
+                    if (recipient.getOrderList() != null && CollectionUtils.isNotEmpty(recipient.getOrderList().getValue())) {
+                        List<String> orderIds = recipient.getOrderList().getValue().stream()
+                            .map(DynamicMultiselectListElement::getCode)
+                            .toList();
+                        allServedOrderIds.addAll(orderIds);
+                        log.info("Collected {} order IDs from recipient: {}",
+                                orderIds.size(),
+                                recipient.getSelectedPartyName());
+                    } else if (CollectionUtils.isNotEmpty(recipient.getSelectedOrderIds())) {
+                        // Also check selectedOrderIds in case they're already processed
+                        allServedOrderIds.addAll(recipient.getSelectedOrderIds());
+                        log.info("Collected {} order IDs from recipient (pre-processed): {}",
+                                recipient.getSelectedOrderIds().size(),
+                                recipient.getSelectedPartyName());
+                    }
+                });
+        }
+
+        // Remove duplicates and return unique order IDs
+        List<String> uniqueOrderIds = allServedOrderIds.stream().distinct().toList();
+        log.info("Total unique served order IDs collected: {}", uniqueOrderIds.size());
+        return uniqueOrderIds;
+    }
+
+    private void updateStatementOfServiceWithServedOrderIds(CaseData caseData,
+                                                           Map<String, Object> caseDataUpdateMap,
+                                                           List<String> servedOrderIds) {
+        if (caseData.getStatementOfService() != null) {
+            List<String> existingServedOrderIds = caseData.getStatementOfService().getServedOrderIds();
+            List<String> allServedOrderIds = new ArrayList<>();
+
+            if (CollectionUtils.isNotEmpty(existingServedOrderIds)) {
+                allServedOrderIds.addAll(existingServedOrderIds);
+            }
+            if (CollectionUtils.isNotEmpty(servedOrderIds)) {
+                allServedOrderIds.addAll(servedOrderIds);
+            }
+
+            List<String> uniqueServedOrderIds = allServedOrderIds.stream().distinct().toList();
+            log.info("Updating StatementOfService with {} served order IDs", uniqueServedOrderIds.size());
+
+            caseDataUpdateMap.put("statementOfService", caseData.getStatementOfService().toBuilder()
+                .servedOrderIds(uniqueServedOrderIds)
+                .build());
+        }
+    }
+
+}
