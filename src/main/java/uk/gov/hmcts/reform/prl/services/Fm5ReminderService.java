@@ -182,7 +182,14 @@ public class Fm5ReminderService {
             List<Hearings> hearingsForBatch = new ArrayList<>();
             for (int i = 0; i < caseIdsForHearing.size(); i += batchSize) {
                 List<String> batch = caseIdsForHearing.subList(i, Math.min(i + batchSize, caseIdsForHearing.size()));
-                hearingsForBatch = hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(
+                List<Hearings> result = hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(
+            systemUserService.getSysUserToken(),
+            authTokenGenerator.generate(),
+            batch
+        );
+        if (result != null && !result.isEmpty()) {
+            allHearings.addAll(result); // add to the list
+        }
                     userToken,
                     authToken,
                     batch
