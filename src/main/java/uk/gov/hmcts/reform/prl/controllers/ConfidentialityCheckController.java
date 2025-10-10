@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityCheckService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
@@ -47,6 +48,7 @@ public class ConfidentialityCheckController {
 
     private final ConfidentialityCheckService confidentialityCheckService;
 
+    private final CafcassDateTimeService cafcassDateTimeService;
 
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -99,7 +101,7 @@ public class ConfidentialityCheckController {
             ));
             //PRL-3466 - auto link citizen case if conf check is approved
             serviceOfApplicationService.autoLinkCitizenCase(caseData, caseDataMap, callbackRequest.getEventId());
-
+            cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

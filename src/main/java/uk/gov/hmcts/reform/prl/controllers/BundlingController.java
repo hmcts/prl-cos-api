@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.bundle.BundlingService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -42,15 +43,18 @@ import static uk.gov.hmcts.reform.prl.mapper.bundle.BundleCreateRequestMapper.ge
 public class BundlingController extends AbstractCallbackController {
     private final BundlingService bundlingService;
     private final AuthorisationService authorisationService;
+    private final CafcassDateTimeService cafcassDateTimeService;
 
     @Autowired
     protected BundlingController(ObjectMapper objectMapper,
                                  EventService eventPublisher,
                                  BundlingService bundlingService,
-                                 AuthorisationService authorisationService) {
+                                 AuthorisationService authorisationService,
+                                 CafcassDateTimeService cafcassDateTimeService) {
         super(objectMapper, eventPublisher);
         this.bundlingService = bundlingService;
         this.authorisationService = authorisationService;
+        this.cafcassDateTimeService = cafcassDateTimeService;
     }
 
     @PostMapping(path = "/createBundle", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -89,6 +93,7 @@ public class BundlingController extends AbstractCallbackController {
                     "*** Bundle created successfully.. Updating bundle Information in case data for the case id: {}",
                     caseData.getId()
                 );
+                cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
             }
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {

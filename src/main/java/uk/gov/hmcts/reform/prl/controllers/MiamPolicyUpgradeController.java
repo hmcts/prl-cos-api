@@ -18,7 +18,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 
+import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -30,6 +32,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 public class MiamPolicyUpgradeController {
     private final AuthorisationService authorisationService;
     private final MiamPolicyUpgradeService miamPolicyUpgradeService;
+    private final CafcassDateTimeService cafcassDateTimeService;
+
 
     @PostMapping(path = "/submit-miam-policy-upgrade", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Submit Miam Policy Upgrade event")
@@ -44,8 +48,10 @@ public class MiamPolicyUpgradeController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            Map<String, Object> caseDataMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
+            cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest)).build();
+                .data(caseDataMap).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

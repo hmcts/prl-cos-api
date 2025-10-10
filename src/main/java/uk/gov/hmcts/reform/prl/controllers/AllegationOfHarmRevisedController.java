@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AllegationOfHarmRevisedService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.Map;
@@ -39,6 +40,8 @@ public class AllegationOfHarmRevisedController {
     private final AllegationOfHarmRevisedService allegationOfHarmRevisedService;
 
     private final AuthorisationService authorisationService;
+
+    private final CafcassDateTimeService cafcassDateTimeService;
 
     @PostMapping(path = "/pre-populate-child-data", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "pre populuates child data ")
@@ -72,6 +75,7 @@ public class AllegationOfHarmRevisedController {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             allegationOfHarmRevisedService.resetFields(caseData,caseDataUpdated);
+            cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
