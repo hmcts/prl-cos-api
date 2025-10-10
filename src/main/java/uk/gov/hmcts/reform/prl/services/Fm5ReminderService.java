@@ -179,7 +179,7 @@ public class Fm5ReminderService {
             String userToken = systemUserService.getSysUserToken();
             String authToken = authTokenGenerator.generate();
             int batchSize = 10;
-            List<Hearings> hearingsForBatch = new ArrayList<>();
+            List<Hearings> hearingsAll = new ArrayList<>();
             for (int i = 0; i < caseIdsForHearing.size(); i += batchSize) {
                 List<String> batch = caseIdsForHearing.subList(i, Math.min(i + batchSize, caseIdsForHearing.size()));
                 List<Hearings> result = hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(
