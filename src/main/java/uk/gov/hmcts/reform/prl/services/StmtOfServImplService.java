@@ -880,7 +880,6 @@ public class StmtOfServImplService {
                                 orderIds.size(),
                                 recipient.getSelectedPartyName());
                     } else if (CollectionUtils.isNotEmpty(recipient.getSelectedOrderIds())) {
-                        // Also check selectedOrderIds in case they're already processed
                         allServedOrderIds.addAll(recipient.getSelectedOrderIds());
                         log.info("Collected {} order IDs from recipient (pre-processed): {}",
                                 recipient.getSelectedOrderIds().size(),
