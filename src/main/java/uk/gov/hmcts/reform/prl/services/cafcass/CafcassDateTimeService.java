@@ -31,12 +31,19 @@ public class CafcassDateTimeService {
     private List<String> excludedEventList;
 
     public Map<String, Object> updateCafcassDateTime(CallbackRequest callbackRequest) {
+
+        return updateCafcassDateTime(callbackRequest.getCaseDetails().getData(),
+                                     callbackRequest.getCaseDetails().getState(),
+                                     callbackRequest.getEventId());
+    }
+
+    private Map<String, Object> updateCafcassDateTime(Map<String, Object> caseDataMap, String state, String eventId) {
         if (featureToggleService.isCafcassDateTimeFeatureEnabled()
-            && !excludedEventList.contains(callbackRequest.getEventId())
-            && caseStateList.contains(callbackRequest.getCaseDetails().getState())) {
-            callbackRequest.getCaseDetails().getData().put(CAFCASS_DATE_TIME, LocalDateTime.now());
+            && !excludedEventList.contains(eventId)
+            && caseStateList.contains(state)) {
+            caseDataMap.put(CAFCASS_DATE_TIME, LocalDateTime.now());
         }
 
-        return callbackRequest.getCaseDetails().getData();
+        return caseDataMap;
     }
 }

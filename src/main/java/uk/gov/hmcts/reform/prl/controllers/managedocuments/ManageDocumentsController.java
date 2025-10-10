@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -44,6 +45,7 @@ import static org.springframework.http.ResponseEntity.ok;
 @SecurityRequirement(name = "Bearer Authentication")
 public class ManageDocumentsController extends AbstractCallbackController {
     private final ManageDocumentsService manageDocumentsService;
+    private final CafcassDateTimeService cafcassDateTimeService;
     private final UserService userService;
     public static final String CONFIRMATION_HEADER = "# Cyflwynwyd y ddogfen<br/>Documents submitted";
     public static final String CONFIRMATION_BODY =
@@ -55,9 +57,11 @@ public class ManageDocumentsController extends AbstractCallbackController {
     @Autowired
     protected ManageDocumentsController(ObjectMapper objectMapper, EventService eventPublisher,
                                         ManageDocumentsService manageDocumentsService,
+                                        CafcassDateTimeService cafcassDateTimeService,
                                         UserService userService) {
         super(objectMapper, eventPublisher);
         this.manageDocumentsService = manageDocumentsService;
+        this.cafcassDateTimeService = cafcassDateTimeService;
         this.userService = userService;
     }
 
@@ -126,9 +130,11 @@ public class ManageDocumentsController extends AbstractCallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
+        Map<String, Object> caseDataMap = manageDocumentsService.copyDocument(callbackRequest, authorisation);
+        caseDataMap = cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
         return AboutToStartOrSubmitCallbackResponse
             .builder()
-            .data(manageDocumentsService.copyDocument(callbackRequest, authorisation))
+            .data(caseDataMap)
             .build();
     }
 
