@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SosUploadedByEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.time.LocalDateTime;
@@ -30,6 +31,10 @@ public class StmtOfServiceAddRecipient {
     private final LocalDateTime submittedDateTime;
     //Date - citizen sos, date & time - court staff/solicitor sos
     private final String partiesServedDateTime;
+    //Multi-select list for orders being served
+    private final DynamicMultiSelectList orderList;
+    //Store selected order IDs
+    private final List<String> selectedOrderIds;
     //NOT IN USE, DO NOT USE THESE
     private final String citizenPartiesServedList;
     private final String citizenPartiesServedDate;

@@ -21,9 +21,12 @@ import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRes
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.StatementOfServiceWhatWasServed;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.ServeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.CoverLetterMap;
@@ -49,7 +52,10 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
@@ -60,6 +66,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
+import static uk.gov.hmcts.reform.prl.services.StmtOfServImplService.STMT_OF_SERVICE_FOR_APPLICATION;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -711,6 +718,60 @@ public class StmtOfServImplServiceTest {
 
     }
 
+    // Simplified order ID tests - replace the 5 complex tests with these 2
+    @Test
+    public void testCollectServedOrderIds_BasicFunctionality() {
+        // Test basic order ID collection
+        List<String> orderIds = Arrays.asList("order-1", "order-2");
+        CaseData caseData = createBasicCaseDataWithOrders(orderIds);
+
+        Map<String, Object> result = stmtOfServImplService.handleSosAboutToSubmit(
+            createCaseDetails(caseData), authToken);
+
+        StatementOfService sos = (StatementOfService) result.get("statementOfService");
+        assertEquals(orderIds, sos.getServedOrderIds());
+    }
+
+    @Test
+    public void testCollectServedOrderIds_DuplicateHandling() {
+        // Test duplicate removal
+        List<String> existingIds = Arrays.asList("order-1", "order-2");
+        List<String> newIds = Arrays.asList("order-2", "order-3"); // order-2 is duplicate
+
+        CaseData caseData = createBasicCaseDataWithOrders(newIds, existingIds);
+
+        Map<String, Object> result = stmtOfServImplService.handleSosAboutToSubmit(
+            createCaseDetails(caseData), authToken);
+
+        StatementOfService sos = (StatementOfService) result.get("statementOfService");
+        assertEquals(3, sos.getServedOrderIds().size()); // Should remove duplicates
+        assertTrue(sos.getServedOrderIds().containsAll(Arrays.asList("order-1", "order-2", "order-3")));
+    }
+
+    // Simplified negative test - replace the 4 complex negative tests with this one
+    @Test
+    public void testHandleSosForApplicationPacks_WhenConditionsFail() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .statementOfService(StatementOfService.builder()
+                .stmtOfServiceWhatWasServed(StatementOfServiceWhatWasServed.statementOfServiceApplicationPack)
+                .stmtOfServiceAddRecipient(Arrays.asList(element(StmtOfServiceAddRecipient.builder()
+                    .respondentDynamicList(DynamicList.builder()
+                        .value(DynamicListElement.builder().code(TEST_UUID).label("Test Recipient").build())
+                        .build())
+                    .stmtOfServiceDocument(Document.builder().documentFileName("test.pdf").build())
+                    .build())))
+                .build())
+            .serviceOfApplication(null) // Missing required data - this will cause the condition to fail
+            .respondents(listOfRespondents) // Add respondents so the service doesn't fail on other null checks
+            .build();
+
+        Map<String, Object> result = stmtOfServImplService.handleSosAboutToSubmit(
+            createCaseDetails(caseData), authToken);
+
+        assertNull(result.get("finalServedApplicationDetailsList"));
+    }
+
     @Test
     public void testcitizenSosSubmissionC100() {
         CaseData caseData = CaseData.builder()
@@ -871,4 +932,274 @@ public class StmtOfServImplServiceTest {
         verify(allTabService, times(1))
             .submitAllTabsUpdate(Mockito.anyString(), Mockito.anyString(), Mockito.any(),Mockito.any(),Mockito.any());
     }
-}
+
+    @Test
+    public void testRetrieveRespondentsListWithOrderCollection() {
+        // Create OrderDetails with otherDetails containing orderCreatedDate to cover the uncovered block
+        OtherOrderDetails otherDetails1 = OtherOrderDetails.builder()
+            .orderCreatedDate("2024-01-15")
+            .build();
+
+        OtherOrderDetails otherDetails2 = OtherOrderDetails.builder()
+            .orderCreatedDate(null) // Test null orderCreatedDate case
+            .build();
+
+        OrderDetails order1 = OrderDetails.builder()
+            .orderTypeId("C21Order")
+            .otherDetails(otherDetails1)
+            .build();
+
+        OrderDetails order2 = OrderDetails.builder()
+            .orderTypeId(null) // Test null orderTypeId case
+            .otherDetails(otherDetails2)
+            .build();
+
+        OrderDetails order3 = OrderDetails.builder()
+            .orderTypeId("C43Order")
+            .otherDetails(null) // Test null otherDetails case
+            .build();
+
+        List<Element<OrderDetails>> orderCollection = Arrays.asList(
+            element(UUID.fromString(TEST_UUID), order1),
+            element(UUID.randomUUID(), order2),
+            element(UUID.randomUUID(), order3),
+            element(UUID.randomUUID(), null) // Test null OrderDetails case
+        );
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .respondents(listOfRespondents)
+            .orderCollection(orderCollection)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .data(stringObjectMap)
+            .build();
+
+        Map<String, Object> updatedCaseData = stmtOfServImplService.retrieveRespondentsList(caseDetails);
+
+        assertNotNull(updatedCaseData);
+        assertNotNull(updatedCaseData.get("stmtOfServiceAddRecipient"));
+
+        // Verify that the order collection was processed and the method completed successfully
+        List<Element<StmtOfServiceAddRecipient>> recipients =
+            (List<Element<StmtOfServiceAddRecipient>>) updatedCaseData.get("stmtOfServiceAddRecipient");
+        assertNotNull(recipients);
+        assertEquals(1, recipients.size());
+
+        // Verify that the orderList was populated with the processed orders
+        StmtOfServiceAddRecipient recipient = recipients.get(0).getValue();
+        assertNotNull(recipient.getOrderList());
+        assertNotNull(recipient.getOrderList().getListItems());
+        // Should have 2 items (order1 with valid data, order2 with null orderCreatedDate)
+        // order3 and null order should be filtered out due to null otherDetails or null OrderDetails
+        assertEquals(2, recipient.getOrderList().getListItems().size());
+    }
+
+    // Simplified helper methods
+    private CaseData createBasicCaseDataWithOrders(List<String> orderIds) {
+        return createBasicCaseDataWithOrders(orderIds, null);
+    }
+
+    private CaseData createBasicCaseDataWithOrders(List<String> orderIds, List<String> existingOrderIds) {
+        List<Element<StmtOfServiceAddRecipient>> recipients = Arrays.asList(
+            element(StmtOfServiceAddRecipient.builder()
+                .orderList(DynamicMultiSelectList.builder()
+                    .value(orderIds.stream()
+                        .map(id -> DynamicMultiselectListElement.builder().code(id).label("Order " + id).build())
+                        .toList())
+                    .build())
+                .respondentDynamicList(DynamicList.builder()
+                    .value(DynamicListElement.builder().code(TEST_UUID).label("Test Recipient").build())
+                    .build())
+                .stmtOfServiceDocument(Document.builder().documentFileName("test.pdf").build())
+                .build())
+        );
+
+        StatementOfService.StatementOfServiceBuilder sosBuilder = StatementOfService.builder()
+            .stmtOfServiceWhatWasServed(StatementOfServiceWhatWasServed.statementOfServiceOrder)
+            .stmtOfServiceAddRecipient(recipients);
+
+        if (existingOrderIds != null) {
+            sosBuilder.servedOrderIds(existingOrderIds);
+        }
+
+        return CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .statementOfService(sosBuilder.build())
+            .respondents(listOfRespondents)
+            .build();
+    }
+
+    private CaseDetails createCaseDetails(CaseData caseData) {
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageDocumentsService.getLoggedInUserType(anyString())).thenReturn(List.of(PrlAppsConstants.COURT_ADMIN_ROLE));
+        when(userService.getUserDetails(Mockito.any())).thenReturn(UserDetails.builder().build());
+
+        return CaseDetails.builder()
+            .id(12345678L)
+            .data(stringObjectMap)
+            .build();
+    }
+
+    @Test
+    public void testHandleSosForApplicationPacks_WhenAllConditionsPass() {
+        CaseData caseData = createTestScenarioForApplicationPacks(
+            C100_CASE_TYPE,
+            Arrays.asList(TEST_UUID)
+        );
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .data(stringObjectMap)
+            .build();
+
+        when(manageDocumentsService.getLoggedInUserType(anyString())).thenReturn(List.of(PrlAppsConstants.COURT_ADMIN_ROLE));
+        when(userService.getUserDetails(Mockito.any())).thenReturn(UserDetails.builder().build());
+
+        // Execute
+        Map<String, Object> result = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
+
+        // Verify - should process finalServedApplicationDetailsList when all conditions pass
+        assertNotNull(result);
+        assertNotNull(result.get("finalServedApplicationDetailsList"));
+        assertNull(result.get("unServedRespondentPack")); // Should be cleared after processing
+    }
+
+    @Test
+    public void testHandleSosForApplicationPacks_OrderListFieldIsClearedToPreventCcdValidationError() {
+        DynamicMultiSelectList orderList = DynamicMultiSelectList.builder()
+            .value(Arrays.asList(
+                DynamicMultiselectListElement.builder().code("order-1").label("Test Order 1").build(),
+                DynamicMultiselectListElement.builder().code("order-2").label("Test Order 2").build()
+            ))
+            .build();
+
+        StmtOfServiceAddRecipient recipient = StmtOfServiceAddRecipient.builder()
+            .respondentDynamicList(DynamicList.builder()
+                .value(DynamicListElement.builder().code(TEST_UUID).label("Test Recipient").build())
+                .build())
+            .orderList(orderList) // This should be cleared by the service even for application packs
+            .stmtOfServiceDocument(Document.builder().documentFileName("test.pdf").build())
+            .build();
+
+        // Create test case data for APPLICATION PACKS (not orders)
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .statementOfService(StatementOfService.builder()
+                .stmtOfServiceWhatWasServed(StatementOfServiceWhatWasServed.statementOfServiceApplicationPack)
+                .stmtOfServiceAddRecipient(Arrays.asList(element(recipient)))
+                .build())
+            .serviceOfApplication(ServiceOfApplication.builder()
+                .unServedRespondentPack(SoaPack.builder()
+                    .personalServiceBy(SoaSolicitorServingRespondentsEnum.courtAdmin.toString())
+                    .packDocument(Arrays.asList(element(Document.builder()
+                        .documentFileName("application-pack.pdf")
+                        .build())))
+                    .build())
+                .build())
+            .respondents(listOfRespondents)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(Mockito.any())).thenReturn(UserDetails.builder().build());
+        when(manageDocumentsService.getLoggedInUserType(anyString())).thenReturn(List.of(PrlAppsConstants.COURT_ADMIN_ROLE));
+        when(launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)).thenReturn(false);
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .data(stringObjectMap)
+            .build();
+
+        Map<String, Object> result = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
+
+        assertNotNull(result.get(STMT_OF_SERVICE_FOR_APPLICATION));
+
+        @SuppressWarnings("unchecked")
+        List<Element<StmtOfServiceAddRecipient>> processedRecipients =
+            (List<Element<StmtOfServiceAddRecipient>>) result.get(STMT_OF_SERVICE_FOR_APPLICATION);
+
+        assertFalse("Processed recipients list should not be empty", processedRecipients.isEmpty());
+
+        processedRecipients.forEach(recipientElement -> {
+            StmtOfServiceAddRecipient processedRecipient = recipientElement.getValue();
+            assertNull("orderList field should be cleared to prevent CCD validation error 'Field is not recognised'",
+                      processedRecipient.getOrderList());
+            assertNull("respondentDynamicList should also be cleared",
+                      processedRecipient.getRespondentDynamicList());
+        });
+
+        assertNotNull("finalServedApplicationDetailsList should be populated when conditions are met",
+                     result.get("finalServedApplicationDetailsList"));
+    }
+
+    @Test
+    public void testHandleSosForOrders_OrderListFieldIsClearedToPreventCcdValidationError() {
+
+        DynamicMultiSelectList orderList = DynamicMultiSelectList.builder()
+            .value(Arrays.asList(
+                DynamicMultiselectListElement.builder().code("order-1").label("Test Order 1").build(),
+                DynamicMultiselectListElement.builder().code("order-2").label("Test Order 2").build()
+            ))
+            .build();
+
+        StmtOfServiceAddRecipient recipient = StmtOfServiceAddRecipient.builder()
+            .respondentDynamicList(DynamicList.builder()
+                .value(DynamicListElement.builder().code(TEST_UUID).label("Test Recipient").build())
+                .build())
+            .orderList(orderList) // This should be cleared by the service
+            .stmtOfServiceDocument(Document.builder().documentFileName("test.pdf").build())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .statementOfService(StatementOfService.builder()
+                .stmtOfServiceWhatWasServed(StatementOfServiceWhatWasServed.statementOfServiceOrder)
+                .stmtOfServiceAddRecipient(Arrays.asList(element(recipient)))
+                .build())
+            .orderCollection(Arrays.asList(element(UUID.fromString(TEST_UUID), OrderDetails.builder()
+                .sosStatus("PENDING")
+                .serveOrderDetails(ServeOrderDetails.builder()
+                    .servedParties(Arrays.asList(element(ServedParties.builder().build())))
+                    .build())
+                .build())))
+            .respondents(listOfRespondents)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(Mockito.any())).thenReturn(UserDetails.builder().build());
+        when(manageDocumentsService.getLoggedInUserType(anyString())).thenReturn(List.of(PrlAppsConstants.COURT_ADMIN_ROLE));
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .data(stringObjectMap)
+            .build();
+
+        Map<String, Object> result = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
+
+        assertNotNull(result.get("stmtOfServiceForOrder"));
+
+        @SuppressWarnings("unchecked")
+        List<Element<StmtOfServiceAddRecipient>> processedRecipients =
+            (List<Element<StmtOfServiceAddRecipient>>) result.get("stmtOfServiceForOrder");
+
+        assertFalse("Processed recipients list should not be empty", processedRecipients.isEmpty());
+
+        processedRecipients.forEach(recipientElement -> {
+            StmtOfServiceAddRecipient processedRecipient = recipientElement.getValue();
+            assertNull("orderList field should be cleared to prevent CCD validation error 'Field is not recognised'",
+                      processedRecipient.getOrderList());
+            assertNull("respondentDynamicList should also be cleared",
+                      processedRecipient.getRespondentDynamicList());
+        });
+    }

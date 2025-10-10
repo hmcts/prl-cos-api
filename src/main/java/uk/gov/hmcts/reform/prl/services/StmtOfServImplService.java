@@ -20,6 +20,8 @@ import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
@@ -115,6 +117,7 @@ public class StmtOfServImplService {
                                                                                         .code(UUID.randomUUID())
                                                                                         .label(ALL_RESPONDENTS).build())
                                                                              .build())
+                                                  .orderList(getOrdersMultiSelectList(caseData))
                                                   .build()));
         caseDataUpdated.put("stmtOfServiceAddRecipient", stmtOfServiceAddRecipient);
         return caseDataUpdated;
@@ -124,6 +127,10 @@ public class StmtOfServImplService {
         Map<String, Object> caseDataUpdateMap = caseDetails.getData();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         log.info("*** Statement of service, about-to-submit callback ***");
+
+        // Collect all served order IDs from recipients
+        List<String> allServedOrderIds = collectServedOrderIds(caseData);
+
         if (StatementOfServiceWhatWasServed.statementOfServiceApplicationPack
             .equals(caseData.getStatementOfService().getStmtOfServiceWhatWasServed())) {
             //Application packs
@@ -133,6 +140,9 @@ public class StmtOfServImplService {
             //Orders
             handleSosForOrders(authorisation, caseData, caseDataUpdateMap);
         }
+
+        // Update the statement of service with served order IDs
+        updateStatementOfServiceWithServedOrderIds(caseData, caseDataUpdateMap, allServedOrderIds);
 
         caseDataUpdateMap.put("stmtOfServiceAddRecipient", null);
         caseDataUpdateMap.put("stmtOfServiceWhatWasServed", null);
@@ -159,6 +169,7 @@ public class StmtOfServImplService {
 
                 sosRecipients.add(element(sosRecipient.toBuilder()
                                               .respondentDynamicList(null) //clear dynamic list after sending access code info
+                                              .orderList(null) //clear order list to avoid CCD validation error
                                               .build()));
             });
         //Add all existing sos recipients & update into case data
@@ -309,9 +320,18 @@ public class StmtOfServImplService {
                                                    StmtOfServiceAddRecipient recipient,
                                                    String selectedPartyId,
                                                    String selectedPartyName) {
+        // Extract selected order IDs from the multi-select list if present
+        List<String> selectedOrderIds = null;
+        if (recipient.getOrderList() != null && CollectionUtils.isNotEmpty(recipient.getOrderList().getValue())) {
+            selectedOrderIds = recipient.getOrderList().getValue().stream()
+                .map(DynamicMultiselectListElement::getCode)
+                .toList();
+        }
+
         return recipient.toBuilder()
             .selectedPartyId(selectedPartyId)
             .selectedPartyName(selectedPartyName)
+            .selectedOrderIds(selectedOrderIds)
             .stmtOfServiceDocument(recipient.getStmtOfServiceDocument())
             .partiesServedDateTime(null != recipient.getServedDateTimeOption()
                                        ? recipient.getServedDateTimeOption().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN))
@@ -320,6 +340,8 @@ public class StmtOfServImplService {
             .submittedDateTime(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)).toLocalDateTime())
             //PRL-6478 - Reset to null as not to show duplicate date field in XUI
             .servedDateTimeOption(null)
+            // Clear order list after processing to avoid showing in UI
+            .orderList(null)
             .build();
     }
 
@@ -354,6 +376,32 @@ public class StmtOfServImplService {
                                         .label(name).build());
         }
         return respondentListItems;
+    }
+
+    private DynamicMultiSelectList getOrdersMultiSelectList(CaseData caseData) {
+        List<DynamicMultiselectListElement> orderListItems = new ArrayList<>();
+
+        if (CollectionUtils.isNotEmpty(caseData.getOrderCollection())) {
+            caseData.getOrderCollection().forEach(orderElement -> {
+                OrderDetails order = orderElement.getValue();
+                if (order != null && order.getOtherDetails() != null) {
+                    String orderLabel = String.format("%s - %s",
+                        order.getOrderTypeId() != null ? order.getOrderTypeId() : "Order",
+                        order.getOtherDetails().getOrderCreatedDate() != null
+                            ? order.getOtherDetails().getOrderCreatedDate()
+                            : "No date");
+
+                    orderListItems.add(DynamicMultiselectListElement.builder()
+                        .code(orderElement.getId().toString())
+                        .label(orderLabel)
+                        .build());
+                }
+            });
+        }
+
+        return DynamicMultiSelectList.builder()
+            .listItems(orderListItems)
+            .build();
     }
 
     public ServedApplicationDetails checkAndServeRespondentPacksPersonalService(CaseData caseData, String authorization) {
@@ -728,10 +776,9 @@ public class StmtOfServImplService {
                                                                      String template) {
         if (!CaseUtils.hasDashboardAccess(respondent)
             && !CaseUtils.hasLegalRepresentation(respondent.getValue())) {
-            List<Document> documents = null;
             try {
                 //cover sheets
-                documents = new ArrayList<>(serviceOfApplicationPostService
+                List<Document> documents = new ArrayList<>(serviceOfApplicationPostService
                                                 .getCoverSheets(caseData, authorization,
                                                                 respondent.getValue().getAddress(),
                                                                 respondent.getValue().getLabelForDynamicList(),
@@ -812,6 +859,63 @@ public class StmtOfServImplService {
                                                  "Citizen journey is not enabled to send access code for respondents")
                                              .build())
                            .build());
+    }
+
+    private List<String> collectServedOrderIds(CaseData caseData) {
+        List<String> allServedOrderIds = new ArrayList<>();
+
+        if (caseData.getStatementOfService() != null
+            && CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceAddRecipient())) {
+
+            caseData.getStatementOfService().getStmtOfServiceAddRecipient()
+                .stream()
+                .map(Element::getValue)
+                .forEach(recipient -> {
+                    // Extract order IDs directly from the orderList (before it gets processed)
+                    if (recipient.getOrderList() != null && CollectionUtils.isNotEmpty(recipient.getOrderList().getValue())) {
+                        List<String> orderIds = recipient.getOrderList().getValue().stream()
+                            .map(DynamicMultiselectListElement::getCode)
+                            .toList();
+                        allServedOrderIds.addAll(orderIds);
+                        log.info("Collected {} order IDs from recipient: {}",
+                                orderIds.size(),
+                                recipient.getSelectedPartyName());
+                    } else if (CollectionUtils.isNotEmpty(recipient.getSelectedOrderIds())) {
+                        allServedOrderIds.addAll(recipient.getSelectedOrderIds());
+                        log.info("Collected {} order IDs from recipient (pre-processed): {}",
+                                recipient.getSelectedOrderIds().size(),
+                                recipient.getSelectedPartyName());
+                    }
+                });
+        }
+
+        // Remove duplicates and return unique order IDs
+        List<String> uniqueOrderIds = allServedOrderIds.stream().distinct().toList();
+        log.info("Total unique served order IDs collected: {}", uniqueOrderIds.size());
+        return uniqueOrderIds;
+    }
+
+    private void updateStatementOfServiceWithServedOrderIds(CaseData caseData,
+                                                           Map<String, Object> caseDataUpdateMap,
+                                                           List<String> servedOrderIds) {
+        if (caseData.getStatementOfService() != null) {
+            List<String> existingServedOrderIds = caseData.getStatementOfService().getServedOrderIds();
+            List<String> allServedOrderIds = new ArrayList<>();
+
+            if (CollectionUtils.isNotEmpty(existingServedOrderIds)) {
+                allServedOrderIds.addAll(existingServedOrderIds);
+            }
+            if (CollectionUtils.isNotEmpty(servedOrderIds)) {
+                allServedOrderIds.addAll(servedOrderIds);
+            }
+
+            List<String> uniqueServedOrderIds = allServedOrderIds.stream().distinct().toList();
+            log.info("Updating StatementOfService with {} served order IDs", uniqueServedOrderIds.size());
+
+            caseDataUpdateMap.put("statementOfService", caseData.getStatementOfService().toBuilder()
+                .servedOrderIds(uniqueServedOrderIds)
+                .build());
+        }
     }
 
 }
