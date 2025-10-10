@@ -169,6 +169,7 @@ public class StmtOfServImplService {
 
                 sosRecipients.add(element(sosRecipient.toBuilder()
                                               .respondentDynamicList(null) //clear dynamic list after sending access code info
+                                              .orderList(null) //clear order list to avoid CCD validation error
                                               .build()));
             });
         //Add all existing sos recipients & update into case data

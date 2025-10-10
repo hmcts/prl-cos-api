@@ -52,6 +52,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -65,6 +66,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
+import static uk.gov.hmcts.reform.prl.services.StmtOfServImplService.STMT_OF_SERVICE_FOR_APPLICATION;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -1047,7 +1049,6 @@ public class StmtOfServImplServiceTest {
 
     @Test
     public void testHandleSosForApplicationPacks_WhenAllConditionsPass() {
-        // Test case for when all conditions pass for APPLICATION PACKS (not orders)
         CaseData caseData = createTestScenarioForApplicationPacks(
             C100_CASE_TYPE,
             Arrays.asList(TEST_UUID)
@@ -1073,62 +1074,132 @@ public class StmtOfServImplServiceTest {
         assertNull(result.get("unServedRespondentPack")); // Should be cleared after processing
     }
 
-    // **Factory Methods for Test Data Creation**
-    private CaseData createTestScenarioForApplicationPacks(String caseType, List<String> recipients) {
-        // Create application pack data instead of orders
-        List<Element<Document>> packDocuments = Arrays.asList(
-            element(Document.builder()
-                .documentFileName("application-pack.pdf")
-                .documentUrl("http://test-url.com/doc1")
+    @Test
+    public void testHandleSosForApplicationPacks_OrderListFieldIsClearedToPreventCcdValidationError() {
+        DynamicMultiSelectList orderList = DynamicMultiSelectList.builder()
+            .value(Arrays.asList(
+                DynamicMultiselectListElement.builder().code("order-1").label("Test Order 1").build(),
+                DynamicMultiselectListElement.builder().code("order-2").label("Test Order 2").build()
+            ))
+            .build();
+
+        StmtOfServiceAddRecipient recipient = StmtOfServiceAddRecipient.builder()
+            .respondentDynamicList(DynamicList.builder()
+                .value(DynamicListElement.builder().code(TEST_UUID).label("Test Recipient").build())
                 .build())
-        );
-
-        SoaPack unServedRespondentPack = SoaPack.builder()
-            .packDocument(packDocuments)
-            .personalServiceBy("courtAdmin")
+            .orderList(orderList) // This should be cleared by the service even for application packs
+            .stmtOfServiceDocument(Document.builder().documentFileName("test.pdf").build())
             .build();
 
-        ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder()
-            .unServedRespondentPack(unServedRespondentPack)
-            .build();
-
-        // Create recipients for application packs
-        List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipients = new ArrayList<>();
-        for (String recipientId : recipients) {
-            StmtOfServiceAddRecipient recipient = StmtOfServiceAddRecipient.builder()
-                .respondentDynamicList(DynamicList.builder()
-                    .value(DynamicListElement.builder()
-                        .code(recipientId)
-                        .label("Test Recipient " + recipientId)
-                        .build())
-                    .build())
-                .stmtOfServiceDocument(Document.builder()
-                    .documentFileName("statement-of-service.pdf")
-                    .documentUrl("http://test-url.com/sos")
-                    .build())
-                .build();
-            stmtOfServiceAddRecipients.add(element(recipient));
-        }
-
-        // Create statement of service for APPLICATION PACKS
-        StatementOfService statementOfService = StatementOfService.builder()
-            .stmtOfServiceWhatWasServed(StatementOfServiceWhatWasServed.statementOfServiceApplicationPack)
-            .stmtOfServiceAddRecipient(stmtOfServiceAddRecipients)
-            .build();
-
-        // Create respondents
-        List<Element<PartyDetails>> respondents = Arrays.asList(
-            element(UUID.fromString(recipients.get(0)), PartyDetails.builder()
-                .firstName("Test")
-                .lastName("Respondent")
+        // Create test case data for APPLICATION PACKS (not orders)
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .statementOfService(StatementOfService.builder()
+                .stmtOfServiceWhatWasServed(StatementOfServiceWhatWasServed.statementOfServiceApplicationPack)
+                .stmtOfServiceAddRecipient(Arrays.asList(element(recipient)))
                 .build())
-        );
-
-        return CaseData.builder()
-            .caseTypeOfApplication(caseType)
-            .serviceOfApplication(serviceOfApplication)
-            .statementOfService(statementOfService)
-            .respondents(respondents)
+            .serviceOfApplication(ServiceOfApplication.builder()
+                .unServedRespondentPack(SoaPack.builder()
+                    .personalServiceBy(SoaSolicitorServingRespondentsEnum.courtAdmin.toString())
+                    .packDocument(Arrays.asList(element(Document.builder()
+                        .documentFileName("application-pack.pdf")
+                        .build())))
+                    .build())
+                .build())
+            .respondents(listOfRespondents)
             .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(Mockito.any())).thenReturn(UserDetails.builder().build());
+        when(manageDocumentsService.getLoggedInUserType(anyString())).thenReturn(List.of(PrlAppsConstants.COURT_ADMIN_ROLE));
+        when(launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)).thenReturn(false);
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .data(stringObjectMap)
+            .build();
+
+        Map<String, Object> result = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
+
+        assertNotNull(result.get(STMT_OF_SERVICE_FOR_APPLICATION));
+
+        @SuppressWarnings("unchecked")
+        List<Element<StmtOfServiceAddRecipient>> processedRecipients =
+            (List<Element<StmtOfServiceAddRecipient>>) result.get(STMT_OF_SERVICE_FOR_APPLICATION);
+
+        assertFalse("Processed recipients list should not be empty", processedRecipients.isEmpty());
+
+        processedRecipients.forEach(recipientElement -> {
+            StmtOfServiceAddRecipient processedRecipient = recipientElement.getValue();
+            assertNull("orderList field should be cleared to prevent CCD validation error 'Field is not recognised'",
+                      processedRecipient.getOrderList());
+            assertNull("respondentDynamicList should also be cleared",
+                      processedRecipient.getRespondentDynamicList());
+        });
+
+        assertNotNull("finalServedApplicationDetailsList should be populated when conditions are met",
+                     result.get("finalServedApplicationDetailsList"));
     }
-}
+
+    @Test
+    public void testHandleSosForOrders_OrderListFieldIsClearedToPreventCcdValidationError() {
+
+        DynamicMultiSelectList orderList = DynamicMultiSelectList.builder()
+            .value(Arrays.asList(
+                DynamicMultiselectListElement.builder().code("order-1").label("Test Order 1").build(),
+                DynamicMultiselectListElement.builder().code("order-2").label("Test Order 2").build()
+            ))
+            .build();
+
+        StmtOfServiceAddRecipient recipient = StmtOfServiceAddRecipient.builder()
+            .respondentDynamicList(DynamicList.builder()
+                .value(DynamicListElement.builder().code(TEST_UUID).label("Test Recipient").build())
+                .build())
+            .orderList(orderList) // This should be cleared by the service
+            .stmtOfServiceDocument(Document.builder().documentFileName("test.pdf").build())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .statementOfService(StatementOfService.builder()
+                .stmtOfServiceWhatWasServed(StatementOfServiceWhatWasServed.statementOfServiceOrder)
+                .stmtOfServiceAddRecipient(Arrays.asList(element(recipient)))
+                .build())
+            .orderCollection(Arrays.asList(element(UUID.fromString(TEST_UUID), OrderDetails.builder()
+                .sosStatus("PENDING")
+                .serveOrderDetails(ServeOrderDetails.builder()
+                    .servedParties(Arrays.asList(element(ServedParties.builder().build())))
+                    .build())
+                .build())))
+            .respondents(listOfRespondents)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(Mockito.any())).thenReturn(UserDetails.builder().build());
+        when(manageDocumentsService.getLoggedInUserType(anyString())).thenReturn(List.of(PrlAppsConstants.COURT_ADMIN_ROLE));
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .data(stringObjectMap)
+            .build();
+
+        Map<String, Object> result = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
+
+        assertNotNull(result.get("stmtOfServiceForOrder"));
+
+        @SuppressWarnings("unchecked")
+        List<Element<StmtOfServiceAddRecipient>> processedRecipients =
+            (List<Element<StmtOfServiceAddRecipient>>) result.get("stmtOfServiceForOrder");
+
+        assertFalse("Processed recipients list should not be empty", processedRecipients.isEmpty());
+
+        processedRecipients.forEach(recipientElement -> {
+            StmtOfServiceAddRecipient processedRecipient = recipientElement.getValue();
+            assertNull("orderList field should be cleared to prevent CCD validation error 'Field is not recognised'",
+                      processedRecipient.getOrderList());
+            assertNull("respondentDynamicList should also be cleared",
+                      processedRecipient.getRespondentDynamicList());
+        });
+    }
