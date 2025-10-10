@@ -182,6 +182,7 @@ public class Fm5ReminderService {
             int batchSize = 10;
             for (int i = 0; i < caseIdsForHearing.size(); i += batchSize) {
                 List<String> batch = caseIdsForHearing.subList(i, Math.min(i + batchSize, caseIdsForHearing.size()));
+                log.info("Fetching hearings for batch {}", batch);
                 List<Hearings> result = hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(
                     userToken,
                     authToken,
