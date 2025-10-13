@@ -120,10 +120,11 @@ public class NoticeOfChangeController extends AbstractCallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
         List<String> errorList = new ArrayList<>();
+        Map<String, Object> caseDataMap = noticeOfChangePartiesService.aboutToSubmitStopRepresenting(authorisation, callbackRequest);
+        cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
         return AboutToStartOrSubmitCallbackResponse
             .builder()
-            .data(noticeOfChangePartiesService.aboutToSubmitStopRepresenting(authorisation, callbackRequest
-            )).errors(errorList).build();
+            .data(caseDataMap).errors(errorList).build();
     }
 
     @PostMapping(path = "/submittedStopRepresentation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

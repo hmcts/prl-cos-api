@@ -503,6 +503,7 @@ public class CallbackController {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             amendCourtService.handleAmendCourtSubmission(authorisation, callbackRequest, caseDataUpdated);
+            cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
