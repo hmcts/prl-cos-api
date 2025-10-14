@@ -22,15 +22,15 @@ public class CaseNameService {
 
     public void setFinalCaseName(Map<String, Object> updatedCaseData, CaseData caseData) {
         if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
-            updateCACaseName(updatedCaseData, caseData);
+            setCaseNameForCA(updatedCaseData, caseData);
         } else if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
-            updateDACaseName(updatedCaseData, caseData);
+            setCaseNameForDA(updatedCaseData, caseData);
         } else {
-            throw new RuntimeException("Invalid caseTypeOfApplication found for case "+caseData.getId());
+            throw new RuntimeException("Invalid caseTypeOfApplication found for case " + caseData.getId());
         }
     }
 
-    private void updateCACaseName(Map<String, Object> updatedCaseData, CaseData caseData) {
+    private void setCaseNameForCA(Map<String, Object> updatedCaseData, CaseData caseData) {
         if (StringUtils.isEmpty(caseData.getApplicantCaseName())) {
             if (!isEmpty(caseData.getApplicants()) && !isEmpty(caseData.getRespondents())) {
                 PartyDetails applicant = caseData.getApplicants().stream().findFirst().get().getValue();
@@ -43,7 +43,7 @@ public class CaseNameService {
         }
     }
 
-    private void updateDACaseName(Map<String, Object> updatedCaseData, CaseData caseData) {
+    private void setCaseNameForDA(Map<String, Object> updatedCaseData, CaseData caseData) {
         if (StringUtils.isEmpty(caseData.getApplicantCaseName())) {
             PartyDetails applicant = caseData.getApplicantsFL401();
             PartyDetails respondent = caseData.getRespondentsFL401();
