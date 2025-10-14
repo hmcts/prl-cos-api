@@ -1116,6 +1116,41 @@ public class StmtOfServImplServiceTest {
             .build();
     }
 
+    private CaseData createTestScenarioForApplicationPacks(String caseType, List<String> orderIds) {
+        List<Element<StmtOfServiceAddRecipient>> recipients = Arrays.asList(
+            element(StmtOfServiceAddRecipient.builder()
+                        .orderList(DynamicMultiSelectList.builder()
+                                       .value(orderIds.stream()
+                                                  .map(id -> DynamicMultiselectListElement.builder().code(id).label(
+                                                      "Order " + id).build())
+                                                  .toList())
+                                       .build())
+                        .respondentDynamicList(DynamicList.builder()
+                                                   .value(DynamicListElement.builder().code(TEST_UUID).label(
+                                                       "Test Recipient").build())
+                                                   .build())
+                        .stmtOfServiceDocument(Document.builder().documentFileName("test.pdf").build())
+                        .build())
+        );
+
+        return CaseData.builder()
+            .caseTypeOfApplication(caseType)
+            .statementOfService(StatementOfService.builder()
+                .stmtOfServiceWhatWasServed(StatementOfServiceWhatWasServed.statementOfServiceApplicationPack)
+                .stmtOfServiceAddRecipient(recipients)
+                .build())
+            .serviceOfApplication(ServiceOfApplication.builder()
+                .unServedRespondentPack(SoaPack.builder()
+                    .personalServiceBy(SoaSolicitorServingRespondentsEnum.courtAdmin.toString())
+                    .packDocument(List.of(element(Document.builder()
+                        .documentFileName("application-pack.pdf")
+                        .build())))
+                    .build())
+                .build())
+            .respondents(listOfRespondents)
+            .build();
+    }
+
     private CaseDetails createCaseDetails(CaseData caseData) {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
