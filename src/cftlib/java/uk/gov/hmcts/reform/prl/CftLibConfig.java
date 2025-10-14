@@ -5,15 +5,22 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.rse.ccd.lib.api.CFTLib;
 import uk.gov.hmcts.rse.ccd.lib.api.CFTLibConfigurer;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-
 @Component
 public class CftLibConfig implements CFTLibConfigurer {
+
     @Override
     public void configure(CFTLib lib) throws Exception {
+        createCcdRoles(lib);
+        configureRoleAssignments(lib);
+        importCcdDefinitions(lib);
+    }
+
+    private void createCcdRoles(CFTLib lib) {
         lib.createRoles(
             "caseworker-privatelaw-judge",
             "caseworker-privatelaw-courtadmin",
@@ -45,12 +52,15 @@ public class CftLibConfig implements CFTLibConfigurer {
             "caseworker-privatelaw-courtadmin-casecreator",
             "ctsc"
         );
+    }
 
+    private void configureRoleAssignments(CFTLib lib) throws IOException {
         var json = Resources.toString(Resources.getResource("cftlib-am-role-assignments.json"), StandardCharsets.UTF_8);
         lib.configureRoleAssignments(json);
+    }
 
-        var def = Files.readAllBytes(Path.of("bin/ccd-config-PRL-local.xlsx"));
+    private void importCcdDefinitions(CFTLib lib) throws IOException {
+        var def = Files.readAllBytes(Path.of("build/definitionsToBeImported/ccd-config-PRL-local.xlsx"));
         lib.importDefinition(def);
     }
 }
-

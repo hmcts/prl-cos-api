@@ -19,7 +19,7 @@ plugins {
   id 'org.sonarqube' version '5.1.0.4882'
   id 'org.springframework.boot' version '3.3.5'
   id 'au.com.dius.pact' version '4.2.6'
-  id 'com.github.hmcts.rse-cft-lib' version '0.19.1701'
+  id 'com.github.hmcts.rse-cft-lib' version '0.19.1886'
 }
 
 def versions = [
@@ -698,15 +698,19 @@ task loadEnvSecrets() {
           commandLine 'az', 'keyvault', 'secret', 'show', '--vault-name', 'prl-aat', '-o', 'tsv', '--query', 'value', '--name', 'prl-cos-cft-lib-local-config'
           standardOutput = os
         }
-        project.file('./.aat-env').write(new String(os.toString().replace('\n', '').decodeBase64(), java.nio.charset.StandardCharsets.UTF_8))
+        project.file('./.aat-env').write(os.toString())
       }
     }
   }
 }
 
+task buildCCDXlsx(type: Exec) {
+  commandLine './bin/build-ccd-xlsx-definitions.sh'
+}
 
 bootWithCCD {
   dependsOn(loadEnvSecrets)
+  dependsOn(buildCCDXlsx)
   doFirst() {
     project.file('./.aat-env').readLines().each() {
       def index = it.indexOf("=")
@@ -715,6 +719,8 @@ bootWithCCD {
       environment key, value
     }
   }
+
+  environment("spring.profiles.active", "local")
 }
 
 test {
