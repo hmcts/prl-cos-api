@@ -277,7 +277,7 @@ class CsvWriterTest {
                 arguments("applicant.firstName", "Jane", standardCase),
                 arguments("applicant.phoneNumber", APPLICANT_PHONE, standardCase),
                 arguments("applicant.email", APPLICANT_EMAIL, standardCase),
-                arguments("dateOrderMade", LocalDateTime.of(2024, 1, 15, 10, 30), standardCase),
+                arguments("dateOrderMade", "9 Oct 2025", standardCase),
                 arguments("orderExpiryDate", LocalDateTime.of(2024, 6, 15, 23, 59), standardCase)
             );
         }
@@ -348,7 +348,7 @@ class CsvWriterTest {
                 .respondent(respondent)
                 .applicant(applicant)
                 .daApplicantContactInstructions(contactInstructions)
-                .dateOrderMade(LocalDateTime.of(2024, 1, 15, 10, 30))
+                .dateOrderMade("9 Oct 2025")
                 .orderExpiryDate(LocalDateTime.of(2024, 6, 15, 23, 59))
                 .build();
         }

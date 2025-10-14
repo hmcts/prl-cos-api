@@ -27,5 +27,5 @@ public class CsvData {
     private PartyDetails applicant;
     private PartyDetails respondent;
     private String daApplicantContactInstructions;
-    private LocalDateTime dateOrderMade;
+    private String dateOrderMade;
 }

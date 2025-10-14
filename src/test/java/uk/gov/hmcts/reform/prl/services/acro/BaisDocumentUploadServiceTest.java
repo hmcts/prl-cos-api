@@ -15,6 +15,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -301,9 +302,14 @@ class BaisDocumentUploadServiceTest {
     void testPrepareDataForCsvMapsAllFieldsCorrectly() throws Exception {
         LocalDateTime orderCreatedDate = LocalDateTime.of(2024, 10, 15, 14, 30);
         LocalDateTime expectedExpiryDate = LocalDateTime.of(2025, 4, 15, 14, 30);
+        String expectedOrderMadeDate = "2025-10-14";
 
         FL404 fl404CustomFields = FL404.builder()
             .orderSpecifiedDateTime(expectedExpiryDate)
+            .build();
+
+        OtherOrderDetails otherOrderDetails = OtherOrderDetails.builder()
+            .orderMadeDate(expectedOrderMadeDate)
             .build();
 
         OrderDetails order = OrderDetails.builder()
@@ -311,6 +317,7 @@ class BaisDocumentUploadServiceTest {
             .orderDocument(createDocument())
             .orderDocumentWelsh(createDocument())
             .fl404CustomFields(fl404CustomFields)
+            .otherDetails(otherOrderDetails)
             .build();
 
 
@@ -365,8 +372,8 @@ class BaisDocumentUploadServiceTest {
                 "caseData.getCourtEpimsId()"},
             "Court Type ID", new Object[]{caseData.getCourtTypeId(), capturedData.getCourtTypeId(),
                 "caseData.getCourtTypeId()"},
-            "Date Order Made", new Object[]{order.getDateCreated(), capturedData.getDateOrderMade(),
-                "order.getDateCreated()"},
+            "Date Order Made", new Object[]{expectedOrderMadeDate, capturedData.getDateOrderMade(),
+                "order.getOtherDetails().getOrderMadeDate()"},
             "Order Expiry Date", new Object[]{expectedExpiryDate, capturedData.getOrderExpiryDate(),
                 "fl404CustomFields.getOrderSpecifiedDateTime()"}
         );
@@ -431,6 +438,9 @@ class BaisDocumentUploadServiceTest {
             .dateCreated(LocalDateTime.now())
             .orderDocument(createDocument())
             .orderDocumentWelsh(createDocument())
+            .otherDetails(OtherOrderDetails.builder()
+                .orderMadeDate("2025-10-14")
+                .build())
             .build();
     }
 
