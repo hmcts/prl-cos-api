@@ -9,8 +9,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.exception.BaisDocumentUploadRuntimeException;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
-import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
-import uk.gov.hmcts.reform.prl.models.cafcass.hearing.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroResponse;
 import uk.gov.hmcts.reform.prl.models.dto.acro.CsvData;
@@ -22,13 +20,8 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Slf4j
 @Service
@@ -146,7 +139,7 @@ public class BaisDocumentUploadService {
             .courtName(caseData.getCourtName())
             .courtEpimsId(caseData.getCourtEpimsId())
             .courtTypeId(caseData.getCourtTypeId())
-            .dateOrderMade(order.getDateCreated())
+            .dateOrderMade(order.getOtherDetails().getOrderMadeDate())
             .orderExpiryDate(getOrderExpiryDate(order))
             .build();
     }
@@ -156,25 +149,6 @@ public class BaisDocumentUploadService {
         return sourceDirectory + "/FL404A-" + caseId + "-" + zdt.toEpochSecond();
     }
 
-    private LocalDateTime getNextHearingDateWithInHearing(List<CaseHearing> hearings) {
-        if (hearings == null || hearings.isEmpty()) {
-            return null;
-        }
-
-        AtomicReference<LocalDateTime> nextHearingDate = new AtomicReference<>();
-        hearings.stream().filter(h -> h.getHmcStatus().equals(LISTED)).forEach(hearing -> {
-            Optional<LocalDateTime> minDateOfHearingDaySche = nullSafeCollection(hearing.getHearingDaySchedule())
-                .stream()
-                .map(HearingDaySchedule::getHearingStartDateTime)
-                .filter(hearingStartDateTime -> hearingStartDateTime.isAfter(LocalDateTime.now()))
-                .min(LocalDateTime::compareTo);
-
-            minDateOfHearingDaySche.ifPresent(nextHearingDate::set);
-
-        });
-        return nextHearingDate.get();
-    }
-
     private LocalDateTime getOrderExpiryDate(OrderDetails order) {
 
         if (order.getFl404CustomFields() != null && order.getFl404CustomFields().getOrderSpecifiedDateTime() != null) {
@@ -182,5 +156,4 @@ public class BaisDocumentUploadService {
         }
         return null;
     }
-
 }
