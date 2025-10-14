@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.Barrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnum;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 
@@ -94,6 +96,20 @@ public class PartyDetails {
 
     private YesOrNo isRemoveLegalRepresentativeRequested;
 
+    private UUID partyId;
+    private UUID solicitorOrgUuid;
+    private UUID solicitorPartyId;
+
+    @JsonUnwrapped
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Barrister barrister;
+
+    @JsonIgnore
+    private CitizenSos citizenSosObject;
+
+    private YesOrNo liveInRefuge;
+    private Document refugeConfidentialityC8Form;
+
     public boolean hasConfidentialInfo() {
         return this.isAddressConfidential.equals(YesOrNo.Yes)
             || this.isPhoneNumberConfidential.equals(YesOrNo.Yes);
@@ -155,15 +171,13 @@ public class PartyDetails {
         }
     }
 
-    private UUID partyId;
-
-    private UUID solicitorOrgUuid;
-
-    private UUID solicitorPartyId;
-
     @JsonIgnore
-    private CitizenSos citizenSosObject;
-
-    private YesOrNo liveInRefuge;
-    private Document refugeConfidentialityC8Form;
+    public String getBarristerFullNameForCaseFlags() {
+        if (getBarrister() != null && !StringUtils.isEmpty(getBarrister().getBarristerFirstName())
+            && !StringUtils.isEmpty(getBarrister().getBarristerLastName())) {
+            return getBarrister().getBarristerFullName();
+        } else {
+            return StringUtils.EMPTY;
+        }
+    }
 }

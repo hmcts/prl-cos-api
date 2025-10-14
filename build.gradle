@@ -143,7 +143,7 @@ allprojects {
         entry 'jackson-module-parameter-names'
       }
 
-        // solves CVE-2014-3488, CVE-2015-2156, CVE-2019-16869, CVE-2021-21409
+        // solves CVE-2014-3488, CVE-2015-2156, CVE-2019-16869, CVE-2021-21409,CVE-2025-25193
         dependencySet(group: 'io.netty', version: '4.1.118.Final') {
             entry 'netty-buffer'
             entry 'netty-codec'
@@ -152,6 +152,8 @@ allprojects {
             entry 'netty-handler'
             entry 'netty-resolver'
             entry 'netty-transport'
+            entry 'netty-transport-native-unix-common'
+            entry 'netty-transport-classes-epoll'
         }
 
       // CVE-2019-10086
@@ -362,6 +364,7 @@ dependencies {
   implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '2.1.2'
   implementation group: 'com.github.hmcts', name:'ccd-case-document-am-client', version: versions.ccdCaseDocumentAmClient
   implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
+  implementation group: 'org.apache.commons', name: 'commons-csv', version: '1.14.0'
 
   implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '7.10.1'
   implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '8.18.3'
@@ -406,6 +409,7 @@ dependencies {
   implementation(group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.18')
   implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.18')
   implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version:'7.4'
+  implementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.5'
 
   runtimeOnly('org.springframework.boot:spring-boot-devtools')
 
@@ -430,6 +434,7 @@ dependencies {
   testImplementation group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: versions.serenity
   testImplementation group: 'net.serenity-bdd', name: 'serenity-spring', version: versions.serenity
   testImplementation group: 'com.github.mifmif', name: 'generex', version: '1.0.2'
+  testImplementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.5'
 
 
 
@@ -622,10 +627,7 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/mapper/citizen/awp/CitizenAwpMapper.java',
   '**uk/gov/hmcts/reform/prl/mapper/citizen/CitizenPartyDetailsMapper.java',
   '**uk/gov/hmcts/reform/prl/services/DraftAnOrderService.java',
-  '**uk/gov/hmcts/reform/prl/services/ManageOrderService.java',
-  '**uk/gov/hmcts/reform/prl/controllers/EditAndApproveDraftOrderController.java',
-  '**uk/gov/hmcts/reform/prl/controllers/ManageOrdersController.java',
-  '**uk/gov/hmcts/reform/prl/clients/HearingApiClient.java'
+  '**uk/gov/hmcts/reform/prl/services/ManageOrderService.java'
 ]
 
 sonarqube {
@@ -718,3 +720,4 @@ bootWithCCD {
 test {
   useJUnitPlatform()
 }
+

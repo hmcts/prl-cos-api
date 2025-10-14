@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -56,13 +57,15 @@ public class RemoveDocumentsService {
             : Stream.empty();
 
         return Stream.concat(removableReviewDocs, removableDocMgmtDocs)
-                .filter(Objects::nonNull)
-                .toList();
+            .filter(Objects::nonNull)
+            .toList();
     }
 
     public List<Element<RemovableDocument>> getDocsBeingRemoved(CaseData caseData, CaseData old) {
-        List<Element<RemovableDocument>> current = caseData.getRemovableDocuments();
-        List<Element<RemovableDocument>> previous = getRemovableDocuments(old);
+        List<Element<RemovableDocument>> current =
+            Optional.ofNullable(caseData.getRemovableDocuments()).orElse(List.of());
+        List<Element<RemovableDocument>> previous =
+            Optional.ofNullable(getRemovableDocuments(old)).orElse(List.of());
         return previous.stream()
             .filter(prevDoc -> current.stream()
                 .noneMatch(currDoc -> currDoc.getId().equals(prevDoc.getId())))
@@ -86,39 +89,67 @@ public class RemoveDocumentsService {
             .orElse("");
     }
 
-    public CaseData removeDocuments(CaseData caseData, List<Element<RemovableDocument>> documentsToRemove) {
+    public Map<String, Object> removeDocuments(CaseData caseData, List<Element<RemovableDocument>> documentsToRemove) {
         DocumentManagementDetails docMgmt = Optional.ofNullable(caseData.getDocumentManagementDetails())
             .orElseGet(() -> DocumentManagementDetails.builder().build());
         ReviewDocuments reviewDocs = Optional.ofNullable(caseData.getReviewDocuments())
             .orElseGet(() -> ReviewDocuments.builder().build());
 
-        // Remove from DocumentManagementDetails collections
-        DocumentManagementDetails updatedDocMgmt = docMgmt.toBuilder()
-            .legalProfQuarantineDocsList(removeById(docMgmt.getLegalProfQuarantineDocsList(), documentsToRemove))
-            .courtStaffQuarantineDocsList(removeById(docMgmt.getCourtStaffQuarantineDocsList(), documentsToRemove))
-            .cafcassQuarantineDocsList(removeById(docMgmt.getCafcassQuarantineDocsList(), documentsToRemove))
-            .citizenQuarantineDocsList(removeById(docMgmt.getCitizenQuarantineDocsList(), documentsToRemove))
-            .courtNavQuarantineDocumentList(removeById(docMgmt.getCourtNavQuarantineDocumentList(), documentsToRemove))
-            .build();
+        Map<String, Object> updatedCaseData = new HashMap<>();
 
-        // Remove from ReviewDocuments collections
-        ReviewDocuments updatedReviewDocs = reviewDocs.toBuilder()
-            .legalProfUploadDocListDocTab(removeById(reviewDocs.getLegalProfUploadDocListDocTab(), documentsToRemove))
-            .cafcassUploadDocListDocTab(removeById(reviewDocs.getCafcassUploadDocListDocTab(), documentsToRemove))
-            .courtStaffUploadDocListDocTab(removeById(reviewDocs.getCourtStaffUploadDocListDocTab(), documentsToRemove))
-            .bulkScannedDocListDocTab(removeById(reviewDocs.getBulkScannedDocListDocTab(), documentsToRemove))
-            .citizenUploadedDocListDocTab(removeById(reviewDocs.getCitizenUploadedDocListDocTab(), documentsToRemove))
-            .courtNavUploadedDocListDocTab(removeById(reviewDocs.getCourtNavUploadedDocListDocTab(), documentsToRemove))
-            .restrictedDocuments(removeById(reviewDocs.getRestrictedDocuments(), documentsToRemove))
-            .confidentialDocuments(removeById(reviewDocs.getConfidentialDocuments(), documentsToRemove))
-            .build();
+        // update the map using the field names
+        updatedCaseData.put(
+            "legalProfQuarantineDocsList",
+            removeById(docMgmt.getLegalProfQuarantineDocsList(), documentsToRemove)
+        );
+        updatedCaseData.put(
+            "courtStaffQuarantineDocsList",
+            removeById(docMgmt.getCourtStaffQuarantineDocsList(), documentsToRemove)
+        );
+        updatedCaseData.put(
+            "cafcassQuarantineDocsList",
+            removeById(docMgmt.getCafcassQuarantineDocsList(), documentsToRemove)
+        );
+        updatedCaseData.put(
+            "citizenQuarantineDocsList",
+            removeById(docMgmt.getCitizenQuarantineDocsList(), documentsToRemove)
+        );
+        updatedCaseData.put(
+            "courtNavQuarantineDocumentList",
+            removeById(docMgmt.getCourtNavQuarantineDocumentList(), documentsToRemove)
+        );
 
-        return caseData.toBuilder()
-            .documentManagementDetails(updatedDocMgmt)
-            .reviewDocuments(updatedReviewDocs)
-            .removableDocuments(null) // clear the removable documents list as temporary
-            .documentsToBeRemoved(null)
-            .build();
+        updatedCaseData.put(
+            "legalProfUploadDocListDocTab",
+            removeById(reviewDocs.getLegalProfUploadDocListDocTab(), documentsToRemove)
+        );
+        updatedCaseData.put(
+            "cafcassUploadDocListDocTab",
+            removeById(reviewDocs.getCafcassUploadDocListDocTab(), documentsToRemove)
+        );
+        updatedCaseData.put(
+            "courtStaffUploadDocListDocTab",
+            removeById(reviewDocs.getCourtStaffUploadDocListDocTab(), documentsToRemove)
+        );
+        updatedCaseData.put(
+            "bulkScannedDocListDocTab",
+            removeById(reviewDocs.getBulkScannedDocListDocTab(), documentsToRemove)
+        );
+        updatedCaseData.put(
+            "citizenUploadedDocListDocTab",
+            removeById(reviewDocs.getCitizenUploadedDocListDocTab(), documentsToRemove)
+        );
+        updatedCaseData.put(
+            "courtNavUploadedDocListDocTab",
+            removeById(reviewDocs.getCourtNavUploadedDocListDocTab(), documentsToRemove)
+        );
+        updatedCaseData.put("restrictedDocuments", removeById(reviewDocs.getRestrictedDocuments(), documentsToRemove));
+        updatedCaseData.put(
+            "confidentialDocuments",
+            removeById(reviewDocs.getConfidentialDocuments(), documentsToRemove)
+        );
+
+        return updatedCaseData;
     }
 
     private List<Element<QuarantineLegalDoc>> removeById(List<Element<QuarantineLegalDoc>> source, List<Element<RemovableDocument>> toRemove) {

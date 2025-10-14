@@ -40,7 +40,9 @@ public class Applicant {
     private final String dxNumber;
     private final Organisation solicitorOrg;
 
-
-
+    private final String barristerFirstName;
+    private final String barristerLastName;
+    private final String barristerEmail;
+    private final Organisation barristerOrg;
 }
 

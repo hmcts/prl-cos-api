@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.CitizenUpdatePartyDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
@@ -40,12 +41,15 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenFlags;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.Contact;
+import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.refuge.RefugeConfidentialDocumentsRecord;
+import uk.gov.hmcts.reform.prl.services.C8ArchiveService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 
 import java.util.ArrayList;
@@ -112,6 +116,8 @@ public class CitizenPartyDetailsMapper {
     private final CitizenRespondentAohElementsMapper citizenAllegationOfHarmMapper;
     private final ConfidentialityTabService confidentialityTabService;
     private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
+    private final DocumentGenService documentGenService;
+    private final C8ArchiveService c8ArchiveService;
 
     public CitizenUpdatePartyDataContent mapUpdatedPartyDetails(CaseData dbCaseData,
                                                                 CitizenUpdatedCaseData citizenUpdatedCaseData,
@@ -230,8 +236,10 @@ public class CitizenPartyDetailsMapper {
                                                                  String authorisation) {
         Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
         if (PartyEnum.applicant.equals(citizenUpdatedCaseData.getPartyType())) {
-            List<Element<ChildDetailsRevised>> childDetails = caseData.getNewChildDetails();// child details only
+            List<Element<ChildDetailsRevised>> childDetails = caseData.getNewChildDetails();
             List<Element<PartyDetails>> applicants = new ArrayList<>(caseData.getApplicants());
+            CaseData updatedCaseData = addUpdatedApplicantConfidentialFieldsToCaseData(caseData, citizenUpdatedCaseData);
+            CaseData finalCaseData = caseData;
             applicants.stream()
                 .filter(party -> Objects.equals(
                     party.getValue().getUser().getIdamId(),
@@ -239,14 +247,29 @@ public class CitizenPartyDetailsMapper {
                 ))
                 .findFirst()
                 .ifPresent(party -> {
-                    PartyDetails updatedPartyDetails = getUpdatedPartyDetailsBasedOnEvent(citizenUpdatedCaseData.getPartyDetails(),
-                                                                                          party.getValue(),
-                                                                                          caseEvent, childDetails);
-
+                    PartyDetails updatedPartyDetails = getUpdatedPartyDetailsBasedOnEvent(
+                        citizenUpdatedCaseData.getPartyDetails(),
+                        party.getValue(),
+                        caseEvent, childDetails
+                    );
                     applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
+
+                    if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
+                        c8ArchiveService.archiveC8DocumentIfConfidentialChangedFromCitizen(
+                            finalCaseData, citizenUpdatedCaseData, caseDataMapToBeUpdated);
+                        log.info("Regenerating C8 document for applicant in case: {}", updatedCaseData.getId());
+                        try {
+                            caseDataMapToBeUpdated.putAll(
+                                documentGenService.createUpdatedCaseDataWithDocuments(authorisation, updatedCaseData)
+                            );
+                        } catch (Exception e) {
+                            log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
+                        }
+                    }
                 });
             caseData = caseData.toBuilder().applicants(applicants).build();
             caseDataMapToBeUpdated.put(C100_APPLICANTS, caseData.getApplicants());
+
             return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
         } else if (PartyEnum.respondent.equals(citizenUpdatedCaseData.getPartyType())) {
             List<Element<PartyDetails>> respondents = new ArrayList<>(caseData.getRespondents());
@@ -294,7 +317,7 @@ public class CitizenPartyDetailsMapper {
         dataMapForC8Document.put(RESPONDENT, updatedPartyElement.getValue());
         if (oldCaseData.getTaskListVersion() != null
             && (TASK_LIST_VERSION_V2.equalsIgnoreCase(oldCaseData.getTaskListVersion())
-                || TASK_LIST_VERSION_V3.equalsIgnoreCase(oldCaseData.getTaskListVersion()))) {
+            || TASK_LIST_VERSION_V3.equalsIgnoreCase(oldCaseData.getTaskListVersion()))) {
             List<Element<ChildDetailsRevised>> listOfChildren = oldCaseData.getNewChildDetails();
             dataMapForC8Document.put(CHILDREN, listOfChildren);
 
@@ -331,6 +354,7 @@ public class CitizenPartyDetailsMapper {
         PartyDetails partyDetails;
         Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
         if (PartyEnum.applicant.equals(citizenUpdatedCaseData.getPartyType())) {
+            CaseData updatedCaseData = addUpdatedApplicantConfidentialFieldsToCaseData(caseData, citizenUpdatedCaseData);
             if (citizenUpdatedCaseData.getPartyDetails().getUser().getIdamId()
                 .equalsIgnoreCase(caseData.getApplicantsFL401().getUser().getIdamId())) {
                 partyDetails = getUpdatedPartyDetailsBasedOnEvent(
@@ -338,6 +362,17 @@ public class CitizenPartyDetailsMapper {
                     caseData.getApplicantsFL401(),
                     caseEvent, caseData.getNewChildDetails()
                 );
+                if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
+                    c8ArchiveService.archiveC8DocumentIfConfidentialChangedFromCitizen(caseData,citizenUpdatedCaseData,caseDataMapToBeUpdated);
+                    log.info("Regenerating C8 document for applicant in case: {}", updatedCaseData.getId());
+                    try {
+                        caseDataMapToBeUpdated.putAll(
+                            documentGenService.createUpdatedCaseDataWithDocuments(authorisation, updatedCaseData)
+                        );
+                    } catch (Exception e) {
+                        log.error("Failed to generate C8 document for FL401 case {}", e.getMessage());
+                    }
+                }
                 caseData = caseData.toBuilder().applicantsFL401(partyDetails).build();
                 if (partyDetails.getResponse() != null) {
                     String safeToCallOption = partyDetails.getResponse().getSafeToCallOption();
@@ -347,6 +382,7 @@ public class CitizenPartyDetailsMapper {
                         caseDataMapToBeUpdated.put("daApplicantContactInstructions",null);
                     }
                 }
+
                 caseDataMapToBeUpdated.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
                 return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
             }
@@ -373,8 +409,8 @@ public class CitizenPartyDetailsMapper {
     }
 
     public PartyDetails getUpdatedPartyDetailsBasedOnEvent(PartyDetails citizenProvidedPartyDetails,
-                                                                   PartyDetails existingPartyDetails,
-                                                                   CaseEvent caseEvent,
+                                                           PartyDetails existingPartyDetails,
+                                                           CaseEvent caseEvent,
                                                            List<Element<ChildDetailsRevised>> childDetails) {
         switch (caseEvent) {
             case CONFIRM_YOUR_DETAILS -> {
@@ -495,7 +531,7 @@ public class CitizenPartyDetailsMapper {
         //Need to revisit later
         return existingPartyDetails.toBuilder()
             .contactPreferences(isNotEmpty(citizenProvidedPartyDetails.getContactPreferences())
-            ? citizenProvidedPartyDetails.getContactPreferences() : existingPartyDetails.getContactPreferences())
+                                    ? citizenProvidedPartyDetails.getContactPreferences() : existingPartyDetails.getContactPreferences())
             .build();
     }
 
@@ -622,7 +658,8 @@ public class CitizenPartyDetailsMapper {
             .build();
     }
 
-    private PartyDetails updateCitizenPersonalDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+    public static PartyDetails updateCitizenPersonalDetails(PartyDetails existingPartyDetails,
+                                                            PartyDetails citizenProvidedPartyDetails) {
         boolean isAddressNeedsToUpdate = isNotEmpty(citizenProvidedPartyDetails.getAddress())
             && StringUtils.isNotEmpty(citizenProvidedPartyDetails.getAddress().getAddressLine1());
 
@@ -646,11 +683,11 @@ public class CitizenPartyDetailsMapper {
             .phoneNumber(isPhoneNoNeedsToUpdate
                              ? citizenProvidedPartyDetails.getPhoneNumber() : existingPartyDetails.getPhoneNumber())
             .isAtAddressLessThan5Years(null != citizenProvidedPartyDetails.getIsAtAddressLessThan5Years()
-                ? mapApplicantHaveYouLivedAtThisAddressForLessThanFiveYears(citizenProvidedPartyDetails)
-                : existingPartyDetails.getIsAtAddressLessThan5Years())
+                                           ? mapApplicantHaveYouLivedAtThisAddressForLessThanFiveYears(citizenProvidedPartyDetails)
+                                           : existingPartyDetails.getIsAtAddressLessThan5Years())
             .isAtAddressLessThan5YearsWithDontKnow(null != citizenProvidedPartyDetails.getIsAtAddressLessThan5YearsWithDontKnow()
-                ? mapRespondentHaveYouLivedAtThisAddressForLessThanFiveYears(citizenProvidedPartyDetails)
-                : existingPartyDetails.getIsAtAddressLessThan5YearsWithDontKnow())
+                                                       ? mapRespondentHaveYouLivedAtThisAddressForLessThanFiveYears(citizenProvidedPartyDetails)
+                                                       : existingPartyDetails.getIsAtAddressLessThan5YearsWithDontKnow())
             .isCurrentAddressKnown(isAddressNeedsToUpdate ? citizenProvidedPartyDetails.getIsCurrentAddressKnown()
                                        : existingPartyDetails.getIsCurrentAddressKnown())
             .address(isAddressNeedsToUpdate ? citizenProvidedPartyDetails.getAddress() : existingPartyDetails.getAddress())
@@ -678,7 +715,7 @@ public class CitizenPartyDetailsMapper {
             .build();
     }
 
-    private PartyDetails forceConfidentiality(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+    private static PartyDetails forceConfidentiality(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
         if (Yes.equals(citizenProvidedPartyDetails.getLiveInRefuge())) {
             existingPartyDetails = existingPartyDetails.toBuilder()
                 .response(getPartyResponse(existingPartyDetails).toBuilder()
@@ -702,13 +739,13 @@ public class CitizenPartyDetailsMapper {
         return existingPartyDetails;
     }
 
-    private String fetchSafeToCallOption(PartyDetails citizenProvidedPartyDetails) {
+    private static String fetchSafeToCallOption(PartyDetails citizenProvidedPartyDetails) {
         return null != citizenProvidedPartyDetails.getResponse()
             ? citizenProvidedPartyDetails.getResponse().getSafeToCallOption()
             : null;
     }
 
-    private YesOrNo mapApplicantHaveYouLivedAtThisAddressForLessThanFiveYears(PartyDetails citizenProvidedPartyDetails) {
+    private static YesOrNo mapApplicantHaveYouLivedAtThisAddressForLessThanFiveYears(PartyDetails citizenProvidedPartyDetails) {
         if (Yes.equals(citizenProvidedPartyDetails.getIsAtAddressLessThan5Years())) {
             return Yes;
         } else {
@@ -716,7 +753,7 @@ public class CitizenPartyDetailsMapper {
         }
     }
 
-    private YesNoDontKnow mapRespondentHaveYouLivedAtThisAddressForLessThanFiveYears(PartyDetails citizenProvidedPartyDetails) {
+    private static YesNoDontKnow mapRespondentHaveYouLivedAtThisAddressForLessThanFiveYears(PartyDetails citizenProvidedPartyDetails) {
         if (Yes.equals(citizenProvidedPartyDetails.getIsAtAddressLessThan5Years())) {
             return YesNoDontKnow.yes;
         } else {
@@ -724,7 +761,7 @@ public class CitizenPartyDetailsMapper {
         }
     }
 
-    private CitizenDetails mapResponseCitizenDetails(PartyDetails citizenProvidedPartyDetails) {
+    private static CitizenDetails mapResponseCitizenDetails(PartyDetails citizenProvidedPartyDetails) {
         return CitizenDetails.builder()
             .firstName(citizenProvidedPartyDetails.getFirstName())
             .lastName(citizenProvidedPartyDetails.getLastName())
@@ -736,7 +773,7 @@ public class CitizenPartyDetailsMapper {
                               ? citizenProvidedPartyDetails.getPreviousName() : null)
             .contact(Contact.builder()
                          .email(StringUtils.isNotEmpty(citizenProvidedPartyDetails.getEmail())
-                             ? citizenProvidedPartyDetails.getEmail() : null)
+                                    ? citizenProvidedPartyDetails.getEmail() : null)
                          .phoneNumber(StringUtils.isNotEmpty(citizenProvidedPartyDetails.getPhoneNumber())
                                           ? citizenProvidedPartyDetails.getPhoneNumber() : null)
                          .build())
@@ -995,6 +1032,7 @@ public class CitizenPartyDetailsMapper {
         updateHelpWithFeesDetailsForCaseData(caseDataBuilder, c100RebuildData);
 
         caseDataBuilder.applicantCaseName(buildApplicantAndRespondentForCaseName(c100RebuildData));
+        caseDataBuilder.caseAccessCategory(caseData.getCaseTypeOfApplication());
         //Set case type, applicant name & respondent names for case list table
         caseDataBuilder.selectedCaseTypeID(caseData.getCaseTypeOfApplication());
         caseDataBuilder.applicantName(getPartyName(caseDataBuilder.build().getApplicants()));
@@ -1047,13 +1085,92 @@ public class CitizenPartyDetailsMapper {
     private PartyDetails updateCitizenC7Response(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
         if (null != citizenProvidedPartyDetails.getResponse()) {
             return existingPartyDetails.toBuilder()
-                    .response(getPartyResponse(existingPartyDetails).toBuilder()
-                            .c7ResponseSubmitted(Yes)
-                            .build())
-                    .currentRespondent(null)
-                    .build();
+                .response(getPartyResponse(existingPartyDetails).toBuilder()
+                              .c7ResponseSubmitted(Yes)
+                              .build())
+                .currentRespondent(null)
+                .build();
         }
 
         return existingPartyDetails;
+    }
+
+    private CaseData addUpdatedApplicantConfidentialFieldsToCaseData(CaseData caseData, CitizenUpdatedCaseData citizenUpdatedCaseData) {
+        return "FL401".equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+            ? addUpdatedApplicantConfidentialFieldsToCaseDataFL401(caseData, citizenUpdatedCaseData)
+            : addUpdatedApplicantConfidentialFieldsToCaseDataC100(caseData, citizenUpdatedCaseData);
+    }
+
+    public CaseData addUpdatedApplicantConfidentialFieldsToCaseDataFL401(CaseData caseData, CitizenUpdatedCaseData citizenUpdatedCaseData) {
+        PartyDetails partyDetails = citizenUpdatedCaseData.getPartyDetails();
+        PartyDetails updatedApplicant = caseData.getApplicantsFL401().toBuilder()
+            .isAddressConfidential(partyDetails.getIsAddressConfidential())
+            .isEmailAddressConfidential(partyDetails.getIsEmailAddressConfidential())
+            .isPhoneNumberConfidential(partyDetails.getIsPhoneNumberConfidential())
+            .build();
+
+        List<Element<PartyDetails>> updatedApplicants = List.of(element(null, updatedApplicant));
+        List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails =
+            createApplicantConfidentialDetailsForCaseData(updatedApplicant);
+
+        return caseData.toBuilder()
+            .applicants(updatedApplicants)
+            .applicantsFL401(updatedApplicant)
+            .applicantsConfidentialDetails(applicantsConfidentialDetails)
+            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
+            .caseTypeOfApplication(citizenUpdatedCaseData.getCaseTypeOfApplication())
+            .daApplicantContactInstructions(partyDetails.getResponse() != null
+                                                ? partyDetails.getResponse().getSafeToCallOption()
+                                                : null)
+            .build();
+    }
+
+    public CaseData addUpdatedApplicantConfidentialFieldsToCaseDataC100(CaseData caseData, CitizenUpdatedCaseData citizenUpdatedCaseData) {
+        PartyDetails updatedPartyDetails = citizenUpdatedCaseData.getPartyDetails();
+        List<Element<PartyDetails>> applicants = caseData.getApplicants();
+        List<Element<PartyDetails>> updatedApplicants = new ArrayList<>();
+        List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails = new ArrayList<>();
+
+        if (applicants != null) {
+            for (Element<PartyDetails> applicantElement : applicants) {
+                PartyDetails applicant = applicantElement.getValue();
+                PartyDetails source = (applicantElement.getId() != null
+                    && applicantElement.getId().toString().equals(updatedPartyDetails.getPartyId().toString()))
+                    ? updatedPartyDetails : applicant;
+
+                PartyDetails updatedApplicant = source.toBuilder()
+                    .isAddressConfidential(source.getIsAddressConfidential())
+                    .isEmailAddressConfidential(source.getIsEmailAddressConfidential())
+                    .isPhoneNumberConfidential(source.getIsPhoneNumberConfidential())
+                    .build();
+
+                updatedApplicants.add(element(applicantElement.getId(), updatedApplicant));
+                applicantsConfidentialDetails.addAll(createApplicantConfidentialDetailsForCaseData(updatedApplicant));
+            }
+        }
+
+        return caseData.toBuilder()
+            .applicants(updatedApplicants)
+            .applicantsConfidentialDetails(applicantsConfidentialDetails)
+            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
+            .caseTypeOfApplication(citizenUpdatedCaseData.getCaseTypeOfApplication())
+            .build();
+    }
+
+    public List<Element<ApplicantConfidentialityDetails>> createApplicantConfidentialDetailsForCaseData(PartyDetails partyDetails) {
+        ApplicantConfidentialityDetails.ApplicantConfidentialityDetailsBuilder appConfBuilder = ApplicantConfidentialityDetails.builder();
+
+        appConfBuilder.address(YesOrNo.Yes.equals(partyDetails.getIsAddressConfidential())
+                                   ? partyDetails.getAddress() : null);
+        appConfBuilder.email(YesOrNo.Yes.equals(partyDetails.getIsEmailAddressConfidential())
+                                 ? partyDetails.getEmail() : null);
+        appConfBuilder.phoneNumber(YesOrNo.Yes.equals(partyDetails.getIsPhoneNumberConfidential())
+                                       ? partyDetails.getPhoneNumber() : null);
+
+        return List.of(element(null, appConfBuilder.build()));
+    }
+
+    public <T> T getConfidentialField(YesOrNo isConfidential, T value) {
+        return YesOrNo.Yes.equals(isConfidential) ? value : null;
     }
 }

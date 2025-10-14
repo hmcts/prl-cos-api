@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -48,6 +49,7 @@ import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.barrister.BarristerRemoveService;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessClient;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
@@ -55,6 +57,7 @@ import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelec
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
+import uk.gov.hmcts.reform.prl.utils.BarristerHelper;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.noticeofchange.NoticeOfChangePartiesConverter;
@@ -114,6 +117,9 @@ public class NoticeOfChangePartiesService {
     private final CaseEventService caseEventService;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     private final ServiceOfApplicationService serviceOfApplicationService;
+    private final CaseAssignmentService caseAssignmentService;
+    private final BarristerHelper barristerHelper;
+    private final BarristerRemoveService barristerRemoveService;
 
     public static final String REPRESENTATIVE_REMOVED_LABEL = "# Representative removed";
 
@@ -223,6 +229,7 @@ public class NoticeOfChangePartiesService {
 
     public AboutToStartOrSubmitCallbackResponse applyDecision(CallbackRequest callbackRequest, String authorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        caseAssignmentService.removeAmBarristerIfPresent(caseDetails);
 
         return assignCaseAccessClient.applyDecision(
             authorisation,
@@ -278,6 +285,8 @@ public class NoticeOfChangePartiesService {
         }
 
         if (solicitorDetails.isPresent()) {
+            caseAssignmentService.removePartyBarristerIfPresent(allTabsUpdateCaseData,
+                                                                changeOrganisationRequest);
 
             allTabsUpdateCaseData = updateRepresentedPartyDetails(
                 changeOrganisationRequest,
@@ -534,8 +543,12 @@ public class NoticeOfChangePartiesService {
                 .solicitorOrg(Organisation.builder().organisationID(organisations.getOrganisationIdentifier()).organisationName(
                     organisations.getName()).build()).build();
         } else if (TypeOfNocEventEnum.removeLegalRepresentation.equals(typeOfNocEvent)) {
-            partyDetails = partyDetails.toBuilder().solicitorOrg(Organisation.builder().build())
-                .solicitorReference(null).solicitorTelephone(null).build();
+            partyDetails = partyDetails.toBuilder()
+                .solicitorOrg(Organisation.builder().build())
+                .solicitorReference(null)
+                .solicitorTelephone(null)
+                .barrister(null)
+                .build();
         }
         return partyDetails;
     }
@@ -649,6 +662,9 @@ public class NoticeOfChangePartiesService {
                     }
                 });
         }
+        caseAssignmentService.removeAmBarristerCaseRole(caseData,
+                                                        selectedPartyDetailsMap);
+
         caseDataUpdated = createChangeOrgReqAndRemoveRepresentative(
             authorisation,
             caseDetails,
@@ -756,6 +772,9 @@ public class NoticeOfChangePartiesService {
                     TypeOfNocEventEnum.removeLegalRepresentation,
                     null
                 );
+                removeBarristerFlags(oldDetailsMap.get(removeSolicitorRole),
+                                     newPartyDetailsElement,
+                                     allTabsUpdateCaseData);
             }
         }
 
@@ -900,6 +919,20 @@ public class NoticeOfChangePartiesService {
         }
     }
 
+    void removeBarristerFlags(Element<PartyDetails> oldPartyDetails,
+                              Element<PartyDetails> newPartyDetails,
+                              CaseData caseData) {
+        barristerHelper.setAllocatedBarrister(Optional.ofNullable(oldPartyDetails)
+                                                  .map(Element::getValue)
+                                                  .orElseGet(newPartyDetails::getValue),
+                                              caseData,
+                                              Optional.ofNullable(oldPartyDetails)
+                                                  .map(Element::getId)
+                                                  .orElseGet(newPartyDetails::getId));
+        partyLevelCaseFlagsService.updateCaseDataWithGeneratePartyCaseFlags(caseData,
+                                                                            partyLevelCaseFlagsService::generatePartyCaseFlagsForBarristerOnly);
+    }
+
     void sendEmailOnRemovalOfLegalRepresentation(Element<PartyDetails> oldPartyDetails,
                                                          Element<PartyDetails> newPartyDetails,
                                                          Optional<SolicitorRole> solicitorRole,
@@ -919,7 +952,14 @@ public class NoticeOfChangePartiesService {
             TypeOfNocEventEnum.removeLegalRepresentation.getDisplayedValue()
         );
         eventPublisher.publishEvent(noticeOfChangeEvent);
-
+        barristerHelper.setAllocatedBarrister(Optional.ofNullable(oldPartyDetails)
+                                             .map(Element::getValue)
+                                             .orElseGet(newPartyDetails::getValue),
+                                         caseData,
+                                         Optional.ofNullable(oldPartyDetails)
+                                             .map(Element::getId)
+                                             .orElseGet(newPartyDetails::getId));
+        barristerRemoveService.notifyBarrister(caseData);
     }
 
     private List<Element<PartyDetails>> findSolicitorRepresentedParties(CaseData caseData, String authorisation) {
@@ -1003,6 +1043,9 @@ public class NoticeOfChangePartiesService {
             removeLegalRepAndPartiesList,
             selectedPartyDetailsMap
         );
+
+        caseAssignmentService.removeAmBarristerCaseRole(caseData,
+                                                        selectedPartyDetailsMap);
 
         caseDataUpdated = createChangeOrgReqAndRemoveRepresentative(
             authorisation,

@@ -42,6 +42,7 @@ java:
     COMMON_DATA_API: http://rd-commondata-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     SEND_LETTER_URL: http://rpe-send-letter-service-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     AM_ROLE_ASSIGNMENT_API_URL: http://am-role-assignment-service-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    ACRO_CRONJOB_ENABLED: false
     APP_ENV: "prod"
 
 
@@ -93,3 +94,5 @@ java:
           alias: WELSH_COURT_MAPPING
         - name: app-insights-connection-string
           alias: app-insights-connection-string
+        - name: acro-zip-password
+          alias: ACRO_ZIP_PASSWORD

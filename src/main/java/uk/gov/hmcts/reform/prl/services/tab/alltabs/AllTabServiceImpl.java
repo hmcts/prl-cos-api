@@ -182,6 +182,7 @@ public class AllTabServiceImpl implements AllTabsService {
         documentMap.put("finalWelshDocument", caseData.getFinalWelshDocument());
         documentMap.put("c8Document", caseData.getC8Document());
         documentMap.put("c8WelshDocument", caseData.getC8WelshDocument());
+        documentMap.put("c8ArchivedDocuments", caseData.getC8ArchivedDocuments());
         documentMap.put("submitAndPayDownloadApplicationLink", caseData.getSubmitAndPayDownloadApplicationLink());
         documentMap.put("submitAndPayDownloadApplicationWelshLink", caseData.getSubmitAndPayDownloadApplicationWelshLink());
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) && State.SUBMITTED_PAID.equals(
@@ -246,6 +247,7 @@ public class AllTabServiceImpl implements AllTabsService {
                 dataMap.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
                 dataMap.put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
             }
+
             combinedFieldsMap = findCaseDataMap(caseData);
             combinedFieldsMap.putAll(dataMap);
         }

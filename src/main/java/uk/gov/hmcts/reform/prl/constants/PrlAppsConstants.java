@@ -226,6 +226,10 @@ public class PrlAppsConstants {
     public static final String OTHER = "Other";
     public static final String ENGDOCGEN = "isEngDocGen";
 
+    public static final String C8_ARCHIVED_DOCUMENTS = "c8ArchivedDocuments";
+    public static final String C8_ARCHIVED_DOCUMENT_NAME = "C8ArchivedDocument.pdf";
+    public static final String C8_ARCHIVED_WELSH_DOCUMENT_NAME = "C8ArchivedDocumentWelsh.pdf";
+
     public static final String SERVICE_ID = "ABA5";
     public static final String FAMILY_COURT_TYPE_ID = "18";
     public static final String[] HEARING_PAGE_NEEDED_ORDER_IDS = {"noticeOfProceedings","childArrangementsSpecificProhibitedOrder",
@@ -604,7 +608,7 @@ public class PrlAppsConstants {
     public static final String SOLICITOR_RESPONDENT_C1A_APPLCATION = "Respondent C1A Application";
     public static final String RESPONDENT_C1A_RESPONSE = "Respondent C1A response";
     public static final String CASE_SUMMARY = "Case summary";
-    public static final String TRANSCRIPTS_OF_JUDGEMENTS = "Transcripts of judgements";
+    public static final String TRANSCRIPTS_OF_JUDGEMENTS = "Transcripts and judgments";
     public static final String MAGISTRATES_FACTS_AND_REASONS = "Magistrates facts and reasons";
     public static final String SAFEGUARDING_LETTER = "Safeguarding letter/Safeguarding Enquiries Report (SER)";
     public static final String SECTION_7_REPORT = "Section 7 report/Child Impact Analysis";
@@ -685,6 +689,7 @@ public class PrlAppsConstants {
     public static final String DIO_URGENT_HEARING_DETAILS = "dioUrgentHearingDetails";
     public static final String DIO_WITHOUT_NOTICE_HEARING_DETAILS = "dioWithoutNoticeHearingDetails";
     public static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
+    public static final String CASE_ACCESS_CATEGORY = "CaseAccessCategory";
     public static final String DA_ORDER_FOR_CA_CASE = "daOrderForCaCase";
     public static final String CHILD_AND_CAFCASS_OFFICER_DETAILS = "childAndCafcassOfficers";
     public static final String CHILD_NAME = "Child name: ";
@@ -1137,5 +1142,5 @@ public class PrlAppsConstants {
     public static final String REGION_WALES = "7";
 
     public static final String IS_INVOKED_FROM_TASK = "isInvokedFromTask";
-
+    public static final String ALLOCATED_BARRISTER = "allocatedBarrister";
 }

@@ -8,6 +8,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -73,6 +74,7 @@ import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
+import uk.gov.hmcts.reform.prl.utils.TaskUtils;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -82,6 +84,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -92,6 +95,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -121,6 +125,9 @@ public class ManageOrdersControllerTest {
 
     @Mock
     private ObjectMapper objectMapper;
+
+    @Mock
+    private TaskUtils taskUtils;
 
     private CaseData caseData;
 
@@ -1846,11 +1853,11 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testManageOrderMidEvent() throws Exception {
+    public void testManageOrderMidEventWithNullDoYouWantToServeOrder() throws Exception {
 
         caseData = CaseData.builder()
             .id(12345L)
-            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(Yes).build())
+            .serveOrderData(ServeOrderData.builder().build())
             .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .build();
@@ -1928,6 +1935,7 @@ public class ManageOrdersControllerTest {
         List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
             OrderDetails.builder().build()).build());
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap.put(IS_INVOKED_FROM_TASK, No);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
             .thenReturn(Map.of("orderCollection", orderDetailsList));
@@ -1935,6 +1943,8 @@ public class ManageOrdersControllerTest {
             .thenReturn(stringObjectMap);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
             .thenReturn(caseData);
+        when(objectMapper.convertValue(eq(No),
+                                       ArgumentMatchers.<TypeReference<YesOrNo>>any())).thenReturn(No);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -1950,6 +1960,63 @@ public class ManageOrdersControllerTest {
             callbackRequest
         );
         assertEquals(Yes.getDisplayedValue(), responseResponseEntity.getBody().getData().get("doYouWantToServeOrder"));
+        assertThat(responseResponseEntity.getHeaders())
+            .doesNotContainKey(CLIENT_CONTEXT_HEADER_PARAMETER);
+    }
+
+    @Test
+    public void testAddUploadOrderWithNullDoYouWantToServeOrder() throws Exception {
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(Yes)
+            .build();
+
+        caseData = CaseData.builder()
+            .id(12345L)
+            .courtName("testcourt")
+            .manageOrders(manageOrders)
+            .previewOrderDoc(Document.builder()
+                                 .documentUrl(generatedDocumentInfo.getUrl())
+                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                 .documentHash(generatedDocumentInfo.getHashToken())
+                                 .documentFileName("PRL-ORDER-C21-COMMON.docx")
+                                 .build())
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .previewOrderDoc(Document.builder().build())
+            .manageOrdersOptions(ManageOrdersOptionsEnum.amendOrderUnderSlipRule)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(null).build())
+            .build();
+
+        List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
+            OrderDetails.builder().build()).build());
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap.put(IS_INVOKED_FROM_TASK, No);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
+            .thenReturn(Map.of("orderCollection", orderDetailsList));
+        when(manageOrderService.populateHeader(caseData))
+            .thenReturn(stringObjectMap);
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
+            .thenReturn(caseData);
+        when(objectMapper.convertValue(eq(No),
+                                       ArgumentMatchers.<TypeReference<YesOrNo>>any())).thenReturn(No);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        ResponseEntity<AboutToStartOrSubmitCallbackResponse> responseResponseEntity = manageOrdersController.whenToServeOrder(
+            authToken,
+            s2sToken,
+            null,
+            callbackRequest
+        );
+        assertNull(responseResponseEntity.getBody().getData().get("doYouWantToServeOrder"));
         assertThat(responseResponseEntity.getHeaders())
             .doesNotContainKey(CLIENT_CONTEXT_HEADER_PARAMETER);
     }
@@ -1982,6 +2049,7 @@ public class ManageOrdersControllerTest {
         List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
             OrderDetails.builder().build()).build());
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap.put(IS_INVOKED_FROM_TASK, No);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
             .thenReturn(Map.of("orderCollection", orderDetailsList));
@@ -1989,6 +2057,8 @@ public class ManageOrdersControllerTest {
             .thenReturn(stringObjectMap);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
             .thenReturn(caseData);
+        when(objectMapper.convertValue(eq(No),
+                                       ArgumentMatchers.<TypeReference<YesOrNo>>any())).thenReturn(No);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -2036,6 +2106,7 @@ public class ManageOrdersControllerTest {
         List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
             OrderDetails.builder().build()).build());
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap.put(IS_INVOKED_FROM_TASK, No);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
             .thenReturn(Map.of("orderCollection", orderDetailsList));
@@ -2051,6 +2122,9 @@ public class ManageOrdersControllerTest {
                              .build())
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(objectMapper.convertValue(eq(No),
+                                       ArgumentMatchers.<TypeReference<YesOrNo>>any())).thenReturn(No);
+
         ResponseEntity<AboutToStartOrSubmitCallbackResponse> responseResponseEntity = manageOrdersController.whenToServeOrder(
             authToken,
             s2sToken,
@@ -2116,9 +2190,11 @@ public class ManageOrdersControllerTest {
                              .build())
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(objectMapper.writeValueAsString(any())).thenReturn(CLIENT_CONTEXT);
+        when(taskUtils.setTaskCompletion(anyString(),
+                                         isA(CaseData.class), any(Predicate.class)))
+            .thenReturn(CLIENT_CONTEXT);
         when(objectMapper.convertValue(eq(stringObjectMap.get(IS_INVOKED_FROM_TASK)),
-                                       any(TypeReference.class)))
+                                       ArgumentMatchers.<TypeReference<YesOrNo>>any()))
             .thenReturn(Yes);
 
         ResponseEntity<AboutToStartOrSubmitCallbackResponse> responseResponseEntity = manageOrdersController.whenToServeOrder(
@@ -2133,9 +2209,9 @@ public class ManageOrdersControllerTest {
 
         ObjectMapper objectMapper = new ObjectMapper();
         assertThat(objectMapper.readTree(
-            new String(Base64.getDecoder().decode(responseResponseEntity
-                                                      .getHeaders()
-                                                      .getFirst(CLIENT_CONTEXT_HEADER_PARAMETER)))))
+            responseResponseEntity
+                .getHeaders()
+                .getFirst(CLIENT_CONTEXT_HEADER_PARAMETER)))
             .isEqualTo(objectMapper.readTree(CLIENT_CONTEXT));
     }
 
@@ -2194,9 +2270,8 @@ public class ManageOrdersControllerTest {
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.writeValueAsString(any())).thenReturn(CLIENT_CONTEXT_FALSE);
-        when(objectMapper.convertValue(eq(stringObjectMap.get(IS_INVOKED_FROM_TASK)),
-                                       any(TypeReference.class)))
-            .thenReturn(No);
+        when(objectMapper.convertValue(eq(No),
+                                       ArgumentMatchers.<TypeReference<YesOrNo>>any())).thenReturn(No);
 
         ResponseEntity<AboutToStartOrSubmitCallbackResponse> responseResponseEntity = manageOrdersController.whenToServeOrder(
             authToken,
@@ -2207,15 +2282,6 @@ public class ManageOrdersControllerTest {
 
         assertThat(No.getDisplayedValue())
             .isEqualTo(responseResponseEntity.getBody().getData().get("doYouWantToServeOrder"));
-        assertThat(responseResponseEntity.getHeaders().getFirst(CLIENT_CONTEXT_HEADER_PARAMETER))
-            .isNotNull();
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        assertThat(objectMapper.readTree(
-            new String(Base64.getDecoder().decode(responseResponseEntity
-                                                      .getHeaders()
-                                                      .getFirst(CLIENT_CONTEXT_HEADER_PARAMETER)))))
-            .isEqualTo(objectMapper.readTree(CLIENT_CONTEXT_FALSE));
     }
 
 
@@ -3370,9 +3436,11 @@ public class ManageOrdersControllerTest {
         when(refDataUserService.getLegalAdvisorList()).thenReturn(List.of(DynamicListElement.builder().build()));
         when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(objectMapper.writeValueAsString(any())).thenReturn(CLIENT_CONTEXT);
+        when(taskUtils.setTaskCompletion(anyString(),
+                                         isA(CaseData.class), any(Predicate.class)))
+            .thenReturn(CLIENT_CONTEXT);
         when(objectMapper.convertValue(eq(stringObjectMap.get(IS_INVOKED_FROM_TASK)),
-                                       any(TypeReference.class)))
+                                       ArgumentMatchers.<TypeReference<YesOrNo>>any()))
             .thenReturn(Yes);
         ResponseEntity<AboutToStartOrSubmitCallbackResponse> responseResponseEntity = manageOrdersController.prePopulateJudgeOrLegalAdviser(
             authToken,
@@ -3386,9 +3454,7 @@ public class ManageOrdersControllerTest {
 
         ObjectMapper mapper = new ObjectMapper();
         assertThat(objectMapper.readTree(
-            new String(Base64.getDecoder().decode(responseResponseEntity
-                                                      .getHeaders()
-                                                      .getFirst(CLIENT_CONTEXT_HEADER_PARAMETER)))))
+            responseResponseEntity.getHeaders().getFirst(CLIENT_CONTEXT_HEADER_PARAMETER)))
             .isEqualTo(objectMapper.readTree(CLIENT_CONTEXT));
     }
 
@@ -3440,14 +3506,7 @@ public class ManageOrdersControllerTest {
         );
         assertThat(responseResponseEntity.getBody().getData().get("nameOfLaToReviewOrder")).isNotNull();
         assertThat(responseResponseEntity.getHeaders())
-            .containsKey(CLIENT_CONTEXT_HEADER_PARAMETER);
-
-        ObjectMapper mapper = new ObjectMapper();
-        assertThat(objectMapper.readTree(
-            new String(Base64.getDecoder().decode(responseResponseEntity
-                                                      .getHeaders()
-                                                      .getFirst(CLIENT_CONTEXT_HEADER_PARAMETER)))))
-            .isEqualTo(objectMapper.readTree(CLIENT_CONTEXT_FALSE));
+            .doesNotContainKey(CLIENT_CONTEXT_HEADER_PARAMETER);
     }
 
     @Test

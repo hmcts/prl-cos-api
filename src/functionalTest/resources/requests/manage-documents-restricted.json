@@ -90,6 +90,10 @@
                   "label": "Other documents"
                 },
                 {
+                  "code": "otherDocs",
+                  "label": "Other documents"
+                },
+                {
                   "code": "emailsToCourtToRequestHearingsAdjourned",
                   "label": "Emails to request hearings adjourned"
                 },
@@ -179,7 +183,7 @@
                 },
                 {
                   "code": "transcriptsOfJudgements",
-                  "label": "Transcripts of judgements"
+                  "label": "Transcripts and judgments"
                 },
                 {
                   "code": "magistratesFactsAndReasons",

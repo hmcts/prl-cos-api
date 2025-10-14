@@ -109,10 +109,12 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_OR_RESPONDENT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ACCESS_CATEGORY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CREATED_BY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.GATEKEEPING_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -332,6 +334,7 @@ public class CallbackController {
 
             ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            caseDataUpdated.put(DATE_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
             caseDataUpdated.put(
                 CASE_DATE_AND_TIME_SUBMITTED_FIELD,
                 DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime)
@@ -358,7 +361,7 @@ public class CallbackController {
                 caseData = populateMiamPolicyUpgradeDetails(caseData, caseDataUpdated);
             }
 
-            Map<String, Object> map = documentGenService.generateDocuments(authorisation, caseData);
+            Map<String, Object> map = documentGenService.createUpdatedCaseDataWithDocuments(authorisation, caseData);
             // updating Summary tab to update case status
             caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
             caseDataUpdated.putAll(map);
@@ -654,6 +657,28 @@ public class CallbackController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
+    @PostMapping(path = "/update-party-details-mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback for update Applicants, Children and Respondents details on mid-event")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse handleUpdatePartyDetailsMidEvent(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            return AboutToStartOrSubmitCallbackResponse
+                .builder()
+                .data(callbackRequest.getCaseDetails().getData())
+                .errors(updatePartyDetailsService.validateUpdatePartyDetails(callbackRequest))
+                .build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
 
     @PostMapping(path = "/update-party-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Update Applicants, Children and Respondents details for future processing")
@@ -725,6 +750,7 @@ public class CallbackController {
             }
             if (caseDataUpdated.get(CASE_TYPE_OF_APPLICATION) != null) {
                 caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get(CASE_TYPE_OF_APPLICATION));
+                caseDataUpdated.put(CASE_ACCESS_CATEGORY, caseDataUpdated.get(CASE_TYPE_OF_APPLICATION));
                 if (isEmpty(caseDataUpdated.get(TASK_LIST_VERSION))) {
                     setTaskListVersion(caseDataUpdated);
                 }
