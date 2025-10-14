@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -72,8 +73,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     @Mock
     private DgsService dgsService;
 
-    @Mock
-    private GeneratedDocumentInfo generatedDocumentInfo;
+    private GeneratedDocumentInfo generatedDocumentInfoShared;
 
     @Mock
     private FeeService feesService;
@@ -85,18 +85,14 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     private CourtFinderService courtFinderService;
 
     @Mock
-    private UserDetails userDetails;
+    private UserDetails userDetailsShared;
 
-    @Mock
     private FeeResponse feeResponse;
 
-    @Mock
     private Court court;
 
-    @Mock
     private CaseDetails caseDetails;
 
-    @Mock
     private CaseData caseData;
 
     @Mock
@@ -108,10 +104,8 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     @Mock
     private OrganisationService organisationService;
 
-    @Mock
-    private CallbackRequest callbackRequest;
+    private CallbackRequest callbackRequestShared;
 
-    @Mock
     private DocumentLanguage documentLanguage;
 
     @Mock
@@ -137,13 +131,11 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     @Value("${document.templates.c100.c100_draft_welsh_filename}")
     protected String c100DraftWelshFilename;
 
-    public static final String authToken = "Bearer TestAuthToken";
-    public static final String s2sToken = "s2s AuthToken";
-    private static final String DRAFT_C_100_APPLICATION = "Draft_c100_application.pdf";
+    public static final String AUTH_TOKEN = "Bearer TestAuthToken";
+    public static final String S2S_TOKEN = "s2s AuthToken";
 
     @Before
     public void setUp() {
-
 
         feeResponse = FeeResponse.builder()
             .amount(BigDecimal.valueOf(232.00))
@@ -179,64 +171,64 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
 
-        callbackRequest = CallbackRequest.builder()
+        callbackRequestShared = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
 
-        generatedDocumentInfo = GeneratedDocumentInfo.builder().build();
+        generatedDocumentInfoShared = GeneratedDocumentInfo.builder().build();
 
         documentLanguage = DocumentLanguage.builder()
             .isGenEng(true)
             .isGenWelsh(true)
             .build();
+
+        when(miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(any(), any()))
+            .thenAnswer(inv -> inv.getArgument(0));
     }
 
-    //TODO Update this testcase once we have integration with Fee and Pay
     @Test
     public void testUserDetailsForSolicitorName() throws Exception {
+        when(submitAndPayChecker.hasMandatoryCompleted(any(CaseData.class))).thenReturn(true);
+
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
+        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
 
-        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
-            .thenReturn(generatedDocumentInfo);
-        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
-            .thenReturn(generatedDocumentInfo);
+        UserDetails concreteUser = UserDetails.builder()
+            .forename("userFirst")
+            .surname("userLast")
+            .email("solicitor@test.com")
+            .build();
+        when(userService.getUserDetails(AUTH_TOKEN)).thenReturn(concreteUser);
 
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
-
-        when(courtFinderService.getNearestFamilyCourt(caseDetails.getCaseData()))
-            .thenReturn(court);
-
+        when(courtFinderService.getNearestFamilyCourt(any(CaseData.class))).thenReturn(court);
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        assertNotNull(prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken, s2sToken, callbackRequest));
-
-    }
-
-    @Test
-    public void testUserDetailsForSolicitorName_FeeException() throws Exception {
-        when(submitAndPayChecker.hasMandatoryCompleted(Mockito.any(CaseData.class))).thenReturn(true);
-        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
-            .thenReturn(caseData);
-
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
-            .thenReturn(generatedDocumentInfo);
+            .thenReturn(generatedDocumentInfoShared);
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
-            .thenReturn(generatedDocumentInfo);
-
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
-
-        when(courtFinderService.getNearestFamilyCourt(caseDetails.getCaseData()))
-            .thenReturn(court);
-
-        when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenThrow(new Exception());
+            .thenReturn(generatedDocumentInfoShared);
 
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        assertNotNull(prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken, s2sToken, callbackRequest));
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
 
+        uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse resp =
+            prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(AUTH_TOKEN,
+                                                                                 S2S_TOKEN, getCallbackRequest()
+            );
+
+        assertNotNull(resp);
+        CaseData out = (CaseData) resp.getData();
+        assertNotNull(out);
+
+        assertEquals("caseSolicitorName should match user full name",
+                     concreteUser.getFullName(), out.getCaseSolicitorName());
+
+        assertEquals(concreteUser.getFullName(), out.getSolicitorName());
+        assertEquals(concreteUser.getEmail(), out.getApplicantSolicitorEmailAddress());
+        assertEquals(court.getCourtName(), out.getCourtName());
+        assertEquals("£" + feeResponse.getAmount().toString(), out.getFeeAmount());
     }
 
     @Test
@@ -246,19 +238,21 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
-            .thenReturn(generatedDocumentInfo);
+            .thenReturn(generatedDocumentInfoShared);
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
-            .thenReturn(generatedDocumentInfo);
+            .thenReturn(generatedDocumentInfoShared);
 
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
+        when(userService.getUserDetails(AUTH_TOKEN)).thenReturn(userDetailsShared);
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
-        when(courtFinderService.getNearestFamilyCourt(caseDetails.getCaseData()))
+        when(courtFinderService.getNearestFamilyCourt(any(CaseData.class)))
             .thenReturn(court);
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(submitAndPayChecker.hasMandatoryCompleted(Mockito.any(CaseData.class))).thenReturn(true);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken, s2sToken, callbackRequest);
+        prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(AUTH_TOKEN, S2S_TOKEN,
+                                                                             callbackRequestShared
+        );
         verify(dgsService, times(1)).generateDocument(
             Mockito.anyString(),
             Mockito.any(CaseDetails.class),
@@ -279,21 +273,24 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
-            .thenReturn(generatedDocumentInfo);
+            .thenReturn(generatedDocumentInfoShared);
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
-            .thenReturn(generatedDocumentInfo);
+            .thenReturn(generatedDocumentInfoShared);
 
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
+        when(userService.getUserDetails(AUTH_TOKEN)).thenReturn(userDetailsShared);
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
-        when(courtFinderService.getNearestFamilyCourt(caseDetails.getCaseData()))
+        when(courtFinderService.getNearestFamilyCourt(any(CaseData.class)))
             .thenReturn(court);
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(submitAndPayChecker.hasMandatoryCompleted(Mockito.any(CaseData.class))).thenReturn(true);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(Mockito.any(), Mockito.any())).thenReturn(caseData);
 
-        assertNotNull(prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken, s2sToken, callbackRequest));
+        assertNotNull(prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(AUTH_TOKEN,
+                                                                                           S2S_TOKEN,
+                                                                                           callbackRequestShared
+        ));
 
 
     }
@@ -304,70 +301,36 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
-            .thenReturn(generatedDocumentInfo);
+            .thenReturn(generatedDocumentInfoShared);
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
-            .thenReturn(generatedDocumentInfo);
+            .thenReturn(generatedDocumentInfoShared);
 
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
+        when(userService.getUserDetails(AUTH_TOKEN)).thenReturn(userDetailsShared);
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
-        when(courtFinderService.getNearestFamilyCourt(caseDetails.getCaseData()))
+        when(courtFinderService.getNearestFamilyCourt(any(CaseData.class)))
             .thenReturn(court);
 
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        assertNotNull(prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken,s2sToken, callbackRequest));
+        when(submitAndPayChecker.hasMandatoryCompleted(Mockito.any(CaseData.class))).thenReturn(true);
+        assertNotNull(prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(AUTH_TOKEN,
+                                                                                           S2S_TOKEN,
+                                                                                           callbackRequestShared
+        ));
     }
 
     @Test
     public void testCourtDetailsWithCourtName() throws Exception {
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
-        PartyDetails applicant = PartyDetails.builder()
-            .firstName("TestFirst")
-            .lastName("TestLast")
-            .address(Address.builder()
-                         .postCode("SE1 9BA")
-                         .build())
-            .build();
-
-        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
-        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
-
-        List<LiveWithEnum> childLiveWithList = new ArrayList<>();
-        childLiveWithList.add(LiveWithEnum.applicant);
-
-        Child child = Child.builder()
-            .childLiveWith(childLiveWithList)
-            .build();
-
-        String childNames = "child1 child2";
-
-        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
-        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
-
-        CaseData caseDataForCourt = CaseData.builder()
-            .id(12345L)
-            .applicantCaseName("TestCaseName")
-            .applicantSolicitorEmailAddress("test@test.com")
-            .applicants(listOfApplicants)
-            .children(listOfChildren)
-            .courtName("testcourt")
-            .build();
-
-        CaseDetails caseDetails1 = CaseDetails.builder()
-            .caseData(caseDataForCourt)
-            .build();
-
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails1)
-            .build();
+        CallbackRequest callbackRequestCourt = getCallbackRequest();
 
         Court court1 = Court.builder()
             .courtName("testcourt")
             .build();
-        when(submitAndPayChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
-        when(courtFinderService.getNearestFamilyCourt(callbackRequest.getCaseDetails().getCaseData()))
+        when(submitAndPayChecker.hasMandatoryCompleted(any(CaseData.class))).thenReturn(true);
+        when(courtFinderService.getNearestFamilyCourt(callbackRequestCourt.getCaseDetails().getCaseData()))
             .thenReturn(court1);
 
         UserDetails userDetails = UserDetails.builder()
@@ -375,7 +338,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .surname("userLast")
             .build();
 
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
+        when(userService.getUserDetails(AUTH_TOKEN)).thenReturn(userDetails);
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -383,7 +346,6 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
-        ;
 
         CaseData caseData1 = objectMapper.convertValue(
             CaseData.builder()
@@ -408,22 +370,87 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(objectMapper.convertValue(callbackRequest.getCaseDetails().getCaseData(), CaseData.class))
+        when(objectMapper.convertValue(callbackRequestCourt.getCaseDetails().getCaseData(), CaseData.class))
             .thenReturn(caseData1);
-        assertNotNull(prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken, s2sToken,callbackRequest));
+        assertNotNull(prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(AUTH_TOKEN,
+                                                                                           S2S_TOKEN,
+                                                                                           callbackRequestCourt
+        ));
     }
 
     @Test
     public void testCaseCreationAndSubmitWithAllegationHarmRevised() throws Exception {
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
-                .thenReturn(caseData);
+            .thenReturn(caseData);
+        CallbackRequest callbackRequest = getCallbackRequest();
+
+        Court court1 = Court.builder()
+            .courtName("testcourt")
+            .build();
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
+        when(submitAndPayChecker.hasMandatoryCompleted(any(CaseData.class))).thenReturn(true);
+        when(courtFinderService.getNearestFamilyCourt(callbackRequest.getCaseDetails().getCaseData()))
+
+
+            .thenReturn(court1);
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("userFirst")
+            .surname("userLast")
+            .build();
+
+        when(userService.getUserDetails(AUTH_TOKEN)).thenReturn(userDetails);
+        when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
+
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+        ;
+
+        CaseData caseData1 = objectMapper.convertValue(
+            CaseData.builder()
+                .allegationOfHarmRevised(AllegationOfHarmRevised.builder().newAllegationsOfHarmYesNo(Yes)
+                                             .newAllegationsOfHarmChildAbuseYesNo(Yes)
+                                             .newAllegationsOfHarmDomesticAbuseYesNo(Yes)
+                                             .newAllegationsOfHarmChildAbductionYesNo(Yes).build())
+                .taskListVersion(TASK_LIST_VERSION_V2)
+                .solicitorName(userDetails.getFullName())
+                .applicantSolicitorEmailAddress("test@gmail.com")
+                .caseworkerEmailAddress("prl_caseworker_solicitor@mailinator.com")
+                .feeAmount(feeResponse.getAmount().toString())
+                .submitAndPayDownloadApplicationLink(Document.builder()
+                                                         .documentUrl(generatedDocumentInfo.getUrl())
+                                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                                         .documentHash(generatedDocumentInfo.getHashToken())
+                                                         .documentFileName("Draft_c100_application.pdf").build())
+                .courtName(court1.getCourtName())
+                .build(),
+            CaseData.class
+        );
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
+        when(objectMapper.convertValue(callbackRequest.getCaseDetails().getCaseData(), CaseData.class))
+            .thenReturn(caseData1);
+        assertNotNull(prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(AUTH_TOKEN,
+                                                                                           S2S_TOKEN, callbackRequest));
+    }
+
+    private static CallbackRequest getCallbackRequest() {
         PartyDetails applicant = PartyDetails.builder()
-                .firstName("TestFirst")
-                .lastName("TestLast")
-                .address(Address.builder()
-                        .postCode("SE1 9BA")
-                        .build())
-                .build();
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .address(Address.builder()
+                         .postCode("SE1 9BA")
+                         .build())
+            .build();
 
         Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
@@ -432,136 +459,38 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
         childLiveWithList.add(LiveWithEnum.applicant);
 
         Child child = Child.builder()
-                .childLiveWith(childLiveWithList)
-                .build();
-
-        String childNames = "child1 child2";
+            .childLiveWith(childLiveWithList)
+            .build();
 
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseDataForCourt = CaseData.builder()
-                .id(12345L)
-                .applicantCaseName("TestCaseName")
-                .applicantSolicitorEmailAddress("test@test.com")
-                .applicants(listOfApplicants)
-                .children(listOfChildren)
-                .courtName("testcourt")
-                .build();
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicantSolicitorEmailAddress("test@test.com")
+            .applicants(listOfApplicants)
+            .children(listOfChildren)
+            .courtName("testcourt")
+            .build();
 
         CaseDetails caseDetails1 = CaseDetails.builder()
-                .caseData(caseDataForCourt)
-                .build();
+            .caseData(caseDataForCourt)
+            .build();
 
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-                .caseDetails(caseDetails1)
-                .build();
-
-        Court court1 = Court.builder()
-                .courtName("testcourt")
-                .build();
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
-        when(submitAndPayChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
-        when(courtFinderService.getNearestFamilyCourt(callbackRequest.getCaseDetails().getCaseData()))
-
-
-                .thenReturn(court1);
-
-        UserDetails userDetails = UserDetails.builder()
-                .forename("userFirst")
-                .surname("userLast")
-                .build();
-
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
-        when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
-
-        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
-                .url("TestUrl")
-                .binaryUrl("binaryUrl")
-                .hashToken("testHashToken")
-                .build();
-        ;
-
-        CaseData caseData1 = objectMapper.convertValue(
-                CaseData.builder()
-                        .allegationOfHarmRevised(AllegationOfHarmRevised.builder().newAllegationsOfHarmYesNo(Yes)
-                                .newAllegationsOfHarmChildAbuseYesNo(Yes)
-                                .newAllegationsOfHarmDomesticAbuseYesNo(Yes)
-                                .newAllegationsOfHarmChildAbductionYesNo(Yes).build())
-                        .taskListVersion(TASK_LIST_VERSION_V2)
-                        .solicitorName(userDetails.getFullName())
-                        .applicantSolicitorEmailAddress("test@gmail.com")
-                        .caseworkerEmailAddress("prl_caseworker_solicitor@mailinator.com")
-                        .feeAmount(feeResponse.getAmount().toString())
-                        .submitAndPayDownloadApplicationLink(Document.builder()
-                                .documentUrl(generatedDocumentInfo.getUrl())
-                                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                .documentHash(generatedDocumentInfo.getHashToken())
-                                .documentFileName("Draft_c100_application.pdf").build())
-                        .courtName(court1.getCourtName())
-                        .build(),
-                CaseData.class
-        );
-
-        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
-                .thenReturn(generatedDocumentInfo);
-        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
-                .thenReturn(generatedDocumentInfo);
-
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-
-        when(objectMapper.convertValue(callbackRequest.getCaseDetails().getCaseData(), CaseData.class))
-                .thenReturn(caseData1);
-        assertNotNull(prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken,s2sToken, callbackRequest));
+        return CallbackRequest.builder()
+            .caseDetails(caseDetails1)
+            .build();
     }
-
 
 
     @Test
     public void testCourtDetailsWithoutCourtName() throws Exception {
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
-        PartyDetails applicant = PartyDetails.builder()
-            .firstName("TestFirst")
-            .lastName("TestLast")
-            .address(Address.builder()
-                         .postCode("SE1 9BA")
-                         .build())
-            .build();
+        CallbackRequest callbackRequest = getCallbackRequest();
 
-        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
-        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
-
-        List<LiveWithEnum> childLiveWithList = new ArrayList<>();
-        childLiveWithList.add(LiveWithEnum.applicant);
-
-        Child child = Child.builder()
-            .childLiveWith(childLiveWithList)
-            .build();
-
-        String childNames = "child1 child2";
-
-        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
-        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
-
-        CaseData caseDataForCourt = CaseData.builder()
-            .id(12345L)
-            .applicantCaseName("TestCaseName")
-            .applicantSolicitorEmailAddress("test@test.com")
-            .applicants(listOfApplicants)
-            .children(listOfChildren)
-            .courtName("testcourt")
-            .build();
-
-        CaseDetails caseDetails1 = CaseDetails.builder()
-            .caseData(caseDataForCourt)
-            .build();
-
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails1)
-            .build();
-
-        when(submitAndPayChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(submitAndPayChecker.hasMandatoryCompleted(any(CaseData.class))).thenReturn(true);
         when(courtFinderService.getNearestFamilyCourt(callbackRequest.getCaseDetails().getCaseData()))
             .thenReturn(null);
 
@@ -570,7 +499,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .surname("userLast")
             .build();
 
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
+        when(userService.getUserDetails(AUTH_TOKEN)).thenReturn(userDetails);
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -605,54 +534,17 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getCaseData(), CaseData.class))
             .thenReturn(caseData1);
-        assertNotNull(prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken, s2sToken, callbackRequest));
+        assertNotNull(prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(AUTH_TOKEN,
+                                                                                           S2S_TOKEN, callbackRequest));
     }
 
     @Test
     public void testExceptionCourtDetailsWithoutCourtName() throws Exception {
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
-        PartyDetails applicant = PartyDetails.builder()
-            .firstName("TestFirst")
-            .lastName("TestLast")
-            .address(Address.builder()
-                         .postCode("SE1 9BA")
-                         .build())
-            .build();
+        CallbackRequest callbackRequest = getCallbackRequest();
 
-        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
-        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
-
-        List<LiveWithEnum> childLiveWithList = new ArrayList<>();
-        childLiveWithList.add(LiveWithEnum.applicant);
-
-        Child child = Child.builder()
-            .childLiveWith(childLiveWithList)
-            .build();
-
-        String childNames = "child1 child2";
-
-        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
-        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
-
-        CaseData caseDataForCourt = CaseData.builder()
-            .id(12345L)
-            .applicantCaseName("TestCaseName")
-            .applicantSolicitorEmailAddress("test@test.com")
-            .applicants(listOfApplicants)
-            .children(listOfChildren)
-            .courtName("testcourt")
-            .build();
-
-        CaseDetails caseDetails1 = CaseDetails.builder()
-            .caseData(caseDataForCourt)
-            .build();
-
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails1)
-            .build();
-
-        when(submitAndPayChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(submitAndPayChecker.hasMandatoryCompleted(any(CaseData.class))).thenReturn(true);
         when(courtFinderService.getNearestFamilyCourt(callbackRequest.getCaseDetails().getCaseData()))
             .thenReturn(null);
 
@@ -661,7 +553,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .surname("userLast")
             .build();
 
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
+        when(userService.getUserDetails(AUTH_TOKEN)).thenReturn(userDetails);
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -696,9 +588,10 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getCaseData(), CaseData.class))
             .thenReturn(caseData1);
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         assertExpectedException(() -> {
-            prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken, s2sToken, callbackRequest);
+            prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(AUTH_TOKEN,
+                                                                                 S2S_TOKEN, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 
@@ -706,5 +599,138 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
                                                                  String expectedMessage) {
         T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
         assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    @Test
+    public void testGenerateDocumentReceivesUpdatedSolicitorName() throws Exception {
+        when(organisationService.getApplicantOrganisationDetails(any(CaseData.class))).thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetails(any(CaseData.class))).thenReturn(caseData);
+        CaseData caseDataOld = CaseData.builder()
+            .solicitorName("Old Solicitor")
+            .build();
+        CaseDetails caseDetailsSols = CaseDetails.builder()
+            .caseId("123")
+            .caseData(caseDataOld)
+            .build();
+
+        UserDetails userDetailsSols = UserDetails.builder()
+            .forename("New")
+            .surname("Solicitor")
+            .email("new.sols@test.com")
+            .build();
+        when(userService.getUserDetails(AUTH_TOKEN)).thenReturn(userDetailsSols);
+        when(organisationService.getApplicantOrganisationDetails(any(CaseData.class))).thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetails(any(CaseData.class))).thenReturn(caseData);
+
+        when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
+        when(courtFinderService.getNearestFamilyCourt(any(CaseData.class))).thenReturn(court);
+
+        when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), any())).thenReturn(
+            generatedDocumentInfoShared);
+        when(dgsService.generateWelshDocument(Mockito.anyString(), any(CaseDetails.class), any())).thenReturn(
+            generatedDocumentInfoShared);
+
+        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
+        when(submitAndPayChecker.hasMandatoryCompleted(any(CaseData.class))).thenReturn(true);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
+        CallbackRequest callbackRequestSols = CallbackRequest.builder()
+            .caseDetails(caseDetailsSols)
+            .build();
+        prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(AUTH_TOKEN,
+                                                                             S2S_TOKEN, callbackRequestSols);
+
+        ArgumentCaptor<CaseDetails> captor = ArgumentCaptor.forClass(CaseDetails.class);
+        verify(dgsService).generateDocument(Mockito.anyString(), captor.capture(), any());
+        CaseData sentToDgs = captor.getValue().getCaseData();
+        assertEquals("New Solicitor", sentToDgs.getSolicitorName());
+    }
+
+    @Test
+    public void testOrgEnrichmentExceptionDoesNotBlockDocGeneration_C100() throws Exception {
+        CaseData c100 = caseData.toBuilder()
+            .caseTypeOfApplication("c100")
+            .build();
+        CaseDetails caseDetailsC100 = CaseDetails.builder().caseId("123").caseData(c100).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetailsC100).build();
+
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(submitAndPayChecker.hasMandatoryCompleted(any(CaseData.class))).thenReturn(true);
+        when(organisationService.getApplicantOrganisationDetails(any(CaseData.class)))
+            .thenThrow(new RuntimeException("boom"));
+        when(organisationService.getRespondentOrganisationDetails(any(CaseData.class)))
+            .thenReturn(c100);
+        when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
+        when(courtFinderService.getNearestFamilyCourt(any(CaseData.class))).thenReturn(court);
+        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
+        when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), any())).thenReturn(generatedDocumentInfoShared);
+        when(dgsService.generateWelshDocument(Mockito.anyString(), any(CaseDetails.class), any())).thenReturn(generatedDocumentInfoShared);
+        UserDetails userDetails = UserDetails.builder().forename("userFirst").surname("userLast").email("solicitor@test.com").build();
+        when(userService.getUserDetails(AUTH_TOKEN)).thenReturn(userDetails);
+
+        uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse resp =
+            prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+
+        assertNotNull(resp);
+        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), any());
+        verify(dgsService, times(1)).generateWelshDocument(Mockito.anyString(), any(CaseDetails.class), any());
+    }
+
+    @Test
+    public void testOrgEnrichmentExceptionDoesNotBlockDocGeneration_FL401() throws Exception {
+        CaseData fl401 = caseData.toBuilder()
+            .caseTypeOfApplication("fl401")
+            .build();
+        CaseDetails caseDetailsFL401 = CaseDetails.builder().caseId("456").caseData(fl401).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetailsFL401).build();
+
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(submitAndPayChecker.hasMandatoryCompleted(any(CaseData.class))).thenReturn(true);
+        when(organisationService.getApplicantOrganisationDetailsForFL401(any(CaseData.class)))
+            .thenThrow(new RuntimeException("kapow"));
+        when(organisationService.getRespondentOrganisationDetailsForFL401(any(CaseData.class)))
+            .thenReturn(fl401);
+        when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
+        when(courtFinderService.getNearestFamilyCourt(any(CaseData.class))).thenReturn(court);
+        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
+        when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), any())).thenReturn(generatedDocumentInfoShared);
+        when(dgsService.generateWelshDocument(Mockito.anyString(), any(CaseDetails.class), any())).thenReturn(generatedDocumentInfoShared);
+        UserDetails userDetails = UserDetails.builder().forename("userFirst").surname("userLast").email("solicitor@test.com").build();
+        when(userService.getUserDetails(AUTH_TOKEN)).thenReturn(userDetails);
+
+        uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse resp =
+            prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+
+        assertNotNull(resp);
+        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), any());
+        verify(dgsService, times(1)).generateWelshDocument(Mockito.anyString(), any(CaseDetails.class), any());
+    }
+
+    @Test
+    public void testOrgEnrichmentFL401HappyPathInvokesFL401Services() throws Exception {
+        CaseData fl401 = caseData.toBuilder()
+            .caseTypeOfApplication("fl401")
+            .build();
+        CaseDetails caseDetailsFL401 = CaseDetails.builder().caseId("789").caseData(fl401).build();
+
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(submitAndPayChecker.hasMandatoryCompleted(any(CaseData.class))).thenReturn(true);
+        when(organisationService.getApplicantOrganisationDetailsForFL401(any(CaseData.class))).thenReturn(fl401);
+        when(organisationService.getRespondentOrganisationDetailsForFL401(any(CaseData.class))).thenReturn(fl401);
+        when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
+        when(courtFinderService.getNearestFamilyCourt(any(CaseData.class))).thenReturn(court);
+        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
+        when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), any())).thenReturn(generatedDocumentInfoShared);
+        when(dgsService.generateWelshDocument(Mockito.anyString(), any(CaseDetails.class), any())).thenReturn(generatedDocumentInfoShared);
+        UserDetails userDetails = UserDetails.builder().forename("userFirst").surname("userLast").email("solicitor@test.com").build();
+        when(userService.getUserDetails(AUTH_TOKEN)).thenReturn(userDetails);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetailsFL401).build();
+
+        prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+
+        verify(organisationService, times(1)).getApplicantOrganisationDetailsForFL401(any(CaseData.class));
+        verify(organisationService, times(1)).getRespondentOrganisationDetailsForFL401(any(CaseData.class));
+        verify(organisationService, times(0)).getApplicantOrganisationDetails(any(CaseData.class));
+        verify(organisationService, times(0)).getRespondentOrganisationDetails(any(CaseData.class));
     }
 }
