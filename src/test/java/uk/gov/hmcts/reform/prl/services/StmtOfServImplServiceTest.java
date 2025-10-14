@@ -118,8 +118,10 @@ public class StmtOfServImplServiceTest {
             .firstName("TestFirst")
             .solicitorEmail("test@gmail.com")
             .build();
-        coverLetterMap = List.of(element(UUID.fromString(TEST_UUID), CoverLetterMap.builder()
-                                             .coverLetters(List.of(element(Document.builder().build()))).build()));
+        coverLetterMap = List.of(element(
+            UUID.fromString(TEST_UUID), CoverLetterMap.builder()
+                .coverLetters(List.of(element(Document.builder().build()))).build()
+        ));
         wrappedRespondents = Element.<PartyDetails>builder()
             .id(UUID.fromString(TEST_UUID))
             .value(respondent).build();
@@ -131,7 +133,13 @@ public class StmtOfServImplServiceTest {
             .listItems(List.of(dynamicListElement))
             .value(dynamicListElement)
             .build();
-        when(serviceOfApplicationPostService.getCoverSheets(Mockito.any(), Mockito.any(), Mockito.any(),Mockito.any(),Mockito.any()))
+        when(serviceOfApplicationPostService.getCoverSheets(
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        ))
             .thenReturn(List.of(Document.builder().build()));
         when(launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)).thenReturn(true);
     }
@@ -298,8 +306,10 @@ public class StmtOfServImplServiceTest {
             .build();
         when(launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)).thenReturn(true);
         when(manageDocumentsService.getLoggedInUserType(Mockito.anyString())).thenReturn(List.of(PrlAppsConstants.SOLICITOR_ROLE));
-        when(serviceOfApplicationPostService.sendPostNotificationToParty(Mockito.any(), Mockito.anyString(), Mockito.any(),
-                                                                         Mockito.any(), Mockito.anyString()))
+        when(serviceOfApplicationPostService.sendPostNotificationToParty(
+            Mockito.any(), Mockito.anyString(), Mockito.any(),
+            Mockito.any(), Mockito.anyString()
+        ))
             .thenReturn(BulkPrintDetails.builder().bulkPrintId(TEST_UUID).build());
         Map<String, Object> updatedCaseData = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
         assertNotNull(updatedCaseData);
@@ -337,11 +347,13 @@ public class StmtOfServImplServiceTest {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .respondents(listOfRespondents)
-            .orderCollection(Arrays.asList(element(UUID.fromString(TEST_UUID), OrderDetails.builder()
-                .sosStatus("PENDING")
-                .serveOrderDetails(ServeOrderDetails.builder()
-                                       .servedParties(Arrays.asList(element(ServedParties.builder().build()))).build())
-                .build())))
+            .orderCollection(Arrays.asList(element(
+                UUID.fromString(TEST_UUID), OrderDetails.builder()
+                    .sosStatus("PENDING")
+                    .serveOrderDetails(ServeOrderDetails.builder()
+                                           .servedParties(Arrays.asList(element(ServedParties.builder().build()))).build())
+                    .build()
+            )))
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .unServedRespondentPack(SoaPack.builder()
                                                                   .personalServiceBy(SoaSolicitorServingRespondentsEnum
@@ -621,7 +633,7 @@ public class StmtOfServImplServiceTest {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .respondents(Collections.singletonList(Element.<PartyDetails>builder().id(partyId)
-                                                .value(listOfRespondents.stream().findFirst().get().getValue()).build()))
+                                                       .value(listOfRespondents.stream().findFirst().get().getValue()).build()))
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .unServedRespondentPack(SoaPack.builder()
                                                                   .personalServiceBy(SoaSolicitorServingRespondentsEnum
@@ -645,15 +657,19 @@ public class StmtOfServImplServiceTest {
             .data(stringObjectMap)
             .build();
         when(launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)).thenReturn(true);
-        when(serviceOfApplicationPostService.sendPostNotificationToParty(Mockito.any(), Mockito.anyString(), Mockito.any(),
-                                                                         Mockito.any(), Mockito.anyString()))
+        when(serviceOfApplicationPostService.sendPostNotificationToParty(
+            Mockito.any(), Mockito.anyString(), Mockito.any(),
+            Mockito.any(), Mockito.anyString()
+        ))
             .thenReturn(BulkPrintDetails.builder().bulkPrintId(TEST_UUID).build());
         Map<String, Object> updatedCaseData = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
 
         assertNotNull(updatedCaseData);
-        assertEquals(TEST_UUID,
-                     ((List<Element<StmtOfServiceAddRecipient>>)updatedCaseData.get("stmtOfServiceForApplication"))
-                         .get(0).getValue().getSelectedPartyId());
+        assertEquals(
+            TEST_UUID,
+            ((List<Element<StmtOfServiceAddRecipient>>) updatedCaseData.get("stmtOfServiceForApplication"))
+                .get(0).getValue().getSelectedPartyId()
+        );
     }
 
     @Test
@@ -754,14 +770,19 @@ public class StmtOfServImplServiceTest {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .statementOfService(StatementOfService.builder()
-                .stmtOfServiceWhatWasServed(StatementOfServiceWhatWasServed.statementOfServiceApplicationPack)
-                .stmtOfServiceAddRecipient(Arrays.asList(element(StmtOfServiceAddRecipient.builder()
-                    .respondentDynamicList(DynamicList.builder()
-                        .value(DynamicListElement.builder().code(TEST_UUID).label("Test Recipient").build())
-                        .build())
-                    .stmtOfServiceDocument(Document.builder().documentFileName("test.pdf").build())
-                    .build())))
-                .build())
+                                    .stmtOfServiceWhatWasServed(StatementOfServiceWhatWasServed.statementOfServiceApplicationPack)
+                                    .stmtOfServiceAddRecipient(Arrays.asList(element(StmtOfServiceAddRecipient.builder()
+                                                                                         .respondentDynamicList(
+                                                                                             DynamicList.builder()
+                                                                                                 .value(
+                                                                                                     DynamicListElement.builder().code(
+                                                                                                         TEST_UUID).label(
+                                                                                                         "Test Recipient").build())
+                                                                                                 .build())
+                                                                                         .stmtOfServiceDocument(Document.builder().documentFileName(
+                                                                                             "test.pdf").build())
+                                                                                         .build())))
+                                    .build())
             .serviceOfApplication(null) // Missing required data - this will cause the condition to fail
             .respondents(listOfRespondents) // Add respondents so the service doesn't fail on other null checks
             .build();
@@ -778,11 +799,11 @@ public class StmtOfServImplServiceTest {
             .caseTypeOfApplication(C100_CASE_TYPE)
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .unservedCitizenRespondentPack(SoaPack.builder()
-                                                                  .personalServiceBy(
-                                                                      SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
-                                                                  .packDocument(List.of(element(Document.builder().build())))
+                                                                         .personalServiceBy(
+                                                                             SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
+                                                                         .packDocument(List.of(element(Document.builder().build())))
                                                                          .partyIds(List.of(element(TEST_UUID)))
-                                                                  .build())
+                                                                         .build())
                                       .build())
             .finalServedApplicationDetailsList(new ArrayList<>())
             .statementOfService(StatementOfService.builder()
@@ -791,26 +812,40 @@ public class StmtOfServImplServiceTest {
             .respondents(listOfRespondents)
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
-                                                                                                        EventRequestData.builder().build(),
-                                                                                                        StartEventResponse.builder().build(),
-                                                                                                        stringObjectMap,
-                                                                                                        caseData, null);
-        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(startAllTabsUpdateDataContent);
-        when(allTabService.submitAllTabsUpdate(anyString(), anyString(), any(), any(), any())).thenReturn(CaseDetails.builder().build());
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            stringObjectMap,
+            caseData,
+            null
+        );
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(
+            startAllTabsUpdateDataContent);
+        when(allTabService.submitAllTabsUpdate(
+            anyString(),
+            anyString(),
+            any(),
+            any(),
+            any()
+        )).thenReturn(CaseDetails.builder().build());
 
-        when(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(Mockito.anyString(),Mockito.any(),
-                                                                              Mockito.any(),Mockito.anyString()))
+        when(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(
+            Mockito.anyString(), Mockito.any(),
+            Mockito.any(), Mockito.anyString()
+        ))
             .thenReturn(List.of(Document.builder().build()));
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().build());
-        stmtOfServImplService.saveCitizenSos("","", authToken, CitizenSos.builder()
+        stmtOfServImplService.saveCitizenSos(
+            "", "", authToken, CitizenSos.builder()
                 .partiesServed(List.of(TEST_UUID, "234", "1234"))
                 .partiesServedDate("2020-08-01")
                 .isOrder(YesOrNo.No)
                 .citizenSosDocs(Document.builder().documentFileName("test").build())
-            .build());
+                .build()
+        );
         verify(allTabService, times(1))
-            .submitAllTabsUpdate(Mockito.anyString(), Mockito.anyString(), Mockito.any(),Mockito.any(),Mockito.any());
+            .submitAllTabsUpdate(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -819,38 +854,53 @@ public class StmtOfServImplServiceTest {
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .unservedCitizenRespondentPack(SoaPack.builder()
-                                                                  .personalServiceBy(
-                                                                      SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
-                                                                  .packDocument(List.of(element(Document.builder().build())))
+                                                                         .personalServiceBy(
+                                                                             SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
+                                                                         .packDocument(List.of(element(Document.builder().build())))
                                                                          .partyIds(List.of(element("123")))
-                                                                  .build())
+                                                                         .build())
                                       .build())
             .statementOfService(StatementOfService.builder()
 
                                     .build())
-            .respondentsFL401(PartyDetails.builder().firstName("hello").lastName("World").partyId(UUID.fromString(TEST_UUID)).build())
+            .respondentsFL401(PartyDetails.builder().firstName("hello").lastName("World").partyId(UUID.fromString(
+                TEST_UUID)).build())
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
-                                                                                                        EventRequestData.builder().build(),
-                                                                                                        StartEventResponse.builder().build(),
-                                                                                                        stringObjectMap,
-                                                                                                        caseData, null);
-        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(startAllTabsUpdateDataContent);
-        when(allTabService.submitAllTabsUpdate(anyString(), anyString(), any(), any(), any())).thenReturn(CaseDetails.builder().build());
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            stringObjectMap,
+            caseData,
+            null
+        );
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(
+            startAllTabsUpdateDataContent);
+        when(allTabService.submitAllTabsUpdate(
+            anyString(),
+            anyString(),
+            any(),
+            any(),
+            any()
+        )).thenReturn(CaseDetails.builder().build());
 
-        when(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(Mockito.anyString(),Mockito.any(),
-                                                                              Mockito.any(),Mockito.anyString()))
+        when(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(
+            Mockito.anyString(), Mockito.any(),
+            Mockito.any(), Mockito.anyString()
+        ))
             .thenReturn(List.of(Document.builder().build()));
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().build());
-        stmtOfServImplService.saveCitizenSos("","", authToken, CitizenSos.builder()
-            .partiesServed(List.of(TEST_UUID, "234", "1234"))
-            .isOrder(YesOrNo.No)
-            .partiesServedDate("2020-08-01")
-            .citizenSosDocs(Document.builder().documentFileName("test").build())
-            .build());
+        stmtOfServImplService.saveCitizenSos(
+            "", "", authToken, CitizenSos.builder()
+                .partiesServed(List.of(TEST_UUID, "234", "1234"))
+                .isOrder(YesOrNo.No)
+                .partiesServedDate("2020-08-01")
+                .citizenSosDocs(Document.builder().documentFileName("test").build())
+                .build()
+        );
         verify(allTabService, times(1))
-            .submitAllTabsUpdate(Mockito.anyString(), Mockito.anyString(), Mockito.any(),Mockito.any(),Mockito.any());
+            .submitAllTabsUpdate(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -868,29 +918,44 @@ public class StmtOfServImplServiceTest {
             .statementOfService(StatementOfService.builder()
                                     .stmtOfServiceForOrder(List.of(element(StmtOfServiceAddRecipient.builder().build())))
                                     .build())
-            .respondentsFL401(PartyDetails.builder().firstName("hello").lastName("World").partyId(UUID.fromString(TEST_UUID)).build())
+            .respondentsFL401(PartyDetails.builder().firstName("hello").lastName("World").partyId(UUID.fromString(
+                TEST_UUID)).build())
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
-                                                                                                        EventRequestData.builder().build(),
-                                                                                                        StartEventResponse.builder().build(),
-                                                                                                        stringObjectMap,
-                                                                                                        caseData, null);
-        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(startAllTabsUpdateDataContent);
-        when(allTabService.submitAllTabsUpdate(anyString(), anyString(), any(), any(), any())).thenReturn(CaseDetails.builder().build());
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            stringObjectMap,
+            caseData,
+            null
+        );
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(
+            startAllTabsUpdateDataContent);
+        when(allTabService.submitAllTabsUpdate(
+            anyString(),
+            anyString(),
+            any(),
+            any(),
+            any()
+        )).thenReturn(CaseDetails.builder().build());
 
-        when(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(Mockito.anyString(),Mockito.any(),
-                                                                              Mockito.any(),Mockito.anyString()))
+        when(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(
+            Mockito.anyString(), Mockito.any(),
+            Mockito.any(), Mockito.anyString()
+        ))
             .thenReturn(List.of(Document.builder().build()));
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().build());
-        stmtOfServImplService.saveCitizenSos("","", authToken, CitizenSos.builder()
-            .partiesServed(List.of("123", "234", "1234"))
-            .isOrder(YesOrNo.Yes)
-            .partiesServedDate("2020-08-01")
-            .citizenSosDocs(Document.builder().documentFileName("test").build())
-            .build());
+        stmtOfServImplService.saveCitizenSos(
+            "", "", authToken, CitizenSos.builder()
+                .partiesServed(List.of("123", "234", "1234"))
+                .isOrder(YesOrNo.Yes)
+                .partiesServedDate("2020-08-01")
+                .citizenSosDocs(Document.builder().documentFileName("test").build())
+                .build()
+        );
         verify(allTabService, times(1))
-            .submitAllTabsUpdate(Mockito.anyString(), Mockito.anyString(), Mockito.any(),Mockito.any(),Mockito.any());
+            .submitAllTabsUpdate(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -911,26 +976,40 @@ public class StmtOfServImplServiceTest {
             .respondents(listOfRespondents)
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
-                                                                                                        EventRequestData.builder().build(),
-                                                                                                        StartEventResponse.builder().build(),
-                                                                                                        stringObjectMap,
-                                                                                                        caseData, null);
-        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(startAllTabsUpdateDataContent);
-        when(allTabService.submitAllTabsUpdate(anyString(), anyString(), any(), any(), any())).thenReturn(CaseDetails.builder().build());
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            stringObjectMap,
+            caseData,
+            null
+        );
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(
+            startAllTabsUpdateDataContent);
+        when(allTabService.submitAllTabsUpdate(
+            anyString(),
+            anyString(),
+            any(),
+            any(),
+            any()
+        )).thenReturn(CaseDetails.builder().build());
 
-        when(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(Mockito.anyString(),Mockito.any(),
-                                                                              Mockito.any(),Mockito.anyString()))
+        when(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(
+            Mockito.anyString(), Mockito.any(),
+            Mockito.any(), Mockito.anyString()
+        ))
             .thenReturn(List.of(Document.builder().build()));
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().build());
-        stmtOfServImplService.saveCitizenSos("","", authToken, CitizenSos.builder()
-            .partiesServed(List.of("123", "234", "1234"))
-            .isOrder(YesOrNo.Yes)
-            .partiesServedDate("2020-08-01")
-            .citizenSosDocs(Document.builder().documentFileName("test").build())
-            .build());
+        stmtOfServImplService.saveCitizenSos(
+            "", "", authToken, CitizenSos.builder()
+                .partiesServed(List.of("123", "234", "1234"))
+                .isOrder(YesOrNo.Yes)
+                .partiesServedDate("2020-08-01")
+                .citizenSosDocs(Document.builder().documentFileName("test").build())
+                .build()
+        );
         verify(allTabService, times(1))
-            .submitAllTabsUpdate(Mockito.anyString(), Mockito.anyString(), Mockito.any(),Mockito.any(),Mockito.any());
+            .submitAllTabsUpdate(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -1008,16 +1087,18 @@ public class StmtOfServImplServiceTest {
     private CaseData createBasicCaseDataWithOrders(List<String> orderIds, List<String> existingOrderIds) {
         List<Element<StmtOfServiceAddRecipient>> recipients = Arrays.asList(
             element(StmtOfServiceAddRecipient.builder()
-                .orderList(DynamicMultiSelectList.builder()
-                    .value(orderIds.stream()
-                        .map(id -> DynamicMultiselectListElement.builder().code(id).label("Order " + id).build())
-                        .toList())
-                    .build())
-                .respondentDynamicList(DynamicList.builder()
-                    .value(DynamicListElement.builder().code(TEST_UUID).label("Test Recipient").build())
-                    .build())
-                .stmtOfServiceDocument(Document.builder().documentFileName("test.pdf").build())
-                .build())
+                        .orderList(DynamicMultiSelectList.builder()
+                                       .value(orderIds.stream()
+                                                  .map(id -> DynamicMultiselectListElement.builder().code(id).label(
+                                                      "Order " + id).build())
+                                                  .toList())
+                                       .build())
+                        .respondentDynamicList(DynamicList.builder()
+                                                   .value(DynamicListElement.builder().code(TEST_UUID).label(
+                                                       "Test Recipient").build())
+                                                   .build())
+                        .stmtOfServiceDocument(Document.builder().documentFileName("test.pdf").build())
+                        .build())
         );
 
         StatementOfService.StatementOfServiceBuilder sosBuilder = StatementOfService.builder()
@@ -1085,8 +1166,8 @@ public class StmtOfServImplServiceTest {
 
         StmtOfServiceAddRecipient recipient = StmtOfServiceAddRecipient.builder()
             .respondentDynamicList(DynamicList.builder()
-                .value(DynamicListElement.builder().code(TEST_UUID).label("Test Recipient").build())
-                .build())
+                                       .value(DynamicListElement.builder().code(TEST_UUID).label("Test Recipient").build())
+                                       .build())
             .orderList(orderList) // This should be cleared by the service even for application packs
             .stmtOfServiceDocument(Document.builder().documentFileName("test.pdf").build())
             .build();
@@ -1095,17 +1176,18 @@ public class StmtOfServImplServiceTest {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .statementOfService(StatementOfService.builder()
-                .stmtOfServiceWhatWasServed(StatementOfServiceWhatWasServed.statementOfServiceApplicationPack)
-                .stmtOfServiceAddRecipient(Arrays.asList(element(recipient)))
-                .build())
+                                    .stmtOfServiceWhatWasServed(StatementOfServiceWhatWasServed.statementOfServiceApplicationPack)
+                                    .stmtOfServiceAddRecipient(Arrays.asList(element(recipient)))
+                                    .build())
             .serviceOfApplication(ServiceOfApplication.builder()
-                .unServedRespondentPack(SoaPack.builder()
-                    .personalServiceBy(SoaSolicitorServingRespondentsEnum.courtAdmin.toString())
-                    .packDocument(Arrays.asList(element(Document.builder()
-                        .documentFileName("application-pack.pdf")
-                        .build())))
-                    .build())
-                .build())
+                                      .unServedRespondentPack(SoaPack.builder()
+                                                                  .personalServiceBy(SoaSolicitorServingRespondentsEnum.courtAdmin.toString())
+                                                                  .packDocument(Arrays.asList(element(Document.builder()
+                                                                                                          .documentFileName(
+                                                                                                              "application-pack.pdf")
+                                                                                                          .build())))
+                                                                  .build())
+                                      .build())
             .respondents(listOfRespondents)
             .build();
 
@@ -1132,14 +1214,20 @@ public class StmtOfServImplServiceTest {
 
         processedRecipients.forEach(recipientElement -> {
             StmtOfServiceAddRecipient processedRecipient = recipientElement.getValue();
-            assertNull("orderList field should be cleared to prevent CCD validation error 'Field is not recognised'",
-                      processedRecipient.getOrderList());
-            assertNull("respondentDynamicList should also be cleared",
-                      processedRecipient.getRespondentDynamicList());
+            assertNull(
+                "orderList field should be cleared to prevent CCD validation error 'Field is not recognised'",
+                processedRecipient.getOrderList()
+            );
+            assertNull(
+                "respondentDynamicList should also be cleared",
+                processedRecipient.getRespondentDynamicList()
+            );
         });
 
-        assertNotNull("finalServedApplicationDetailsList should be populated when conditions are met",
-                     result.get("finalServedApplicationDetailsList"));
+        assertNotNull(
+            "finalServedApplicationDetailsList should be populated when conditions are met",
+            result.get("finalServedApplicationDetailsList")
+        );
     }
 
     @Test
@@ -1154,8 +1242,8 @@ public class StmtOfServImplServiceTest {
 
         StmtOfServiceAddRecipient recipient = StmtOfServiceAddRecipient.builder()
             .respondentDynamicList(DynamicList.builder()
-                .value(DynamicListElement.builder().code(TEST_UUID).label("Test Recipient").build())
-                .build())
+                                       .value(DynamicListElement.builder().code(TEST_UUID).label("Test Recipient").build())
+                                       .build())
             .orderList(orderList) // This should be cleared by the service
             .stmtOfServiceDocument(Document.builder().documentFileName("test.pdf").build())
             .build();
@@ -1163,15 +1251,17 @@ public class StmtOfServImplServiceTest {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .statementOfService(StatementOfService.builder()
-                .stmtOfServiceWhatWasServed(StatementOfServiceWhatWasServed.statementOfServiceOrder)
-                .stmtOfServiceAddRecipient(Arrays.asList(element(recipient)))
-                .build())
-            .orderCollection(Arrays.asList(element(UUID.fromString(TEST_UUID), OrderDetails.builder()
-                .sosStatus("PENDING")
-                .serveOrderDetails(ServeOrderDetails.builder()
-                    .servedParties(Arrays.asList(element(ServedParties.builder().build())))
-                    .build())
-                .build())))
+                                    .stmtOfServiceWhatWasServed(StatementOfServiceWhatWasServed.statementOfServiceOrder)
+                                    .stmtOfServiceAddRecipient(Arrays.asList(element(recipient)))
+                                    .build())
+            .orderCollection(Arrays.asList(element(
+                UUID.fromString(TEST_UUID), OrderDetails.builder()
+                    .sosStatus("PENDING")
+                    .serveOrderDetails(ServeOrderDetails.builder()
+                                           .servedParties(Arrays.asList(element(ServedParties.builder().build())))
+                                           .build())
+                    .build()
+            )))
             .respondents(listOfRespondents)
             .build();
 
@@ -1197,9 +1287,14 @@ public class StmtOfServImplServiceTest {
 
         processedRecipients.forEach(recipientElement -> {
             StmtOfServiceAddRecipient processedRecipient = recipientElement.getValue();
-            assertNull("orderList field should be cleared to prevent CCD validation error 'Field is not recognised'",
-                      processedRecipient.getOrderList());
-            assertNull("respondentDynamicList should also be cleared",
-                      processedRecipient.getRespondentDynamicList());
+            assertNull(
+                "orderList field should be cleared to prevent CCD validation error 'Field is not recognised'",
+                processedRecipient.getOrderList()
+            );
+            assertNull(
+                "respondentDynamicList should also be cleared",
+                processedRecipient.getRespondentDynamicList()
+            );
         });
     }
+}
