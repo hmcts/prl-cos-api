@@ -10,7 +10,6 @@ import java.util.Map;
 
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_NAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_OR_RESPONDENT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
@@ -18,7 +17,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 @RequiredArgsConstructor
 public class CaseNameService {
     public static final String CA_CASE_NAME_FORMAT = "%s V %s";
-    public static final String DA_CASE_NAME_FORMAT = "%s %s V %s %s";
+    public static final String DA_CASE_NAME_FORMAT = "%s %s & %s %s";
 
     public void setFinalCaseName(Map<String, Object> updatedCaseData, CaseData caseData) {
         if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
@@ -52,7 +51,7 @@ public class CaseNameService {
                                                 applicant.getFirstName(), applicant.getLastName(),
                                                 respondent.getFirstName(), respondent.getLastName()
                 );
-                updatedCaseData.put(APPLICANT_OR_RESPONDENT_CASE_NAME, caseName);
+                updatedCaseData.put(APPLICANT_CASE_NAME, caseName);
             }
         }
     }
