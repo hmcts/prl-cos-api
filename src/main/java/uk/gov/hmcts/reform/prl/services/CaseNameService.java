@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_NAME;
@@ -33,8 +34,8 @@ public class CaseNameService {
     private void setCaseNameForCA(Map<String, Object> updatedCaseData, CaseData caseData) {
         if (StringUtils.isEmpty(caseData.getApplicantCaseName())) {
             if (!isEmpty(caseData.getApplicants()) && !isEmpty(caseData.getRespondents())) {
-                PartyDetails applicant = caseData.getApplicants().stream().findFirst().get().getValue();
-                PartyDetails respondent = caseData.getRespondents().stream().findFirst().get().getValue();
+                PartyDetails applicant = caseData.getApplicants().stream().findFirst().orElseThrow().getValue();
+                PartyDetails respondent = caseData.getRespondents().stream().findFirst().orElseThrow().getValue();
                 String caseName = String.format(CA_CASE_NAME_FORMAT,
                                                 applicant.getLastName(), respondent.getLastName()
                 );
