@@ -23,7 +23,7 @@ public class EventsCheckerTest {
     EventsChecker eventsChecker;
 
     @Mock
-    CaseNameChecker caseNameChecker;
+    ApplicationTypeChecker applicationTypeChecker;
 
 
 
@@ -34,9 +34,9 @@ public class EventsCheckerTest {
 
     @Test
     public void testIsFinished() {
-        Event event = Event.CASE_NAME;
+        Event event = Event.TYPE_OF_APPLICATION;
         CaseData caseData = CaseData.builder().build();
-        when(caseNameChecker.isFinished(caseData)).thenReturn(Boolean.TRUE);
+        when(applicationTypeChecker.isFinished(caseData)).thenReturn(Boolean.TRUE);
         eventsChecker.init();
         assertTrue(eventsChecker.isFinished(event, caseData));
 
@@ -44,9 +44,9 @@ public class EventsCheckerTest {
 
     @Test
     public void testIsStarted() {
-        Event event = Event.CASE_NAME;
+        Event event = Event.TYPE_OF_APPLICATION;
         CaseData caseData = CaseData.builder().build();
-        when(caseNameChecker.isStarted(caseData)).thenReturn(Boolean.TRUE);
+        when(applicationTypeChecker.isStarted(caseData)).thenReturn(Boolean.TRUE);
         eventsChecker.init();
         assertTrue(eventsChecker.isStarted(event, caseData));
 
@@ -54,9 +54,9 @@ public class EventsCheckerTest {
 
     @Test
     public void testHasMandatoryCompleted() {
-        Event event = Event.CASE_NAME;
+        Event event = Event.TYPE_OF_APPLICATION;
         CaseData caseData = CaseData.builder().build();
-        when(caseNameChecker.hasMandatoryCompleted(caseData)).thenReturn(Boolean.TRUE);
+        when(applicationTypeChecker.hasMandatoryCompleted(caseData)).thenReturn(Boolean.TRUE);
         eventsChecker.init();
         assertTrue(eventsChecker.hasMandatoryCompleted(event, caseData));
 
@@ -64,9 +64,9 @@ public class EventsCheckerTest {
 
     @Test
     public void testGetDefaultState() {
-        Event event = Event.CASE_NAME;
+        Event event = Event.TYPE_OF_APPLICATION;
         CaseData caseData = CaseData.builder().build();
-        when(caseNameChecker.getDefaultTaskState(caseData)).thenReturn(TaskState.NOT_STARTED);
+        when(applicationTypeChecker.getDefaultTaskState(caseData)).thenReturn(TaskState.NOT_STARTED);
         eventsChecker.init();
         assertEquals(TaskState.NOT_STARTED,eventsChecker.getDefaultState(event,caseData));
 
