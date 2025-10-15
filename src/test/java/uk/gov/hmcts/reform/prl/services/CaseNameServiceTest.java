@@ -17,6 +17,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -135,4 +136,17 @@ public class CaseNameServiceTest {
 
         assertEquals("I already have a name", updatedCaseData.get("applicantCaseName"));
     }
+
+    @Test
+    public void shouldNotSetFinalCaseNameForInvalidCaseType() {
+        when(caseData.getId()).thenReturn(1234L);
+        when(caseData.getCaseTypeOfApplication()).thenReturn("INVALID");
+
+        RuntimeException rte = assertThrows(RuntimeException.class, () ->
+            caseNameService.setFinalCaseName(updatedCaseData, caseData)
+        );
+
+        assertEquals("Invalid caseTypeOfApplication found for case 1234", rte.getMessage());
+    }
+
 }
