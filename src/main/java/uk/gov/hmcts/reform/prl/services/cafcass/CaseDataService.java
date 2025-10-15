@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.cafcass.hearing.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResponseToAllegationsOfHarm;
+import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.ApplicantDetails;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
@@ -43,6 +44,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.request.QueryParam;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Range;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Should;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.StateFilter;
+import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
@@ -241,6 +243,7 @@ public class CaseDataService {
                 .stmtOfServiceAddRecipient(null)
                 .stmtOfServiceForOrder(null)
                 .stmtOfServiceForApplication(null)
+                .finalServedApplicationDetailsList(null)
                 .respondents(respondents)
                 .build();
             cafCassCaseDetail.setCaseData(cafCassCaseData);
@@ -314,6 +317,64 @@ public class CaseDataService {
                     otherDocsList
                 ));
         }
+
+        if (ObjectUtils.isNotEmpty(caseData.getFinalServedApplicationDetailsList())) {
+            caseData.getFinalServedApplicationDetailsList().parallelStream().forEach(
+                servedApplicationDetails -> {
+                    servedApplicationDetails.getValue().getBulkPrintDetails().parallelStream().forEach(
+                      bulkPrintDetailsElement ->
+                          processServiceOfApplicationBulkPrintDocs(bulkPrintDetailsElement.getValue(), otherDocsList)
+                    );
+                    servedApplicationDetails.getValue().getEmailNotificationDetails().parallelStream().forEach(
+                        emailNotificationDetailsElement ->
+                            processServiceOfApplicationEmailedDocs(emailNotificationDetailsElement.getValue(), otherDocsList)
+                    );
+                }
+            );
+        }
+    }
+
+    private void processServiceOfApplicationBulkPrintDocs(BulkPrintDetails bulkPrintDetails, List<Element<OtherDocuments>> otherDocsList) {
+        bulkPrintDetails.getPrintDocs().parallelStream().forEach(
+            docElement -> {
+                if (!isDocumentPresent(docElement.getValue(), otherDocsList)) {
+                    addInOtherDocuments(
+                        ANY_OTHER_DOC,
+                        docElement.getValue(),
+                        otherDocsList
+                    );
+                }
+            }
+        );
+    }
+
+    private void processServiceOfApplicationEmailedDocs(EmailNotificationDetails emailNotificationDetails, List<Element<OtherDocuments>> otherDocsList) {
+        emailNotificationDetails.getDocs().parallelStream().forEach(
+            docElement -> {
+                if (!isDocumentPresent(docElement.getValue(), otherDocsList)) {
+                    addInOtherDocuments(
+                        ANY_OTHER_DOC,
+                        docElement.getValue(),
+                        otherDocsList
+                    );
+                }
+            }
+        );
+    }
+
+    private boolean isDocumentPresent(uk.gov.hmcts.reform.prl.models.documents.Document caseDocument,
+                                   List<Element<OtherDocuments>> otherDocsList) {
+        if (isNotEmpty(caseDocument)) {
+            return otherDocsList.parallelStream().anyMatch(el -> {
+                try {
+                    return el.getValue().getDocumentOther().equals(buildFromCaseDocument(caseDocument));
+                } catch (MalformedURLException e) {
+                    log.error("Error in populating otherDocsList for CAFCASS {}", e.getMessage());
+                }
+                return false;
+            });
+        }
+        return false;
     }
 
     private void populateBundleDoc(CafCassCaseData caseData, List<Element<OtherDocuments>> otherDocsList) {
@@ -792,7 +853,8 @@ public class CaseDataService {
             "data.additionalDocumentsList",
             "data.stmtOfServiceAddRecipient",
             "data.stmtOfServiceForOrder",
-            "data.stmtOfServiceForApplication"
+            "data.stmtOfServiceForApplication",
+            "data.finalServedApplicationDetailsList"
         );
     }
 }
