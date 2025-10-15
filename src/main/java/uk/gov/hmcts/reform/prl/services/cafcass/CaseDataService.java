@@ -296,7 +296,8 @@ public class CaseDataService {
         }
     }
 
-    private void populateServiceOfApplicationUploadDocs(CafCassCaseData caseData, List<Element<OtherDocuments>> otherDocsList) {
+    private void populateServiceOfApplicationUploadDocs(CafCassCaseData caseData,
+                                                        List<Element<OtherDocuments>> otherDocsList) {
         if (null != caseData.getSpecialArrangementsLetter()) {
             addInOtherDocuments(
                 ANY_OTHER_DOC,
@@ -322,19 +323,21 @@ public class CaseDataService {
             caseData.getFinalServedApplicationDetailsList().parallelStream().forEach(
                 servedApplicationDetails -> {
                     servedApplicationDetails.getValue().getBulkPrintDetails().parallelStream().forEach(
-                      bulkPrintDetailsElement ->
-                          processServiceOfApplicationBulkPrintDocs(bulkPrintDetailsElement.getValue(), otherDocsList)
+                        bulkPrintDetailsElement ->
+                            processServiceOfApplicationBulkPrintDocs(bulkPrintDetailsElement.getValue(), otherDocsList)
                     );
                     servedApplicationDetails.getValue().getEmailNotificationDetails().parallelStream().forEach(
                         emailNotificationDetailsElement ->
-                            processServiceOfApplicationEmailedDocs(emailNotificationDetailsElement.getValue(), otherDocsList)
+                            processServiceOfApplicationEmailedDocs(
+                                emailNotificationDetailsElement.getValue(), otherDocsList)
                     );
                 }
             );
         }
     }
 
-    private void processServiceOfApplicationBulkPrintDocs(BulkPrintDetails bulkPrintDetails, List<Element<OtherDocuments>> otherDocsList) {
+    private void processServiceOfApplicationBulkPrintDocs(BulkPrintDetails bulkPrintDetails,
+                                                          List<Element<OtherDocuments>> otherDocsList) {
         bulkPrintDetails.getPrintDocs().parallelStream().forEach(
             docElement -> {
                 if (!isDocumentPresent(docElement.getValue(), otherDocsList)) {
@@ -348,7 +351,8 @@ public class CaseDataService {
         );
     }
 
-    private void processServiceOfApplicationEmailedDocs(EmailNotificationDetails emailNotificationDetails, List<Element<OtherDocuments>> otherDocsList) {
+    private void processServiceOfApplicationEmailedDocs(EmailNotificationDetails emailNotificationDetails,
+                                                        List<Element<OtherDocuments>> otherDocsList) {
         emailNotificationDetails.getDocs().parallelStream().forEach(
             docElement -> {
                 if (!isDocumentPresent(docElement.getValue(), otherDocsList)) {
