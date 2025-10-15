@@ -570,6 +570,4 @@ public class CaseDataServiceTest {
         assertTrue(otherDocs.contains("testEmail"));
     }
 
-
-
 }
