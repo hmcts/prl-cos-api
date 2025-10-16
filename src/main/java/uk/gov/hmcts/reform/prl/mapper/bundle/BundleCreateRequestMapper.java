@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.mapper.bundle;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -145,11 +147,17 @@ public class BundleCreateRequestMapper {
 
         List<Element<BundlingRequestDocument>> fl401SupportingDocs = mapFl401SupportingDocs(caseData.getFl401UploadSupportDocuments());
         if (!fl401SupportingDocs.isEmpty()) {
-            allOtherDocuments.addAll(fl401SupportingDocs);
+            fl401SupportingDocs.forEach(docDetailsElement -> {
+                //FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles
+                addOtherDocument(allOtherDocuments, docDetailsElement);
+            });
         }
         List<Element<BundlingRequestDocument>> fl401WitnessDocs = mapFl401WitnessDocs(caseData.getFl401UploadWitnessDocuments());
         if (!fl401WitnessDocs.isEmpty()) {
-            allOtherDocuments.addAll(fl401WitnessDocs);
+            fl401WitnessDocs.forEach(docDetailsElement -> {
+                //FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles
+                addOtherDocument(allOtherDocuments, docDetailsElement);
+            });
         }
 
         FL401OtherProceedingDetails fl401OtherProceedingDetails = caseData.getFl401OtherProceedingDetails();
@@ -157,35 +165,71 @@ public class BundleCreateRequestMapper {
             List<Element<BundlingRequestDocument>> fl401ApplicantOtherProceedingsDocs = mapFl401OtherProceedings(
                 caseData.getFl401OtherProceedingDetails().getFl401OtherProceedings());
             if (!fl401ApplicantOtherProceedingsDocs.isEmpty()) {
-                allOtherDocuments.addAll(fl401ApplicantOtherProceedingsDocs);
+                fl401ApplicantOtherProceedingsDocs.forEach(docDetailsElement -> {
+                    //FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles
+                    addOtherDocument(allOtherDocuments, docDetailsElement);
+                });
             }
         }
 
         List<Element<BundlingRequestDocument>> c100ApplicantOtherProceedingsDocs = mapC100OtherProceedings(caseData.getExistingProceedingsWithDoc());
         if (!c100ApplicantOtherProceedingsDocs.isEmpty()) {
-            allOtherDocuments.addAll(c100ApplicantOtherProceedingsDocs);
+            c100ApplicantOtherProceedingsDocs.forEach(docDetailsElement -> {
+                //FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles
+                addOtherDocument(allOtherDocuments, docDetailsElement);
+            });
         }
 
         //SNI-4260 fix
         //Updated to retrieve otherDocuments according to the new manageDocuments event
         List<Element<BundlingRequestDocument>> otherDocuments = mapOtherDocumentsFromCaseData(caseData);
         if (null != otherDocuments && !otherDocuments.isEmpty()) {
-            allOtherDocuments.addAll(otherDocuments);
+            otherDocuments.forEach(docDetailsElement -> {
+                //FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles
+                addOtherDocument(allOtherDocuments, docDetailsElement);
+            });
         }
 
         List<Element<BundlingRequestDocument>> miamCertAndPreviousOrdersUploadedByCourtAdmin =
             mapApplicationsFromFurtherEvidences(caseData.getFurtherEvidences());
         if (!miamCertAndPreviousOrdersUploadedByCourtAdmin.isEmpty()) {
-            allOtherDocuments.addAll(miamCertAndPreviousOrdersUploadedByCourtAdmin);
+            miamCertAndPreviousOrdersUploadedByCourtAdmin.forEach(docDetailsElement -> {
+                //FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles
+                addOtherDocument(allOtherDocuments, docDetailsElement);
+            });
         }
 
         List<Element<BundlingRequestDocument>> miamDocuments = mapMiamDetails(caseData.getMiamDetails());
         if (null != miamDocuments && !miamDocuments.isEmpty()) {
-            allOtherDocuments.addAll(miamDocuments);
+            miamDocuments.forEach(docDetailsElement -> {
+                //FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles
+                addOtherDocument(allOtherDocuments, docDetailsElement);
+            });
         }
 
         return allOtherDocuments;
 
+    }
+
+    /**
+     * FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles
+     * @param allOtherDocuments list of BundlingRequestDocument including other documents to be added to the list
+     * @param docDetailsElement Other Document to be added to the list
+     */
+    private void addOtherDocument(List<Element<BundlingRequestDocument>> allOtherDocuments, Element<BundlingRequestDocument> docDetailsElement) {
+        @NotNull @Valid BundlingRequestDocument docDetails = docDetailsElement.getValue();
+        Document document = docDetails.getDocumentLink();
+        if (document != null
+            && document.getDocumentFileName() != null
+            && document.getDocumentUrl() != null
+            && document.getDocumentBinaryUrl() != null
+            && !document.getDocumentUrl().equals("http://dm-store-aat.service.core-compute-aat.internal/documents/00000000-0000-0000-0000-000000000000")
+            && !document.getDocumentBinaryUrl()
+            .equals("http://dm-store-aat.service.core-compute-aat.internal/documents/00000000-0000-0000-0000-000000000000/binary")
+            && !(document.getDocumentFileName().toLowerCase()).contains("redacted")) {
+            //Once verified that this is not a redacted document, add to the global other documents list
+            allOtherDocuments.add(docDetailsElement);
+        }
     }
 
 
@@ -324,15 +368,31 @@ public class BundleCreateRequestMapper {
         ordersFromCaseData.forEach(orderDetailsElement -> {
             OrderDetails orderDetails = orderDetailsElement.getValue();
             Document document = orderDetails.getOrderDocument();
-            orders.add(BundlingRequestDocument.builder().documentGroup(BundlingDocGroupEnum.ordersSubmittedWithApplication)
-                .documentFileName(document.getDocumentFileName()).documentLink(document).build());
+            //FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles
+            addOrderDocument(orders, document);
             Document welshDocument = orderDetails.getOrderDocumentWelsh();
-            if (welshDocument != null) {
-                orders.add(BundlingRequestDocument.builder().documentGroup(BundlingDocGroupEnum.ordersSubmittedWithApplication)
-                               .documentFileName(welshDocument.getDocumentFileName()).documentLink(welshDocument).build());
-            }
+            addOrderDocument(orders, welshDocument);
         });
         return ElementUtils.wrapElements(orders);
+    }
+
+    /**
+     * FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles
+     * @param orders list of BundlingRequestDocument including order documents to be added to the list
+     * @param document Order Document to be added to the list
+     */
+    private void addOrderDocument(List<BundlingRequestDocument> orders, Document document) {
+        if (document != null
+            && document.getDocumentFileName() != null
+            && document.getDocumentUrl() != null
+            && document.getDocumentBinaryUrl() != null
+            && !document.getDocumentUrl().equals("http://dm-store-aat.service.core-compute-aat.internal/documents/00000000-0000-0000-0000-000000000000")
+            && !document.getDocumentBinaryUrl()
+            .equals("http://dm-store-aat.service.core-compute-aat.internal/documents/00000000-0000-0000-0000-000000000000/binary")
+            && !(document.getDocumentFileName().toLowerCase()).contains("redacted")) {
+            orders.add(BundlingRequestDocument.builder().documentGroup(BundlingDocGroupEnum.ordersSubmittedWithApplication)
+                           .documentFileName(document.getDocumentFileName()).documentLink(document).build());
+        }
     }
 
     //SNI-4260 fix

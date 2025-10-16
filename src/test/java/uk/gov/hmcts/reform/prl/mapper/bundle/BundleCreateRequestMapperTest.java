@@ -109,11 +109,17 @@ public class BundleCreateRequestMapperTest {
                 DocTypeOtherDocumentsEnum.applicantStatement).restrictCheckboxOtherDocuments(new ArrayList<>()).build());
 
         List<OrderDetails> orders = new ArrayList<>();
+        String redactedURL = "http://dm-store-aat.service.core-compute-aat.internal/documents/00000000-0000-0000-0000-000000000000";
+        String redactedURLBinary = "http://dm-store-aat.service.core-compute-aat.internal/documents/00000000-0000-0000-0000-000000000000/binary";
         orders.add(OrderDetails.builder().orderType("orders")
                        .orderDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName(
                            "Order.pdf").build())
+                       .orderDocument(Document.builder().documentUrl(redactedURL).documentBinaryUrl(redactedURLBinary).documentFileName(
+                           "Redacted.pdf").build())
                        .orderDocumentWelsh(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName(
                            "welshOrder.pdf").build())
+                       .orderDocumentWelsh(Document.builder().documentUrl(redactedURL).documentBinaryUrl(redactedURLBinary).documentFileName(
+                           "*Redacted*").build())
                        .build());
 
         List<ResponseDocuments> citizenC7uploadedDocs = new ArrayList<>();
@@ -414,6 +420,12 @@ public class BundleCreateRequestMapperTest {
             .miamCertificateDocument(Document.builder().documentFileName("miamCertificate").build())
             .categoryName(MIAM_CERTIFICATE).categoryId("MIAMCertificate").build();
         courtStaffDoc.add(element(miamCertificate));
+
+        QuarantineLegalDoc miamCertificateRedacted = QuarantineLegalDoc.builder()
+            .miamCertificateDocument(Document.builder().documentUrl(redactedURL).documentBinaryUrl(redactedURLBinary)
+                                         .documentFileName("*Redacted*").build())
+            .categoryName(MIAM_CERTIFICATE).categoryId("MIAMCertificate").build();
+        courtStaffDoc.add(element(miamCertificateRedacted));
 
         QuarantineLegalDoc fm5Statement = QuarantineLegalDoc.builder()
             .fm5StatementsDocument(Document.builder().documentFileName("fm5Statements").build())
