@@ -15,12 +15,14 @@ import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
+import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_RESUBMIT;
@@ -54,6 +56,7 @@ public class EventsChecker extends PartyChecker {
 
     @PostConstruct
     public void init() {
+        eventStatus.put(CASE_NAME, this.getCaseNameChecker());
         eventStatus.put(TYPE_OF_APPLICATION, this.getApplicationTypeChecker());
         eventStatus.put(HEARING_URGENCY, this.getHearingUrgencyChecker());
         eventStatus.put(APPLICANT_DETAILS, this.getApplicantsChecker());
@@ -86,6 +89,7 @@ public class EventsChecker extends PartyChecker {
             this.getChildrenAndOtherPeopleInThisApplicationChecker()
         );
 
+        eventStatus.put(FL401_CASE_NAME, this.getCaseNameChecker());
         eventStatus.put(FL401_HOME, this.getHomeChecker());
         eventStatus.put(RELATIONSHIP_TO_RESPONDENT, this.getRespondentRelationshipChecker());
         eventStatus.put(FL401_TYPE_OF_APPLICATION, this.getFl401ApplicationTypeChecker());

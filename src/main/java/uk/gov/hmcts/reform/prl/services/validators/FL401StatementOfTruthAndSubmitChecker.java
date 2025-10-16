@@ -19,6 +19,7 @@ import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
@@ -48,6 +49,7 @@ public class FL401StatementOfTruthAndSubmitChecker implements EventChecker {
     public boolean hasMandatoryCompleted(CaseData caseData) {
         EnumMap<Event, EventChecker> mandatoryEvents = new EnumMap<>(Event.class);
 
+        mandatoryEvents.put(FL401_CASE_NAME, eventsChecker.getCaseNameChecker());
         mandatoryEvents.put(FL401_TYPE_OF_APPLICATION, eventsChecker.getFl401ApplicationTypeChecker());
         mandatoryEvents.put(WITHOUT_NOTICE_ORDER, eventsChecker.getWithoutNoticeOrderChecker());
         mandatoryEvents.put(APPLICANT_DETAILS, eventsChecker.getApplicantsChecker());

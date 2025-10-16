@@ -48,12 +48,14 @@ import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
+import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_RESUBMIT;
@@ -159,6 +161,7 @@ public class TaskListService {
 
         if (TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())) {
             return new ArrayList<>(List.of(
+                CASE_NAME,
                 TYPE_OF_APPLICATION,
                 HEARING_URGENCY,
                 APPLICANT_DETAILS,
@@ -182,6 +185,7 @@ public class TaskListService {
             ));
         } else if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
             return new ArrayList<>(List.of(
+                CASE_NAME,
                 TYPE_OF_APPLICATION,
                 HEARING_URGENCY,
                 CHILD_DETAILS_REVISED,
@@ -206,6 +210,7 @@ public class TaskListService {
         }
 
         return new ArrayList<>(List.of(
+            CASE_NAME,
             TYPE_OF_APPLICATION,
             HEARING_URGENCY,
             APPLICANT_DETAILS,
@@ -230,6 +235,7 @@ public class TaskListService {
         Optional<TypeOfApplicationOrders> ordersOptional = ofNullable(caseData.getTypeOfApplicationOrders());
 
         List<Event> eventsList = new ArrayList<>(List.of(
+            FL401_CASE_NAME,
             FL401_TYPE_OF_APPLICATION,
             WITHOUT_NOTICE_ORDER,
             APPLICANT_DETAILS,

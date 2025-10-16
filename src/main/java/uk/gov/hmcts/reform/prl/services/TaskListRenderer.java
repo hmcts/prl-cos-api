@@ -37,12 +37,14 @@ import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
+import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_RESUBMIT;
@@ -83,11 +85,11 @@ public class TaskListRenderer {
     private static final String IN_PROGRESS = "in-progress.png";
     private static final String INFORMATION_ADDED = "information-added.png";
     private static final String FINISHED = "finished.png";
-    public static final String ADD_REQUIRED_DETAILS = "Add required details / Ychwanegu manylion angenrheidiol";
-    public static final String MIAM_DETAILS = "MIAM details / Manylion MIAM";
-    public static final String VIEW_PDF_APPLICATION = "View PDF application / Gweld y cais PDF";
+    public static final String ADD_REQUIRED_DETAILS = "Add required details / Ychwanegu manylion angenrheidiol"; 
+    public static final String MIAM_DETAILS = "MIAM details / Manylion MIAM"; 
+    public static final String VIEW_PDF_APPLICATION = "View PDF application / Gweld y cais PDF"; 
     public static final String SUBMIT1 = "Submit";
-    public static final String SUBMIT_AND_PAY_TEXT = "Submit and pay / Cyflwyno a thalu";
+    public static final String SUBMIT_AND_PAY_TEXT = "Submit and pay / Cyflwyno a thalu"; 
 
     private final TaskListRenderElements taskListRenderElements;
 
@@ -120,6 +122,7 @@ public class TaskListRenderer {
         }
 
         final TaskSection applicationDetails = newSection(ADD_APPLICATION_DETAILS)
+            .withTask(tasks.get(CASE_NAME))
             .withTask(tasks.get(TYPE_OF_APPLICATION))
             .withTask(tasks.get(HEARING_URGENCY));
 
@@ -176,6 +179,7 @@ public class TaskListRenderer {
 
     private static List<TaskSection> generateTaskListV2(CaseData caseData, Map<Event, Task> tasks) {
         final TaskSection applicationDetails = newSection(ADD_APPLICATION_DETAILS)
+                .withTask(tasks.get(CASE_NAME))
                 .withTask(tasks.get(TYPE_OF_APPLICATION))
                 .withTask(tasks.get(HEARING_URGENCY));
 
@@ -273,6 +277,7 @@ public class TaskListRenderer {
 
     private static List<TaskSection> generateTaskListV3(CaseData caseData, Map<Event, Task> tasks) {
         final TaskSection applicationDetails = newSection(ADD_APPLICATION_DETAILS)
+            .withTask(tasks.get(CASE_NAME))
             .withTask(tasks.get(TYPE_OF_APPLICATION))
             .withTask(tasks.get(HEARING_URGENCY));
 
@@ -449,7 +454,7 @@ public class TaskListRenderer {
                 .map(error -> format("%s %s", error, taskListRenderElements.renderLink(task.getEvent()))))
             .toList();
 
-        return taskListRenderElements.renderCollapsible("Why can't I submit my application? / Pam na fedraf gyflwyno fy nghais?", errors);
+        return taskListRenderElements.renderCollapsible("Why can't I submit my application? / Pam na fedraf gyflwyno fy nghais?", errors); 
     }
 
     private List<String> renderSectionErrors(List<EventValidationErrors> taskErrors) {
@@ -471,6 +476,7 @@ public class TaskListRenderer {
         Optional<TypeOfApplicationOrders> ordersOptional = ofNullable(caseData.getTypeOfApplicationOrders());
 
         final TaskSection applicationDetails = newSection(ADD_APPLICATION_DETAILS)
+            .withTask(tasks.get(FL401_CASE_NAME))
             .withTask(tasks.get(FL401_TYPE_OF_APPLICATION))
             .withTask(tasks.get(WITHOUT_NOTICE_ORDER));
 
