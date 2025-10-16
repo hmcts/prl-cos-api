@@ -64,7 +64,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
@@ -128,7 +127,6 @@ public class StmtOfServImplService {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         log.info("*** Statement of service, about-to-submit callback ***");
 
-        // Collect all served order IDs from recipients
         List<String> allServedOrderIds = collectServedOrderIds(caseData);
 
         if (StatementOfServiceWhatWasServed.statementOfServiceApplicationPack
@@ -141,8 +139,8 @@ public class StmtOfServImplService {
             handleSosForOrders(authorisation, caseData, caseDataUpdateMap);
         }
 
-        // Update the statement of service with served order IDs
         updateStatementOfServiceWithServedOrderIds(caseData, caseDataUpdateMap, allServedOrderIds);
+        log.info("Order IDs in servedOrderIds list on StatementOfService: {}", caseData.getStatementOfService().getServedOrderIds());
 
         caseDataUpdateMap.put("stmtOfServiceAddRecipient", null);
         caseDataUpdateMap.put("stmtOfServiceWhatWasServed", null);
@@ -168,12 +166,13 @@ public class StmtOfServImplService {
                 );
 
                 sosRecipients.add(element(sosRecipient.toBuilder()
-                                              .respondentDynamicList(null) //clear dynamic list after sending access code info
-                                              .orderList(null) //clear order list to avoid CCD validation error
-                                              .build()));
+                    .respondentDynamicList(null) //clear dynamic list after sending access code info
+                    .orderList(null) //clear order list to avoid CCD validation error
+                    .build()));
             });
         //Add all existing sos recipients & update into case data
-        if (CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceForApplication())) {
+        if (caseData.getStatementOfService() != null
+            && CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceForApplication())) {
             sosRecipients.addAll(caseData.getStatementOfService().getStmtOfServiceForApplication());
         }
         caseDataMap.put(STMT_OF_SERVICE_FOR_APPLICATION, sosRecipients);
@@ -217,7 +216,8 @@ public class StmtOfServImplService {
             });
 
         //Add all existing sos recipients & update into case data
-        if (CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceForOrder())) {
+        if (caseData.getStatementOfService() != null
+            && CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceForOrder())) {
             sosRecipients.addAll(caseData.getStatementOfService().getStmtOfServiceForOrder());
         }
         caseDataMap.put("stmtOfServiceForOrder", sosRecipients);
@@ -340,7 +340,6 @@ public class StmtOfServImplService {
             .submittedDateTime(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)).toLocalDateTime())
             //PRL-6478 - Reset to null as not to show duplicate date field in XUI
             .servedDateTimeOption(null)
-            // Clear order list after processing to avoid showing in UI
             .orderList(null)
             .build();
     }
@@ -782,7 +781,7 @@ public class StmtOfServImplService {
                                                 .getCoverSheets(caseData, authorization,
                                                                 respondent.getValue().getAddress(),
                                                                 respondent.getValue().getLabelForDynamicList(),
-                                                                DOCUMENT_COVER_SHEET_HINT
+                                                                respondent.getValue().getLabelForDynamicList()
                                                 ));
 
                 //cover letters
@@ -877,19 +876,19 @@ public class StmtOfServImplService {
                             .map(DynamicMultiselectListElement::getCode)
                             .toList();
                         allServedOrderIds.addAll(orderIds);
-                        log.info("Collected {} order IDs from recipient: {}",
-                                orderIds.size(),
-                                recipient.getSelectedPartyName());
+                        log.info("Collected {} order IDs from recipient: {}", orderIds.size(), recipient.getSelectedPartyName());
+                        log.info("orderList object for recipient {}: {}",
+                            recipient.getSelectedPartyName(),
+                            recipient.getOrderList());
                     } else if (CollectionUtils.isNotEmpty(recipient.getSelectedOrderIds())) {
                         allServedOrderIds.addAll(recipient.getSelectedOrderIds());
                         log.info("Collected {} order IDs from recipient (pre-processed): {}",
-                                recipient.getSelectedOrderIds().size(),
-                                recipient.getSelectedPartyName());
+                                 recipient.getSelectedOrderIds().size(),
+                                 recipient.getSelectedPartyName());
                     }
                 });
         }
 
-        // Remove duplicates and return unique order IDs
         List<String> uniqueOrderIds = allServedOrderIds.stream().distinct().toList();
         log.info("Total unique served order IDs collected: {}", uniqueOrderIds.size());
         return uniqueOrderIds;

@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.models.serviceofapplication;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,6 +33,7 @@ public class StmtOfServiceAddRecipient {
     //Date - citizen sos, date & time - court staff/solicitor sos
     private final String partiesServedDateTime;
     //Multi-select list for orders being served
+    @JsonProperty("orderList")
     private final DynamicMultiSelectList orderList;
     //Store selected order IDs
     private final List<String> selectedOrderIds;
