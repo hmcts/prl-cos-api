@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -19,6 +18,14 @@ public class CaseNameService {
     public static final String CA_CASE_NAME_FORMAT = "%s V %s";
     public static final String DA_CASE_NAME_FORMAT = "%s %s & %s %s";
 
+    public String getCaseNameForCA(String applicantLastName, String respondentLastName) {
+        return String.format(CA_CASE_NAME_FORMAT, applicantLastName, respondentLastName);
+    }
+
+    public String getCaseNameForDA(String applicantFirstName, String applicantLastName, String respondentFirstName, String respondentLastName) {
+        return String.format(DA_CASE_NAME_FORMAT, applicantFirstName, applicantLastName, respondentFirstName, respondentLastName);
+    }
+
     public void setFinalCaseName(Map<String, Object> updatedCaseData, CaseData caseData) {
         if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             setCaseNameForCA(updatedCaseData, caseData);
@@ -30,29 +37,21 @@ public class CaseNameService {
     }
 
     private void setCaseNameForCA(Map<String, Object> updatedCaseData, CaseData caseData) {
-        if (StringUtils.isEmpty(caseData.getApplicantCaseName())) {
-            if (!isEmpty(caseData.getApplicants()) && !isEmpty(caseData.getRespondents())) {
-                PartyDetails applicant = caseData.getApplicants().stream().findFirst().orElseThrow().getValue();
-                PartyDetails respondent = caseData.getRespondents().stream().findFirst().orElseThrow().getValue();
-                String caseName = String.format(CA_CASE_NAME_FORMAT,
-                                                applicant.getLastName(), respondent.getLastName()
-                );
-                updatedCaseData.put(APPLICANT_CASE_NAME, caseName);
-            }
+        if (!isEmpty(caseData.getApplicants()) && !isEmpty(caseData.getRespondents())) {
+            PartyDetails applicant = caseData.getApplicants().stream().findFirst().orElseThrow().getValue();
+            PartyDetails respondent = caseData.getRespondents().stream().findFirst().orElseThrow().getValue();
+            String caseName = getCaseNameForCA(applicant.getLastName(), respondent.getLastName());
+            updatedCaseData.put(APPLICANT_CASE_NAME, caseName);
         }
     }
 
     private void setCaseNameForDA(Map<String, Object> updatedCaseData, CaseData caseData) {
-        if (StringUtils.isEmpty(caseData.getApplicantCaseName())) {
-            PartyDetails applicant = caseData.getApplicantsFL401();
-            PartyDetails respondent = caseData.getRespondentsFL401();
-            if (applicant != null && respondent != null) {
-                String caseName = String.format(DA_CASE_NAME_FORMAT,
-                                                applicant.getFirstName(), applicant.getLastName(),
-                                                respondent.getFirstName(), respondent.getLastName()
-                );
-                updatedCaseData.put(APPLICANT_CASE_NAME, caseName);
-            }
+        PartyDetails applicant = caseData.getApplicantsFL401();
+        PartyDetails respondent = caseData.getRespondentsFL401();
+        if (applicant != null && respondent != null) {
+            String caseName = getCaseNameForDA(applicant.getFirstName(), applicant.getLastName(),
+                                            respondent.getFirstName(), respondent.getLastName());
+            updatedCaseData.put(APPLICANT_CASE_NAME, caseName);
         }
     }
 }

@@ -40,6 +40,17 @@ public class CaseNameServiceTest {
     }
 
     @Test
+    public void shouldGetFinalCaseNameC100() {
+        assertEquals("app1LN V respLN", caseNameService.getCaseNameForCA("app1LN", "respLN"));
+    }
+
+    @Test
+    public void shouldGetFinalCaseNameFL01() {
+        assertEquals("app1FN app1LN & respFN respLN",
+                     caseNameService.getCaseNameForDA("app1FN", "app1LN", "respFN", "respLN"));
+    }
+
+    @Test
     public void shouldSetFinalCaseNameC100() {
         when(applicant.getLastName()).thenReturn("AppLN");
         when(respondent.getLastName()).thenReturn("RespLN");
@@ -73,14 +84,38 @@ public class CaseNameServiceTest {
     }
 
     @Test
-    public void shouldNotSetFinalCaseNameC100WhenAlreadySet() {
-        updatedCaseData.put("applicantCaseName", "I already have a name");
-        when(caseData.getApplicantCaseName()).thenReturn("I already have a name");
+    public void shouldUpdateFinalCaseNameC100() {
+        updatedCaseData.put("applicantCaseName", "CaseNameBefore");
+        when(applicant.getLastName()).thenReturn("AppLN");
+        when(respondent.getLastName()).thenReturn("RespLN");
+
+        List<Element<PartyDetails>> applicantsList = List.of(Element.<PartyDetails>builder().value(applicant).build());
+        List<Element<PartyDetails>> respondentsList = List.of(Element.<PartyDetails>builder().value(respondent).build());
+        when(caseData.getApplicants()).thenReturn(applicantsList);
+        when(caseData.getRespondents()).thenReturn(respondentsList);
         when(caseData.getCaseTypeOfApplication()).thenReturn("C100");
 
         caseNameService.setFinalCaseName(updatedCaseData, caseData);
 
-        assertEquals("I already have a name", updatedCaseData.get("applicantCaseName"));
+        assertEquals("AppLN V RespLN", updatedCaseData.get("applicantCaseName"));
+    }
+
+    @Test
+    public void shouldUpdateFinalCaseNameFL401() {
+        updatedCaseData.put("applicantCaseName", "CaseNameBefore");
+        when(applicant.getFirstName()).thenReturn("AppFN");
+        when(applicant.getLastName()).thenReturn("AppLN");
+        when(respondent.getFirstName()).thenReturn("RespFN");
+        when(respondent.getLastName()).thenReturn("RespLN");
+
+        when(caseData.getApplicantsFL401()).thenReturn(applicant);
+        when(caseData.getRespondentsFL401()).thenReturn(respondent);
+        when(caseData.getCaseTypeOfApplication()).thenReturn("FL401");
+
+        caseNameService.setFinalCaseName(updatedCaseData, caseData);
+
+        assertEquals("AppFN AppLN & RespFN RespLN", updatedCaseData.get("applicantCaseName"));
+
     }
 
     @Test
@@ -124,17 +159,6 @@ public class CaseNameServiceTest {
         caseNameService.setFinalCaseName(updatedCaseData, caseData);
 
         assertNull(updatedCaseData.get("applicantCaseName"));
-    }
-
-    @Test
-    public void shouldNotSetFinalCaseNameFL401WhenAlreadySet() {
-        updatedCaseData.put("applicantCaseName", "I already have a name");
-        when(caseData.getApplicantCaseName()).thenReturn("I already have a name");
-        when(caseData.getCaseTypeOfApplication()).thenReturn("FL401");
-
-        caseNameService.setFinalCaseName(updatedCaseData, caseData);
-
-        assertEquals("I already have a name", updatedCaseData.get("applicantCaseName"));
     }
 
     @Test
