@@ -48,12 +48,11 @@ public class C100DocumentTemplateFinderService {
     @Value("${document.templates.c100.c100_draft_welsh_template_v2}")
     protected String c100DraftWelshTemplateV2;
 
-    @Value("${document.templates.c100.c100_draft_template_v3}")
-    protected String c100DraftTemplateV3;
+    @Value("${document.templates.c100.c100_draft_template_v4}")
+    protected String c100DraftTemplateV4;
 
-
-    @Value("${document.templates.c100.c100_draft_welsh_template_v3}")
-    protected String c100DraftWelshTemplateV3;
+    @Value("${document.templates.c100.c100_draft_welsh_template_v4}")
+    protected String c100DraftWelshTemplateV4;
 
     @Value("${document.templates.c100.c100_c8_template}")
     protected String c100C8Template;
@@ -121,8 +120,8 @@ public class C100DocumentTemplateFinderService {
     public String findFinalDraftDocumentTemplate(CaseData caseData,boolean isWelsh) {
 
         if (TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())) {
-            log.info("generate v3 {}", !isWelsh ? c100DraftTemplateV3 : c100DraftWelshTemplateV3);
-            return !isWelsh ? c100DraftTemplateV3 : c100DraftWelshTemplateV3;
+            log.info("generate v3 {}", !isWelsh ? c100DraftTemplateV4 : c100DraftWelshTemplateV4);
+            return !isWelsh ? c100DraftTemplateV4 : c100DraftWelshTemplateV4;
         } else if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
             log.info("generate v2 {}", !isWelsh ? c100DraftTemplateV2 : c100DraftWelshTemplateV2);
             return !isWelsh ? c100DraftTemplateV2 : c100DraftWelshTemplateV2;
