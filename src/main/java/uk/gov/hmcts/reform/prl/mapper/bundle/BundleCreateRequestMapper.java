@@ -217,7 +217,7 @@ public class BundleCreateRequestMapper {
     }
 
     /**
-     * FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles
+     * FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles.
      * @param allOtherDocuments list of BundlingRequestDocument including other documents to be added to the list
      * @param docDetailsElement Other Document to be added to the list
      */
@@ -381,7 +381,7 @@ public class BundleCreateRequestMapper {
     }
 
     /**
-     * FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles
+     * FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles.
      * @param orders list of BundlingRequestDocument including order documents to be added to the list
      * @param document Order Document to be added to the list
      */
