@@ -139,9 +139,11 @@ public class StmtOfServImplService {
             handleSosForOrders(authorisation, caseData, caseDataUpdateMap);
         }
 
+        // Merge and add servedOrderIds at the top-level, consistent with other properties
         updateStatementOfServiceWithServedOrderIds(caseData, caseDataUpdateMap, allServedOrderIds);
-        log.info("Order IDs in servedOrderIds list on StatementOfService: {}", caseData.getStatementOfService().getServedOrderIds());
+        log.info("Order IDs in servedOrderIds (map): {}", caseDataUpdateMap.get("servedOrderIds"));
 
+        // Clear transient top-level fields used during the event to avoid CCD validation errors
         caseDataUpdateMap.put("stmtOfServiceAddRecipient", null);
         caseDataUpdateMap.put("stmtOfServiceWhatWasServed", null);
         return caseDataUpdateMap;
@@ -897,22 +899,21 @@ public class StmtOfServImplService {
     private void updateStatementOfServiceWithServedOrderIds(CaseData caseData,
                                                            Map<String, Object> updatedCaseDataMap,
                                                            List<String> servedOrderIds) {
-        if (caseData.getStatementOfService() != null) {
-            List<String> existingServedOrderIds = caseData.getStatementOfService().getServedOrderIds();
-            List<String> allServedOrderIds = new ArrayList<>();
-
-            if (CollectionUtils.isNotEmpty(existingServedOrderIds)) {
-                allServedOrderIds.addAll(existingServedOrderIds);
-            }
-            if (CollectionUtils.isNotEmpty(servedOrderIds)) {
-                allServedOrderIds.addAll(servedOrderIds);
-            }
-
-            List<String> uniqueServedOrderIds = allServedOrderIds.stream().distinct().toList();
-            log.info("Updating StatementOfService with {} served order IDs", uniqueServedOrderIds.size());
-
-            updatedCaseDataMap.put("servedOrderIds", uniqueServedOrderIds);
+        if (caseData.getStatementOfService() == null) {
+            return;
         }
+        List<String> existingServedOrderIds = caseData.getStatementOfService().getServedOrderIds();
+        List<String> allServedOrderIds = new ArrayList<>();
+
+        if (CollectionUtils.isNotEmpty(existingServedOrderIds)) {
+            allServedOrderIds.addAll(existingServedOrderIds);
+        }
+        if (CollectionUtils.isNotEmpty(servedOrderIds)) {
+            allServedOrderIds.addAll(servedOrderIds);
+        }
+
+        List<String> uniqueServedOrderIds = allServedOrderIds.stream().distinct().toList();
+        updatedCaseDataMap.put("servedOrderIds", uniqueServedOrderIds);
     }
 
 }
