@@ -734,23 +734,22 @@ public class StmtOfServImplServiceTest {
 
     }
 
-    // Simplified order ID tests - replace the 5 complex tests with these 2
     @Test
     public void testCollectServedOrderIds_BasicFunctionality() {
-        // Test basic order ID collection
         List<String> orderIds = Arrays.asList("order-1", "order-2");
         CaseData caseData = createBasicCaseDataWithOrders(orderIds);
 
         Map<String, Object> result = stmtOfServImplService.handleSosAboutToSubmit(
             createCaseDetails(caseData), authToken);
 
-        StatementOfService sos = (StatementOfService) result.get("statementOfService");
-        assertEquals(orderIds, sos.getServedOrderIds());
+        @SuppressWarnings("unchecked")
+        List<String> servedOrderIds = (List<String>) result.get("servedOrderIds");
+        assertNotNull(servedOrderIds);
+        assertEquals(orderIds, servedOrderIds);
     }
 
     @Test
     public void testCollectServedOrderIds_DuplicateHandling() {
-        // Test duplicate removal
         List<String> existingIds = Arrays.asList("order-1", "order-2");
         List<String> newIds = Arrays.asList("order-2", "order-3"); // order-2 is duplicate
 
@@ -759,9 +758,11 @@ public class StmtOfServImplServiceTest {
         Map<String, Object> result = stmtOfServImplService.handleSosAboutToSubmit(
             createCaseDetails(caseData), authToken);
 
-        StatementOfService sos = (StatementOfService) result.get("statementOfService");
-        assertEquals(3, sos.getServedOrderIds().size()); // Should remove duplicates
-        assertTrue(sos.getServedOrderIds().containsAll(Arrays.asList("order-1", "order-2", "order-3")));
+        @SuppressWarnings("unchecked")
+        List<String> servedOrderIds = (List<String>) result.get("servedOrderIds");
+        assertNotNull(servedOrderIds);
+        assertEquals(3, servedOrderIds.size()); // Should remove duplicates
+        assertTrue(servedOrderIds.containsAll(Arrays.asList("order-1", "order-2", "order-3")));
     }
 
     // Simplified negative test - replace the 4 complex negative tests with this one
@@ -783,8 +784,8 @@ public class StmtOfServImplServiceTest {
                                                                                              "test.pdf").build())
                                                                                          .build())))
                                     .build())
-            .serviceOfApplication(null) // Missing required data - this will cause the condition to fail
-            .respondents(listOfRespondents) // Add respondents so the service doesn't fail on other null checks
+            .serviceOfApplication(null)
+            .respondents(listOfRespondents)
             .build();
 
         Map<String, Object> result = stmtOfServImplService.handleSosAboutToSubmit(

@@ -255,7 +255,7 @@ public class StmtOfServImplService {
                 StmtOfServiceAddRecipient finalRecipient = recipient;
                 List<Element<PartyDetails>> partiesServed = caseData.getRespondents().stream()
                     .filter(respondent -> respondent.getId().toString().equals(
-                            finalRecipient.getRespondentDynamicList().getValue().getCode()))
+                        finalRecipient.getRespondentDynamicList().getValue().getCode()))
                     .toList();
                 //PRL-6122
                 updateOrdersServedParties(caseData, orderCollection, ManageOrdersUtils.getServedParties(partiesServed));
@@ -895,7 +895,7 @@ public class StmtOfServImplService {
     }
 
     private void updateStatementOfServiceWithServedOrderIds(CaseData caseData,
-                                                           Map<String, Object> caseDataUpdateMap,
+                                                           Map<String, Object> updatedCaseDataMap,
                                                            List<String> servedOrderIds) {
         if (caseData.getStatementOfService() != null) {
             List<String> existingServedOrderIds = caseData.getStatementOfService().getServedOrderIds();
@@ -911,9 +911,7 @@ public class StmtOfServImplService {
             List<String> uniqueServedOrderIds = allServedOrderIds.stream().distinct().toList();
             log.info("Updating StatementOfService with {} served order IDs", uniqueServedOrderIds.size());
 
-            caseDataUpdateMap.put("statementOfService", caseData.getStatementOfService().toBuilder()
-                .servedOrderIds(uniqueServedOrderIds)
-                .build());
+            updatedCaseDataMap.put("servedOrderIds", uniqueServedOrderIds);
         }
     }
 
