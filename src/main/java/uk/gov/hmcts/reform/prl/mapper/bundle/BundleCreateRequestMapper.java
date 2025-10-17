@@ -84,6 +84,11 @@ import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGro
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class BundleCreateRequestMapper {
+
+    public static final String REDACTED_DOCUMENT_URL = "http://dm-store-aat.service.core-compute-aat.internal/documents/00000000-0000-0000-0000-000000000000";
+    public static final String REDACTED_DOCUMENT_URL_BINARY = "http://dm-store-aat.service.core-compute-aat.internal/documents/00000000-0000-0000-0000-000000000000/binary";
+    public static final String REDACTED_DOCUMENT_FILE_NAME = "redacted";
+
     public BundleCreateRequest mapCaseDataToBundleCreateRequest(CaseData caseData, String eventId, Hearings hearingDetails,
                                                                 String bundleConfigFileName) {
         BundleCreateRequest bundleCreateRequest = BundleCreateRequest.builder()
@@ -223,10 +228,9 @@ public class BundleCreateRequestMapper {
             && document.getDocumentFileName() != null
             && document.getDocumentUrl() != null
             && document.getDocumentBinaryUrl() != null
-            && !document.getDocumentUrl().equals("http://dm-store-aat.service.core-compute-aat.internal/documents/00000000-0000-0000-0000-000000000000")
-            && !document.getDocumentBinaryUrl()
-            .equals("http://dm-store-aat.service.core-compute-aat.internal/documents/00000000-0000-0000-0000-000000000000/binary")
-            && !(document.getDocumentFileName().toLowerCase()).contains("redacted")) {
+            && !document.getDocumentUrl().equals(REDACTED_DOCUMENT_URL)
+            && !document.getDocumentBinaryUrl().equals(REDACTED_DOCUMENT_URL_BINARY)
+            && !(document.getDocumentFileName().toLowerCase()).contains(REDACTED_DOCUMENT_FILE_NAME)) {
             //Once verified that this is not a redacted document, add to the global other documents list
             allOtherDocuments.add(docDetailsElement);
         }
@@ -386,10 +390,9 @@ public class BundleCreateRequestMapper {
             && document.getDocumentFileName() != null
             && document.getDocumentUrl() != null
             && document.getDocumentBinaryUrl() != null
-            && !document.getDocumentUrl().equals("http://dm-store-aat.service.core-compute-aat.internal/documents/00000000-0000-0000-0000-000000000000")
-            && !document.getDocumentBinaryUrl()
-            .equals("http://dm-store-aat.service.core-compute-aat.internal/documents/00000000-0000-0000-0000-000000000000/binary")
-            && !(document.getDocumentFileName().toLowerCase()).contains("redacted")) {
+            && !document.getDocumentUrl().equals(REDACTED_DOCUMENT_URL)
+            && !document.getDocumentBinaryUrl().equals(REDACTED_DOCUMENT_URL_BINARY)
+            && !(document.getDocumentFileName().toLowerCase()).contains(REDACTED_DOCUMENT_FILE_NAME)) {
             orders.add(BundlingRequestDocument.builder().documentGroup(BundlingDocGroupEnum.ordersSubmittedWithApplication)
                            .documentFileName(document.getDocumentFileName()).documentLink(document).build());
         }
