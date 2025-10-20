@@ -4,6 +4,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.models.court.DfjAreaCourtMapping;
 import uk.gov.hmcts.reform.prl.utils.ResourceReader;
@@ -25,8 +26,7 @@ public class DfjLookupService {
     private List<DfjAreaCourtMapping> dfjCourtMapping;
     private Set<String> courtFields;
 
-
-    public DfjLookupService(ObjectMapper objectMapper) {
+    public DfjLookupService(@Autowired ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
         loadDfjMappings();
         loadCourtFields();
