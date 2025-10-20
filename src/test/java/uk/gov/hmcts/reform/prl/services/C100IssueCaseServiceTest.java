@@ -73,6 +73,9 @@ public class C100IssueCaseServiceTest {
     private ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
 
     @Mock
+    private DfjLookupService dfjLookupService;
+
+    @Mock
     private ApplicationConsiderationTimetableValidationWorkflow applicationConsiderationTimetableValidationWorkflow;
 
     @InjectMocks

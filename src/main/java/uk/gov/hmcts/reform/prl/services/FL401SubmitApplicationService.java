@@ -57,6 +57,7 @@ public class FL401SubmitApplicationService {
     private final EventService eventPublisher;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
+    private final DfjLookupService dfjLookupService;
 
     public Map<String, Object> fl401GenerateDocumentSubmitApplication(String authorisation,
                                                                       CallbackRequest callbackRequest, CaseData caseData) throws Exception {
@@ -85,6 +86,8 @@ public class FL401SubmitApplicationService {
             String regionId = courtVenue.get().getRegionId();
             String courtSeal = courtSealFinderService.getCourtSeal(regionId);
             caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
+            caseDataUpdated.keySet().removeAll(dfjLookupService.getAllCourtFields());
+            caseDataUpdated.putAll(dfjLookupService.getDfjAreaFields(baseLocationId));
             caseData = caseData.toBuilder()
                 .courtSeal(courtSeal)
                 .build();

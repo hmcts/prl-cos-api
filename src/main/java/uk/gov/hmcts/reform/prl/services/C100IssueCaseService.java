@@ -49,6 +49,7 @@ public class C100IssueCaseService {
     private final CourtFinderService courtFinderService;
     private final ObjectMapper objectMapper;
     private final EventService eventPublisher;
+    private final DfjLookupService dfjLookupService;
 
     public Map<String, Object> issueAndSendToLocalCourt(String authorisation, CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -70,6 +71,8 @@ public class C100IssueCaseService {
                     .courtCodeFromFact(courtId).build();
                 caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
                 caseDataUpdated.put(COURT_CODE_FROM_FACT, courtId);
+                caseDataUpdated.keySet().removeAll(dfjLookupService.getAllCourtFields());
+                caseDataUpdated.putAll(dfjLookupService.getDfjAreaFields(baseLocationId));
             }
             caseDataUpdated.put("localCourtAdmin", List.of(Element.<LocalCourtAdminEmail>builder().id(UUID.randomUUID())
                                                                .value(LocalCourtAdminEmail

@@ -1,0 +1,56 @@
+[
+  {
+    "courtCode": "827534",
+    "courtName": "Aberystwyth",
+    "courtField": "swanseaDFJCourt",
+    "dfjArea": "SWANSEA"
+  },
+  {
+    "courtCode": "700596",
+    "courtName": "Haverfordwest",
+    "courtField": "swanseaDFJCourt",
+    "dfjArea": "SWANSEA"
+  },
+  {
+    "courtCode": "390932",
+    "courtName": "Llanelli",
+    "courtField": "swanseaDFJCourt",
+    "dfjArea": "SWANSEA"
+  },
+  {
+    "courtCode": "846055",
+    "courtName": "Port Talbot",
+    "courtField": "swanseaDFJCourt",
+    "dfjArea": "SWANSEA"
+  },
+  {
+    "courtCode": "234946",
+    "courtName": "Swansea",
+    "courtField": "swanseaDFJCourt",
+    "dfjArea": "SWANSEA"
+  },
+  {
+    "courtCode": "478126",
+    "courtName": "Great Grimsby",
+    "courtField": "humbersideDFJCourt",
+    "dfjArea": "HUMBERSIDE"
+  },
+  {
+    "courtCode": "195520",
+    "courtName": "Kingston-Upon-Hull",
+    "courtField": "humbersideDFJCourt",
+    "dfjArea": "HUMBERSIDE"
+  },
+  {
+    "courtCode": "816875",
+    "courtName": "Chelmsford",
+    "courtField": "essexAndSuffolkDFJCourt",
+    "dfjArea": "ESSEX_AND_SUFFOLK"
+  },
+  {
+    "courtCode": "41047",
+    "courtName": "Wolverhampton",
+    "courtField": "wolverhamptonDFJCourt",
+    "dfjArea": "WOLVERHAMPTON"
+  }
+]

@@ -40,6 +40,9 @@ public class AmendCourtServiceTest {
     @Mock
     private EmailService emailService;
 
+    @Mock
+    private DfjLookupService dfjLookupService;
+
     @InjectMocks
     private AmendCourtService amendCourtService;
 
