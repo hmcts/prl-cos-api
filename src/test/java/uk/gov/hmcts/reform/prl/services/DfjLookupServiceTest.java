@@ -26,7 +26,7 @@ class DfjLookupServiceTest {
 
     @Test
     void shouldGetDfjAreaFieldsToBeUpdatedByNameIfExists() {
-        Map<String, String> fields = dfjLookupService.getDfjAreaFieldsByCourtId("Chelmsford Justice Centre");
+        Map<String, String> fields = dfjLookupService.getDfjAreaFieldsByCourtName("Chelmsford Justice Centre");
         assertThat(fields).containsAllEntriesOf(Map.of("dfjArea", "ESSEX_AND_SUFFOLK",
                                          "essexAndSuffolkDFJCourt", "816875"));
     }
