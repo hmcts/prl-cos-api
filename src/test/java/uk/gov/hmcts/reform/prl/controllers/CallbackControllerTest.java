@@ -90,6 +90,7 @@ import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
+import uk.gov.hmcts.reform.prl.services.DfjLookupService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.EventService;
@@ -307,6 +308,9 @@ public class CallbackControllerTest {
 
     @Mock
     private C100IssueCaseService c100IssueCaseService;
+
+    @Mock
+    private DfjLookupService dfjLookupService;
 
     @Mock
     private  EventService eventPublisher;
