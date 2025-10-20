@@ -832,8 +832,9 @@ public class BundleCreateRequestMapperTest {
             .reviewDocuments(ReviewDocuments.builder().build())
             .build();
 
-        BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(c100CaseData,"eventI",
-                                                                                                             Hearings.hearingsWith().caseHearings(caseHearings).build(), "sample.yaml");
+        BundleCreateRequest bundleCreateRequest =
+            bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(c100CaseData,"eventI",
+                                                                       Hearings.hearingsWith().caseHearings(caseHearings).build(), "sample.yaml");
         assertNotNull(bundleCreateRequest);
 
     }
