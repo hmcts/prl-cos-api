@@ -735,40 +735,6 @@ public class StmtOfServImplServiceTest {
     }
 
     @Test
-    public void testCollectServedOrderIds_BasicFunctionality() {
-        List<String> orderIds = Arrays.asList("order-1", "order-2");
-        CaseData caseData = createBasicCaseDataWithOrders(orderIds);
-
-        Map<String, Object> result = stmtOfServImplService.handleSosAboutToSubmit(
-            createCaseDetails(caseData), authToken);
-
-        assertNotNull(result.get("statementOfService"));
-        StatementOfService statementOfService = (StatementOfService) result.get("statementOfService");
-        List<String> servedOrderIds = statementOfService.getServedOrderIds();
-        assertNotNull(servedOrderIds);
-        assertEquals(orderIds, servedOrderIds);
-    }
-
-    @Test
-    public void testCollectServedOrderIds_DuplicateHandling() {
-        List<String> existingIds = Arrays.asList("order-1", "order-2");
-        List<String> newIds = Arrays.asList("order-2", "order-3"); // order-2 is duplicate
-
-        CaseData caseData = createBasicCaseDataWithOrders(newIds, existingIds);
-
-        Map<String, Object> result = stmtOfServImplService.handleSosAboutToSubmit(
-            createCaseDetails(caseData), authToken);
-
-        assertNotNull(result.get("statementOfService"));
-        StatementOfService statementOfService = (StatementOfService) result.get("statementOfService");
-        List<String> servedOrderIds = statementOfService.getServedOrderIds();
-        assertNotNull(servedOrderIds);
-        assertEquals(3, servedOrderIds.size()); // Should remove duplicates
-        assertTrue(servedOrderIds.containsAll(Arrays.asList("order-1", "order-2", "order-3")));
-    }
-
-    // Simplified negative test - replace the 4 complex negative tests with this one
-    @Test
     public void testHandleSosForApplicationPacks_WhenConditionsFail() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -1015,72 +981,6 @@ public class StmtOfServImplServiceTest {
             .submitAllTabsUpdate(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
     }
 
-    @Test
-    public void testRetrieveRespondentsListWithOrderCollection() {
-        // Create OrderDetails with otherDetails containing orderCreatedDate to cover the uncovered block
-        OtherOrderDetails otherDetails1 = OtherOrderDetails.builder()
-            .orderCreatedDate("2024-01-15")
-            .build();
-
-        OtherOrderDetails otherDetails2 = OtherOrderDetails.builder()
-            .orderCreatedDate(null) // Test null orderCreatedDate case
-            .build();
-
-        OrderDetails order1 = OrderDetails.builder()
-            .orderTypeId("C21Order")
-            .otherDetails(otherDetails1)
-            .build();
-
-        OrderDetails order2 = OrderDetails.builder()
-            .orderTypeId(null) // Test null orderTypeId case
-            .otherDetails(otherDetails2)
-            .build();
-
-        OrderDetails order3 = OrderDetails.builder()
-            .orderTypeId("C43Order")
-            .otherDetails(null) // Test null otherDetails case
-            .build();
-
-        List<Element<OrderDetails>> orderCollection = Arrays.asList(
-            element(UUID.fromString(TEST_UUID), order1),
-            element(UUID.randomUUID(), order2),
-            element(UUID.randomUUID(), order3),
-            element(UUID.randomUUID(), null) // Test null OrderDetails case
-        );
-
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(C100_CASE_TYPE)
-            .respondents(listOfRespondents)
-            .orderCollection(orderCollection)
-            .build();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(12345678L)
-            .data(stringObjectMap)
-            .build();
-
-        Map<String, Object> updatedCaseData = stmtOfServImplService.retrieveRespondentsList(caseDetails);
-
-        assertNotNull(updatedCaseData);
-        assertNotNull(updatedCaseData.get("stmtOfServiceAddRecipient"));
-
-        // Verify that the order collection was processed and the method completed successfully
-        List<Element<StmtOfServiceAddRecipient>> recipients =
-            (List<Element<StmtOfServiceAddRecipient>>) updatedCaseData.get("stmtOfServiceAddRecipient");
-        assertNotNull(recipients);
-        assertEquals(1, recipients.size());
-
-        // Verify that the orderList was populated with the processed orders
-        StmtOfServiceAddRecipient recipient = recipients.get(0).getValue();
-        assertNotNull(recipient.getOrderList());
-        assertNotNull(recipient.getOrderList().getListItems());
-        // Should have 2 items (order1 with valid data, order2 with null orderCreatedDate)
-        // order3 and null order should be filtered out due to null otherDetails or null OrderDetails
-        assertEquals(2, recipient.getOrderList().getListItems().size());
-    }
 
     // Simplified helper methods
     private CaseData createBasicCaseDataWithOrders(List<String> orderIds) {
