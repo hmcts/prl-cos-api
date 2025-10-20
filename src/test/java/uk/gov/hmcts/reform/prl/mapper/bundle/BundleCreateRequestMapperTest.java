@@ -109,8 +109,8 @@ public class BundleCreateRequestMapperTest {
                 DocTypeOtherDocumentsEnum.applicantStatement).restrictCheckboxOtherDocuments(new ArrayList<>()).build());
 
         List<OrderDetails> orders = new ArrayList<>();
-        String redactedUrl = "http://dm-store-aat.service.core-compute-aat.internal/documents/00000000-0000-0000-0000-000000000000";
-        String redactedUrlBinary = "http://dm-store-aat.service.core-compute-aat.internal/documents/00000000-0000-0000-0000-000000000000/binary";
+        String redactedUrl = BundleCreateRequestMapper.REDACTED_DOCUMENT_URL;
+        String redactedUrlBinary = BundleCreateRequestMapper.REDACTED_DOCUMENT_URL_BINARY;
         orders.add(OrderDetails.builder().orderType("orders")
                        .orderDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName(
                            "Order.pdf").build())
@@ -120,7 +120,7 @@ public class BundleCreateRequestMapperTest {
                            "welshOrder.pdf").build())
                        .orderDocumentWelsh(Document.builder().documentUrl(redactedUrl).documentBinaryUrl(
                            redactedUrlBinary).documentFileName(
-                           "*Redacted*").build())
+                           BundleCreateRequestMapper.REDACTED_DOCUMENT_FILE_NAME).build())
                        .build());
 
         List<ResponseDocuments> citizenC7uploadedDocs = new ArrayList<>();
@@ -789,6 +789,53 @@ public class BundleCreateRequestMapperTest {
         Assert.assertNull(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingDateAndTime());
         Assert.assertNull(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingJudgeName());
         Assert.assertNull(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingVenueAddress());
+    }
+
+    @Test
+    public void testAddOrderDocument_includesValidDocument() {
+
+        List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>();
+        hearingDaySchedules.add(HearingDaySchedule.hearingDayScheduleWith().build());
+        List<CaseHearing> caseHearings = new ArrayList<>();
+        caseHearings.add(CaseHearing.caseHearingWith().hmcStatus(CANCELLED).hearingDaySchedule(hearingDaySchedules).build());
+
+        List<OrderDetails> orders = new ArrayList<>();
+        String redactedUrl = BundleCreateRequestMapper.REDACTED_DOCUMENT_URL;
+        String redactedUrlBinary = BundleCreateRequestMapper.REDACTED_DOCUMENT_URL_BINARY;
+        orders.add(OrderDetails.builder().orderType("orders")
+                       .orderDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName(
+                           "Order.pdf").build())
+                       .orderDocument(Document.builder().documentUrl(redactedUrl).documentBinaryUrl(redactedUrlBinary).documentFileName(
+                           "Redacted.pdf").build())
+                       .orderDocumentWelsh(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName(
+                           "welshOrder.pdf").build())
+                       .orderDocumentWelsh(Document.builder().documentUrl(redactedUrl).documentBinaryUrl(
+                           redactedUrlBinary).documentFileName(
+                           BundleCreateRequestMapper.REDACTED_DOCUMENT_FILE_NAME).build())
+                       .build());
+
+
+        CaseData c100CaseData = CaseData.builder()
+            .id(123456789123L)
+            .languagePreferenceWelsh(Yes)
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .orderCollection(ElementUtils.wrapElements(orders))
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .state(State.DECISION_OUTCOME)
+            .finalDocument(Document.builder().documentFileName("C100AppDoc").documentUrl("Url").build())
+            .c1ADocument(Document.builder().documentFileName("c1ADocument").documentUrl("Url").build())
+            .bundleInformation(BundlingInformation.builder().build())
+            .finalWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("finalWelshDoc.pdf").build())
+            .c1AWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("C1AWelshDoc.pdf").build())
+            .reviewDocuments(ReviewDocuments.builder().build())
+            .build();
+
+        BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(c100CaseData,"eventI",
+                                                                                                             Hearings.hearingsWith().caseHearings(caseHearings).build(), "sample.yaml");
+        assertNotNull(bundleCreateRequest);
+
     }
 
 }
