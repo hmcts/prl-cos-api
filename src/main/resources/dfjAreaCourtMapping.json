@@ -1,55 +1,55 @@
 [
   {
     "courtCode": "827534",
-    "courtName": "Aberystwyth",
+    "courtName": "Aberystwyth Justice Centre",
     "courtField": "swanseaDFJCourt",
     "dfjArea": "SWANSEA"
   },
   {
     "courtCode": "700596",
-    "courtName": "Haverfordwest",
+    "courtName": "Haverfordwest County Court and Family Court",
     "courtField": "swanseaDFJCourt",
     "dfjArea": "SWANSEA"
   },
   {
     "courtCode": "390932",
-    "courtName": "Llanelli",
+    "courtName": "Llanelli Justice Centre",
     "courtField": "swanseaDFJCourt",
     "dfjArea": "SWANSEA"
   },
   {
     "courtCode": "846055",
-    "courtName": "Port Talbot",
+    "courtName": "Port Talbot Justice Centre",
     "courtField": "swanseaDFJCourt",
     "dfjArea": "SWANSEA"
   },
   {
     "courtCode": "234946",
-    "courtName": "Swansea",
+    "courtName": "Swansea Civil Justice Centre",
     "courtField": "swanseaDFJCourt",
     "dfjArea": "SWANSEA"
   },
   {
     "courtCode": "478126",
-    "courtName": "Great Grimsby",
+    "courtName": "Great Grimsby Combined Court Centre",
     "courtField": "humbersideDFJCourt",
     "dfjArea": "HUMBERSIDE"
   },
   {
     "courtCode": "195520",
-    "courtName": "Kingston-Upon-Hull",
+    "courtName": "Kingston-upon-Hull Combined Court Centre",
     "courtField": "humbersideDFJCourt",
     "dfjArea": "HUMBERSIDE"
   },
   {
     "courtCode": "816875",
-    "courtName": "Chelmsford",
+    "courtName": "Chelmsford Justice Centre",
     "courtField": "essexAndSuffolkDFJCourt",
     "dfjArea": "ESSEX_AND_SUFFOLK"
   },
   {
     "courtCode": "41047",
-    "courtName": "Wolverhampton",
+    "courtName": "Wolverhampton Combined Court Centre",
     "courtField": "wolverhamptonDFJCourt",
     "dfjArea": "WOLVERHAMPTON"
   }

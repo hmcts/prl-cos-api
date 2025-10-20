@@ -87,7 +87,7 @@ public class FL401SubmitApplicationService {
             String courtSeal = courtSealFinderService.getCourtSeal(regionId);
             caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
             caseDataUpdated.keySet().removeAll(dfjLookupService.getAllCourtFields());
-            caseDataUpdated.putAll(dfjLookupService.getDfjAreaFields(baseLocationId));
+            caseDataUpdated.putAll(dfjLookupService.getDfjAreaFieldsByCourtId(baseLocationId));
             caseData = caseData.toBuilder()
                 .courtSeal(courtSeal)
                 .build();

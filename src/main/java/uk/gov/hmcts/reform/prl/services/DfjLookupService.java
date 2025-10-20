@@ -47,18 +47,34 @@ public class DfjLookupService {
             .collect(toSet());
     }
 
-    public Optional<DfjAreaCourtMapping> getDfjArea(String courtCode) {
+    private Optional<DfjAreaCourtMapping> getDfjArea(String courtCode) {
         return dfjCourtMapping.stream()
             .filter(dfjCourtMap -> dfjCourtMap.getCourtCode().equals(courtCode))
             .findAny();
     }
 
-    public Map<String, String> getDfjAreaFields(String courtCode) {
+    private Optional<DfjAreaCourtMapping> getDfjAreaFromName(String courtName) {
+        return dfjCourtMapping.stream()
+            .filter(dfjCourtMap -> dfjCourtMap.getCourtName().equalsIgnoreCase(courtName))
+            .findAny();
+    }
+
+    public Map<String, String> getDfjAreaFieldsByCourtId(String courtCode) {
         Optional<DfjAreaCourtMapping> dfjArea = getDfjArea(courtCode);
         Map<String, String> dfjAreaFields = new HashMap<>();
         if (dfjArea.isPresent()) {
             dfjAreaFields.put("dfjArea", dfjArea.get().getDfjArea());
             dfjAreaFields.put(dfjArea.get().getCourtField(), courtCode);
+        }
+        return dfjAreaFields;
+    }
+
+    public Map<String, String> getDfjAreaFieldsByCourtName(String name) {
+        Optional<DfjAreaCourtMapping> dfjArea = getDfjAreaFromName(name);
+        Map<String, String> dfjAreaFields = new HashMap<>();
+        if (dfjArea.isPresent()) {
+            dfjAreaFields.put("dfjArea", dfjArea.get().getDfjArea());
+            dfjAreaFields.put(dfjArea.get().getCourtField(), dfjArea.get().getCourtCode());
         }
         return dfjAreaFields;
     }

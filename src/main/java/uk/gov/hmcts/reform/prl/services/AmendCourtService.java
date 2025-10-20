@@ -64,7 +64,7 @@ public class AmendCourtService {
                 String courtSeal = courtSealFinderService.getCourtSeal(courtVenue.get().getRegionId());
                 caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
                 caseDataUpdated.keySet().removeAll(dfjLookupService.getAllCourtFields());
-                caseDataUpdated.putAll(dfjLookupService.getDfjAreaFields(baseLocationId));
+                caseDataUpdated.putAll(dfjLookupService.getDfjAreaFieldsByCourtId(baseLocationId));
             }
             caseDataUpdated.put(STATE_FIELD, caseData.getState());
         }

@@ -44,6 +44,7 @@ import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
@@ -68,6 +69,7 @@ import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
+import uk.gov.hmcts.reform.prl.services.DfjLookupService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeFileUploadService;
@@ -181,6 +183,7 @@ public class CallbackController {
     private final MiamPolicyUpgradeService miamPolicyUpgradeService;
     private final MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
     private final SystemUserService systemUserService;
+    private final DfjLookupService dfjLookupService;
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(summary = "Callback to validate application consideration timetable. Returns error messages if validation fails.")
@@ -391,7 +394,13 @@ public class CallbackController {
                 );
             }
             //Assign default court to all c100 cases for work allocation.
-            caseDataUpdated.put("caseManagementLocation", locationRefDataService.getDefaultCourtForCA(authorisation));
+            CaseManagementLocation location = locationRefDataService.getDefaultCourtForCA(authorisation);
+            caseDataUpdated.put("caseManagementLocation", location);
+
+            // add DFJ filter info based on the Court Name, as the default "court" is likely the CTSC offices
+            caseDataUpdated.keySet().removeAll(dfjLookupService.getAllCourtFields());
+            caseDataUpdated.putAll(dfjLookupService.getDfjAreaFieldsByCourtName(caseData.getCourtName()));
+
             caseDataUpdated.put("caseFlags", Flags.builder().build());
             confidentialityC8RefugeService.processRefugeDocumentsOnSubmit(
                 caseDataUpdated,

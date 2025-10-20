@@ -72,7 +72,7 @@ public class C100IssueCaseService {
                 caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
                 caseDataUpdated.put(COURT_CODE_FROM_FACT, courtId);
                 caseDataUpdated.keySet().removeAll(dfjLookupService.getAllCourtFields());
-                caseDataUpdated.putAll(dfjLookupService.getDfjAreaFields(baseLocationId));
+                caseDataUpdated.putAll(dfjLookupService.getDfjAreaFieldsByCourtId(baseLocationId));
             }
             caseDataUpdated.put("localCourtAdmin", List.of(Element.<LocalCourtAdminEmail>builder().id(UUID.randomUUID())
                                                                .value(LocalCourtAdminEmail
