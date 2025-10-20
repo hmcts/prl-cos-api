@@ -805,6 +805,7 @@ public class BundleCreateRequestMapperTest {
         orders.add(OrderDetails.builder().orderType("orders")
                        .orderDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName(
                            "Order.pdf").build())
+                       .orderDocument(null)
                        .orderDocument(Document.builder().documentUrl(redactedUrl).documentBinaryUrl(redactedUrlBinary).documentFileName(
                            "Redacted.pdf").build())
                        .orderDocumentWelsh(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName(
