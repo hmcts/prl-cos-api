@@ -35,6 +35,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notification.PartyType;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -899,10 +900,11 @@ public class StmtOfServImplService {
     private void updateStatementOfServiceWithServedOrderIds(CaseData caseData,
                                                            Map<String, Object> updatedCaseDataMap,
                                                            List<String> servedOrderIds) {
-        if (caseData.getStatementOfService() == null) {
-            return;
+        StatementOfService statementOfService = caseData.getStatementOfService();
+        if (statementOfService == null) {
+            statementOfService = StatementOfService.builder().build();
         }
-        List<String> existingServedOrderIds = caseData.getStatementOfService().getServedOrderIds();
+        List<String> existingServedOrderIds = statementOfService.getServedOrderIds();
         List<String> allServedOrderIds = new ArrayList<>();
 
         if (CollectionUtils.isNotEmpty(existingServedOrderIds)) {
@@ -913,7 +915,8 @@ public class StmtOfServImplService {
         }
 
         List<String> uniqueServedOrderIds = allServedOrderIds.stream().distinct().toList();
-        updatedCaseDataMap.put("servedOrderIds", uniqueServedOrderIds);
+        statementOfService = statementOfService.toBuilder().servedOrderIds(uniqueServedOrderIds).build();
+        updatedCaseDataMap.put("statementOfService", statementOfService);
     }
 
 }

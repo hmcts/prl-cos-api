@@ -742,8 +742,9 @@ public class StmtOfServImplServiceTest {
         Map<String, Object> result = stmtOfServImplService.handleSosAboutToSubmit(
             createCaseDetails(caseData), authToken);
 
-        @SuppressWarnings("unchecked")
-        List<String> servedOrderIds = (List<String>) result.get("servedOrderIds");
+        assertNotNull(result.get("statementOfService"));
+        StatementOfService statementOfService = (StatementOfService) result.get("statementOfService");
+        List<String> servedOrderIds = statementOfService.getServedOrderIds();
         assertNotNull(servedOrderIds);
         assertEquals(orderIds, servedOrderIds);
     }
@@ -758,8 +759,9 @@ public class StmtOfServImplServiceTest {
         Map<String, Object> result = stmtOfServImplService.handleSosAboutToSubmit(
             createCaseDetails(caseData), authToken);
 
-        @SuppressWarnings("unchecked")
-        List<String> servedOrderIds = (List<String>) result.get("servedOrderIds");
+        assertNotNull(result.get("statementOfService"));
+        StatementOfService statementOfService = (StatementOfService) result.get("statementOfService");
+        List<String> servedOrderIds = statementOfService.getServedOrderIds();
         assertNotNull(servedOrderIds);
         assertEquals(3, servedOrderIds.size()); // Should remove duplicates
         assertTrue(servedOrderIds.containsAll(Arrays.asList("order-1", "order-2", "order-3")));
@@ -1099,8 +1101,7 @@ public class StmtOfServImplServiceTest {
                                                        "Test Recipient").build())
                                                    .build())
                         .stmtOfServiceDocument(Document.builder().documentFileName("test.pdf").build())
-                        .build())
-        );
+                        .build()));
 
         StatementOfService.StatementOfServiceBuilder sosBuilder = StatementOfService.builder()
             .stmtOfServiceWhatWasServed(StatementOfServiceWhatWasServed.statementOfServiceOrder)
@@ -1131,8 +1132,7 @@ public class StmtOfServImplServiceTest {
                                                        "Test Recipient").build())
                                                    .build())
                         .stmtOfServiceDocument(Document.builder().documentFileName("test.pdf").build())
-                        .build())
-        );
+                        .build()));
 
         return CaseData.builder()
             .caseTypeOfApplication(caseType)
