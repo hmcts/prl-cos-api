@@ -136,6 +136,10 @@ public class StmtOfServImplService {
             .equals(caseData.getStatementOfService().getStmtOfServiceWhatWasServed())) {
             //Orders
             handleSosForOrders(authorisation, caseData, caseDataUpdateMap);
+
+            // Log the servedOrderIds after they've been saved to caseData for QA verification
+            List<String> savedOrderIds = (List<String>) caseDataUpdateMap.get("servedOrderIds");
+            log.info("Statement of service order IDs saved to caseData: {}", savedOrderIds);
         }
 
         caseDataUpdateMap.put("stmtOfServiceAddRecipient", null);
@@ -205,7 +209,6 @@ public class StmtOfServImplService {
             .stream()
             .map(Element::getValue)
             .forEach(sosRecipient -> {
-                //Collect served order IDs from the recipient's order list BEFORE updating
                 if (sosRecipient.getOrderList() != null
                     && CollectionUtils.isNotEmpty(sosRecipient.getOrderList().getValue())) {
                     sosRecipient.getOrderList().getValue().stream()
@@ -226,11 +229,12 @@ public class StmtOfServImplService {
             sosRecipients.addAll(caseData.getStatementOfService().getStmtOfServiceForOrder());
         }
 
-        //Add existing served order IDs if present
         if (caseData.getStatementOfService() != null
             && CollectionUtils.isNotEmpty(caseData.getStatementOfService().getServedOrderIds())) {
             servedOrderIds.addAll(caseData.getStatementOfService().getServedOrderIds());
         }
+
+        log.info("Statement of service order IDs being stored: {}", servedOrderIds);
 
         caseDataMap.put("stmtOfServiceForOrder", sosRecipients);
         caseDataMap.put("servedOrderIds", servedOrderIds);
@@ -341,7 +345,6 @@ public class StmtOfServImplService {
                                                    String selectedPartyId,
                                                    String selectedPartyName) {
 
-        //Extract selected order IDs from orderList before clearing it
         List<String> selectedOrderIds = null;
         if (recipient.getOrderList() != null
             && CollectionUtils.isNotEmpty(recipient.getOrderList().getValue())) {
@@ -398,7 +401,6 @@ public class StmtOfServImplService {
         }
         return respondentListItems;
     }
-
 
     public ServedApplicationDetails checkAndServeRespondentPacksPersonalService(CaseData caseData, String authorization) {
         SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getUnServedRespondentPack();
