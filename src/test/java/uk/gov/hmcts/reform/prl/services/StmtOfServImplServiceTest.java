@@ -1056,7 +1056,7 @@ public class StmtOfServImplServiceTest {
 
         assertNotNull(result);
         assertNotNull(result.get("finalServedApplicationDetailsList"));
-        assertNull(result.get("unServedRespondentPack")); // Should be cleared after processing
+        assertNull(result.get("unServedRespondentPack"));
     }
 
     @Test
@@ -1072,11 +1072,10 @@ public class StmtOfServImplServiceTest {
             .respondentDynamicList(DynamicList.builder()
                                        .value(DynamicListElement.builder().code(TEST_UUID).label("Test Recipient").build())
                                        .build())
-            .orderList(orderList) // This should be cleared by the service even for application packs
+            .orderList(orderList)
             .stmtOfServiceDocument(Document.builder().documentFileName("test.pdf").build())
             .build();
 
-        // Create test case data for APPLICATION PACKS (not orders)
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .statementOfService(StatementOfService.builder()
@@ -1148,7 +1147,7 @@ public class StmtOfServImplServiceTest {
             .respondentDynamicList(DynamicList.builder()
                                        .value(DynamicListElement.builder().code(TEST_UUID).label("Test Recipient").build())
                                        .build())
-            .orderList(orderList) // This should be cleared by the service
+            .orderList(orderList)
             .stmtOfServiceDocument(Document.builder().documentFileName("test.pdf").build())
             .build();
 
@@ -1279,7 +1278,7 @@ public class StmtOfServImplServiceTest {
             .statementOfService(StatementOfService.builder()
                                     .stmtOfServiceWhatWasServed(StatementOfServiceWhatWasServed.statementOfServiceOrder)
                                     .stmtOfServiceAddRecipient(Arrays.asList(element(recipient)))
-                                    .servedOrderIds(Arrays.asList("order-1", "order-2")) // Existing served order IDs
+                                    .servedOrderIds(Arrays.asList("order-1", "order-2"))
                                     .build())
             .orderCollection(Arrays.asList(element(
                 UUID.fromString(TEST_UUID), OrderDetails.builder()
@@ -1321,7 +1320,7 @@ public class StmtOfServImplServiceTest {
             .respondentDynamicList(DynamicList.builder()
                                        .value(DynamicListElement.builder().code(TEST_UUID).label("Test Recipient").build())
                                        .build())
-            .orderList(null) // No orders selected
+            .orderList(null)
             .stmtOfServiceDocument(Document.builder().documentFileName("test.pdf").build())
             .build();
 
@@ -1571,5 +1570,209 @@ public class StmtOfServImplServiceTest {
         stmtOfServImplService.retrieveRespondentsList(caseDetails);
 
         verify(dynamicMultiSelectListService, times(1)).getOrdersAsDynamicMultiSelectList(caseData);
+    }
+
+    @Test
+    public void testRetrieveRespondentsList_IncludesApplicantsAndRespondentsForC100() {
+        PartyDetails applicant1 = PartyDetails.builder()
+            .firstName("ApplicantFirst1")
+            .lastName("ApplicantLast1")
+            .partyId(UUID.randomUUID())
+            .build();
+
+        PartyDetails applicant2 = PartyDetails.builder()
+            .firstName("ApplicantFirst2")
+            .lastName("ApplicantLast2")
+            .partyId(UUID.randomUUID())
+            .build();
+
+        List<Element<PartyDetails>> applicants = Arrays.asList(
+            element(UUID.randomUUID(), applicant1),
+            element(UUID.randomUUID(), applicant2)
+        );
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(applicants)
+            .respondents(listOfRespondents)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule()));
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData))
+            .thenReturn(DynamicMultiSelectList.builder().listItems(new ArrayList<>()).build());
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .data(stringObjectMap)
+            .build();
+
+        Map<String, Object> result = stmtOfServImplService.retrieveRespondentsList(caseDetails);
+
+        @SuppressWarnings("unchecked")
+        List<Element<StmtOfServiceAddRecipient>> recipients =
+            (List<Element<StmtOfServiceAddRecipient>>) result.get("stmtOfServiceAddRecipient");
+
+        assertNotNull("Recipients should not be null", recipients);
+        assertFalse("Recipients list should not be empty", recipients.isEmpty());
+
+        StmtOfServiceAddRecipient recipient = recipients.get(0).getValue();
+        DynamicList respondentDynamicList = recipient.getRespondentDynamicList();
+
+        assertNotNull("Respondent dynamic list should not be null", respondentDynamicList);
+        List<DynamicListElement> listItems = respondentDynamicList.getListItems();
+
+        assertEquals("Should have 5 items (2 applicants + 2 respondents + All Respondents)",
+            5, listItems.size());
+
+        assertEquals("First item should be applicant 1",
+            applicant1.getLabelForDynamicList() + " (Applicant 1)", listItems.get(0).getLabel());
+        assertEquals("Second item should be applicant 2",
+            applicant2.getLabelForDynamicList() + " (Applicant 2)", listItems.get(1).getLabel());
+
+        assertEquals("Third item should be respondent 1",
+            respondent.getLabelForDynamicList() + " (Respondent 1)", listItems.get(2).getLabel());
+        assertEquals("Fourth item should be respondent 2",
+            listOfRespondents.get(1).getValue().getLabelForDynamicList() + " (Respondent 2)",
+            listItems.get(3).getLabel());
+
+        assertEquals("Last item should be All Respondents",
+            ALL_RESPONDENTS, listItems.get(4).getLabel());
+    }
+
+    @Test
+    public void testRetrieveRespondentsList_IncludesApplicantAndRespondentForFL401() {
+        PartyDetails applicantFL401 = PartyDetails.builder()
+            .firstName("ApplicantFirst")
+            .lastName("ApplicantLast")
+            .partyId(UUID.randomUUID())
+            .build();
+
+        PartyDetails respondentFL401 = PartyDetails.builder()
+            .firstName("RespondentFirst")
+            .lastName("RespondentLast")
+            .partyId(UUID.randomUUID())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(applicantFL401)
+            .respondentsFL401(respondentFL401)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule()));
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData))
+            .thenReturn(DynamicMultiSelectList.builder().listItems(new ArrayList<>()).build());
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .data(stringObjectMap)
+            .build();
+
+        Map<String, Object> result = stmtOfServImplService.retrieveRespondentsList(caseDetails);
+
+        @SuppressWarnings("unchecked")
+        List<Element<StmtOfServiceAddRecipient>> recipients =
+            (List<Element<StmtOfServiceAddRecipient>>) result.get("stmtOfServiceAddRecipient");
+
+        assertNotNull("Recipients should not be null", recipients);
+        assertFalse("Recipients list should not be empty", recipients.isEmpty());
+
+        StmtOfServiceAddRecipient recipient = recipients.get(0).getValue();
+        DynamicList respondentDynamicList = recipient.getRespondentDynamicList();
+
+        assertNotNull("Respondent dynamic list should not be null", respondentDynamicList);
+        List<DynamicListElement> listItems = respondentDynamicList.getListItems();
+
+        assertEquals("Should have 2 items (1 applicant + 1 respondent)", 2, listItems.size());
+
+        assertEquals("First item should be applicant",
+            applicantFL401.getLabelForDynamicList() + " (Applicant)", listItems.get(0).getLabel());
+        assertEquals("First item code should match applicant ID",
+            applicantFL401.getPartyId().toString(), listItems.get(0).getCode());
+
+        assertEquals("Second item should be respondent",
+            respondentFL401.getLabelForDynamicList() + " (Respondent)", listItems.get(1).getLabel());
+        assertEquals("Second item code should match respondent ID",
+            respondentFL401.getPartyId().toString(), listItems.get(1).getCode());
+    }
+
+    @Test
+    public void testRetrieveRespondentsList_HandlesNullApplicantsForC100() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(null)
+            .respondents(listOfRespondents)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule()));
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData))
+            .thenReturn(DynamicMultiSelectList.builder().listItems(new ArrayList<>()).build());
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .data(stringObjectMap)
+            .build();
+
+        Map<String, Object> result = stmtOfServImplService.retrieveRespondentsList(caseDetails);
+
+        @SuppressWarnings("unchecked")
+        List<Element<StmtOfServiceAddRecipient>> recipients =
+            (List<Element<StmtOfServiceAddRecipient>>) result.get("stmtOfServiceAddRecipient");
+
+        StmtOfServiceAddRecipient recipient = recipients.get(0).getValue();
+        DynamicList respondentDynamicList = recipient.getRespondentDynamicList();
+
+        assertNotNull("Respondent dynamic list should not be null", respondentDynamicList);
+        List<DynamicListElement> listItems = respondentDynamicList.getListItems();
+
+        assertEquals("Should have 3 items (2 respondents + All Respondents)", 3, listItems.size());
+    }
+
+    @Test
+    public void testRetrieveRespondentsList_HandlesNullApplicantForFL401() {
+        PartyDetails respondentFL401 = PartyDetails.builder()
+            .firstName("RespondentFirst")
+            .lastName("RespondentLast")
+            .partyId(UUID.randomUUID())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(null)
+            .respondentsFL401(respondentFL401)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule()));
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData))
+            .thenReturn(DynamicMultiSelectList.builder().listItems(new ArrayList<>()).build());
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .data(stringObjectMap)
+            .build();
+
+        Map<String, Object> result = stmtOfServImplService.retrieveRespondentsList(caseDetails);
+
+        @SuppressWarnings("unchecked")
+        List<Element<StmtOfServiceAddRecipient>> recipients =
+            (List<Element<StmtOfServiceAddRecipient>>) result.get("stmtOfServiceAddRecipient");
+
+        StmtOfServiceAddRecipient recipient = recipients.get(0).getValue();
+        DynamicList respondentDynamicList = recipient.getRespondentDynamicList();
+
+        assertNotNull("Respondent dynamic list should not be null", respondentDynamicList);
+        List<DynamicListElement> listItems = respondentDynamicList.getListItems();
+
+        assertEquals("Should have 1 item (respondent only)", 1, listItems.size());
+        assertEquals("Item should be respondent",
+            respondentFL401.getLabelForDynamicList() + " (Respondent)", listItems.get(0).getLabel());
     }
 }

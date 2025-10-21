@@ -270,10 +270,19 @@ public class StmtOfServImplService {
                 );
 
                 StmtOfServiceAddRecipient finalRecipient = recipient;
+
                 List<Element<PartyDetails>> partiesServed = caseData.getRespondents().stream()
                     .filter(respondent -> respondent.getId().toString().equals(
                         finalRecipient.getRespondentDynamicList().getValue().getCode()))
                     .toList();
+
+                if (partiesServed.isEmpty() && CollectionUtils.isNotEmpty(caseData.getApplicants())) {
+                    partiesServed = caseData.getApplicants().stream()
+                        .filter(applicant -> applicant.getId().toString().equals(
+                            finalRecipient.getRespondentDynamicList().getValue().getCode()))
+                        .toList();
+                }
+
                 //PRL-6122
                 updateOrdersServedParties(caseData, orderCollection, ManageOrdersUtils.getServedParties(partiesServed));
             }
@@ -283,9 +292,24 @@ public class StmtOfServImplService {
                                      recipient.getRespondentDynamicList().getValue().getCode(),
                                      recipient.getRespondentDynamicList().getValue().getLabel()
             );
+
+            // Check if selected party is respondent or applicant
+            String selectedPartyId = recipient.getRespondentDynamicList().getValue().getCode();
+            PartyDetails selectedParty = null;
+
+            if (caseData.getRespondentsFL401() != null
+                && caseData.getRespondentsFL401().getPartyId().toString().equals(selectedPartyId)) {
+                selectedParty = caseData.getRespondentsFL401();
+            } else if (caseData.getApplicantsFL401() != null
+                       && caseData.getApplicantsFL401().getPartyId().toString().equals(selectedPartyId)) {
+                selectedParty = caseData.getApplicantsFL401();
+            }
+
             //PRL-6122
-            updateOrdersServedParties(caseData, orderCollection,
-                                      List.of(ManageOrdersUtils.getServedParty(caseData.getRespondentsFL401())));
+            if (selectedParty != null) {
+                updateOrdersServedParties(caseData, orderCollection,
+                                          List.of(ManageOrdersUtils.getServedParty(selectedParty)));
+            }
         }
         return recipient;
     }
@@ -384,22 +408,46 @@ public class StmtOfServImplService {
     }
 
     private List<DynamicListElement> getRespondentsList(CaseData caseData) {
-        List<DynamicListElement> respondentListItems = new ArrayList<>();
+        List<DynamicListElement> partyListItems = new ArrayList<>();
         if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
-            IncrementalInteger i = new IncrementalInteger(1);
+            // Add applicants
+            if (CollectionUtils.isNotEmpty(caseData.getApplicants())) {
+                IncrementalInteger applicantIndex = new IncrementalInteger(1);
+                caseData.getApplicants()
+                    .forEach(applicant ->
+                                 partyListItems.add(DynamicListElement.builder()
+                                                        .code(applicant.getId().toString())
+                                                        .label(applicant.getValue().getLabelForDynamicList()
+                                                                   + " (Applicant " + applicantIndex.getAndIncrement() + ")")
+                                                        .build()));
+            }
+            // Add respondents
+            IncrementalInteger respondentIndex = new IncrementalInteger(1);
             caseData.getRespondents()
                 .forEach(respondent ->
-                             respondentListItems.add(DynamicListElement.builder().code(respondent.getId().toString())
-                                                         .label(respondent.getValue().getLabelForDynamicList()
-                                                                    + " (Respondent " + i.getAndIncrement() + ")").build()));
-            respondentListItems.add(DynamicListElement.builder().code(ALL_RESPONDENTS).label(ALL_RESPONDENTS).build());
+                             partyListItems.add(DynamicListElement.builder()
+                                                    .code(respondent.getId().toString())
+                                                    .label(respondent.getValue().getLabelForDynamicList()
+                                                               + " (Respondent " + respondentIndex.getAndIncrement() + ")")
+                                                    .build()));
+            partyListItems.add(DynamicListElement.builder().code(ALL_RESPONDENTS).label(ALL_RESPONDENTS).build());
         } else if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
-            String name = caseData.getRespondentsFL401().getLabelForDynamicList() + " (Respondent)";
-            respondentListItems.add(DynamicListElement.builder()
-                                        .code(caseData.getRespondentsFL401().getPartyId().toString())
-                                        .label(name).build());
+            // Add applicant
+            if (caseData.getApplicantsFL401() != null) {
+                String applicantName = caseData.getApplicantsFL401().getLabelForDynamicList() + " (Applicant)";
+                partyListItems.add(DynamicListElement.builder()
+                                       .code(caseData.getApplicantsFL401().getPartyId().toString())
+                                       .label(applicantName)
+                                       .build());
+            }
+            // Add respondent
+            String respondentName = caseData.getRespondentsFL401().getLabelForDynamicList() + " (Respondent)";
+            partyListItems.add(DynamicListElement.builder()
+                                   .code(caseData.getRespondentsFL401().getPartyId().toString())
+                                   .label(respondentName)
+                                   .build());
         }
-        return respondentListItems;
+        return partyListItems;
     }
 
     public ServedApplicationDetails checkAndServeRespondentPacksPersonalService(CaseData caseData, String authorization) {
