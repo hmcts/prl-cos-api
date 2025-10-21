@@ -55,6 +55,8 @@ public class AcroCaseDataService {
     private final AuthTokenGenerator authTokenGenerator;
     @Value("${acro.search-case-type-id}")
     private String searchCaseTypeId;
+    @Value("${ccd.elastic-search-api.result-size}")
+    private String ccdElasticSearchApiResultSize;
     private final SystemUserService systemUserService;
     private final HearingService hearingService;
     private final AcroDatesService acroDatesService;
@@ -64,7 +66,7 @@ public class AcroCaseDataService {
         maxAttempts = 4,
         backoff = @Backoff(delay = 2000, multiplier = 2)
     )
-    public AcroResponse getCaseData(String authorisation) throws IOException {
+    public AcroResponse getNonMolestationData(String authorisation) throws IOException {
 
         AcroResponse acroResponse;
 
@@ -154,7 +156,8 @@ public class AcroCaseDataService {
             ))
             .build();
         Query query = Query.builder().bool(bool).build();
-        return QueryParam.builder().query(query).dataToReturn(fetchFieldsRequiredForAcro()).build();
+        return QueryParam.builder().query(query).size(ccdElasticSearchApiResultSize)
+            .dataToReturn(fetchFieldsRequiredForAcro()).build();
     }
 
     private List<String> fetchFieldsRequiredForAcro() {
@@ -169,6 +172,7 @@ public class AcroCaseDataService {
             "data.respondentsFL401",
             "data.respondents",
             "data.applicantsConfidentialDetails",
+            "data.respondentConfidentialDetails",
             "data.orderCollection",
             "data.caseManagementLocation",
             "data.stmtOfServiceForOrder",
