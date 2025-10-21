@@ -194,12 +194,21 @@ public class StmtOfServImplService {
         log.info("SOS for Orders");
         List<Element<StmtOfServiceAddRecipient>> sosRecipients = new ArrayList<>();
         List<Element<OrderDetails>> orderCollection = caseData.getOrderCollection();
+        List<String> servedOrderIds = new ArrayList<>();
 
         //Get all sos recipients
         caseData.getStatementOfService().getStmtOfServiceAddRecipient()
             .stream()
             .map(Element::getValue)
             .forEach(sosRecipient -> {
+                //Collect served order IDs from the recipient's order list BEFORE updating
+                if (sosRecipient.getOrderList() != null
+                    && CollectionUtils.isNotEmpty(sosRecipient.getOrderList().getValue())) {
+                    sosRecipient.getOrderList().getValue().stream()
+                        .map(element -> element.getCode())
+                        .forEach(servedOrderIds::add);
+                }
+
                 sosRecipient = getUpdatedSosRecipient(authorisation, caseData, sosRecipient, orderCollection);
 
                 sosRecipients.add(element(sosRecipient.toBuilder()
@@ -212,7 +221,15 @@ public class StmtOfServImplService {
             && CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceForOrder())) {
             sosRecipients.addAll(caseData.getStatementOfService().getStmtOfServiceForOrder());
         }
+
+        //Add existing served order IDs if present
+        if (caseData.getStatementOfService() != null
+            && CollectionUtils.isNotEmpty(caseData.getStatementOfService().getServedOrderIds())) {
+            servedOrderIds.addAll(caseData.getStatementOfService().getServedOrderIds());
+        }
+
         caseDataMap.put("stmtOfServiceForOrder", sosRecipients);
+        caseDataMap.put("servedOrderIds", servedOrderIds);
         //PRL-6122
         caseDataMap.put(ORDER_COLLECTION, orderCollection);
     }

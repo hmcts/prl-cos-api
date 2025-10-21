@@ -1231,4 +1231,164 @@ public class StmtOfServImplServiceTest {
             );
         });
     }
+
+    @Test
+    public void testHandleSosForOrders_ServedOrderIdsAreCollectedCorrectly() {
+        DynamicMultiSelectList orderList = DynamicMultiSelectList.builder()
+            .value(Arrays.asList(
+                DynamicMultiselectListElement.builder().code("order-1").label("Test Order 1").build(),
+                DynamicMultiselectListElement.builder().code("order-2").label("Test Order 2").build()
+            ))
+            .build();
+
+        StmtOfServiceAddRecipient recipient = StmtOfServiceAddRecipient.builder()
+            .respondentDynamicList(DynamicList.builder()
+                                       .value(DynamicListElement.builder().code(TEST_UUID).label("Test Recipient").build())
+                                       .build())
+            .orderList(orderList)
+            .stmtOfServiceDocument(Document.builder().documentFileName("test.pdf").build())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .statementOfService(StatementOfService.builder()
+                                    .stmtOfServiceWhatWasServed(StatementOfServiceWhatWasServed.statementOfServiceOrder)
+                                    .stmtOfServiceAddRecipient(Arrays.asList(element(recipient)))
+                                    .build())
+            .orderCollection(Arrays.asList(element(
+                UUID.fromString(TEST_UUID), OrderDetails.builder()
+                    .sosStatus("PENDING")
+                    .serveOrderDetails(ServeOrderDetails.builder()
+                                           .servedParties(Arrays.asList(element(ServedParties.builder().build())))
+                                           .build())
+                    .build()
+            )))
+            .respondents(listOfRespondents)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(Mockito.any())).thenReturn(UserDetails.builder().build());
+        when(manageDocumentsService.getLoggedInUserType(anyString())).thenReturn(List.of(PrlAppsConstants.COURT_ADMIN_ROLE));
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .data(stringObjectMap)
+            .build();
+
+        Map<String, Object> result = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
+
+        assertNotNull("servedOrderIds should be populated", result.get("servedOrderIds"));
+
+        @SuppressWarnings("unchecked")
+        List<String> servedOrderIds = (List<String>) result.get("servedOrderIds");
+
+        assertEquals("Should have 2 served order IDs", 2, servedOrderIds.size());
+        assertEquals("First order ID should be order-1", "order-1", servedOrderIds.get(0));
+        assertEquals("Second order ID should be order-2", "order-2", servedOrderIds.get(1));
+    }
+
+    @Test
+    public void testHandleSosForOrders_ServedOrderIdsPreserveExistingIds() {
+        DynamicMultiSelectList orderList = DynamicMultiSelectList.builder()
+            .value(Arrays.asList(
+                DynamicMultiselectListElement.builder().code("order-3").label("Test Order 3").build()
+            ))
+            .build();
+
+        StmtOfServiceAddRecipient recipient = StmtOfServiceAddRecipient.builder()
+            .respondentDynamicList(DynamicList.builder()
+                                       .value(DynamicListElement.builder().code(TEST_UUID).label("Test Recipient").build())
+                                       .build())
+            .orderList(orderList)
+            .stmtOfServiceDocument(Document.builder().documentFileName("test.pdf").build())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .statementOfService(StatementOfService.builder()
+                                    .stmtOfServiceWhatWasServed(StatementOfServiceWhatWasServed.statementOfServiceOrder)
+                                    .stmtOfServiceAddRecipient(Arrays.asList(element(recipient)))
+                                    .servedOrderIds(Arrays.asList("order-1", "order-2")) // Existing served order IDs
+                                    .build())
+            .orderCollection(Arrays.asList(element(
+                UUID.fromString(TEST_UUID), OrderDetails.builder()
+                    .sosStatus("PENDING")
+                    .serveOrderDetails(ServeOrderDetails.builder()
+                                           .servedParties(Arrays.asList(element(ServedParties.builder().build())))
+                                           .build())
+                    .build()
+            )))
+            .respondents(listOfRespondents)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(Mockito.any())).thenReturn(UserDetails.builder().build());
+        when(manageDocumentsService.getLoggedInUserType(anyString())).thenReturn(List.of(PrlAppsConstants.COURT_ADMIN_ROLE));
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .data(stringObjectMap)
+            .build();
+
+        Map<String, Object> result = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
+
+        assertNotNull("servedOrderIds should be populated", result.get("servedOrderIds"));
+
+        @SuppressWarnings("unchecked")
+        List<String> servedOrderIds = (List<String>) result.get("servedOrderIds");
+
+        assertEquals("Should have 3 served order IDs (1 new + 2 existing)", 3, servedOrderIds.size());
+        assertEquals("First order ID should be new order-3", "order-3", servedOrderIds.get(0));
+        assertEquals("Second order ID should be existing order-1", "order-1", servedOrderIds.get(1));
+        assertEquals("Third order ID should be existing order-2", "order-2", servedOrderIds.get(2));
+    }
+
+    @Test
+    public void testHandleSosForOrders_ServedOrderIdsEmptyWhenNoOrdersSelected() {
+        StmtOfServiceAddRecipient recipient = StmtOfServiceAddRecipient.builder()
+            .respondentDynamicList(DynamicList.builder()
+                                       .value(DynamicListElement.builder().code(TEST_UUID).label("Test Recipient").build())
+                                       .build())
+            .orderList(null) // No orders selected
+            .stmtOfServiceDocument(Document.builder().documentFileName("test.pdf").build())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .statementOfService(StatementOfService.builder()
+                                    .stmtOfServiceWhatWasServed(StatementOfServiceWhatWasServed.statementOfServiceOrder)
+                                    .stmtOfServiceAddRecipient(Arrays.asList(element(recipient)))
+                                    .build())
+            .orderCollection(Arrays.asList(element(
+                UUID.fromString(TEST_UUID), OrderDetails.builder()
+                    .sosStatus("PENDING")
+                    .serveOrderDetails(ServeOrderDetails.builder()
+                                           .servedParties(Arrays.asList(element(ServedParties.builder().build())))
+                                           .build())
+                    .build()
+            )))
+            .respondents(listOfRespondents)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(Mockito.any())).thenReturn(UserDetails.builder().build());
+        when(manageDocumentsService.getLoggedInUserType(anyString())).thenReturn(List.of(PrlAppsConstants.COURT_ADMIN_ROLE));
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .data(stringObjectMap)
+            .build();
+
+        Map<String, Object> result = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
+
+        assertNotNull("servedOrderIds should be populated", result.get("servedOrderIds"));
+
+        @SuppressWarnings("unchecked")
+        List<String> servedOrderIds = (List<String>) result.get("servedOrderIds");
+
+        assertEquals("Should have 0 served order IDs when no orders selected", 0, servedOrderIds.size());
+    }
 }
