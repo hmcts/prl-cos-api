@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,6 +40,7 @@ import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
@@ -93,6 +95,9 @@ public class StmtOfServImplServiceTest {
 
     @Mock
     private ManageDocumentsService manageDocumentsService;
+
+    @Mock
+    private DynamicMultiSelectListService dynamicMultiSelectListService;
 
     private DynamicList dynamicList1;
     private PartyDetails respondent;
@@ -177,6 +182,8 @@ public class StmtOfServImplServiceTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(Mockito.any(CaseData.class)))
+            .thenReturn(DynamicMultiSelectList.builder().listItems(new ArrayList<>()).build());
 
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
@@ -229,6 +236,8 @@ public class StmtOfServImplServiceTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(Mockito.any(CaseData.class)))
+            .thenReturn(DynamicMultiSelectList.builder().listItems(new ArrayList<>()).build());
 
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
@@ -761,7 +770,7 @@ public class StmtOfServImplServiceTest {
     }
 
     @Test
-    public void testcitizenSosSubmissionC100() {
+    public void testCitizenSosSubmissionC100() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .serviceOfApplication(ServiceOfApplication.builder()
@@ -816,7 +825,7 @@ public class StmtOfServImplServiceTest {
     }
 
     @Test
-    public void testcitizenSosSubmissionFl401() {
+    public void testCitizenSosSubmissionFl401() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .serviceOfApplication(ServiceOfApplication.builder()
@@ -979,43 +988,6 @@ public class StmtOfServImplServiceTest {
             .submitAllTabsUpdate(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
     }
 
-
-    // Simplified helper methods
-    private CaseData createBasicCaseDataWithOrders(List<String> orderIds) {
-        return createBasicCaseDataWithOrders(orderIds, null);
-    }
-
-    private CaseData createBasicCaseDataWithOrders(List<String> orderIds, List<String> existingOrderIds) {
-        List<Element<StmtOfServiceAddRecipient>> recipients = Arrays.asList(
-            element(StmtOfServiceAddRecipient.builder()
-                        .orderList(DynamicMultiSelectList.builder()
-                                       .value(orderIds.stream()
-                                                  .map(id -> DynamicMultiselectListElement.builder().code(id).label(
-                                                      "Order " + id).build())
-                                                  .toList())
-                                       .build())
-                        .respondentDynamicList(DynamicList.builder()
-                                                   .value(DynamicListElement.builder().code(TEST_UUID).label(
-                                                       "Test Recipient").build())
-                                                   .build())
-                        .stmtOfServiceDocument(Document.builder().documentFileName("test.pdf").build())
-                        .build()));
-
-        StatementOfService.StatementOfServiceBuilder sosBuilder = StatementOfService.builder()
-            .stmtOfServiceWhatWasServed(StatementOfServiceWhatWasServed.statementOfServiceOrder)
-            .stmtOfServiceAddRecipient(recipients);
-
-        if (existingOrderIds != null) {
-            sosBuilder.servedOrderIds(existingOrderIds);
-        }
-
-        return CaseData.builder()
-            .caseTypeOfApplication(C100_CASE_TYPE)
-            .statementOfService(sosBuilder.build())
-            .respondents(listOfRespondents)
-            .build();
-    }
-
     private CaseData createTestScenarioForApplicationPacks(String caseType, List<String> orderIds) {
         List<Element<StmtOfServiceAddRecipient>> recipients = Arrays.asList(
             element(StmtOfServiceAddRecipient.builder()
@@ -1080,10 +1052,8 @@ public class StmtOfServImplServiceTest {
         when(manageDocumentsService.getLoggedInUserType(anyString())).thenReturn(List.of(PrlAppsConstants.COURT_ADMIN_ROLE));
         when(userService.getUserDetails(Mockito.any())).thenReturn(UserDetails.builder().build());
 
-        // Execute
         Map<String, Object> result = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
 
-        // Verify - should process finalServedApplicationDetailsList when all conditions pass
         assertNotNull(result);
         assertNotNull(result.get("finalServedApplicationDetailsList"));
         assertNull(result.get("unServedRespondentPack")); // Should be cleared after processing
@@ -1199,7 +1169,7 @@ public class StmtOfServImplServiceTest {
             .respondents(listOfRespondents)
             .build();
 
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule()));
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(Mockito.any())).thenReturn(UserDetails.builder().build());
         when(manageDocumentsService.getLoggedInUserType(anyString())).thenReturn(List.of(PrlAppsConstants.COURT_ADMIN_ROLE));
@@ -1266,7 +1236,7 @@ public class StmtOfServImplServiceTest {
             .respondents(listOfRespondents)
             .build();
 
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule()));
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(Mockito.any())).thenReturn(UserDetails.builder().build());
         when(manageDocumentsService.getLoggedInUserType(anyString())).thenReturn(List.of(PrlAppsConstants.COURT_ADMIN_ROLE));
@@ -1390,5 +1360,216 @@ public class StmtOfServImplServiceTest {
         List<String> servedOrderIds = (List<String>) result.get("servedOrderIds");
 
         assertEquals("Should have 0 served order IDs when no orders selected", 0, servedOrderIds.size());
+    }
+
+    @Test
+    public void testHandleSosForOrders_SelectedOrderIdsPreservedInRecipient() {
+        DynamicMultiSelectList orderList = DynamicMultiSelectList.builder()
+            .value(Arrays.asList(
+                DynamicMultiselectListElement.builder().code("order-1").label("Test Order 1").build(),
+                DynamicMultiselectListElement.builder().code("order-2").label("Test Order 2").build()
+            ))
+            .build();
+
+        StmtOfServiceAddRecipient recipient = StmtOfServiceAddRecipient.builder()
+            .respondentDynamicList(DynamicList.builder()
+                                       .value(DynamicListElement.builder().code(TEST_UUID).label("Test Recipient").build())
+                                       .build())
+            .orderList(orderList)
+            .stmtOfServiceDocument(Document.builder().documentFileName("test.pdf").build())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .statementOfService(StatementOfService.builder()
+                                    .stmtOfServiceWhatWasServed(StatementOfServiceWhatWasServed.statementOfServiceOrder)
+                                    .stmtOfServiceAddRecipient(Arrays.asList(element(recipient)))
+                                    .build())
+            .orderCollection(Arrays.asList(element(
+                UUID.fromString(TEST_UUID), OrderDetails.builder()
+                    .sosStatus("PENDING")
+                    .serveOrderDetails(ServeOrderDetails.builder()
+                                           .servedParties(Arrays.asList(element(ServedParties.builder().build())))
+                                           .build())
+                    .build()
+            )))
+            .respondents(listOfRespondents)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule()));
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(Mockito.any())).thenReturn(UserDetails.builder().build());
+        when(manageDocumentsService.getLoggedInUserType(anyString())).thenReturn(List.of(PrlAppsConstants.COURT_ADMIN_ROLE));
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .data(stringObjectMap)
+            .build();
+
+        Map<String, Object> result = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
+
+        assertNotNull("stmtOfServiceForOrder should be populated", result.get("stmtOfServiceForOrder"));
+
+        @SuppressWarnings("unchecked")
+        List<Element<StmtOfServiceAddRecipient>> processedRecipients =
+            (List<Element<StmtOfServiceAddRecipient>>) result.get("stmtOfServiceForOrder");
+
+        assertFalse("Processed recipients list should not be empty", processedRecipients.isEmpty());
+
+        StmtOfServiceAddRecipient processedRecipient = processedRecipients.get(0).getValue();
+
+        assertNull(
+            "orderList should be cleared to prevent CCD validation error",
+            processedRecipient.getOrderList()
+        );
+
+        assertNotNull(
+            "selectedOrderIds should be populated for XUI display",
+            processedRecipient.getSelectedOrderIds()
+        );
+
+        assertEquals(
+            "Should have 2 selected order IDs",
+            2,
+            processedRecipient.getSelectedOrderIds().size()
+        );
+
+        assertEquals(
+            "First order ID should be order-1",
+            "order-1",
+            processedRecipient.getSelectedOrderIds().get(0)
+        );
+
+        assertEquals(
+            "Second order ID should be order-2",
+            "order-2",
+            processedRecipient.getSelectedOrderIds().get(1)
+        );
+    }
+
+    @Test
+    public void testRetrieveRespondentsList_PopulatesOrderListWithMultipleOrders() {
+        UUID order1Id = UUID.randomUUID();
+        UUID order2Id = UUID.randomUUID();
+        UUID order3Id = UUID.randomUUID();
+
+        List<Element<OrderDetails>> orderCollection = Arrays.asList(
+            element(order1Id, OrderDetails.builder()
+                .orderType("Care Order")
+                .orderTypeId("careOrder")
+                .dateCreated(LocalDateTime.now())
+                .build()),
+            element(order2Id, OrderDetails.builder()
+                .orderType("Supervision Order")
+                .orderTypeId("supervisionOrder")
+                .dateCreated(LocalDateTime.now())
+                .build()),
+            element(order3Id, OrderDetails.builder()
+                .orderType("Emergency Protection Order")
+                .orderTypeId("emergencyProtectionOrder")
+                .dateCreated(LocalDateTime.now())
+                .build())
+        );
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .respondents(listOfRespondents)
+            .orderCollection(orderCollection)
+            .build();
+
+        DynamicMultiSelectList expectedOrderList = DynamicMultiSelectList.builder()
+            .listItems(Arrays.asList(
+                DynamicMultiselectListElement.builder().code(order1Id.toString()).label("Care Order").build(),
+                DynamicMultiselectListElement.builder().code(order2Id.toString()).label("Supervision Order").build(),
+                DynamicMultiselectListElement.builder().code(order3Id.toString()).label("Emergency Protection Order").build()
+            ))
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule()));
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData))
+            .thenReturn(expectedOrderList);
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .data(stringObjectMap)
+            .build();
+
+        Map<String, Object> result = stmtOfServImplService.retrieveRespondentsList(caseDetails);
+
+        assertNotNull("Result should not be null", result);
+        assertNotNull("stmtOfServiceAddRecipient should be populated", result.get("stmtOfServiceAddRecipient"));
+
+        @SuppressWarnings("unchecked")
+        List<Element<StmtOfServiceAddRecipient>> recipients =
+            (List<Element<StmtOfServiceAddRecipient>>) result.get("stmtOfServiceAddRecipient");
+
+        assertFalse("Recipients list should not be empty", recipients.isEmpty());
+
+        StmtOfServiceAddRecipient recipient = recipients.get(0).getValue();
+        assertNotNull("Order list should be populated", recipient.getOrderList());
+        assertEquals("Should have 3 orders in the list", 3, recipient.getOrderList().getListItems().size());
+        assertEquals("First order code should match", order1Id.toString(),
+            recipient.getOrderList().getListItems().get(0).getCode());
+    }
+
+    @Test
+    public void testRetrieveRespondentsList_PopulatesEmptyOrderListWhenNoOrders() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .respondents(listOfRespondents)
+            .orderCollection(new ArrayList<>())
+            .build();
+
+        DynamicMultiSelectList emptyOrderList = DynamicMultiSelectList.builder()
+            .listItems(new ArrayList<>())
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule()));
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData))
+            .thenReturn(emptyOrderList);
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .data(stringObjectMap)
+            .build();
+
+        Map<String, Object> result = stmtOfServImplService.retrieveRespondentsList(caseDetails);
+
+        @SuppressWarnings("unchecked")
+        List<Element<StmtOfServiceAddRecipient>> recipients =
+            (List<Element<StmtOfServiceAddRecipient>>) result.get("stmtOfServiceAddRecipient");
+
+        StmtOfServiceAddRecipient recipient = recipients.get(0).getValue();
+        assertNotNull("Order list should not be null even when empty", recipient.getOrderList());
+        assertEquals("Should have 0 orders when case has no orders", 0,
+            recipient.getOrderList().getListItems().size());
+    }
+
+    @Test
+    public void testRetrieveRespondentsList_VerifyDynamicMultiSelectListServiceCalled() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .respondents(listOfRespondents)
+            .orderCollection(new ArrayList<>())
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule()));
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData))
+            .thenReturn(DynamicMultiSelectList.builder().listItems(new ArrayList<>()).build());
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .data(stringObjectMap)
+            .build();
+
+        stmtOfServImplService.retrieveRespondentsList(caseDetails);
+
+        verify(dynamicMultiSelectListService, times(1)).getOrdersAsDynamicMultiSelectList(caseData);
     }
 }

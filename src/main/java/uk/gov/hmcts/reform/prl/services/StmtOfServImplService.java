@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotif
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -98,6 +99,7 @@ public class StmtOfServImplService {
     private final ServiceOfApplicationPostService serviceOfApplicationPostService;
     private final LaunchDarklyClient launchDarklyClient;
     private final ManageDocumentsService manageDocumentsService;
+    private final DynamicMultiSelectListService dynamicMultiSelectListService;
 
     public Map<String, Object> retrieveRespondentsList(CaseDetails caseDetails) {
         CaseData caseData = objectMapper.convertValue(
@@ -114,10 +116,12 @@ public class StmtOfServImplService {
                                                                                         .code(UUID.randomUUID())
                                                                                         .label(ALL_RESPONDENTS).build())
                                                                              .build())
+                                                  .orderList(dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData))
                                                   .build()));
         caseDataUpdated.put("stmtOfServiceAddRecipient", stmtOfServiceAddRecipient);
         return caseDataUpdated;
     }
+
 
     public Map<String, Object> handleSosAboutToSubmit(CaseDetails caseDetails, String authorisation) {
         Map<String, Object> caseDataUpdateMap = caseDetails.getData();
@@ -337,6 +341,15 @@ public class StmtOfServImplService {
                                                    String selectedPartyId,
                                                    String selectedPartyName) {
 
+        //Extract selected order IDs from orderList before clearing it
+        List<String> selectedOrderIds = null;
+        if (recipient.getOrderList() != null
+            && CollectionUtils.isNotEmpty(recipient.getOrderList().getValue())) {
+            selectedOrderIds = recipient.getOrderList().getValue().stream()
+                .map(element -> element.getCode())
+                .collect(Collectors.toList());
+        }
+
         return recipient.toBuilder()
             .selectedPartyId(selectedPartyId)
             .selectedPartyName(selectedPartyName)
@@ -348,6 +361,7 @@ public class StmtOfServImplService {
             .submittedDateTime(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)).toLocalDateTime())
             //PRL-6478 - Reset to null as not to show duplicate date field in XUI
             .servedDateTimeOption(null)
+            .selectedOrderIds(selectedOrderIds)
             .orderList(null)
             .build();
     }
@@ -842,6 +856,4 @@ public class StmtOfServImplService {
                                              .build())
                            .build());
     }
-
-
 }
