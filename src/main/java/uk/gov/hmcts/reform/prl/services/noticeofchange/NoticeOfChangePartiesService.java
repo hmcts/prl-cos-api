@@ -187,16 +187,16 @@ public class NoticeOfChangePartiesService {
 
             if (null != daElements) {
 
-                if (!DAAPPLICANT.equals(representing)) {
-                    OrganisationPolicy organisationPolicy = policyConverter.daGenerate(
+                // Always generate organisation policy for DA (applicant and respondent)
+                OrganisationPolicy organisationPolicy = policyConverter.daGenerate(
                         solicitorRole, daElements
-                    );
-                    data.put(representing.getPolicyFieldTemplate(), organisationPolicy);
-                }
-                Optional<NoticeOfChangeParties> possibleAnswer = populateDaAnswer(
-                    strategy, daElements
                 );
-                data.put(representing.getNocAnswersTemplate(), possibleAnswer.get());
+                data.put(representing.getPolicyFieldTemplate(), organisationPolicy);
+
+                Optional<NoticeOfChangeParties> possibleAnswer = populateDaAnswer(strategy, daElements);
+                possibleAnswer.ifPresent(answer ->
+                                             data.put(representing.getNocAnswersTemplate(), answer)
+                );
             }
         }
 
@@ -412,6 +412,15 @@ public class NoticeOfChangePartiesService {
                                             SolicitorRole.Representing representing,
                                             TypeOfNocEventEnum typeOfNocEvent,
                                             Organisations organisations) {
+
+        if (parties == null || partyIndex < 0 || partyIndex >= parties.size()) {
+            log.warn(
+                "updateC100PartyDetails: index {} out of bounds (size {}), representing {}",
+                partyIndex, parties == null ? -1 : parties.size(), representing
+            );
+            return caseData;
+        }
+
         Element<PartyDetails> partyDetailsElement = parties.get(partyIndex);
         PartyDetails updPartyDetails = updatePartyDetails(
             legalRepresentativeSolicitorDetails,
@@ -580,11 +589,14 @@ public class NoticeOfChangePartiesService {
             if (CAAPPLICANT.equals(solicitorRole.getRepresenting()) || CARESPONDENT.equals(solicitorRole.getRepresenting())) {
                 OrganisationPolicy organisationPolicy = policyConverter.caGenerate(
                     solicitorRole, Optional.empty());
-                data.put(String.format(
-                    solicitorRole.getRepresenting().getPolicyFieldTemplate(),
-                    (solicitorRole.getIndex() + 1)
-                ), organisationPolicy);
-            } else if (DARESPONDENT.equals(solicitorRole.getRepresenting())) {
+                data.put(
+                    String.format(
+                        solicitorRole.getRepresenting().getPolicyFieldTemplate(),
+                        (solicitorRole.getIndex() + 1)
+                    ), organisationPolicy
+                );
+            } else if (DARESPONDENT.equals(solicitorRole.getRepresenting()) ||
+                DAAPPLICANT.equals(solicitorRole.getRepresenting())) {
                 OrganisationPolicy organisationPolicy = policyConverter.daGenerate(
                     solicitorRole, PartyDetails.builder().build());
                 data.put(solicitorRole.getRepresenting().getPolicyFieldTemplate(), organisationPolicy);
@@ -916,7 +928,7 @@ public class NoticeOfChangePartiesService {
                         .createdBy(userDetails.getEmail())
                         .caseRoleId(DynamicList.builder()
                                         .value(roleItem)
-                                        .listItems(java.util.Arrays.asList(roleItem)) // keep style; avoids java.util.List.of
+                                        .listItems(java.util.Arrays.asList(roleItem))
                                         .build())
                         .approvalStatus(ChangeOrganisationApprovalStatus.APPROVED)
                         .requestTimestamp(time.now())

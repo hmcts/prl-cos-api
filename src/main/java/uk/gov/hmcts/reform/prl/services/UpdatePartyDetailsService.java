@@ -532,18 +532,12 @@ public class UpdatePartyDetailsService {
     }
 
     private void setRespondentSolicitorUuid(CaseData caseData, Map<String, Object> caseDetails) {
-        Optional<List<Element<PartyDetails>>> respondentsWrapped = ofNullable(caseData.getRespondents());
-        if (respondentsWrapped.isPresent() && !respondentsWrapped.get().isEmpty()) {
-            List<PartyDetails> respondents = respondentsWrapped.get()
-                .stream()
-                .map(Element::getValue)
-                .toList();
+        List<Element<PartyDetails>> wrapped =
+            Optional.ofNullable(caseData.getRespondents()).orElseGet(List::of);
 
-            for (PartyDetails respondent : respondents) {
-                CommonUtils.generatePartyUuidForC100(respondent);
-            }
-            caseDetails.put(RESPONDENTS, respondentsWrapped);
-        }
+        wrapped.forEach(e -> CommonUtils.generatePartyUuidForC100(e.getValue()));
+        // put actual list, not Optional
+        caseDetails.put(RESPONDENTS, wrapped);
     }
 
     private void generateC8DocumentsForRespondents(Map<String, Object> updatedCaseData, CallbackRequest callbackRequest, String authorisation,
