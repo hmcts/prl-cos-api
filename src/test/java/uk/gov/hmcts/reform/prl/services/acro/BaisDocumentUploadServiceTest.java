@@ -6,6 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -13,8 +15,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.HearingDaySchedule;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseDetail;
@@ -26,8 +31,10 @@ import java.io.File;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -53,6 +60,9 @@ class BaisDocumentUploadServiceTest {
     @Mock private CsvWriter csvWriter;
     @Mock private PdfExtractorService pdfExtractorService;
     @Mock private LaunchDarklyClient launchDarklyClient;
+
+    @Captor
+    ArgumentCaptor<CsvData> csvDataArgumentCaptor;
 
     private File tempCsv;
 
@@ -288,6 +298,95 @@ class BaisDocumentUploadServiceTest {
             .downloadPdf(anyString(), eq(CASE_ID), any(Document.class), eq(AUTH_TOKEN));
     }
 
+    @Test
+    void testPrepareDataForCsvMapsAllFieldsCorrectly() throws Exception {
+        LocalDateTime orderCreatedDate = LocalDateTime.of(2024, 10, 15, 14, 30);
+        LocalDateTime expectedExpiryDate = LocalDateTime.of(2025, 4, 15, 14, 30);
+        String expectedOrderMadeDate = "2025-10-14";
+
+        FL404 fl404CustomFields = FL404.builder()
+            .orderSpecifiedDateTime(expectedExpiryDate)
+            .build();
+
+        OtherOrderDetails otherOrderDetails = OtherOrderDetails.builder()
+            .orderMadeDate(expectedOrderMadeDate)
+            .build();
+
+        OrderDetails order = OrderDetails.builder()
+            .dateCreated(orderCreatedDate)
+            .orderDocument(createDocument())
+            .orderDocumentWelsh(createDocument())
+            .fl404CustomFields(fl404CustomFields)
+            .otherDetails(otherOrderDetails)
+            .build();
+
+
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("John")
+            .lastName("Doe")
+            .build();
+
+        PartyDetails respondent = PartyDetails.builder()
+            .firstName("Jane")
+            .lastName("Smith")
+            .build();
+
+        AcroCaseData caseData = AcroCaseData.builder()
+            .id(98765L)
+            .caseTypeOfApplication("FL402")
+            .applicant(applicant)
+            .respondent(respondent)
+            .courtName("Birmingham Family Court")
+            .courtEpimsId("456789")
+            .courtTypeId("FC001")
+            .fl404Orders(List.of(order))
+            .build();
+
+        AcroResponse response = AcroResponse.builder()
+            .total(1)
+            .cases(List.of(AcroCaseDetail.builder()
+                .id(1L)
+                .caseData(caseData)
+                .build()))
+            .build();
+
+        when(acroCaseDataService.getNonMolestationData(AUTH_TOKEN)).thenReturn(response);
+        File englishFile = File.createTempFile("test_english", ".pdf");
+        when(pdfExtractorService.downloadPdf(anyString(), eq(CASE_ID), any(Document.class), eq(AUTH_TOKEN)))
+            .thenReturn(englishFile);
+
+        service.uploadFL404Orders();
+
+        verify(csvWriter).appendCsvRowToFile(eq(tempCsv), csvDataArgumentCaptor.capture(), eq(englishFile.getName()));
+
+        CsvData capturedData = csvDataArgumentCaptor.getValue();
+
+        Map<String, Object[]> fieldMappings = Map.of(
+            "ID", new Object[]{caseData.getId(), capturedData.getId(), "caseData.getId()"},
+            "Case Type", new Object[]{caseData.getCaseTypeOfApplication(),
+                capturedData.getCaseTypeOfApplication(), "caseData.getCaseTypeOfApplication()"},
+            "Applicant", new Object[]{caseData.getApplicant(), capturedData.getApplicant(), "caseData.getApplicant()"},
+            "Respondent", new Object[]{caseData.getRespondent(), capturedData.getRespondent(), "caseData.getRespondent()"},
+            "Court Name", new Object[]{caseData.getCourtName(), capturedData.getCourtName(), "caseData.getCourtName()"},
+            "Court EPIMS ID", new Object[]{caseData.getCourtEpimsId(), capturedData.getCourtEpimsId(),
+                "caseData.getCourtEpimsId()"},
+            "Court Type ID", new Object[]{caseData.getCourtTypeId(), capturedData.getCourtTypeId(),
+                "caseData.getCourtTypeId()"},
+            "Date Order Made", new Object[]{expectedOrderMadeDate, capturedData.getDateOrderMade(),
+                "order.getOtherDetails().getOrderMadeDate()"},
+            "Order Expiry Date", new Object[]{expectedExpiryDate, capturedData.getOrderExpiryDate(),
+                "fl404CustomFields.getOrderSpecifiedDateTime()"}
+        );
+
+        fieldMappings.forEach((fieldName, mapping) -> {
+            Object expected = mapping[0];
+            Object actual = mapping[1];
+            String source = (String) mapping[2];
+            assertEquals(expected, actual,
+                String.format("%s should be mapped from %s", fieldName, source));
+        });
+    }
+
     static Stream<Arguments> documentProcessingScenarios() {
         return Stream.of(
             Arguments.of(0, "No PDFs download successfully"),
@@ -339,6 +438,9 @@ class BaisDocumentUploadServiceTest {
             .dateCreated(LocalDateTime.now())
             .orderDocument(createDocument())
             .orderDocumentWelsh(createDocument())
+            .otherDetails(OtherOrderDetails.builder()
+                .orderMadeDate("2025-10-14")
+                .build())
             .build();
     }
 
