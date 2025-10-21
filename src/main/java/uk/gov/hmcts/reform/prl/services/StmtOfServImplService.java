@@ -209,14 +209,12 @@ public class StmtOfServImplService {
             .stream()
             .map(Element::getValue)
             .forEach(sosRecipient -> {
-                if (sosRecipient.getOrderList() != null
-                    && CollectionUtils.isNotEmpty(sosRecipient.getOrderList().getValue())) {
-                    sosRecipient.getOrderList().getValue().stream()
-                        .map(element -> element.getCode())
-                        .forEach(servedOrderIds::add);
-                }
-
                 sosRecipient = getUpdatedSosRecipient(authorisation, caseData, sosRecipient, orderCollection);
+
+                // Extract order IDs from the processed recipient's selectedOrderIds field
+                if (CollectionUtils.isNotEmpty(sosRecipient.getSelectedOrderIds())) {
+                    servedOrderIds.addAll(sosRecipient.getSelectedOrderIds());
+                }
 
                 sosRecipients.add(element(sosRecipient.toBuilder()
                                               .respondentDynamicList(null) //clear dynamic list
