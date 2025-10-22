@@ -59,6 +59,7 @@ import java.util.UUID;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CANCELLED;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeList;
 
 @Slf4j
 @Service
@@ -322,15 +323,16 @@ public class CaseDataService {
         if (ObjectUtils.isNotEmpty(caseData.getFinalServedApplicationDetailsList())) {
             caseData.getFinalServedApplicationDetailsList().parallelStream().forEach(
                 servedApplicationDetails -> {
-                    servedApplicationDetails.getValue().getBulkPrintDetails().parallelStream().forEach(
+                    nullSafeList(servedApplicationDetails.getValue().getBulkPrintDetails()).parallelStream().forEach(
                         bulkPrintDetailsElement ->
                             processServiceOfApplicationBulkPrintDocs(bulkPrintDetailsElement.getValue(), otherDocsList)
                     );
-                    servedApplicationDetails.getValue().getEmailNotificationDetails().parallelStream().forEach(
-                        emailNotificationDetailsElement ->
-                            processServiceOfApplicationEmailedDocs(
-                                emailNotificationDetailsElement.getValue(), otherDocsList)
-                    );
+                    nullSafeList(servedApplicationDetails.getValue().getEmailNotificationDetails()).parallelStream()
+                        .forEach(
+                            emailNotificationDetailsElement ->
+                                processServiceOfApplicationEmailedDocs(
+                                    emailNotificationDetailsElement.getValue(), otherDocsList)
+                        );
                 }
             );
         }
@@ -353,7 +355,8 @@ public class CaseDataService {
 
     private void processServiceOfApplicationEmailedDocs(EmailNotificationDetails emailNotificationDetails,
                                                         List<Element<OtherDocuments>> otherDocsList) {
-        emailNotificationDetails.getDocs().parallelStream().forEach(
+
+        nullSafeList(emailNotificationDetails.getDocs()).parallelStream().forEach(
             docElement -> {
                 if (!isDocumentPresent(docElement.getValue(), otherDocsList)) {
                     addInOtherDocuments(
