@@ -321,14 +321,14 @@ public class CaseDataService {
         }
 
         if (ObjectUtils.isNotEmpty(caseData.getFinalServedApplicationDetailsList())) {
-            caseData.getFinalServedApplicationDetailsList().parallelStream().forEach(
+            caseData.getFinalServedApplicationDetailsList().forEach(
                 servedApplicationDetails -> {
-                    nullSafeList(servedApplicationDetails.getValue().getBulkPrintDetails()).parallelStream().forEach(
+                    nullSafeList(servedApplicationDetails.getValue().getBulkPrintDetails()).forEach(
                         bulkPrintDetailsElement ->
                             processServiceOfApplicationBulkPrintDocs(bulkPrintDetailsElement.getValue(), otherDocsList)
                     );
                     nullSafeList(servedApplicationDetails.getValue().getEmailNotificationDetails())
-                        .parallelStream().forEach(
+                        .forEach(
                             emailNotificationDetailsElement ->
                                 processServiceOfApplicationEmailedDocs(
                                     emailNotificationDetailsElement.getValue(), otherDocsList)
@@ -340,7 +340,7 @@ public class CaseDataService {
 
     private void processServiceOfApplicationBulkPrintDocs(BulkPrintDetails bulkPrintDetails,
                                                           List<Element<OtherDocuments>> otherDocsList) {
-        bulkPrintDetails.getPrintDocs().parallelStream().forEach(
+        bulkPrintDetails.getPrintDocs().forEach(
             docElement -> {
                 if (!isDocumentPresent(docElement.getValue(), otherDocsList)) {
                     addInOtherDocuments(
@@ -356,7 +356,7 @@ public class CaseDataService {
     private void processServiceOfApplicationEmailedDocs(EmailNotificationDetails emailNotificationDetails,
                                                         List<Element<OtherDocuments>> otherDocsList) {
 
-        nullSafeList(emailNotificationDetails.getDocs()).parallelStream().forEach(
+        nullSafeList(emailNotificationDetails.getDocs()).forEach(
             docElement -> {
                 if (!isDocumentPresent(docElement.getValue(), otherDocsList)) {
                     addInOtherDocuments(
@@ -372,7 +372,7 @@ public class CaseDataService {
     private boolean isDocumentPresent(uk.gov.hmcts.reform.prl.models.documents.Document caseDocument,
                                    List<Element<OtherDocuments>> otherDocsList) {
         if (isNotEmpty(caseDocument)) {
-            return otherDocsList.parallelStream().anyMatch(el -> {
+            return otherDocsList.stream().anyMatch(el -> {
                 try {
                     return el.getValue().getDocumentOther().equals(buildFromCaseDocument(caseDocument));
                 } catch (MalformedURLException e) {
