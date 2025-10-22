@@ -52,6 +52,8 @@ public class TestingSupportCreateCaseDataController {
                                                                   @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
                                                                   @RequestBody CallbackRequest callbackRequest) {
 
+        log.info("Creating test CCD case via testing support endpoint");
+
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails().toBuilder()
                                                       .id(0L)
                                                       .caseTypeId(PrlAppsConstants.C100_CASE_TYPE)
@@ -61,10 +63,14 @@ public class TestingSupportCreateCaseDataController {
                                                       .lastModified(LocalDateTime.now())
                                                       .build(), objectMapper);
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
+
+        log.info("Requesting event for case creation");
         EventRequestData eventRequestData = coreCaseDataService.eventRequest(
             CaseEvent.TS_ADMIN_APPLICATION_NOC,
             idamClient.getUserInfo(authorisation).getUid()
         );
+
+        log.info("Starting case creation event");
         StartEventResponse startEventResponse = coreCaseDataService.startSubmitCreate(
             authorisation,
             authTokenGenerator.generate(),
@@ -79,13 +85,22 @@ public class TestingSupportCreateCaseDataController {
                        .build())
             .data(caseDataMap).build();
 
-        return coreCaseDataService.submitCreate(
+        log.info("Submitting case creation to CCD");
+        CaseDetails createdCase = coreCaseDataService.submitCreate(
             authorisation,
             authTokenGenerator.generate(),
             idamClient.getUserInfo(authorisation).getUid(),
             caseDataContent,
             true
         );
+
+        if (createdCase != null && createdCase.getId() != null) {
+            log.info("Test CCD case created successfully with ID: {}", createdCase.getId());
+        } else {
+            log.error("CCD case creation returned null or case without ID. CaseDetails: {}", createdCase);
+        }
+
+        return createdCase;
     }
 
 }
