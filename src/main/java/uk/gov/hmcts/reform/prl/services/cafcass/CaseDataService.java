@@ -327,12 +327,12 @@ public class CaseDataService {
                         bulkPrintDetailsElement ->
                             processServiceOfApplicationBulkPrintDocs(bulkPrintDetailsElement.getValue(), otherDocsList)
                     );
-                    nullSafeList(servedApplicationDetails.getValue().getEmailNotificationDetails()).parallelStream()
-                        .forEach(
+                    nullSafeList(servedApplicationDetails.getValue().getEmailNotificationDetails())
+                        .parallelStream().forEach(
                             emailNotificationDetailsElement ->
                                 processServiceOfApplicationEmailedDocs(
                                     emailNotificationDetailsElement.getValue(), otherDocsList)
-                        );
+                    );
                 }
             );
         }
