@@ -240,6 +240,8 @@ public class PaymentRequestService {
             paymentResponseCard.setServiceRequestReference(paymentServiceReferenceNumber);
         }
 
+        // Maybe we need to refactor above code. Once a payment is not successful it doesn't seem to go into this method again.
+
         return paymentResponseCard;
     }
 
