@@ -160,6 +160,7 @@ public class PaymentRequestService {
         if (null == paymentServiceReferenceNumber
             && null == paymentReferenceNumber) {
             //Create dummy caseData with id & name
+            log.info("Payment reference numbers are null, creating dummy case data");
             CaseData caseData = CaseData.builder()
                 .id(Long.parseLong(createPaymentRequest.getCaseId()))
                 .applicantCaseName(createPaymentRequest.getApplicantCaseName())
