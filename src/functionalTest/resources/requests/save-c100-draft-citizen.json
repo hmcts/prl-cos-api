@@ -768,6 +768,7 @@
   "stmtOfServiceAddRecipient": null,
   "stmtOfServiceForOrder": null,
   "stmtOfServiceForApplication": null,
+  "servedOrderIds": null,
   "caApplicant1ExternalFlags": null,
   "caApplicant2ExternalFlags": null,
   "caApplicant3ExternalFlags": null,
