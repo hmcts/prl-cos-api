@@ -332,7 +332,7 @@ public class CaseDataService {
                             emailNotificationDetailsElement ->
                                 processServiceOfApplicationEmailedDocs(
                                     emailNotificationDetailsElement.getValue(), otherDocsList)
-                    );
+                        );
                 }
             );
         }
