@@ -1827,8 +1827,8 @@ public class StmtOfServImplServiceTest {
                         .build())
                     .build()
             )))
-            .respondents(Arrays.asList(element(respondentId, respondent))) // Respondent with different ID
-            .applicants(Arrays.asList(element(applicantId, applicant))) // Applicant with matching ID
+            .respondents(Arrays.asList(element(respondentId, respondent)))
+            .applicants(Arrays.asList(element(applicantId, applicant)))
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule()));
@@ -1843,7 +1843,6 @@ public class StmtOfServImplServiceTest {
 
         Map<String, Object> result = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
 
-        // Verify the method completes successfully and processes the applicant as the served party
         assertNotNull("Result should not be null", result);
         assertNotNull("stmtOfServiceForOrder should be populated", result.get("stmtOfServiceForOrder"));
 
@@ -1853,7 +1852,6 @@ public class StmtOfServImplServiceTest {
 
         assertFalse("Processed recipients list should not be empty", processedRecipients.isEmpty());
 
-        // Verify that the order collection was updated with the applicant as a served party
         @SuppressWarnings("unchecked")
         List<Element<OrderDetails>> updatedOrderCollection =
             (List<Element<OrderDetails>>) result.get(ORDER_COLLECTION);
@@ -1863,7 +1861,6 @@ public class StmtOfServImplServiceTest {
 
     @Test
     public void testHandleSosForOrders_FL401_WhenSelectedPartyIsRespondent() {
-        // Create FL401 respondent with a specific UUID
         UUID respondentId = UUID.randomUUID();
         PartyDetails respondentFL401 = PartyDetails.builder()
             .firstName("Jane")
@@ -1871,7 +1868,6 @@ public class StmtOfServImplServiceTest {
             .partyId(respondentId)
             .build();
 
-        // Create a recipient that references the respondent ID
         DynamicMultiSelectList orderList = DynamicMultiSelectList.builder()
             .value(Arrays.asList(
                 DynamicMultiselectListElement.builder().code("order-1").label("Test Order 1").build()
@@ -1903,7 +1899,7 @@ public class StmtOfServImplServiceTest {
                         .build())
                     .build()
             )))
-            .respondentsFL401(respondentFL401) // FL401 respondent with matching ID
+            .respondentsFL401(respondentFL401)
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule()));
@@ -1918,7 +1914,6 @@ public class StmtOfServImplServiceTest {
 
         Map<String, Object> result = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
 
-        // Verify the method completes successfully and processes the FL401 respondent as the served party
         assertNotNull("Result should not be null", result);
         assertNotNull("stmtOfServiceForOrder should be populated", result.get("stmtOfServiceForOrder"));
 
@@ -1928,7 +1923,6 @@ public class StmtOfServImplServiceTest {
 
         assertFalse("Processed recipients list should not be empty", processedRecipients.isEmpty());
 
-        // Verify that the order collection was updated with the FL401 respondent as a served party
         @SuppressWarnings("unchecked")
         List<Element<OrderDetails>> updatedOrderCollection =
             (List<Element<OrderDetails>>) result.get(ORDER_COLLECTION);
@@ -1938,7 +1932,6 @@ public class StmtOfServImplServiceTest {
 
     @Test
     public void testHandleSosForOrders_FL401_WhenSelectedPartyIsApplicant() {
-        // Create FL401 applicant with a specific UUID
         UUID applicantId = UUID.randomUUID();
         PartyDetails applicantFL401 = PartyDetails.builder()
             .firstName("John")
@@ -1946,7 +1939,6 @@ public class StmtOfServImplServiceTest {
             .partyId(applicantId)
             .build();
 
-        // Create FL401 respondent with a different UUID
         UUID respondentId = UUID.randomUUID();
         PartyDetails respondentFL401 = PartyDetails.builder()
             .firstName("Jane")
@@ -1954,7 +1946,6 @@ public class StmtOfServImplServiceTest {
             .partyId(respondentId)
             .build();
 
-        // Create a recipient that references the applicant ID (not the respondent)
         DynamicMultiSelectList orderList = DynamicMultiSelectList.builder()
             .value(Arrays.asList(
                 DynamicMultiselectListElement.builder().code("order-1").label("Test Order 1").build()
@@ -1964,7 +1955,7 @@ public class StmtOfServImplServiceTest {
         StmtOfServiceAddRecipient recipient = StmtOfServiceAddRecipient.builder()
             .respondentDynamicList(DynamicList.builder()
                 .value(DynamicListElement.builder()
-                    .code(applicantId.toString()) // Using applicant ID, not respondent
+                    .code(applicantId.toString())
                     .label("John Applicant")
                     .build())
                 .build())
@@ -1986,8 +1977,8 @@ public class StmtOfServImplServiceTest {
                         .build())
                     .build()
             )))
-            .respondentsFL401(respondentFL401) // FL401 respondent with different ID
-            .applicantsFL401(applicantFL401) // FL401 applicant with matching ID
+            .respondentsFL401(respondentFL401)
+            .applicantsFL401(applicantFL401)
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule()));
@@ -2002,7 +1993,6 @@ public class StmtOfServImplServiceTest {
 
         Map<String, Object> result = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
 
-        // Verify the method completes successfully and processes the FL401 applicant as the served party
         assertNotNull("Result should not be null", result);
         assertNotNull("stmtOfServiceForOrder should be populated", result.get("stmtOfServiceForOrder"));
 
@@ -2012,11 +2002,234 @@ public class StmtOfServImplServiceTest {
 
         assertFalse("Processed recipients list should not be empty", processedRecipients.isEmpty());
 
-        // Verify that the order collection was updated with the FL401 applicant as a served party
         @SuppressWarnings("unchecked")
         List<Element<OrderDetails>> updatedOrderCollection =
             (List<Element<OrderDetails>>) result.get(ORDER_COLLECTION);
 
         assertNotNull("Order collection should be updated", updatedOrderCollection);
+    }
+
+    @Test
+    public void testHandleSosForOrders_UpdatesOrderServedPartiesAndSosStatus_C100() {
+        UUID respondent1Id = UUID.randomUUID();
+        UUID respondent2Id = UUID.randomUUID();
+        PartyDetails respondent1 = PartyDetails.builder()
+            .firstName("Jane")
+            .lastName("Respondent1")
+            .partyId(respondent1Id)
+            .build();
+        PartyDetails respondent2 = PartyDetails.builder()
+            .firstName("John")
+            .lastName("Respondent2")
+            .partyId(respondent2Id)
+            .build();
+
+        UUID orderId = UUID.randomUUID();
+
+        DynamicMultiSelectList orderList = DynamicMultiSelectList.builder()
+            .value(Arrays.asList(
+                DynamicMultiselectListElement.builder().code(orderId.toString()).label("Test Order 1").build()
+            ))
+            .build();
+
+        StmtOfServiceAddRecipient recipient = StmtOfServiceAddRecipient.builder()
+            .respondentDynamicList(DynamicList.builder()
+                .value(DynamicListElement.builder()
+                    .code(respondent1Id.toString())
+                    .label("Jane Respondent1")
+                    .build())
+                .build())
+            .orderList(orderList)
+            .stmtOfServiceDocument(Document.builder().documentFileName("test.pdf").build())
+            .build();
+
+        OrderDetails orderWithPendingSos = OrderDetails.builder()
+            .sosStatus("PENDING")
+            .serveOrderDetails(ServeOrderDetails.builder()
+                .servedParties(new ArrayList<>())
+                .build())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .statementOfService(StatementOfService.builder()
+                .stmtOfServiceWhatWasServed(StatementOfServiceWhatWasServed.statementOfServiceOrder)
+                .stmtOfServiceAddRecipient(Arrays.asList(element(recipient)))
+                .build())
+            .orderCollection(Arrays.asList(element(orderId, orderWithPendingSos)))
+            .respondents(Arrays.asList(
+                element(respondent1Id, respondent1),
+                element(respondent2Id, respondent2)
+            ))
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule()));
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(Mockito.any())).thenReturn(UserDetails.builder().build());
+        when(manageDocumentsService.getLoggedInUserType(anyString())).thenReturn(List.of(PrlAppsConstants.COURT_ADMIN_ROLE));
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .data(stringObjectMap)
+            .build();
+
+        Map<String, Object> result = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
+
+        assertNotNull("Result should not be null", result);
+
+        @SuppressWarnings("unchecked")
+        List<Element<OrderDetails>> updatedOrderCollection =
+            (List<Element<OrderDetails>>) result.get(ORDER_COLLECTION);
+
+        assertNotNull("Order collection should be updated", updatedOrderCollection);
+        assertFalse("Order collection should not be empty", updatedOrderCollection.isEmpty());
+
+        OrderDetails updatedOrder = updatedOrderCollection.get(0).getValue();
+        assertNotNull("Updated order should not be null", updatedOrder);
+        assertNotNull("Served parties should be populated", updatedOrder.getServeOrderDetails().getServedParties());
+        assertFalse("Served parties should not be empty", updatedOrder.getServeOrderDetails().getServedParties().isEmpty());
+
+        assertEquals("SOS status should still be PENDING as not all respondents served",
+            "PENDING", updatedOrder.getSosStatus());
+    }
+
+    @Test
+    public void testHandleSosForOrders_UpdatesSosStatusToCompleted_C100_AllRespondentsServed() {
+        UUID respondent1Id = UUID.randomUUID();
+        PartyDetails respondent1 = PartyDetails.builder()
+            .firstName("Jane")
+            .lastName("Respondent1")
+            .partyId(respondent1Id)
+            .build();
+
+        UUID orderId = UUID.randomUUID();
+
+        DynamicMultiSelectList orderList = DynamicMultiSelectList.builder()
+            .value(Arrays.asList(
+                DynamicMultiselectListElement.builder().code(orderId.toString()).label("Test Order 1").build()
+            ))
+            .build();
+
+        StmtOfServiceAddRecipient recipient = StmtOfServiceAddRecipient.builder()
+            .respondentDynamicList(DynamicList.builder()
+                .value(DynamicListElement.builder()
+                    .code(respondent1Id.toString())
+                    .label("Jane Respondent1")
+                    .build())
+                .build())
+            .orderList(orderList)
+            .stmtOfServiceDocument(Document.builder().documentFileName("test.pdf").build())
+            .build();
+
+        OrderDetails orderWithPendingSos = OrderDetails.builder()
+            .sosStatus("PENDING")
+            .serveOrderDetails(ServeOrderDetails.builder()
+                .servedParties(new ArrayList<>())
+                .build())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .statementOfService(StatementOfService.builder()
+                .stmtOfServiceWhatWasServed(StatementOfServiceWhatWasServed.statementOfServiceOrder)
+                .stmtOfServiceAddRecipient(Arrays.asList(element(recipient)))
+                .build())
+            .orderCollection(Arrays.asList(element(orderId, orderWithPendingSos)))
+            .respondents(Arrays.asList(element(respondent1Id, respondent1))) // Only one respondent
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule()));
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(Mockito.any())).thenReturn(UserDetails.builder().build());
+        when(manageDocumentsService.getLoggedInUserType(anyString())).thenReturn(List.of(PrlAppsConstants.COURT_ADMIN_ROLE));
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .data(stringObjectMap)
+            .build();
+
+        Map<String, Object> result = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
+
+        assertNotNull("Result should not be null", result);
+
+        @SuppressWarnings("unchecked")
+        List<Element<OrderDetails>> updatedOrderCollection =
+            (List<Element<OrderDetails>>) result.get(ORDER_COLLECTION);
+
+        assertNotNull("Order collection should be updated", updatedOrderCollection);
+
+        OrderDetails updatedOrder = updatedOrderCollection.get(0).getValue();
+        assertEquals("SOS status should be COMPLETED as all respondents are served",
+            "COMPLETED", updatedOrder.getSosStatus());
+    }
+
+    @Test
+    public void testHandleSosForOrders_UpdatesSosStatusToCompleted_FL401() {
+        UUID respondentId = UUID.randomUUID();
+        PartyDetails respondentFL401 = PartyDetails.builder()
+            .firstName("Jane")
+            .lastName("Respondent")
+            .partyId(respondentId)
+            .build();
+
+        UUID orderId = UUID.randomUUID();
+
+        DynamicMultiSelectList orderList = DynamicMultiSelectList.builder()
+            .value(Arrays.asList(
+                DynamicMultiselectListElement.builder().code(orderId.toString()).label("Test Order 1").build()
+            ))
+            .build();
+
+        StmtOfServiceAddRecipient recipient = StmtOfServiceAddRecipient.builder()
+            .respondentDynamicList(DynamicList.builder()
+                .value(DynamicListElement.builder()
+                    .code(respondentId.toString())
+                    .label("Jane Respondent")
+                    .build())
+                .build())
+            .orderList(orderList)
+            .stmtOfServiceDocument(Document.builder().documentFileName("test.pdf").build())
+            .build();
+
+        OrderDetails orderWithPendingSos = OrderDetails.builder()
+            .sosStatus("PENDING")
+            .serveOrderDetails(ServeOrderDetails.builder()
+                .servedParties(new ArrayList<>())
+                .build())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .statementOfService(StatementOfService.builder()
+                .stmtOfServiceWhatWasServed(StatementOfServiceWhatWasServed.statementOfServiceOrder)
+                .stmtOfServiceAddRecipient(Arrays.asList(element(recipient)))
+                .build())
+            .orderCollection(Arrays.asList(element(orderId, orderWithPendingSos)))
+            .respondentsFL401(respondentFL401)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule()));
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(Mockito.any())).thenReturn(UserDetails.builder().build());
+        when(manageDocumentsService.getLoggedInUserType(anyString())).thenReturn(List.of(PrlAppsConstants.COURT_ADMIN_ROLE));
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .data(stringObjectMap)
+            .build();
+
+        Map<String, Object> result = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
+
+        assertNotNull("Result should not be null", result);
+
+        @SuppressWarnings("unchecked")
+        List<Element<OrderDetails>> updatedOrderCollection =
+            (List<Element<OrderDetails>>) result.get(ORDER_COLLECTION);
+
+        assertNotNull("Order collection should be updated", updatedOrderCollection);
+
+        OrderDetails updatedOrder = updatedOrderCollection.get(0).getValue();
+        assertEquals("SOS status should be COMPLETED for FL401 cases",
+            "COMPLETED", updatedOrder.getSosStatus());
     }
 }
