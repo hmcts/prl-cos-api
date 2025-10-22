@@ -24,3 +24,4 @@ public class StatementOfService {
     @JsonProperty("stmtOfServiceForApplication")
     private List<Element<StmtOfServiceAddRecipient>> stmtOfServiceForApplication;
 }
+
