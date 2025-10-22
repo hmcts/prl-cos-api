@@ -162,17 +162,16 @@ public class StmtOfServImplService {
                 .forEach(sosRecipient -> {
                     sosRecipient = getUpdatedSosRecipient(authorisation, caseData, sosRecipient, null);
 
-                //PRL-5979 - Send cover letter with access code to respondents
-                caseDataMap.put(
-                    ACCESS_CODE_NOTIFICATIONS,
-                    sendAccessCodesToRespondentsByCourtLegalRep(authorisation, caseData, sosRecipient)
-                );
+                    caseDataMap.put(
+                        ACCESS_CODE_NOTIFICATIONS,
+                        sendAccessCodesToRespondentsByCourtLegalRep(authorisation, caseData, sosRecipient)
+                    );
 
-                sosRecipients.add(element(sosRecipient.toBuilder()
-                    .respondentDynamicList(null) //clear dynamic list after sending access code info
-                    .orderList(null) //clear order list to avoid CCD validation error
-                    .build()));
-            });
+                    sosRecipients.add(element(sosRecipient.toBuilder()
+                        .respondentDynamicList(null)
+                        .orderList(null)
+                        .build()));
+                });
         }
         //Add all existing sos recipients & update into case data
         if (caseData.getStatementOfService() != null
