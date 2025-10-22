@@ -607,10 +607,11 @@ public class StmtOfServImplService {
             .selectedPartyId(String.join(COMMA, sosObject.getPartiesServed()))
                                       .uploadedBy(getSosUploadedBy(authorisation))
                                       .submittedDateTime(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)).toLocalDateTime())
-            .partiesServedDateTime(sosObject.getPartiesServedDate())
+                                      .partiesServedDateTime(sosObject.getPartiesServedDate())
             .build()));
         //Add all existing sos recipients & update into case data
-        if (CollectionUtils.isNotEmpty(updatedCaseData.getStatementOfService().getStmtOfServiceForOrder())) {
+        if (updatedCaseData.getStatementOfService() != null
+            && CollectionUtils.isNotEmpty(updatedCaseData.getStatementOfService().getStmtOfServiceForOrder())) {
             sosRecipients.addAll(updatedCaseData.getStatementOfService().getStmtOfServiceForOrder());
         }
         updatedCaseDataMap.put("stmtOfServiceForOrder", sosRecipients);
