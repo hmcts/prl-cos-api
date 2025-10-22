@@ -23,9 +23,9 @@ public class CsvData {
     private String courtTypeId;
     private String courtName;
     private String caseTypeOfApplication;
-    private LocalDateTime currentHearingDate;
     private LocalDateTime orderExpiryDate;
     private PartyDetails applicant;
     private PartyDetails respondent;
     private String daApplicantContactInstructions;
+    private String dateOrderMade;
 }
