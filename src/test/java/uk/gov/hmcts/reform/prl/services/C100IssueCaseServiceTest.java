@@ -48,6 +48,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -193,6 +194,10 @@ public class C100IssueCaseServiceTest {
                                                                          .label("Swansea")
                                                                          .build());
         when(locationRefDataService.getFilteredCourtLocations(authToken)).thenReturn(workAllocationEnabledList);
+        when(dfjLookupService.getDfjAreaFieldsByCourtId("234946")).thenReturn(Map.of(
+            "dfjArea", "SWANSEA",
+            "swanseaDFJCourt", "234946"
+        ));
     }
 
 
@@ -660,8 +665,10 @@ public class C100IssueCaseServiceTest {
                                                        .data(stringObjectMap).build()).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
-        c100IssueCaseService.issueAndSendToLocalCourt(authToken, callbackRequest);
+        Map<String, Object> updates = c100IssueCaseService.issueAndSendToLocalCourt(authToken, callbackRequest);
 
         Assertions.assertNull(stringObjectMap.get("isNonWorkAllocationEnabledCourtSelected"));
+        assertThat(updates).extracting("dfjArea").isEqualTo("SWANSEA");
+        assertThat(updates).extracting("swanseaDFJCourt").isEqualTo("234946");
     }
 }
