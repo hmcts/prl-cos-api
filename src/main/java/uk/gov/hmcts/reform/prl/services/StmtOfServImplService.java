@@ -128,18 +128,19 @@ public class StmtOfServImplService {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         log.info("*** Statement of service, about-to-submit callback ***");
 
-        if (StatementOfServiceWhatWasServed.statementOfServiceApplicationPack
-            .equals(caseData.getStatementOfService().getStmtOfServiceWhatWasServed())) {
-            //Application packs
-            handleSosForApplicationPacks(authorisation, caseData, caseDataUpdateMap);
-        } else if (StatementOfServiceWhatWasServed.statementOfServiceOrder
-            .equals(caseData.getStatementOfService().getStmtOfServiceWhatWasServed())) {
-            //Orders
-            handleSosForOrders(authorisation, caseData, caseDataUpdateMap);
+        if (caseData.getStatementOfService() != null
+            && caseData.getStatementOfService().getStmtOfServiceWhatWasServed() != null) {
+            if (StatementOfServiceWhatWasServed.statementOfServiceApplicationPack
+                .equals(caseData.getStatementOfService().getStmtOfServiceWhatWasServed())) {
+                handleSosForApplicationPacks(authorisation, caseData, caseDataUpdateMap);
+            } else if (StatementOfServiceWhatWasServed.statementOfServiceOrder
+                .equals(caseData.getStatementOfService().getStmtOfServiceWhatWasServed())) {
+                //Orders
+                handleSosForOrders(authorisation, caseData, caseDataUpdateMap);
 
-            // Log the servedOrderIds after they've been saved to caseData for QA verification
-            List<String> savedOrderIds = (List<String>) caseDataUpdateMap.get("servedOrderIds");
-            log.info("Statement of service order IDs saved to caseData: {}", savedOrderIds);
+                List<String> savedOrderIds = (List<String>) caseDataUpdateMap.get("servedOrderIds");
+                log.info("Statement of service order IDs saved to caseData: {}", savedOrderIds);
+            }
         }
 
         caseDataUpdateMap.put("stmtOfServiceAddRecipient", null);
@@ -153,11 +154,13 @@ public class StmtOfServImplService {
         log.info("SOS for Application packs");
         List<Element<StmtOfServiceAddRecipient>> sosRecipients = new ArrayList<>();
         //Get all sos recipients
-        caseData.getStatementOfService().getStmtOfServiceAddRecipient()
-            .stream()
-            .map(Element::getValue)
-            .forEach(sosRecipient -> {
-                sosRecipient = getUpdatedSosRecipient(authorisation, caseData, sosRecipient, null);
+        if (caseData.getStatementOfService() != null
+            && CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceAddRecipient())) {
+            caseData.getStatementOfService().getStmtOfServiceAddRecipient()
+                .stream()
+                .map(Element::getValue)
+                .forEach(sosRecipient -> {
+                    sosRecipient = getUpdatedSosRecipient(authorisation, caseData, sosRecipient, null);
 
                 //PRL-5979 - Send cover letter with access code to respondents
                 caseDataMap.put(
@@ -170,6 +173,7 @@ public class StmtOfServImplService {
                     .orderList(null) //clear order list to avoid CCD validation error
                     .build()));
             });
+        }
         //Add all existing sos recipients & update into case data
         if (caseData.getStatementOfService() != null
             && CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceForApplication())) {
@@ -205,21 +209,24 @@ public class StmtOfServImplService {
         List<String> servedOrderIds = new ArrayList<>();
 
         //Get all sos recipients
-        caseData.getStatementOfService().getStmtOfServiceAddRecipient()
-            .stream()
-            .map(Element::getValue)
-            .forEach(sosRecipient -> {
-                sosRecipient = getUpdatedSosRecipient(authorisation, caseData, sosRecipient, orderCollection);
+        if (caseData.getStatementOfService() != null
+            && CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceAddRecipient())) {
+            caseData.getStatementOfService().getStmtOfServiceAddRecipient()
+                .stream()
+                .map(Element::getValue)
+                .forEach(sosRecipient -> {
+                    sosRecipient = getUpdatedSosRecipient(authorisation, caseData, sosRecipient, orderCollection);
 
-                // Extract order IDs from the processed recipient's selectedOrderIds field
-                if (CollectionUtils.isNotEmpty(sosRecipient.getSelectedOrderIds())) {
-                    servedOrderIds.addAll(sosRecipient.getSelectedOrderIds());
-                }
+                    // Extract order IDs from the processed recipient's selectedOrderIds field
+                    if (CollectionUtils.isNotEmpty(sosRecipient.getSelectedOrderIds())) {
+                        servedOrderIds.addAll(sosRecipient.getSelectedOrderIds());
+                    }
 
-                sosRecipients.add(element(sosRecipient.toBuilder()
-                                              .respondentDynamicList(null) //clear dynamic list
-                                              .build()));
-            });
+                    sosRecipients.add(element(sosRecipient.toBuilder()
+                                                  .respondentDynamicList(null) //clear dynamic list
+                                                  .build()));
+                });
+        }
 
         //Add all existing sos recipients & update into case data
         if (caseData.getStatementOfService() != null
