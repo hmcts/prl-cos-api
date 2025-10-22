@@ -159,7 +159,7 @@ public class CaseDataService {
                 }
             }
         } catch (Exception e) {
-            log.error("Error in search cases {}", e.getMessage());
+            log.error("Error in search cases", e);
             throw e;
         }
         return cafCassResponse;
