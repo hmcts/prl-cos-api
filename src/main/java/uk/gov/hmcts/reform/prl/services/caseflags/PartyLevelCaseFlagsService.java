@@ -126,7 +126,7 @@ public class PartyLevelCaseFlagsService {
     public Map<String, Object> generatePartyCaseFlags(CaseData caseData) {
         Map<String, Object> data = new HashMap<>();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            data.putAll(generateC100PartyCaseFlags(caseData, CAAPPLICANT));
+            data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.valueOf("hello")));
             data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.CARESPONDENT));
             data.putAll(generateC100PartyCaseFlags(caseData, CAOTHERPARTY));
             if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
