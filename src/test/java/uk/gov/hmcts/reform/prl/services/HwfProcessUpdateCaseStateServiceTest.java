@@ -37,6 +37,7 @@ import java.util.Map;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -160,6 +161,41 @@ public class HwfProcessUpdateCaseStateServiceTest {
             ).replace("-", " ")).build(), caseUpdated.get(DATE_OF_SUBMISSION)
         );
 
+    }
+
+    @Test
+    public void shouldOnlySetDateOfSubmissionIfNull() {
+        // Setup a case with a dateSubmitted already set
+        caseData = CaseData.builder()
+            .id(123L)
+            .state(State.SUBMITTED_NOT_PAID)
+            .dateSubmitted("2024-01-01")
+            .helpWithFeesNumber("HWF-1BC-AF")
+            .paymentServiceRequestReferenceNumber("2024-1709204678984")
+            .build();
+        caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(caseData.toMap(objectMapper))
+            .build();
+        SearchResult searchResult = SearchResult.builder()
+            .total(1)
+            .cases(List.of(caseDetails))
+            .build();
+        when(coreCaseDataApi.searchCases(authToken, s2sAuthToken, CASE_TYPE, null)).thenReturn(searchResult);
+
+        SearchResultResponse response = SearchResultResponse.builder()
+            .total(1)
+            .cases(List.of(caseDetails))
+            .build();
+        when(objectMapper.convertValue(searchResult, SearchResultResponse.class)).thenReturn(response);
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+
+        hwfProcessUpdateCaseStateService.checkHwfPaymentStatusAndUpdateCaseState();
+        Map<String, Object> caseUpdated = caseDataUpdatedCaptor.getValue();
+
+        assertFalse(caseUpdated.containsKey(DATE_SUBMITTED_FIELD));
     }
 
     @Test
