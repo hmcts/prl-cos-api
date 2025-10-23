@@ -156,19 +156,18 @@ public class NoticeOfChangePartiesService {
         for (int i = 0; i < solicitorRoles.size(); i++) {
             SolicitorRole solicitorRole = solicitorRoles.get(i);
 
-            if (null != caElements) {
-                Optional<Element<PartyDetails>> solicitorContainer = i < numElements
-                    ? Optional.of(caElements.get(i))
-                    : Optional.empty();
+            // Always create the OrganisationPolicy slot so CCD NoC has a target to update
+            Optional<Element<PartyDetails>> solicitorContainer =
+                (caElements != null && i < numElements) ? Optional.of(caElements.get(i)) : Optional.empty();
 
-                OrganisationPolicy organisationPolicy = policyConverter.caGenerate(
-                    solicitorRole, solicitorContainer
-                );
-                data.put(String.format(representing.getPolicyFieldTemplate(), (i + 1)), organisationPolicy);
+            OrganisationPolicy organisationPolicy = policyConverter.caGenerate(
+                solicitorRole, solicitorContainer
+            );
+            data.put(String.format(representing.getPolicyFieldTemplate(), (i + 1)), organisationPolicy);
 
-                Optional<NoticeOfChangeParties> possibleAnswer = populateCaAnswer(
-                    strategy, solicitorContainer
-                );
+            // Only populate NoC answers when we actually have a party element
+            if (solicitorContainer.isPresent()) {
+                Optional<NoticeOfChangeParties> possibleAnswer = populateCaAnswer(strategy, solicitorContainer);
                 if (possibleAnswer.isPresent()) {
                     data.put(String.format(representing.getNocAnswersTemplate(), (i + 1)), possibleAnswer.get());
                 }
@@ -188,16 +187,16 @@ public class NoticeOfChangePartiesService {
 
             if (null != daElements) {
 
-                if (!DAAPPLICANT.equals(representing)) {
-                    OrganisationPolicy organisationPolicy = policyConverter.daGenerate(
+                // Always generate organisation policy for DA (applicant and respondent)
+                OrganisationPolicy organisationPolicy = policyConverter.daGenerate(
                         solicitorRole, daElements
-                    );
-                    data.put(representing.getPolicyFieldTemplate(), organisationPolicy);
-                }
-                Optional<NoticeOfChangeParties> possibleAnswer = populateDaAnswer(
-                    strategy, daElements
                 );
-                data.put(representing.getNocAnswersTemplate(), possibleAnswer.get());
+                data.put(representing.getPolicyFieldTemplate(), organisationPolicy);
+
+                Optional<NoticeOfChangeParties> possibleAnswer = populateDaAnswer(strategy, daElements);
+                possibleAnswer.ifPresent(answer ->
+                                             data.put(representing.getNocAnswersTemplate(), answer)
+                );
             }
         }
 
@@ -413,6 +412,15 @@ public class NoticeOfChangePartiesService {
                                             SolicitorRole.Representing representing,
                                             TypeOfNocEventEnum typeOfNocEvent,
                                             Organisations organisations) {
+
+        if (parties == null || partyIndex < 0 || partyIndex >= parties.size()) {
+            log.warn(
+                "updateC100PartyDetails: index {} out of bounds (size {}), representing {}",
+                partyIndex, parties == null ? -1 : parties.size(), representing
+            );
+            return caseData;
+        }
+
         Element<PartyDetails> partyDetailsElement = parties.get(partyIndex);
         PartyDetails updPartyDetails = updatePartyDetails(
             legalRepresentativeSolicitorDetails,
@@ -581,11 +589,14 @@ public class NoticeOfChangePartiesService {
             if (CAAPPLICANT.equals(solicitorRole.getRepresenting()) || CARESPONDENT.equals(solicitorRole.getRepresenting())) {
                 OrganisationPolicy organisationPolicy = policyConverter.caGenerate(
                     solicitorRole, Optional.empty());
-                data.put(String.format(
-                    solicitorRole.getRepresenting().getPolicyFieldTemplate(),
-                    (solicitorRole.getIndex() + 1)
-                ), organisationPolicy);
-            } else if (DARESPONDENT.equals(solicitorRole.getRepresenting())) {
+                data.put(
+                    String.format(
+                        solicitorRole.getRepresenting().getPolicyFieldTemplate(),
+                        (solicitorRole.getIndex() + 1)
+                    ), organisationPolicy
+                );
+            } else if (DARESPONDENT.equals(solicitorRole.getRepresenting()) ||
+                DAAPPLICANT.equals(solicitorRole.getRepresenting())) {
                 OrganisationPolicy organisationPolicy = policyConverter.daGenerate(
                     solicitorRole, PartyDetails.builder().build());
                 data.put(solicitorRole.getRepresenting().getPolicyFieldTemplate(), organisationPolicy);
@@ -887,35 +898,61 @@ public class NoticeOfChangePartiesService {
                 callbackRequest.getCaseDetailsBefore().getData(),
                 CaseData.class
             );
-            caseData.getRespondents().stream().forEach(newRepresentedPartyElement -> {
-                int respondentIndex = caseData.getRespondents().indexOf(newRepresentedPartyElement);
-                Element<PartyDetails> oldRepresentedPartyElement = oldCaseData.getRespondents().get(respondentIndex);
+
+            // Use an indexed loop so we can pick the right case role (…SOLICITOR1, 2, 3…)
+            List<Element<PartyDetails>> newRespondents = caseData.getRespondents();
+            List<Element<PartyDetails>> oldRespondents = oldCaseData.getRespondents();
+            if (newRespondents == null || oldRespondents == null) {
+                return;
+            }
+
+            for (int i = 0; i < newRespondents.size() && i < oldRespondents.size(); i++) {
+                Element<PartyDetails> newRepresentedPartyElement = newRespondents.get(i);
+                Element<PartyDetails> oldRepresentedPartyElement = oldRespondents.get(i);
+
                 if (YesNoDontKnow.no.equals(newRepresentedPartyElement.getValue().getDoTheyHaveLegalRepresentation())
                     && YesNoDontKnow.yes.equals(oldRepresentedPartyElement.getValue().getDoTheyHaveLegalRepresentation())) {
+
                     UserDetails userDetails = userService.getUserDetails(authorisation);
+
+                    // IMPORTANT: use the correct respondent slot when building the role
+                    // e.g. C100RESPONDENTSOLICITOR1, C100RESPONDENTSOLICITOR2, ...
+                    CaseRole caseRole = CaseRole.valueOf("C100RESPONDENTSOLICITOR" + (i + 1));
                     DynamicListElement roleItem = DynamicListElement.builder()
-                        .code(CaseRole.C100RESPONDENTSOLICITOR1.formattedName())
-                        .label(CaseRole.C100RESPONDENTSOLICITOR1.formattedName())
+                        .code(caseRole.formattedName())
+                        .label(caseRole.formattedName())
                         .build();
+
                     ChangeOrganisationRequest changeOrganisationRequest = ChangeOrganisationRequest.builder()
                         .organisationToRemove(oldRepresentedPartyElement.getValue().getSolicitorOrg())
                         .createdBy(userDetails.getEmail())
                         .caseRoleId(DynamicList.builder()
                                         .value(roleItem)
-                                        .listItems(List.of(roleItem))
+                                        .listItems(java.util.Arrays.asList(roleItem))
                                         .build())
                         .approvalStatus(ChangeOrganisationApprovalStatus.APPROVED)
                         .requestTimestamp(time.now())
                         .build();
+
                     callbackRequest.getCaseDetails().getData()
                         .put("changeOrganisationRequestField", changeOrganisationRequest);
+
                     AboutToStartOrSubmitCallbackResponse response = assignCaseAccessClient.applyDecision(
                         authorisation,
                         tokenGenerator.generate(),
                         decisionRequest(callbackRequest.getCaseDetails())
                     );
+
+                    // Merge any returned fields (e.g. updated org policies) into the case data
+                    if (response != null && response.getData() != null) {
+                        Map<String, Object> updated = response.getData();
+                        callbackRequest.getCaseDetails().getData().putAll(updated);
+                        if (response.getErrors() != null && !response.getErrors().isEmpty()) {
+                            log.warn("applyDecision returned errors: {}", response.getErrors());
+                        }
+                    }
                 }
-            });
+            }
         }
     }
 
