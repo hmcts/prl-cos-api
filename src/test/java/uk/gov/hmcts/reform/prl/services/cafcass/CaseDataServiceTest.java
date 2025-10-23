@@ -40,6 +40,7 @@ import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.Element;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
@@ -77,6 +78,8 @@ public class CaseDataServiceTest {
     private final String s2sToken = "s2s token";
 
     private final String userToken = "Bearer testToken";
+
+    private static final String REDACTED_DOCUMENT_URL = "http://test/documents/00000000-0000-0000-0000-000000000000";
 
     @Mock
     HearingService hearingService;
@@ -318,11 +321,14 @@ public class CaseDataServiceTest {
         List<String> excludedDocumentList = new ArrayList<>();
         excludedDocumentList.add("Draft_C100_application");
         ReflectionTestUtils.setField(caseDataService, "excludedDocumentList", excludedDocumentList);
+        ReflectionTestUtils.setField(caseDataService, "objMapper", objectMapper);
         uk.gov.hmcts.reform.ccd.client.model.Document documents =
             new uk.gov.hmcts.reform.ccd.client.model
                 .Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
         Category subCategory = new Category("applicantC1AResponse", "categoryName", 2, List.of(documents), null);
         Category category = new Category("applicantC1AResponse", "categoryName", 2, List.of(documents), List.of(subCategory));
+
+
 
         CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(documents));
         when(coreCaseDataApi.getCategoriesAndDocuments(
@@ -335,6 +341,10 @@ public class CaseDataServiceTest {
                                                                           "start", "end"
         );
         assertNotNull(objectMapper.writeValueAsString(realCafCassResponse));
+        List<CafCassCaseDetail> realCafCassCaseDetail = realCafCassResponse.getCases().stream()
+            .filter(c -> c.getId().equals(1673970714366224L)).toList();
+        //it must filter the Redacted document
+        assertEquals(1, realCafCassCaseDetail.get(0).getCaseData().getOtherDocuments().size());
 
     }
 
@@ -548,5 +558,88 @@ public class CaseDataServiceTest {
 
     }
 
+    @Test
+    public void testRedactedDocumentsOnAddSpecificDocumentsFromCaseFileViewBasedOnCategories() throws NoSuchMethodException,
+        InvocationTargetException, IllegalAccessException {
+        Document document = Document.builder().documentUrl(REDACTED_DOCUMENT_URL).documentFileName("*Redacted*").build();
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().categoryId("MIAMCertificate")
+            .miamCertificateDocument(document).build();
+        Map<String, Object> attributes = Map.of("miamCertificateDocument", Element.builder().value(quarantineLegalDoc));
+        when(objMapper.convertValue(any(QuarantineLegalDoc.class), eq(Map.class))).thenReturn(attributes);
+        when(objMapper.convertValue(any(), eq(uk.gov.hmcts.reform.prl.models.documents.Document.class))).thenReturn(
+            document);
+        Bundle caseBundles = Bundle.builder()
+            .value(BundleDetails.builder().stitchedDocument(DocumentLink.builder().documentUrl("http://test.link")
+                                                                .documentFilename("test").build()).build())
+            .build();
+        ResponseDocuments responseDocuments = ResponseDocuments.builder()
+            .citizenDocument(document)
+            .respondentC8Document(document)
+            .respondentC8DocumentWelsh(document)
+            .build();
+        ApplicantDetails applicantDetails = ApplicantDetails.builder()
+            .response(Response.builder().responseToAllegationsOfHarm(ResponseToAllegationsOfHarm.builder()
+                                                                         .responseToAllegationsOfHarmDocument(document)
+                                                                         .build()).build())
+            .build();
+        CafCassCaseData cafCassCaseData = CafCassCaseData.builder()
+            .respondents(List.of(Element.<ApplicantDetails>builder().id(UUID.randomUUID()).value(applicantDetails).build()))
+            .bundleInformation(BundlingInformation.builder().caseBundles(List.of(caseBundles)).build())
+            .respondentAc8Documents(List.of(element(responseDocuments)))
+            .respondentBc8Documents(List.of(element(responseDocuments)))
+            .respondentCc8Documents(List.of(element(responseDocuments)))
+            .respondentDc8Documents(List.of(element(responseDocuments)))
+            .respondentEc8Documents(List.of(element(responseDocuments)))
+            .build();
+        CafCassCaseDetail cafCassCaseDetail = CafCassCaseDetail.builder()
+            .caseData(cafCassCaseData)
+            .build();
+        CafCassResponse cafCassResponse = CafCassResponse.builder().cases(List.of(cafCassCaseDetail)).build();
+        Method privateMethod = CaseDataService.class.getDeclaredMethod(
+            "addSpecificDocumentsFromCaseFileViewBasedOnCategories",
+            CafCassResponse.class
+        );
+        privateMethod.setAccessible(true);
+        privateMethod.invoke(caseDataService, cafCassResponse);
+
+        assertEquals("test", cafCassResponse.getCases().get(0).getCaseData().getOtherDocuments().get(0).getValue().getDocumentName());
+        assertNull(cafCassResponse.getCases().get(0).getCaseData().getCourtStaffUploadDocListDocTab());
+        assertNull(cafCassResponse.getCases().get(0).getCaseData().getCafcassUploadDocListDocTab());
+
+    }
+
+    @Test
+    public void testRedactedDocumentsOnAddInOtherDocuments() throws NoSuchMethodException,
+        InvocationTargetException, IllegalAccessException {
+        String category = "MIAMCertificate";
+        Document document = Document.builder().documentUrl(REDACTED_DOCUMENT_URL).documentFileName("*Redacted*").build();
+        List<Element<OtherDocuments>> otherDocsList = new ArrayList<>();
+        Method privateMethod = CaseDataService.class.getDeclaredMethod(
+            "addInOtherDocuments",
+            String.class, Document.class, List.class
+        );
+        privateMethod.setAccessible(true);
+        privateMethod.invoke(caseDataService, category, document, otherDocsList);
+
+        assertTrue(otherDocsList.isEmpty());
+
+    }
+
+    @Test
+    public void testAddInOtherDocuments() throws NoSuchMethodException,
+        InvocationTargetException, IllegalAccessException {
+        String category = "MIAMCertificate";
+        Document document = Document.builder().documentUrl("http://test").documentFileName("test").build();
+        List<Element<OtherDocuments>> otherDocsList = new ArrayList<>();
+        Method privateMethod = CaseDataService.class.getDeclaredMethod(
+            "addInOtherDocuments",
+            String.class, Document.class, List.class
+        );
+        privateMethod.setAccessible(true);
+        privateMethod.invoke(caseDataService, category, document, otherDocsList);
+
+        assertFalse(otherDocsList.isEmpty());
+        assertEquals("test", otherDocsList.get(0).getValue().getDocumentName());
+    }
 
 }
