@@ -26,6 +26,5 @@ public class StatementOfService {
     @JsonProperty("stmtOfServiceForApplication")
     private List<Element<StmtOfServiceAddRecipient>> stmtOfServiceForApplication;
     @JsonProperty("servedOrderIds")
-    @Builder.Default
-    private List<String> servedOrderIds = null;
+    private List<String> servedOrderIds;
 }
