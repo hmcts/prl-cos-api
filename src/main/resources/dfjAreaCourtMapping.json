@@ -52,5 +52,41 @@
     "courtName": "Wolverhampton Combined Court Centre",
     "courtField": "wolverhamptonDFJCourt",
     "dfjArea": "WOLVERHAMPTON"
+  },
+  {
+    "courtCode": "471349",
+    "courtName": "Ipswich County Court and Family Hearing Centre",
+    "courtField": "essexAndSuffolkDFJCourt",
+    "dfjArea": "ESSEX_AND_SUFFOLK"
+  },
+  {
+    "courtCode": "257431",
+    "courtName": "Bury St Edmunds County Court and Family Court",
+    "courtField": "essexAndSuffolkDFJCourt",
+    "dfjArea": "ESSEX_AND_SUFFOLK"
+  },
+  {
+    "courtCode": "781139",
+    "courtName": "Southend Combined - Crown, Mags, County and Family Courts",
+    "courtField": "essexAndSuffolkDFJCourt",
+    "dfjArea": "ESSEX_AND_SUFFOLK"
+  },
+  {
+    "courtCode": "177463",
+    "courtName": "Walsall County and Family Court",
+    "courtField": "wolverhamptonDFJCourt",
+    "dfjArea": "WOLVERHAMPTON"
+  },
+  {
+    "courtCode": "758998",
+    "courtName": "Dudley Magistrates Court",
+    "courtField": "wolverhamptonDFJCourt",
+    "dfjArea": "WOLVERHAMPTON"
+  },
+  {
+    "courtCode": "292771",
+    "courtName": "Telford Magistrates Court",
+    "courtField": "wolverhamptonDFJCourt",
+    "dfjArea": "WOLVERHAMPTON"
   }
 ]
