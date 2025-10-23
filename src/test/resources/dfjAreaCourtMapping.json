@@ -1,0 +1,14 @@
+[
+  {
+    "courtCode": "234946",
+    "courtName": "Swansea Civil Justice Centre",
+    "courtField": "swanseaDFJCourt",
+    "dfjArea": "SWANSEA"
+  },
+  {
+    "courtCode": "816875",
+    "courtName": "Chelmsford Justice Centre",
+    "courtField": "essexAndSuffolkDFJCourt",
+    "dfjArea": "ESSEX_AND_SUFFOLK"
+  }
+]

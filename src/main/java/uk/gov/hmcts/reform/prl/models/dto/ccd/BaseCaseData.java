@@ -150,4 +150,6 @@ public class BaseCaseData {
     private String documentsToBeRemoved;
 
     private AllocatedBarrister allocatedBarrister;
+
+    private String dfjArea;
 }
