@@ -100,6 +100,7 @@ class FL401ApplicationMapperTest {
             "test1",
             caseData.getReasonForOrderWithoutGivingNotice().getFutherDetails()
         );
+        assertEquals("applicant_first_name applicant_last_name & resp test fl401", caseData.getApplicantCaseName());
     }
 
     @Test
