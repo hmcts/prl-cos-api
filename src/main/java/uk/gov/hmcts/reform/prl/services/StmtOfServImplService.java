@@ -224,6 +224,11 @@ public class StmtOfServImplService {
             sosRecipients.addAll(caseData.getStatementOfService().getStmtOfServiceForOrder());
         }
 
+        log.info("Statement of service recipients being saved to stmtOfServiceForOrder - count: {}", sosRecipients.size());
+        sosRecipients.forEach(recipient ->
+            log.info("Recipient order IDs: {}", recipient.getValue().getServedOrderIds())
+        );
+
         caseDataMap.put("stmtOfServiceForOrder", sosRecipients);
         //PRL-6122
         caseDataMap.put(ORDER_COLLECTION, orderCollection);
@@ -351,21 +356,13 @@ public class StmtOfServImplService {
                           .collect(Collectors.toSet())::contains);
     }
 
-    /**
-     * Builds a complete StmtOfServiceAddRecipient with party details, served dates/times, and order IDs.
-     * Populates fields: selectedPartyId, selectedPartyName, partiesServedDateTime, uploadedBy,
-     * submittedDateTime, and servedOrderIds (extracted from orderList).
-     *
-     * @param authorisation User authorization token for determining who uploaded the SOS
-     * @param recipient The original recipient with orderList and servedDateTimeOption
-     * @param selectedPartyId The ID of the party being served
-     * @param selectedPartyName The name of the party being served
-     * @return A fully populated recipient with all details and order IDs
-     */
     private StmtOfServiceAddRecipient buildRecipientWithPartyAndOrderDetails(String authorisation,
                                                                               StmtOfServiceAddRecipient recipient,
                                                                               String selectedPartyId,
                                                                               String selectedPartyName) {
+
+        List<String> servedOrderIds = extractServedOrderIds(recipient);
+        log.info("Statement of service order IDs being saved to recipient: {}", servedOrderIds);
 
         return recipient.toBuilder()
             .selectedPartyId(selectedPartyId)
@@ -378,7 +375,7 @@ public class StmtOfServImplService {
             .submittedDateTime(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)).toLocalDateTime())
             //PRL-6478 - Reset to null as not to show duplicate date field in XUI
             .servedDateTimeOption(null)
-            .servedOrderIds(extractServedOrderIds(recipient))
+            .servedOrderIds(servedOrderIds)
             .orderList(null)
             .build();
     }
@@ -386,10 +383,13 @@ public class StmtOfServImplService {
     private List<String> extractServedOrderIds(StmtOfServiceAddRecipient recipient) {
         if (recipient.getOrderList() != null
             && CollectionUtils.isNotEmpty(recipient.getOrderList().getValue())) {
-            return recipient.getOrderList().getValue().stream()
+            List<String> orderIds = recipient.getOrderList().getValue().stream()
                 .map(element -> element.getCode())
                 .collect(Collectors.toList());
+            log.info("Statement of service order IDs extracted from orderList: {}", orderIds);
+            return orderIds;
         }
+        log.info("No order IDs found - orderList is null or empty");
         return null;
     }
 
