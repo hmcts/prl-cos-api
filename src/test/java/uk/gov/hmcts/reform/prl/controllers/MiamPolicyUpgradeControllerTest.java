@@ -10,6 +10,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 
 import java.util.HashMap;
 
@@ -28,6 +29,9 @@ public class MiamPolicyUpgradeControllerTest {
 
     @Mock
     MiamPolicyUpgradeService miamPolicyUpgradeService;
+
+    @Mock
+    private CafcassDateTimeService cafcassDateTimeService;
 
     @Test
     public void testSubmitMiamPolicyUpgrade() {

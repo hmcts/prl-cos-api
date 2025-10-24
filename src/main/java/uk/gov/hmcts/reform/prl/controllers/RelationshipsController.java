@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
@@ -46,6 +47,8 @@ public class RelationshipsController {
     private final ObjectMapper objectMapper;
 
     private final ConfidentialityTabService confidentialityTabService;
+
+    private final CafcassDateTimeService cafcassDateTimeService;
 
     private static final String CHILD_AND_APPLICANT_RELATIONS = "buffChildAndApplicantRelations";
 
@@ -150,6 +153,7 @@ public class RelationshipsController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put(CHILD_AND_APPLICANT_RELATIONS, null);
         caseDataUpdated.put("childAndApplicantRelations", updatedChildAndApplicantRelations);
+        cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -253,6 +257,7 @@ public class RelationshipsController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put(PrlAppsConstants.BUFF_CHILD_AND_RESPONDENT_RELATIONS, null);
         caseDataUpdated.put("childAndRespondentRelations", updatedChildAndRespondentRelations);
+        cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -283,6 +288,7 @@ public class RelationshipsController {
                 })
         );
         caseDataUpdated.put(PrlAppsConstants.BUFF_CHILD_AND_OTHER_PEOPLE_RELATIONS, otherPeopleChildRelationsList);
+        cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -386,6 +392,7 @@ public class RelationshipsController {
                 caseData.getOtherPartyInTheCaseRevised()
             )
         );
+        cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 

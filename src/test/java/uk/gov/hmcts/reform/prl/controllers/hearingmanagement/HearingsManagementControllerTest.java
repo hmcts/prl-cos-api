@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingsUpdate;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDateRequest;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.services.hearingmanagement.HearingManagementService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -62,6 +63,9 @@ public class HearingsManagementControllerTest {
 
     @Mock
     private AllTabServiceImpl allTabService;
+
+    @Mock
+    private CafcassDateTimeService cafcassDateTimeService;
 
     private HearingRequest hearingRequest;
     @MockBean
@@ -160,6 +164,7 @@ public class HearingsManagementControllerTest {
             .build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(cafcassDateTimeService.updateCafcassDateTime(callbackRequest)).thenReturn(stringObjectMap);
 
         when(CaseUtils.getCaseData(
             callbackRequest.getCaseDetails(),
