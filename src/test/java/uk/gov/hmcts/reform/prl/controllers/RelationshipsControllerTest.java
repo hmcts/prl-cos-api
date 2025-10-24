@@ -42,6 +42,8 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
@@ -802,6 +804,7 @@ public class RelationshipsControllerTest {
 
         Map<String, Object> caseDetailsRespnse = aboutToStartOrSubmitCallbackResponse.getData();
         assertNotNull(caseDetailsRespnse.get("buffChildAndOtherPeopleRelations"));
+        verify(cafcassDateTimeService).updateCafcassDateTime(any());
     }
 
     @Test

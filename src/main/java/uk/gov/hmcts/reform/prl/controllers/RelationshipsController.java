@@ -392,6 +392,7 @@ public class RelationshipsController {
                 caseData.getOtherPartyInTheCaseRevised()
             )
         );
+        cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
