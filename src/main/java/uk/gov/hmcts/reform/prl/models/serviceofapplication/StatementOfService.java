@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.StatementOfServiceWhatWasServed;
 import uk.gov.hmcts.reform.prl.models.Element;
 
@@ -12,7 +11,6 @@ import java.util.List;
 
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class StatementOfService {
@@ -25,7 +23,4 @@ public class StatementOfService {
     private List<Element<StmtOfServiceAddRecipient>> stmtOfServiceForOrder;
     @JsonProperty("stmtOfServiceForApplication")
     private List<Element<StmtOfServiceAddRecipient>> stmtOfServiceForApplication;
-    @JsonProperty("servedOrderIds")
-    @Builder.Default
-    private List<String> servedOrderIds = null;
 }

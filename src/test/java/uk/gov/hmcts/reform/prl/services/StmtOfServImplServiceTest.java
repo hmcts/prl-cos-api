@@ -1203,7 +1203,7 @@ public class StmtOfServImplServiceTest {
     }
 
     @Test
-    public void testHandleSosForOrders_ServedOrderIdsAreCollectedCorrectly() {
+    public void testHandleSosForOrders_ServedOrderIdsAreStoredOnRecipient() {
         DynamicMultiSelectList orderList = DynamicMultiSelectList.builder()
             .value(Arrays.asList(
                 DynamicMultiselectListElement.builder().code("order-1").label("Test Order 1").build(),
@@ -1248,25 +1248,31 @@ public class StmtOfServImplServiceTest {
 
         Map<String, Object> result = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
 
-        assertNotNull("servedOrderIds should be populated", result.get("servedOrderIds"));
+        // servedOrderIds are now stored on each recipient, not at case data level
+        assertNotNull("stmtOfServiceForOrder should be populated", result.get("stmtOfServiceForOrder"));
 
         @SuppressWarnings("unchecked")
-        List<String> servedOrderIds = (List<String>) result.get("servedOrderIds");
+        List<Element<StmtOfServiceAddRecipient>> stmtOfServiceForOrder =
+            (List<Element<StmtOfServiceAddRecipient>>) result.get("stmtOfServiceForOrder");
 
-        assertEquals("Should have 2 served order IDs", 2, servedOrderIds.size());
-        assertEquals("First order ID should be order-1", "order-1", servedOrderIds.get(0));
-        assertEquals("Second order ID should be order-2", "order-2", servedOrderIds.get(1));
+        assertEquals("Should have 1 recipient", 1, stmtOfServiceForOrder.size());
+
+        StmtOfServiceAddRecipient processedRecipient = stmtOfServiceForOrder.get(0).getValue();
+        assertNotNull("Recipient should have servedOrderIds", processedRecipient.getServedOrderIds());
+        assertEquals("Should have 2 served order IDs", 2, processedRecipient.getServedOrderIds().size());
+        assertEquals("First order ID should be order-1", "order-1", processedRecipient.getServedOrderIds().get(0));
+        assertEquals("Second order ID should be order-2", "order-2", processedRecipient.getServedOrderIds().get(1));
     }
 
     @Test
-    public void testHandleSosForOrders_ServedOrderIdsPreserveExistingIds() {
+    public void testHandleSosForOrders_ServedOrderIdsPreservedOnExistingRecipients() {
         DynamicMultiSelectList orderList = DynamicMultiSelectList.builder()
             .value(Arrays.asList(
                 DynamicMultiselectListElement.builder().code("order-3").label("Test Order 3").build()
             ))
             .build();
 
-        StmtOfServiceAddRecipient recipient = StmtOfServiceAddRecipient.builder()
+        StmtOfServiceAddRecipient newRecipient = StmtOfServiceAddRecipient.builder()
             .respondentDynamicList(DynamicList.builder()
                                        .value(DynamicListElement.builder().code(TEST_UUID).label("Test Recipient").build())
                                        .build())
@@ -1274,12 +1280,20 @@ public class StmtOfServImplServiceTest {
             .stmtOfServiceDocument(Document.builder().documentFileName("test.pdf").build())
             .build();
 
+        // Existing recipient with previously served orders
+        StmtOfServiceAddRecipient existingRecipient = StmtOfServiceAddRecipient.builder()
+            .selectedPartyId(TEST_UUID)
+            .selectedPartyName("Existing Recipient")
+            .servedOrderIds(Arrays.asList("order-1", "order-2"))
+            .stmtOfServiceDocument(Document.builder().documentFileName("existing.pdf").build())
+            .build();
+
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .statementOfService(StatementOfService.builder()
                                     .stmtOfServiceWhatWasServed(StatementOfServiceWhatWasServed.statementOfServiceOrder)
-                                    .stmtOfServiceAddRecipient(Arrays.asList(element(recipient)))
-                                    .servedOrderIds(Arrays.asList("order-1", "order-2"))
+                                    .stmtOfServiceAddRecipient(Arrays.asList(element(newRecipient)))
+                                    .stmtOfServiceForOrder(Arrays.asList(element(existingRecipient)))
                                     .build())
             .orderCollection(Arrays.asList(element(
                 UUID.fromString(TEST_UUID), OrderDetails.builder()
@@ -1304,19 +1318,28 @@ public class StmtOfServImplServiceTest {
 
         Map<String, Object> result = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
 
-        assertNotNull("servedOrderIds should be populated", result.get("servedOrderIds"));
-
         @SuppressWarnings("unchecked")
-        List<String> servedOrderIds = (List<String>) result.get("servedOrderIds");
+        List<Element<StmtOfServiceAddRecipient>> stmtOfServiceForOrder =
+            (List<Element<StmtOfServiceAddRecipient>>) result.get("stmtOfServiceForOrder");
 
-        assertEquals("Should have 3 served order IDs (1 new + 2 existing)", 3, servedOrderIds.size());
-        assertEquals("First order ID should be new order-3", "order-3", servedOrderIds.get(0));
-        assertEquals("Second order ID should be existing order-1", "order-1", servedOrderIds.get(1));
-        assertEquals("Third order ID should be existing order-2", "order-2", servedOrderIds.get(2));
+        assertEquals("Should have 2 recipients (1 new + 1 existing)", 2, stmtOfServiceForOrder.size());
+
+        // Check new recipient has its order IDs
+        StmtOfServiceAddRecipient processedNewRecipient = stmtOfServiceForOrder.get(0).getValue();
+        assertNotNull("New recipient should have servedOrderIds", processedNewRecipient.getServedOrderIds());
+        assertEquals("New recipient should have 1 order ID", 1, processedNewRecipient.getServedOrderIds().size());
+        assertEquals("New recipient order ID should be order-3", "order-3", processedNewRecipient.getServedOrderIds().get(0));
+
+        // Check existing recipient still has its order IDs
+        StmtOfServiceAddRecipient processedExistingRecipient = stmtOfServiceForOrder.get(1).getValue();
+        assertNotNull("Existing recipient should have servedOrderIds", processedExistingRecipient.getServedOrderIds());
+        assertEquals("Existing recipient should have 2 order IDs", 2, processedExistingRecipient.getServedOrderIds().size());
+        assertEquals("First existing order ID should be order-1", "order-1", processedExistingRecipient.getServedOrderIds().get(0));
+        assertEquals("Second existing order ID should be order-2", "order-2", processedExistingRecipient.getServedOrderIds().get(1));
     }
 
     @Test
-    public void testHandleSosForOrders_ServedOrderIdsEmptyWhenNoOrdersSelected() {
+    public void testHandleSosForOrders_ServedOrderIdsNullWhenNoOrdersSelected() {
         StmtOfServiceAddRecipient recipient = StmtOfServiceAddRecipient.builder()
             .respondentDynamicList(DynamicList.builder()
                                        .value(DynamicListElement.builder().code(TEST_UUID).label("Test Recipient").build())
@@ -1354,12 +1377,15 @@ public class StmtOfServImplServiceTest {
 
         Map<String, Object> result = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
 
-        assertNotNull("servedOrderIds should be populated", result.get("servedOrderIds"));
-
         @SuppressWarnings("unchecked")
-        List<String> servedOrderIds = (List<String>) result.get("servedOrderIds");
+        List<Element<StmtOfServiceAddRecipient>> stmtOfServiceForOrder =
+            (List<Element<StmtOfServiceAddRecipient>>) result.get("stmtOfServiceForOrder");
 
-        assertEquals("Should have 0 served order IDs when no orders selected", 0, servedOrderIds.size());
+        assertEquals("Should have 1 recipient", 1, stmtOfServiceForOrder.size());
+
+        StmtOfServiceAddRecipient processedRecipient = stmtOfServiceForOrder.get(0).getValue();
+        assertNull("Recipient should have null servedOrderIds when no orders selected (backward compatible)",
+                   processedRecipient.getServedOrderIds());
     }
 
     @Test
@@ -1424,26 +1450,26 @@ public class StmtOfServImplServiceTest {
         );
 
         assertNotNull(
-            "selectedOrderIds should be populated for XUI display",
-            processedRecipient.getSelectedOrderIds()
+            "servedOrderIds should be populated for XUI display",
+            processedRecipient.getServedOrderIds()
         );
 
         assertEquals(
-            "Should have 2 selected order IDs",
+            "Should have 2 served order IDs",
             2,
-            processedRecipient.getSelectedOrderIds().size()
+            processedRecipient.getServedOrderIds().size()
         );
 
         assertEquals(
             "First order ID should be order-1",
             "order-1",
-            processedRecipient.getSelectedOrderIds().get(0)
+            processedRecipient.getServedOrderIds().get(0)
         );
 
         assertEquals(
             "Second order ID should be order-2",
             "order-2",
-            processedRecipient.getSelectedOrderIds().get(1)
+            processedRecipient.getServedOrderIds().get(1)
         );
     }
 

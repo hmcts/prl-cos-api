@@ -137,9 +137,6 @@ public class StmtOfServImplService {
                 .equals(caseData.getStatementOfService().getStmtOfServiceWhatWasServed())) {
                 //Orders
                 handleSosForOrders(authorisation, caseData, caseDataUpdateMap);
-
-                List<String> savedOrderIds = (List<String>) caseDataUpdateMap.get("servedOrderIds");
-                log.info("Statement of service order IDs saved to caseData: {}", savedOrderIds);
             }
         }
 
@@ -160,7 +157,7 @@ public class StmtOfServImplService {
                 .stream()
                 .map(Element::getValue)
                 .forEach(sosRecipient -> {
-                    sosRecipient = getUpdatedSosRecipient(authorisation, caseData, sosRecipient, null);
+                    sosRecipient = buildRecipientAndUpdateOrderCollection(authorisation, caseData, sosRecipient, null);
 
                     caseDataMap.put(
                         ACCESS_CODE_NOTIFICATIONS,
@@ -205,7 +202,6 @@ public class StmtOfServImplService {
         log.info("SOS for Orders");
         List<Element<StmtOfServiceAddRecipient>> sosRecipients = new ArrayList<>();
         List<Element<OrderDetails>> orderCollection = caseData.getOrderCollection();
-        List<String> servedOrderIds = new ArrayList<>();
 
         //Get all sos recipients
         if (caseData.getStatementOfService() != null
@@ -214,12 +210,7 @@ public class StmtOfServImplService {
                 .stream()
                 .map(Element::getValue)
                 .forEach(sosRecipient -> {
-                    sosRecipient = getUpdatedSosRecipient(authorisation, caseData, sosRecipient, orderCollection);
-
-                    // Extract order IDs from the processed recipient's selectedOrderIds field
-                    if (CollectionUtils.isNotEmpty(sosRecipient.getSelectedOrderIds())) {
-                        servedOrderIds.addAll(sosRecipient.getSelectedOrderIds());
-                    }
+                    sosRecipient = buildRecipientAndUpdateOrderCollection(authorisation, caseData, sosRecipient, orderCollection);
 
                     sosRecipients.add(element(sosRecipient.toBuilder()
                                                   .respondentDynamicList(null) //clear dynamic list
@@ -233,29 +224,21 @@ public class StmtOfServImplService {
             sosRecipients.addAll(caseData.getStatementOfService().getStmtOfServiceForOrder());
         }
 
-        if (caseData.getStatementOfService() != null
-            && CollectionUtils.isNotEmpty(caseData.getStatementOfService().getServedOrderIds())) {
-            servedOrderIds.addAll(caseData.getStatementOfService().getServedOrderIds());
-        }
-
-        log.info("Statement of service order IDs being stored: {}", servedOrderIds);
-
         caseDataMap.put("stmtOfServiceForOrder", sosRecipients);
-        caseDataMap.put("servedOrderIds", servedOrderIds);
         //PRL-6122
         caseDataMap.put(ORDER_COLLECTION, orderCollection);
     }
 
-    private StmtOfServiceAddRecipient getUpdatedSosRecipient(String authorisation,
-                                                             CaseData caseData,
-                                                             StmtOfServiceAddRecipient recipient,
-                                                             List<Element<OrderDetails>> orderCollection) {
-        log.info("Inside *getUpdatedSosRecipient*");
+    private StmtOfServiceAddRecipient buildRecipientAndUpdateOrderCollection(String authorisation,
+                                                                              CaseData caseData,
+                                                                              StmtOfServiceAddRecipient recipient,
+                                                                              List<Element<OrderDetails>> orderCollection) {
+        log.info("Inside *buildRecipientAndUpdateOrderCollection*");
         if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             if (ALL_RESPONDENTS.equals(recipient.getRespondentDynamicList().getValue().getLabel())) {
                 List<String> respondentNamesList = CaseUtils.getPartyNameList(caseData.getRespondents());
                 String allRespondentNames = String.join(", ", respondentNamesList).concat(" (All respondents)");
-                recipient = getRecipient(
+                recipient = buildRecipientWithPartyAndOrderDetails(
                     authorisation,
                     recipient,
                     CaseUtils.getPartyIdListAsString(caseData.getRespondents()),
@@ -267,7 +250,7 @@ public class StmtOfServImplService {
                                           ManageOrdersUtils.getServedParties(caseData.getRespondents()));
 
             } else {
-                recipient = getRecipient(authorisation,
+                recipient = buildRecipientWithPartyAndOrderDetails(authorisation,
                                          recipient,
                                          recipient.getRespondentDynamicList().getValue().getCode(),
                                          recipient.getRespondentDynamicList().getValue().getLabel()
@@ -291,7 +274,7 @@ public class StmtOfServImplService {
                 updateOrdersServedParties(caseData, orderCollection, ManageOrdersUtils.getServedParties(partiesServed));
             }
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            recipient = getRecipient(authorisation,
+            recipient = buildRecipientWithPartyAndOrderDetails(authorisation,
                                      recipient,
                                      recipient.getRespondentDynamicList().getValue().getCode(),
                                      recipient.getRespondentDynamicList().getValue().getLabel()
@@ -368,18 +351,21 @@ public class StmtOfServImplService {
                           .collect(Collectors.toSet())::contains);
     }
 
-    private StmtOfServiceAddRecipient getRecipient(String authorisation,
-                                                   StmtOfServiceAddRecipient recipient,
-                                                   String selectedPartyId,
-                                                   String selectedPartyName) {
-
-        List<String> selectedOrderIds = null;
-        if (recipient.getOrderList() != null
-            && CollectionUtils.isNotEmpty(recipient.getOrderList().getValue())) {
-            selectedOrderIds = recipient.getOrderList().getValue().stream()
-                .map(element -> element.getCode())
-                .collect(Collectors.toList());
-        }
+    /**
+     * Builds a complete StmtOfServiceAddRecipient with party details, served dates/times, and order IDs.
+     * Populates fields: selectedPartyId, selectedPartyName, partiesServedDateTime, uploadedBy,
+     * submittedDateTime, and servedOrderIds (extracted from orderList).
+     *
+     * @param authorisation User authorization token for determining who uploaded the SOS
+     * @param recipient The original recipient with orderList and servedDateTimeOption
+     * @param selectedPartyId The ID of the party being served
+     * @param selectedPartyName The name of the party being served
+     * @return A fully populated recipient with all details and order IDs
+     */
+    private StmtOfServiceAddRecipient buildRecipientWithPartyAndOrderDetails(String authorisation,
+                                                                              StmtOfServiceAddRecipient recipient,
+                                                                              String selectedPartyId,
+                                                                              String selectedPartyName) {
 
         return recipient.toBuilder()
             .selectedPartyId(selectedPartyId)
@@ -392,9 +378,19 @@ public class StmtOfServImplService {
             .submittedDateTime(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)).toLocalDateTime())
             //PRL-6478 - Reset to null as not to show duplicate date field in XUI
             .servedDateTimeOption(null)
-            .selectedOrderIds(selectedOrderIds)
+            .servedOrderIds(extractServedOrderIds(recipient))
             .orderList(null)
             .build();
+    }
+
+    private List<String> extractServedOrderIds(StmtOfServiceAddRecipient recipient) {
+        if (recipient.getOrderList() != null
+            && CollectionUtils.isNotEmpty(recipient.getOrderList().getValue())) {
+            return recipient.getOrderList().getValue().stream()
+                .map(element -> element.getCode())
+                .collect(Collectors.toList());
+        }
+        return null;
     }
 
     private SosUploadedByEnum getSosUploadedBy(String authorisation) {

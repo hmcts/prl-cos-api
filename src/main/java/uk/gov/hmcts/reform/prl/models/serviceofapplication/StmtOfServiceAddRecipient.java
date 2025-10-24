@@ -35,8 +35,8 @@ public class StmtOfServiceAddRecipient {
     //Multi-select list for orders being served
     @JsonProperty("orderList")
     private final DynamicMultiSelectList orderList;
-    //Store selected order IDs
-    private final List<String> selectedOrderIds;
+    @JsonProperty("ServedOrderIds")
+    private final List<String> servedOrderIds;
     //NOT IN USE, DO NOT USE THESE
     private final String citizenPartiesServedList;
     private final String citizenPartiesServedDate;
