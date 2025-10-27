@@ -47,6 +47,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -509,12 +511,20 @@ public class SendAndReplyControllerTest {
     @Test
     public void testHandSubmittedSendAndReply() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .caseTypeOfApplication("C100")
+            .build();
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
         when(sendAndReplyService.sendAndReplySubmitted(callbackRequest)).thenReturn(ok(SubmittedCallbackResponse.builder().build()));
         ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyController.handleSubmittedSendAndReply(auth, callbackRequest);
         Assertions.assertThat(response.getStatusCode().value()).isEqualTo(200);
         verify(sendAndReplyService).sendAndReplySubmitted(callbackRequest);
+
+        verify(sendAndReplyCommonService).sendNotifications(any(), eq(caseData));
 
     }
 

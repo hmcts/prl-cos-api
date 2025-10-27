@@ -78,6 +78,11 @@ public class SendAndReplyCommonService {
             );
         }
 
+        //WA - clear reply field in case of SEND
+        sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
+    }
+
+    public void sendNotifications(String authorisation, CaseData caseData) {
         sendAndReplyService.sendNotificationToExternalParties(
             caseData,
             authorisation
@@ -85,8 +90,6 @@ public class SendAndReplyCommonService {
 
         //send emails in case of sending to others with emails
         sendAndReplyService.sendNotificationEmailOther(caseData);
-        //WA - clear reply field in case of SEND
-        sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
     }
 
 }
