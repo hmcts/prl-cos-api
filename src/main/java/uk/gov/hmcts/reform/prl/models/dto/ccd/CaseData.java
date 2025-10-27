@@ -736,7 +736,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
 
     private NextHearingDetails nextHearingDetails;
 
-    private final YesOrNo isAddCaseNumberAdded;
+    private YesOrNo isAddCaseNumberAdded;
 
     private final ChangeOrganisationRequest changeOrganisationRequestField;
 
