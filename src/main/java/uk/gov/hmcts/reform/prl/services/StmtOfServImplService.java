@@ -239,6 +239,12 @@ public class StmtOfServImplService {
                                                                               StmtOfServiceAddRecipient recipient,
                                                                               List<Element<OrderDetails>> orderCollection) {
         log.info("Inside *buildRecipientAndUpdateOrderCollection*");
+        log.info("DEBUG - orderList received from CCD: {}", recipient.getOrderList());
+        if (recipient.getOrderList() != null) {
+            log.info("DEBUG - orderList.getValue() (selected orders): {}", recipient.getOrderList().getValue());
+            log.info("DEBUG - orderList.getListItems() (available orders): {}",
+                recipient.getOrderList().getListItems() != null ? recipient.getOrderList().getListItems().size() + " items" : "null");
+        }
         if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             if (ALL_RESPONDENTS.equals(recipient.getRespondentDynamicList().getValue().getLabel())) {
                 List<String> respondentNamesList = CaseUtils.getPartyNameList(caseData.getRespondents());
