@@ -821,12 +821,12 @@ public class CallbackController {
             log.info("eventsForCase ........................... {} ", eventsForCase.stream().map(CaseEventDetail::getStateId).collect(
                 Collectors.joining(",")));
             Optional<String> previousState = eventsForCase.stream()
-                .map(CaseEventDetail::getStateId)
+                .map(CaseEventDetail::getStateId).distinct()
                 .findFirst();
-            previousState.ifPresent(s -> caseDataUpdated.put(
-                VERIFY_CASE_NUMBER_ADDED,
-                SUBMITTED_PAID.getValue().equalsIgnoreCase(s) ? Yes : No
-            ));
+            if (previousState.isPresent()) {
+                YesOrNo isAddCaseNumberAdded = SUBMITTED_PAID.getValue().equalsIgnoreCase(previousState.get()) ? Yes : No;
+                caseDataUpdated.put(VERIFY_CASE_NUMBER_ADDED, isAddCaseNumberAdded);
+            }
             return AboutToStartOrSubmitCallbackResponse
                 .builder()
                 .data(caseDataUpdated)
@@ -856,10 +856,10 @@ public class CallbackController {
             Optional<String> previousState = eventsForCase.stream()
                 .map(CaseEventDetail::getStateId)
                 .findFirst();
-            previousState.ifPresent(s -> caseDataUpdated.put(
-                VERIFY_CASE_NUMBER_ADDED,
-                SUBMITTED_PAID.getValue().equalsIgnoreCase(s) ? Yes : No
-            ));
+            if (previousState.isPresent()) {
+                YesOrNo isAddCaseNumberAdded = SUBMITTED_PAID.getValue().equalsIgnoreCase(previousState.get()) ? Yes : No;
+                caseDataUpdated.put(VERIFY_CASE_NUMBER_ADDED, isAddCaseNumberAdded);
+            }
             caseDataUpdated.put(ISSUE_DATE_FIELD, LocalDate.now());
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
