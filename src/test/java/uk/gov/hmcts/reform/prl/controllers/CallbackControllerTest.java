@@ -1187,6 +1187,72 @@ public class CallbackControllerTest {
     }
 
     @Test
+    public void testAddCaseNumberMidEventStateNotInSubmittedPaid() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .issueDate(LocalDate.now())
+            .build();
+
+        Map<String, Object> stringObjectMap = new HashMap<>();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        when(caseEventService.findEventsForCase("1"))
+            .thenReturn(List.of(CaseEventDetail.builder().stateId(ISSUED_STATE).build()));
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(1L)
+                             .data(stringObjectMap).build()).build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
+            .handleAddCaseNumberMidEvent(authToken, s2sToken, callbackRequest);
+        assertEquals(No,aboutToStartOrSubmitCallbackResponse.getData().get("isAddCaseNumberAdded"));
+    }
+
+    @Test
+    public void testAddCaseNumberMidEventStateSubmittedPaid() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .issueDate(LocalDate.now())
+            .build();
+
+        Map<String, Object> stringObjectMap = new HashMap<>();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        when(caseEventService.findEventsForCase("1"))
+            .thenReturn(List.of(CaseEventDetail.builder().stateId(SUBMITTED_STATE).build()));
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(1L)
+                             .data(stringObjectMap).build()).build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
+            .handleAddCaseNumberMidEvent(authToken, s2sToken, callbackRequest);
+        assertEquals(Yes,aboutToStartOrSubmitCallbackResponse.getData().get("isAddCaseNumberAdded"));
+    }
+
+    @Test
+    public void testExceptionForAddCaseNumberMidEvent() throws Exception {
+
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        when(amendCourtService.handleAmendCourtSubmission(Mockito.anyString(), Mockito.any(), Mockito.any()))
+            .thenReturn(new HashMap<>());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                                                       .data(stringObjectMap).build()).build();
+
+        assertExpectedException(() -> {
+            callbackController.handleAddCaseNumberMidEvent(authToken,s2sToken,callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+    }
+
+    @Test
     public void testAddCaseNumberSubmitted() throws Exception {
 
         CaseData caseData = CaseData.builder()
