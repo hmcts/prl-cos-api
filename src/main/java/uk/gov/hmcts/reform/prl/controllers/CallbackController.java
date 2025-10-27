@@ -803,39 +803,6 @@ public class CallbackController {
         }
     }
 
-    @PostMapping(path = "/fl401-add-case-number-mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback for add case number on mid-event")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback processed.",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
-        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse handleAddCaseNumberMidEvent(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest
-    ) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(callbackRequest.getCaseDetails().getId()));
-            log.info("eventsForCase ........................... {} ", eventsForCase.stream().map(CaseEventDetail::getStateId).collect(
-                Collectors.joining(",")));
-            Optional<String> previousState = eventsForCase.stream()
-                .map(CaseEventDetail::getStateId).distinct()
-                .findFirst();
-            if (previousState.isPresent()) {
-                YesOrNo isAddCaseNumberAdded = SUBMITTED_PAID.getValue().equalsIgnoreCase(previousState.get()) ? Yes : No;
-                caseDataUpdated.put(VERIFY_CASE_NUMBER_ADDED, isAddCaseNumberAdded);
-            }
-            return AboutToStartOrSubmitCallbackResponse
-                .builder()
-                .data(caseDataUpdated)
-                .build();
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
-    }
-
     @PostMapping(path = "/fl401-add-case-number", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for add case number submit event")
     @ApiResponses(value = {
@@ -858,9 +825,10 @@ public class CallbackController {
                 .findFirst();
             if (previousState.isPresent()) {
                 YesOrNo isAddCaseNumberAdded = SUBMITTED_PAID.getValue().equalsIgnoreCase(previousState.get()) ? Yes : No;
-                caseDataUpdated.put(VERIFY_CASE_NUMBER_ADDED, isAddCaseNumberAdded);
+                caseDataUpdated.put(VERIFY_CASE_NUMBER_ADDED, isAddCaseNumberAdded.getDisplayedValue());
             }
             caseDataUpdated.put(ISSUE_DATE_FIELD, LocalDate.now());
+            log.info("VERIFY_CASE_NUMBER_ADDED.............. : {}", caseDataUpdated.get(VERIFY_CASE_NUMBER_ADDED));
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
                 .build();
