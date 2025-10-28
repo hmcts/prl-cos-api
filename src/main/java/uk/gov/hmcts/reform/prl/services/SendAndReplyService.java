@@ -1932,7 +1932,7 @@ public class SendAndReplyService {
         dataMap.put("partyAddress", partyDetails.getAddress());
         dataMap.put("date", new SimpleDateFormat("dd/MM/yyyy").format(new Date()));
         dataMap.put("id", String.valueOf(caseData.getId()));
-        dataMap.put("messageContent", caseData.getMessageContent());
+        dataMap.put("messageContent", message.getMessageContent());
         dataMap.put("documentSize", isNotEmpty(attachedDocs) ? attachedDocs.size() : 0);
 
         String messageAbout = "";
@@ -2050,7 +2050,7 @@ public class SendAndReplyService {
             documentSize = allSelectedDocuments.size();
         }
         dynamicData.put("subject", message.getMessageSubject());
-        dynamicData.put("messageContent", caseData.getMessageContent());
+        dynamicData.put("messageContent", message.getMessageContent());
         dynamicData.put("attachmentType", "pdf");
         dynamicData.put("disposition", "attachment");
         dynamicData.put("documentSize", documentSize);
