@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
@@ -142,6 +143,21 @@ public class StmtOfServImplService {
 
         caseDataUpdateMap.put("stmtOfServiceAddRecipient", null);
         caseDataUpdateMap.put("stmtOfServiceWhatWasServed", null);
+        // Log servedOrderIds for debugging
+        if (caseDataUpdateMap.containsKey("stmtOfServiceForOrder")) {
+            Object stmtOfServiceForOrder = caseDataUpdateMap.get("stmtOfServiceForOrder");
+            if (stmtOfServiceForOrder instanceof List<?>) {
+                @SuppressWarnings("unchecked")
+                List<Element<StmtOfServiceAddRecipient>> recipients = (List<Element<StmtOfServiceAddRecipient>>) stmtOfServiceForOrder;
+                recipients.forEach(recipient -> {
+                    if (recipient.getValue() != null) {
+                        log.info("Recipient {} has servedOrderIds: {}",
+                            recipient.getValue().getSelectedPartyName(),
+                            recipient.getValue().getServedOrderIds());
+                    }
+                });
+            }
+        }
         return caseDataUpdateMap;
     }
 
@@ -224,11 +240,6 @@ public class StmtOfServImplService {
             sosRecipients.addAll(caseData.getStatementOfService().getStmtOfServiceForOrder());
         }
 
-        log.info("Statement of service recipients being saved to stmtOfServiceForOrder - count: {}", sosRecipients.size());
-        sosRecipients.forEach(recipient ->
-            log.info("Recipient order IDs: {}", recipient.getValue().getServedOrderIds())
-        );
-
         caseDataMap.put("stmtOfServiceForOrder", sosRecipients);
         //PRL-6122
         caseDataMap.put(ORDER_COLLECTION, orderCollection);
@@ -238,13 +249,7 @@ public class StmtOfServImplService {
                                                                               CaseData caseData,
                                                                               StmtOfServiceAddRecipient recipient,
                                                                               List<Element<OrderDetails>> orderCollection) {
-        log.info("Inside *buildRecipientAndUpdateOrderCollection*");
-        log.info("DEBUG - orderList received from CCD: {}", recipient.getOrderList());
-        if (recipient.getOrderList() != null) {
-            log.info("DEBUG - orderList.getValue() (selected orders): {}", recipient.getOrderList().getValue());
-            log.info("DEBUG - orderList.getListItems() (available orders): {}",
-                recipient.getOrderList().getListItems() != null ? recipient.getOrderList().getListItems().size() + " items" : "null");
-        }
+        log.info("Building recipient and updating order collection for case type: {}", caseData.getCaseTypeOfApplication());
         if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             if (ALL_RESPONDENTS.equals(recipient.getRespondentDynamicList().getValue().getLabel())) {
                 List<String> respondentNamesList = CaseUtils.getPartyNameList(caseData.getRespondents());
@@ -368,7 +373,6 @@ public class StmtOfServImplService {
                                                                               String selectedPartyName) {
 
         List<String> servedOrderIds = extractServedOrderIds(recipient);
-        log.info("Statement of service order IDs being saved to recipient: {}", servedOrderIds);
 
         return recipient.toBuilder()
             .selectedPartyId(selectedPartyId)
@@ -389,13 +393,11 @@ public class StmtOfServImplService {
     private List<String> extractServedOrderIds(StmtOfServiceAddRecipient recipient) {
         if (recipient.getOrderList() != null
             && CollectionUtils.isNotEmpty(recipient.getOrderList().getValue())) {
-            List<String> orderIds = recipient.getOrderList().getValue().stream()
-                .map(element -> element.getCode())
+            return recipient.getOrderList().getValue().stream()
+                .map(DynamicMultiselectListElement::getCode)
                 .collect(Collectors.toList());
-            log.info("Statement of service order IDs extracted from orderList: {}", orderIds);
-            return orderIds;
         }
-        log.info("No order IDs found - orderList is null or empty");
+        log.warn("No orders selected for statement of service - orderList is null or empty");
         return null;
     }
 
