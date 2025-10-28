@@ -146,7 +146,7 @@ public class BundleCreateRequestMapper {
             : hearingDaySchedule.getHearingVenueAddress();
     }
 
-    private List<Element<BundlingRequestDocument>> mapAllOtherDocuments(CaseData caseData) {
+     List<Element<BundlingRequestDocument>> mapAllOtherDocuments(CaseData caseData) {
 
         List<Element<BundlingRequestDocument>> allOtherDocuments = new ArrayList<>();
 
@@ -221,7 +221,7 @@ public class BundleCreateRequestMapper {
      * @param allOtherDocuments list of BundlingRequestDocument including other documents to be added to the list
      * @param docDetailsElement Other Document to be added to the list
      */
-    private void addOtherDocument(List<Element<BundlingRequestDocument>> allOtherDocuments, Element<BundlingRequestDocument> docDetailsElement) {
+    void addOtherDocument(List<Element<BundlingRequestDocument>> allOtherDocuments, Element<BundlingRequestDocument> docDetailsElement) {
         @NotNull @Valid BundlingRequestDocument docDetails = docDetailsElement.getValue();
         Document document = docDetails.getDocumentLink();
         if (document != null
@@ -309,7 +309,7 @@ public class BundleCreateRequestMapper {
         return ElementUtils.wrapElements(applications);
     }
 
-    private List<Element<BundlingRequestDocument>> mapMiamDetails(MiamDetails miamDetails) {
+    List<Element<BundlingRequestDocument>> mapMiamDetails(MiamDetails miamDetails) {
         List<BundlingRequestDocument> miamBundlingDocuments = new ArrayList<>();
         if (null != miamDetails) {
             Document miamCertificateUpload = miamDetails.getMiamCertificationDocumentUpload();
@@ -324,7 +324,7 @@ public class BundleCreateRequestMapper {
         return ElementUtils.wrapElements(miamBundlingDocuments);
     }
 
-    private List<BundlingRequestDocument> mapC7DocumentsFromCaseData(List<Element<ResponseDocuments>> citizenResponseC7DocumentList) {
+    List<BundlingRequestDocument> mapC7DocumentsFromCaseData(List<Element<ResponseDocuments>> citizenResponseC7DocumentList) {
         List<BundlingRequestDocument> applications = new ArrayList<>();
         Optional<List<Element<ResponseDocuments>>> uploadedC7CitizenDocs = ofNullable(citizenResponseC7DocumentList);
         if (uploadedC7CitizenDocs.isEmpty()) {
@@ -341,7 +341,7 @@ public class BundleCreateRequestMapper {
             .documentGroup(applicationsDocGroup).build() : BundlingRequestDocument.builder().build();
     }
 
-    private List<Element<BundlingRequestDocument>> mapApplicationsFromFurtherEvidences(List<Element<FurtherEvidence>> furtherEvidencesFromCaseData) {
+    List<Element<BundlingRequestDocument>> mapApplicationsFromFurtherEvidences(List<Element<FurtherEvidence>> furtherEvidencesFromCaseData) {
         List<BundlingRequestDocument> applications = new ArrayList<>();
         Optional<List<Element<FurtherEvidence>>> existingFurtherEvidences = ofNullable(furtherEvidencesFromCaseData);
         if (existingFurtherEvidences.isEmpty()) {
@@ -361,7 +361,7 @@ public class BundleCreateRequestMapper {
         return ElementUtils.wrapElements(applications);
     }
 
-    private List<Element<BundlingRequestDocument>> mapOrdersFromCaseData(List<Element<OrderDetails>> ordersFromCaseData) {
+    List<Element<BundlingRequestDocument>> mapOrdersFromCaseData(List<Element<OrderDetails>> ordersFromCaseData) {
         List<BundlingRequestDocument> orders = new ArrayList<>();
         Optional<List<Element<OrderDetails>>> existingOrders = ofNullable(ordersFromCaseData);
         if (existingOrders.isEmpty()) {
@@ -385,7 +385,7 @@ public class BundleCreateRequestMapper {
      * @param orders list of BundlingRequestDocument including order documents to be added to the list
      * @param document Order Document to be added to the list
      */
-    private void addOrderDocument(List<BundlingRequestDocument> orders, Document document) {
+    void addOrderDocument(List<BundlingRequestDocument> orders, Document document) {
         if (document != null
             && document.getDocumentFileName() != null
             && document.getDocumentUrl() != null
