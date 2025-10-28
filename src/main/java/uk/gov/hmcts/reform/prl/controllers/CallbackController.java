@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
@@ -64,7 +63,6 @@ import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssig
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.AmendCourtService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
@@ -98,7 +96,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
@@ -149,7 +146,6 @@ public class CallbackController {
     private static final String CONFIRMATION_BODY_PREFIX = "The case has been transferred to ";
     private static final String CONFIRMATION_BODY_SUFFIX = " \n\n Local court admin have been notified ";
     public static final String TASK_LIST_VERSION = "taskListVersion";
-    private final CaseEventService caseEventService;
     private final ApplicationConsiderationTimetableValidationWorkflow applicationConsiderationTimetableValidationWorkflow;
     private final OrganisationService organisationService;
     private final ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
@@ -817,16 +813,10 @@ public class CallbackController {
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(callbackRequest.getCaseDetails().getId()));
-            log.info("eventsForCase ........................... {} ", eventsForCase.stream().map(CaseEventDetail::getStateId).collect(
-                Collectors.joining(",")));
-            Optional<String> previousState = eventsForCase.stream()
-                .map(CaseEventDetail::getStateId)
-                .findFirst();
-            if (previousState.isPresent()) {
-                YesOrNo isAddCaseNumberAdded = SUBMITTED_PAID.getValue().equalsIgnoreCase(previousState.get()) ? Yes : No;
-                caseDataUpdated.put(VERIFY_CASE_NUMBER_ADDED, isAddCaseNumberAdded.getDisplayedValue());
-            }
+            YesOrNo isAddCaseNumberAdded = SUBMITTED_PAID.getValue()
+                .equalsIgnoreCase(callbackRequest.getCaseDetails().getState()) ? Yes : No;
+            caseDataUpdated.put(VERIFY_CASE_NUMBER_ADDED, isAddCaseNumberAdded.getDisplayedValue());
+
             caseDataUpdated.put(ISSUE_DATE_FIELD, LocalDate.now());
             log.info("VERIFY_CASE_NUMBER_ADDED.............. : {}", caseDataUpdated.get(VERIFY_CASE_NUMBER_ADDED));
             return AboutToStartOrSubmitCallbackResponse.builder()
