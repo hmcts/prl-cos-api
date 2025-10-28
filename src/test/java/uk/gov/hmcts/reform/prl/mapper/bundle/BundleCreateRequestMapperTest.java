@@ -84,11 +84,12 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRANSCRIPTS_OF_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_POSITION_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_WITNESS_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
+import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
-import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
+
 
 @RunWith(MockitoJUnitRunner.class)
 public class BundleCreateRequestMapperTest {
@@ -155,12 +156,47 @@ public class BundleCreateRequestMapperTest {
     @Test
     public void testMapAllOtherDocuments_withAllBranches() {
         CaseData caseData = CaseData.builder()
-            .fl401UploadSupportDocuments(List.of(ElementUtils.element(Document.builder().documentUrl("validUrl").documentBinaryUrl("validBinaryUrl").documentFileName("valid-file.pdf").build())))
-            .fl401UploadWitnessDocuments(List.of(ElementUtils.element(Document.builder().documentUrl("validUrl").documentBinaryUrl("validBinaryUrl").documentFileName("valid-file.pdf").build())))
-            .fl401OtherProceedingDetails(FL401OtherProceedingDetails.builder().fl401OtherProceedings(List.of(ElementUtils.element(FL401Proceedings.builder().uploadRelevantOrder(Document.builder().documentUrl("validUrl").documentBinaryUrl("validBinaryUrl").documentFileName("valid-file.pdf").build()).build()))).build())
-            .existingProceedingsWithDoc(List.of(ElementUtils.element(ProceedingDetails.builder().uploadRelevantOrder(Document.builder().documentUrl("validUrl").documentBinaryUrl("validBinaryUrl").documentFileName("valid-file.pdf").build()).build())))
-            .furtherEvidences(List.of(ElementUtils.element(FurtherEvidence.builder().typeOfDocumentFurtherEvidence(FurtherEvidenceDocumentType.miamCertificate).documentFurtherEvidence(Document.builder().documentUrl("validUrl").documentBinaryUrl("validBinaryUrl").documentFileName("valid-file.pdf").build()).restrictCheckboxFurtherEvidence(new ArrayList<>()).build())))
-            .miamDetails(MiamDetails.builder().miamCertificationDocumentUpload(Document.builder().documentUrl("validUrl").documentBinaryUrl("validBinaryUrl").documentFileName("valid-file.pdf").build()).build())
+            .fl401UploadSupportDocuments(List.of(ElementUtils.element(Document.builder().documentUrl("validUrl")
+                                                                          .documentBinaryUrl("validBinaryUrl")
+                                                                          .documentFileName("valid-file.pdf").build())))
+            .fl401UploadWitnessDocuments(List.of(ElementUtils.element(Document.builder().documentUrl("validUrl")
+                                                                          .documentBinaryUrl("validBinaryUrl")
+                                                                          .documentFileName("valid-file.pdf").build())))
+            .fl401OtherProceedingDetails(FL401OtherProceedingDetails
+                                             .builder()
+                                             .fl401OtherProceedings(
+                                                 List.of(ElementUtils
+                                                             .element(FL401Proceedings.builder()
+                                                                          .uploadRelevantOrder(Document.builder()
+                                                                                                   .documentUrl("validUrl")
+                                                                                                   .documentBinaryUrl("validBinaryUrl")
+                                                                                                   .documentFileName("valid-file.pdf")
+                                                                                                   .build()).build()))).build())
+            .existingProceedingsWithDoc(
+                List.of(ElementUtils.element(ProceedingDetails
+                                                 .builder()
+                                                 .uploadRelevantOrder(Document.builder()
+                                                                          .documentUrl("validUrl")
+                                                                          .documentBinaryUrl("validBinaryUrl")
+                                                                          .documentFileName("valid-file.pdf")
+                                                                          .build()).build())))
+            .furtherEvidences(List.of(ElementUtils.element(FurtherEvidence
+                                                               .builder()
+                                                               .typeOfDocumentFurtherEvidence(FurtherEvidenceDocumentType.miamCertificate)
+                                                               .documentFurtherEvidence(Document
+                                                                                            .builder()
+                                                                                            .documentUrl("validUrl")
+                                                                                            .documentBinaryUrl("validBinaryUrl")
+                                                                                            .documentFileName("valid-file.pdf")
+                                                                                            .build())
+                                                               .restrictCheckboxFurtherEvidence(new ArrayList<>()).build())))
+            .miamDetails(MiamDetails
+                             .builder()
+                             .miamCertificationDocumentUpload(Document
+                                                                  .builder()
+                                                                  .documentUrl("validUrl")
+                                                                  .documentBinaryUrl("validBinaryUrl")
+                                                                  .documentFileName("valid-file.pdf").build()).build())
             .reviewDocuments(ReviewDocuments.builder().courtStaffUploadDocListDocTab(new ArrayList<>()).build())
             .build();
         List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapAllOtherDocuments(caseData);
@@ -170,8 +206,10 @@ public class BundleCreateRequestMapperTest {
     @Test
     public void testMapOrdersFromCaseData_excludesRedactedOrderDocuments() {
         OrderDetails orderDetails = OrderDetails.builder()
-            .orderDocument(Document.builder().documentUrl(BundleCreateRequestMapper.REDACTED_DOCUMENT_URL).documentBinaryUrl("validBinaryUrl").documentFileName("valid-file.pdf").build())
-            .orderDocumentWelsh(Document.builder().documentUrl("validUrl").documentBinaryUrl(BundleCreateRequestMapper.REDACTED_DOCUMENT_URL_BINARY).documentFileName("valid-file.pdf").build())
+            .orderDocument(Document.builder().documentUrl(BundleCreateRequestMapper.REDACTED_DOCUMENT_URL)
+                               .documentBinaryUrl("validBinaryUrl").documentFileName("valid-file.pdf").build())
+            .orderDocumentWelsh(Document.builder().documentUrl("validUrl").documentBinaryUrl(BundleCreateRequestMapper.REDACTED_DOCUMENT_URL_BINARY)
+                                    .documentFileName("valid-file.pdf").build())
             .build();
         List<Element<OrderDetails>> orders = List.of(ElementUtils.element(orderDetails));
         List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapOrdersFromCaseData(orders);
@@ -181,8 +219,10 @@ public class BundleCreateRequestMapperTest {
     @Test
     public void testMapOrdersFromCaseData_includesValidOrderDocuments() {
         OrderDetails orderDetails = OrderDetails.builder()
-            .orderDocument(Document.builder().documentUrl("validUrl").documentBinaryUrl("validBinaryUrl").documentFileName("valid-file.pdf").build())
-            .orderDocumentWelsh(Document.builder().documentUrl("validUrl2").documentBinaryUrl("validBinaryUrl2").documentFileName("valid-file2.pdf").build())
+            .orderDocument(Document.builder().documentUrl("validUrl").documentBinaryUrl("validBinaryUrl")
+                               .documentFileName("valid-file.pdf").build())
+            .orderDocumentWelsh(Document.builder().documentUrl("validUrl2").documentBinaryUrl("validBinaryUrl2")
+                                    .documentFileName("valid-file2.pdf").build())
             .build();
         List<Element<OrderDetails>> orders = List.of(ElementUtils.element(orderDetails));
         List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapOrdersFromCaseData(orders);
@@ -193,7 +233,8 @@ public class BundleCreateRequestMapperTest {
     public void testMapApplicationsFromFurtherEvidences_withRestrictCheckbox() {
         FurtherEvidence restrictedEvidence = FurtherEvidence.builder()
             .typeOfDocumentFurtherEvidence(FurtherEvidenceDocumentType.miamCertificate)
-            .documentFurtherEvidence(Document.builder().documentUrl("validUrl").documentBinaryUrl("validBinaryUrl").documentFileName("valid-file.pdf").build())
+            .documentFurtherEvidence(Document.builder().documentUrl("validUrl").documentBinaryUrl("validBinaryUrl")
+                                         .documentFileName("valid-file.pdf").build())
             .restrictCheckboxFurtherEvidence(List.of(restrictToGroup))
             .build();
         List<Element<FurtherEvidence>> furtherEvidences = List.of(ElementUtils.element(restrictedEvidence));
@@ -206,12 +247,14 @@ public class BundleCreateRequestMapperTest {
     public void testMapApplicationsFromFurtherEvidences_withMiamCertificateAndPreviousOrders() {
         FurtherEvidence miamEvidence = FurtherEvidence.builder()
             .typeOfDocumentFurtherEvidence(FurtherEvidenceDocumentType.miamCertificate)
-            .documentFurtherEvidence(Document.builder().documentUrl("validUrl").documentBinaryUrl("validBinaryUrl").documentFileName("valid-file.pdf").build())
+            .documentFurtherEvidence(Document.builder().documentUrl("validUrl").documentBinaryUrl("validBinaryUrl")
+                                         .documentFileName("valid-file.pdf").build())
             .restrictCheckboxFurtherEvidence(new ArrayList<>())
             .build();
         FurtherEvidence previousOrdersEvidence = FurtherEvidence.builder()
             .typeOfDocumentFurtherEvidence(FurtherEvidenceDocumentType.previousOrders)
-            .documentFurtherEvidence(Document.builder().documentUrl("validUrl2").documentBinaryUrl("validBinaryUrl2").documentFileName("valid-file2.pdf").build())
+            .documentFurtherEvidence(Document.builder().documentUrl("validUrl2").documentBinaryUrl("validBinaryUrl2")
+                                         .documentFileName("valid-file2.pdf").build())
             .restrictCheckboxFurtherEvidence(new ArrayList<>())
             .build();
         List<Element<FurtherEvidence>> furtherEvidences = List.of(ElementUtils.element(miamEvidence), ElementUtils.element(previousOrdersEvidence));
@@ -222,8 +265,10 @@ public class BundleCreateRequestMapperTest {
     @Test
     public void testMapMiamDetails_withBothCertificates() {
         MiamDetails miamDetails = MiamDetails.builder()
-            .miamCertificationDocumentUpload(Document.builder().documentUrl("validUrl").documentBinaryUrl("validBinaryUrl").documentFileName("valid-file.pdf").build())
-            .miamCertificationDocumentUpload1(Document.builder().documentUrl("validUrl2").documentBinaryUrl("validBinaryUrl2").documentFileName("valid-file2.pdf").build())
+            .miamCertificationDocumentUpload(Document.builder().documentUrl("validUrl").documentBinaryUrl("validBinaryUrl")
+                                                 .documentFileName("valid-file.pdf").build())
+            .miamCertificationDocumentUpload1(Document.builder().documentUrl("validUrl2").documentBinaryUrl("validBinaryUrl2")
+                                                  .documentFileName("valid-file2.pdf").build())
             .build();
         List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapMiamDetails(miamDetails);
         assertEquals(2, result.size());
@@ -243,7 +288,8 @@ public class BundleCreateRequestMapperTest {
         assertTrue(resultEmpty.isEmpty());
 
         ResponseDocuments responseDoc = ResponseDocuments.builder()
-            .citizenDocument(Document.builder().documentUrl("validUrl").documentBinaryUrl("validBinaryUrl").documentFileName("valid-file.pdf").build())
+            .citizenDocument(Document.builder().documentUrl("validUrl").documentBinaryUrl("validBinaryUrl")
+                                 .documentFileName("valid-file.pdf").build())
             .build();
         List<Element<ResponseDocuments>> nonEmptyList = List.of(ElementUtils.element(responseDoc));
         List<BundlingRequestDocument> resultNonEmpty = bundleCreateRequestMapper.mapC7DocumentsFromCaseData(nonEmptyList);
