@@ -820,6 +820,13 @@ public class CallbackController {
             YesOrNo isAddCaseNumberAdded = SUBMITTED_PAID.getValue()
                 .equalsIgnoreCase(callbackRequest.getCaseDetails().getState()) ? Yes : No;
             caseDataUpdated.put(VERIFY_CASE_NUMBER_ADDED, isAddCaseNumberAdded.getDisplayedValue());
+            if (Yes.equals(isAddCaseNumberAdded)) {
+                caseDataUpdated.put(
+                    CASE_STATUS, CaseStatus.builder()
+                        .state(CASE_ISSUED.getLabel())
+                        .build()
+                );
+            }
 
             caseDataUpdated.put(ISSUE_DATE_FIELD, LocalDate.now());
             log.info("VERIFY_CASE_NUMBER_ADDED.............. : {}", caseDataUpdated.get(VERIFY_CASE_NUMBER_ADDED));
