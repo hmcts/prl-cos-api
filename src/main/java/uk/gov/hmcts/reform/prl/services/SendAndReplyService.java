@@ -2101,7 +2101,7 @@ public class SendAndReplyService {
 
     }
 
-    public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmitted(CallbackRequest callbackRequest) {
+    public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmitted(CallbackRequest callbackRequest, String authorisation) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         if (REPLY.equals(caseData.getChooseSendOrReply())
@@ -2111,11 +2111,21 @@ public class SendAndReplyService {
             ).build());
         }
 
-        if (SEND.equals(caseData.getChooseSendOrReply()) && InternalExternalMessageEnum.EXTERNAL.equals(
-            caseData.getSendOrReplyMessage().getSendMessageObject().getInternalOrExternalMessage())) {
-            return ok(SubmittedCallbackResponse.builder().confirmationBody(
-                SEND_AND_CLOSE_EXTERNAL_MESSAGE
-            ).build());
+        if (SEND.equals(caseData.getChooseSendOrReply())) {
+            sendNotificationToExternalParties(
+                caseData,
+                authorisation
+            );
+
+            //send emails in case of sending to others with emails
+            sendNotificationEmailOther(caseData);
+
+            if (InternalExternalMessageEnum.EXTERNAL.equals(
+                caseData.getSendOrReplyMessage().getSendMessageObject().getInternalOrExternalMessage())) {
+                return ok(SubmittedCallbackResponse.builder().confirmationBody(
+                    SEND_AND_CLOSE_EXTERNAL_MESSAGE
+                ).build());
+            }
         }
 
         closeAwPTask(caseData);

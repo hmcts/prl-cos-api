@@ -89,14 +89,4 @@ public class SendAndReplyCommonService {
         sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
     }
 
-    public void sendNotifications(String authorisation, CaseData caseData) {
-        sendAndReplyService.sendNotificationToExternalParties(
-            caseData,
-            authorisation
-        );
-
-        //send emails in case of sending to others with emails
-        sendAndReplyService.sendNotificationEmailOther(caseData);
-    }
-
 }

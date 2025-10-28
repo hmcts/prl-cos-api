@@ -264,13 +264,7 @@ public class SendAndReplyController extends AbstractCallbackController {
     public ResponseEntity<SubmittedCallbackResponse> handleSubmittedSendAndReply(@RequestHeader("Authorization")
                                                                                  @Parameter(hidden = true) String authorisation,
                                                                                  @RequestBody CallbackRequest callbackRequest) {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-
-        if (caseData.getChooseSendOrReply().equals(SEND)) {
-            sendAndReplyCommonService.sendNotifications(authorisation, caseData);
-        }
-        return sendAndReplyService.sendAndReplySubmitted(callbackRequest);
+        return sendAndReplyService.sendAndReplySubmitted(callbackRequest, authorisation);
     }
 
 
