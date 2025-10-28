@@ -146,7 +146,7 @@ public class BundleCreateRequestMapper {
             : hearingDaySchedule.getHearingVenueAddress();
     }
 
-     List<Element<BundlingRequestDocument>> mapAllOtherDocuments(CaseData caseData) {
+    List<Element<BundlingRequestDocument>> mapAllOtherDocuments(CaseData caseData) {
 
         List<Element<BundlingRequestDocument>> allOtherDocuments = new ArrayList<>();
 
