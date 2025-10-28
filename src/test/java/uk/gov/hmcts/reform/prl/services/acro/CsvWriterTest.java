@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Stream;
@@ -275,7 +276,9 @@ class CsvWriterTest {
                 arguments("applicant.lastName", "Smith", standardCase),
                 arguments("applicant.firstName", "Jane", standardCase),
                 arguments("applicant.phoneNumber", APPLICANT_PHONE, standardCase),
-                arguments("applicant.email", APPLICANT_EMAIL, standardCase)
+                arguments("applicant.email", APPLICANT_EMAIL, standardCase),
+                arguments("dateOrderMade", "9 Oct 2025", standardCase),
+                arguments("orderExpiryDate", LocalDateTime.of(2024, 6, 15, 23, 59), standardCase)
             );
         }
     }
@@ -345,6 +348,8 @@ class CsvWriterTest {
                 .respondent(respondent)
                 .applicant(applicant)
                 .daApplicantContactInstructions(contactInstructions)
+                .dateOrderMade("9 Oct 2025")
+                .orderExpiryDate(LocalDateTime.of(2024, 6, 15, 23, 59))
                 .build();
         }
     }
