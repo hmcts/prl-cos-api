@@ -10,6 +10,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.services.closingcase.ClosingCaseService;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -28,6 +29,8 @@ public class ClosingCaseControllerTest {
 
     @Mock
     private AuthorisationService authorisationService;
+    @Mock
+    private CafcassDateTimeService cafcassDateTimeService;
 
     public static final String AUTH_TOKEN = "Bearer TestAuthToken";
     public static final String S_2_S_TOKEN = "s2s AuthToken";
@@ -63,6 +66,7 @@ public class ClosingCaseControllerTest {
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         closingCaseController.closingCaseAboutToSubmit(AUTH_TOKEN, S_2_S_TOKEN, CallbackRequest.builder().build());
         verify(closingCaseService, times(1)).closingCaseForChildren(Mockito.any(CallbackRequest.class));
+        verify(cafcassDateTimeService, times(1)).updateCafcassDateTime(any());
     }
 
     @Test

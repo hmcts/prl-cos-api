@@ -14,10 +14,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.TaskListService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
+
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @Tag(name = "task-list-controller")
 @Slf4j
@@ -27,13 +32,34 @@ import uk.gov.hmcts.reform.prl.services.TaskListService;
 public class TaskListController extends AbstractCallbackController {
 
     private final TaskListService taskListService;
+    private final AuthorisationService authorisationService;
+    private final CafcassDateTimeService cafcassDateTimeService;
 
     @Autowired
     public TaskListController(ObjectMapper objectMapper,
                               EventService eventPublisher,
-                              TaskListService taskListService) {
+                              TaskListService taskListService,
+                              AuthorisationService authorisationService,
+                              CafcassDateTimeService cafcassDateTimeService) {
         super(objectMapper, eventPublisher);
         this.taskListService = taskListService;
+        this.authorisationService = authorisationService;
+        this.cafcassDateTimeService = cafcassDateTimeService;
+    }
+
+    @PostMapping("/about-to-submit")
+    public AboutToStartOrSubmitCallbackResponse handleAboutToSubmitted(
+        @RequestBody CallbackRequest callbackRequest,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken) {
+
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(cafcassDateTimeService.updateCafcassDateTime(callbackRequest)).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+
     }
 
     @PostMapping("/submitted")

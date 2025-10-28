@@ -18,4 +18,8 @@ public class Range {
 
     @JsonProperty("data.orderCollection.value.dateCreated")
     private LastModified dateCreated;
+
+    @JsonProperty("data.cafcassDateTime")
+    private LastModified cafcassDateTime;
+
 }

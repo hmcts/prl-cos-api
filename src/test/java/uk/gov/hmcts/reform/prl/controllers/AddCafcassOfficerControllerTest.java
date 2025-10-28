@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.addcafcassofficer.ChildAndCaf
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AddCafcassOfficerService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,9 @@ public class AddCafcassOfficerControllerTest {
 
     @Mock
     private AuthorisationService authorisationService;
+
+    @Mock
+    private CafcassDateTimeService cafcassDateTimeService;
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "s2s AuthToken";

@@ -14,6 +14,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.services.AddCafcassOfficerService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
+
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -25,6 +28,7 @@ public class AddCafcassOfficerController {
 
     private final AddCafcassOfficerService addCafcassOfficerService;
     private final AuthorisationService authorisationService;
+    private final CafcassDateTimeService cafcassDateTimeService;
 
     @PostMapping(path = "/add-cafcass-officer/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to add Cafcass officer details")
@@ -33,8 +37,10 @@ public class AddCafcassOfficerController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            return AboutToStartOrSubmitCallbackResponse.builder().data(addCafcassOfficerService.populateCafcassOfficerDetails(
-                callbackRequest)).build();
+            Map<String, Object> caseDataMap = addCafcassOfficerService.populateCafcassOfficerDetails(
+                callbackRequest);
+            cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

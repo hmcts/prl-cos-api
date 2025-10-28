@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDateReque
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.services.hearingmanagement.HearingManagementService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
@@ -46,17 +47,20 @@ public class HearingsManagementController extends AbstractCallbackController {
     private final AuthorisationService authorisationService;
     private final HearingManagementService hearingManagementService;
     private final AllTabServiceImpl allTabService;
+    private final CafcassDateTimeService cafcassDateTimeService;
 
     @Autowired
     public HearingsManagementController(ObjectMapper objectMapper,
                                     EventService eventPublisher,
                                         AuthorisationService authorisationService,
                                         HearingManagementService hearingManagementService,
-                                        AllTabServiceImpl allTabService) {
+                                        AllTabServiceImpl allTabService,
+                                        CafcassDateTimeService cafcassDateTimeService) {
         super(objectMapper, eventPublisher);
         this.hearingManagementService = hearingManagementService;
         this.allTabService = allTabService;
         this.authorisationService = authorisationService;
+        this.cafcassDateTimeService = cafcassDateTimeService;
     }
 
     @PutMapping(path = "/hearing-management-state-update/{caseState}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -110,6 +114,7 @@ public class HearingsManagementController extends AbstractCallbackController {
         if (ObjectUtils.isNotEmpty(nextHearingDetails) && null != nextHearingDetails.getHearingDateTime()) {
             caseDataUpdated.put(NEXT_HEARING_DATE, nextHearingDetails.getHearingDateTime().toLocalDate());
         }
+        cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 

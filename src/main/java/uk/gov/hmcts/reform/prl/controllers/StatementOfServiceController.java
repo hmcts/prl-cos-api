@@ -26,6 +26,9 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.StmtOfServImplService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
+
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
@@ -43,6 +46,7 @@ public class StatementOfServiceController {
     private final AuthorisationService authorisationService;
     private final StmtOfServImplService stmtOfServImplService;
     private final ObjectMapper objectMapper;
+    private final CafcassDateTimeService cafcassDateTimeService;
 
     @PostMapping(path = "/Statement-of-service-about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to Statement of service about to start.")
@@ -79,11 +83,13 @@ public class StatementOfServiceController {
     ) {
         if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
             && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken))) {
+            Map<String, Object> caseDataMap = stmtOfServImplService.handleSosAboutToSubmit(
+                callbackRequest.getCaseDetails(),
+                authorisation
+            );
+            cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(stmtOfServImplService.handleSosAboutToSubmit(
-                    callbackRequest.getCaseDetails(),
-                    authorisation
-                )).build();
+                .data(caseDataMap).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
