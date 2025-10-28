@@ -135,6 +135,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROL
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.TASK_LIST_V2_FLAG;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.TASK_LIST_V3_FLAG;
 import static uk.gov.hmcts.reform.prl.enums.Event.SEND_TO_GATEKEEPER;
+import static uk.gov.hmcts.reform.prl.enums.State.CASE_ISSUED;
 import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -851,7 +852,7 @@ public class CallbackController {
                     CaseEvent.FL401_ADD_CASE_NUMBER_AND_CASE_ISSUED.getValue()
                 );
                 startAllTabsUpdateDataContent.caseDataMap().put(CASE_STATUS, CaseStatus.builder()
-                    .state(callbackRequest.getCaseDetails().getState())
+                    .state(CASE_ISSUED.getLabel())
                     .build());
                 allTabsService.submitAllTabsUpdate(
                     startAllTabsUpdateDataContent.authorisation(),
