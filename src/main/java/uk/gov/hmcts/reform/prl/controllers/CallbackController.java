@@ -135,7 +135,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.TAS
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.TASK_LIST_V3_FLAG;
 import static uk.gov.hmcts.reform.prl.enums.Event.SEND_TO_GATEKEEPER;
 import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 
