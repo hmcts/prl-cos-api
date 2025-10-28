@@ -509,10 +509,6 @@ public class SendAndReplyControllerTest {
     @Test
     public void testHandSubmittedSendAndReply() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
-        CaseData caseData = CaseData.builder().id(12345L)
-            .chooseSendOrReply(SEND)
-            .caseTypeOfApplication("C100")
-            .build();
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
