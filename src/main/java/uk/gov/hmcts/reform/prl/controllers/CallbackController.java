@@ -113,7 +113,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ACCESS_CATEGORY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CREATED_BY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_STATUS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
@@ -135,7 +134,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROL
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.TASK_LIST_V2_FLAG;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.TASK_LIST_V3_FLAG;
 import static uk.gov.hmcts.reform.prl.enums.Event.SEND_TO_GATEKEEPER;
-import static uk.gov.hmcts.reform.prl.enums.State.CASE_ISSUED;
 import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
@@ -823,11 +821,7 @@ public class CallbackController {
                 .map(CaseEventDetail::getStateId)
                 .findFirst();
             if  (previousState.isPresent() && SUBMITTED_PAID.getValue().equalsIgnoreCase(previousState.get())) {
-                callbackRequest.getCaseDetails().setState(CASE_ISSUED.getValue());
                 caseDataUpdated.put(ADD_CASE_NUMBER_CHECK_FL401, "Yes");
-                caseDataUpdated.put(CASE_STATUS, CaseStatus.builder()
-                    .state(CASE_ISSUED.getLabel())
-                    .build());
             } else {
                 caseDataUpdated.remove(ADD_CASE_NUMBER_CHECK_FL401);
             }
