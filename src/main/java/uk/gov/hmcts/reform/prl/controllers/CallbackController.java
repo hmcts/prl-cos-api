@@ -823,7 +823,7 @@ public class CallbackController {
             if  (previousState.isPresent() && SUBMITTED_PAID.getValue().equalsIgnoreCase(previousState.get())) {
                 caseDataUpdated.put(ADD_CASE_NUMBER_CHECK_FL401, "Yes");
             } else {
-                caseDataUpdated.remove(ADD_CASE_NUMBER_CHECK_FL401);
+                caseDataUpdated.put(ADD_CASE_NUMBER_CHECK_FL401, null);
             }
             caseDataUpdated.put(ISSUE_DATE_FIELD, LocalDate.now());
             return AboutToStartOrSubmitCallbackResponse.builder()
