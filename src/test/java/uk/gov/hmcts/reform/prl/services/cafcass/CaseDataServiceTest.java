@@ -613,6 +613,7 @@ public class CaseDataServiceTest {
         assertFalse(otherDocsList.isEmpty());
         assertEquals("test", otherDocsList.get(0).getValue().getDocumentName());
     }
+
     @Test
     public void shouldMapFinalisedServiceOfApplicationDocuments() throws NoSuchMethodException,
         InvocationTargetException, IllegalAccessException {
