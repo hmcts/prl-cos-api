@@ -105,7 +105,6 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.springframework.http.ResponseEntity.ok;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADD_CASE_NUMBER_CHECK_FL401;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_OR_RESPONDENT_CASE_NAME;
@@ -128,6 +127,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VERIFY_CASE_NUMBER_ADDED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.CREATE_URGENT_CASES_FLAG;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
@@ -820,11 +820,10 @@ public class CallbackController {
             Optional<String> previousState = eventsForCase.stream()
                 .map(CaseEventDetail::getStateId)
                 .findFirst();
-            if  (previousState.isPresent() && SUBMITTED_PAID.getValue().equalsIgnoreCase(previousState.get())) {
-                caseDataUpdated.put(ADD_CASE_NUMBER_CHECK_FL401, "Yes");
-            } else {
-                caseDataUpdated.put(ADD_CASE_NUMBER_CHECK_FL401, null);
-            }
+            previousState.ifPresent(s -> caseDataUpdated.put(
+                VERIFY_CASE_NUMBER_ADDED,
+                SUBMITTED_PAID.getValue().equalsIgnoreCase(s) ? Yes.getDisplayedValue() : null
+            ));
             caseDataUpdated.put(ISSUE_DATE_FIELD, LocalDate.now());
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
