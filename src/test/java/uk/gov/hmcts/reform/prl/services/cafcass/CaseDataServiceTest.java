@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResponseToAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
@@ -41,6 +42,8 @@ import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.Element;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments;
+import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -525,7 +528,6 @@ public class CaseDataServiceTest {
         assertEquals("test", cafCassResponse.getCases().get(0).getCaseData().getOtherDocuments().get(0).getValue().getDocumentName());
         assertNull(cafCassResponse.getCases().get(0).getCaseData().getCourtStaffUploadDocListDocTab());
         assertNull(cafCassResponse.getCases().get(0).getCaseData().getCafcassUploadDocListDocTab());
-
     }
 
     @Test
@@ -610,6 +612,56 @@ public class CaseDataServiceTest {
 
         assertFalse(otherDocsList.isEmpty());
         assertEquals("test", otherDocsList.get(0).getValue().getDocumentName());
+    }
+
+    @Test
+    public void shouldMapFinalisedServiceOfApplicationDocuments() throws NoSuchMethodException,
+        InvocationTargetException, IllegalAccessException {
+        Document document = Document.builder().documentUrl("test").documentFileName("test").build();
+        when(objMapper.convertValue(any(QuarantineLegalDoc.class), eq(Map.class))).thenReturn(new HashMap<>());
+        when(objMapper.convertValue(anyMap(), eq(uk.gov.hmcts.reform.prl.models.documents.Document.class))).thenReturn(
+            document);
+        CafCassCaseData cafCassCaseData = CafCassCaseData.builder()
+            .finalServedApplicationDetailsList(List.of(element(ServedApplicationDetails.builder()
+                                                                   .bulkPrintDetails(List.of(element(
+                                                                       BulkPrintDetails.builder()
+                                                                           .printDocs(List.of(element(
+                                                                               Document.builder()
+                                                                                   .documentUrl("http://test.link")
+                                                                                   .documentFileName("testPrint")
+                                                                                   .build()
+                                                                           )))
+                                                                           .build()
+                                                                   )))
+                                                                   .emailNotificationDetails(List.of(element(
+                                                                       EmailNotificationDetails.builder()
+                                                                           .docs(List.of(element(
+                                                                               Document.builder()
+                                                                                   .documentUrl("http://test.link")
+                                                                                   .documentFileName("testEmail")
+                                                                                   .build())))
+                                                                           .build()
+                                                                   )))
+                                                                   .build())))
+            .build();
+        CafCassCaseDetail cafCassCaseDetail = CafCassCaseDetail.builder()
+            .caseData(cafCassCaseData)
+            .build();
+        CafCassResponse cafCassResponse = CafCassResponse.builder().cases(List.of(cafCassCaseDetail)).build();
+        Method privateMethod = CaseDataService.class.getDeclaredMethod(
+            "addSpecificDocumentsFromCaseFileViewBasedOnCategories",
+            CafCassResponse.class
+        );
+        privateMethod.setAccessible(true);
+        privateMethod.invoke(caseDataService, cafCassResponse);
+
+        CafCassCaseData response = cafCassResponse.getCases().get(0).getCaseData();
+        assertEquals(2, response.getOtherDocuments().size());
+        List<String> otherDocs = response.getOtherDocuments().stream()
+            .map(el -> el.getValue().getDocumentName()).toList();
+
+        assertTrue(otherDocs.contains("testPrint"));
+        assertTrue(otherDocs.contains("testEmail"));
     }
 
 }
