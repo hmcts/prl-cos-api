@@ -6,10 +6,6 @@
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 
-<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/fl401CaseName/fl401CaseName1'>Case name / Enw'r achos</a><img align='right' height='25px' src='NO IMAGE URL IN THIS BRANCHnot-started.png' title='Not started / Heb ddechrau'/>
-
-<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
-
 <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/fl401TypeOfApplication/fl401TypeOfApplication1'>Type of application / Math o gais</a><img align='right' height='25px' src='NO IMAGE URL IN THIS BRANCHnot-started.png' title='Not started / Heb ddechrau'/>
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>

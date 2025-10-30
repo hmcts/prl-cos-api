@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtProceedings;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicationCoverEnum;
+import uk.gov.hmcts.reform.prl.services.CaseNameService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
@@ -46,6 +47,7 @@ public class FL401ApplicationMapper {
     private final RespondentBehaviourMapper respondentBehaviourMapper;
     private final StatementOfTruthMapper statementOfTruthMapper;
     private final AttendHearingMapper attendHearingMapper;
+    private final CaseNameService caseNameService;
 
     public CaseData mapCourtNavData(CourtNavFl401 courtNavCaseData) {
         CaseData caseData = CaseData.builder()
@@ -91,11 +93,12 @@ public class FL401ApplicationMapper {
     }
 
     private String buildCaseName(CourtNavFl401 source) {
-        String applicantName = source.getFl401().getCourtNavApplicant().getFirstName() + " "
-            + source.getFl401().getCourtNavApplicant().getLastName();
-        String respondentName = source.getFl401().getCourtNavRespondent().getFirstName() + " "
-            + source.getFl401().getCourtNavRespondent().getLastName();
-        return applicantName + " & " + respondentName;
+        String applicantFName = source.getFl401().getCourtNavApplicant().getFirstName();
+        String applicantLName = source.getFl401().getCourtNavApplicant().getLastName();
+        String respondentFName = source.getFl401().getCourtNavRespondent().getFirstName();
+        String respondentLName = source.getFl401().getCourtNavRespondent().getLastName();
+
+        return caseNameService.getCaseNameForDA(applicantFName, applicantLName, respondentFName, respondentLName);
     }
 
     private TypeOfApplicationOrders buildTypeOfApplicationOrders(CourtNavFl401 source) {
