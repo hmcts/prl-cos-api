@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -39,6 +40,9 @@ public class AmendCourtServiceTest {
 
     @Mock
     private EmailService emailService;
+
+    @Mock
+    private DfjLookupService dfjLookupService;
 
     @InjectMocks
     private AmendCourtService amendCourtService;
@@ -75,18 +79,20 @@ public class AmendCourtServiceTest {
     @Before
     public void setUp() {
         caseDataMap = new HashMap<>();
-        courtVenue = CourtVenue.builder().build();
+        courtVenue = CourtVenue.builder().courtEpimmsId("234946").build();
         callbackRequest = CallbackRequest.builder()
                 .caseDetails(CaseDetails.builder().id(123L).state(State.CASE_ISSUED.getValue()).data(caseDataMap).build()).build();
         caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
-            .courtList(DynamicList.builder().value(DynamicListElement.builder().code(":test@test.com").build()).build())
+            .courtList(DynamicList.builder().value(DynamicListElement.builder().code("234946:test@test.com").build()).build())
             .build();
         when(locationRefDataService.getCourtDetailsFromEpimmsId(Mockito.anyString(), Mockito.anyString()))
             .thenReturn(Optional.of(courtVenue));
         when(c100IssueCaseService.getFactCourtId(courtVenue)).thenReturn("");
         when(courtSealFinderService.getCourtSeal(Mockito.anyString())).thenReturn("");
+        when(dfjLookupService.getDfjAreaFieldsByCourtId("234946"))
+            .thenReturn(Map.of("dfjArea", "SWANSEA", "swanseaDFJCourt", "234946"));
     }
 
     @Test
@@ -101,6 +107,21 @@ public class AmendCourtServiceTest {
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
         amendCourtService.handleAmendCourtSubmission("", callbackRequest, caseDataMap);
         verifyNoInteractions(emailService);
+    }
+
+    @Test
+    public void shouldAddDfjFilterFields() {
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        when(CaseUtils.getCaseData(
+            callbackRequest.getCaseDetails(),
+            objectMapper
+        )).thenReturn(caseData);
+        when(locationRefDataService.getCourtDetailsFromEpimmsId(Mockito.anyString(), Mockito.anyString()))
+            .thenReturn(Optional.of(courtVenue));
+        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+        Map<String, Object> fields = amendCourtService.handleAmendCourtSubmission("", callbackRequest, caseDataMap);
+        assertThat(fields).extracting("dfjArea").isEqualTo("SWANSEA");
+        assertThat(fields).extracting("swanseaDFJCourt").isEqualTo("234946");
     }
 
     @Test
