@@ -130,7 +130,7 @@ public class BundleCreateRequestMapperTest {
         Document redactedDoc = Document.builder()
             .documentUrl("someUrl")
             .documentBinaryUrl("someBinaryUrl")
-            .documentFileName("redacted-file.pdf")
+            .documentFileName("*redacted*")
             .build();
         BundlingRequestDocument brd = BundlingRequestDocument.builder().documentLink(redactedDoc).documentFileName("redacted-file.pdf").build();
         List<Element<BundlingRequestDocument>> allOtherDocuments = new ArrayList<>();
@@ -322,7 +322,7 @@ public class BundleCreateRequestMapperTest {
                        .orderDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName(
                            "Order.pdf").build())
                        .orderDocument(Document.builder().documentUrl(redactedUrl).documentBinaryUrl(redactedUrlBinary).documentFileName(
-                           "Redacted.pdf").build())
+                           "*Redacted*").build())
                        .orderDocumentWelsh(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName(
                            "welshOrder.pdf").build())
                        .orderDocumentWelsh(Document.builder().documentUrl(redactedUrl).documentBinaryUrl(
@@ -1014,7 +1014,7 @@ public class BundleCreateRequestMapperTest {
                            "Order.pdf").build())
                        .orderDocument(null)
                        .orderDocument(Document.builder().documentUrl(redactedUrl).documentBinaryUrl(redactedUrlBinary).documentFileName(
-                           "Redacted.pdf").build())
+                           "*Redacted*").build())
                        .orderDocumentWelsh(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName(
                            "welshOrder.pdf").build())
                        .orderDocumentWelsh(Document.builder().documentUrl(redactedUrl).documentBinaryUrl(

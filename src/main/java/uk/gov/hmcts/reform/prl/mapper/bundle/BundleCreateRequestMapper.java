@@ -87,7 +87,7 @@ public class BundleCreateRequestMapper {
 
     public static final String REDACTED_DOCUMENT_URL = "documents/00000000-0000-0000-0000-000000000000";
     public static final String REDACTED_DOCUMENT_URL_BINARY = "documents/00000000-0000-0000-0000-000000000000/binary";
-    public static final String REDACTED_DOCUMENT_FILE_NAME = "redacted";
+    public static final String REDACTED_DOCUMENT_FILE_NAME = "*redacted*";
 
     public BundleCreateRequest mapCaseDataToBundleCreateRequest(CaseData caseData, String eventId, Hearings hearingDetails,
                                                                 String bundleConfigFileName) {
@@ -230,7 +230,7 @@ public class BundleCreateRequestMapper {
             && document.getDocumentBinaryUrl() != null
             && !document.getDocumentUrl().endsWith(REDACTED_DOCUMENT_URL)
             && !document.getDocumentBinaryUrl().endsWith(REDACTED_DOCUMENT_URL_BINARY)
-            && !(document.getDocumentFileName().toLowerCase()).contains(REDACTED_DOCUMENT_FILE_NAME)) {
+            && !(document.getDocumentFileName()).equalsIgnoreCase(REDACTED_DOCUMENT_FILE_NAME)) {
             //Once verified that this is not a redacted document, add to the global other documents list
             allOtherDocuments.add(docDetailsElement);
         }
@@ -392,7 +392,7 @@ public class BundleCreateRequestMapper {
             && document.getDocumentBinaryUrl() != null
             && !document.getDocumentUrl().endsWith(REDACTED_DOCUMENT_URL)
             && !document.getDocumentBinaryUrl().endsWith(REDACTED_DOCUMENT_URL_BINARY)
-            && !(document.getDocumentFileName().toLowerCase()).contains(REDACTED_DOCUMENT_FILE_NAME)) {
+            && !(document.getDocumentFileName()).equalsIgnoreCase(REDACTED_DOCUMENT_FILE_NAME)) {
             orders.add(BundlingRequestDocument.builder().documentGroup(BundlingDocGroupEnum.ordersSubmittedWithApplication)
                            .documentFileName(document.getDocumentFileName()).documentLink(document).build());
         }
