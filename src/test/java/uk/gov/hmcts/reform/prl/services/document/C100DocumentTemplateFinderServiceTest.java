@@ -36,8 +36,8 @@ public class C100DocumentTemplateFinderServiceTest {
         ReflectionTestUtils.setField(c100DocumentTemplateFinderService, "c100DraftWelshTemplate", "c100DraftWelshTemplate");
         ReflectionTestUtils.setField(c100DocumentTemplateFinderService, "c100DraftTemplateV2", "c100DraftTemplateV2");
         ReflectionTestUtils.setField(c100DocumentTemplateFinderService, "c100DraftWelshTemplateV2", "c100DraftWelshTemplateV2");
-        ReflectionTestUtils.setField(c100DocumentTemplateFinderService, "c100DraftTemplateV3", "c100DraftTemplateV3");
-        ReflectionTestUtils.setField(c100DocumentTemplateFinderService, "c100DraftWelshTemplateV3", "c100DraftWelshTemplateV3");
+        ReflectionTestUtils.setField(c100DocumentTemplateFinderService, "c100DraftTemplateV4", "c100DraftTemplateV4");
+        ReflectionTestUtils.setField(c100DocumentTemplateFinderService, "c100DraftWelshTemplateV4", "c100DraftWelshTemplateV4");
 
         ReflectionTestUtils.setField(c100DocumentTemplateFinderService, "c100C8Template", "c100C8Template");
         ReflectionTestUtils.setField(c100DocumentTemplateFinderService, "c100C8DraftTemplate", "c100C8DraftTemplate");
