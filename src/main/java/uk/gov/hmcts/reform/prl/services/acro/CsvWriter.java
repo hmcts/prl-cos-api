@@ -45,8 +45,8 @@ public class CsvWriter {
         COURT_NAME("Court Name/Location", "courtName"),
         COURT_ID("Court Code", "courtEpimsId"),
         ORDER_NAME("Order Name", "caseTypeOfApplication"),
-        COURT_DATE("Court Date", "currentHearingDate"),
-        ORDER_EXPIRY_DATE("Order Expiry Date", "orderExpiryDate"), // Assuming this is a date field
+        COURT_DATE("Court Date", "dateOrderMade"),
+        ORDER_EXPIRY_DATE("Order Expiry Date", "orderExpiryDate"),
         RESPONDENT_SURNAME("Respondent Surname", "respondent.lastName"),
         RESPONDENT_FORENAMES("Respondent Forename(s)", "respondent.firstName"),
         RESPONDENT_DOB("Respondent DOB", "respondent.dateOfBirth"),
