@@ -32,7 +32,7 @@ class AcroDatesServiceTest {
             acroDatesService.getStartDateForSearch(),
             LocalDateTime.of(
                 LocalDate.now(ZoneId.systemDefault()).minusDays(1L),
-                LocalTime.of(20, 59, 59)
+                LocalTime.of(21, 0, 0)
             )
         );
     }

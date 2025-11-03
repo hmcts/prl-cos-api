@@ -18,7 +18,7 @@ public class AcroDatesService {
     public LocalDateTime getStartDateForSearch() {
         long searchDuration = (long) launchDarklyClient.getFeatureValue("acro-fl404a-search-duration");
         return LocalDateTime.of(
-            LocalDate.now(ZoneId.systemDefault()).minusDays(searchDuration), LocalTime.of(20, 59, 59));
+            LocalDate.now(ZoneId.systemDefault()).minusDays(searchDuration), LocalTime.of(21, 0, 0));
     }
 
     public LocalDateTime getEndDateForSearch() {
