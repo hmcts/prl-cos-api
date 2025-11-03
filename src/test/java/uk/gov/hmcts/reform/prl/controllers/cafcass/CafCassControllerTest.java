@@ -26,6 +26,7 @@ import static feign.Request.HttpMethod.GET;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
@@ -44,7 +45,7 @@ public class CafCassControllerTest {
     @Mock
     private CaseDataService caseDataService;
 
-    private static final String jsonInString =
+    private static final String RESPONSE_JSON =
         "classpath:response/CafCaasResponse.json";
 
     private String startDate = "2022-08-22T10:54:43.49";
@@ -56,7 +57,7 @@ public class CafCassControllerTest {
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
         objectMapper.registerModule(new ParameterNamesModule());
         CafCassResponse expectedCafCassResponse = objectMapper.readValue(
-            TestResourceUtil.readFileFrom(jsonInString),
+            TestResourceUtil.readFileFrom(RESPONSE_JSON),
             CafCassResponse.class
         );
 
@@ -165,4 +166,64 @@ public class CafCassControllerTest {
             .request(Request.create(GET, EMPTY, Map.of(), new byte[]{}, UTF_8, null))
             .build());
     }
+
+    @Test
+    public void getCaseData_shouldNotFail_whenHearingTypesIsNull() throws Exception {
+        // Arrange: the same resilient payload as above
+        String json = """
+            {
+               "cases": [
+                 {
+                   "id": 1234567890123456,
+                   "case_data": {
+                     "orderCollection": [
+                       {
+                         "id": "00000000-0000-0000-0000-000000000000",
+                         "value": {
+                           "orderType": "SomeOrder",
+                           "manageOrderHearingDetails": [
+                             {
+                               "id": "11111111-1111-1111-1111-111111111111",
+                               "value": {
+                                 "hearingTypes": null,
+                                 "confirmedHearingDates": null
+                               }
+                             }
+                           ]
+                         }
+                       }
+                     ]
+                   }
+                 }
+               ],
+               "total": 1
+             }
+    """;
+
+        ObjectMapper mapper = CcdObjectMapper.getObjectMapper();
+        mapper.registerModule(new ParameterNamesModule());
+        CafCassResponse cafCassResponse = mapper.readValue(json, CafCassResponse.class);
+
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(caseDataService.getCaseData("authorisation", startDate, endDate))
+            .thenReturn(cafCassResponse);
+
+        // Act
+        ResponseEntity<?> responseEntity = cafCassController.searcCasesByDates(
+            "authorisation", "Bearer serviceAuthorisation", startDate, endDate
+        );
+
+        // Assert: still 200 and body present
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        CafCassResponse body = (CafCassResponse) responseEntity.getBody();
+        assertEquals(1, body.getTotal());
+        assertEquals(1, body.getCases().size());
+
+        // And the problematic part didn’t crash the controller
+        var caseOrder = body.getCases().get(0).getCaseData().getOrderCollection().get(0).getValue();
+        assertNull(caseOrder.getHearingDetails());
+        assertNull(caseOrder.getHearingId());
+    }
+
 }
