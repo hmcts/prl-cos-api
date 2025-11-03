@@ -136,10 +136,20 @@ public class CaseDataService {
                     s2sToken,
                     cafCassSearchCaseTypeId
                 );
-                cafCassResponse = objectMapper.convertValue(
-                    searchResult,
-                    CafCassResponse.class
-                );
+                if (searchResult != null) {
+                    List<CafCassCaseDetail> cafCassCaseDetails = new ArrayList<>();
+                    searchResult.getCases().forEach(caseData -> {
+                        try {
+                            CafCassCaseDetail cafCassCaseDetail = objectMapper.convertValue(caseData, CafCassCaseDetail.class);
+                            cafCassCaseDetails.add(cafCassCaseDetail);
+                        } catch (IllegalArgumentException e) {
+                            log.info("Error while converting result case to Cafcass casedetails {}", caseData.getId());
+                        }
+                    });
+                    cafCassResponse.setCases(cafCassCaseDetails);
+                    cafCassResponse.setTotal(searchResult.getTotal());
+                }
+
                 if (cafCassResponse.getCases() != null && !cafCassResponse.getCases().isEmpty()) {
                     log.info("CCD Search Result Size --> {}", cafCassResponse.getTotal());
                     cafCassFilter.filter(cafCassResponse);
