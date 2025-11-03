@@ -826,4 +826,4 @@ acro:
     pool-size: 10
     allow-unknown-keys: true
     remote-directory: /
-    password: ${BAIS_SFTP_USER_PASSWORD:test_password}
+    password: ${ACRO_SFTP_USER_PASSWORD:test_password}
