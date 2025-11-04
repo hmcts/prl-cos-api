@@ -142,8 +142,8 @@ public class CaseDataService {
                         try {
                             CafCassCaseDetail cafCassCaseDetail = objectMapper.convertValue(caseData, CafCassCaseDetail.class);
                             cafCassCaseDetails.add(cafCassCaseDetail);
-                        } catch (IllegalArgumentException e) {
-                            log.info("Error while converting result case to Cafcass casedetails {}", caseData.getId());
+                        } catch (Exception e) {
+                            log.error("Error while converting result case to Cafcass casedetails {} with exception", caseData.getId(), e);
                         }
                     });
                     cafCassResponse.setCases(cafCassCaseDetails);
@@ -151,7 +151,8 @@ public class CaseDataService {
                 }
 
                 if (cafCassResponse.getCases() != null && !cafCassResponse.getCases().isEmpty()) {
-                    log.info("CCD Search Result Size --> {}", cafCassResponse.getTotal());
+                    log.info("CCD Search Result Size --> {} and Cafcass Response Size --> {}", searchResult.getTotal(),
+                             cafCassResponse.getTotal());
                     cafCassFilter.filter(cafCassResponse);
                     log.info("After applying filter Result Size --> {}", cafCassResponse.getTotal());
                     CafCassResponse filteredCafcassData = getHearingDetailsForAllCases(authorisation, cafCassResponse);
