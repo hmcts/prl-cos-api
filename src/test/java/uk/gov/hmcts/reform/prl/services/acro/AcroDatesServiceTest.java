@@ -60,9 +60,9 @@ class AcroDatesServiceTest {
         assertEquals(
             acroDatesService.getStartDateForSearch(),
             LocalDateTime.of(
-                    LocalDate.parse(pastDate, DateTimeFormatter.ofPattern("yyyy-MM-dd")).minusDays(duration),
+                LocalDate.parse(pastDate, DateTimeFormatter.ofPattern("yyyy-MM-dd")).minusDays(duration),
                 LocalTime.of(21, 0)
-        )
+            )
         );
     }
 
@@ -98,6 +98,32 @@ class AcroDatesServiceTest {
     void getEndDateForSearchForForInvalidDate() {
         String pastDate = "2025-15-10";
         when(launchDarklyClient.getStringVariation(eq("acro-fl404a-search-date"))).thenReturn(pastDate);
+        assertEquals(
+            acroDatesService.getEndDateForSearch(),
+            LocalDateTime.of(
+                LocalDate.now(ZoneId.systemDefault()),
+                LocalTime.of(21, 0)
+            )
+        );
+    }
+
+    @Test
+    void getStartDateForSearchForNullValue() {
+        int duration = 1;
+        when(launchDarklyClient.getIntVariation(eq("acro-fl404a-search-duration"))).thenReturn(duration);
+        when(launchDarklyClient.getStringVariation(eq("acro-fl404a-search-date"))).thenReturn("false");
+        assertEquals(
+            acroDatesService.getStartDateForSearch(),
+            LocalDateTime.of(
+                LocalDate.now(ZoneId.systemDefault()).minusDays(duration),
+                LocalTime.of(21, 0)
+            )
+        );
+    }
+
+    @Test
+    void getEndDateForSearchForNullValue() {
+        when(launchDarklyClient.getStringVariation(eq("acro-fl404a-search-date"))).thenReturn("false");
         assertEquals(
             acroDatesService.getEndDateForSearch(),
             LocalDateTime.of(
