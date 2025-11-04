@@ -78,4 +78,32 @@ class AcroDatesServiceTest {
             )
         );
     }
+
+    @Test
+    void getStartDateForSearchForInvalidDate() {
+        int duration = 1;
+        String pastDate = "2025-15-15";
+        when(launchDarklyClient.getIntVariation(eq("acro-fl404a-search-duration"))).thenReturn(duration);
+        when(launchDarklyClient.getStringVariation(eq("acro-fl404a-search-date"))).thenReturn(pastDate);
+        assertEquals(
+            acroDatesService.getStartDateForSearch(),
+            LocalDateTime.of(
+                LocalDate.now(ZoneId.systemDefault()).minusDays(duration),
+                LocalTime.of(21, 0)
+            )
+        );
+    }
+
+    @Test
+    void getEndDateForSearchForForInvalidDate() {
+        String pastDate = "2025-15-10";
+        when(launchDarklyClient.getStringVariation(eq("acro-fl404a-search-date"))).thenReturn(pastDate);
+        assertEquals(
+            acroDatesService.getEndDateForSearch(),
+            LocalDateTime.of(
+                LocalDate.now(ZoneId.systemDefault()),
+                LocalTime.of(21, 0)
+            )
+        );
+    }
 }
