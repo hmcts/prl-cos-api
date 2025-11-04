@@ -147,7 +147,7 @@ public class CaseDataService {
                         }
                     });
                     cafCassResponse.setCases(cafCassCaseDetails);
-                    cafCassResponse.setTotal(searchResult.getTotal());
+                    cafCassResponse.setTotal(cafCassCaseDetails.size());
                 }
 
                 if (cafCassResponse.getCases() != null && !cafCassResponse.getCases().isEmpty()) {

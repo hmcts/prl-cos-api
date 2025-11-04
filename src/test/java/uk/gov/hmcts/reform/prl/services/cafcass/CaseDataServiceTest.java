@@ -16,16 +16,20 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.filter.cafcaas.CafCassFilter;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.ContactInformation;
+import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
@@ -42,6 +46,8 @@ import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.Element;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
@@ -72,6 +78,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.testng.AssertJUnit.assertNull;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
@@ -321,7 +328,7 @@ public class CaseDataServiceTest {
 
     }
 
-    @org.junit.Test
+    @Test
     public void testGetCaseDataWithZeroRecords() throws IOException {
 
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
@@ -343,6 +350,53 @@ public class CaseDataServiceTest {
         assertEquals(cafCassResponse, realCafCassResponse);
 
         assertEquals(0, realCafCassResponse.getTotal());
+
+    }
+
+    @Test
+    public void testGetCaseDataWithConvertError() throws IOException {
+
+        ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
+        objectMapper.registerModule(new ParameterNamesModule());
+        String expectedCafCassResponse = TestResourceUtil.readFileFrom("classpath:response/CafCaasResponse.json");
+        SearchResult searchResult = objectMapper.readValue(expectedCafCassResponse,
+                                                           SearchResult.class);
+        CaseData caseData = CaseData.builder()
+            .orderCollection(List.of(element(OrderDetails.builder()
+                                            .manageOrderHearingDetails(
+                                                List.of(element(HearingData.builder()
+                                                                    .confirmedHearingDates(DynamicList.builder()
+                                                                                               .value(
+                                                                                                   DynamicListElement.builder().code(
+                                                                                                       "1234").build()).build())
+                                                                    .build())))
+                                            .build()))).build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put(ORDER_COLLECTION, caseData.getOrderCollection());
+        searchResult.setTotal(5);
+        searchResult.getCases().add(CaseDetails.builder().id(123L).data(caseDataMap).build());
+
+        final CafCassResponse cafCassResponse = objectMapper.readValue(expectedCafCassResponse, CafCassResponse.class);
+
+        when(cafcassCcdDataStoreService.searchCases(anyString(),anyString(),any(),any())).thenReturn(searchResult);
+        when(systemUserService.getSysUserToken()).thenReturn(userToken);
+        List<String> caseTypeList = new LinkedList<>();
+        caseTypeList.add("C100");
+        ReflectionTestUtils.setField(caseDataService, "caseTypeList", caseTypeList);
+        List<String> caseStateList = new LinkedList<>();
+        caseStateList.add("DECISION_OUTCOME");
+        ReflectionTestUtils.setField(caseDataService, "caseStateList", caseStateList);
+
+        CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation",
+                                                                          "start", "end"
+        );
+        assertTrue(searchResult.getTotal() > realCafCassResponse.getTotal());
+        assertEquals(4, realCafCassResponse.getTotal());
+
+        assertEquals(cafCassResponse.cases.stream()
+            .map(CafCassCaseDetail::getId).reduce(0L, Long::sum),
+                     realCafCassResponse.getCases().stream()
+            .map(CafCassCaseDetail::getId).reduce(0L, Long::sum));
 
     }
 
