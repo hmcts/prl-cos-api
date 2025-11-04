@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.acro;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 
@@ -8,23 +9,41 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AcroDatesService {
 
+    public static final LocalTime SEARCH_TIME = LocalTime.of(21, 0);
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private final LaunchDarklyClient launchDarklyClient;
 
     public LocalDateTime getStartDateForSearch() {
-        long searchDuration = (long) launchDarklyClient.getFeatureValue("acro-fl404a-search-duration");
-        return LocalDateTime.of(
-            LocalDate.now(ZoneId.systemDefault()).minusDays(searchDuration), LocalTime.of(20, 59, 59));
+        long searchDuration = launchDarklyClient.getIntVariation("acro-fl404a-search-duration");
+        return LocalDateTime.of(getCurrentDateForSearch().minusDays(searchDuration), SEARCH_TIME);
     }
 
     public LocalDateTime getEndDateForSearch() {
-        return LocalDateTime.of(
-            LocalDate.now(ZoneId.systemDefault()),
-            LocalTime.of(21, 0, 0)
-        );
+        return LocalDateTime.of(getCurrentDateForSearch(), SEARCH_TIME);
+    }
+
+    private LocalDate getCurrentDateForSearch() {
+        String stringValue = launchDarklyClient.getStringVariation("acro-fl404a-search-date");
+
+        LocalDate localDate = LocalDate.now(ZoneId.systemDefault());
+
+        if ("false".equals(stringValue) || "now".equals(stringValue)) {
+            return localDate;
+        }
+
+        try {
+            return LocalDate.parse(stringValue, dateFormatter);
+        } catch (DateTimeParseException e) {
+            log.warn("could not parse date ... falling back to current date", e);
+            return localDate;
+        }
     }
 }

@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
@@ -26,24 +27,54 @@ class AcroDatesServiceTest {
     AcroDatesService acroDatesService;
 
     @Test
-    void getStartDateForSearch() {
-        when(launchDarklyClient.getFeatureValue(eq("acro-fl404a-search-duration"))).thenReturn(1);
+    void getStartDateForSearchNow() {
+        when(launchDarklyClient.getIntVariation(eq("acro-fl404a-search-duration"))).thenReturn(1);
+        when(launchDarklyClient.getStringVariation(eq("acro-fl404a-search-date"))).thenReturn("now");
         assertEquals(
             acroDatesService.getStartDateForSearch(),
             LocalDateTime.of(
                 LocalDate.now(ZoneId.systemDefault()).minusDays(1L),
-                LocalTime.of(20, 59, 59)
+                LocalTime.of(21, 0)
             )
         );
     }
 
     @Test
-    void getEndDateForSearch() {
+    void getEndDateForSearchForNow() {
+        when(launchDarklyClient.getStringVariation(eq("acro-fl404a-search-date"))).thenReturn("now");
         assertEquals(
             acroDatesService.getEndDateForSearch(),
             LocalDateTime.of(
                 LocalDate.now(ZoneId.systemDefault()),
-                LocalTime.of(21, 0, 0)
+                LocalTime.of(21, 0)
+            )
+        );
+    }
+
+    @Test
+    void getStartDateForSearchForPastDate() {
+        int duration = 1;
+        String pastDate = "2025-10-15";
+        when(launchDarklyClient.getIntVariation(eq("acro-fl404a-search-duration"))).thenReturn(duration);
+        when(launchDarklyClient.getStringVariation(eq("acro-fl404a-search-date"))).thenReturn(pastDate);
+        assertEquals(
+            acroDatesService.getStartDateForSearch(),
+            LocalDateTime.of(
+                    LocalDate.parse(pastDate, DateTimeFormatter.ofPattern("yyyy-MM-dd")).minusDays(duration),
+                LocalTime.of(21, 0)
+        )
+        );
+    }
+
+    @Test
+    void getEndDateForSearchForForPastDate() {
+        String pastDate = "2025-10-10";
+        when(launchDarklyClient.getStringVariation(eq("acro-fl404a-search-date"))).thenReturn(pastDate);
+        assertEquals(
+            acroDatesService.getEndDateForSearch(),
+            LocalDateTime.of(
+                LocalDate.parse(pastDate, DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                LocalTime.of(21, 0)
             )
         );
     }
