@@ -26,6 +26,7 @@ import static feign.Request.HttpMethod.GET;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -171,34 +172,34 @@ public class CafCassControllerTest {
     public void getCaseData_shouldNotFail_whenHearingTypesIsNull() throws Exception {
         // Arrange: the same resilient payload as above
         String json = """
-            {
-               "cases": [
-                 {
-                   "id": 1234567890123456,
-                   "case_data": {
-                     "orderCollection": [
-                       {
-                         "id": "00000000-0000-0000-0000-000000000000",
-                         "value": {
-                           "orderType": "SomeOrder",
-                           "manageOrderHearingDetails": [
-                             {
-                               "id": "11111111-1111-1111-1111-111111111111",
-                               "value": {
-                                 "hearingTypes": null,
-                                 "confirmedHearingDates": null
+                    {
+                       "cases": [
+                         {
+                           "id": 1234567890123456,
+                           "case_data": {
+                             "orderCollection": [
+                               {
+                                 "id": "00000000-0000-0000-0000-000000000000",
+                                 "value": {
+                                   "orderType": "SomeOrder",
+                                   "manageOrderHearingDetails": [
+                                     {
+                                       "id": "11111111-1111-1111-1111-111111111111",
+                                       "value": {
+                                         "hearingTypes": null,
+                                         "confirmedHearingDates": null
+                                       }
+                                     }
+                                   ]
+                                 }
                                }
-                             }
-                           ]
+                             ]
+                           }
                          }
-                       }
-                     ]
-                   }
-                 }
-               ],
-               "total": 1
-             }
-    """;
+                       ],
+                       "total": 1
+                     }
+            """;
 
         ObjectMapper mapper = CcdObjectMapper.getObjectMapper();
         mapper.registerModule(new ParameterNamesModule());
@@ -224,6 +225,82 @@ public class CafCassControllerTest {
         var caseOrder = body.getCases().get(0).getCaseData().getOrderCollection().get(0).getValue();
         assertNull(caseOrder.getHearingDetails());
         assertNull(caseOrder.getHearingId());
+    }
+
+    @Test
+    public void getCaseData_shouldDeserializeNormally_withMultipleHearings() throws Exception {
+        // Arrange: create a valid payload with 2 hearing details
+        String json = """
+            {
+              "cases": [
+                {
+                  "id": 9876543210123456,
+                  "case_data": {
+                    "orderCollection": [
+                      {
+                        "id": "00000000-0000-0000-0000-000000000000",
+                        "value": {
+                          "orderType": "StandardOrder",
+                          "manageOrderHearingDetails": [
+                            {
+                              "id": "11111111-1111-1111-1111-111111111111",
+                              "value": {
+                                "hearingTypes": {
+                                  "value": {"code": "TYPE_A", "label": "First Hearing"}
+                                },
+                                "confirmedHearingDates": {
+                                  "value": {"code": "Hearing1", "label": "2022-01-01T10:00:00"}
+                                }
+                              }
+                            },
+                            {
+                              "id": "22222222-2222-2222-2222-222222222222",
+                              "value": {
+                                "hearingTypes": {
+                                  "value": {"code": "TYPE_B", "label": "Second Hearing"}
+                                },
+                                "confirmedHearingDates": {
+                                  "value": {"code": "Hearing2", "label": "2022-01-01T11:00:00"}
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ],
+              "total": 1
+            }
+            """;
+
+        ObjectMapper mapper = CcdObjectMapper.getObjectMapper();
+        mapper.registerModule(new ParameterNamesModule());
+        CafCassResponse cafCassResponse = mapper.readValue(json, CafCassResponse.class);
+
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(caseDataService.getCaseData("authorisation", startDate, endDate))
+            .thenReturn(cafCassResponse);
+
+        // Act
+        ResponseEntity<?> responseEntity = cafCassController.searcCasesByDates(
+            "authorisation", "Bearer serviceAuthorisation", startDate, endDate
+        );
+
+        // Assert
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        CafCassResponse body = (CafCassResponse) responseEntity.getBody();
+        assertEquals(1, body.getTotal());
+        assertEquals(1, body.getCases().size());
+
+        // Verify both hearings parsed correctly
+        var order = body.getCases().get(0).getCaseData().getOrderCollection().get(0).getValue();
+        assertNotNull(order.getHearingDetails());
+        assertEquals("TYPE_A", order.getHearingDetails().getHearingType()); // first one taken
+        assertEquals("First Hearing", order.getHearingDetails().getHearingTypeValue());
+        assertEquals("Hearing1, Hearing2", order.getHearingId());
     }
 
 }
