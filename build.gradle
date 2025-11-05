@@ -705,7 +705,7 @@ task loadEnvSecrets() {
 }
 
 task buildCCDXlsx(type: Exec) {
-  commandLine './bin/build-ccd-xlsx-definitions.sh'
+  commandLine './bin/cftlib/build-ccd-xlsx-definitions.sh'
 }
 
 bootWithCCD {
