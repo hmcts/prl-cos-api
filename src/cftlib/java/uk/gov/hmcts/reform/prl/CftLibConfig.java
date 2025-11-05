@@ -50,7 +50,8 @@ public class CftLibConfig implements CFTLibConfigurer {
             "judge",
             "senior-tribunal-caseworker",
             "caseworker-privatelaw-courtadmin-casecreator",
-            "ctsc"
+            "ctsc",
+            "TTL_profile"
         );
     }
 
