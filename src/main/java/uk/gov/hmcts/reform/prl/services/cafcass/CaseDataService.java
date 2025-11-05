@@ -180,17 +180,30 @@ public class CaseDataService {
     private CafCassResponse removeUnnecessaryFieldsFromResponse(CafCassResponse filteredCafcassData) {
         filteredCafcassData.getCases().forEach(cafCassCaseDetail -> {
             CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
+            if (caseData.getOrderCollection() != null) {
+                caseData.getOrderCollection().forEach(order -> {
+                    CaseOrder value = order.getValue();
+                    if (value != null) {
+                        log.info(
+                            "Case {} has hearingId={} on orderTypeId={}",
+                            cafCassCaseDetail.getId(),
+                            value.getHearingId(),
+                            value.getOrderType()
+                        );
+                    }
+                });
+            }
+
             caseData = caseData.toBuilder()
                 .applicants(removeResponse(caseData.getApplicants()))
                 .respondents(removeResponse(caseData.getRespondents()))
                 .orderCollection(removeServeOrderDetails(caseData.getOrderCollection()))
                 .build();
-
             cafCassCaseDetail.setCaseData(caseData);
         });
-
-        return  filteredCafcassData;
+        return filteredCafcassData;
     }
+
 
     private List<Element<CaseOrder>> removeServeOrderDetails(List<Element<CaseOrder>> orderCollection) {
         if (!CollectionUtils.isEmpty(orderCollection)) {
