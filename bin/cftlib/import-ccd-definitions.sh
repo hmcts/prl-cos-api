@@ -1,6 +1,6 @@
 #!/bin/bash
-# Imports the local versions of CCD definition files into an environment running CFTLib authMode = AAT.
-# The local versions are automatically generated prior to import.
+# Imports the local version of the CCD definition file into an environment running CFTLib authMode = AAT.
+# The local version is automatically generated prior to import.
 #
 # Usage: import-ccd-definitions.sh
 #

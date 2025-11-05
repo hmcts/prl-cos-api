@@ -11,7 +11,8 @@ There is currently no support for
 1. The [prl-ccd-definitions](https://github.com/hmcts/prl-ccd-definitions) repository must be cloned in the same parent directory as `prl-cos-api`.
 2. You must be connected to the VPN.
 3. Docker must be running.
-4. An `.aat-env` file is needed to provide the environment variables required to point services at AAT.
+4. [jq](https://jqlang.org/) must be installed.
+5. `.aat-env` file is needed to provide the environment variables required to point services at AAT.
    As these include Azure secrets, it is not stored in Git.
    If the file is not already present then it is downloaded automatically when the local development environment is started.
 
