@@ -355,7 +355,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         Optional<YesOrNo> behavioursApplicantSoughtHelp = ofNullable(domesticAbuseBehaviours.getNewBehavioursApplicantSoughtHelp());
         Optional<String> behavioursApplicantHelpSoughtWho = ofNullable(domesticAbuseBehaviours.getNewBehavioursApplicantHelpSoughtWho());
         List<Optional<?>> fields = new ArrayList<>();
-        fields.add(ofNullable(domesticAbuseBehaviours.getTypeOfAbuse().getDisplayedValue()));
+        fields.add(ofNullable(domesticAbuseBehaviours.getTypeOfAbuse()));
         fields.add(abuseNatureDescription);
         fields.add(behavioursStartDateAndLength);
         fields.add(behavioursApplicantSoughtHelp);
