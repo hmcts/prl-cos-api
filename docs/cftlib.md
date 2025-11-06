@@ -2,19 +2,23 @@
 This page provides instructions on how to develop and test `prl-cos-api` in a local development
 environment using [cftlib](https://github.com/hmcts/rse-cft-lib). AAT is used to provide some of the dependent services.
 
+An `.aat-env` file is needed to provide the environment variables required to point services at AAT.
+As these include Azure secrets, it is not stored in Git.
+If the file is not already present then it is downloaded automatically when the local development environment is started.
+
+
 ## Limitations
 There is currently no support for
 - Work Allocation
 - Hearings
 
 ## Prerequisites
-1. The [prl-ccd-definitions](https://github.com/hmcts/prl-ccd-definitions) repository must be cloned in the same parent directory as `prl-cos-api`.
-2. You must be connected to the VPN.
-3. Docker must be running.
-4. [jq](https://jqlang.org/) must be installed.
-5. `.aat-env` file is needed to provide the environment variables required to point services at AAT.
-   As these include Azure secrets, it is not stored in Git.
-   If the file is not already present then it is downloaded automatically when the local development environment is started.
+1. Java 21.
+2. The [prl-ccd-definitions](https://github.com/hmcts/prl-ccd-definitions) repository must be cloned in the same parent directory as `prl-cos-api`.
+3. The `prl-ccd-definitions` setup tasks must have been run: `yarn install` and `yarn reset-ccd-submodule`.
+4. You must be connected to the VPN.
+5. Docker must be running.
+6. [jq](https://jqlang.org/) must be installed.
 
 ## Setup
 The first time cftlib is run it needs to download Docker images from the Azure Registry. You must therefore login
