@@ -374,6 +374,20 @@ public class AllegationsOfHarmRevisedCheckerTest {
         assertTrue(allegationsOfHarmChecker.validateDomesticAbuseBehaviours(behaviour));
     }
 
+    @Test
+    public void shouldReturnFalseWhenMissingTypeOfAbuse() {
+        DomesticAbuseBehaviours behaviour = DomesticAbuseBehaviours.builder()
+            .typeOfAbuse(null)
+            .newAbuseNatureDescription("Test")
+            .newBehavioursStartDateAndLength("5 days")
+            .newBehavioursApplicantSoughtHelp(Yes)
+            .newBehavioursApplicantHelpSoughtWho("Who from")
+            .build();
+
+        assertFalse(allegationsOfHarmChecker.validateDomesticAbuseBehaviours(behaviour));
+
+    }
+
 
     @Test
     public void whenDomesticBehaviourPresentButIncompleteReturnFalse() {
