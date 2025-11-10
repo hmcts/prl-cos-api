@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -8,7 +7,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.FL401RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
@@ -39,65 +37,28 @@ public class CaseWorkerEmailServiceTest {
 
     private static final String MANAGE_CASE_URL = null;
 
-    public static final CaseWorkerEmail expectedEmailVars = CaseWorkerEmail.builder()
-        .caseReference("123")
-        .caseName("Case 123")
-        .applicantName("applicantName")
-        .respondentLastName("respondentName")
-        .hearingDateRequested("  ")
-        .ordersApplyingFor("CA Order")
-        .typeOfHearing("Urgent")
-        .courtEmail("C@justice.gov.uk")
-        .caseLink("http://localhost:3333/")
-        .build();
-
-
     @Mock
     private EmailService emailService;
-
-    @Mock
-    private IdamClient idamClient;
-
-    @InjectMocks
-    private UserService userService;
 
     @InjectMocks
     private CaseWorkerEmailService caseWorkerEmailService;
 
-    private PartyDetails applicant;
-    private PartyDetails respondent;
-    private String applicantNames;
-    private Element<PartyDetails> wrappedApplicants;
-    private List<Element<PartyDetails>> listOfApplicants;
-
-    private Element<PartyDetails> wrappedRespondents;
-    private List<Element<PartyDetails>> listOfRespondents;
-
-
-    @Before
-    public void setUp() {
-
-        applicant = PartyDetails.builder()
+    @Test
+    public void whenApplicantPresentThenApplicantStringCreated() {
+        PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
             .build();
 
-        applicantNames = "TestFirst TestLast";
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
 
-        wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
-        listOfApplicants = Collections.singletonList(wrappedApplicants);
-
-        respondent = PartyDetails.builder()
+        PartyDetails respondent = PartyDetails.builder()
             .lastName("TestLast")
             .build();
 
-        wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
-        listOfRespondents = Collections.singletonList(wrappedRespondents);
-
-    }
-
-    @Test
-    public void whenApplicantPresentThenApplicantStringCreated() {
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
+        List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -117,7 +78,7 @@ public class CaseWorkerEmailServiceTest {
         EmailTemplateVars email = CaseWorkerEmail.builder()
             .caseReference(String.valueOf(caseDetails.getId()))
             .caseName(caseData.getApplicantCaseName())
-            .applicantName(applicantNames)
+            .applicantName("TestFirst TestLast")
             .respondentLastName(respondent.getLastName())
             .typeOfHearing("Urgent ")
             .hearingDateRequested("  ")
@@ -125,16 +86,13 @@ public class CaseWorkerEmailServiceTest {
             .caseLink(MANAGE_CASE_URL + "/" + caseDetails.getId())
             .build();
 
-
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
         assertEquals(email, caseWorkerEmailService.buildEmail(caseDetails));
-
     }
 
     @Test
     public void whenRespondentPresentThenRespondentStringCreated() {
-
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -151,7 +109,6 @@ public class CaseWorkerEmailServiceTest {
 
         Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
         List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
-
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -183,13 +140,10 @@ public class CaseWorkerEmailServiceTest {
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
         assertEquals(email, caseWorkerEmailService.buildEmail(caseDetails));
-
-
     }
 
     @Test
     public void whenTypeOfApplicationPresentThenOrdersApplyForWillBeDispalyed() {
-
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -236,12 +190,10 @@ public class CaseWorkerEmailServiceTest {
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
         assertEquals(email, caseWorkerEmailService.buildEmail(caseDetails));
-
     }
 
     @Test
     public void whenTypeOfApplicationIsReducedNoticeThenOrdersApplyForWillBeDispalyed() {
-
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -288,7 +240,6 @@ public class CaseWorkerEmailServiceTest {
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
         assertEquals(email, caseWorkerEmailService.buildEmail(caseDetails));
-
     }
 
     @Test
@@ -298,15 +249,12 @@ public class CaseWorkerEmailServiceTest {
             .lastName("TestLast")
             .build();
 
-        String applicantNames = "TestFirst TestLast";
-
         Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
 
         PartyDetails respondent = PartyDetails.builder()
             .lastName("respondentLast")
             .build();
-
 
         Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
         List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
@@ -338,7 +286,6 @@ public class CaseWorkerEmailServiceTest {
 
     @Test
     public void testCourtAdminEmailWithNoUrgency() {
-
         PartyDetails applicant1 = PartyDetails.builder()
             .canYouProvideEmailAddress(YesOrNo.No)
             .isAddressConfidential(YesOrNo.No)
@@ -388,12 +335,10 @@ public class CaseWorkerEmailServiceTest {
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
         assertEquals(email, caseWorkerEmailService.buildCourtAdminEmail(caseDetails));
-
     }
 
     @Test
     public void testCourtAdminEmailWithUrgencyAndConfidentialInfo() {
-
         PartyDetails applicant1 = PartyDetails.builder()
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .isEmailAddressConfidential(YesOrNo.Yes)
@@ -444,12 +389,10 @@ public class CaseWorkerEmailServiceTest {
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
         assertEquals(email, caseWorkerEmailService.buildCourtAdminEmail(caseDetails));
-
     }
 
     @Test
     public void testSendEmailToCourtAdmin() {
-
         LocalCourtAdminEmail localCourtAdminEmail = LocalCourtAdminEmail.builder()
             .email("test@demo.com")
             .build();
@@ -511,7 +454,6 @@ public class CaseWorkerEmailServiceTest {
         listOfApplicants.add(wrappedApplicants);
         listOfApplicants.add(wrappedApplicant2);
 
-
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -523,7 +465,6 @@ public class CaseWorkerEmailServiceTest {
         Map<String, Object> data = new HashMap<>();
         data.put("applicantSolicitorEmailAddress", "test@test.com");
 
-
         CaseDetails caseDetails = CaseDetails.builder()
             .id(caseData.getId())
             .data(data)
@@ -532,7 +473,6 @@ public class CaseWorkerEmailServiceTest {
 
         caseWorkerEmailService.sendReturnApplicationEmailToSolicitor(caseDetails);
         assertEquals("test@test.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
-
     }
 
     @Test
@@ -553,7 +493,6 @@ public class CaseWorkerEmailServiceTest {
         Map<String, Object> data = new HashMap<>();
         data.put("applicantSolicitorEmailAddress", "test@test.com");
 
-
         CaseDetails caseDetails = CaseDetails.builder()
             .id(caseData.getId())
             .data(data)
@@ -562,12 +501,10 @@ public class CaseWorkerEmailServiceTest {
 
         caseWorkerEmailService.sendReturnApplicationEmailToSolicitor(caseDetails);
         assertEquals("test@test.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
-
     }
 
     @Test
     public void testGateKeeperEmailWithNoUrgency() {
-
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("TestCaseName")
@@ -593,12 +530,10 @@ public class CaseWorkerEmailServiceTest {
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
         assertEquals(email, caseWorkerEmailService.buildGatekeeperEmail(caseDetails));
-
     }
 
     @Test
     public void testGateKeeperEmailWithUrgency() {
-
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("TestCaseName")
@@ -624,12 +559,10 @@ public class CaseWorkerEmailServiceTest {
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
         assertEquals(email, caseWorkerEmailService.buildGatekeeperEmail(caseDetails));
-
     }
 
     @Test
     public void testSendEmailToGateKeeper() {
-
         GatekeeperEmail gatekeeperEmail = GatekeeperEmail.builder()
             .email("test@demo.com")
             .build();
@@ -657,7 +590,6 @@ public class CaseWorkerEmailServiceTest {
 
     @Test
     public void testSendEmailToGateKeeperFl401() {
-
         GatekeeperEmail gatekeeperEmail = GatekeeperEmail.builder()
             .email("test@demo.com")
             .build();
@@ -685,7 +617,6 @@ public class CaseWorkerEmailServiceTest {
 
     @Test
     public void testFL401LocalCourtEmailWithoutConfidentialInformation() {
-
         PartyDetails fl401Applicant = PartyDetails.builder()
             .firstName("testUser")
             .lastName("last test")
@@ -727,12 +658,10 @@ public class CaseWorkerEmailServiceTest {
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
         assertEquals(email, caseWorkerEmailService.buildFl401LocalCourtAdminEmail(caseDetails));
-
     }
 
     @Test
     public void testFL401LocalCourtEmailWithConfidentialInformation() {
-
         PartyDetails fl401Applicant = PartyDetails.builder()
             .firstName("testUser")
             .lastName("last test")
@@ -774,12 +703,10 @@ public class CaseWorkerEmailServiceTest {
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
         assertEquals(email, caseWorkerEmailService.buildFl401LocalCourtAdminEmail(caseDetails));
-
     }
 
     @Test
     public void testSendEmailToFl401LocalCourt() {
-
         PartyDetails fl401Applicant = PartyDetails.builder()
             .firstName("testUser")
             .lastName("last test")
@@ -801,17 +728,6 @@ public class CaseWorkerEmailServiceTest {
             .id(caseData.getId())
             .build();
 
-        LocalDate issueDate = LocalDate.now();
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-
-        String isConfidential = "No";
-        if (fl401Applicant.getCanYouProvideEmailAddress().equals(YesOrNo.Yes)
-            || (fl401Applicant.getIsEmailAddressConfidential() != null
-            && fl401Applicant.getIsEmailAddressConfidential().equals(YesOrNo.Yes))
-            || (fl401Applicant.hasConfidentialInfo())) {
-            isConfidential = "Yes";
-        }
-
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
         caseWorkerEmailService.sendEmailToFl401LocalCourt(caseDetails, caseData.getCourtEmailAddress());
@@ -821,7 +737,6 @@ public class CaseWorkerEmailServiceTest {
 
     @Test
     public void testSendEmailToFl401LocalCourtWhenWithdrawnAfterIssued() {
-
         PartyDetails fl401Applicant = PartyDetails.builder()
             .firstName("testUser")
             .lastName("last test")
@@ -843,17 +758,6 @@ public class CaseWorkerEmailServiceTest {
         CaseDetails caseDetails = CaseDetails.builder()
             .id(caseData.getId())
             .build();
-
-        LocalDate issueDate = LocalDate.now();
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-
-        String isConfidential = "No";
-        if (fl401Applicant.getCanYouProvideEmailAddress().equals(YesOrNo.Yes)
-            || (fl401Applicant.getIsEmailAddressConfidential() != null
-            && fl401Applicant.getIsEmailAddressConfidential().equals(YesOrNo.Yes))
-            || (fl401Applicant.hasConfidentialInfo())) {
-            isConfidential = "Yes";
-        }
 
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
@@ -936,4 +840,3 @@ public class CaseWorkerEmailServiceTest {
         );
     }
 }
-
