@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.FL401RejectReasonEnum;
@@ -29,11 +29,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class CaseWorkerEmailServiceTest {
+@ExtendWith(MockitoExtension.class)
+class CaseWorkerEmailServiceTest {
 
     private static final String MANAGE_CASE_URL = null;
 
@@ -44,7 +44,7 @@ public class CaseWorkerEmailServiceTest {
     private CaseWorkerEmailService caseWorkerEmailService;
 
     @Test
-    public void whenApplicantPresentThenApplicantStringCreated() {
+    void whenApplicantPresentThenApplicantStringCreated() {
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -92,7 +92,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void whenRespondentPresentThenRespondentStringCreated() {
+    void whenRespondentPresentThenRespondentStringCreated() {
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -143,7 +143,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void whenTypeOfApplicationPresentThenOrdersApplyForWillBeDispalyed() {
+    void whenTypeOfApplicationPresentThenOrdersApplyForWillBeDispalyed() {
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -193,7 +193,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void whenTypeOfApplicationIsReducedNoticeThenOrdersApplyForWillBeDispalyed() {
+    void whenTypeOfApplicationIsReducedNoticeThenOrdersApplyForWillBeDispalyed() {
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -243,7 +243,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void sendEmailSuccessfully() {
+    void sendEmailSuccessfully() {
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -285,7 +285,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void testCourtAdminEmailWithNoUrgency() {
+    void testCourtAdminEmailWithNoUrgency() {
         PartyDetails applicant1 = PartyDetails.builder()
             .canYouProvideEmailAddress(YesOrNo.No)
             .isAddressConfidential(YesOrNo.No)
@@ -338,7 +338,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void testCourtAdminEmailWithUrgencyAndConfidentialInfo() {
+    void testCourtAdminEmailWithUrgencyAndConfidentialInfo() {
         PartyDetails applicant1 = PartyDetails.builder()
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .isEmailAddressConfidential(YesOrNo.Yes)
@@ -392,7 +392,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailToCourtAdmin() {
+    void testSendEmailToCourtAdmin() {
         LocalCourtAdminEmail localCourtAdminEmail = LocalCourtAdminEmail.builder()
             .email("test@demo.com")
             .build();
@@ -437,7 +437,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void sendReturnApplicationEmailSuccessfully() {
+    void sendReturnApplicationEmailSuccessfully() {
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -476,7 +476,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void sendFl401ReturnApplicationEmailSuccessfully() {
+    void sendFl401ReturnApplicationEmailSuccessfully() {
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -504,7 +504,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void testGateKeeperEmailWithNoUrgency() {
+    void testGateKeeperEmailWithNoUrgency() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("TestCaseName")
@@ -533,7 +533,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void testGateKeeperEmailWithUrgency() {
+    void testGateKeeperEmailWithUrgency() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("TestCaseName")
@@ -562,7 +562,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailToGateKeeper() {
+    void testSendEmailToGateKeeper() {
         GatekeeperEmail gatekeeperEmail = GatekeeperEmail.builder()
             .email("test@demo.com")
             .build();
@@ -589,7 +589,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailToGateKeeperFl401() {
+    void testSendEmailToGateKeeperFl401() {
         GatekeeperEmail gatekeeperEmail = GatekeeperEmail.builder()
             .email("test@demo.com")
             .build();
@@ -616,7 +616,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void testFL401LocalCourtEmailWithoutConfidentialInformation() {
+    void testFL401LocalCourtEmailWithoutConfidentialInformation() {
         PartyDetails fl401Applicant = PartyDetails.builder()
             .firstName("testUser")
             .lastName("last test")
@@ -661,7 +661,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void testFL401LocalCourtEmailWithConfidentialInformation() {
+    void testFL401LocalCourtEmailWithConfidentialInformation() {
         PartyDetails fl401Applicant = PartyDetails.builder()
             .firstName("testUser")
             .lastName("last test")
@@ -706,7 +706,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailToFl401LocalCourt() {
+    void testSendEmailToFl401LocalCourt() {
         PartyDetails fl401Applicant = PartyDetails.builder()
             .firstName("testUser")
             .lastName("last test")
@@ -736,7 +736,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailToFl401LocalCourtWhenWithdrawnAfterIssued() {
+    void testSendEmailToFl401LocalCourtWhenWithdrawnAfterIssued() {
         PartyDetails fl401Applicant = PartyDetails.builder()
             .firstName("testUser")
             .lastName("last test")
@@ -767,7 +767,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void sendEmailShouldNotThrowWhenEmailIsNullOrBlank() {
+    void sendEmailShouldNotThrowWhenEmailIsNullOrBlank() {
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345L)
             .data(new HashMap<>()) // No email address
@@ -785,7 +785,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void sendEmailShouldHandleExceptionFromEmailService() {
+    void sendEmailShouldHandleExceptionFromEmailService() {
         Map<String, Object> data = new HashMap<>();
         data.put("caseworkerEmailAddress", "test@test.com");
         CaseDetails caseDetails = CaseDetails.builder()
@@ -822,7 +822,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    public void sendEmailShouldNotThrowWhenEmailIsBlank() {
+    void sendEmailShouldNotThrowWhenEmailIsBlank() {
         Map<String, Object> data = new HashMap<>();
         data.put("caseworkerEmailAddress", "   "); // blank string
         CaseDetails caseDetails = CaseDetails.builder()
