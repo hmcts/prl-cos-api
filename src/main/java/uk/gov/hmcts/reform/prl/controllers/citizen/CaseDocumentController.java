@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,7 +88,6 @@ public class CaseDocumentController {
     private final ObjectMapper objectMapper;
     private final IdamClient idamClient;
     private final CaseService caseService;
-    Integer fileIndex;
     private final EmailService emailService;
     private final CitizenDocumentService citizenDocumentService;
 
@@ -103,28 +103,27 @@ public class CaseDocumentController {
     public ResponseEntity<Object> generateCitizenStatementDocument(@RequestBody GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
                                                            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                            @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
-        fileIndex = 0;
         String caseId = generateAndUploadDocumentRequest.getValues().get("caseId");
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
         CaseData tempCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+
+        int fileIndex = 0;
         if (generateAndUploadDocumentRequest.getValues() != null
             && generateAndUploadDocumentRequest.getValues().containsKey("documentType")
             && generateAndUploadDocumentRequest.getValues().containsKey("partyName")) {
             final String documentType = generateAndUploadDocumentRequest.getValues().get("documentType");
             final String partyName = generateAndUploadDocumentRequest.getValues().get("partyName");
-            if (tempCaseData.getCitizenUploadedDocumentList() != null
-                && !tempCaseData.getCitizenUploadedDocumentList().isEmpty()) {
-                tempCaseData.getCitizenUploadedDocumentList()
-                    .stream().forEach(document -> {
-                        if (documentType.equalsIgnoreCase(document.getValue().getDocumentType())
-                            && partyName.equalsIgnoreCase(document.getValue().getPartyName())) {
-                            fileIndex++;
-                        }
-                    });
+
+            if (CollectionUtils.isNotEmpty(tempCaseData.getCitizenUploadedDocumentList())) {
+                fileIndex = (int) tempCaseData.getCitizenUploadedDocumentList().stream()
+                    .map(Element::getValue)
+                    .filter(uploadedDocuments -> documentType.equalsIgnoreCase(uploadedDocuments.getDocumentType()))
+                    .filter(uploadedDocuments -> partyName.equalsIgnoreCase(uploadedDocuments.getPartyName()))
+                    .count();
             }
         }
-        UploadedDocuments uploadedDocuments =
-            documentGenService.generateCitizenStatementDocument(
+
+        UploadedDocuments uploadedDocuments = documentGenService.generateCitizenStatementDocument(
                 authorisation,
                 generateAndUploadDocumentRequest,
                 fileIndex + 1
@@ -136,7 +135,6 @@ public class CaseDocumentController {
             tempCaseData,
             uploadedDocuments
         );
-
     }
 
     private ResponseEntity<Object> getUploadedDocumentsList(@RequestBody GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
