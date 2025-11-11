@@ -31,8 +31,7 @@ class AcroDatesServiceTest {
         assertEquals(
             acroDatesService.getStartDateForSearch(),
             LocalDateTime.of(
-                LocalDate.now(ZoneId.systemDefault()).minusDays(1L),
-                LocalTime.of(20, 59, 59)
+                LocalDate.now(ZoneId.systemDefault()).minusDays(1L), LocalTime.of(21, 0)
             )
         );
     }
@@ -41,9 +40,7 @@ class AcroDatesServiceTest {
     void getEndDateForSearch() {
         assertEquals(
             acroDatesService.getEndDateForSearch(),
-            LocalDateTime.of(
-                LocalDate.now(ZoneId.systemDefault()),
-                LocalTime.of(21, 0, 0)
+            LocalDateTime.of(LocalDate.now(ZoneId.systemDefault()), LocalTime.of(21, 0)
             )
         );
     }

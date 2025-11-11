@@ -13,18 +13,15 @@ import java.time.ZoneId;
 @RequiredArgsConstructor
 public class AcroDatesService {
 
+    public static final LocalTime SEARCH_TIME = LocalTime.of(21, 0);
     private final LaunchDarklyClient launchDarklyClient;
 
     public LocalDateTime getStartDateForSearch() {
         long searchDuration = (long) launchDarklyClient.getFeatureValue("acro-fl404a-search-duration");
-        return LocalDateTime.of(
-            LocalDate.now(ZoneId.systemDefault()).minusDays(searchDuration), LocalTime.of(20, 59, 59));
+        return LocalDateTime.of(LocalDate.now(ZoneId.systemDefault()).minusDays(searchDuration), SEARCH_TIME);
     }
 
     public LocalDateTime getEndDateForSearch() {
-        return LocalDateTime.of(
-            LocalDate.now(ZoneId.systemDefault()),
-            LocalTime.of(21, 0, 0)
-        );
+        return LocalDateTime.of(LocalDate.now(ZoneId.systemDefault()), SEARCH_TIME);
     }
 }
