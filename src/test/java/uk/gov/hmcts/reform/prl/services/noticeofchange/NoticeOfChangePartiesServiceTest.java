@@ -74,6 +74,7 @@ import uk.gov.hmcts.reform.prl.utils.noticeofchange.RespondentPolicyConverter;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -1720,4 +1721,99 @@ public class NoticeOfChangePartiesServiceTest {
         verify(assignCaseAccessClient, times(1)).applyDecision(anyString(), anyString(), any(DecisionRequest.class));
     }
 
+    // ---- helper to invoke the private method that contains the guard clause
+    @SuppressWarnings("unchecked")
+    // ---- helper to invoke the private method that contains the guard clause
+    private CaseData invokeUpdateC100PartyDetails(
+        int partyIndex,
+        CaseData caseData,
+        PartyRole.Representing representing,
+        TypeOfNocEventEnum typeOfNocEvent
+    ) {
+        try {
+            // find the first declared method named updateC100PartyDetails
+            Method target = Arrays.stream(NoticeOfChangePartiesService.class.getDeclaredMethods())
+                .filter(m -> m.getName().equals("updateC100PartyDetails"))
+                .findFirst()
+                .orElseThrow(() -> new NoSuchMethodException("updateC100PartyDetails(..) not found"));
+
+            target.setAccessible(true);
+
+            Class<?>[] pts = target.getParameterTypes();
+            Object[] args = new Object[pts.length];
+
+            for (int i = 0; i < pts.length; i++) {
+                Class<?> pt = pts[i];
+
+                if (pt == int.class) {
+                    args[i] = partyIndex;
+                } else if (CaseData.class.isAssignableFrom(pt)) {
+                    args[i] = caseData;
+                } else if (pt.getName().endsWith("PartyRole$Representing")) {
+                    args[i] = representing;
+                } else if (pt.getName().endsWith("TypeOfNocEventEnum")) {
+                    args[i] = typeOfNocEvent;
+                } else {
+                    // Any other params (List<Element<PartyDetails>>, SolicitorUser, ChangeOrganisationRequest,
+                    // Organisations, etc.) aren't needed for the guard clause we want to hit; pass null.
+                    args[i] = null;
+                }
+            }
+
+            Object out = target.invoke(noticeOfChangePartiesService, args);
+            return (CaseData) out;
+        } catch (Exception e) {
+            // Helpful dump if it ever fails again
+            String sigs = Arrays.stream(NoticeOfChangePartiesService.class.getDeclaredMethods())
+                .filter(m -> m.getName().equals("updateC100PartyDetails"))
+                .map(Method::toString)
+                .reduce((a,b) -> a + "\n" + b)
+                .orElse("<none>");
+            throw new RuntimeException("Failed to invoke updateC100PartyDetails. Available overloads:\n" + sigs, e);
+        }
+    }
+
+    @Test
+    public void updateC100PartyDetails_returnsOriginal_whenPartiesNull() {
+        CaseData original = CaseData.builder().id(1L).build(); // respondents == null
+        CaseData result = invokeUpdateC100PartyDetails(
+            0, original,
+            PartyRole.Representing.CARESPONDENTSOLICITOR,
+            TypeOfNocEventEnum.removeLegalRepresentation
+        );
+        assertThat(result).isSameAs(original);
+    }
+
+    @Test
+    public void updateC100PartyDetails_returnsOriginal_whenIndexNegative() {
+        CaseData cd = CaseData.builder()
+            .id(2L)
+            .caseTypeOfApplication("c100")
+            .respondents(Collections.singletonList(element(PartyDetails.builder().build())))
+            .build();
+
+        CaseData result = invokeUpdateC100PartyDetails(
+            -1, cd,
+            PartyRole.Representing.CARESPONDENTSOLICITOR,
+            TypeOfNocEventEnum.removeLegalRepresentation
+        );
+        assertThat(result).isSameAs(cd);
+    }
+
+    @Test
+    public void updateC100PartyDetails_returnsOriginal_whenIndexTooLarge() {
+        CaseData cd = CaseData.builder()
+            .id(3L)
+            .caseTypeOfApplication("c100")
+            .respondents(Collections.singletonList(element(PartyDetails.builder().build())))
+            .build();
+
+        // size is 1 ⇒ valid index is 0; 1 is out-of-bounds
+        CaseData result = invokeUpdateC100PartyDetails(
+            1, cd,
+            PartyRole.Representing.CARESPONDENTSOLICITOR,
+            TypeOfNocEventEnum.removeLegalRepresentation
+        );
+        assertThat(result).isSameAs(cd);
+    }
 }
