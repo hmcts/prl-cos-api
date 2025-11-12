@@ -464,6 +464,12 @@ courtfinder:
   api:
     url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal}
 
+courtmapper:
+  api:
+    url: https://www.gov.uk
+    endpoint: /api/local-authority?postcode=
+  csv: Local-Authority-to-Court-Nov 25.csv
+
 locationfinder:
   api:
     url: ${LOCATION_REF_API:http://rd-location-ref-api-aat.service.core-compute-aat.internal}
@@ -812,3 +818,4 @@ acro:
   search-case-type-id: PRLAPPS
   cronjob:
     enabled: false
+
