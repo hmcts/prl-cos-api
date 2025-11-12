@@ -56,6 +56,6 @@ public class LaunchDarklyClientTest {
     @Test
     public void testGetFeatureValue() {
         when(ldClient.intVariation(eq(FAKE_FEATURE), any(LDContext.class), anyInt())).thenReturn(1);
-        assertEquals(1, launchDarklyClient.getFeatureValue(FAKE_FEATURE));
+        assertEquals(1, launchDarklyClient.getIntVariation(FAKE_FEATURE));
     }
 }
