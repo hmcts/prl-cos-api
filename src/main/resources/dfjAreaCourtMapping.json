@@ -60,12 +60,6 @@
     "dfjArea": "WOLVERHAMPTON"
   },
   {
-    "courtCode": "590621",
-    "courtName": "Wolverhampton Magistrates Court",
-    "courtField": "wolverhamptonDFJCourt",
-    "dfjArea": "WOLVERHAMPTON"
-  },
-  {
     "courtCode": "471349",
     "courtName": "Ipswich County Court and Family Hearing Centre",
     "courtField": "essexAndSuffolkDFJCourt",
@@ -86,12 +80,6 @@
   {
     "courtCode": "177463",
     "courtName": "Walsall County and Family Court",
-    "courtField": "wolverhamptonDFJCourt",
-    "dfjArea": "WOLVERHAMPTON"
-  },
-  {
-    "courtCode": "326813",
-    "courtName": "Walsall Magistrates Court",
     "courtField": "wolverhamptonDFJCourt",
     "dfjArea": "WOLVERHAMPTON"
   },
