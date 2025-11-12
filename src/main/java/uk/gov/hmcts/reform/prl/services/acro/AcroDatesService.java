@@ -31,19 +31,19 @@ public class AcroDatesService {
     }
 
     private LocalDate getCurrentDateForSearch() {
-        String stringValue = launchDarklyClient.getStringVariation("acro-fl404a-search-date");
+        String searchDate = launchDarklyClient.getStringVariation("acro-fl404a-search-date");
 
         LocalDate localDate = LocalDate.now(ZoneId.systemDefault());
 
-        if ("false".equals(stringValue) || "now".equals(stringValue)) {
+        if ("false".equals(searchDate) || "now".equals(searchDate)) {
             return localDate;
         }
 
         try {
-            return LocalDate.parse(stringValue, dateFormatter);
+            return LocalDate.parse(searchDate, dateFormatter);
         } catch (DateTimeParseException e) {
-            log.warn("could not parse date ... falling back to current date", e);
-            return localDate;
+            log.warn("could not parse date {} configured in launch darkly due to ",searchDate, e);
+            throw new RuntimeException("could not parse date " + searchDate, e);
         }
     }
 }

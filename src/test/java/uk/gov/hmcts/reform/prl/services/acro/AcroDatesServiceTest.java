@@ -13,6 +13,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -85,26 +86,17 @@ class AcroDatesServiceTest {
         String pastDate = "2025-15-15";
         when(launchDarklyClient.getIntVariation(eq("acro-fl404a-search-duration"))).thenReturn(duration);
         when(launchDarklyClient.getStringVariation(eq("acro-fl404a-search-date"))).thenReturn(pastDate);
-        assertEquals(
-            acroDatesService.getStartDateForSearch(),
-            LocalDateTime.of(
-                LocalDate.now(ZoneId.systemDefault()).minusDays(duration),
-                LocalTime.of(21, 0)
-            )
-        );
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> acroDatesService.getStartDateForSearch());
+        assertEquals("could not parse date " + pastDate, exception.getMessage());
     }
 
     @Test
     void getEndDateForSearchForForInvalidDate() {
         String pastDate = "2025-15-10";
         when(launchDarklyClient.getStringVariation(eq("acro-fl404a-search-date"))).thenReturn(pastDate);
-        assertEquals(
-            acroDatesService.getEndDateForSearch(),
-            LocalDateTime.of(
-                LocalDate.now(ZoneId.systemDefault()),
-                LocalTime.of(21, 0)
-            )
-        );
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> acroDatesService.getEndDateForSearch());
+        assertEquals("could not parse date " + pastDate, exception.getMessage());
     }
 
     @Test
