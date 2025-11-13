@@ -14,11 +14,14 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.TaskListService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,11 +38,18 @@ public class TaskListControllerTest {
     @Mock
     private ObjectMapper objectMapper;
 
+    @Mock
+    private AuthorisationService authorisationService;
+
+    @Mock
+    private CafcassDateTimeService cafcassDateTimeService;
+
     Map<String, Object> caseDataMap;
     CaseDetails caseDetails;
     CaseData caseData;
     CallbackRequest callbackRequest;
     String auth = "authorisation";
+    String s2sToken = "s2s AuthToken";
 
     @Before
     public void setup() {
@@ -56,6 +66,18 @@ public class TaskListControllerTest {
         callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
+    }
+
+    @Test
+    public void testHandleAboutToSubmit() {
+        Map<String, Object> caseDataMap = new HashMap<>();
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(cafcassDateTimeService.updateCafcassDateTime(callbackRequest))
+            .thenReturn(caseDataMap);
+        AboutToStartOrSubmitCallbackResponse response = taskListController.handleAboutToSubmitted(callbackRequest, auth, s2sToken);
+
+        Assert.assertNotNull(response);
+        verify(cafcassDateTimeService, times(1)).updateCafcassDateTime(callbackRequest);
     }
 
     @Test

@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -56,6 +57,8 @@ public class ManageDocumentsControllerTest {
 
     @Mock
     ManageDocumentsService manageDocumentsService;
+    @Mock
+    CafcassDateTimeService cafcassDateTimeService;
     @Mock
     UserService userService;
 
@@ -128,6 +131,7 @@ public class ManageDocumentsControllerTest {
 
         dynamicList = DynamicList.builder().value(DynamicListElement.EMPTY)
             .listItems(dynamicListElementList).build();
+
     }
 
     @Test
@@ -158,6 +162,7 @@ public class ManageDocumentsControllerTest {
         Map<String, Object> caseDataUpdated = new HashMap<>();
 
         when(manageDocumentsService.copyDocument(callbackRequest, auth)).thenReturn(caseDataUpdated);
+        when(cafcassDateTimeService.updateCafcassDateTime(callbackRequest)).thenReturn(caseDataUpdated);
 
         manageDocumentsController.copyManageDocs(auth, callbackRequest);
         verify(manageDocumentsService).copyDocument(callbackRequest, auth);
