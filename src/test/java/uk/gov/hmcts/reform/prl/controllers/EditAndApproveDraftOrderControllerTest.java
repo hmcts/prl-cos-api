@@ -65,6 +65,7 @@ import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -147,6 +148,9 @@ public class EditAndApproveDraftOrderControllerTest {
 
     @Mock
     TaskUtils taskUtils;
+
+    @Mock
+    private CafcassDateTimeService cafcassDateTimeService;
 
     public static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
 

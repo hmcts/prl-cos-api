@@ -51,6 +51,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
+import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
@@ -119,6 +120,9 @@ public class CaseDataServiceTest {
 
     @Mock
     private ObjectMapper objMapper;
+
+    @Mock
+    private FeatureToggleService featureToggleService;
 
     @BeforeEach
     public void setUp() {
@@ -219,6 +223,32 @@ public class CaseDataServiceTest {
                 SearchResult.class
             );
             CafCassResponse cafCassResponse = objectMapper.readValue(expectedCafCassResponse, CafCassResponse.class);
+
+            when(cafcassCcdDataStoreService.searchCases(
+                anyString(),
+                anyString(),
+                any(),
+                any()
+            )).thenReturn(searchResult);
+            Mockito.doNothing().when(cafCassFilter).filter(cafCassResponse);
+
+            CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation", "start", "end");
+            assertEquals(
+                objectMapper.writeValueAsString(cafCassResponse),
+                objectMapper.writeValueAsString(realCafCassResponse)
+            );
+        }
+
+        @Test
+        public void getCaseDataWhenCafcassDateTimeFeatureFlagIsEnabled() throws IOException {
+            String expectedCafCassResponse = TestResourceUtil.readFileFrom("classpath:response/CafCaasResponse.json");
+            SearchResult searchResult = objectMapper.readValue(
+                expectedCafCassResponse,
+                SearchResult.class
+            );
+            CafCassResponse cafCassResponse = objectMapper.readValue(expectedCafCassResponse, CafCassResponse.class);
+
+            when(featureToggleService.isCafcassDateTimeFeatureEnabled()).thenReturn(true);
 
             when(cafcassCcdDataStoreService.searchCases(
                 anyString(),
