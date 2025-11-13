@@ -10,10 +10,12 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarkClientFactory;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -49,5 +51,11 @@ public class LaunchDarklyClientTest {
     public void testFeatureDisabled() {
         when(ldClient.boolVariation(eq(FAKE_FEATURE), any(LDContext.class), anyBoolean())).thenReturn(false);
         assertFalse(launchDarklyClient.isFeatureEnabled(FAKE_FEATURE, ldContext));
+    }
+
+    @Test
+    public void testGetFeatureValue() {
+        when(ldClient.intVariation(eq(FAKE_FEATURE), any(LDContext.class), anyInt())).thenReturn(1);
+        assertEquals(1, launchDarklyClient.getIntVariation(FAKE_FEATURE));
     }
 }

@@ -33,6 +33,14 @@ public class LaunchDarklyClient {
         return internalClient.boolVariation(feature, user, false);
     }
 
+    public int getIntVariation(String feature) {
+        return internalClient.intVariation(feature, privateLawProcessorContext, 1);
+    }
+
+    public String getStringVariation(String feature) {
+        return internalClient.stringVariation(feature, privateLawProcessorContext, "false");
+    }
+
     private void close() {
         try {
             internalClient.close();

@@ -54,11 +54,9 @@ public class CaseWorkerEmailService {
     @Value("${xui.url}")
     private String manageCaseUrl;
 
-    private CaseData caseData;
-
     public EmailTemplateVars buildEmail(CaseDetails caseDetails) {
 
-        caseData = emailService.getCaseData(caseDetails);
+        CaseData caseData = emailService.getCaseData(caseDetails);
 
         List<PartyDetails> applicants = caseData
             .getApplicants()
@@ -132,7 +130,6 @@ public class CaseWorkerEmailService {
             .courtEmail(courtEmail)
             .caseLink(manageCaseUrl + URL_STRING + caseDetails.getId())
             .build();
-
     }
 
     public void sendEmail(CaseDetails caseDetails) {
@@ -161,8 +158,7 @@ public class CaseWorkerEmailService {
     }
 
     private EmailTemplateVars buildReturnApplicationEmail(CaseDetails caseDetails) {
-
-        caseData = emailService.getCaseData(caseDetails);
+        CaseData caseData = emailService.getCaseData(caseDetails);
 
         String returnMessage = caseData.getReturnMessage();
 
@@ -173,9 +169,8 @@ public class CaseWorkerEmailService {
             .build();
     }
 
-
     public void sendReturnApplicationEmailToSolicitor(CaseDetails caseDetails) {
-        caseData = emailService.getCaseData(caseDetails);
+        CaseData caseData = emailService.getCaseData(caseDetails);
         String email = "";
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             List<PartyDetails> applicants = caseData
@@ -188,7 +183,7 @@ public class CaseWorkerEmailService {
                 .map(PartyDetails::getSolicitorEmail)
                 .toList();
 
-            email = applicantEmailList.get(0);
+            email = applicantEmailList.getFirst();
 
             if (applicants.size() > 1) {
                 email = caseData.getApplicantSolicitorEmailAddress();
@@ -201,10 +196,8 @@ public class CaseWorkerEmailService {
                     LanguagePreference.getPreferenceLanguage(caseData)
                 );
             }
-
         } else {
-            PartyDetails fl401Applicant = caseData
-                .getApplicantsFL401();
+            PartyDetails fl401Applicant = caseData.getApplicantsFL401();
 
             email = fl401Applicant.getSolicitorEmail();
             if (caseData.getFl401RejectReason().contains(FL401RejectReasonEnum.consentOrderNotProvided)) {
@@ -223,13 +216,10 @@ public class CaseWorkerEmailService {
             buildReturnApplicationEmail(caseDetails),
             LanguagePreference.english
         );
-
-
     }
 
     public void sendEmailToGateKeeper(CaseDetails caseDetails) {
-
-        caseData = emailService.getCaseData(caseDetails);
+        CaseData caseData = emailService.getCaseData(caseDetails);
 
         List<GatekeeperEmail> gatekeeperEmails = caseData
             .getGatekeeper()
@@ -251,8 +241,7 @@ public class CaseWorkerEmailService {
     }
 
     public EmailTemplateVars buildGatekeeperEmail(CaseDetails caseDetails) {
-
-        caseData = emailService.getCaseData(caseDetails);
+        CaseData caseData = emailService.getCaseData(caseDetails);
 
         String typeOfHearing = "";
         String isCaseUrgent = NO;
@@ -275,11 +264,9 @@ public class CaseWorkerEmailService {
             .build();
     }
 
-
     public void sendEmailToCourtAdmin(CaseDetails caseDetails) {
-
-        caseData = emailService.getCaseData(caseDetails);
         log.info("Triggering case worker email service to send mail to court admin");
+        CaseData caseData = emailService.getCaseData(caseDetails);
         List<LocalCourtAdminEmail> localCourtAdminEmails = caseData
             .getLocalCourtAdmin()
             .stream()
@@ -302,8 +289,7 @@ public class CaseWorkerEmailService {
     }
 
     public EmailTemplateVars buildCourtAdminEmail(CaseDetails caseDetails) {
-
-        caseData = emailService.getCaseData(caseDetails);
+        CaseData caseData = emailService.getCaseData(caseDetails);
 
         List<PartyDetails> applicants = caseData
             .getApplicants()
@@ -361,11 +347,9 @@ public class CaseWorkerEmailService {
     }
 
     public EmailTemplateVars buildFl401LocalCourtAdminEmail(CaseDetails caseDetails) {
-
         log.info("building FL401 email to localcourt for :{} ", caseDetails.getId());
-        caseData = emailService.getCaseData(caseDetails);
-        PartyDetails fl401Applicant = caseData
-            .getApplicantsFL401();
+        CaseData caseData = emailService.getCaseData(caseDetails);
+        PartyDetails fl401Applicant = caseData.getApplicantsFL401();
 
         String isConfidential = NO;
         if (fl401Applicant.getCanYouProvideEmailAddress().equals(YesOrNo.Yes)
@@ -388,7 +372,6 @@ public class CaseWorkerEmailService {
     }
 
     public void sendWithdrawApplicationEmailToLocalCourt(CaseDetails caseDetails, String courtEmail) {
-
         log.info("Sending FL401 withdraw application email to local court for case :{} ", caseDetails.getId());
 
         emailService.send(
@@ -400,9 +383,8 @@ public class CaseWorkerEmailService {
     }
 
     public EmailTemplateVars buildLocalCourtAdminEmailForWithdrawAfterIssued(CaseDetails caseDetails) {
-
         log.info("building email to local court for withdraw after issued for case:{} ", caseDetails.getId());
-        caseData = emailService.getCaseData(caseDetails);
+        CaseData caseData = emailService.getCaseData(caseDetails);
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
 
         return CaseWorkerEmail.builder()
