@@ -331,7 +331,7 @@ dependencies {
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
   implementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: versions.junit
-  implementation group: 'com.sun.xml.bind', name: 'jaxb-osgi', version: '4.0.5'
+  implementation group: 'com.sun.xml.bind', name: 'jaxb-osgi', version: '4.0.6'
   implementation group: 'com.github.kirviq', name: 'dumbster', version: versions.dumbster
   implementation group: 'com.puppycrawl.tools', name: 'checkstyle', version: versions.puppyCrawl
   implementation group: 'commons-io', name: 'commons-io', version: versions.commonsIo
@@ -425,7 +425,7 @@ dependencies {
 
   testImplementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
   testImplementation group: 'io.rest-assured', name: 'rest-assured', version: '5.5.5'
-  testImplementation group: 'io.rest-assured', name: 'json-path', version: '5.5.5'
+  testImplementation group: 'io.rest-assured', name: 'json-path', version: '5.5.6'
   testImplementation group: 'io.rest-assured', name: 'xml-path', version: '5.5.5'
   testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   testImplementation group: 'net.serenity-bdd', name: 'serenity-core', version: versions.serenity
