@@ -1,0 +1,8 @@
+hearing:
+  preview:
+    bypass:
+      enabled: true
+
+idam:
+  s2s-auth:
+    totp-secret: ${PRL_IDAM_S2S_AUTH_TOTP_SECRET:}
