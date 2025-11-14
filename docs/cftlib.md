@@ -32,6 +32,14 @@ az acr login --name hmctsprivate --subscription DCD-CNP-Prod
 ```bash
 ./gradlew bootWithCCD
 ```
+# run in debugger with
+```bash
+./gradlew bootWithCCD --debug-jvm
+```
+or set up a gradle Run configuration in Intellij with:
+Run to 'Local Machine', Run cmd 'bootWithCCD', Gradle project 'prl-cos-api'
+then Run or Debug
+
 
 This will start `prl-cos-api` along with CCD common components and Docker containers for
 ExUI, PostgreSQL, Elasticsearch and Logstash.

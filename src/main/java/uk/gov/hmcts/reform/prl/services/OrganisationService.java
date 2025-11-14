@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.MaskEmail;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import javax.ws.rs.NotFoundException;
@@ -29,9 +30,11 @@ import static org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace;
 public class OrganisationService {
     public static final String ACTIVE = "Active";
     private final OrganisationApi organisationApi;
+    private Organisations organisations;
     private final AuthTokenGenerator authTokenGenerator;
     private final SystemUserService systemUserService;
     private final MaskEmail maskEmail;
+    private List<Element<PartyDetails>> applicantsWithOrganisationDetails = new ArrayList<>();
 
     public CaseData getApplicantOrganisationDetails(CaseData caseData) {
         if (Optional.ofNullable(caseData.getApplicants()).isPresent()) {
@@ -53,6 +56,7 @@ public class OrganisationService {
 
         if (Optional.ofNullable(caseData.getRespondents()).isPresent()) {
             String userToken = systemUserService.getSysUserToken();
+            applicantsWithOrganisationDetails.clear();
 
             List<Element<PartyDetails>> respondents = caseData.getRespondents()
                 .stream()
@@ -74,7 +78,7 @@ public class OrganisationService {
             String organisationID = respondent.getSolicitorOrg().getOrganisationID();
             if (organisationID != null) {
                 try {
-                    Organisations organisations = getOrganisationDetails(userToken, organisationID);
+                    organisations = getOrganisationDetails(userToken, organisationID);
                     respondent = respondent.toBuilder()
                         .organisations(organisations)
                         .build();
@@ -119,7 +123,7 @@ public class OrganisationService {
             String organisationID = applicant.getSolicitorOrg().getOrganisationID();
             if (organisationID != null) {
                 try {
-                    Organisations organisations = getOrganisationDetails(userToken, organisationID);
+                    organisations = getOrganisationDetails(userToken, organisationID);
                     applicant = applicant.toBuilder()
                         .organisations(organisations)
                         .build();
@@ -170,12 +174,9 @@ public class OrganisationService {
     public Optional<Organisations> findUserOrganisation(String authorization) {
         try {
             return ofNullable(organisationApi.findUserOrganisation(authorization, authTokenGenerator.generate()));
-        } catch (FeignException.NotFound ex) {
-            log.error("Could not find org details of the logged in users ", ex);
-            return Optional.empty();
-        } catch (FeignException.Forbidden ex) {
+        } catch (FeignException.NotFound | FeignException.Forbidden ex) {
             log.error("Exception while getting org details of the logged in users ", ex);
-            throw ex; // rethrow to bubble up
+            return Optional.empty();
         }
     }
 
