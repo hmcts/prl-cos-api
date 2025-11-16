@@ -176,7 +176,7 @@ public class ReviewAdditionalApplicationController extends AbstractCallbackContr
     public ResponseEntity<SubmittedCallbackResponse> handleSubmittedSendAndReply(@RequestHeader("Authorization")
                                                                                  @Parameter(hidden = true) String authorisation,
                                                                                  @RequestBody CallbackRequest callbackRequest) {
-        return sendAndReplyService.sendAndReplySubmitted(callbackRequest);
+        return sendAndReplyService.sendAndReplySubmitted(callbackRequest, authorisation);
     }
 
     @PostMapping("/review-additional-application/clear-dynamic-lists")
