@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.services.C8ArchiveService;
+import uk.gov.hmcts.reform.prl.services.CaseNameService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
@@ -59,6 +60,7 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -92,6 +94,8 @@ public class CitizenPartyDetailsMapperTest {
     DocumentGenService documentGenService;
     @Mock
     C8ArchiveService c8ArchiveService;
+    @Mock
+    CaseNameService caseNameService;
     @Mock
     ObjectMapper objectMapper;
 
@@ -433,6 +437,7 @@ public class CitizenPartyDetailsMapperTest {
             .build();
         CaseData caseDataResult = citizenPartyDetailsMapper.buildUpdatedCaseData(caseData,c100RebuildData);
         assertNotNull(caseDataResult);
+        verify(caseNameService).getCaseNameForCA(anyString(), anyString());
     }
 
     @Test
@@ -462,6 +467,7 @@ public class CitizenPartyDetailsMapperTest {
         CaseData caseDataResult = citizenPartyDetailsMapper.buildUpdatedCaseData(caseData,c100RebuildData);
         assertNotNull(caseDataResult.getCaseAccessCategory());
         assertEquals(caseData.getCaseTypeOfApplication(), caseDataResult.getCaseAccessCategory());
+        verify(caseNameService).getCaseNameForCA(anyString(), anyString());
     }
 
 
@@ -490,6 +496,7 @@ public class CitizenPartyDetailsMapperTest {
             .build();
         CaseData caseDataResult = citizenPartyDetailsMapper.buildUpdatedCaseData(caseData,c100RebuildData);
         assertNotNull(caseDataResult);
+        verify(caseNameService).getCaseNameForCA(anyString(), anyString());
     }
 
     @Test
@@ -522,6 +529,7 @@ public class CitizenPartyDetailsMapperTest {
             .build();
         CaseData caseDataResult = citizenPartyDetailsMapper.buildUpdatedCaseData(caseData,c100RebuildData);
         assertNotNull(caseDataResult);
+        verify(caseNameService).getCaseNameForCA(anyString(), anyString());
     }
 
     @Test
@@ -648,6 +656,7 @@ public class CitizenPartyDetailsMapperTest {
         assertNotNull(caseDataResult);
         assertEquals(isAddressConfidential, caseDataResult.getOtherPartyInTheCaseRevised().get(0).getValue().getIsAddressConfidential());
         assertEquals(liveInRefuge, caseDataResult.getOtherPartyInTheCaseRevised().get(0).getValue().getLiveInRefuge());
+        verify(caseNameService).getCaseNameForCA(anyString(), anyString());
     }
 
     @Test

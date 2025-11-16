@@ -105,6 +105,7 @@ public class UpdatePartyDetailsService {
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     private final ManageOrderService manageOrderService;
     private final C8ArchiveService c8ArchiveService;
+    private final CaseNameService caseNameService;
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
@@ -264,6 +265,7 @@ public class UpdatePartyDetailsService {
             Map<String, Object> oldCaseDataMap = callbackRequest.getCaseDetailsBefore().getData();
             partyLevelCaseFlagsService.amendCaseFlags(oldCaseDataMap, updatedCaseData, callbackRequest.getEventId());
         }
+        caseNameService.setFinalCaseName(updatedCaseData, caseData);
         return updatedCaseData;
     }
 
