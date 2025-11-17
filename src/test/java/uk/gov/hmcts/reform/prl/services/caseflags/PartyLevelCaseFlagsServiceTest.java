@@ -214,9 +214,8 @@ class PartyLevelCaseFlagsServiceTest {
             .thenReturn(eventRequestData);
         StartEventResponse startEventResponse = StartEventResponse.builder()
             .caseDetails(caseDetails).build();
-        when(coreCaseDataService.startUpdate(
-            AUTHORISATION, eventRequestData, CASE_ID,
-            true)).thenReturn(startEventResponse);
+        when(coreCaseDataService.startUpdate(AUTHORISATION, eventRequestData, CASE_ID, true))
+            .thenReturn(startEventResponse);
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseDataSolicitorRepresent);
         CaseDataContent caseDataContent = CaseDataContent.builder().build();
         when(coreCaseDataService.createCaseDataContent(any(), any()))
@@ -364,7 +363,7 @@ class PartyLevelCaseFlagsServiceTest {
         Map<String, Object> caseData = partyLevelCaseFlagsService
             .generatePartyCaseFlags(caseDataSolicitorBarristerRepresent);
 
-        assertNotNull(caseDetails);
+        assertNotNull(caseData);
         assertNotNull(caseData.get("caApplicantSolicitor1ExternalFlags"));
         assertNotNull(caseData.get("caApplicantBarrister1ExternalFlags"));
         assertNotNull(caseData.get("caRespondentSolicitor1ExternalFlags"));
