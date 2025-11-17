@@ -1,14 +1,13 @@
 package uk.gov.hmcts.reform.prl.services.caseflags;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
@@ -42,6 +41,9 @@ import java.util.UUID;
 import static java.util.Map.entry;
 import static java.util.Optional.empty;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -54,10 +56,9 @@ import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.DAA
 import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.DAAPPLICANTSOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.DARESPONDENTSOLICITOR;
 
-@RunWith(MockitoJUnitRunner.class)
-public class PartyLevelCaseFlagsServiceTest {
+@ExtendWith(MockitoExtension.class)
+class PartyLevelCaseFlagsServiceTest {
 
-    public static final String CASE_ID = "1234567891234567";
     @Mock
     private ObjectMapper objectMapper;
     @Mock
@@ -66,26 +67,25 @@ public class PartyLevelCaseFlagsServiceTest {
     private SystemUserService systemUserService;
     @Mock
     private CcdCoreCaseDataService coreCaseDataService;
+    @InjectMocks
+    private  PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     private CaseData caseData;
     private CaseData caseDataFl401;
     private CaseDetails caseDetails;
     private Map<String, Object> caseDataMap;
-
-    private static final String authorisation = "Bearer auth";
-    private static final String systemUpdateUser = "system User";
-
-    @InjectMocks
-    private  PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     private CaseData caseDataSolicitorRepresent;
     private CaseData caseDataFl401SolicitorRepresent;
 
+    private static final String AUTHORISATION = "Bearer auth";
+    private static final String SYSTEM_UPDATE_USER = "system User";
+    private static final String CASE_ID = "1234567891234567";
     private static final String AMEND_APPLICANTS_DETAILS = "amendApplicantsDetails";
     private static final String AMEND_RESPONDENT_DETAILS = "amendRespondentsDetails";
     private static final String AMEND_OTHER_PEOPLE_IN_THE_CASE = "amendOtherPeopleInTheCaseRevised";
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         caseDataMap = new HashMap<>();
         caseDetails = CaseDetails.builder()
             .data(caseDataMap)
@@ -156,97 +156,108 @@ public class PartyLevelCaseFlagsServiceTest {
             .applicantsFL401(partyDetailsApplicantSolicitor)
             .respondentsFL401(partyDetailsRespondentSolicitor)
             .build();
-        when(systemUserService.getSysUserToken()).thenReturn(authorisation);
-        when(systemUserService.getUserId(authorisation)).thenReturn(systemUpdateUser);
     }
 
     @Test
-    public void testGenerateAndStoreC100CaseFlagsForProvidedCaseIdWhenRepresentedByParty() {
+    void testGenerateAndStoreC100CaseFlagsForProvidedCaseIdWhenRepresentedByParty() {
         EventRequestData eventRequestData = EventRequestData.builder().build();
-        when(coreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, systemUpdateUser))
+        when(coreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, SYSTEM_UPDATE_USER))
             .thenReturn(eventRequestData);
         StartEventResponse startEventResponse = StartEventResponse.builder()
             .caseDetails(caseDetails).build();
-        when(coreCaseDataService.startUpdate(authorisation, eventRequestData, CASE_ID,
-                                             true)).thenReturn(startEventResponse);
+        when(coreCaseDataService.startUpdate(
+            AUTHORISATION, eventRequestData, CASE_ID,
+            true)).thenReturn(startEventResponse);
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
         CaseDataContent caseDataContent = CaseDataContent.builder().build();
         when(coreCaseDataService.createCaseDataContent(any(), any()))
             .thenReturn(caseDataContent);
         when(coreCaseDataService
-                 .submitUpdate(authorisation, eventRequestData, caseDataContent, CASE_ID, true))
+                 .submitUpdate(AUTHORISATION, eventRequestData, caseDataContent, CASE_ID, true))
             .thenReturn(caseDetails);
+        when(systemUserService.getSysUserToken()).thenReturn(AUTHORISATION);
+        when(systemUserService.getUserId(AUTHORISATION)).thenReturn(SYSTEM_UPDATE_USER);
+
         CaseDetails caseDetails = partyLevelCaseFlagsService.generateAndStoreCaseFlags(CASE_ID);
-        Assert.assertNotNull(caseDetails);
-        Assert.assertEquals(SUBMITTED_STATE, caseDetails.getState());
+        assertNotNull(caseDetails);
+        assertEquals(SUBMITTED_STATE, caseDetails.getState());
     }
 
     @Test
-    public void testGenerateAndStoreFl401CaseFlagsForProvidedCaseIdWhenRepresentedBySolicitor() {
+    void testGenerateAndStoreFl401CaseFlagsForProvidedCaseIdWhenRepresentedBySolicitor() {
         EventRequestData eventRequestData = EventRequestData.builder().build();
-        when(coreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, systemUpdateUser))
+        when(coreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, SYSTEM_UPDATE_USER))
             .thenReturn(eventRequestData);
         StartEventResponse startEventResponse = StartEventResponse.builder()
             .caseDetails(caseDetails).build();
-        when(coreCaseDataService.startUpdate(authorisation, eventRequestData, CASE_ID,
-                                             true)).thenReturn(startEventResponse);
+        when(coreCaseDataService.startUpdate(
+            AUTHORISATION, eventRequestData, CASE_ID,
+            true)).thenReturn(startEventResponse);
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseDataFl401);
         CaseDataContent caseDataContent = CaseDataContent.builder().build();
         when(coreCaseDataService.createCaseDataContent(any(), any()))
             .thenReturn(caseDataContent);
         when(coreCaseDataService
-                 .submitUpdate(authorisation, eventRequestData, caseDataContent, CASE_ID, true))
+                 .submitUpdate(AUTHORISATION, eventRequestData, caseDataContent, CASE_ID, true))
             .thenReturn(caseDetails);
+        when(systemUserService.getSysUserToken()).thenReturn(AUTHORISATION);
+        when(systemUserService.getUserId(AUTHORISATION)).thenReturn(SYSTEM_UPDATE_USER);
         CaseDetails caseDetails = partyLevelCaseFlagsService.generateAndStoreCaseFlags(CASE_ID);
-        Assert.assertNotNull(caseDetails);
-        Assert.assertEquals(SUBMITTED_STATE, caseDetails.getState());
+        assertNotNull(caseDetails);
+        assertEquals(SUBMITTED_STATE, caseDetails.getState());
     }
 
     @Test
-    public void testGenerateAndStoreC100CaseFlagsForProvidedCaseIdWhenRepresentedBySolicitor() {
+    void testGenerateAndStoreC100CaseFlagsForProvidedCaseIdWhenRepresentedBySolicitor() {
         EventRequestData eventRequestData = EventRequestData.builder().build();
-        when(coreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, systemUpdateUser))
+        when(coreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, SYSTEM_UPDATE_USER))
             .thenReturn(eventRequestData);
         StartEventResponse startEventResponse = StartEventResponse.builder()
             .caseDetails(caseDetails).build();
-        when(coreCaseDataService.startUpdate(authorisation, eventRequestData, CASE_ID,
-                                             true)).thenReturn(startEventResponse);
+        when(coreCaseDataService.startUpdate(
+            AUTHORISATION, eventRequestData, CASE_ID,
+            true)).thenReturn(startEventResponse);
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseDataSolicitorRepresent);
         CaseDataContent caseDataContent = CaseDataContent.builder().build();
         when(coreCaseDataService.createCaseDataContent(any(), any()))
             .thenReturn(caseDataContent);
         when(coreCaseDataService
-                 .submitUpdate(authorisation, eventRequestData, caseDataContent, CASE_ID, true))
+                 .submitUpdate(AUTHORISATION, eventRequestData, caseDataContent, CASE_ID, true))
             .thenReturn(caseDetails);
+        when(systemUserService.getSysUserToken()).thenReturn(AUTHORISATION);
+        when(systemUserService.getUserId(AUTHORISATION)).thenReturn(SYSTEM_UPDATE_USER);
         CaseDetails caseDetails = partyLevelCaseFlagsService.generateAndStoreCaseFlags(CASE_ID);
-        Assert.assertNotNull(caseDetails);
-        Assert.assertEquals(SUBMITTED_STATE, caseDetails.getState());
+        assertNotNull(caseDetails);
+        assertEquals(SUBMITTED_STATE, caseDetails.getState());
     }
 
     @Test
-    public void testGenerateAndStoreFL401CaseFlagsForProvidedCaseIdForSolicitorRepresentedCase() {
+    void testGenerateAndStoreFL401CaseFlagsForProvidedCaseIdForSolicitorRepresentedCase() {
         EventRequestData eventRequestData = EventRequestData.builder().build();
-        when(coreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, systemUpdateUser))
+        when(coreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, SYSTEM_UPDATE_USER))
             .thenReturn(eventRequestData);
         StartEventResponse startEventResponse = StartEventResponse.builder()
             .caseDetails(caseDetails).build();
-        when(coreCaseDataService.startUpdate(authorisation, eventRequestData, CASE_ID,
-                                             true)).thenReturn(startEventResponse);
+        when(coreCaseDataService.startUpdate(
+            AUTHORISATION, eventRequestData, CASE_ID,
+            true)).thenReturn(startEventResponse);
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseDataFl401SolicitorRepresent);
         CaseDataContent caseDataContent = CaseDataContent.builder().build();
         when(coreCaseDataService.createCaseDataContent(any(), any()))
             .thenReturn(caseDataContent);
         when(coreCaseDataService
-                 .submitUpdate(authorisation, eventRequestData, caseDataContent, CASE_ID, true))
+                 .submitUpdate(AUTHORISATION, eventRequestData, caseDataContent, CASE_ID, true))
             .thenReturn(caseDetails);
+        when(systemUserService.getSysUserToken()).thenReturn(AUTHORISATION);
+        when(systemUserService.getUserId(AUTHORISATION)).thenReturn(SYSTEM_UPDATE_USER);
+
         CaseDetails caseDetails = partyLevelCaseFlagsService.generateAndStoreCaseFlags(CASE_ID);
-        Assert.assertNotNull(caseDetails);
-        Assert.assertEquals(SUBMITTED_STATE, caseDetails.getState());
+        assertNotNull(caseDetails);
+        assertEquals(SUBMITTED_STATE, caseDetails.getState());
     }
 
     @Test
-    public void testIndividualCaseFlagForC100CaseWhenPartiesRepresent() {
-
+    void testIndividualCaseFlagForC100CaseWhenPartiesRepresent() {
         when(partyLevelCaseFlagsGenerator
                  .generatePartyFlags(any(),
                                      any(), any(), any(), Mockito.anyBoolean(), any()))
@@ -255,37 +266,36 @@ public class PartyLevelCaseFlagsServiceTest {
             .generateIndividualPartySolicitorCaseFlags(
                 this.caseData, 0, CARESPONDENTSOLICITOR, false);
 
-        Assert.assertNotNull(caseData);
-        Assert.assertEquals(C100_CASE_TYPE, caseData.getCaseTypeOfApplication());
+        assertNotNull(caseDetails);
+        assertEquals(C100_CASE_TYPE, caseData.getCaseTypeOfApplication());
     }
 
     @Test
-    public void testIndividualCaseFlagForFl401CaseWhenPartiesRepresent() {
-
+    void testIndividualCaseFlagForFl401CaseWhenPartiesRepresent() {
         CaseData caseData =  partyLevelCaseFlagsService
             .generateIndividualPartySolicitorCaseFlags(
                 caseDataFl401, 0, DARESPONDENTSOLICITOR, false);
-        Assert.assertNotNull(caseData);
-        Assert.assertEquals(FL401_CASE_TYPE, caseData.getCaseTypeOfApplication());
+        assertNotNull(caseDetails);
+        assertEquals(FL401_CASE_TYPE, caseData.getCaseTypeOfApplication());
     }
 
     @Test
-    public void testIndividualCaseFlagForC100CaseWhenSolicitorRepresent() {
+    void testIndividualCaseFlagForC100CaseWhenSolicitorRepresent() {
 
         when(partyLevelCaseFlagsGenerator
                  .generatePartyFlags(any(),
                                      any(), any(), any(), Mockito.anyBoolean(), any()))
             .thenReturn(caseDataSolicitorRepresent);
-        CaseData caseData =  partyLevelCaseFlagsService
+        CaseData caseData = partyLevelCaseFlagsService
             .generateIndividualPartySolicitorCaseFlags(
                 caseDataSolicitorRepresent, 0, CAAPPLICANTSOLICITOR, true);
 
-        Assert.assertNotNull(caseData);
-        Assert.assertEquals(C100_CASE_TYPE, caseData.getCaseTypeOfApplication());
+        assertNotNull(caseDetails);
+        assertEquals(C100_CASE_TYPE, caseData.getCaseTypeOfApplication());
     }
 
     @Test
-    public void testIndividualCaseFlagForC100CaseWhenSolicitorRepresentAndBarrister() {
+    void testIndividualCaseFlagForC100CaseWhenSolicitorRepresentAndBarrister() {
         PartyDetails partyDetailsApplicantSolicitorBarrister = PartyDetails.builder()
             .firstName("")
             .lastName("")
@@ -307,16 +317,16 @@ public class PartyLevelCaseFlagsServiceTest {
                  .generatePartyFlags(any(),
                                      any(), any(), any(), Mockito.anyBoolean(), any()))
             .thenReturn(caseDataSolicitorBarristerRepresent);
-        CaseData caseData =  partyLevelCaseFlagsService
+        CaseData caseData = partyLevelCaseFlagsService
             .generateIndividualPartySolicitorCaseFlags(
                 caseDataSolicitorBarristerRepresent, 0, CAAPPLICANTBARRISTER, true);
 
-        Assert.assertNotNull(caseData);
-        Assert.assertEquals(C100_CASE_TYPE, caseData.getCaseTypeOfApplication());
+        assertNotNull(caseDetails);
+        assertEquals(C100_CASE_TYPE, caseData.getCaseTypeOfApplication());
     }
 
     @Test
-    public void testPartyCaseFlagForC100CaseWhenSolicitorRepresentAndBarrister() {
+    void testPartyCaseFlagForC100CaseWhenSolicitorRepresentAndBarrister() {
         PartyDetails partyDetailsApplicantSolicitorBarrister = PartyDetails.builder()
             .firstName("")
             .lastName("")
@@ -351,30 +361,30 @@ public class PartyLevelCaseFlagsServiceTest {
             .thenReturn(Flags.builder().partyName("ext").build());
         when(partyLevelCaseFlagsGenerator.generateInternalPartyFlags(any(), any(), any()))
             .thenReturn(Flags.builder().partyName("int").build());
-        Map<String, Object> caseData =  partyLevelCaseFlagsService
+        Map<String, Object> caseData = partyLevelCaseFlagsService
             .generatePartyCaseFlags(caseDataSolicitorBarristerRepresent);
 
-        Assert.assertNotNull(caseData);
-        Assert.assertNotNull(caseData.get("caApplicantSolicitor1ExternalFlags"));
-        Assert.assertNotNull(caseData.get("caApplicantBarrister1ExternalFlags"));
-        Assert.assertNotNull(caseData.get("caRespondentSolicitor1ExternalFlags"));
-        Assert.assertNotNull(caseData.get("caRespondentBarrister1ExternalFlags"));
-        Assert.assertNotNull(caseData.get("caApplicantSolicitor1InternalFlags"));
-        Assert.assertNotNull(caseData.get("caApplicantBarrister1InternalFlags"));
-        Assert.assertNotNull(caseData.get("caRespondentSolicitor1InternalFlags"));
-        Assert.assertNotNull(caseData.get("caRespondentBarrister1InternalFlags"));
-        Assert.assertEquals("ext", ((Flags)(caseData.get("caApplicantSolicitor1ExternalFlags"))).getPartyName());
-        Assert.assertEquals("ext", ((Flags)(caseData.get("caApplicantBarrister1ExternalFlags"))).getPartyName());
-        Assert.assertEquals("ext", ((Flags)(caseData.get("caRespondentSolicitor1ExternalFlags"))).getPartyName());
-        Assert.assertEquals("ext", ((Flags)(caseData.get("caRespondentBarrister1ExternalFlags"))).getPartyName());
-        Assert.assertEquals("int", ((Flags)(caseData.get("caApplicantSolicitor1InternalFlags"))).getPartyName());
-        Assert.assertEquals("int", ((Flags)(caseData.get("caApplicantBarrister1InternalFlags"))).getPartyName());
-        Assert.assertEquals("int", ((Flags)(caseData.get("caRespondentSolicitor1InternalFlags"))).getPartyName());
-        Assert.assertEquals("int", ((Flags)(caseData.get("caRespondentBarrister1InternalFlags"))).getPartyName());
+        assertNotNull(caseDetails);
+        assertNotNull(caseData.get("caApplicantSolicitor1ExternalFlags"));
+        assertNotNull(caseData.get("caApplicantBarrister1ExternalFlags"));
+        assertNotNull(caseData.get("caRespondentSolicitor1ExternalFlags"));
+        assertNotNull(caseData.get("caRespondentBarrister1ExternalFlags"));
+        assertNotNull(caseData.get("caApplicantSolicitor1InternalFlags"));
+        assertNotNull(caseData.get("caApplicantBarrister1InternalFlags"));
+        assertNotNull(caseData.get("caRespondentSolicitor1InternalFlags"));
+        assertNotNull(caseData.get("caRespondentBarrister1InternalFlags"));
+        assertEquals("ext", ((Flags)(caseData.get("caApplicantSolicitor1ExternalFlags"))).getPartyName());
+        assertEquals("ext", ((Flags)(caseData.get("caApplicantBarrister1ExternalFlags"))).getPartyName());
+        assertEquals("ext", ((Flags)(caseData.get("caRespondentSolicitor1ExternalFlags"))).getPartyName());
+        assertEquals("ext", ((Flags)(caseData.get("caRespondentBarrister1ExternalFlags"))).getPartyName());
+        assertEquals("int", ((Flags)(caseData.get("caApplicantSolicitor1InternalFlags"))).getPartyName());
+        assertEquals("int", ((Flags)(caseData.get("caApplicantBarrister1InternalFlags"))).getPartyName());
+        assertEquals("int", ((Flags)(caseData.get("caRespondentSolicitor1InternalFlags"))).getPartyName());
+        assertEquals("int", ((Flags)(caseData.get("caRespondentBarrister1InternalFlags"))).getPartyName());
     }
 
     @Test
-    public void testPartyCaseFlagForFL401CaseWhenSolicitorRepresentAndBarrister() {
+    void testPartyCaseFlagForFL401CaseWhenSolicitorRepresentAndBarrister() {
         PartyDetails partyDetailsApplicantSolicitorBarrister = PartyDetails.builder()
             .firstName("AppFN")
             .lastName("AppLN")
@@ -412,20 +422,20 @@ public class PartyLevelCaseFlagsServiceTest {
         Map<String, Object> caseData =  partyLevelCaseFlagsService
             .generatePartyCaseFlags(caseDataSolicitorBarristerRepresent);
 
-        Assert.assertNotNull(caseData);
-        Assert.assertNull(caseData.get("caApplicantSolicitor1ExternalFlags"));
-        Assert.assertNull(caseData.get("caRespondentSolicitor1ExternalFlags"));
-        Assert.assertNull(caseData.get("caRespondentBarrister1ExternalFlags"));
-        Assert.assertEquals("ext", ((Flags)(caseData.get("daApplicantSolicitorExternalFlags"))).getPartyName());
-        Assert.assertEquals("ext", ((Flags)(caseData.get("daRespondentSolicitorExternalFlags"))).getPartyName());
-        Assert.assertEquals("ext", ((Flags)(caseData.get("daRespondentBarristerExternalFlags"))).getPartyName());
-        Assert.assertEquals("int", ((Flags)(caseData.get("daApplicantSolicitorInternalFlags"))).getPartyName());
-        Assert.assertEquals("int", ((Flags)(caseData.get("daRespondentSolicitorInternalFlags"))).getPartyName());
-        Assert.assertEquals("int", ((Flags)(caseData.get("daRespondentBarristerInternalFlags"))).getPartyName());
+        assertNotNull(caseData);
+        assertNull(caseData.get("caApplicantSolicitor1ExternalFlags"));
+        assertNull(caseData.get("caRespondentSolicitor1ExternalFlags"));
+        assertNull(caseData.get("caRespondentBarrister1ExternalFlags"));
+        assertEquals("ext", ((Flags)(caseData.get("daApplicantSolicitorExternalFlags"))).getPartyName());
+        assertEquals("ext", ((Flags)(caseData.get("daRespondentSolicitorExternalFlags"))).getPartyName());
+        assertEquals("ext", ((Flags)(caseData.get("daRespondentBarristerExternalFlags"))).getPartyName());
+        assertEquals("int", ((Flags)(caseData.get("daApplicantSolicitorInternalFlags"))).getPartyName());
+        assertEquals("int", ((Flags)(caseData.get("daRespondentSolicitorInternalFlags"))).getPartyName());
+        assertEquals("int", ((Flags)(caseData.get("daRespondentBarristerInternalFlags"))).getPartyName());
     }
 
     @Test
-    public void testPartyCaseFlagForC100CaseWhenRepresentAndBarristerOnlyAdd() {
+    void testPartyCaseFlagForC100CaseWhenRepresentAndBarristerOnlyAdd() {
         UUID appPartyUuid = UUID.fromString("fbd63138-6396-4879-ac62-7f1c915f0111");
         UUID respPartyUuid = UUID.fromString("fbd63138-6396-4879-ac62-7f1c915f0222");
         Barrister applicantBarrister = Barrister.builder().barristerId("UUID3")
@@ -477,10 +487,10 @@ public class PartyLevelCaseFlagsServiceTest {
             systemUserService,
             coreCaseDataService
         );
-        Map<String, Object> caseData =  localPartyLevelCaseFlagsService
+        Map<String, Object> caseData = localPartyLevelCaseFlagsService
             .generatePartyCaseFlagsForBarristerOnly(caseDataSolicitorBarristerRepresent);
 
-        Assert.assertNotNull(caseData);
+        assertNotNull(caseData);
         Flags externalFlag = Flags.builder()
             .partyName("BarrFN BarrLN")
             .roleOnCase("Applicant barrister 1")
@@ -496,7 +506,7 @@ public class PartyLevelCaseFlagsServiceTest {
             .details(List.of())
             .build();
 
-        Assert.assertNotNull(caseData);
+        assertNotNull(caseData);
         assertThat(caseData)
             .contains(entry("caApplicantBarrister1ExternalFlags", externalFlag),
                       entry("caApplicantBarrister1InternalFlags", internalFlag));
@@ -511,7 +521,7 @@ public class PartyLevelCaseFlagsServiceTest {
     }
 
     @Test
-    public void testPartyCaseFlagForC100CaseWhenBarristerNotRepresented() {
+    void testPartyCaseFlagForC100CaseWhenBarristerNotRepresented() {
         UUID appPartyUuid = UUID.fromString("fbd63138-6396-4879-ac62-7f1c915f0111");
         UUID respPartyUuid = UUID.fromString("fbd63138-6396-4879-ac62-7f1c915f0222");
 
@@ -557,7 +567,7 @@ public class PartyLevelCaseFlagsServiceTest {
         Map<String, Object> localCaseData =  localPartyLevelCaseFlagsService
             .generatePartyCaseFlagsForBarristerOnly(caseDataSolicitorBarristerRepresent);
 
-        Assert.assertNotNull(localCaseData);
+        assertNotNull(localCaseData);
 
         assertThat(localCaseData)
             .doesNotContainKeys("caApplicantBarrister1ExternalFlags",
@@ -571,7 +581,7 @@ public class PartyLevelCaseFlagsServiceTest {
     }
 
     @Test
-    public void testCaseDataPartyCaseFlagForC100CaseWhenRepresentAndBarristerOnlyAdd() {
+    void testCaseDataPartyCaseFlagForC100CaseWhenRepresentAndBarristerOnlyAdd() {
         UUID appPartyUuid = UUID.fromString("fbd63138-6396-4879-ac62-7f1c915f0111");
         UUID respPartyUuid = UUID.fromString("fbd63138-6396-4879-ac62-7f1c915f0222");
         Barrister applicantBarrister = Barrister.builder().barristerId("UUID3")
@@ -651,9 +661,7 @@ public class PartyLevelCaseFlagsServiceTest {
     }
 
     @Test
-    public void testPartyCaseFlagForC100CaseWhenRepresentAndBarristerOnlyRemove() {
-
-
+    void testPartyCaseFlagForC100CaseWhenRepresentAndBarristerOnlyRemove() {
         UUID appPartyUuid = UUID.fromString("fbd63138-6396-4879-ac62-7f1c915f0111");
         UUID respPartyUuid = UUID.fromString("fbd63138-6396-4879-ac62-7f1c915f0222");
 
@@ -707,7 +715,7 @@ public class PartyLevelCaseFlagsServiceTest {
         Map<String, Object> localCaseData =  localPartyLevelCaseFlagsService
             .generatePartyCaseFlagsForBarristerOnly(caseDataSolicitorBarristerRepresent);
 
-        Assert.assertNotNull(localCaseData);
+        assertNotNull(localCaseData);
         assertThat(localCaseData)
             .contains(entry("caApplicantBarrister1ExternalFlags", empty()),
                       entry("caApplicantBarrister1InternalFlags", empty()));
@@ -722,7 +730,7 @@ public class PartyLevelCaseFlagsServiceTest {
     }
 
     @Test
-    public void testIndividualCaseFlagForFl401CaseWhenSolicitorRepresent() {
+    void testIndividualCaseFlagForFl401CaseWhenSolicitorRepresent() {
 
         when(partyLevelCaseFlagsGenerator
                  .generatePartyFlags(any(),
@@ -731,13 +739,12 @@ public class PartyLevelCaseFlagsServiceTest {
         CaseData caseData =  partyLevelCaseFlagsService
             .generateIndividualPartySolicitorCaseFlags(
                 caseDataFl401SolicitorRepresent, 0, DAAPPLICANTSOLICITOR, true);
-        Assert.assertNotNull(caseData);
-        Assert.assertEquals(FL401_CASE_TYPE, caseData.getCaseTypeOfApplication());
+        assertNotNull(caseData);
+        assertEquals(FL401_CASE_TYPE, caseData.getCaseTypeOfApplication());
     }
 
     @Test
-    public void testIndividualCaseFlagForFl401CaseWhenSolicitorBarristerRepresent() {
-
+    void testIndividualCaseFlagForFl401CaseWhenSolicitorBarristerRepresent() {
         PartyDetails partyDetailsApplicantSolicitorBarrister = PartyDetails.builder()
             .firstName("")
             .lastName("")
@@ -762,12 +769,12 @@ public class PartyLevelCaseFlagsServiceTest {
         CaseData caseData =  partyLevelCaseFlagsService
             .generateIndividualPartySolicitorCaseFlags(
                 caseDataFl401SolicitorBarristerRepresent, 0, DAAPPLICANTBARRISTER, true);
-        Assert.assertNotNull(caseData);
-        Assert.assertEquals(FL401_CASE_TYPE, caseData.getCaseTypeOfApplication());
+        assertNotNull(caseData);
+        assertEquals(FL401_CASE_TYPE, caseData.getCaseTypeOfApplication());
     }
 
     @Test
-    public void testPartyCaseFlagForFl401CaseWhenSolicitorBarristerRepresent() {
+    void testPartyCaseFlagForFl401CaseWhenSolicitorBarristerRepresent() {
         UUID appPartyUuid = UUID.fromString("fbd63138-6396-4879-ac62-7f1c915f0111");
         UUID respPartyUuid = UUID.fromString("fbd63138-6396-4879-ac62-7f1c915f0222");
         Barrister applicantBarrister = Barrister.builder().barristerId("UUID3")
@@ -815,15 +822,15 @@ public class PartyLevelCaseFlagsServiceTest {
 
         Map<String, Object> caseData =  partyLevelCaseFlagsService
             .generatePartyCaseFlagsForBarristerOnly(caseDataFl401SolicitorBarristerRepresent);
-        Assert.assertNotNull(caseData);
-        Assert.assertNull((caseData.get("daApplicantBarristerExternalFlags")));
-        Assert.assertNull((caseData.get("daApplicantBarristerInternalFlags")));
-        Assert.assertEquals("ext", ((Flags)(caseData.get("daRespondentBarristerExternalFlags"))).getPartyName());
-        Assert.assertEquals("int", ((Flags)(caseData.get("daRespondentBarristerInternalFlags"))).getPartyName());
+        assertNotNull(caseData);
+        assertNull((caseData.get("daApplicantBarristerExternalFlags")));
+        assertNull((caseData.get("daApplicantBarristerInternalFlags")));
+        assertEquals("ext", ((Flags)(caseData.get("daRespondentBarristerExternalFlags"))).getPartyName());
+        assertEquals("int", ((Flags)(caseData.get("daRespondentBarristerInternalFlags"))).getPartyName());
     }
 
     @Test
-    public void testPartyCaseFlagForFl401CaseWhenBarristerNotRepresented() {
+    void testPartyCaseFlagForFl401CaseWhenBarristerNotRepresented() {
         UUID appPartyUuid = UUID.fromString("fbd63138-6396-4879-ac62-7f1c915f0111");
         UUID respPartyUuid = UUID.fromString("fbd63138-6396-4879-ac62-7f1c915f0222");
 
@@ -837,7 +844,6 @@ public class PartyLevelCaseFlagsServiceTest {
             .lastName("last name")
             .partyId(appPartyUuid)
             .build();
-
 
         PartyDetails partyDetailsRespondentSolicitorBarrister = PartyDetails.builder()
             .firstName("")
@@ -859,15 +865,14 @@ public class PartyLevelCaseFlagsServiceTest {
 
         Map<String, Object> caseData =  partyLevelCaseFlagsService
             .generatePartyCaseFlagsForBarristerOnly(caseDataFl401SolicitorBarristerRepresent);
-        Assert.assertNotNull(caseData);
+        assertNotNull(caseData);
         assertThat(caseData)
             .doesNotContainKeys("daApplicantBarristerExternalFlags",
                                 "daApplicantBarristerInternalFlags");
     }
 
     @Test
-    public void testGenerateC100AllPartyCaseFlags() {
-
+    void testGenerateC100AllPartyCaseFlags() {
         when(partyLevelCaseFlagsGenerator
                  .generatePartyFlags(any(),
                                      any(), any(), any(), Mockito.anyBoolean(), any()))
@@ -876,40 +881,34 @@ public class PartyLevelCaseFlagsServiceTest {
         caseData =  partyLevelCaseFlagsService
             .generateC100AllPartyCaseFlags(caseData, this.caseData);
 
-        Assert.assertNotNull(caseData);
-        Assert.assertEquals(C100_CASE_TYPE, caseData.getCaseTypeOfApplication());
+        assertEquals(C100_CASE_TYPE, caseData.getCaseTypeOfApplication());
     }
 
     @Test
-    public void testGenerateC100AllPartyCaseFlagsForSolicitor() {
+    void testGenerateC100AllPartyCaseFlagsForSolicitor() {
 
         when(partyLevelCaseFlagsGenerator
                  .generatePartyFlags(any(),
                                      any(), any(), any(), Mockito.anyBoolean(), any()))
             .thenReturn(caseDataSolicitorRepresent);
 
-        CaseData caseData = CaseData.builder().build();
-        caseData =  partyLevelCaseFlagsService
+        CaseData caseData = partyLevelCaseFlagsService
             .generateC100AllPartyCaseFlags(this.caseDataSolicitorRepresent, this.caseDataSolicitorRepresent);
 
-        Assert.assertNotNull(caseData);
-        Assert.assertEquals(C100_CASE_TYPE, caseData.getCaseTypeOfApplication());
+        assertEquals(C100_CASE_TYPE, caseData.getCaseTypeOfApplication());
     }
 
     @Test
-    public void testGetPartyCaseDataExternalField() {
+    void testGetPartyCaseDataExternalField() {
         CaseData caseData1 = CaseData.builder().caseTypeOfApplication(C100_CASE_TYPE).build();
         partyLevelCaseFlagsService.getPartyCaseDataExternalField(C100_CASE_TYPE,PartyRole.Representing.CAAPPLICANTSOLICITOR,1);
-        Assert.assertEquals(C100_CASE_TYPE, caseData1.getCaseTypeOfApplication());
+        assertEquals(C100_CASE_TYPE, caseData1.getCaseTypeOfApplication());
     }
 
     @Test
-    public void testAmendApplicantDetails() {
-
-
+    void testAmendApplicantDetails() {
         Map<String, Object> caseDataMap1 = new HashMap<>();
         Map<String, Object> caseDataMapBefore = new HashMap<>();
-
 
         PartyDetails partyDetailsApplicant = PartyDetails.builder()
             .firstName("test")
@@ -930,7 +929,6 @@ public class PartyLevelCaseFlagsServiceTest {
             .user(User.builder().email("").idamId("").build())
             .build();
 
-
         PartyDetails partyDetailsApplicant3 = PartyDetails.builder()
             .firstName("test3")
             .lastName("test3")
@@ -947,7 +945,6 @@ public class PartyLevelCaseFlagsServiceTest {
             .representativeLastName("Smith")
             .user(User.builder().email("").idamId("").build())
             .build();
-
 
         CaseData caseDataBefore = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -984,19 +981,15 @@ public class PartyLevelCaseFlagsServiceTest {
         when(objectMapper.convertValue(caseDataMapBefore,CaseData.class)).thenReturn(caseDataBefore);
 
         partyLevelCaseFlagsService.amendCaseFlags(caseDataMapBefore,caseDataMap1,AMEND_APPLICANTS_DETAILS);
-        Assert.assertNotNull(caseDataMap1);
+        assertNotNull(caseDataMap1);
     }
 
-
     @Test
-    public void testAmendApplicantDetailsWithCaseFlags() {
-
-
+    void testAmendApplicantDetailsWithCaseFlags() {
         Map<String, Object> caseDataMapLatest = new HashMap<>();
         Map<String, Object> caseDataMapBefore = new HashMap<>();
         caseDataMapBefore.put("id",Long.valueOf(1234567));
         caseDataMapBefore.put("caseTypeOfApplication","C100");
-
 
         PartyDetails partyDetailsApplicant = PartyDetails.builder()
             .firstName("test")
@@ -1017,7 +1010,6 @@ public class PartyLevelCaseFlagsServiceTest {
             .user(User.builder().email("").idamId("").build())
             .build();
 
-
         PartyDetails partyDetailsApplicant3 = PartyDetails.builder()
             .firstName("test3")
             .lastName("test3")
@@ -1034,8 +1026,6 @@ public class PartyLevelCaseFlagsServiceTest {
             .representativeLastName("Smith")
             .user(User.builder().email("").idamId("").build())
             .build();
-
-
 
         FlagDetail flagDetail = FlagDetail.builder().flagCode("test").flagComment("test comment").name("test flag").build();
         Flags caApplicant1ExternalFlags = generateCaseFlag("Applicant 1", "caApplicant1", flagDetail);
@@ -1086,7 +1076,7 @@ public class PartyLevelCaseFlagsServiceTest {
 
         when(objectMapper.convertValue(null,Flags.class)).thenReturn(Flags.builder().build());
         partyLevelCaseFlagsService.amendCaseFlags(caseDataMapBefore,caseDataMapLatest,AMEND_APPLICANTS_DETAILS);
-        Assert.assertNotNull(caseDataMapLatest);
+        assertNotNull(caseDataMapLatest);
     }
 
     private Flags generateCaseFlag(String roleOnCase, String caApplicant3, FlagDetail flagDetail) {
@@ -1095,16 +1085,12 @@ public class PartyLevelCaseFlagsServiceTest {
                 ElementUtils.element(flagDetail))).build();
     }
 
-
     @Test
-    public void testAmendApplicantDetailsWithCaseFlagsRespondents() {
-
-
+    void testAmendApplicantDetailsWithCaseFlagsRespondents() {
         Map<String, Object> caseDataMapLatest = new HashMap<>();
         Map<String, Object> caseDataMapBefore = new HashMap<>();
         caseDataMapBefore.put("id",Long.valueOf(1234567));
         caseDataMapBefore.put("caseTypeOfApplication","C100");
-
 
         PartyDetails partyDetailsApplicant = PartyDetails.builder()
             .firstName("test")
@@ -1125,7 +1111,6 @@ public class PartyLevelCaseFlagsServiceTest {
             .user(User.builder().email("").idamId("").build())
             .build();
 
-
         PartyDetails partyDetailsApplicant3 = PartyDetails.builder()
             .firstName("test3")
             .lastName("test3")
@@ -1142,8 +1127,6 @@ public class PartyLevelCaseFlagsServiceTest {
             .representativeLastName("Smith")
             .user(User.builder().email("").idamId("").build())
             .build();
-
-
 
         FlagDetail flagDetail = FlagDetail.builder().flagCode("test").flagComment("test comment").name("test flag").build();
         Flags caRespondent1ExternalFlags = generateCaseFlag("Applicant 1", "caApplicant1", flagDetail);
@@ -1192,17 +1175,13 @@ public class PartyLevelCaseFlagsServiceTest {
 
         when(objectMapper.convertValue(caseDataMapBefore,CaseData.class)).thenReturn(caseDataBefore);
         partyLevelCaseFlagsService.amendCaseFlags(caseDataMapBefore,caseDataMapLatest,AMEND_RESPONDENT_DETAILS);
-        Assert.assertNotNull(caseDataMapLatest);
+        assertNotNull(caseDataMapLatest);
     }
 
-
     @Test
-    public void testAmendApplicantDetailsWithCaseFlagsOtherPeople() {
-
-
+    void testAmendApplicantDetailsWithCaseFlagsOtherPeople() {
         Map<String, Object> caseDataMapLatest = new HashMap<>();
         Map<String, Object> caseDataMapBefore = new HashMap<>();
-
 
         PartyDetails partyDetailsApplicant = PartyDetails.builder()
             .firstName("test")
@@ -1229,8 +1208,6 @@ public class PartyLevelCaseFlagsServiceTest {
             .representativeLastName("Smith")
             .user(User.builder().email("").idamId("").build())
             .build();
-
-
 
         FlagDetail flagDetail = FlagDetail.builder().flagCode("test").flagComment("test comment").name("test flag").build();
         Flags caOtherParty1ExternalFlags = generateCaseFlag("Applicant 1", "caApplicant1", flagDetail);
@@ -1283,7 +1260,6 @@ public class PartyLevelCaseFlagsServiceTest {
         when(objectMapper.convertValue(caseDataMapBefore,CaseData.class)).thenReturn(caseDataBefore);
 
         partyLevelCaseFlagsService.amendCaseFlags(caseDataMapBefore,caseDataMapLatest,AMEND_OTHER_PEOPLE_IN_THE_CASE);
-        Assert.assertNotNull(caseDataMapLatest);
+        assertNotNull(caseDataMapLatest);
     }
-
 }
