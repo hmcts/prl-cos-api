@@ -19,7 +19,10 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.services.closingcase.ClosingCaseService;
+
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -30,14 +33,17 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 public class ClosingCaseController extends AbstractCallbackController {
     private final ClosingCaseService closingCaseService;
     private final AuthorisationService authorisationService;
+    private final CafcassDateTimeService cafcassDateTimeService;
 
     @Autowired
     public ClosingCaseController(ObjectMapper objectMapper, EventService eventPublisher,
                                  ClosingCaseService closingCaseService,
-                                 AuthorisationService authorisationService) {
+                                 AuthorisationService authorisationService,
+                                 CafcassDateTimeService cafcassDateTimeService) {
         super(objectMapper, eventPublisher);
         this.closingCaseService = closingCaseService;
         this.authorisationService = authorisationService;
+        this.cafcassDateTimeService = cafcassDateTimeService;
     }
 
     @PostMapping(path = "/closing-case/pre-populate-child-data", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -101,8 +107,10 @@ public class ClosingCaseController extends AbstractCallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            Map<String, Object> caseDataMap = closingCaseService.closingCaseForChildren(callbackRequest);
+            cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(closingCaseService.closingCaseForChildren(callbackRequest)).build();
+                .data(caseDataMap).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
