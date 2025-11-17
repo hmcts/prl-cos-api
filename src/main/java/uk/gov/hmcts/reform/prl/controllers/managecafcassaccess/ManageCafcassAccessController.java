@@ -15,12 +15,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
@@ -32,6 +34,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @SuppressWarnings({"java:S5665"})
 public class ManageCafcassAccessController {
     private final AuthorisationService authorisationService;
+    private final CafcassDateTimeService cafcassDateTimeService;
 
     public static final String CAFCASS_ALLOWED_HEADER = "# Cafcass can access this case";
 
@@ -42,6 +45,27 @@ public class ManageCafcassAccessController {
          """;
 
     private final ObjectMapper objectMapper;
+
+    @PostMapping(path = "/manage-cafcass-access/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "About to submit callback to display confirmation message "
+        + "successful")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json",
+                schema = @Schema(implementation = uk.gov.hmcts.reform.ccd.client.model.CallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> manageCafcassAccessAboutToSubmit(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            return ok(AboutToStartOrSubmitCallbackResponse.builder()
+                .data(cafcassDateTimeService.updateCafcassDateTime(callbackRequest)).build());
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
 
     @PostMapping(path = "/manage-cafcass-access/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Submitted Callback to display confirmation message "
