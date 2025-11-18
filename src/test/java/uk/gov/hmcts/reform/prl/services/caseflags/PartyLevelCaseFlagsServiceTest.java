@@ -543,11 +543,9 @@ class PartyLevelCaseFlagsServiceTest {
             systemUserService,
             coreCaseDataService
         );
-        localPartyLevelCaseFlagsService
-            .updateCaseDataWithGeneratePartyCaseFlags(
+        localPartyLevelCaseFlagsService.updateCaseDataWithGeneratePartyCaseFlags(
                 caseDataSolicitorBarristerRepresent,
-                localPartyLevelCaseFlagsService::generatePartyCaseFlagsForBarristerOnly
-            );
+                localPartyLevelCaseFlagsService::generatePartyCaseFlagsForBarristerOnly);
 
         Flags externalFlag = Flags.builder()
             .partyName("BarrFN BarrLN")
@@ -564,10 +562,8 @@ class PartyLevelCaseFlagsServiceTest {
             .details(List.of())
             .build();
         AllPartyFlags updatedPartyFlags = caseDataSolicitorBarristerRepresent.getAllPartyFlags();
-        assertThat(updatedPartyFlags.getCaApplicantBarrister1InternalFlags())
-            .isEqualTo(internalFlag);
-        assertThat(updatedPartyFlags.getCaApplicantBarrister1ExternalFlags())
-            .isEqualTo(externalFlag);
+        assertThat(updatedPartyFlags.getCaApplicantBarrister1InternalFlags()).isEqualTo(internalFlag);
+        assertThat(updatedPartyFlags.getCaApplicantBarrister1ExternalFlags()).isEqualTo(externalFlag);
     }
 
     @Test
