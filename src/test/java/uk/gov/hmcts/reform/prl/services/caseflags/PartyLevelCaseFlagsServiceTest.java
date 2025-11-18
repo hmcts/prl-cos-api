@@ -187,7 +187,7 @@ class PartyLevelCaseFlagsServiceTest {
             .thenReturn(caseData);
 
         CaseData updatedCaseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
-                caseData, 0, CAAPPLICANTSOLICITOR, true);
+            caseData, 0, CAAPPLICANTSOLICITOR, true);
 
         assertEquals(C100_CASE_TYPE, updatedCaseData.getCaseTypeOfApplication());
     }
@@ -215,7 +215,7 @@ class PartyLevelCaseFlagsServiceTest {
             .thenReturn(caseDataSolicitorBarristerRepresent);
 
         CaseData caseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
-                caseDataSolicitorBarristerRepresent, 0, CAAPPLICANTBARRISTER, true);
+            caseDataSolicitorBarristerRepresent, 0, CAAPPLICANTBARRISTER, true);
 
         assertEquals(C100_CASE_TYPE, caseData.getCaseTypeOfApplication());
     }
@@ -369,9 +369,9 @@ class PartyLevelCaseFlagsServiceTest {
         CaseData caseDataSolicitorBarristerRepresent = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(List.of(Element.<PartyDetails>builder().value(partyDetailsApplicantSolicitorBarrister)
-                .id(appPartyUuid).build()))
+                                    .id(appPartyUuid).build()))
             .respondents(List.of(Element.<PartyDetails>builder().value(partyDetailsRespondentSolicitorBarrister)
-                .id(respPartyUuid).build()))
+                                     .id(respPartyUuid).build()))
             .allPartyFlags(allPartyFlags)
             .allocatedBarrister(allocatedBarrister)
             .build();
@@ -447,9 +447,9 @@ class PartyLevelCaseFlagsServiceTest {
         CaseData caseDataSolicitorBarristerRepresent = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(List.of(Element.<PartyDetails>builder().value(partyDetailsApplicantSolicitorBarrister)
-                .id(appPartyUuid).build()))
+                                    .id(appPartyUuid).build()))
             .respondents(List.of(Element.<PartyDetails>builder().value(partyDetailsRespondentSolicitorBarrister)
-                .id(respPartyUuid).build()))
+                                     .id(respPartyUuid).build()))
             .allPartyFlags(allPartyFlags)
             .build();
 
@@ -591,9 +591,9 @@ class PartyLevelCaseFlagsServiceTest {
         CaseData caseDataSolicitorBarristerRepresent = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(List.of(Element.<PartyDetails>builder().value(partyDetailsApplicantSolicitorBarrister)
-                .id(appPartyUuid).build()))
+                                    .id(appPartyUuid).build()))
             .respondents(List.of(Element.<PartyDetails>builder().value(partyDetailsRespondentSolicitorBarrister)
-                .id(respPartyUuid).build()))
+                                     .id(respPartyUuid).build()))
             .allPartyFlags(allPartyFlags)
             .allocatedBarrister(allocatedBarrister)
             .build();
@@ -615,11 +615,11 @@ class PartyLevelCaseFlagsServiceTest {
 
         assertThat(localCaseData)
             .doesNotContainKeys("caApplicantSolicitor1ExternalFlags",
-                            "caRespondentSolicitor1ExternalFlags",
-                            "caApplicantSolicitor1InternalFlags",
-                            "caRespondentSolicitor1InternalFlags",
-                            "caRespondentBarrister1InternalFlags",
-                            "caRespondentBarrister1ExternalFlags");
+                                "caRespondentSolicitor1ExternalFlags",
+                                "caApplicantSolicitor1InternalFlags",
+                                "caRespondentSolicitor1InternalFlags",
+                                "caRespondentBarrister1InternalFlags",
+                                "caRespondentBarrister1ExternalFlags");
     }
 
     @Test
@@ -628,7 +628,7 @@ class PartyLevelCaseFlagsServiceTest {
         when(partyLevelCaseFlagsGenerator.generatePartyFlags(any(), any(), any(), any(), Mockito.anyBoolean(), any()))
             .thenReturn(caseData);
         CaseData updatedCaseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
-                caseData, 0, DAAPPLICANTSOLICITOR, true);
+            caseData, 0, DAAPPLICANTSOLICITOR, true);
 
         assertEquals(FL401_CASE_TYPE, updatedCaseData.getCaseTypeOfApplication());
     }
@@ -926,7 +926,7 @@ class PartyLevelCaseFlagsServiceTest {
             .allPartyFlags(createAllPartyFlags())
             .applicants(List.of(Element.<PartyDetails>builder().id(UUID.fromString(
                     "00000000-0000-0000-0000-000000000000"))
-                                     .value(partyDetailsRespondent).build()))
+                                    .value(partyDetailsRespondent).build()))
             .build();
 
         CaseData caseData1 = CaseData.builder()
@@ -943,7 +943,7 @@ class PartyLevelCaseFlagsServiceTest {
             .allPartyFlags(createAllPartyFlags())
             .applicants(List.of(Element.<PartyDetails>builder().id(UUID.fromString(
                     "00000000-0000-0000-0000-000000000000"))
-                                     .value(partyDetailsRespondent).build()))
+                                    .value(partyDetailsRespondent).build()))
             .build();
         Map<String, Object> caseDataMapBefore = objectMapper.convertValue(caseDataBefore, new TypeReference<>() {});
         Map<String, Object> caseDataMapLatest = objectMapper.convertValue(caseData1, new TypeReference<>() {});
