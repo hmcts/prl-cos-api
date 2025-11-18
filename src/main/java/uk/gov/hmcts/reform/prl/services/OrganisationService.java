@@ -200,12 +200,40 @@ public class OrganisationService {
             log.error("Could not find user by email {}", maskEmail);
             return Optional.empty();
         } catch (FeignException exception) {
-            String message = String.join(":", "Error while fetching user id by email",
-                                         Optional.ofNullable(email)
-                                             .map(value -> maskEmail.mask(getStackTrace(exception), value))
-                                             .orElse(email));
+            String message = String.join(
+                ":", "Error while fetching user id by email",
+                Optional.ofNullable(email)
+                    .map(value -> maskEmail.mask(getStackTrace(exception), value))
+                    .orElse(email)
+            );
+            log.error(message, exception);
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    public Optional<Organisations> getOrganisationByEmailDetail(String email) {
+        Optional<String> userId;
+        try {
+
+            userId = findUserByEmail(email);
+            if (userId.isPresent()) {
+                return Optional.ofNullable(organisationApi.getOrganisationByUserId(
+                    systemUserService.getSysUserToken(),
+                    authTokenGenerator.generate(),
+                    String.valueOf(userId)
+                ));
+            } else {
+                log.error("Could not find user id when getting organisation {}", email);
+                return Optional.empty();
+            }
+        } catch (FeignException exception) {
+            String message = String.join(
+                ":", "Error while fetching organisations by user id "
+            );
             log.error(message, exception);
             throw new IllegalArgumentException(message);
         }
     }
 }
+
+
