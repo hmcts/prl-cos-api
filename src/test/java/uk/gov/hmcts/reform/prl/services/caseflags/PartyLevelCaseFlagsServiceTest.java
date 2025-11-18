@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.caseflags.PartyLevelCaseFlagsGenerator;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -524,7 +525,7 @@ class PartyLevelCaseFlagsServiceTest {
         AllPartyFlags allPartyFlags = AllPartyFlags.builder().caApplicantSolicitor1ExternalFlags(
             caApplicantSolicitor1ExternalFlags).build();
         DynamicListElement abp = DynamicListElement.builder().code(appPartyUuid.toString()).label(appPartyUuid.toString()).build();
-        DynamicList abpl = DynamicList.builder().value(abp).listItems(List.of(abp)).build();
+        DynamicList abpl = DynamicList.builder().value(abp).listItems(Arrays.asList(abp)).build();
         AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder().partyList(abpl).build();
 
         CaseData caseDataSolicitorBarristerRepresent = CaseData.builder()
