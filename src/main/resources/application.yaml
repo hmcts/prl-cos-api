@@ -79,6 +79,7 @@ pba:
 feature:
   toggle:
     barristerFeatureEnabled: ${BARRISTER_FEATURE_ENABLED:false}
+    cafcassDateTimeFeatureEnabled: ${CAFCASS_DATE_TIME_FEATURE_ENABLED:false}
 
 xui:
   url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}
@@ -777,6 +778,7 @@ cafcaas:
   hearingStatus: LISTED, CANCELLED
   excludedDocumentCategories: draftOrders,judgeNotesFromHearing,previousOrdersSubmittedWithApplication,ordersFromOtherProceedings,safeguardingLetter,16aRiskAssessment,guardianReport,otherDocs,emailsToCourtToRequestHearingsAdjourned,publicFundingCertificates,requestForFASFormsToBeChanged,witnessAvailability,lettersOfComplaint,internalCorrespondence,importantInfoAboutAddressAndContact,privacyNotice
   excludedDocuments: Draft_C100_application,C8Document,C1A_Document,C100FinalDocument
+  excludedEvents:
 ccd:
   elastic-search-api:
     result-size: 10000

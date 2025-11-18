@@ -55,20 +55,42 @@ public class CaseOrder {
     public void setManageOrderHearingDetails(List<Element<HearingDetails>> manageOrderHearingDetails) {
         this.manageOrderHearingDetails = manageOrderHearingDetails;
         setHearingIdFromManageOrderHearingDetails(manageOrderHearingDetails);
-        CaseHearing caseHearing = null;
-        if (this.manageOrderHearingDetails != null && !this.manageOrderHearingDetails.isEmpty()) {
-            caseHearing = CaseHearing.caseHearingWith()
-                .hearingType(manageOrderHearingDetails.get(0).getValue()
-                                 .getHearingTypes().getValue() != null
-                                 ? manageOrderHearingDetails.get(0).getValue().getHearingTypes().getValue().getCode() : null)
-                .hearingTypeValue(manageOrderHearingDetails.get(0).getValue()
-                                      .getHearingTypes().getValue() != null
-                                      ? manageOrderHearingDetails.get(0).getValue().getHearingTypes().getValue().getLabel() : null)
+
+        if (manageOrderHearingDetails == null || manageOrderHearingDetails.isEmpty()) {
+            log.warn("No manageOrderHearingDetails provided for orderTypeId={}", orderTypeId);
+            this.hearingDetails = null;
+            return;
+        }
+
+        HearingDetails hearingDetailsObj = manageOrderHearingDetails.get(0).getValue();
+
+        if (hearingDetailsObj == null) {
+            log.warn("HearingDetails element is null for orderTypeId={}", orderTypeId);
+            this.hearingDetails = null;
+            return;
+        }
+
+        String hearingTypeCode = null;
+        String hearingTypeLabel = null;
+        if (hearingDetailsObj.getHearingTypes() != null
+            && hearingDetailsObj.getHearingTypes().getValue() != null) {
+            hearingTypeCode = hearingDetailsObj.getHearingTypes().getValue().getCode();
+            hearingTypeLabel = hearingDetailsObj.getHearingTypes().getValue().getLabel();
+        } else {
+            // handle missing hearingTypes — don't crash
+            log.warn("HearingDetails has no hearingTypes for orderTypeId={}", orderTypeId);
+        }
+
+        // Only build CaseHearing if we have *some* data
+        if (hearingTypeCode != null || hearingTypeLabel != null) {
+            CaseHearing caseHearing = CaseHearing.caseHearingWith()
+                .hearingType(hearingTypeCode)
+                .hearingTypeValue(hearingTypeLabel)
                 .build();
             setHearingDetails(caseHearing);
         }
-
     }
+
 
     private void setHearingIdFromManageOrderHearingDetails(List<Element<HearingDetails>> manageOrderHearingDetails) {
         final String[] hearingId = {""};

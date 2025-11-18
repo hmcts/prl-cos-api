@@ -771,6 +771,7 @@ cafcaas:
   hearingStatus: LISTED, CANCELLED
   excludedDocumentCategories: draftOrders,judgeNotesFromHearing,previousOrdersSubmittedWithApplication,ordersFromOtherProceedings,safeguardingLetter,16aRiskAssessment,guardianReport,otherDocs,emailsToCourtToRequestHearingsAdjourned,publicFundingCertificates,requestForFASFormsToBeChanged,witnessAvailability,lettersOfComplaint,internalCorrespondence,importantInfoAboutAddressAndContact,privacyNotice,MIAMCertificate
   excludedDocuments: Draft_C100_application,C8Document,C1A_Document,C100FinalDocument
+  excludedEvents:
 ccd:
   elastic-search-api:
     result-size: 10000
