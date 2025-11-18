@@ -522,8 +522,7 @@ class PartyLevelCaseFlagsServiceTest {
 
         FlagDetail flagDetail = FlagDetail.builder().flagCode("test").flagComment("test comment").name("test flag").build();
         Flags caApplicantSolicitor1ExternalFlags = generateCaseFlag("ApplicantSolicitor1", "caApplicant1", flagDetail);
-        AllPartyFlags allPartyFlags = AllPartyFlags.builder().caApplicantSolicitor1ExternalFlags(
-            caApplicantSolicitor1ExternalFlags).build();
+        AllPartyFlags allPartyFlags = AllPartyFlags.builder().caApplicantSolicitor1ExternalFlags(caApplicantSolicitor1ExternalFlags).build();
         DynamicListElement abp = DynamicListElement.builder().code(appPartyUuid.toString()).label(appPartyUuid.toString()).build();
         DynamicList abpl = DynamicList.builder().value(abp).listItems(Arrays.asList(abp)).build();
         AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder().partyList(abpl).build();
@@ -537,16 +536,18 @@ class PartyLevelCaseFlagsServiceTest {
             .allPartyFlags(allPartyFlags)
             .allocatedBarrister(allocatedBarrister)
             .build();
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.findAndRegisterModules();
 
         PartyLevelCaseFlagsService localPartyLevelCaseFlagsService = new PartyLevelCaseFlagsService(
-            objectMapper,
+            mapper,
             new PartyLevelCaseFlagsGenerator(),
             systemUserService,
             coreCaseDataService
         );
-        localPartyLevelCaseFlagsService.updateCaseDataWithGeneratePartyCaseFlags(
-                caseDataSolicitorBarristerRepresent,
-                localPartyLevelCaseFlagsService::generatePartyCaseFlagsForBarristerOnly);
+        localPartyLevelCaseFlagsService
+            .updateCaseDataWithGeneratePartyCaseFlags(caseDataSolicitorBarristerRepresent,
+                                                      localPartyLevelCaseFlagsService::generatePartyCaseFlagsForBarristerOnly);
 
         Flags externalFlag = Flags.builder()
             .partyName("BarrFN BarrLN")
@@ -563,8 +564,10 @@ class PartyLevelCaseFlagsServiceTest {
             .details(List.of())
             .build();
         AllPartyFlags updatedPartyFlags = caseDataSolicitorBarristerRepresent.getAllPartyFlags();
-        assertThat(updatedPartyFlags.getCaApplicantBarrister1InternalFlags()).isEqualTo(internalFlag);
-        assertThat(updatedPartyFlags.getCaApplicantBarrister1ExternalFlags()).isEqualTo(externalFlag);
+        assertThat(updatedPartyFlags.getCaApplicantBarrister1InternalFlags())
+            .isEqualTo(internalFlag);
+        assertThat(updatedPartyFlags.getCaApplicantBarrister1ExternalFlags())
+            .isEqualTo(externalFlag);
     }
 
     @Test
