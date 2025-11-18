@@ -530,4 +530,76 @@ public class OrganisationServiceTest {
         PartyDetails enriched = out.getRespondents().get(0).getValue();
         assertNull("organisations should not be set when org lookup 404s", enriched.getOrganisations());
     }
+
+    @Test
+    public void testGetOrganisationByEmailDetail_userFound_returnsOrganisation() {
+        // given
+        String email = "user@malinator.com";
+        String userId = "11111111-2222-3333-4444-555555555555";
+
+        OrganisationUser orgUser = OrganisationUser.builder()
+            .userIdentifier(userId)
+            .build();
+
+        Organisations org = Organisations.builder()
+            .organisationIdentifier("ORG123")
+            .name("Test Org")
+            .build();
+
+        when(maskEmail.mask(email)).thenReturn("u**r@malinator.com");
+        when(organisationApi.findUserByEmail(anyString(), anyString(), eq(email)))
+            .thenReturn(orgUser);
+        when(organisationApi.getOrganisationByUserId(authToken, serviceAuthToken, userId))
+            .thenReturn(org);
+
+        // when
+        Optional<Organisations> result = organisationService.getOrganisationByEmailDetail(email);
+
+        // then
+        assertThat(result).isPresent().contains(org);
+        Mockito.verify(organisationApi)
+            .getOrganisationByUserId(authToken, serviceAuthToken, userId);
+    }
+
+    @Test
+    public void testGetOrganisationByEmailDetail_userNotFound_returnsEmpty() {
+        // given
+        String email = "user@malinator.com";
+
+        when(maskEmail.mask(email)).thenReturn("u**r@malinator.com");
+        // simulate 404 returned by PRD when user not found
+        when(organisationApi.findUserByEmail(anyString(), anyString(), eq(email)))
+            .thenThrow(feignException(404, "Not Found"));
+
+        // when
+        Optional<Organisations> result = organisationService.getOrganisationByEmailDetail(email);
+
+        // then
+        assertThat(result).isEmpty();
+        Mockito.verify(organisationApi, Mockito.never())
+            .getOrganisationByUserId(anyString(), anyString(), anyString());
+    }
+
+    @Test
+    public void testGetOrganisationByEmailDetail_apiThrows_rethrowsAsIllegalArgumentException() {
+        // given
+        String email = "user@malinator.com";
+        String userId = "11111111-2222-3333-4444-555555555555";
+
+        OrganisationUser orgUser = OrganisationUser.builder()
+            .userIdentifier(userId)
+            .build();
+
+        when(maskEmail.mask(email)).thenReturn("u**r@malinator.com");
+        when(organisationApi.findUserByEmail(anyString(), anyString(), eq(email)))
+            .thenReturn(orgUser);
+        when(organisationApi.getOrganisationByUserId(anyString(), anyString(), eq(userId)))
+            .thenThrow(feignException(500, "Internal Server Error"));
+
+        // when / then
+        assertThatThrownBy(() -> organisationService.getOrganisationByEmailDetail(email))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Error while fetching organisations by user id");
+    }
+
 }

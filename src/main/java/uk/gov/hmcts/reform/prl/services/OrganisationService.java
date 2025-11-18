@@ -220,7 +220,7 @@ public class OrganisationService {
                 return Optional.ofNullable(organisationApi.getOrganisationByUserId(
                     systemUserService.getSysUserToken(),
                     authTokenGenerator.generate(),
-                    String.valueOf(userId)
+                    userId.get()
                 ));
             } else {
                 log.error("Could not find user id when getting organisation {}", email);
