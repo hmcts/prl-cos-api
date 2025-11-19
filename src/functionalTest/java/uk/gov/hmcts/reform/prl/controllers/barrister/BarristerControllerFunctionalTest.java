@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.controllers.barrister;
 import io.restassured.RestAssured;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
-import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -49,20 +48,15 @@ public class BarristerControllerFunctionalTest {
     public void testBarristerAddAboutToStartCallback() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
 
-        Response resp = request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .contentType("application/json")
+        request
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
-            .post("/barrister/add/about-to-start");
-
-        // Print everything when not 200 so Jenkins shows the message/cause
-        if (resp.statusCode() != 200) {
-            System.out.println("=== RESPONSE " + resp.statusLine() + " ===");
-            System.out.println(resp.asString());
-        }
-
-        resp.then().statusCode(200);
+            .when()
+            .contentType(APPLICATION_JSON)
+            .post("/barrister/add/about-to-start")
+            .then()
+            .assertThat().statusCode(200);
     }
 
     @Test

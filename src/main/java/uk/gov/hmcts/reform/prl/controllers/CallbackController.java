@@ -910,8 +910,7 @@ public class CallbackController {
     private Map<String, Object> getSolicitorDetails(String authorisation, Map<String, Object> caseDataUpdated, CaseData caseData) {
         try {
             UserDetails userDetails = userService.getUserDetails(authorisation);
-            organisationService.getOrganisationByEmailDetail(userDetails.getEmail());
-            Optional<Organisations> userOrganisation = organisationService.findUserOrganisation(authorisation);
+            Optional<Organisations> userOrganisation = organisationService.getOrganisationByEmailDetail(userDetails.getEmail());
             caseDataUpdated.put("caseSolicitorName", userDetails.getFullName());
             if (userOrganisation.isPresent()) {
                 caseDataUpdated.put("caseSolicitorOrgName", userOrganisation.get().getName());
