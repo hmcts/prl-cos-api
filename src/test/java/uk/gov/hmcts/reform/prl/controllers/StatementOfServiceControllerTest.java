@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.StmtOfServImplService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 
 import java.util.Collections;
 import java.util.List;
@@ -48,6 +49,9 @@ public class StatementOfServiceControllerTest {
 
     @Mock
     private ObjectMapper objectMapper;
+
+    @Mock
+    private CafcassDateTimeService cafcassDateTimeService;
 
     private DynamicList dynamicList;
     private PartyDetails respondent;

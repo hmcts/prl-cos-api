@@ -45,6 +45,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConf
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.refuge.RefugeConfidentialDocumentsRecord;
 import uk.gov.hmcts.reform.prl.services.C8ArchiveService;
+import uk.gov.hmcts.reform.prl.services.CaseNameService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
@@ -118,6 +119,7 @@ public class CitizenPartyDetailsMapper {
     private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
     private final DocumentGenService documentGenService;
     private final C8ArchiveService c8ArchiveService;
+    private final CaseNameService caseNameService;
 
     public CitizenUpdatePartyDataContent mapUpdatedPartyDetails(CaseData dbCaseData,
                                                                 CitizenUpdatedCaseData citizenUpdatedCaseData,
@@ -1075,8 +1077,8 @@ public class CitizenPartyDetailsMapper {
             && null != c100RebuildRespondentDetailsElements.getRespondentDetails()
             && !c100RebuildRespondentDetailsElements.getRespondentDetails().isEmpty()
             && null != c100RebuildRespondentDetailsElements.getRespondentDetails().get(0)) {
-            caseName = c100RebuildApplicantDetailsElements.getApplicants().get(0).getApplicantLastName() + " V "
-                + c100RebuildRespondentDetailsElements.getRespondentDetails().get(0).getLastName();
+            caseName = caseNameService.getCaseNameForCA(c100RebuildApplicantDetailsElements.getApplicants().get(0).getApplicantLastName(),
+                c100RebuildRespondentDetailsElements.getRespondentDetails().get(0).getLastName());
         }
 
         return caseName;

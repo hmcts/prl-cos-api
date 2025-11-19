@@ -20,7 +20,7 @@ plugins {
   id 'org.sonarqube' version '5.1.0.4882'
   id 'org.springframework.boot' version '3.3.5'
   id 'au.com.dius.pact' version '4.2.6'
-  id 'com.github.hmcts.rse-cft-lib' version '0.19.1914'
+  id 'com.github.hmcts.rse-cft-lib' version '0.19.1926'
 }
 
 def versions = [
@@ -28,7 +28,7 @@ def versions = [
   bcpkixJdk18on                : '1.81',
   ccdClient                    : '4.9.2',
   commonsBeanUtils             : '1.11.0',
-  commonsIo                    : '2.19.0',
+  commonsIo                    : '2.21.0',
   commonsLang3                 : '3.17.0',
   commonsMath3                 : '3.6.1',
   dumbster                     : '1.7.1',
@@ -40,10 +40,10 @@ def versions = [
   //  idamClient                   : '1.3.0',
   httpComponents               : '4.5.14',
   jackson                      : '2.17.2',
-  jacksonDatatypeJsr           : '2.19.1',
+  jacksonDatatypeJsr           : '2.20.1',
   jsonAssert                   : '1.5.3',
   junit                        : '6.0.1',
-  lombok                       : '1.18.38',
+  lombok                       : '1.18.42',
   pact                         : '4.1.11',
   pitest                       : '1.21.1',
   puppyCrawl                   : '8.45.1',
@@ -60,7 +60,7 @@ def versions = [
   tomcat                       : '10.1.26',
   unirest                      : '1.4.9',
   ccdCaseDocumentAmClient      : '1.59.2',
-  pdfbox                       : '2.0.34',
+  pdfbox                       : '2.0.35',
   springFramework              : '6.1.14',
 ]
 
@@ -182,7 +182,7 @@ allprojects {
       dependency group: 'org.springframework.security', name: 'spring-security-crypto', version: '5.8.16'
 
       //CVE-2023-42795, CVE-2023-45648
-      dependencySet(group: 'org.apache.tomcat.embed', version: '10.1.43') {
+      dependencySet(group: 'org.apache.tomcat.embed', version: '10.1.49') {
         entry 'tomcat-embed-core'
         entry 'tomcat-embed-websocket'
       }
@@ -293,8 +293,8 @@ configurations.configureEach {
     force 'org.bouncycastle:bcpkix-jdk18on:1.81'
     force 'org.springframework.security:spring-security-rsa:1.1.5'
     force 'org.springframework.security:spring-security-crypto:5.8.16'
-    force 'ch.qos.logback:logback-classic:1.5.18'
-    force 'ch.qos.logback:logback-core:1.5.18'
+    force 'ch.qos.logback:logback-classic:1.5.21'
+    force 'ch.qos.logback:logback-core:1.5.21'
   }
 }
 
@@ -338,7 +338,7 @@ dependencies {
   implementation group: 'com.puppycrawl.tools', name: 'checkstyle', version: versions.puppyCrawl
   implementation group: 'commons-io', name: 'commons-io', version: versions.commonsIo
   implementation group: 'io.github.openfeign', name: 'feign-httpclient'
-  implementation group: 'jakarta.activation', name: 'jakarta.activation-api', version: '2.1.3'
+  implementation group: 'jakarta.activation', name: 'jakarta.activation-api', version: '2.1.4'
   implementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
   implementation group: 'org.apache.commons', name: 'commons-math3', version: versions.commonsMath3
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
@@ -349,7 +349,7 @@ dependencies {
   implementation group: 'org.apache.httpcomponents', name: 'fluent-hc', version: versions.httpComponents
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-loadbalancer', version: versions.springCloud
   implementation group: 'org.springframework.retry', name: 'spring-retry', version: '2.0.12'
-  implementation group: 'com.github.hmcts', name: 'ccd-config-generator', version: '6.2.2'
+  implementation group: 'com.github.hmcts', name: 'ccd-config-generator', version: '6.5.3'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: versions.reformsJavaLogging
   implementation group: 'com.github.hmcts.java-logging', name: 'logging-appinsights', version: versions.reformsJavaLogging
@@ -366,7 +366,7 @@ dependencies {
   implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '2.1.2'
   implementation group: 'com.github.hmcts', name:'ccd-case-document-am-client', version: versions.ccdCaseDocumentAmClient
   implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
-  implementation group: 'org.apache.commons', name: 'commons-csv', version: '1.14.0'
+  implementation group: 'org.apache.commons', name: 'commons-csv', version: '1.14.1'
 
   implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '7.10.2'
   implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '8.18.3'
@@ -375,7 +375,7 @@ dependencies {
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
   implementation group: 'com.sendgrid', name: 'sendgrid-java', version: '4.10.3'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
-  implementation group: 'commons-net', name: 'commons-net', version: '3.11.1'
+  implementation group: 'commons-net', name: 'commons-net', version: '3.12.0'
 //  //implementation group: 'uk.gov.hmcts.reform.auth', name: 'auth-checker-lib', version: '2.1.4'
 //
   implementation group: 'org.springframework.security', name: 'spring-security-web', version: '5.8.16'
@@ -408,8 +408,8 @@ dependencies {
     implementation group: 'com.warrenstrange', name: 'googleauth', version: '1.5.0'
   }
 
-  implementation(group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.18')
-  implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.18')
+  implementation(group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.21')
+  implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.21')
   implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version:'7.4'
   implementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.5'
 
@@ -426,9 +426,9 @@ dependencies {
   }
 
   testImplementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
-  testImplementation group: 'io.rest-assured', name: 'rest-assured', version: '5.5.5'
+  testImplementation group: 'io.rest-assured', name: 'rest-assured', version: '5.5.6'
   testImplementation group: 'io.rest-assured', name: 'json-path', version: '5.5.6'
-  testImplementation group: 'io.rest-assured', name: 'xml-path', version: '5.5.5'
+  testImplementation group: 'io.rest-assured', name: 'xml-path', version: '5.5.6'
   testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   testImplementation group: 'net.serenity-bdd', name: 'serenity-core', version: versions.serenity
   testImplementation group: 'net.serenity-bdd', name: 'serenity-cucumber', version: versions.serenityCucumber
@@ -590,6 +590,7 @@ pitest {
   outputFormats = ['XML', 'HTML']
   timestampedReports = true
   mutationThreshold = 80
+  junit5PluginVersion.set('1.2.3')
 }
 
 jacocoTestReport {
@@ -602,7 +603,7 @@ jacocoTestReport {
   }
 }
 jacoco {
-  toolVersion = "0.8.13"
+  toolVersion = "0.8.14"
 }
 
 jacocoTestCoverageVerification {
