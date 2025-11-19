@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.rpa.mappers;
 
-import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,7 +23,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@Slf4j
 @RunWith(MockitoJUnitRunner.class)
 public class ApplicantsMapperTest {
 
