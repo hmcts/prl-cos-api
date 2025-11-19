@@ -47,6 +47,7 @@ import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.AutomatedHearingUtils;
@@ -107,6 +108,7 @@ public class ManageOrdersController {
     private final RoleAssignmentService roleAssignmentService;
     private final HearingService hearingService;
     private final TaskUtils taskUtils;
+    private final CafcassDateTimeService cafcassDateTimeService;
 
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
 
@@ -338,6 +340,8 @@ public class ManageOrdersController {
             manageOrderService.populateCheckForAutomatedRequest(caseData, caseDataUpdated, callbackRequest.getEventId());
 
             cleanUpSelectedManageOrderOptions(caseDataUpdated);
+
+            cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {

@@ -64,14 +64,12 @@ import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.Event.AMEND_MIAM_POLICY_UPGRADE;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
-import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
-import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_RESUBMIT;
@@ -175,7 +173,6 @@ public class TaskListServiceTest {
         CaseData caseData = CaseData.builder().caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).build();
 
         List<Task> expectedTasks = List.of(
-                Task.builder().event(CASE_NAME).state(NOT_STARTED).state(NOT_STARTED).build(),
                 Task.builder().event(TYPE_OF_APPLICATION).state(NOT_STARTED).build(),
                 Task.builder().event(HEARING_URGENCY).state(NOT_STARTED).build(),
                 Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
@@ -330,7 +327,6 @@ public class TaskListServiceTest {
                 .taskListVersion(TASK_LIST_VERSION_V2).build();
 
         List<Task> expectedTasks = List.of(
-                Task.builder().event(CASE_NAME).build(),
                 Task.builder().event(TYPE_OF_APPLICATION).build(),
                 Task.builder().event(HEARING_URGENCY).build(),
                 Task.builder().event(CHILD_DETAILS_REVISED).build(),
@@ -381,7 +377,6 @@ public class TaskListServiceTest {
                 .typeOfApplicationLinkToCA(linkToCA).build();
 
         List<Task> expectedTasks = List.of(
-                Task.builder().event(FL401_CASE_NAME).state(NOT_STARTED).build(),
                 Task.builder().event(FL401_TYPE_OF_APPLICATION).state(NOT_STARTED).build(),
                 Task.builder().event(WITHOUT_NOTICE_ORDER).state(NOT_STARTED).build(),
                 Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
@@ -426,7 +421,6 @@ public class TaskListServiceTest {
                 .build();
 
         List<Task> expectedTasks = List.of(
-                Task.builder().event(FL401_CASE_NAME).state(NOT_STARTED).build(),
                 Task.builder().event(FL401_TYPE_OF_APPLICATION).state(NOT_STARTED).build(),
                 Task.builder().event(WITHOUT_NOTICE_ORDER).state(NOT_STARTED).build(),
                 Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
@@ -471,7 +465,6 @@ public class TaskListServiceTest {
                 .build();
 
         List<Task> expectedTasks = List.of(
-                Task.builder().event(FL401_CASE_NAME).state(NOT_STARTED).build(),
                 Task.builder().event(FL401_TYPE_OF_APPLICATION).state(NOT_STARTED).build(),
                 Task.builder().event(WITHOUT_NOTICE_ORDER).state(NOT_STARTED).build(),
                 Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
@@ -502,8 +495,7 @@ public class TaskListServiceTest {
                 .build();
 
         List<Task> expectedTasks = List.of(
-                Task.builder().event(CASE_NAME).state(FINISHED).state(FINISHED).build(),
-                Task.builder().event(TYPE_OF_APPLICATION).state(NOT_STARTED).build(),
+                Task.builder().event(TYPE_OF_APPLICATION).state(FINISHED).build(),
                 Task.builder().event(HEARING_URGENCY).state(NOT_STARTED).build(),
                 Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
                 Task.builder().event(CHILD_DETAILS).state(NOT_STARTED).build(),
@@ -520,7 +512,7 @@ public class TaskListServiceTest {
                 Task.builder().event(SUBMIT_AND_PAY).state(NOT_STARTED).build(),
                 Task.builder().event(SUBMIT).state(NOT_STARTED).build()
         );
-        Event event = CASE_NAME;
+        Event event = TYPE_OF_APPLICATION;
         when(eventsChecker.isFinished(event, caseData)).thenReturn(true);
         when(eventsChecker.getDefaultState(Mockito.any(),Mockito.any(CaseData.class))).thenReturn(NOT_STARTED);
         List<Task> actualTasks = taskListService.getTasksForOpenCase(caseData);
@@ -537,7 +529,6 @@ public class TaskListServiceTest {
                 .build();
 
         List<Task> expectedTasks = List.of(
-                Task.builder().event(CASE_NAME).state(NOT_STARTED).state(NOT_STARTED).build(),
                 Task.builder().event(TYPE_OF_APPLICATION).state(IN_PROGRESS).build(),
                 Task.builder().event(HEARING_URGENCY).state(NOT_STARTED).build(),
                 Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
@@ -573,7 +564,6 @@ public class TaskListServiceTest {
                 .build();
 
         List<Task> expectedTasks = List.of(
-                Task.builder().event(CASE_NAME).state(NOT_STARTED).state(NOT_STARTED).build(),
                 Task.builder().event(TYPE_OF_APPLICATION).state(MANDATORY_COMPLETED).build(),
                 Task.builder().event(HEARING_URGENCY).state(NOT_STARTED).build(),
                 Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
@@ -661,7 +651,6 @@ public class TaskListServiceTest {
                 .build();
 
         List<Task> expectedTasks = List.of(
-                Task.builder().event(CASE_NAME).build(),
                 Task.builder().event(TYPE_OF_APPLICATION).build(),
                 Task.builder().event(HEARING_URGENCY).build(),
                 Task.builder().event(CHILD_DETAILS_REVISED).build(),
@@ -973,7 +962,6 @@ public class TaskListServiceTest {
             .build();
 
         List<Task> expectedTasks = List.of(
-            Task.builder().event(CASE_NAME).build(),
             Task.builder().event(TYPE_OF_APPLICATION).build(),
             Task.builder().event(HEARING_URGENCY).build(),
             Task.builder().event(APPLICANT_DETAILS).build(),
