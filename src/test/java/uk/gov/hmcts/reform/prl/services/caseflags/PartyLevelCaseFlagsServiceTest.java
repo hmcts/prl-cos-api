@@ -822,8 +822,8 @@ class PartyLevelCaseFlagsServiceTest {
                     createUnrepresentedParty("oldFirstName", "oldLastName")).build()
             ))
             .allPartyFlags(AllPartyFlags.builder()
-               .caApplicant1ExternalFlags(createFlags("oldFirstName oldLastName", "caApplicant1", "Applicant 1", VISIBILITY_EXTERNAL))
-               .caApplicant1InternalFlags(createFlags("oldFirstName oldLastName", "caApplicant1", "Applicant 1", VISIBILITY_INTERNAL))
+               .caApplicant1ExternalFlags(createFlags("caApplicant1", "Applicant 1", VISIBILITY_EXTERNAL))
+               .caApplicant1InternalFlags(createFlags("caApplicant1", "Applicant 1", VISIBILITY_INTERNAL))
                .build())
             .build();
         CaseData caseData = CaseData.builder()
@@ -833,8 +833,8 @@ class PartyLevelCaseFlagsServiceTest {
                     createUnrepresentedParty("newFirstName", "newLastName")).build()
             ))
             .allPartyFlags(AllPartyFlags.builder()
-               .caApplicant1ExternalFlags(createFlags("oldFirstName oldLastName", "caApplicant1", "Applicant 1", VISIBILITY_EXTERNAL))
-               .caApplicant1InternalFlags(createFlags("oldFirstName oldLastName", "caApplicant1", "Applicant 1", VISIBILITY_INTERNAL))
+               .caApplicant1ExternalFlags(createFlags("caApplicant1", "Applicant 1", VISIBILITY_EXTERNAL))
+               .caApplicant1InternalFlags(createFlags("caApplicant1", "Applicant 1", VISIBILITY_INTERNAL))
                .build())
             .build();
 
@@ -858,8 +858,8 @@ class PartyLevelCaseFlagsServiceTest {
                     createUnrepresentedParty("oldFirstName", "oldLastName")).build()
             ))
             .allPartyFlags(AllPartyFlags.builder()
-               .caRespondent1ExternalFlags(createFlags("oldFirstName oldLastName", "caRespondent1", "Respondent 1", VISIBILITY_EXTERNAL))
-               .caRespondent1InternalFlags(createFlags("oldFirstName oldLastName", "caRespondent1", "Respondent 1", VISIBILITY_INTERNAL))
+               .caRespondent1ExternalFlags(createFlags("caRespondent1", "Respondent 1", VISIBILITY_EXTERNAL))
+               .caRespondent1InternalFlags(createFlags("caRespondent1", "Respondent 1", VISIBILITY_INTERNAL))
                .build())
             .build();
         CaseData caseData = CaseData.builder()
@@ -869,8 +869,8 @@ class PartyLevelCaseFlagsServiceTest {
                     createUnrepresentedParty("newFirstName", "newLastName")).build()
             ))
             .allPartyFlags(AllPartyFlags.builder()
-               .caRespondent1ExternalFlags(createFlags("oldFirstName oldLastName", "caRespondent1", "Respondent 1", VISIBILITY_EXTERNAL))
-               .caRespondent1InternalFlags(createFlags("oldFirstName oldLastName", "caRespondent1", "Respondent 1", VISIBILITY_INTERNAL))
+               .caRespondent1ExternalFlags(createFlags("caRespondent1", "Respondent 1", VISIBILITY_EXTERNAL))
+               .caRespondent1InternalFlags(createFlags("caRespondent1", "Respondent 1", VISIBILITY_INTERNAL))
                .build())
             .build();
 
@@ -894,8 +894,8 @@ class PartyLevelCaseFlagsServiceTest {
                     createUnrepresentedParty("oldFirstName", "oldLastName")).build()
             ))
             .allPartyFlags(AllPartyFlags.builder()
-               .caOtherParty1ExternalFlags(createFlags("oldFirstName oldLastName", "caOtherParty1", "Other Party 1", VISIBILITY_EXTERNAL))
-               .caOtherParty1InternalFlags(createFlags("oldFirstName oldLastName", "caOtherParty1", "Other Party 1", VISIBILITY_INTERNAL))
+               .caOtherParty1ExternalFlags(createFlags("caOtherParty1", "Other Party 1", VISIBILITY_EXTERNAL))
+               .caOtherParty1InternalFlags(createFlags("caOtherParty1", "Other Party 1", VISIBILITY_INTERNAL))
                .build())
             .build();
         CaseData caseData = CaseData.builder()
@@ -905,8 +905,8 @@ class PartyLevelCaseFlagsServiceTest {
                     createUnrepresentedParty("newFirstName", "newLastName")).build()
             ))
             .allPartyFlags(AllPartyFlags.builder()
-               .caOtherParty1ExternalFlags(createFlags("oldFirstName oldLastName", "caOtherParty1", "Other Party 1", VISIBILITY_EXTERNAL))
-               .caOtherParty1InternalFlags(createFlags("oldFirstName oldLastName", "caOtherParty1", "Other Party 1", VISIBILITY_INTERNAL))
+               .caOtherParty1ExternalFlags(createFlags("caOtherParty1", "Other Party 1", VISIBILITY_EXTERNAL))
+               .caOtherParty1InternalFlags(createFlags("caOtherParty1", "Other Party 1", VISIBILITY_INTERNAL))
                .build())
             .build();
 
@@ -1504,9 +1504,9 @@ class PartyLevelCaseFlagsServiceTest {
             .build();
     }
 
-    private Flags createFlags(String partyName, String roleOnCase, String groupId, String visibility) {
+    private Flags createFlags(String roleOnCase, String groupId, String visibility) {
         return Flags.builder()
-            .partyName(partyName)
+            .partyName("oldFirstName oldLastName")
             .roleOnCase(roleOnCase)
             .groupId(groupId)
             .visibility(visibility)
