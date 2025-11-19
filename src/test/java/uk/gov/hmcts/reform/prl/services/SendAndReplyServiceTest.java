@@ -3484,6 +3484,8 @@ public class SendAndReplyServiceTest {
 
         caseData = CaseData.builder().id(12345L)
             .chooseSendOrReply(SEND)
+            .applicantsFL401(getApplicant())
+            .respondentsFL401(getRespondent())
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
                     .respondToMessage(YesOrNo.No)
@@ -3499,7 +3501,7 @@ public class SendAndReplyServiceTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyService.sendAndReplySubmitted(callbackRequest);
+        ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyService.sendAndReplySubmitted(callbackRequest, auth);
         Assertions.assertThat(response.getStatusCode().value()).isEqualTo(200);
     }
 
@@ -3522,7 +3524,7 @@ public class SendAndReplyServiceTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyService.sendAndReplySubmitted(callbackRequest);
+        ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyService.sendAndReplySubmitted(callbackRequest, auth);
         Assertions.assertThat(response.getStatusCode().value()).isEqualTo(200);
     }
 
@@ -3544,7 +3546,7 @@ public class SendAndReplyServiceTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyService.sendAndReplySubmitted(callbackRequest);
+        ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyService.sendAndReplySubmitted(callbackRequest, auth);
         Assertions.assertThat(response.getStatusCode().value()).isEqualTo(200);
 
     }
