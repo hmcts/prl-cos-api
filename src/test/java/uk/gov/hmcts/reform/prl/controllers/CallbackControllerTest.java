@@ -1061,6 +1061,8 @@ public class CallbackControllerTest {
         Organisations org = Organisations.builder().name("testOrg").organisationIdentifier("abcd").build();
         when(organisationService.findUserOrganisation(Mockito.anyString()))
             .thenReturn(Optional.of(org));
+        when(organisationService.getOrganisationByEmailDetail(Mockito.anyString()))
+            .thenReturn(Optional.of(org));
         CaseData caseData = CaseData.builder().id(123L)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicantCaseName("abcd").build();
@@ -1130,7 +1132,6 @@ public class CallbackControllerTest {
     @Test
     public void aboutToSubmitCaseCreationToC100ForNullCaseName() {
 
-        Map<String, Object> caseData = new HashMap<>();
         Organisations org = Organisations.builder().name("testOrg")
             .organisationIdentifier("abcd")
             .build();
@@ -1142,6 +1143,7 @@ public class CallbackControllerTest {
         OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
             .orgPolicyReference("jfljsd")
             .orgPolicyCaseAssignedRole("APPLICANTSOLICITOR").build();
+        Map<String, Object> caseData = new HashMap<>();
         caseData.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
