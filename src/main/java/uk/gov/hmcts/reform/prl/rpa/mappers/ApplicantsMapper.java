@@ -32,16 +32,19 @@ public class ApplicantsMapper {
         if (applicantElementsCheck.isEmpty()) {
             return JsonValue.EMPTY_JSON_ARRAY;
         }
-        List<PartyDetails> applicantList = applicants.stream()
-            .map(Element::getValue)
-            .toList();
         AtomicInteger counter = new AtomicInteger(1);
-        return applicantList.stream().map(applicant -> getApplicant(counter, applicant, applicantSolicitorMap)).collect(
-            JsonCollectors.toJsonArray());
+        for (Element<PartyDetails> applicant : applicants) {
+            addApplicantToApplicantMap(counter, applicant.getValue(), applicantSolicitorMap);
+        }
+
+        return getApplicantArray(applicants);
     }
 
-    private JsonObject getApplicant(AtomicInteger counter, PartyDetails applicant, Map<String, PartyDetails> applicantSolicitorMap) {
+    private void addApplicantToApplicantMap(AtomicInteger counter, PartyDetails applicant, Map<String, PartyDetails> applicantSolicitorMap) {
         applicantSolicitorMap.put("APP_SOL_" + counter, applicant);
+    }
+
+    private JsonObject getApplicant(AtomicInteger counter, PartyDetails applicant) {
         return new NullAwareJsonObjectBuilder()
             .add("firstName", applicant.getFirstName())
             .add("lastName", applicant.getLastName())
@@ -64,5 +67,9 @@ public class ApplicantsMapper {
             .build();
     }
 
-
+    public JsonArray getApplicantArray(List<Element<PartyDetails>> applicantList) {
+        AtomicInteger counter = new AtomicInteger(1);
+        return applicantList.stream().map(applicant -> getApplicant(counter, applicant.getValue())).collect(
+            JsonCollectors.toJsonArray());
+    }
 }

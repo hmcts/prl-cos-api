@@ -33,21 +33,23 @@ public class RespondentsMapper {
         if (respondentElementsCheck.isEmpty()) {
             return JsonValue.EMPTY_JSON_ARRAY;
         }
-        List<PartyDetails> respondentList = respondents.stream()
-            .map(Element::getValue)
-            .toList();
+
         AtomicInteger counter = new AtomicInteger(1);
-        return respondentList.stream().map(respondent -> getRespondent(counter, respondent,
-                                                                       respondentSolicitorMap
-        )).collect(JsonCollectors.toJsonArray());
+        for (Element<PartyDetails> respondent : respondents) {
+            addRespondentToRespondentsMap(counter, respondent.getValue(), respondentSolicitorMap);
+        }
+
+        return getRespondentArray(respondents);
     }
 
-    private JsonObject getRespondent(AtomicInteger counter, PartyDetails respondent,
-                                     Map<String, PartyDetails> respondentSolicitorMap) {
+    private void addRespondentToRespondentsMap(AtomicInteger counter, PartyDetails respondent, Map<String, PartyDetails> respondentSolicitorMap) {
         if (null != respondent.getDoTheyHaveLegalRepresentation()
             && respondent.getDoTheyHaveLegalRepresentation().equals(YesNoDontKnow.yes)) {
             respondentSolicitorMap.put("RES_SOL_" + counter, respondent);
         }
+    }
+
+    private JsonObject getRespondent(AtomicInteger counter, PartyDetails respondent) {
         return new NullAwareJsonObjectBuilder()
             .add("firstName", respondent.getFirstName())
             .add("lastName", respondent.getLastName())
@@ -86,4 +88,9 @@ public class RespondentsMapper {
             .build();
     }
 
+    public JsonArray getRespondentArray(List<Element<PartyDetails>> respondentList) {
+        AtomicInteger counter = new AtomicInteger(1);
+        return respondentList.stream().map(respondent -> getRespondent(counter, respondent.getValue())).collect(
+            JsonCollectors.toJsonArray());
+    }
 }
