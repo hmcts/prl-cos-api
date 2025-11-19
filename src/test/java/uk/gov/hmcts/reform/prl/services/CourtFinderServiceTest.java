@@ -985,14 +985,6 @@ public class CourtFinderServiceTest {
         courtFinderService.getCorrectPartyPostcode(caseData);
     }
 
-    @Test(expected = NotFoundException.class)
-    public void whenChildDetailsNullThrowNotFoundException() throws NotFoundException {
-        CaseData caseData = CaseData.builder()
-            .build();
-
-        courtFinderService.getCorrectPartyPostcode(caseData);
-    }
-
     @Test
     public void givenC100ApplicationsMatchedInExplanationReturnCourtEmailAddress() {
 

@@ -141,20 +141,23 @@ public class CourtFinderService {
             .stream()
             .map(Element::getValue)
             .findFirst()
-            .orElseThrow(() -> new NotFoundException("No child details found"));
+            .orElseThrow(null);
 
-        if (child.getChildLiveWith().contains(applicant)) {
-            return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
-        } else if (child.getChildLiveWith().contains(respondent)) {
-            if (ofNullable(getPostcodeFromWrappedParty(caseData.getRespondents().get(0))).isEmpty()) {
+        if  (child != null) {
+            if (child.getChildLiveWith().contains(applicant)) {
                 return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
+            } else if (child.getChildLiveWith().contains(respondent)) {
+                if (ofNullable(getPostcodeFromWrappedParty(caseData.getRespondents().get(0))).isEmpty()) {
+                    return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
+                }
+                return getPostcodeFromWrappedParty(caseData.getRespondents().get(0));
+            } else if (child.getChildLiveWith().contains(anotherPerson)
+                && ofNullable(getFirstOtherPerson(child)).isPresent()) {
+                if (getPostCode(getFirstOtherPerson(child)).isEmpty()) {
+                    return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
+                }
+                return getFirstOtherPerson(child).getAddress().getPostCode();
             }
-            return getPostcodeFromWrappedParty(caseData.getRespondents().get(0));
-        } else if (child.getChildLiveWith().contains(anotherPerson) && ofNullable(getFirstOtherPerson(child)).isPresent()) {
-            if (getPostCode(getFirstOtherPerson(child)).isEmpty()) {
-                return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
-            }
-            return getFirstOtherPerson(child).getAddress().getPostCode();
         }
         //default to the applicant postcode
         return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
