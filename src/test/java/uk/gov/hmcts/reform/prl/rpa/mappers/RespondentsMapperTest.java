@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.rpa.mappers;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -41,6 +42,7 @@ public class RespondentsMapperTest {
     Address address;
     Organisation organisation;
     PartyDetails partyDetails;
+    PartyDetails partyDetails2;
     Map<String, PartyDetails> respondentSolicitorMap;
     AtomicInteger counter;
 
@@ -70,10 +72,27 @@ public class RespondentsMapperTest {
             .isCurrentAddressKnown(YesOrNo.Yes)
             .build();
 
-        Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder().value(partyDetails).build();
-        respondents = Collections.singletonList(partyDetailsElement);
-        respondentSolicitorMap = new HashMap<>();
+        partyDetails2 = PartyDetails.builder()
+            .firstName("First name1")
+            .lastName("Last name1")
+            .dateOfBirth(LocalDate.of(1991, 11, 30))
+            .isDateOfBirthKnown(YesOrNo.Yes)
+            .gender(Gender.female)
+            .address(address)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("test2@test2.com")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .solicitorOrg(organisation)
+            .isCurrentAddressKnown(YesOrNo.Yes)
+            .build();
 
+        Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder().value(partyDetails).build();
+        Element<PartyDetails> partyDetails2Element = Element.<PartyDetails>builder().value(partyDetails2).build();
+        respondents = new ArrayList<>();
+        respondents.add(partyDetailsElement);
+        respondents.add(partyDetails2Element);
+
+        respondentSolicitorMap = new HashMap<>();
     }
 
     @Test
@@ -85,6 +104,11 @@ public class RespondentsMapperTest {
     @Test
     public void testRespondentsMapperWithAllFields() {
         assertNotNull(respondentsMapper.map(respondents, respondentSolicitorMap));
+    }
+
+    @Test
+    public void respondentSolicitorMapShouldContain2Entries() {
+        Assertions.assertEquals(2, respondentsMapper.map(respondents, respondentSolicitorMap).size());
     }
 
     @Test
@@ -122,7 +146,10 @@ public class RespondentsMapperTest {
         respondentsList.add(element(partyDetails1));
         respondentsList.add(element(partyDetails2));
         assertNotNull(respondentsMapper.map(respondentsList, respondentSolicitorMap));
-
     }
 
+    @Test
+    public void getRespondentArrayShouldReturn2Applicants() {
+        Assertions.assertEquals(2, respondentsMapper.getRespondentArray(respondents).size());
+    }
 }

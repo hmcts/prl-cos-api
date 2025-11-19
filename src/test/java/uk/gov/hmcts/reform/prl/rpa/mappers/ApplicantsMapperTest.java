@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.rpa.mappers;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,16 +15,16 @@ import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import javax.json.JsonObject;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Slf4j
 @RunWith(MockitoJUnitRunner.class)
 public class ApplicantsMapperTest {
 
@@ -34,11 +35,10 @@ public class ApplicantsMapperTest {
     @Mock
     Organisation organisation;
     PartyDetails partyDetails;
+    PartyDetails partyDetails2;
     Address address;
     List<Element<PartyDetails>> applicants;
-    JsonObject applicantSolicitorMap1;
     HashMap<String, PartyDetails> applicantSolicitorMap;
-    AtomicInteger counter = new AtomicInteger();
 
     @Before
     public void setup() {
@@ -63,16 +63,34 @@ public class ApplicantsMapperTest {
             .solicitorOrg(organisation)
             .build();
 
+        partyDetails2 = PartyDetails.builder()
+            .firstName("First name1")
+            .lastName("Last name1")
+            .dateOfBirth(LocalDate.of(1991, 11, 30))
+            .gender(Gender.female)
+            .address(address)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("test2@test2.com")
+            .solicitorOrg(organisation)
+            .build();
+
         Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder().value(partyDetails).build();
-        applicants = Collections.singletonList(partyDetailsElement);
+        Element<PartyDetails> partyDetails2Element = Element.<PartyDetails>builder().value(partyDetails2).build();
+        applicants = new ArrayList<>();
+        applicants.add(partyDetailsElement);
+        applicants.add(partyDetails2Element);
 
         applicantSolicitorMap = new HashMap<String, PartyDetails>();
-        //applicantSolicitorMap.put()
     }
 
     @Test
     public void testApplicantsMapperMap() {
         assertNotNull(applicantsMapper.map(applicants, applicantSolicitorMap));
+    }
+
+    @Test
+    public void applicantSolicitorMapShouldContain2Entries() {
+        assertEquals(2, applicantsMapper.map(applicants, applicantSolicitorMap).size());
     }
 
     @Test
@@ -87,4 +105,8 @@ public class ApplicantsMapperTest {
         assertTrue(applicantsMapper.map(applicants, applicantSolicitorMap).isEmpty());
     }
 
+    @Test
+    public void getApplicantArrayShouldReturn2Applicants() {
+        assertEquals(2, applicantsMapper.getApplicantArray(applicants).size());
+    }
 }
