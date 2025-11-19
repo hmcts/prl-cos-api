@@ -36,13 +36,13 @@ public class RespondentsMapper {
 
         AtomicInteger counter = new AtomicInteger(1);
         for (Element<PartyDetails> respondent : respondents) {
-            addRespondentToRespondentsMap(counter, respondent.getValue(), respondentSolicitorMap);
+            addRespondentToRespondentsMap(counter.getAndIncrement(), respondent.getValue(), respondentSolicitorMap);
         }
 
         return getRespondentArray(respondents);
     }
 
-    private void addRespondentToRespondentsMap(AtomicInteger counter, PartyDetails respondent, Map<String, PartyDetails> respondentSolicitorMap) {
+    private void addRespondentToRespondentsMap(int counter, PartyDetails respondent, Map<String, PartyDetails> respondentSolicitorMap) {
         if (null != respondent.getDoTheyHaveLegalRepresentation()
             && respondent.getDoTheyHaveLegalRepresentation().equals(YesNoDontKnow.yes)) {
             respondentSolicitorMap.put("RES_SOL_" + counter, respondent);

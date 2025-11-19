@@ -34,13 +34,13 @@ public class ApplicantsMapper {
         }
         AtomicInteger counter = new AtomicInteger(1);
         for (Element<PartyDetails> applicant : applicants) {
-            addApplicantToApplicantMap(counter, applicant.getValue(), applicantSolicitorMap);
+            addApplicantToApplicantMap(counter.getAndIncrement(), applicant.getValue(), applicantSolicitorMap);
         }
 
         return getApplicantArray(applicants);
     }
 
-    private void addApplicantToApplicantMap(AtomicInteger counter, PartyDetails applicant, Map<String, PartyDetails> applicantSolicitorMap) {
+    private void addApplicantToApplicantMap(int counter, PartyDetails applicant, Map<String, PartyDetails> applicantSolicitorMap) {
         applicantSolicitorMap.put("APP_SOL_" + counter, applicant);
     }
 
