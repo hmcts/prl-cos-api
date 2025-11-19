@@ -58,6 +58,8 @@ import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.CAR
 import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.DAAPPLICANTBARRISTER;
 import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.DAAPPLICANTSOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.DARESPONDENTSOLICITOR;
+import static uk.gov.hmcts.reform.prl.utils.caseflags.PartyLevelCaseFlagsGenerator.VISIBILITY_EXTERNAL;
+import static uk.gov.hmcts.reform.prl.utils.caseflags.PartyLevelCaseFlagsGenerator.VISIBILITY_INTERNAL;
 
 @ExtendWith(MockitoExtension.class)
 class PartyLevelCaseFlagsServiceTest {
@@ -812,6 +814,296 @@ class PartyLevelCaseFlagsServiceTest {
     }
 
     @Test
+    void givenApplicantNameChangesWhenAmendCaseFlagsThenFlagUpdated() {
+        CaseData caseDataBefore = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(
+                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000001")).value(
+                    createUnrepresentedParty("oldFirstName", "oldLastName")).build()
+            ))
+            .allPartyFlags(AllPartyFlags.builder()
+               .caApplicant1ExternalFlags(createFlags("oldFirstName oldLastName", "caApplicant1", "Applicant 1", VISIBILITY_EXTERNAL))
+               .caApplicant1InternalFlags(createFlags("oldFirstName oldLastName", "caApplicant1", "Applicant 1", VISIBILITY_INTERNAL))
+               .build())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(
+                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000001")).value(
+                    createUnrepresentedParty("newFirstName", "newLastName")).build()
+            ))
+            .allPartyFlags(AllPartyFlags.builder()
+               .caApplicant1ExternalFlags(createFlags("oldFirstName oldLastName", "caApplicant1", "Applicant 1", VISIBILITY_EXTERNAL))
+               .caApplicant1InternalFlags(createFlags("oldFirstName oldLastName", "caApplicant1", "Applicant 1", VISIBILITY_INTERNAL))
+               .build())
+            .build();
+
+        Map<String, Object> caseDataMapBefore = objectMapper.convertValue(caseDataBefore, new TypeReference<>() {});
+        Map<String, Object> caseDataMap = objectMapper.convertValue(caseData, new TypeReference<>() {});
+
+        partyLevelCaseFlagsService.amendCaseFlags(caseDataMapBefore, caseDataMap, AMEND_APPLICANTS_DETAILS.getValue());
+
+        verifyFlags(caseDataMap.get("caApplicant1ExternalFlags"), "newFirstName newLastName", "caApplicant1",
+                    "Applicant 1", VISIBILITY_EXTERNAL);
+        verifyFlags(caseDataMap.get("caApplicant1InternalFlags"), "newFirstName newLastName", "caApplicant1",
+                    "Applicant 1", VISIBILITY_INTERNAL);
+    }
+
+    @Test
+    void givenRespondentNameChangesWhenAmendCaseFlagsThenFlagUpdated() {
+        CaseData caseDataBefore = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .respondents(List.of(
+                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000001")).value(
+                    createUnrepresentedParty("oldFirstName", "oldLastName")).build()
+            ))
+            .allPartyFlags(AllPartyFlags.builder()
+               .caRespondent1ExternalFlags(createFlags("oldFirstName oldLastName", "caRespondent1", "Respondent 1", VISIBILITY_EXTERNAL))
+               .caRespondent1InternalFlags(createFlags("oldFirstName oldLastName", "caRespondent1", "Respondent 1", VISIBILITY_INTERNAL))
+               .build())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .respondents(List.of(
+                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000001")).value(
+                    createUnrepresentedParty("newFirstName", "newLastName")).build()
+            ))
+            .allPartyFlags(AllPartyFlags.builder()
+               .caRespondent1ExternalFlags(createFlags("oldFirstName oldLastName", "caRespondent1", "Respondent 1", VISIBILITY_EXTERNAL))
+               .caRespondent1InternalFlags(createFlags("oldFirstName oldLastName", "caRespondent1", "Respondent 1", VISIBILITY_INTERNAL))
+               .build())
+            .build();
+
+        Map<String, Object> caseDataMapBefore = objectMapper.convertValue(caseDataBefore, new TypeReference<>() {});
+        Map<String, Object> caseDataMap = objectMapper.convertValue(caseData, new TypeReference<>() {});
+
+        partyLevelCaseFlagsService.amendCaseFlags(caseDataMapBefore, caseDataMap, AMEND_RESPONDENTS_DETAILS.getValue());
+
+        verifyFlags(caseDataMap.get("caRespondent1ExternalFlags"), "newFirstName newLastName", "caRespondent1",
+                    "Respondent 1", VISIBILITY_EXTERNAL);
+        verifyFlags(caseDataMap.get("caRespondent1InternalFlags"), "newFirstName newLastName", "caRespondent1",
+                    "Respondent 1", VISIBILITY_INTERNAL);
+    }
+
+    @Test
+    void givenOtherPartyNameChangesWhenAmendCaseFlagsThenFlagUpdated() {
+        CaseData caseDataBefore = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .otherPartyInTheCaseRevised(List.of(
+                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000001")).value(
+                    createUnrepresentedParty("oldFirstName", "oldLastName")).build()
+            ))
+            .allPartyFlags(AllPartyFlags.builder()
+               .caOtherParty1ExternalFlags(createFlags("oldFirstName oldLastName", "caOtherParty1", "Other Party 1", VISIBILITY_EXTERNAL))
+               .caOtherParty1InternalFlags(createFlags("oldFirstName oldLastName", "caOtherParty1", "Other Party 1", VISIBILITY_INTERNAL))
+               .build())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .otherPartyInTheCaseRevised(List.of(
+                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000001")).value(
+                    createUnrepresentedParty("newFirstName", "newLastName")).build()
+            ))
+            .allPartyFlags(AllPartyFlags.builder()
+               .caOtherParty1ExternalFlags(createFlags("oldFirstName oldLastName", "caOtherParty1", "Other Party 1", VISIBILITY_EXTERNAL))
+               .caOtherParty1InternalFlags(createFlags("oldFirstName oldLastName", "caOtherParty1", "Other Party 1", VISIBILITY_INTERNAL))
+               .build())
+            .build();
+
+        Map<String, Object> caseDataMapBefore = objectMapper.convertValue(caseDataBefore, new TypeReference<>() {});
+        Map<String, Object> caseDataMap = objectMapper.convertValue(caseData, new TypeReference<>() {});
+
+        partyLevelCaseFlagsService.amendCaseFlags(caseDataMapBefore, caseDataMap,
+                                                  AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED.getValue());
+
+        verifyFlags(caseDataMap.get("caOtherParty1ExternalFlags"), "newFirstName newLastName", "caOtherParty1",
+                    "Other Party 1", VISIBILITY_EXTERNAL);
+        verifyFlags(caseDataMap.get("caOtherParty1InternalFlags"), "newFirstName newLastName", "caOtherParty1",
+                    "Other Party 1", VISIBILITY_INTERNAL);
+    }
+
+    @Test
+    void givenApplicantCaseFlagsDataMissingWhenAmendCaseFlagsThenFlagUpdated() {
+        CaseData caseDataBefore = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(
+                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000001")).value(
+                    createUnrepresentedParty("appFirstName", "appLastName")).build()
+            ))
+            .respondents(List.of(
+                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000002")).value(
+                    createUnrepresentedParty("respFirstName", "respLastName")).build()
+            ))
+            .otherPartyInTheCaseRevised(List.of(
+                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000003")).value(
+                    createUnrepresentedParty("otherFirstName", "otherLastName")).build()
+            ))
+            .allPartyFlags(AllPartyFlags.builder()
+               .caApplicant1ExternalFlags(Flags.builder().build())
+               .caApplicant1InternalFlags(Flags.builder().build())
+               .caRespondent1ExternalFlags(Flags.builder().build())
+               .caRespondent1InternalFlags(Flags.builder().build())
+               .caOtherParty1ExternalFlags(Flags.builder().build())
+               .caOtherParty1InternalFlags(Flags.builder().build())
+               .build())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(
+                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000001")).value(
+                    createUnrepresentedParty("appFirstName", "appLastName")).build()
+            ))
+            .respondents(List.of(
+                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000002")).value(
+                    createUnrepresentedParty("respFirstName", "respLastName")).build()
+            ))
+            .otherPartyInTheCaseRevised(List.of(
+                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000003")).value(
+                    createUnrepresentedParty("otherFirstName", "otherLastName")).build()
+            ))
+            .allPartyFlags(AllPartyFlags.builder()
+               .caApplicant1ExternalFlags(Flags.builder().build())
+               .caApplicant1InternalFlags(Flags.builder().build())
+               .caRespondent1ExternalFlags(Flags.builder().build())
+               .caRespondent1InternalFlags(Flags.builder().build())
+               .caOtherParty1ExternalFlags(Flags.builder().build())
+               .caOtherParty1InternalFlags(Flags.builder().build())
+               .build())
+            .build();
+
+        Map<String, Object> caseDataMapBefore = objectMapper.convertValue(caseDataBefore, new TypeReference<>() {});
+        Map<String, Object> caseDataMap = objectMapper.convertValue(caseData, new TypeReference<>() {});
+
+        partyLevelCaseFlagsService.amendCaseFlags(caseDataMapBefore, caseDataMap, AMEND_APPLICANTS_DETAILS.getValue());
+
+        verifyFlags(caseDataMap.get("caApplicant1ExternalFlags"), "appFirstName appLastName", "Applicant 1",
+                    "caApplicant1", VISIBILITY_EXTERNAL);
+        verifyFlags(caseDataMap.get("caApplicant1InternalFlags"), "appFirstName appLastName", "Applicant 1",
+                    "caApplicant1", VISIBILITY_INTERNAL);
+    }
+
+    @Test
+    void givenRespondentCaseFlagsDataMissingWhenAmendCaseFlagsThenFlagUpdated() {
+        CaseData caseDataBefore = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(
+                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000001")).value(
+                    createUnrepresentedParty("appFirstName", "appLastName")).build()
+            ))
+            .respondents(List.of(
+                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000002")).value(
+                    createUnrepresentedParty("respFirstName", "respLastName")).build()
+            ))
+            .otherPartyInTheCaseRevised(List.of(
+                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000003")).value(
+                    createUnrepresentedParty("otherFirstName", "otherLastName")).build()
+            ))
+            .allPartyFlags(AllPartyFlags.builder()
+                               .caApplicant1ExternalFlags(Flags.builder().build())
+                               .caApplicant1InternalFlags(Flags.builder().build())
+                               .caRespondent1ExternalFlags(Flags.builder().build())
+                               .caRespondent1InternalFlags(Flags.builder().build())
+                               .caOtherParty1ExternalFlags(Flags.builder().build())
+                               .caOtherParty1InternalFlags(Flags.builder().build())
+                               .build())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(
+                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000001")).value(
+                    createUnrepresentedParty("appFirstName", "appLastName")).build()
+            ))
+            .respondents(List.of(
+                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000002")).value(
+                    createUnrepresentedParty("respFirstName", "respLastName")).build()
+            ))
+            .otherPartyInTheCaseRevised(List.of(
+                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000003")).value(
+                    createUnrepresentedParty("otherFirstName", "otherLastName")).build()
+            ))
+            .allPartyFlags(AllPartyFlags.builder()
+                               .caApplicant1ExternalFlags(Flags.builder().build())
+                               .caApplicant1InternalFlags(Flags.builder().build())
+                               .caRespondent1ExternalFlags(Flags.builder().build())
+                               .caRespondent1InternalFlags(Flags.builder().build())
+                               .caOtherParty1ExternalFlags(Flags.builder().build())
+                               .caOtherParty1InternalFlags(Flags.builder().build())
+                               .build())
+            .build();
+
+        Map<String, Object> caseDataMapBefore = objectMapper.convertValue(caseDataBefore, new TypeReference<>() {});
+        Map<String, Object> caseDataMap = objectMapper.convertValue(caseData, new TypeReference<>() {});
+
+        partyLevelCaseFlagsService.amendCaseFlags(caseDataMapBefore, caseDataMap, AMEND_RESPONDENTS_DETAILS.getValue());
+
+        verifyFlags(caseDataMap.get("caRespondent1ExternalFlags"), "respFirstName respLastName", "Respondent 1",
+                    "caRespondent1", VISIBILITY_EXTERNAL);
+        verifyFlags(caseDataMap.get("caRespondent1InternalFlags"), "respFirstName respLastName", "Respondent 1",
+                    "caRespondent1", VISIBILITY_INTERNAL);
+    }
+
+    @Test
+    void givenOtherPartyCaseFlagsDataMissingWhenAmendCaseFlagsThenFlagUpdated() {
+        CaseData caseDataBefore = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(
+                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000001")).value(
+                    createUnrepresentedParty("appFirstName", "appLastName")).build()
+            ))
+            .respondents(List.of(
+                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000002")).value(
+                    createUnrepresentedParty("respFirstName", "respLastName")).build()
+            ))
+            .otherPartyInTheCaseRevised(List.of(
+                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000003")).value(
+                    createUnrepresentedParty("otherFirstName", "otherLastName")).build()
+            ))
+            .allPartyFlags(AllPartyFlags.builder()
+                               .caApplicant1ExternalFlags(Flags.builder().build())
+                               .caApplicant1InternalFlags(Flags.builder().build())
+                               .caRespondent1ExternalFlags(Flags.builder().build())
+                               .caRespondent1InternalFlags(Flags.builder().build())
+                               .caOtherParty1ExternalFlags(Flags.builder().build())
+                               .caOtherParty1InternalFlags(Flags.builder().build())
+                               .build())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(
+                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000001")).value(
+                    createUnrepresentedParty("appFirstName", "appLastName")).build()
+            ))
+            .respondents(List.of(
+                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000002")).value(
+                    createUnrepresentedParty("respFirstName", "respLastName")).build()
+            ))
+            .otherPartyInTheCaseRevised(List.of(
+                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000003")).value(
+                    createUnrepresentedParty("otherFirstName", "otherLastName")).build()
+            ))
+            .allPartyFlags(AllPartyFlags.builder()
+                               .caApplicant1ExternalFlags(Flags.builder().build())
+                               .caApplicant1InternalFlags(Flags.builder().build())
+                               .caRespondent1ExternalFlags(Flags.builder().build())
+                               .caRespondent1InternalFlags(Flags.builder().build())
+                               .caOtherParty1ExternalFlags(Flags.builder().build())
+                               .caOtherParty1InternalFlags(Flags.builder().build())
+                               .build())
+            .build();
+
+        Map<String, Object> caseDataMapBefore = objectMapper.convertValue(caseDataBefore, new TypeReference<>() {});
+        Map<String, Object> caseDataMap = objectMapper.convertValue(caseData, new TypeReference<>() {});
+
+        partyLevelCaseFlagsService.amendCaseFlags(caseDataMapBefore, caseDataMap,
+                                                  AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED.getValue());
+
+        verifyFlags(caseDataMap.get("caOtherParty1ExternalFlags"), "otherFirstName otherLastName",
+                    "Other people in the case 1", "caOtherParty1", VISIBILITY_EXTERNAL);
+        verifyFlags(caseDataMap.get("caOtherParty1InternalFlags"), "otherFirstName otherLastName",
+                    "Other people in the case 1", "caOtherParty1", VISIBILITY_INTERNAL);
+    }
+
+    @Test
     void testAmendApplicantDetails() {
         PartyDetails partyDetailsApplicant = createUnrepresentedParty("test", "test");
 
@@ -1210,5 +1502,23 @@ class PartyLevelCaseFlagsServiceTest {
             .caRespondentBarrister1ExternalFlags(Flags.builder().build())
             .caRespondentBarrister1InternalFlags(Flags.builder().build())
             .build();
+    }
+
+    private Flags createFlags(String partyName, String roleOnCase, String groupId, String visibility) {
+        return Flags.builder()
+            .partyName(partyName)
+            .roleOnCase(roleOnCase)
+            .groupId(groupId)
+            .visibility(visibility)
+            .build();
+    }
+
+    private void verifyFlags(Object flagsMap, String expectedPartyName, String expectedRoleOnCase,
+                             String expectedGroupId, String expectedVisibility) {
+        Flags flags = objectMapper.convertValue(flagsMap, Flags.class);
+        assertThat(flags.getPartyName()).isEqualTo(expectedPartyName);
+        assertThat(flags.getRoleOnCase()).isEqualTo(expectedRoleOnCase);
+        assertThat(flags.getGroupId()).isEqualTo(expectedGroupId);
+        assertThat(flags.getVisibility()).isEqualTo(expectedVisibility);
     }
 }
