@@ -1,8 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.barrister;
 
 import io.restassured.RestAssured;
-import io.restassured.filter.log.RequestLoggingFilter;
-import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -39,10 +37,7 @@ public class BarristerControllerFunctionalTest {
             "http://localhost:4044"
         );
 
-    private final RequestSpecification request = RestAssured.given()
-        .filters(new RequestLoggingFilter(), new ResponseLoggingFilter())
-        .relaxedHTTPSValidation()
-        .baseUri(targetInstance);
+    private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
     @Test
     public void testBarristerAddAboutToStartCallback() throws Exception {

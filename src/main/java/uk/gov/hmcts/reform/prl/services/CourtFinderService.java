@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.court.ServiceArea;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -135,15 +136,12 @@ public class CourtFinderService {
             return getCorrectPartyPostcodeV2(caseData);
         }
         //current requirements use the first child if multiple children present
-        Optional<Child> childOptional = caseData.getChildren()
+        Child child = Optional.ofNullable(caseData.getChildren())
+            .orElse(Collections.emptyList())
             .stream()
             .map(Element::getValue)
-            .findFirst();
-
-        if (childOptional.isEmpty()) {
-            throw new NotFoundException("No child details found");
-        }
-        Child child = childOptional.get();
+            .findFirst()
+            .orElseThrow(() -> new NotFoundException("No child details found"));
 
         if (child.getChildLiveWith().contains(applicant)) {
             return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));

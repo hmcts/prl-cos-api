@@ -218,7 +218,6 @@ public class CourtFinderServiceTest {
             .childLiveWith(Collections.singletonList(LiveWithEnum.respondent))
             .build();
         Element<Child> wrappedChild = Element.<Child>builder().value(child).build();
-        ;
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
         CaseData caseData = CaseData.builder()
@@ -245,7 +244,6 @@ public class CourtFinderServiceTest {
             .address(respondentAddressWithoutPostCode)
             .build();
         Element<Child> wrappedChild = Element.<Child>builder().value(child).build();
-        ;
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondentNoPostcode).build();
         CaseData caseData = CaseData.builder()
@@ -290,7 +288,6 @@ public class CourtFinderServiceTest {
             .childLiveWith(Collections.singletonList(LiveWithEnum.respondent))
             .build();
         Element<Child> wrappedChild = Element.<Child>builder().value(child).build();
-        ;
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
         CaseData caseData = CaseData.builder()
@@ -330,7 +327,6 @@ public class CourtFinderServiceTest {
             .childLiveWith(Collections.singletonList(LiveWithEnum.respondent))
             .build();
         Element<Child> wrappedChild = Element.<Child>builder().value(child).build();
-        ;
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(inValidApplicant).build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(inValidRespondent).build();
         CaseData caseData = CaseData.builder()
@@ -373,7 +369,6 @@ public class CourtFinderServiceTest {
             .childLiveWith(Collections.singletonList(LiveWithEnum.applicant))
             .build();
         Element<Child> wrappedChild = Element.<Child>builder().value(child).build();
-        ;
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
 
@@ -392,7 +387,6 @@ public class CourtFinderServiceTest {
             .childLiveWith(Collections.singletonList(LiveWithEnum.applicant))
             .build();
         Element<Child> wrappedChild = Element.<Child>builder().value(child).build();
-        ;
         Element<PartyDetails> wrappedApplicant1 = Element.<PartyDetails>builder().value(applicant).build();
         Element<PartyDetails> wrappedApplicant2 = Element.<PartyDetails>builder().value(applicant2).build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
@@ -435,7 +429,6 @@ public class CourtFinderServiceTest {
             .childLiveWith(Collections.singletonList(LiveWithEnum.applicant))
             .build();
         Element<Child> wrappedChild = Element.<Child>builder().value(child).build();
-        ;
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
         CaseData caseData = CaseData.builder()
@@ -992,6 +985,13 @@ public class CourtFinderServiceTest {
         courtFinderService.getCorrectPartyPostcode(caseData);
     }
 
+    @Test(expected = NotFoundException.class)
+    public void whenChildDetailsNullThrowNotFoundException() throws NotFoundException {
+        CaseData caseData = CaseData.builder()
+            .build();
+
+        courtFinderService.getCorrectPartyPostcode(caseData);
+    }
 
     @Test
     public void givenC100ApplicationsMatchedInExplanationReturnCourtEmailAddress() {
