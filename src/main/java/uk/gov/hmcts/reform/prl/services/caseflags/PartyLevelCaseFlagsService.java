@@ -50,6 +50,8 @@ import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.CAO
 import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.CARESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.CARESPONDENTBARRISTER;
 import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.CARESPONDENTSOLICITOR;
+import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.DAAPPLICANTBARRISTER;
+import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.DARESPONDENTBARRISTER;
 import static uk.gov.hmcts.reform.prl.utils.caseflags.PartyLevelCaseFlagsGenerator.VISIBILITY_EXTERNAL;
 import static uk.gov.hmcts.reform.prl.utils.caseflags.PartyLevelCaseFlagsGenerator.VISIBILITY_INTERNAL;
 
@@ -126,8 +128,8 @@ public class PartyLevelCaseFlagsService {
                 data.putAll(generateC100PartyCaseFlagsForBarrister(caseData, CARESPONDENTBARRISTER));
             }
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            data.putAll(generateFL401PartyCaseFlagsForBarrister(caseData, PartyRole.Representing.DAAPPLICANTBARRISTER));
-            data.putAll(generateFL401PartyCaseFlagsForBarrister(caseData, PartyRole.Representing.DARESPONDENTBARRISTER));
+            data.putAll(generateFL401PartyCaseFlagsForBarrister(caseData, DAAPPLICANTBARRISTER));
+            data.putAll(generateFL401PartyCaseFlagsForBarrister(caseData, DARESPONDENTBARRISTER));
         }
         return data;
     }
@@ -147,10 +149,10 @@ public class PartyLevelCaseFlagsService {
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DAAPPLICANT));
             data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DAAPPLICANTSOLICITOR));
-            data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DAAPPLICANTBARRISTER));
+            data.putAll(generateFl401PartyCaseFlags(caseData, DAAPPLICANTBARRISTER));
             data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DARESPONDENT));
             data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DARESPONDENTSOLICITOR));
-            data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DARESPONDENTBARRISTER));
+            data.putAll(generateFl401PartyCaseFlags(caseData, DARESPONDENTBARRISTER));
         }
         return data;
     }
@@ -770,9 +772,9 @@ public class PartyLevelCaseFlagsService {
                 return List.of(
                     CAAPPLICANTBARRISTER,
                     CARESPONDENTBARRISTER,
-                    PartyRole.Representing.DAAPPLICANTBARRISTER,
-                    PartyRole.Representing.DARESPONDENTBARRISTER
-                               );
+                    DAAPPLICANTBARRISTER,
+                    DARESPONDENTBARRISTER
+                );
             }
             default -> {
                 return Collections.emptyList();
