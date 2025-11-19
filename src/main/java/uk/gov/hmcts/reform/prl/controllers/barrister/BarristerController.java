@@ -53,14 +53,17 @@ public class BarristerController extends AbstractCallbackController {
     @Operation(description = "Callback to allocate a barrister on about-to-start")
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse handleAddAboutToStartEvent(
-        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true)
+        String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
 
         log.info("Inside barrister/add/about-to-start for case {}", callbackRequest.getCaseDetails().getId());
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+        if (!authorisationService.isAuthorized(authorisation, s2sToken)) {
+            throw new InvalidClientException(INVALID_CLIENT);
+        }
+        try {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             List<String> errorList = new ArrayList<>();
             AllocatedBarrister barristerList = barristerAddService.getAllocatedBarrister(
@@ -77,8 +80,12 @@ public class BarristerController extends AbstractCallbackController {
                 .errors(errorList)
                 .data(caseDataUpdated)
                 .build();
-        } else {
-            throw (new InvalidClientException(INVALID_CLIENT));
+        } catch (Exception e) {
+            log.error("Error in handleAddAboutToStartEvent", e);
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .errors(List.of("An unexpected error occurred: " + e.getMessage()))
+                .data(callbackRequest.getCaseDetails().getData())
+                .build();
         }
     }
 
@@ -86,7 +93,8 @@ public class BarristerController extends AbstractCallbackController {
     @Operation(description = "Callback to add a barrister on submitted")
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse handleAddSubmitted(
-        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true)
+        String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
 
@@ -108,7 +116,8 @@ public class BarristerController extends AbstractCallbackController {
     @Operation(description = "Callback to remove a barrister on about-to-start")
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse handleRemoveAboutToStart(
-        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true)
+        String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
 
@@ -142,7 +151,8 @@ public class BarristerController extends AbstractCallbackController {
     @Operation(description = "Callback to add a barrister on submitted")
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse handleRemoveSubmitted(
-        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true)
+        String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
 
@@ -163,11 +173,15 @@ public class BarristerController extends AbstractCallbackController {
     @Operation(description = "Callback to remove a barrister on about-to-start")
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse handleStopRepresentingAboutToStart(
-        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true)
+        String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
 
-        log.info("Inside barrister/stop-representing/about-to-start for case {}", callbackRequest.getCaseDetails().getId());
+        log.info(
+            "Inside barrister/stop-representing/about-to-start for case {}",
+            callbackRequest.getCaseDetails().getId()
+        );
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             List<String> errorList = new ArrayList<>();
