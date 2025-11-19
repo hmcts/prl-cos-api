@@ -264,7 +264,7 @@ public class SendAndReplyController extends AbstractCallbackController {
     public ResponseEntity<SubmittedCallbackResponse> handleSubmittedSendAndReply(@RequestHeader("Authorization")
                                                                                  @Parameter(hidden = true) String authorisation,
                                                                                  @RequestBody CallbackRequest callbackRequest) {
-        return sendAndReplyService.sendAndReplySubmitted(callbackRequest);
+        return sendAndReplyService.sendAndReplySubmitted(callbackRequest, authorisation);
     }
 
 
