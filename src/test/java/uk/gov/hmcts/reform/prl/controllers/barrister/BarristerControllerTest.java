@@ -80,10 +80,11 @@ public class BarristerControllerTest {
 
         AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder()
             .partyList(DynamicList.builder()
-                    .listItems(List.of(DynamicListElement.builder().code("code").label("label").build()))
-                    .build())
+                           .listItems(List.of(DynamicListElement.builder().code("code").label("label").build()))
+                           .build())
             .build();
-        when(barristerAddService.getAllocatedBarrister(eq(caseData1), eq(AUTH_TOKEN), any(Function.class))).thenReturn(allocatedBarrister);
+        when(barristerAddService.getAllocatedBarrister(eq(caseData1), eq(AUTH_TOKEN), any(Function.class))).thenReturn(
+            allocatedBarrister);
         AboutToStartOrSubmitCallbackResponse callbackResponse = barristerController
             .handleAddAboutToStartEvent(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
 
@@ -119,13 +120,16 @@ public class BarristerControllerTest {
                            .listItems(new ArrayList<DynamicListElement>())
                            .build())
             .build();
-        when(barristerAddService.getAllocatedBarrister(eq(caseData1), eq(AUTH_TOKEN), any(Function.class))).thenReturn(allocatedBarrister);
+        when(barristerAddService.getAllocatedBarrister(eq(caseData1), eq(AUTH_TOKEN), any(Function.class))).thenReturn(
+            allocatedBarrister);
         AboutToStartOrSubmitCallbackResponse callbackResponse = barristerController
             .handleAddAboutToStartEvent(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
 
         assertEquals(1, callbackResponse.getErrors().size());
-        assertEquals("There are no solicitors currently assigned to any party on this case", callbackResponse
-            .getErrors().get(0));
+        assertEquals(
+            "There are no solicitors currently assigned to any party on this case", callbackResponse
+                .getErrors().get(0)
+        );
 
         verify(barristerAddService, times(1)).getAllocatedBarrister(eq(caseData1), eq(AUTH_TOKEN), any(Function.class));
     }
@@ -178,7 +182,8 @@ public class BarristerControllerTest {
         assertThrows(
             RuntimeException.class,
             () -> barristerController
-                .handleAddAboutToStartEvent(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest));
+                .handleAddAboutToStartEvent(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest)
+        );
     }
 
     @Test
@@ -194,7 +199,8 @@ public class BarristerControllerTest {
         assertThrows(
             RuntimeException.class,
             () -> barristerController
-                .handleRemoveAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest));
+                .handleRemoveAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest)
+        );
     }
 
     @Test
@@ -241,7 +247,8 @@ public class BarristerControllerTest {
         assertThrows(
             RuntimeException.class,
             () -> barristerController
-                .handleAddSubmitted(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest));
+                .handleAddSubmitted(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest)
+        );
     }
 
     @Test
@@ -312,8 +319,9 @@ public class BarristerControllerTest {
             eq(caseData1), eq(AUTH_TOKEN), any(Function.class)))
             .thenReturn(allocatedBarrister);
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () ->
-            barristerController.handleStopRepresentingAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest)
+        RuntimeException exception = assertThrows(
+            RuntimeException.class, () ->
+                barristerController.handleStopRepresentingAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest)
         );
 
         assertEquals("You're not currently assigned to any party", exception.getMessage());
@@ -334,7 +342,8 @@ public class BarristerControllerTest {
 
         assertThrows(
             RuntimeException.class,
-            () -> barristerController.handleStopRepresentingAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest));
+            () -> barristerController.handleStopRepresentingAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest)
+        );
     }
 
     @Test
@@ -362,9 +371,11 @@ public class BarristerControllerTest {
         when(objectMapper.convertValue(caseDataMap, CaseData.class))
             .thenReturn(caseData);
 
-        barristerController.handleRemoveSubmitted(AUTH_TOKEN,
-                                                  SERVICE_TOKEN,
-                                                  callbackRequest);
+        barristerController.handleRemoveSubmitted(
+            AUTH_TOKEN,
+            SERVICE_TOKEN,
+            callbackRequest
+        );
         verify(barristerRemoveService)
             .notifyBarrister(isA(CaseData.class));
     }
@@ -392,13 +403,14 @@ public class BarristerControllerTest {
         when(objectMapper.convertValue(caseDataMap, CaseData.class))
             .thenReturn(caseData);
 
-        barristerController.handleRemoveSubmitted(AUTH_TOKEN,
-                                                  SERVICE_TOKEN,
-                                                  callbackRequest);
+        barristerController.handleRemoveSubmitted(
+            AUTH_TOKEN,
+            SERVICE_TOKEN,
+            callbackRequest
+        );
         verify(barristerRemoveService, never())
             .notifyBarrister(isA(CaseData.class));
     }
-
 
 
     @Test
@@ -411,10 +423,44 @@ public class BarristerControllerTest {
                              .id(1L)
                              .build())
             .build();
-        assertThatThrownBy(() -> barristerController.handleRemoveSubmitted(AUTH_TOKEN,
-                                                                           SERVICE_TOKEN,
-                                                                           callbackRequest))
+        assertThatThrownBy(() -> barristerController.handleRemoveSubmitted(
+            AUTH_TOKEN,
+            SERVICE_TOKEN,
+            callbackRequest
+        ))
             .isInstanceOf(InvalidClientException.class)
             .hasMessageContaining(INVALID_CLIENT);
     }
+
+    @Test
+    public void shouldReturnErrorWhenExceptionThrownInAboutToStartEvent() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("id", 12345L);
+        caseData.put("caseTypeOfApplication", "C100");
+
+        CaseData caseData1 = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .data(caseData)
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
+        when(barristerAddService.getAllocatedBarrister(any(), any(), any()))
+            .thenThrow(new NullPointerException("Simulated NPE"));
+
+        AboutToStartOrSubmitCallbackResponse response = barristerController
+            .handleAddAboutToStartEvent(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
+
+        assertEquals(1, response.getErrors().size());
+        assertEquals("An unexpected error occurred: Simulated NPE", response.getErrors().get(0));
+        assertEquals(caseData, response.getData());
+    }
+
 }
