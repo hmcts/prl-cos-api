@@ -27,17 +27,15 @@ public class ApplicantsMapper {
 
     private final AddressMapper addressMapper;
 
-    public JsonArray map(List<Element<PartyDetails>> applicants, Map<String, PartyDetails> applicantSolicitorMap) {
+    public void map(List<Element<PartyDetails>> applicants, Map<String, PartyDetails> applicantSolicitorMap) {
         Optional<List<Element<PartyDetails>>> applicantElementsCheck = ofNullable(applicants);
         if (applicantElementsCheck.isEmpty()) {
-            return JsonValue.EMPTY_JSON_ARRAY;
+            return;
         }
         AtomicInteger counter = new AtomicInteger(1);
         for (Element<PartyDetails> applicant : applicants) {
             addApplicantToApplicantMap(counter.getAndIncrement(), applicant.getValue(), applicantSolicitorMap);
         }
-
-        return getApplicantArray(applicants);
     }
 
     private void addApplicantToApplicantMap(int counter, PartyDetails applicant, Map<String, PartyDetails> applicantSolicitorMap) {
@@ -68,6 +66,11 @@ public class ApplicantsMapper {
     }
 
     public JsonArray getApplicantArray(List<Element<PartyDetails>> applicantList) {
+        Optional<List<Element<PartyDetails>>> applicantElementsCheck = ofNullable(applicantList);
+        if (applicantElementsCheck.isEmpty()) {
+            return JsonValue.EMPTY_JSON_ARRAY;
+        }
+
         AtomicInteger counter = new AtomicInteger(1);
         return applicantList.stream().map(applicant -> getApplicant(counter, applicant.getValue())).collect(
             JsonCollectors.toJsonArray());

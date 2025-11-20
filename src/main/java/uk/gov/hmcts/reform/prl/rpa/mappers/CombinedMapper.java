@@ -25,8 +25,8 @@ public class CombinedMapper {
     public JsonArray map(CaseData caseData) {
         Map<String, PartyDetails> solicitorMap = new HashMap<>();
         Map<String, PartyDetails> respondentMap = new HashMap<>();
-        JsonArray applicantArray = applicantsMapper.map(caseData.getApplicants(), solicitorMap);
-        JsonArray respondentArray = respondentsMapper.map(caseData.getRespondents(), respondentMap);
+        applicantsMapper.map(caseData.getApplicants(), solicitorMap);
+        respondentsMapper.map(caseData.getRespondents(), respondentMap);
         solicitorMap.putAll(respondentMap);
         return solicitorsMapper.mapSolicitorList(solicitorMap);
     }

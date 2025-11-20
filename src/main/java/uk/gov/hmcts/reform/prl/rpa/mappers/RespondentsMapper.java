@@ -28,18 +28,16 @@ public class RespondentsMapper {
 
     private final AddressMapper addressMapper;
 
-    public JsonArray map(List<Element<PartyDetails>> respondents, Map<String, PartyDetails> respondentSolicitorMap) {
+    public void map(List<Element<PartyDetails>> respondents, Map<String, PartyDetails> respondentSolicitorMap) {
         Optional<List<Element<PartyDetails>>> respondentElementsCheck = ofNullable(respondents);
         if (respondentElementsCheck.isEmpty()) {
-            return JsonValue.EMPTY_JSON_ARRAY;
+            return;
         }
 
         AtomicInteger counter = new AtomicInteger(1);
         for (Element<PartyDetails> respondent : respondents) {
             addRespondentToRespondentsMap(counter.getAndIncrement(), respondent.getValue(), respondentSolicitorMap);
         }
-
-        return getRespondentArray(respondents);
     }
 
     private void addRespondentToRespondentsMap(int counter, PartyDetails respondent, Map<String, PartyDetails> respondentSolicitorMap) {
@@ -89,6 +87,11 @@ public class RespondentsMapper {
     }
 
     public JsonArray getRespondentArray(List<Element<PartyDetails>> respondentList) {
+        Optional<List<Element<PartyDetails>>> respondentElementsCheck = ofNullable(respondentList);
+        if (respondentElementsCheck.isEmpty()) {
+            return JsonValue.EMPTY_JSON_ARRAY;
+        }
+
         AtomicInteger counter = new AtomicInteger(1);
         return respondentList.stream().map(respondent -> getRespondent(counter, respondent.getValue())).collect(
             JsonCollectors.toJsonArray());
