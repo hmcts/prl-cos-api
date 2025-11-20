@@ -312,6 +312,8 @@ public class CallbackControllerTest {
 
     @Mock
     private DfjLookupService dfjLookupService;
+
+    @Mock
     private CafcassDateTimeService cafcassDateTimeService;
 
     @Mock
