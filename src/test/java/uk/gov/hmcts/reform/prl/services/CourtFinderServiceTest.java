@@ -41,6 +41,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
@@ -1022,5 +1027,21 @@ public class CourtFinderServiceTest {
             .address(Address.builder().postCode("G511TQ").build())
             .build();
         Assert.assertNotNull(courtFinderService.getPostCodeOtherPerson(partyDetails));
+    }
+
+    @Test
+    public void shouldCallGetCorrectPartyPostcodeV2WhenTaskListVersionIsV2() throws Exception {
+        CourtFinderService spyService = spy(new CourtFinderService(courtFinderApi));
+        CaseData caseData = CaseData.builder()
+            .taskListVersion("v3")
+            .build();
+
+        // Stub getCorrectPartyPostcodeV2 to avoid NotFoundException
+        doReturn("SOME_POSTCODE").when(spyService).getCorrectPartyPostcodeV2(any());
+
+        String result = spyService.getCorrectPartyPostcode(caseData);
+
+        verify(spyService, times(1)).getCorrectPartyPostcodeV2(caseData);
+        assertEquals("SOME_POSTCODE", result);
     }
 }

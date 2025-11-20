@@ -141,7 +141,7 @@ public class CourtFinderService {
             .stream()
             .map(Element::getValue)
             .findFirst()
-            .orElseThrow(null);
+            .orElseThrow(() -> new NotFoundException("No child details found"));
 
         if  (child != null) {
             if (child.getChildLiveWith().contains(applicant)) {
