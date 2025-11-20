@@ -22,6 +22,9 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
+
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -35,6 +38,8 @@ public class ServiceOfApplicationController {
     private final ServiceOfApplicationService serviceOfApplicationService;
 
     private final AuthorisationService authorisationService;
+
+    private final CafcassDateTimeService cafcassDateTimeService;
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "about to start callback for service of application event")
@@ -66,8 +71,10 @@ public class ServiceOfApplicationController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            return AboutToStartOrSubmitCallbackResponse.builder().data(serviceOfApplicationService.handleAboutToSubmit(
-                callbackRequest, authorisation)).build();
+            Map<String, Object> caseDataMap = serviceOfApplicationService.handleAboutToSubmit(
+                callbackRequest, authorisation);
+            cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
         } else {
             throw (new InvalidClientException(INVALID_CLIENT));
         }

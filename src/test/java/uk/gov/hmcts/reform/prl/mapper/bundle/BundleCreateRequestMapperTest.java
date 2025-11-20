@@ -44,7 +44,9 @@ import java.util.List;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.FM5_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ANY_OTHER_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_C1A_RESPONSE;
@@ -82,15 +84,220 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRANSCRIPTS_OF_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_POSITION_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_WITNESS_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
+import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
+
 @RunWith(MockitoJUnitRunner.class)
 public class BundleCreateRequestMapperTest {
     @InjectMocks
     private BundleCreateRequestMapper bundleCreateRequestMapper;
+
+
+    @Test
+    public void testAddOtherDocument_excludesRedactedByUrl() {
+        Document redactedDoc = Document.builder()
+            .documentUrl(BundleCreateRequestMapper.REDACTED_DOCUMENT_URL)
+            .documentBinaryUrl("someBinaryUrl")
+            .documentFileName("file.pdf")
+            .build();
+        BundlingRequestDocument brd = BundlingRequestDocument.builder().documentLink(redactedDoc).documentFileName("file.pdf").build();
+        List<Element<BundlingRequestDocument>> allOtherDocuments = new ArrayList<>();
+        Element<BundlingRequestDocument> element = ElementUtils.element(brd);
+        bundleCreateRequestMapper.addOtherDocument(allOtherDocuments, element);
+        assertTrue(allOtherDocuments.isEmpty());
+    }
+
+    @Test
+    public void testAddOtherDocument_excludesRedactedByBinaryUrl() {
+        Document redactedDoc = Document.builder()
+            .documentUrl("someUrl")
+            .documentBinaryUrl(BundleCreateRequestMapper.REDACTED_DOCUMENT_URL_BINARY)
+            .documentFileName("file.pdf")
+            .build();
+        BundlingRequestDocument brd = BundlingRequestDocument.builder().documentLink(redactedDoc).documentFileName("file.pdf").build();
+        List<Element<BundlingRequestDocument>> allOtherDocuments = new ArrayList<>();
+        Element<BundlingRequestDocument> element = ElementUtils.element(brd);
+        bundleCreateRequestMapper.addOtherDocument(allOtherDocuments, element);
+        assertTrue(allOtherDocuments.isEmpty());
+    }
+
+    @Test
+    public void testAddOtherDocument_excludesRedactedByFileName() {
+        Document redactedDoc = Document.builder()
+            .documentUrl("someUrl")
+            .documentBinaryUrl("someBinaryUrl")
+            .documentFileName("*redacted*")
+            .build();
+        BundlingRequestDocument brd = BundlingRequestDocument.builder().documentLink(redactedDoc).documentFileName("redacted-file.pdf").build();
+        List<Element<BundlingRequestDocument>> allOtherDocuments = new ArrayList<>();
+        Element<BundlingRequestDocument> element = ElementUtils.element(brd);
+        bundleCreateRequestMapper.addOtherDocument(allOtherDocuments, element);
+        assertTrue(allOtherDocuments.isEmpty());
+    }
+
+    @Test
+    public void testAddOtherDocument_includesValidDocument() {
+        Document validDoc = Document.builder()
+            .documentUrl("validUrl")
+            .documentBinaryUrl("validBinaryUrl")
+            .documentFileName("valid-file.pdf")
+            .build();
+        BundlingRequestDocument brd = BundlingRequestDocument.builder().documentLink(validDoc).documentFileName("valid-file.pdf").build();
+        List<Element<BundlingRequestDocument>> allOtherDocuments = new ArrayList<>();
+        Element<BundlingRequestDocument> element = ElementUtils.element(brd);
+        bundleCreateRequestMapper.addOtherDocument(allOtherDocuments, element);
+        assertEquals(1, allOtherDocuments.size());
+    }
+
+    @Test
+    public void testMapAllOtherDocuments_withAllBranches() {
+        CaseData caseData = CaseData.builder()
+            .fl401UploadSupportDocuments(List.of(ElementUtils.element(Document.builder().documentUrl("validUrl")
+                                                                          .documentBinaryUrl("validBinaryUrl")
+                                                                          .documentFileName("valid-file.pdf").build())))
+            .fl401UploadWitnessDocuments(List.of(ElementUtils.element(Document.builder().documentUrl("validUrl")
+                                                                          .documentBinaryUrl("validBinaryUrl")
+                                                                          .documentFileName("valid-file.pdf").build())))
+            .fl401OtherProceedingDetails(FL401OtherProceedingDetails
+                                             .builder()
+                                             .fl401OtherProceedings(
+                                                 List.of(ElementUtils
+                                                             .element(FL401Proceedings.builder()
+                                                                          .uploadRelevantOrder(Document.builder()
+                                                                                                   .documentUrl("validUrl")
+                                                                                                   .documentBinaryUrl("validBinaryUrl")
+                                                                                                   .documentFileName("valid-file.pdf")
+                                                                                                   .build()).build()))).build())
+            .existingProceedingsWithDoc(
+                List.of(ElementUtils.element(ProceedingDetails
+                                                 .builder()
+                                                 .uploadRelevantOrder(Document.builder()
+                                                                          .documentUrl("validUrl")
+                                                                          .documentBinaryUrl("validBinaryUrl")
+                                                                          .documentFileName("valid-file.pdf")
+                                                                          .build()).build())))
+            .furtherEvidences(List.of(ElementUtils.element(FurtherEvidence
+                                                               .builder()
+                                                               .typeOfDocumentFurtherEvidence(FurtherEvidenceDocumentType.miamCertificate)
+                                                               .documentFurtherEvidence(Document
+                                                                                            .builder()
+                                                                                            .documentUrl("validUrl")
+                                                                                            .documentBinaryUrl("validBinaryUrl")
+                                                                                            .documentFileName("valid-file.pdf")
+                                                                                            .build())
+                                                               .restrictCheckboxFurtherEvidence(new ArrayList<>()).build())))
+            .miamDetails(MiamDetails
+                             .builder()
+                             .miamCertificationDocumentUpload(Document
+                                                                  .builder()
+                                                                  .documentUrl("validUrl")
+                                                                  .documentBinaryUrl("validBinaryUrl")
+                                                                  .documentFileName("valid-file.pdf").build()).build())
+            .reviewDocuments(ReviewDocuments.builder().courtStaffUploadDocListDocTab(new ArrayList<>()).build())
+            .build();
+        List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapAllOtherDocuments(caseData);
+        assertFalse(result.isEmpty());
+    }
+
+    @Test
+    public void testMapOrdersFromCaseData_excludesRedactedOrderDocuments() {
+        OrderDetails orderDetails = OrderDetails.builder()
+            .orderDocument(Document.builder().documentUrl(BundleCreateRequestMapper.REDACTED_DOCUMENT_URL)
+                               .documentBinaryUrl("validBinaryUrl").documentFileName("valid-file.pdf").build())
+            .orderDocumentWelsh(Document.builder().documentUrl("validUrl").documentBinaryUrl(BundleCreateRequestMapper.REDACTED_DOCUMENT_URL_BINARY)
+                                    .documentFileName("valid-file.pdf").build())
+            .build();
+        List<Element<OrderDetails>> orders = List.of(ElementUtils.element(orderDetails));
+        List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapOrdersFromCaseData(orders);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testMapOrdersFromCaseData_includesValidOrderDocuments() {
+        OrderDetails orderDetails = OrderDetails.builder()
+            .orderDocument(Document.builder().documentUrl("validUrl").documentBinaryUrl("validBinaryUrl")
+                               .documentFileName("valid-file.pdf").build())
+            .orderDocumentWelsh(Document.builder().documentUrl("validUrl2").documentBinaryUrl("validBinaryUrl2")
+                                    .documentFileName("valid-file2.pdf").build())
+            .build();
+        List<Element<OrderDetails>> orders = List.of(ElementUtils.element(orderDetails));
+        List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapOrdersFromCaseData(orders);
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    public void testMapApplicationsFromFurtherEvidences_withRestrictCheckbox() {
+        FurtherEvidence restrictedEvidence = FurtherEvidence.builder()
+            .typeOfDocumentFurtherEvidence(FurtherEvidenceDocumentType.miamCertificate)
+            .documentFurtherEvidence(Document.builder().documentUrl("validUrl").documentBinaryUrl("validBinaryUrl")
+                                         .documentFileName("valid-file.pdf").build())
+            .restrictCheckboxFurtherEvidence(List.of(restrictToGroup))
+            .build();
+        List<Element<FurtherEvidence>> furtherEvidences = List.of(ElementUtils.element(restrictedEvidence));
+        List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapApplicationsFromFurtherEvidences(furtherEvidences);
+        assertTrue(result.isEmpty());
+
+    }
+
+    @Test
+    public void testMapApplicationsFromFurtherEvidences_withMiamCertificateAndPreviousOrders() {
+        FurtherEvidence miamEvidence = FurtherEvidence.builder()
+            .typeOfDocumentFurtherEvidence(FurtherEvidenceDocumentType.miamCertificate)
+            .documentFurtherEvidence(Document.builder().documentUrl("validUrl").documentBinaryUrl("validBinaryUrl")
+                                         .documentFileName("valid-file.pdf").build())
+            .restrictCheckboxFurtherEvidence(new ArrayList<>())
+            .build();
+        FurtherEvidence previousOrdersEvidence = FurtherEvidence.builder()
+            .typeOfDocumentFurtherEvidence(FurtherEvidenceDocumentType.previousOrders)
+            .documentFurtherEvidence(Document.builder().documentUrl("validUrl2").documentBinaryUrl("validBinaryUrl2")
+                                         .documentFileName("valid-file2.pdf").build())
+            .restrictCheckboxFurtherEvidence(new ArrayList<>())
+            .build();
+        List<Element<FurtherEvidence>> furtherEvidences = List.of(ElementUtils.element(miamEvidence), ElementUtils.element(previousOrdersEvidence));
+        List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapApplicationsFromFurtherEvidences(furtherEvidences);
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    public void testMapMiamDetails_withBothCertificates() {
+        MiamDetails miamDetails = MiamDetails.builder()
+            .miamCertificationDocumentUpload(Document.builder().documentUrl("validUrl").documentBinaryUrl("validBinaryUrl")
+                                                 .documentFileName("valid-file.pdf").build())
+            .miamCertificationDocumentUpload1(Document.builder().documentUrl("validUrl2").documentBinaryUrl("validBinaryUrl2")
+                                                  .documentFileName("valid-file2.pdf").build())
+            .build();
+        List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapMiamDetails(miamDetails);
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    public void testMapMiamDetails_withNoCertificates() {
+        MiamDetails miamDetails = MiamDetails.builder().build();
+        List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapMiamDetails(miamDetails);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testMapC7DocumentsFromCaseData_emptyAndNonEmpty() {
+        List<Element<ResponseDocuments>> emptyList = new ArrayList<>();
+        List<BundlingRequestDocument> resultEmpty = bundleCreateRequestMapper.mapC7DocumentsFromCaseData(emptyList);
+        assertTrue(resultEmpty.isEmpty());
+
+        ResponseDocuments responseDoc = ResponseDocuments.builder()
+            .citizenDocument(Document.builder().documentUrl("validUrl").documentBinaryUrl("validBinaryUrl")
+                                 .documentFileName("valid-file.pdf").build())
+            .build();
+        List<Element<ResponseDocuments>> nonEmptyList = List.of(ElementUtils.element(responseDoc));
+        List<BundlingRequestDocument> resultNonEmpty = bundleCreateRequestMapper.mapC7DocumentsFromCaseData(nonEmptyList);
+        assertEquals(1, resultNonEmpty.size());
+    }
+
+
+
 
     @Test
     public void testBundleCreateRequestMapper() {
@@ -109,11 +316,18 @@ public class BundleCreateRequestMapperTest {
                 DocTypeOtherDocumentsEnum.applicantStatement).restrictCheckboxOtherDocuments(new ArrayList<>()).build());
 
         List<OrderDetails> orders = new ArrayList<>();
+        String redactedUrl = BundleCreateRequestMapper.REDACTED_DOCUMENT_URL;
+        String redactedUrlBinary = BundleCreateRequestMapper.REDACTED_DOCUMENT_URL_BINARY;
         orders.add(OrderDetails.builder().orderType("orders")
                        .orderDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName(
                            "Order.pdf").build())
+                       .orderDocument(Document.builder().documentUrl(redactedUrl).documentBinaryUrl(redactedUrlBinary).documentFileName(
+                           "*Redacted*").build())
                        .orderDocumentWelsh(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName(
                            "welshOrder.pdf").build())
+                       .orderDocumentWelsh(Document.builder().documentUrl(redactedUrl).documentBinaryUrl(
+                           redactedUrlBinary).documentFileName(
+                           BundleCreateRequestMapper.REDACTED_DOCUMENT_FILE_NAME).build())
                        .build());
 
         List<ResponseDocuments> citizenC7uploadedDocs = new ArrayList<>();
@@ -414,6 +628,12 @@ public class BundleCreateRequestMapperTest {
             .miamCertificateDocument(Document.builder().documentFileName("miamCertificate").build())
             .categoryName(MIAM_CERTIFICATE).categoryId("MIAMCertificate").build();
         courtStaffDoc.add(element(miamCertificate));
+
+        QuarantineLegalDoc miamCertificateRedacted = QuarantineLegalDoc.builder()
+            .miamCertificateDocument(Document.builder().documentUrl(redactedUrl).documentBinaryUrl(redactedUrlBinary)
+                                         .documentFileName("*Redacted*").build())
+            .categoryName(MIAM_CERTIFICATE).categoryId("MIAMCertificate").build();
+        courtStaffDoc.add(element(miamCertificateRedacted));
 
         QuarantineLegalDoc fm5Statement = QuarantineLegalDoc.builder()
             .fm5StatementsDocument(Document.builder().documentFileName("fm5Statements").build())
@@ -776,6 +996,55 @@ public class BundleCreateRequestMapperTest {
         Assert.assertNull(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingDateAndTime());
         Assert.assertNull(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingJudgeName());
         Assert.assertNull(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingVenueAddress());
+    }
+
+    @Test
+    public void testAddOrderDocument_includesValidDocument() {
+
+        List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>();
+        hearingDaySchedules.add(HearingDaySchedule.hearingDayScheduleWith().build());
+        List<CaseHearing> caseHearings = new ArrayList<>();
+        caseHearings.add(CaseHearing.caseHearingWith().hmcStatus(CANCELLED).hearingDaySchedule(hearingDaySchedules).build());
+
+        List<OrderDetails> orders = new ArrayList<>();
+        String redactedUrl = BundleCreateRequestMapper.REDACTED_DOCUMENT_URL;
+        String redactedUrlBinary = BundleCreateRequestMapper.REDACTED_DOCUMENT_URL_BINARY;
+        orders.add(OrderDetails.builder().orderType("orders")
+                       .orderDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName(
+                           "Order.pdf").build())
+                       .orderDocument(null)
+                       .orderDocument(Document.builder().documentUrl(redactedUrl).documentBinaryUrl(redactedUrlBinary).documentFileName(
+                           "*Redacted*").build())
+                       .orderDocumentWelsh(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName(
+                           "welshOrder.pdf").build())
+                       .orderDocumentWelsh(Document.builder().documentUrl(redactedUrl).documentBinaryUrl(
+                           redactedUrlBinary).documentFileName(
+                           BundleCreateRequestMapper.REDACTED_DOCUMENT_FILE_NAME).build())
+                       .build());
+
+
+        CaseData c100CaseData = CaseData.builder()
+            .id(123456789123L)
+            .languagePreferenceWelsh(Yes)
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .orderCollection(ElementUtils.wrapElements(orders))
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .state(State.DECISION_OUTCOME)
+            .finalDocument(Document.builder().documentFileName("C100AppDoc").documentUrl("Url").build())
+            .c1ADocument(Document.builder().documentFileName("c1ADocument").documentUrl("Url").build())
+            .bundleInformation(BundlingInformation.builder().build())
+            .finalWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("finalWelshDoc.pdf").build())
+            .c1AWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("C1AWelshDoc.pdf").build())
+            .reviewDocuments(ReviewDocuments.builder().build())
+            .build();
+
+        BundleCreateRequest bundleCreateRequest =
+            bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(c100CaseData,"eventI",
+                                                                       Hearings.hearingsWith().caseHearings(caseHearings).build(), "sample.yaml");
+        assertNotNull(bundleCreateRequest);
+
     }
 
 }
