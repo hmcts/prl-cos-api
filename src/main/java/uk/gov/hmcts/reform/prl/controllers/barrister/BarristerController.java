@@ -65,6 +65,7 @@ public class BarristerController extends AbstractCallbackController {
         try {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            log.info("caseDataUpdated has taskListVersion {}", caseDataUpdated.get("taskListVersion"));
             List<String> errorList = new ArrayList<>();
             AllocatedBarrister barristerList = barristerAddService.getAllocatedBarrister(
                 caseData,
