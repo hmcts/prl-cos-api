@@ -13,12 +13,12 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 
-import javax.json.JsonValue;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import javax.json.JsonValue;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
