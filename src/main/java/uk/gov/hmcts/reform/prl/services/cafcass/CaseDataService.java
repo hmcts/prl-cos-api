@@ -45,6 +45,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Range;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Should;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.StateFilter;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
+import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
@@ -101,6 +102,8 @@ public class CaseDataService {
     private final CoreCaseDataApi coreCaseDataApi;
 
     private final ObjectMapper objMapper;
+
+    private final FeatureToggleService featureToggleService;
 
     @Value("#{'${cafcaas.excludedDocumentCategories}'.split(',')}")
     private List<String> excludedDocumentCategoryList;
@@ -625,7 +628,11 @@ public class CaseDataService {
 
         LastModified lastModified = LastModified.builder().gte(startDate).lte(endDate).boost(ccdElasticSearchApiBoost)
             .build();
+
         Range range = Range.builder().lastModified(lastModified).build();
+        if (featureToggleService.isCafcassDateTimeFeatureEnabled()) {
+            range = Range.builder().cafcassDateTime(lastModified).build();
+        }
 
         StateFilter stateFilter = StateFilter.builder().should(shoulds).build();
         Filter filter = Filter.builder().range(range).build();

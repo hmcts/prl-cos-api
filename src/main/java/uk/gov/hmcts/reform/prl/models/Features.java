@@ -7,7 +7,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public enum Features {
 
-    IS_BARRISTER_FEATURE_ENABLED("barristerFeatureEnabled");
+    IS_BARRISTER_FEATURE_ENABLED("barristerFeatureEnabled"),
+    IS_CAFCASS_DATE_TIME_FEATURE_ENABLED("cafcassDateTimeFeatureEnabled");
 
     private final String name;
 }
