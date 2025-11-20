@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers.barrister;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
