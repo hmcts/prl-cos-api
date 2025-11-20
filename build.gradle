@@ -290,7 +290,7 @@ ext['quartz.version'] = '2.4.0'
 
 configurations.configureEach {
   resolutionStrategy {
-    force 'org.bouncycastle:bcpkix-jdk18on:1.81'
+    force 'org.bouncycastle:bcpkix-jdk18on:1.82'
     force 'org.springframework.security:spring-security-rsa:1.1.5'
     force 'org.springframework.security:spring-security-crypto:5.8.16'
     force 'ch.qos.logback:logback-classic:1.5.21'
