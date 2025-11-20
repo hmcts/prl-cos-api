@@ -431,7 +431,7 @@ public class ReviewDocumentServiceTest {
         CaseData caseData = CaseData.builder()
             .documentManagementDetails(
                 DocumentManagementDetails.builder()
-                    .tempQuarantineDocumentList(List.of(element(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),
+                    .legalProfQuarantineDocsList(List.of(element(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),
                                                                 quarantineLegalDoc)))
                     .build()
             )
@@ -463,7 +463,7 @@ public class ReviewDocumentServiceTest {
         CaseData caseData = CaseData.builder()
             .documentManagementDetails(
                 DocumentManagementDetails.builder()
-                    .tempQuarantineDocumentList(List.of(element(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),
+                    .legalProfQuarantineDocsList(List.of(element(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),
                                                                 quarantineLegalDoc)))
                     .build()
             )
@@ -493,7 +493,7 @@ public class ReviewDocumentServiceTest {
         CaseData caseData = CaseData.builder()
             .documentManagementDetails(
                 DocumentManagementDetails.builder()
-                    .tempQuarantineDocumentList(List.of(element(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),
+                    .legalProfQuarantineDocsList(List.of(element(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),
                                                                 quarantineLegalDoc)))
                     .build()
             )
@@ -528,7 +528,7 @@ public class ReviewDocumentServiceTest {
             .documentManagementDetails(
                 DocumentManagementDetails.builder()
                     .citizenUploadQuarantineDocsList(List.of(element))
-                    .tempQuarantineDocumentList(List.of(quarantineLegalDocElement))
+                    .legalProfQuarantineDocsList(List.of(quarantineLegalDocElement))
                     .build()
             )
             .reviewDocuments(ReviewDocuments.builder()
@@ -565,7 +565,7 @@ public class ReviewDocumentServiceTest {
         CaseData caseData = CaseData.builder()
             .scannedDocuments(List.of(element1))
             .documentManagementDetails(DocumentManagementDetails.builder()
-                                           .tempQuarantineDocumentList(List.of(quarantineLegalDocElement)).build())
+                                           .legalProfQuarantineDocsList(List.of(quarantineLegalDocElement)).build())
             .reviewDocuments(ReviewDocuments.builder()
                                  .reviewDocsDynamicList(DynamicList.builder().value(
                                      DynamicListElement.builder()
@@ -1386,7 +1386,7 @@ public class ReviewDocumentServiceTest {
             .documentManagementDetails(
                 DocumentManagementDetails.builder()
                     .courtNavQuarantineDocumentList(List.of(element))
-                    .tempQuarantineDocumentList(List.of(quarantineLegalDocElement))
+                    .legalProfQuarantineDocsList(List.of(quarantineLegalDocElement))
                     .build()
             )
             .reviewDocuments(ReviewDocuments.builder()
@@ -1714,7 +1714,7 @@ public class ReviewDocumentServiceTest {
             .documentManagementDetails(
                 DocumentManagementDetails.builder()
                     .courtNavQuarantineDocumentList(List.of(element))
-                    .tempQuarantineDocumentList(List.of(quarantineLegalDocElement))
+                    .legalProfQuarantineDocsList(List.of(quarantineLegalDocElement))
                     .build()
             )
             .reviewDocuments(ReviewDocuments.builder()
@@ -1742,7 +1742,7 @@ public class ReviewDocumentServiceTest {
         CaseData caseData = CaseData.builder()
             .documentManagementDetails(
                 DocumentManagementDetails.builder()
-                    .tempQuarantineDocumentList(List.of(element(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),
+                    .legalProfQuarantineDocsList(List.of(element(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),
                                                                 quarantineLegalDoc)))
                     .build()
             )
