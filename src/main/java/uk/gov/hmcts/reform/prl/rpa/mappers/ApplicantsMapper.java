@@ -30,6 +30,7 @@ public class ApplicantsMapper {
     public void map(List<Element<PartyDetails>> applicants, Map<String, PartyDetails> applicantSolicitorMap) {
         Optional<List<Element<PartyDetails>>> applicantElementsCheck = ofNullable(applicants);
         if (applicantElementsCheck.isEmpty()) {
+            log.info("No applicants found, skipping mapping to applicant solicitor map");
             return;
         }
         AtomicInteger counter = new AtomicInteger(1);

@@ -31,6 +31,7 @@ public class RespondentsMapper {
     public void map(List<Element<PartyDetails>> respondents, Map<String, PartyDetails> respondentSolicitorMap) {
         Optional<List<Element<PartyDetails>>> respondentElementsCheck = ofNullable(respondents);
         if (respondentElementsCheck.isEmpty()) {
+            log.info("No respondents found, skipping mapping to respondent solicitor map");
             return;
         }
 
