@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 
+import javax.json.JsonValue;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -83,24 +84,26 @@ public class ApplicantsMapperTest {
 
     @Test
     public void testApplicantsMapperMap() {
-        assertNotNull(applicantsMapper.map(applicants, applicantSolicitorMap));
+        applicantsMapper.map(applicants, applicantSolicitorMap);
+        assertNotNull(applicantSolicitorMap);
     }
 
     @Test
     public void applicantSolicitorMapShouldContain2Entries() {
-        assertEquals(2, applicantsMapper.map(applicants, applicantSolicitorMap).size());
+        applicantsMapper.map(applicants, applicantSolicitorMap);
+        assertEquals(2, applicantSolicitorMap.size());
     }
 
     @Test
-    public void testIfApplicantsNull() {
-        applicants = null;
-        assertEquals(Collections.emptyList(),applicantsMapper.map(applicants, applicantSolicitorMap));
+    public void testApplicantArrayIfApplicantListIsNull() {
+        assertEquals(JsonValue.EMPTY_JSON_ARRAY, applicantsMapper.getApplicantArray(null));
     }
 
     @Test
     public void testIfApplicantsIsEmpty() {
         applicants = Collections.emptyList();
-        assertTrue(applicantsMapper.map(applicants, applicantSolicitorMap).isEmpty());
+        applicantsMapper.map(applicants, applicantSolicitorMap);
+        assertTrue(applicantSolicitorMap.isEmpty());
     }
 
     @Test

@@ -1,9 +1,7 @@
 package uk.gov.hmcts.reform.prl.rpa.mappers;
 
-
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -57,7 +55,6 @@ public class RespondentsMapperTest {
 
         organisation = Organisation.builder().organisationID("").build();
 
-
         partyDetails = PartyDetails.builder()
             .firstName("First name")
             .lastName("Last name")
@@ -98,22 +95,25 @@ public class RespondentsMapperTest {
     @Test
     public void testRespondentsMapperEmptyCheck() {
         respondents = Collections.emptyList();
-        assertTrue(respondentsMapper.map(respondents, respondentSolicitorMap).isEmpty());
+        respondentsMapper.map(respondents, respondentSolicitorMap);
+        assertTrue(respondentSolicitorMap.isEmpty());
     }
 
     @Test
     public void testRespondentsMapperWithAllFields() {
-        assertNotNull(respondentsMapper.map(respondents, respondentSolicitorMap));
+        respondentsMapper.map(respondents, respondentSolicitorMap);
+        assertNotNull(respondentSolicitorMap);
     }
 
     @Test
     public void respondentSolicitorMapShouldContain2Entries() {
-        Assertions.assertEquals(2, respondentsMapper.map(respondents, respondentSolicitorMap).size());
+        respondentsMapper.map(respondents, respondentSolicitorMap);
+        assertEquals(2, respondentSolicitorMap.size());
     }
 
     @Test
-    public void testMapWhenRespondentsIsNull() {
-        assertEquals(JsonValue.EMPTY_JSON_ARRAY,respondentsMapper.map(null, respondentSolicitorMap));
+    public void testRespondentArrayWhenRespondentListIsNull() {
+        assertEquals(JsonValue.EMPTY_JSON_ARRAY, respondentsMapper.getRespondentArray(null));
     }
 
     @Test
@@ -145,11 +145,12 @@ public class RespondentsMapperTest {
         List<Element<PartyDetails>> respondentsList = new ArrayList<>();
         respondentsList.add(element(partyDetails1));
         respondentsList.add(element(partyDetails2));
-        assertNotNull(respondentsMapper.map(respondentsList, respondentSolicitorMap));
+        respondentsMapper.map(respondentsList, respondentSolicitorMap);
+        assertNotNull(respondentSolicitorMap);
     }
 
     @Test
-    public void getRespondentArrayShouldReturn2Applicants() {
-        Assertions.assertEquals(2, respondentsMapper.getRespondentArray(respondents).size());
+    public void getRespondentArrayShouldReturn2Respondents() {
+        assertEquals(2, respondentsMapper.getRespondentArray(respondents).size());
     }
 }
