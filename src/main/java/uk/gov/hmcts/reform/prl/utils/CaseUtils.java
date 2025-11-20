@@ -128,7 +128,9 @@ public class CaseUtils {
     public static CaseData getCaseData(CaseDetails caseDetails, ObjectMapper objectMapper) {
         State state = State.tryFromValue(caseDetails.getState()).orElse(null);
 
-        log.info("temp log in getCaseData, tasklistversion is {}",caseDetails.getData().get("taskListVersion"));
+        if(caseDetails.getData()!=null) {
+            log.info("temp log in getCaseData, tasklistversion is {}",caseDetails.getData().get("taskListVersion"));
+        }
         CaseData.CaseDataBuilder caseDataBuilder = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
             .toBuilder()
             .id(caseDetails.getId())
