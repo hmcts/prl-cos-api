@@ -160,6 +160,7 @@ public class PaymentRequestService {
         if (null == paymentServiceReferenceNumber
             && null == paymentReferenceNumber) {
             //Create dummy caseData with id & name
+            log.info("Payment reference numbers are null, creating dummy case data");
             CaseData caseData = CaseData.builder()
                 .id(Long.parseLong(createPaymentRequest.getCaseId()))
                 .applicantCaseName(createPaymentRequest.getApplicantCaseName())
@@ -239,6 +240,8 @@ public class PaymentRequestService {
                                                    createPaymentRequest.getReturnUrl(), feeResponse.getAmount());
             paymentResponseCard.setServiceRequestReference(paymentServiceReferenceNumber);
         }
+
+        // Maybe we need to refactor above code. Once a payment is not successful it doesn't seem to go into this method again.
 
         return paymentResponseCard;
     }
