@@ -722,6 +722,7 @@ bootWithCCD {
   }
 
   environment("spring.profiles.active", "local")
+  environment("SERVICES_LOCATION_REF_API_URL", "http://rd-location-ref-api-aat.service.core-compute-aat.internal")
 }
 
 test {
