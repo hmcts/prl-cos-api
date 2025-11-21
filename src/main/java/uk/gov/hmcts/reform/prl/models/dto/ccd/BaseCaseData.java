@@ -152,6 +152,8 @@ public class BaseCaseData {
 
     private AllocatedBarrister allocatedBarrister;
 
+    private String dfjArea;
+
     @JsonProperty("TTL")
     private TTL retainAndDisposeTimeToLive;
 }

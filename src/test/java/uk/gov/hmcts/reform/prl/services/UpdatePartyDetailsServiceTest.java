@@ -121,6 +121,9 @@ public class UpdatePartyDetailsServiceTest {
     @Mock
     C8ArchiveService c8ArchiveService;
 
+    @Mock
+    CaseNameService caseNameService;
+
     @Test
     void updateApplicantAndChildNames() {
 
@@ -201,6 +204,7 @@ public class UpdatePartyDetailsServiceTest {
                              .build())
             .build();
         updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, "");
+        verify(caseNameService).setFinalCaseName(anyMap(), any(CaseData.class));
         assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
         assertNotNull(nocMap);
 
