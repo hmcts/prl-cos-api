@@ -505,6 +505,7 @@ public class SendAndReplyService {
         String caseReference = String.valueOf(caseData.getId());
         DynamicList documentCategoryList = getCategoriesAndDocuments(authorization, caseReference);
         String s2sToken = authTokenGenerator.generate();
+        List<DynamicListElement> legalAdvisorRecipientList = refDataUserService.getLegalAdvisorList();
         final String loggedInUserEmail = getLoggedInUserEmail(authorization);
         return caseData.toBuilder().sendOrReplyMessage(
                 SendOrReplyMessage.builder()
@@ -524,6 +525,9 @@ public class SendAndReplyService {
                                            .ctscEmailList(getDynamicList(List.of(DynamicListElement.builder()
                                                                                      .label(loggedInUserEmail).code(
                                                    loggedInUserEmail).build())))
+                                           .legalAdviserList(DynamicList.builder().value(DynamicListElement.EMPTY)
+                                                                 .listItems(legalAdvisorRecipientList)
+                                                                     .build())
                                            .futureHearingsList(getFutureHearingDynamicList(
                                                authorization,
                                                s2sToken,
