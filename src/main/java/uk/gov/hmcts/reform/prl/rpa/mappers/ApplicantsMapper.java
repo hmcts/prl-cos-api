@@ -27,21 +27,23 @@ public class ApplicantsMapper {
 
     private final AddressMapper addressMapper;
 
-    public JsonArray map(List<Element<PartyDetails>> applicants, Map<String, PartyDetails> applicantSolicitorMap) {
+    public void map(List<Element<PartyDetails>> applicants, Map<String, PartyDetails> applicantSolicitorMap) {
         Optional<List<Element<PartyDetails>>> applicantElementsCheck = ofNullable(applicants);
         if (applicantElementsCheck.isEmpty()) {
-            return JsonValue.EMPTY_JSON_ARRAY;
+            log.info("No applicants found, skipping mapping to applicant solicitor map");
+            return;
         }
-        List<PartyDetails> applicantList = applicants.stream()
-            .map(Element::getValue)
-            .toList();
         AtomicInteger counter = new AtomicInteger(1);
-        return applicantList.stream().map(applicant -> getApplicant(counter, applicant, applicantSolicitorMap)).collect(
-            JsonCollectors.toJsonArray());
+        for (Element<PartyDetails> applicant : applicants) {
+            addApplicantToApplicantMap(counter.getAndIncrement(), applicant.getValue(), applicantSolicitorMap);
+        }
     }
 
-    private JsonObject getApplicant(AtomicInteger counter, PartyDetails applicant, Map<String, PartyDetails> applicantSolicitorMap) {
+    private void addApplicantToApplicantMap(int counter, PartyDetails applicant, Map<String, PartyDetails> applicantSolicitorMap) {
         applicantSolicitorMap.put("APP_SOL_" + counter, applicant);
+    }
+
+    private JsonObject getApplicant(AtomicInteger counter, PartyDetails applicant) {
         return new NullAwareJsonObjectBuilder()
             .add("firstName", applicant.getFirstName())
             .add("lastName", applicant.getLastName())
@@ -64,5 +66,14 @@ public class ApplicantsMapper {
             .build();
     }
 
+    public JsonArray getApplicantArray(List<Element<PartyDetails>> applicantList) {
+        Optional<List<Element<PartyDetails>>> applicantElementsCheck = ofNullable(applicantList);
+        if (applicantElementsCheck.isEmpty()) {
+            return JsonValue.EMPTY_JSON_ARRAY;
+        }
 
+        AtomicInteger counter = new AtomicInteger(1);
+        return applicantList.stream().map(applicant -> getApplicant(counter, applicant.getValue())).collect(
+            JsonCollectors.toJsonArray());
+    }
 }
