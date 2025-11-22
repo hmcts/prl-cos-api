@@ -925,31 +925,32 @@ public class CallbackController {
     private Map<String, Object> getSolicitorDetails(String authorisation, Map<String, Object> caseDataUpdated, CaseData caseData) {
         try {
             UserDetails userDetails = userService.getUserDetails(authorisation);
-            Optional<Organisations> userOrganisation = organisationService.findUserOrganisation(authorisation);
+            Optional<Organisations> userOrganisation = organisationService.getOrganisationByEmailDetail(userDetails.getEmail());
             caseDataUpdated.put("caseSolicitorName", userDetails.getFullName());
             if (userOrganisation.isPresent()) {
                 caseDataUpdated.put("caseSolicitorOrgName", userOrganisation.get().getName());
-                if (launchDarklyClient.isFeatureEnabled("share-a-case")) {
-                    OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
-                        .organisation(Organisation.builder()
-                                          .organisationID(userOrganisation.get().getOrganisationIdentifier())
-                                          .organisationName(userOrganisation.get().getName())
-                                          .build())
+
+                OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
+                    .organisation(Organisation.builder()
+                                      .organisationID(userOrganisation.get().getOrganisationIdentifier())
+                                      .organisationName(userOrganisation.get().getName())
+                                      .build())
+                    .build();
+                if (caseData.getApplicantOrganisationPolicy() != null) {
+                    applicantOrganisationPolicy = applicantOrganisationPolicy.toBuilder()
+                        .orgPolicyReference(caseData.getApplicantOrganisationPolicy().getOrgPolicyReference())
+                        .orgPolicyCaseAssignedRole(caseData.getApplicantOrganisationPolicy()
+                                                       .getOrgPolicyCaseAssignedRole())
                         .build();
-                    if (caseData.getApplicantOrganisationPolicy() != null) {
-                        applicantOrganisationPolicy = applicantOrganisationPolicy.toBuilder()
-                            .orgPolicyReference(caseData.getApplicantOrganisationPolicy().getOrgPolicyReference())
-                            .orgPolicyCaseAssignedRole(caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole())
-                            .build();
-                    } else {
-                        applicantOrganisationPolicy = applicantOrganisationPolicy.toBuilder()
-                            .orgPolicyReference(StringUtils.EMPTY)
-                            .orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]")
-                            .build();
-                    }
-                    caseDataUpdated.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
+                } else {
+                    applicantOrganisationPolicy = applicantOrganisationPolicy.toBuilder()
+                        .orgPolicyReference(StringUtils.EMPTY)
+                        .orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]")
+                        .build();
                 }
+                caseDataUpdated.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
             }
+
         } catch (Exception e) {
             log.error("Error while fetching User or Org details for the logged in user {}", e.getMessage());
         }

@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services;
 import feign.FeignException;
 import feign.Request;
 import feign.Response;
-import javassist.NotFoundException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,6 +31,7 @@ import java.util.UUID;
 
 import static feign.Request.HttpMethod.GET;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static junit.framework.TestCase.assertNull;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -39,6 +39,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -65,8 +66,7 @@ public class OrganisationServiceTest {
     }
 
     @Test
-    public void testApplicantOrganisationDetails() throws NotFoundException {
-
+    public void testApplicantOrganisationDetails() {
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -76,7 +76,6 @@ public class OrganisationServiceTest {
                               .build())
             .build();
 
-        String applicantNames = "TestFirst TestLast";
 
         List<ContactInformation> contactInformationList = Collections.singletonList(ContactInformation.builder()
                                                                                         .addressLine1("29, SEATON DRIVE")
@@ -129,8 +128,7 @@ public class OrganisationServiceTest {
     }
 
     @Test
-    public void testRespondentOrganisationDetails() throws NotFoundException {
-
+    public void testRespondentOrganisationDetails() {
         PartyDetails respondent = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -140,8 +138,6 @@ public class OrganisationServiceTest {
                               .organisationName("Civil - Organisation 2")
                               .build())
             .build();
-
-        String applicantNames = "TestFirst TestLast";
 
         List<ContactInformation> contactInformationList = Collections.singletonList(ContactInformation.builder()
                                                                                         .addressLine1("29, SEATON DRIVE")
@@ -154,25 +150,6 @@ public class OrganisationServiceTest {
             .organisationIdentifier("79ZRSOU")
             .name("Civil - Organisation 2")
             .contactInformation(contactInformationList)
-            .build();
-
-        PartyDetails partyDetailsWithOrganisations = PartyDetails.builder()
-            .firstName("TestFirst")
-            .lastName("TestLast")
-            .solicitorOrg(Organisation.builder()
-                              .organisationID("79ZRSOU")
-                              .organisationName("Civil - Organisation 2")
-                              .build())
-            .organisations(organisations)
-            .build();
-
-        Element<PartyDetails> applicants = Element.<PartyDetails>builder().value(partyDetailsWithOrganisations).build();
-        List<Element<PartyDetails>> elementList = Collections.singletonList(applicants);
-
-        CaseData caseData1 = CaseData.builder()
-            .id(12345L)
-            .applicantCaseName("TestCaseName")
-            .applicants(elementList)
             .build();
 
         when(organisationApi.findOrganisation(authToken,
@@ -194,8 +171,7 @@ public class OrganisationServiceTest {
     }
 
     @Test
-    public void testRespondentOrganisationDetailsNotFound() throws NotFoundException {
-
+    public void testRespondentOrganisationDetailsNotFound() {
         PartyDetails respondent = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -221,8 +197,7 @@ public class OrganisationServiceTest {
     }
 
     @Test
-    public void testApplicantOrganisationDetailsForFl401() throws NotFoundException {
-
+    public void testApplicantOrganisationDetailsForFl401() {
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -232,7 +207,6 @@ public class OrganisationServiceTest {
                               .build())
             .build();
 
-        String applicantNames = "TestFirst TestLast";
 
         List<ContactInformation> contactInformationList = Collections.singletonList(ContactInformation.builder()
                                                                                         .addressLine1("29, SEATON DRIVE")
@@ -281,8 +255,7 @@ public class OrganisationServiceTest {
     }
 
     @Test
-    public void testApplicantOrganisationDetailsForFl401NotFound() throws NotFoundException {
-
+    public void testApplicantOrganisationDetailsForFl401NotFound() {
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -304,8 +277,7 @@ public class OrganisationServiceTest {
     }
 
     @Test
-    public void testRespondentOrganisationDetailsForFl401() throws NotFoundException {
-
+    public void testRespondentOrganisationDetailsForFl401() {
         PartyDetails respondent = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -364,8 +336,7 @@ public class OrganisationServiceTest {
     }
 
     @Test
-    public void testRespondentOrganisationDetailsForFl401NotFound() throws NotFoundException {
-
+    public void testRespondentOrganisationDetailsForFl401NotFound() {
         PartyDetails respondent = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -388,7 +359,6 @@ public class OrganisationServiceTest {
 
     @Test
     public void testRespondentOrganisationDetailsForFl401WhenRespondentNull() {
-
         CaseData caseData = CaseData.builder().respondentsFL401(null).build();
 
         CaseData orgData =  organisationService.getRespondentOrganisationDetailsForFL401(caseData);
@@ -494,6 +464,142 @@ public class OrganisationServiceTest {
             .thenThrow(feignException(500, "Internal Server Error"));
         assertThatThrownBy(() -> organisationService.findUserByEmail(email))
             .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Error while fetching user id by email");
+            .hasMessageContaining("Error while fetching user id by email");
     }
+
+    @Test
+    public void findUserOrganisationForbiddenRethrowsTest() {
+        when(organisationApi.findUserOrganisation(authToken, serviceAuthToken))
+            .thenThrow(feignException(403, "Forbidden"));
+
+        assertThatThrownBy(() -> organisationService.findUserOrganisation(authToken))
+            .isInstanceOf(FeignException.Forbidden.class);
+    }
+
+    @Test
+    public void getApplicantOrganisationDetails_handlesNotFoundException() {
+        when(systemUserService.getSysUserToken()).thenReturn("user-token");
+        when(authTokenGenerator.generate()).thenReturn("svc-token");
+        when(organisationApi.findOrganisation(anyString(), anyString(), eq("ORG-404")))
+            .thenThrow(mock(javax.ws.rs.NotFoundException.class));
+
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("A")
+            .lastName("One")
+            .solicitorOrg(Organisation.builder().organisationID("ORG-404").build())
+            .build();
+
+        List<Element<PartyDetails>> applicants = Collections.singletonList(
+            Element.<PartyDetails>builder().value(applicant).build()
+        );
+
+        CaseData input = CaseData.builder().applicants(applicants).build();
+
+        CaseData out = organisationService.getApplicantOrganisationDetails(input);
+
+        assertNotNull(out);
+        assertNotNull(out.getApplicants());
+        PartyDetails enriched = out.getApplicants().get(0).getValue();
+        assertNull("organisations should not be set when org lookup 404s", enriched.getOrganisations());
+    }
+
+    @Test
+    public void getRespondentOrganisationDetails_handlesNotFoundException() {
+        when(systemUserService.getSysUserToken()).thenReturn("user-token");
+        when(authTokenGenerator.generate()).thenReturn("svc-token");
+        when(organisationApi.findOrganisation(anyString(), anyString(), eq("ORG-404")))
+            .thenThrow(mock(javax.ws.rs.NotFoundException.class));
+
+        PartyDetails respondent = PartyDetails.builder()
+            .firstName("R")
+            .lastName("One")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .solicitorOrg(Organisation.builder().organisationID("ORG-404").build())
+            .build();
+
+        List<Element<PartyDetails>> respondents = Collections.singletonList(
+            Element.<PartyDetails>builder().value(respondent).build()
+        );
+
+        CaseData input = CaseData.builder().respondents(respondents).build();
+
+        CaseData out = organisationService.getRespondentOrganisationDetails(input);
+
+        assertNotNull(out);
+        assertNotNull(out.getRespondents());
+        PartyDetails enriched = out.getRespondents().get(0).getValue();
+        assertNull("organisations should not be set when org lookup 404s", enriched.getOrganisations());
+    }
+
+    @Test
+    public void testGetOrganisationByEmailDetail_userFound_returnsOrganisation() {
+        // given
+        String email = "user@malinator.com";
+        String userId = "11111111-2222-3333-4444-555555555555";
+
+        OrganisationUser orgUser = OrganisationUser.builder()
+            .userIdentifier(userId)
+            .build();
+
+        Organisations org = Organisations.builder()
+            .organisationIdentifier("ORG123")
+            .name("Test Org")
+            .build();
+
+        when(maskEmail.mask(email)).thenReturn("u**r@malinator.com");
+        when(organisationApi.findUserByEmail(anyString(), anyString(), eq(email)))
+            .thenReturn(orgUser);
+        when(organisationApi.getOrganisationByUserId(authToken, serviceAuthToken, userId))
+            .thenReturn(org);
+
+        // when
+        Optional<Organisations> result = organisationService.getOrganisationByEmailDetail(email);
+
+        // then
+        assertThat(result).isPresent().contains(org);
+        Mockito.verify(organisationApi)
+            .getOrganisationByUserId(authToken, serviceAuthToken, userId);
+    }
+
+    @Test
+    public void testGetOrganisationByEmailDetail_userNotFound_returnsEmpty() {
+        // given
+        String email = "user@malinator.com";
+
+        when(maskEmail.mask(email)).thenReturn("u**r@malinator.com");
+        // simulate 404 returned by PRD when user not found
+        when(organisationApi.findUserByEmail(anyString(), anyString(), eq(email)))
+            .thenThrow(feignException(404, "Not Found"));
+
+        // when
+        Optional<Organisations> result = organisationService.getOrganisationByEmailDetail(email);
+
+        // then
+        assertThat(result).isEmpty();
+        Mockito.verify(organisationApi, Mockito.never())
+            .getOrganisationByUserId(anyString(), anyString(), anyString());
+    }
+
+    @Test
+    public void testGetOrganisationByEmailDetail_apiThrows_rethrowsAsIllegalArgumentException() {
+        // given
+        String email = "user@malinator.com";
+        String userId = "11111111-2222-3333-4444-555555555555";
+
+        OrganisationUser orgUser = OrganisationUser.builder()
+            .userIdentifier(userId)
+            .build();
+
+        when(maskEmail.mask(email)).thenReturn("u**r@malinator.com");
+        when(organisationApi.findUserByEmail(anyString(), anyString(), eq(email)))
+            .thenReturn(orgUser);
+        when(organisationApi.getOrganisationByUserId(anyString(), anyString(), eq(userId)))
+            .thenThrow(feignException(500, "Internal Server Error"));
+
+        // when / then
+        assertThatThrownBy(() -> organisationService.getOrganisationByEmailDetail(email))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Error while fetching organisations by user id");
+    }
+
 }

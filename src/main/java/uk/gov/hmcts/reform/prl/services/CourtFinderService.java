@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.court.ServiceArea;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -130,33 +131,36 @@ public class CourtFinderService {
     }
 
     public String getCorrectPartyPostcode(CaseData caseData) throws NotFoundException {
+        log.info("taskListVersion on case {} is {}", caseData.getId(), caseData.getTaskListVersion());
         if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
             || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) {
             return getCorrectPartyPostcodeV2(caseData);
         }
+        log.info("falling thru as not v2 or v3  case {} is {}", caseData.getId(), caseData.getTaskListVersion());
+
         //current requirements use the first child if multiple children present
-        Optional<Child> childOptional = caseData.getChildren()
+        Child child = Optional.ofNullable(caseData.getChildren())
+            .orElse(Collections.emptyList())
             .stream()
             .map(Element::getValue)
-            .findFirst();
+            .findFirst()
+            .orElseThrow(() -> new NotFoundException("No child details found"));
 
-        if (childOptional.isEmpty()) {
-            throw new NotFoundException("No child details found");
-        }
-        Child child = childOptional.get();
-
-        if (child.getChildLiveWith().contains(applicant)) {
-            return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
-        } else if (child.getChildLiveWith().contains(respondent)) {
-            if (ofNullable(getPostcodeFromWrappedParty(caseData.getRespondents().get(0))).isEmpty()) {
+        if  (child != null) {
+            if (child.getChildLiveWith().contains(applicant)) {
                 return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
+            } else if (child.getChildLiveWith().contains(respondent)) {
+                if (ofNullable(getPostcodeFromWrappedParty(caseData.getRespondents().get(0))).isEmpty()) {
+                    return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
+                }
+                return getPostcodeFromWrappedParty(caseData.getRespondents().get(0));
+            } else if (child.getChildLiveWith().contains(anotherPerson)
+                && ofNullable(getFirstOtherPerson(child)).isPresent()) {
+                if (getPostCode(getFirstOtherPerson(child)).isEmpty()) {
+                    return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
+                }
+                return getFirstOtherPerson(child).getAddress().getPostCode();
             }
-            return getPostcodeFromWrappedParty(caseData.getRespondents().get(0));
-        } else if (child.getChildLiveWith().contains(anotherPerson) && ofNullable(getFirstOtherPerson(child)).isPresent()) {
-            if (getPostCode(getFirstOtherPerson(child)).isEmpty()) {
-                return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
-            }
-            return getFirstOtherPerson(child).getAddress().getPostCode();
         }
         //default to the applicant postcode
         return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
