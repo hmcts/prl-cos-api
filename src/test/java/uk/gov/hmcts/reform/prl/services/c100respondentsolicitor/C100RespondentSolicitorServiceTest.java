@@ -2467,10 +2467,8 @@ public class C100RespondentSolicitorServiceTest {
                 .caseTypeOfApplication(C100_CASE_TYPE)
                 .documentManagementDetails(
                     DocumentManagementDetails.builder()
-                        .tempQuarantineDocumentList(List.of(element(
-                            UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"), quarantineLegalDoc)))
-                        .build()
-                ).reviewDocuments(ReviewDocuments.builder()
+                        .build())
+                .reviewDocuments(ReviewDocuments.builder()
                                       .reviewDocsDynamicList(DynamicList.builder().value(
                                           DynamicListElement.builder()
                                               .code("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355").build()
