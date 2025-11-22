@@ -38,13 +38,20 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.CAAPPLICANT;
+import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.CAAPPLICANTBARRISTER;
+import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.CAAPPLICANTSOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.CAOTHERPARTY;
 import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.CARESPONDENT;
+import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.CARESPONDENTBARRISTER;
+import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.CARESPONDENTSOLICITOR;
+import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.DAAPPLICANTBARRISTER;
+import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.DARESPONDENTBARRISTER;
 import static uk.gov.hmcts.reform.prl.utils.caseflags.PartyLevelCaseFlagsGenerator.VISIBILITY_EXTERNAL;
 import static uk.gov.hmcts.reform.prl.utils.caseflags.PartyLevelCaseFlagsGenerator.VISIBILITY_INTERNAL;
 
@@ -57,8 +64,12 @@ public class PartyLevelCaseFlagsService {
     private static final String AMEND_OTHER_PEOPLE_IN_THE_CASE = "amendOtherPeopleInTheCaseRevised";
     private static final String ADMIN_ADD_BARRISTER = "adminAddBarrister";
     private static final String SOLICITOR_ADD_BARRISTER = "solicitorAddBarrister";
+    private static final List<PartyRole.Representing> REPRESENTING_REFRESHABLE_PARTY_FLAG_LIST = List.of(
+        CAAPPLICANT, CAAPPLICANTSOLICITOR, CAAPPLICANTBARRISTER,
+        CARESPONDENT, CARESPONDENTSOLICITOR, CARESPONDENTBARRISTER,
+        CAOTHERPARTY
+    );
 
-    public static final String CA_APPLICANT = "CA_APPLICANT";
     private final ObjectMapper objectMapper;
     public final PartyLevelCaseFlagsGenerator partyLevelCaseFlagsGenerator;
     private final SystemUserService systemUserService;
@@ -113,12 +124,12 @@ public class PartyLevelCaseFlagsService {
         Map<String, Object> data = new HashMap<>();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
-                data.putAll(generateC100PartyCaseFlagsForBarrister(caseData, PartyRole.Representing.CAAPPLICANTBARRISTER));
-                data.putAll(generateC100PartyCaseFlagsForBarrister(caseData, PartyRole.Representing.CARESPONDENTBARRISTER));
+                data.putAll(generateC100PartyCaseFlagsForBarrister(caseData, CAAPPLICANTBARRISTER));
+                data.putAll(generateC100PartyCaseFlagsForBarrister(caseData, CARESPONDENTBARRISTER));
             }
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            data.putAll(generateFL401PartyCaseFlagsForBarrister(caseData, PartyRole.Representing.DAAPPLICANTBARRISTER));
-            data.putAll(generateFL401PartyCaseFlagsForBarrister(caseData, PartyRole.Representing.DARESPONDENTBARRISTER));
+            data.putAll(generateFL401PartyCaseFlagsForBarrister(caseData, DAAPPLICANTBARRISTER));
+            data.putAll(generateFL401PartyCaseFlagsForBarrister(caseData, DARESPONDENTBARRISTER));
         }
         return data;
     }
@@ -130,18 +141,18 @@ public class PartyLevelCaseFlagsService {
             data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.CARESPONDENT));
             data.putAll(generateC100PartyCaseFlags(caseData, CAOTHERPARTY));
             if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
-                data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.CAAPPLICANTSOLICITOR));
-                data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.CARESPONDENTSOLICITOR));
-                data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.CAAPPLICANTBARRISTER));
-                data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.CARESPONDENTBARRISTER));
+                data.putAll(generateC100PartyCaseFlags(caseData, CAAPPLICANTSOLICITOR));
+                data.putAll(generateC100PartyCaseFlags(caseData, CARESPONDENTSOLICITOR));
+                data.putAll(generateC100PartyCaseFlags(caseData, CAAPPLICANTBARRISTER));
+                data.putAll(generateC100PartyCaseFlags(caseData, CARESPONDENTBARRISTER));
             }
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DAAPPLICANT));
             data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DAAPPLICANTSOLICITOR));
-            data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DAAPPLICANTBARRISTER));
+            data.putAll(generateFl401PartyCaseFlags(caseData, DAAPPLICANTBARRISTER));
             data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DARESPONDENT));
             data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DARESPONDENTSOLICITOR));
-            data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DARESPONDENTBARRISTER));
+            data.putAll(generateFl401PartyCaseFlags(caseData, DARESPONDENTBARRISTER));
         }
         return data;
     }
@@ -602,12 +613,12 @@ public class PartyLevelCaseFlagsService {
         caseData = generateC100IndividualPartyCaseFlags(
             caseData,
             startEventResponseData,
-            PartyRole.Representing.CAAPPLICANTSOLICITOR
+            CAAPPLICANTSOLICITOR
         );
         caseData = generateC100IndividualPartyCaseFlags(
             caseData,
             startEventResponseData,
-            PartyRole.Representing.CAAPPLICANTBARRISTER
+            CAAPPLICANTBARRISTER
         );
         caseData = generateC100IndividualPartyCaseFlags(
             caseData,
@@ -617,12 +628,12 @@ public class PartyLevelCaseFlagsService {
         caseData = generateC100IndividualPartyCaseFlags(
             caseData,
             startEventResponseData,
-            PartyRole.Representing.CARESPONDENTSOLICITOR
+            CARESPONDENTSOLICITOR
         );
         caseData = generateC100IndividualPartyCaseFlags(
             caseData,
             startEventResponseData,
-            PartyRole.Representing.CARESPONDENTBARRISTER
+            CARESPONDENTBARRISTER
         );
         caseData = generateC100IndividualPartyCaseFlags(
             caseData,
@@ -746,23 +757,24 @@ public class PartyLevelCaseFlagsService {
         switch (eventId) {
             case AMEND_APPLICANTS_DETAILS -> {
                 return Arrays.asList(
-                    CAAPPLICANT, PartyRole.Representing.CAAPPLICANTSOLICITOR,
-                    PartyRole.Representing.CAAPPLICANTBARRISTER);
+                    CAAPPLICANT, CAAPPLICANTSOLICITOR,
+                    CAAPPLICANTBARRISTER);
             }
             case AMEND_RESPONDENT_DETAILS -> {
                 return Arrays.asList(
-                    CARESPONDENT, PartyRole.Representing.CARESPONDENTSOLICITOR,
-                    PartyRole.Representing.CARESPONDENTBARRISTER);
+                    CARESPONDENT, CARESPONDENTSOLICITOR,
+                    CARESPONDENTBARRISTER);
             }
             case AMEND_OTHER_PEOPLE_IN_THE_CASE -> {
                 return List.of(CAOTHERPARTY);
             }
             case ADMIN_ADD_BARRISTER, SOLICITOR_ADD_BARRISTER -> {
-                return List.of(PartyRole.Representing.CAAPPLICANTBARRISTER,
-                               PartyRole.Representing.CARESPONDENTBARRISTER,
-                               PartyRole.Representing.DAAPPLICANTBARRISTER,
-                               PartyRole.Representing.DARESPONDENTBARRISTER
-                               );
+                return List.of(
+                    CAAPPLICANTBARRISTER,
+                    CARESPONDENTBARRISTER,
+                    DAAPPLICANTBARRISTER,
+                    DARESPONDENTBARRISTER
+                );
             }
             default -> {
                 return Collections.emptyList();
@@ -796,11 +808,7 @@ public class PartyLevelCaseFlagsService {
                 representing1.getCaseDataExternalField(),
                 representing1.getCaseDataInternalField()
             );
-            if (representing1 == CAAPPLICANT || representing1 == PartyRole.Representing.CAAPPLICANTSOLICITOR
-                || representing1 == PartyRole.Representing.CAAPPLICANTBARRISTER
-                || representing1 == CAOTHERPARTY || representing1 == PartyRole.Representing.CARESPONDENTSOLICITOR
-                || representing1 == PartyRole.Representing.CARESPONDENTBARRISTER
-                || representing1 == CARESPONDENT) {
+            if (REPRESENTING_REFRESHABLE_PARTY_FLAG_LIST.contains(representing1)) {
                 for (int i = 0; i < 5; i++) {
                     if (i >= parties.size()) {
                         int caseFlagsIndex = i + 1;
@@ -809,13 +817,55 @@ public class PartyLevelCaseFlagsService {
                             updatedCaseDataMap.put(caseFlagKey, Flags
                                 .builder().build());
                         });
+                    } else {
+                        refreshPartyFlags(updatedCaseDataMap, representing1, parties.get(i).getValue(), i);
                     }
                 }
             }
-
         });
     }
 
+    private void refreshPartyFlags(Map<String, Object> updatedCaseDataMap, PartyRole.Representing representing,
+                                   PartyDetails partyDetails, int index) {
+        Stream.of(representing.getCaseDataExternalField(), representing.getCaseDataInternalField())
+            .forEach(key -> {
+                String caseDataKey = String.format(key, index + 1);
+                Object caseDataValue = updatedCaseDataMap.get(caseDataKey);
+                if (caseDataValue != null) {
+                    Flags flags = getCaseFlagsForParty(caseDataValue);
+                    if (flags != null) {
+                        refreshPartyFlags(flags, representing, partyDetails, key, index);
+                        updatedCaseDataMap.put(caseDataKey, flags);
+                    }
+                }
+            });
+    }
+
+    private void refreshPartyFlags(Flags flags, PartyRole.Representing representing, PartyDetails partyDetails,
+                                   String key, int index) {
+        String partyName = getPartyName(partyDetails, representing);
+        if (StringUtils.isBlank(partyName)) {
+            return;
+        } else {
+            flags.setPartyName(partyName);
+        }
+
+        if (flags.getGroupId() == null) {
+            flags.setGroupId(String.format(representing.getGroupId(), index + 1));
+        }
+        if (flags.getRoleOnCase() == null) {
+            Optional<PartyRole> partyRole = getPartyRole(representing, index);
+            flags.setRoleOnCase(partyRole.isPresent() ? partyRole.get().getCaseRoleLabel() : StringUtils.EMPTY);
+        }
+        if (flags.getVisibility() == null) {
+            if (representing.getCaseDataInternalField().equals(key)) {
+                flags.setVisibility(VISIBILITY_INTERNAL);
+            }
+            if (representing.getCaseDataExternalField().equals(key)) {
+                flags.setVisibility(VISIBILITY_EXTERNAL);
+            }
+        }
+    }
 
     private Optional<PartyRole> getPartyRole(PartyRole.Representing representing1, int caseFlagsIndex) {
         List<PartyRole> partyRoles = PartyRole.matchingRoles(representing1);
