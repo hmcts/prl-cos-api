@@ -1219,7 +1219,7 @@ public class CallbackControllerTest {
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
             .addCaseNumberSubmitted(authToken, s2sToken, callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("issueDate"));
-        assertEquals(No,aboutToStartOrSubmitCallbackResponse.getData().get("isAddCaseNumberAdded"));
+        assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("isAddCaseNumberAdded"));
     }
 
     @Test
@@ -1244,7 +1244,7 @@ public class CallbackControllerTest {
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
                 .addCaseNumberSubmitted(authToken, s2sToken, callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("issueDate"));
-        assertEquals(Yes,aboutToStartOrSubmitCallbackResponse.getData().get("isAddCaseNumberAdded"));
+        assertEquals(Yes.getDisplayedValue(),aboutToStartOrSubmitCallbackResponse.getData().get("isAddCaseNumberAdded"));
     }
 
     @Test

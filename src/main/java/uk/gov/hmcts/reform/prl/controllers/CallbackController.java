@@ -138,7 +138,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.TAS
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.TASK_LIST_V3_FLAG;
 import static uk.gov.hmcts.reform.prl.enums.Event.SEND_TO_GATEKEEPER;
 import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 
@@ -838,7 +837,7 @@ public class CallbackController {
                 .findFirst();
             previousState.ifPresent(s -> caseDataUpdated.put(
                 VERIFY_CASE_NUMBER_ADDED,
-                SUBMITTED_PAID.getValue().equalsIgnoreCase(s) ? Yes : No
+                SUBMITTED_PAID.getValue().equalsIgnoreCase(s) ? Yes.getDisplayedValue() : null
             ));
             caseDataUpdated.put(ISSUE_DATE_FIELD, LocalDate.now());
             return AboutToStartOrSubmitCallbackResponse.builder()
