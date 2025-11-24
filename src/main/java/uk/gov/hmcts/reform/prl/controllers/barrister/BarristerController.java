@@ -144,6 +144,7 @@ public class BarristerController extends AbstractCallbackController {
                 builder = AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).data(caseDataUpdated);
             return builder.build();
         } else {
+            log.error("unauthorized credentials");
             throw (new InvalidClientException(INVALID_CLIENT));
         }
     }

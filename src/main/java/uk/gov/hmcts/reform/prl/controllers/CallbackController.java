@@ -769,6 +769,7 @@ public class CallbackController {
                 caseData
             )).build();
         } else {
+            log.error("unauthorized credentials");
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
@@ -919,7 +920,7 @@ public class CallbackController {
             caseDataUpdated.put("caseSolicitorName", userDetails.getFullName());
             if (userOrganisation.isPresent()) {
                 caseDataUpdated.put("caseSolicitorOrgName", userOrganisation.get().getName());
-
+                log.info("userorg present: {}", caseData.getCaseSolicitorOrgName());
                 OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
                     .organisation(Organisation.builder()
                                       .organisationID(userOrganisation.get().getOrganisationIdentifier())
@@ -938,6 +939,7 @@ public class CallbackController {
                         .orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]")
                         .build();
                 }
+                log.info("putting applicantOrganisationPolicy: {}", applicantOrganisationPolicy);
                 caseDataUpdated.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
             }
 

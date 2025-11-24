@@ -29,10 +29,26 @@ public class BarristerRemoveService extends AbstractBarristerService {
     public AllocatedBarrister getBarristerListToRemove(CaseData caseData,
                                                        String authorisation,
                                                        Function<PartyDetails, String> legalRepOrganisation) {
-        return AllocatedBarrister.builder()
+        // Log input parameters
+        log.info("getBarristerListToRemove called with caseData id: {}, authorisation: {}",
+                 caseData.getId(), authorisation);
+
+        getPartiesToList(
+            caseData, authorisation, partyDetails -> {
+                String orgId = legalRepOrganisation.apply(partyDetails);
+                log.info("Extracted organisation ID for party {}: {}", partyDetails.getPartyId(), orgId);
+                return orgId;
+            }
+        );
+
+        AllocatedBarrister allocatedBarrister = AllocatedBarrister.builder()
             .partyList(getPartiesToList(caseData, authorisation, legalRepOrganisation))
             .barristerOrg(Organisation.builder().build())
             .build();
+
+        log.info("AllocatedBarrister to remove: {}", allocatedBarrister);
+
+        return allocatedBarrister;
     }
 
 
