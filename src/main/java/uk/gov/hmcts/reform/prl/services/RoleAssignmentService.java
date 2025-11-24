@@ -61,57 +61,50 @@ public class RoleAssignmentService {
                                      String eventName,
                                      boolean replaceExisting,
                                      String roleName) {
-        if (!environment.equals("preview")) {
 
-            log.info("Role Assignment called from event - {}", eventName);
-            String actorId = populateActorIdFromDto(authorization, roleAssignmentDto);
-            String roleCategory = RoleCategory.JUDICIAL.name();
-            if (null != actorId) {
-                if (null != roleAssignmentDto.getLegalAdviserList()) {
-                    roleName = "allocated-legal-adviser";
-                    roleCategory = RoleCategory.LEGAL_OPERATIONS.name();
-                }
-
-                String systemUserToken = systemUserService.getSysUserToken();
-                String systemUserId = systemUserService.getUserId(systemUserToken);
-
-                RoleRequest roleRequest = RoleRequest.roleRequest()
-                    .assignerId(systemUserId)
-                    .process("CCD")
-                    .reference(createRoleRequestReference(caseDetails, systemUserId))
-                    .replaceExisting(replaceExisting)
-                    .build();
-                String actorIdForService = actorId.split(UNDERSCORE)[0];
-                List<RequestedRoles> requestedRoles = List.of(RequestedRoles.requestedRoles()
-                                                                  .actorIdType("IDAM")
-                                                                  .actorId(actorIdForService)
-                                                                  .roleType(RoleType.CASE.name())
-                                                                  .roleName(roleName)
-                                                                  .classification(Classification.RESTRICTED.name())
-                                                                  .grantType(GrantType.SPECIFIC.name())
-                                                                  .roleCategory(roleCategory)
-                                                                  .readOnly(false)
-                                                                  .beginTime(Instant.now())
-                                                                  .attributes(Attributes.attributes()
-                                                                                  .jurisdiction(caseDetails.getJurisdiction())
-                                                                                  .caseType(caseDetails.getCaseTypeId())
-                                                                                  .caseId(caseDetails.getId().toString())
-                                                                                  .build())
-
-                                                                  .build());
-
-                RoleAssignmentRequest assignmentRequest = RoleAssignmentRequest.roleAssignmentRequest()
-                    .roleRequest(roleRequest)
-                    .requestedRoles(requestedRoles)
-                    .build();
-
-                roleAssignmentApi.updateRoleAssignment(
-                    systemUserToken,
-                    authTokenGenerator.generate(),
-                    null,
-                    assignmentRequest
-                );
+        log.info("Role Assignment called from event - {}", eventName);
+        String actorId = populateActorIdFromDto(authorization, roleAssignmentDto);
+        String roleCategory = RoleCategory.JUDICIAL.name();
+        if (null != actorId) {
+            if (null != roleAssignmentDto.getLegalAdviserList()) {
+                roleName = "allocated-legal-adviser";
+                roleCategory = RoleCategory.LEGAL_OPERATIONS.name();
             }
+            String systemUserToken = systemUserService.getSysUserToken();
+            String systemUserId = systemUserService.getUserId(systemUserToken);
+            RoleRequest roleRequest = RoleRequest.roleRequest()
+                .assignerId(systemUserId)
+                .process("CCD")
+                .reference(createRoleRequestReference(caseDetails, systemUserId))
+                .replaceExisting(replaceExisting)
+                .build();
+            String actorIdForService = actorId.split(UNDERSCORE)[0];
+            List<RequestedRoles> requestedRoles = List.of(RequestedRoles.requestedRoles()
+                                                              .actorIdType("IDAM")
+                                                              .actorId(actorIdForService)
+                                                              .roleType(RoleType.CASE.name())
+                                                              .roleName(roleName)
+                                                              .classification(Classification.RESTRICTED.name())
+                                                              .grantType(GrantType.SPECIFIC.name())
+                                                              .roleCategory(roleCategory)
+                                                              .readOnly(false)
+                                                              .beginTime(Instant.now())
+                                                              .attributes(Attributes.attributes()
+                                                                              .jurisdiction(caseDetails.getJurisdiction())
+                                                                              .caseType(caseDetails.getCaseTypeId())
+                                                                              .caseId(caseDetails.getId().toString())
+                                                                              .build())
+                                                              .build());
+            RoleAssignmentRequest assignmentRequest = RoleAssignmentRequest.roleAssignmentRequest()
+                .roleRequest(roleRequest)
+                .requestedRoles(requestedRoles)
+                .build();
+            roleAssignmentApi.updateRoleAssignment(
+                systemUserToken,
+                authTokenGenerator.generate(),
+                null,
+                assignmentRequest
+            );
         }
     }
 
