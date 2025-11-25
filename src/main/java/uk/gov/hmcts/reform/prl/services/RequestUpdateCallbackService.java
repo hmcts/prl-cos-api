@@ -58,6 +58,7 @@ public class RequestUpdateCallbackService {
     private final UploadAdditionalApplicationUtils uploadAdditionalApplicationUtils;
 
     public void processCallback(ServiceRequestUpdateDto serviceRequestUpdateDto) {
+        // Test
         String systemAuthorisation = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
         CaseDetails caseDetails
