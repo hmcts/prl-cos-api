@@ -20,7 +20,7 @@ plugins {
   id 'org.sonarqube' version '5.1.0.4882'
   id 'org.springframework.boot' version '3.3.5'
   id 'au.com.dius.pact' version '4.2.6'
-  id 'com.github.hmcts.rse-cft-lib' version '0.19.1933'
+  id 'com.github.hmcts.rse-cft-lib' version '0.19.1942'
 }
 
 def versions = [
@@ -143,7 +143,7 @@ allprojects {
       }
 
         // solves CVE-2014-3488, CVE-2015-2156, CVE-2019-16869, CVE-2021-21409,CVE-2025-25193
-        dependencySet(group: 'io.netty', version: '4.1.118.Final') {
+        dependencySet(group: 'io.netty', version: '4.2.7.Final') {
             entry 'netty-buffer'
             entry 'netty-codec'
             entry 'netty-codec-http'
@@ -351,9 +351,9 @@ dependencies {
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: versions.reformsJavaLogging
   implementation group: 'com.github.hmcts.java-logging', name: 'logging-appinsights', version: versions.reformsJavaLogging
-  implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.24.3'
-  implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.24.3'
-  implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.24.3'
+  implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.25.2'
+  implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.25.2'
+  implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.25.2'
   implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: versions.serviceTokenGenerator
   implementation group: 'com.github.hmcts', name: 'send-letter-client', version: versions.sendLetterClient
   implementation group: 'uk.gov.service.notify', name: 'notifications-java-client', version: versions.hmctsNotify
@@ -401,7 +401,7 @@ dependencies {
 
   implementation(group: 'org.springframework.security', name: 'spring-security-rsa', version: versions.springSecurityRsa)
   implementation(group: 'org.springframework.security', name: 'spring-security-crypto', version: versions.springSecurityCrypto)
-  implementation group: 'io.netty', name: 'netty-transport-native-epoll', version: '4.1.118.Final'
+  implementation group: 'io.netty', name: 'netty-transport-native-epoll', version: '4.2.7.Final'
   constraints{
     implementation group: 'com.warrenstrange', name: 'googleauth', version: '1.5.0'
   }
