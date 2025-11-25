@@ -175,7 +175,7 @@ public class OrganisationService {
             return Optional.empty();
         } catch (FeignException.Forbidden ex) {
             log.error("Exception while getting org details of the logged in users ", ex);
-            throw ex; // rethrow to bubble up
+            return Optional.empty();
         }
     }
 
