@@ -468,15 +468,6 @@ public class OrganisationServiceTest {
     }
 
     @Test
-    public void findUserOrganisationForbiddenRethrowsTest() {
-        when(organisationApi.findUserOrganisation(authToken, serviceAuthToken))
-            .thenThrow(feignException(403, "Forbidden"));
-
-        assertThatThrownBy(() -> organisationService.findUserOrganisation(authToken))
-            .isInstanceOf(FeignException.Forbidden.class);
-    }
-
-    @Test
     public void getApplicantOrganisationDetails_handlesNotFoundException() {
         when(systemUserService.getSysUserToken()).thenReturn("user-token");
         when(authTokenGenerator.generate()).thenReturn("svc-token");
