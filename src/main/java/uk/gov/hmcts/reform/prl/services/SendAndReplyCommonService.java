@@ -78,13 +78,13 @@ public class SendAndReplyCommonService {
             );
         }
 
-        sendAndReplyService.sendNotificationToExternalParties(
-            caseData,
-            authorisation
+        // ensure the message content is set in sendMessageObject for access in submitted cb
+        caseDataMap.put("sendMessageObject", caseData.getSendOrReplyMessage().getSendMessageObject()
+            .toBuilder()
+                .messageContent(caseData.getMessageContent())
+            .build()
         );
 
-        //send emails in case of sending to others with emails
-        sendAndReplyService.sendNotificationEmailOther(caseData);
         //WA - clear reply field in case of SEND
         sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
     }
