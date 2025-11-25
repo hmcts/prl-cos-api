@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.utils.ApplicantsListGenerator;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
@@ -41,6 +42,8 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
@@ -71,6 +74,8 @@ public class RelationshipsControllerTest {
     @Mock
     private ConfidentialityTabService confidentialityTabService;
 
+    @Mock
+    private CafcassDateTimeService cafcassDateTimeService;
 
     public static final String authToken = "Bearer TestAuthToken";
 
@@ -799,6 +804,7 @@ public class RelationshipsControllerTest {
 
         Map<String, Object> caseDetailsRespnse = aboutToStartOrSubmitCallbackResponse.getData();
         assertNotNull(caseDetailsRespnse.get("buffChildAndOtherPeopleRelations"));
+        verify(cafcassDateTimeService).updateCafcassDateTime(any());
     }
 
     @Test

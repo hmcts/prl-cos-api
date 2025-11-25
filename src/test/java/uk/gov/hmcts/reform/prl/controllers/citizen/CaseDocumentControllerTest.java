@@ -1,12 +1,11 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -52,8 +51,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -63,15 +63,13 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_UPLOADE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUCCESS;
 
+@ExtendWith(MockitoExtension.class)
+class CaseDocumentControllerTest {
+    private static final String AUTH_TOKEN = "Bearer TestAuthToken";
+    private static final String S2S_TOKEN = "TestS2sToken";
 
-@RunWith(MockitoJUnitRunner.class)
-public class CaseDocumentControllerTest {
-
-    public static final String authToken = "Bearer TestAuthToken";
-    public static final String s2sToken = "TestS2sToken";
     @InjectMocks
     private CaseDocumentController caseDocumentController;
-
     @Mock
     private ObjectMapper objectMapper;
     @Mock
@@ -82,30 +80,17 @@ public class CaseDocumentControllerTest {
     private UploadDocumentService uploadService;
     @Mock
     private IdamClient idamClient;
-    private GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest;
-
     @Mock
     private EmailService emailService;
-
     @Mock
-    CaseService caseService;
-
+    private CaseService caseService;
     @Mock
     private AuthorisationService authorisationService;
-
     @Mock
     private CitizenDocumentService citizenDocumentService;
 
-    @Before
-    public void setUp() {
-
-        generateAndUploadDocumentRequest = GenerateAndUploadDocumentRequest.builder()
-            .values(Map.of("fileName", "test.docx"))
-            .build();
-    }
-
     @Test
-    public void testNotifyOtherPartiesRespondedentCA() throws Exception {
+    void testNotifyOtherPartiesRespondentCA() throws Exception {
         User user = User.builder().idamId("577346ec-5c58-491d-938a-112c4bff06fb").build();
         PartyDetails applicant = PartyDetails.builder().user(user).email("test@hmcts.net").firstName("test").build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
@@ -118,7 +103,6 @@ public class CaseDocumentControllerTest {
 
         CaseData casedata = CaseData.builder().id(123456).caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).applicants(
             applicantList).respondents(respondentList).build();
-
 
         Method method = CaseDocumentController.class.getDeclaredMethod(
             "notifyOtherParties",
@@ -137,7 +121,7 @@ public class CaseDocumentControllerTest {
     }
 
     @Test
-    public void testNotifyOtherPartiesRespondedentsCA() throws Exception {
+    void testNotifyOtherPartiesRespondedentsCA() throws Exception {
         User user = User.builder().idamId("577346ec-5c58-491d-938a-112c4bff06fb").build();
         PartyDetails applicant = PartyDetails.builder().user(user).email("test@hmcts.net").firstName("test").build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
@@ -155,7 +139,6 @@ public class CaseDocumentControllerTest {
 
         CaseData casedata = CaseData.builder().id(123456).caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).applicants(
             applicantList).respondents(respondentList).build();
-
 
         Method method = CaseDocumentController.class.getDeclaredMethod(
             "notifyOtherParties",
@@ -180,7 +163,7 @@ public class CaseDocumentControllerTest {
     }
 
     @Test
-    public void testNotifyOtherPartiesApplicantCA() throws Exception {
+    void testNotifyOtherPartiesApplicantCA() throws Exception {
         User user = User.builder().idamId("577346ec-5c58-491d-938a-112c4bff06fb").build();
         PartyDetails applicant = PartyDetails.builder().user(user).email("test@hmcts.net").firstName("test").build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
@@ -194,6 +177,32 @@ public class CaseDocumentControllerTest {
         CaseData casedata = CaseData.builder().id(123456).caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).applicants(
             applicantList).respondents(respondentList).build();
 
+        Method method = CaseDocumentController.class.getDeclaredMethod(
+            "notifyOtherParties",
+            String.class,
+            CaseData.class
+        );
+        method.setAccessible(true);
+        method.invoke(caseDocumentController, "577346ec-5c58-491d-938a-112c4bff06fa", casedata);
+        UploadDocumentEmail emailTemplateVars = UploadDocumentEmail.builder().caseReference("123456").name("test").build();
+        verify(emailService).send(
+            "test@hmcts.net",
+            EmailTemplateNames.DOCUMENT_UPLOADED,
+            emailTemplateVars,
+            LanguagePreference.english
+        );
+    }
+
+    @Test
+    void testNotifyOtherPartiesApplicantDA() throws Exception {
+        User user = User.builder().idamId("577346ec-5c58-491d-938a-112c4bff06fb").build();
+        PartyDetails applicant = PartyDetails.builder().user(user).email("test@hmcts.net").firstName("test").build();
+
+        User user1 = User.builder().idamId("577346ec-5c58-491d-938a-112c4bff06fa").build();
+        PartyDetails respondent = PartyDetails.builder().user(user1).email("test@hmcts.net").firstName("test").build();
+
+        CaseData casedata = CaseData.builder().id(123456).caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE).applicantsFL401(
+            applicant).respondentsFL401(respondent).build();
 
         Method method = CaseDocumentController.class.getDeclaredMethod(
             "notifyOtherParties",
@@ -212,7 +221,7 @@ public class CaseDocumentControllerTest {
     }
 
     @Test
-    public void testNotifyOtherPartiesApplicantDA() throws Exception {
+    void testNotifyOtherPartiesRespondentDA() throws Exception {
         User user = User.builder().idamId("577346ec-5c58-491d-938a-112c4bff06fb").build();
         PartyDetails applicant = PartyDetails.builder().user(user).email("test@hmcts.net").firstName("test").build();
 
@@ -221,35 +230,6 @@ public class CaseDocumentControllerTest {
 
         CaseData casedata = CaseData.builder().id(123456).caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE).applicantsFL401(
             applicant).respondentsFL401(respondent).build();
-
-
-        Method method = CaseDocumentController.class.getDeclaredMethod(
-            "notifyOtherParties",
-            String.class,
-            CaseData.class
-        );
-        method.setAccessible(true);
-        method.invoke(caseDocumentController, "577346ec-5c58-491d-938a-112c4bff06fa", casedata);
-        UploadDocumentEmail emailTemplateVars = UploadDocumentEmail.builder().caseReference("123456").name("test").build();
-        verify(emailService).send(
-            "test@hmcts.net",
-            EmailTemplateNames.DOCUMENT_UPLOADED,
-            emailTemplateVars,
-            LanguagePreference.english
-        );
-    }
-
-    @Test
-    public void testNotifyOtherPartiesRespondentDA() throws Exception {
-        User user = User.builder().idamId("577346ec-5c58-491d-938a-112c4bff06fb").build();
-        PartyDetails applicant = PartyDetails.builder().user(user).email("test@hmcts.net").firstName("test").build();
-
-        User user1 = User.builder().idamId("577346ec-5c58-491d-938a-112c4bff06fa").build();
-        PartyDetails respondent = PartyDetails.builder().user(user1).email("test@hmcts.net").firstName("test").build();
-
-        CaseData casedata = CaseData.builder().id(123456).caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE).applicantsFL401(
-            applicant).respondentsFL401(respondent).build();
-
 
         Method method = CaseDocumentController.class.getDeclaredMethod(
             "notifyOtherParties",
@@ -268,35 +248,35 @@ public class CaseDocumentControllerTest {
     }
 
     @Test
-    public void testDocumentUpload() throws IOException {
+    void testDocumentUpload() throws IOException {
         //Given
         MultipartFile mockFile = mock(MultipartFile.class);
         Document mockDocument = Document.builder().build();
         DocumentResponse documentResponse = DocumentResponse
-                .builder()
-                .status("SUCCESS")
-                .document(mockDocument)
-                .build();
+            .builder()
+            .status("SUCCESS")
+            .document(mockDocument)
+            .build();
 
-        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
-        when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
-        when(documentGenService.uploadDocument(authToken, mockFile)).thenReturn(documentResponse);
+        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Boolean.TRUE);
+        when(authorisationService.authoriseService(S2S_TOKEN)).thenReturn(Boolean.TRUE);
+        when(documentGenService.uploadDocument(AUTH_TOKEN, mockFile)).thenReturn(documentResponse);
 
         //When
         ResponseEntity<?> response = caseDocumentController
-                .uploadCitizenDocument(authToken, s2sToken, mockFile);
+            .uploadCitizenDocument(AUTH_TOKEN, S2S_TOKEN, mockFile);
         //Then
         assertEquals(documentResponse, response.getBody());
     }
 
     @Test
-    public void testGenerateCitizenStatementDocumentt() throws Exception {
-        HashMap<String,String> map = new HashMap<>();
-        map.put("caseId","1656350492135029");
-        map.put("state","AWAITING_SUBMISSION_TO_HMCTS");
-        map.put("documentType","test");
-        map.put("partyName","test");
-        map.put("partyId","test");
+    void testGenerateCitizenStatementDocumentt() throws Exception {
+        HashMap<String, String> map = new HashMap<>();
+        map.put("caseId", "1656350492135029");
+        map.put("state", "AWAITING_SUBMISSION_TO_HMCTS");
+        map.put("documentType", "test");
+        map.put("partyName", "test");
+        map.put("partyId", "test");
         Document document = Document.builder().documentUrl("")
             .documentFileName("test")
             .build();
@@ -323,24 +303,31 @@ public class CaseDocumentControllerTest {
             .citizenUploadedDocumentList(listOfUploadedDocuments)
             .build();
         Map<String, Object> stringObjectMap = casedata.toMap(new ObjectMapper());
-        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(
-            Long.parseLong("1656350492135029")).state("AWAITING_SUBMISSION_TO_HMCTS").data(stringObjectMap).build();
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+            .id(Long.parseLong("1656350492135029"))
+            .state("AWAITING_SUBMISSION_TO_HMCTS")
+            .data(stringObjectMap)
+            .build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata);
-        when(coreCaseDataApi.getCase(authToken, s2sToken, "1656350492135029")).thenReturn(
+        when(coreCaseDataApi.getCase(AUTH_TOKEN, S2S_TOKEN, "1656350492135029")).thenReturn(
             caseDetails);
-        when(documentGenService.generateCitizenStatementDocument(authToken, generateAndUploadDocumentRequest, 2)).thenReturn(uploadedDocuments);
+        when(documentGenService.generateCitizenStatementDocument(AUTH_TOKEN, generateAndUploadDocumentRequest, 2))
+            .thenReturn(uploadedDocuments);
         //When
-        assertNotNull(caseDocumentController.generateCitizenStatementDocument(generateAndUploadDocumentRequest,authToken,s2sToken));
+        assertNotNull(caseDocumentController.generateCitizenStatementDocument(
+            generateAndUploadDocumentRequest, AUTH_TOKEN,
+            S2S_TOKEN
+        ));
     }
 
     @Test
-    public void testUploadCitizenStatementDocument() {
-        HashMap<String,String> map = new HashMap<>();
-        map.put("caseId","1656350492135029");
-        map.put("state","AWAITING_SUBMISSION_TO_HMCTS");
-        map.put("documentType","test");
-        map.put("partyName","test");
-        map.put("partyId","test");
+    void testUploadCitizenStatementDocument() {
+        HashMap<String, String> map = new HashMap<>();
+        map.put("caseId", "1656350492135029");
+        map.put("state", "AWAITING_SUBMISSION_TO_HMCTS");
+        map.put("documentType", "test");
+        map.put("partyName", "test");
+        map.put("partyId", "test");
         Document document = Document.builder().documentUrl("")
             .documentFileName("test")
             .build();
@@ -360,7 +347,6 @@ public class CaseDocumentControllerTest {
             .citizenDocument(document)
             .build();
 
-
         Element<UploadedDocuments> uploadedDocumentsElement1 = Element.<UploadedDocuments>builder().value(
             uploadedDocuments).build();
         List<Element<UploadedDocuments>> listOfUploadedDocuments = new ArrayList<>(List.of(
@@ -377,10 +363,10 @@ public class CaseDocumentControllerTest {
         CaseDetails caseDetails = CaseDetails.builder().id(
             Long.parseLong("1656350492135029")).state("AWAITING_SUBMISSION_TO_HMCTS").data(stringObjectMap).build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata);
-        when(coreCaseDataApi.getCase(authToken, s2sToken, "1656350492135029")).thenReturn(
+        when(coreCaseDataApi.getCase(AUTH_TOKEN, S2S_TOKEN, "1656350492135029")).thenReturn(
             caseDetails);
         when(uploadService.uploadCitizenDocument(
-            authToken,
+            AUTH_TOKEN,
             uploadedDocumentRequest
         )).thenReturn(uploadedDocuments);
         StartEventResponse startEventResponse = StartEventResponse.builder().eventId("")
@@ -390,23 +376,29 @@ public class CaseDocumentControllerTest {
         UserInfo userInfo = UserInfo.builder()
             .uid("123456")
             .build();
-        when(idamClient.getUserInfo(authToken)).thenReturn(userInfo);
-        when(coreCaseDataApi.startEventForCitizen(authToken, s2sToken, "123456", JURISDICTION, CASE_TYPE, "1656350492135029",
-                                                                                CITIZEN_UPLOADED_DOCUMENT)).thenReturn(startEventResponse);
-        ResponseEntity responseEntity = caseDocumentController.uploadCitizenStatementDocument(authToken,s2sToken,uploadedDocumentRequest);
+        when(idamClient.getUserInfo(AUTH_TOKEN)).thenReturn(userInfo);
+        when(coreCaseDataApi.startEventForCitizen(
+            AUTH_TOKEN, S2S_TOKEN, "123456", JURISDICTION, CASE_TYPE, "1656350492135029",
+            CITIZEN_UPLOADED_DOCUMENT
+        )).thenReturn(startEventResponse);
+        ResponseEntity<Object> responseEntity = caseDocumentController.uploadCitizenStatementDocument(
+            AUTH_TOKEN,
+            S2S_TOKEN,
+            uploadedDocumentRequest
+        );
         assertNotNull(responseEntity);
     }
 
     @Test
-    public void testDeleteCitizenStatementDocument() throws Exception {
-        HashMap<String,String> map = new HashMap<>();
-        map.put("caseId","1656350492135029");
-        map.put("state","AWAITING_SUBMISSION_TO_HMCTS");
-        map.put("documentType","test");
-        map.put("partyName","test");
-        map.put("partyId","test");
-        map.put("documentId","123455");
-        map.put("id","123455");
+    void testDeleteCitizenStatementDocument() throws Exception {
+        HashMap<String, String> map = new HashMap<>();
+        map.put("caseId", "1656350492135029");
+        map.put("state", "AWAITING_SUBMISSION_TO_HMCTS");
+        map.put("documentType", "test");
+        map.put("partyName", "test");
+        map.put("partyId", "test");
+        map.put("documentId", "123455");
+        map.put("id", "123455");
         Document document = Document.builder().documentUrl("")
             .documentFileName("test")
             .build();
@@ -420,7 +412,6 @@ public class CaseDocumentControllerTest {
             .citizenDocument(document)
             .build();
 
-
         Element<UploadedDocuments> uploadedDocumentsElement1 = Element.<UploadedDocuments>builder().id(UUID.randomUUID()).value(
             uploadedDocuments).build();
         List<Element<UploadedDocuments>> listOfUploadedDocuments = List.of(
@@ -432,103 +423,124 @@ public class CaseDocumentControllerTest {
         User user1 = User.builder().idamId("577346ec-5c58-491d-938a-112c4bff06fa").build();
         PartyDetails respondent = PartyDetails.builder().user(user1).email("test@hmcts.net").firstName("test").build();
         CaseData casedata = CaseData.builder().id(165635049).caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE).applicantsFL401(
-                applicant).respondentsFL401(respondent).state(State.AWAITING_SUBMISSION_TO_HMCTS).citizenUploadedDocumentList(listOfUploadedDocuments)
-               .build();
+                applicant).respondentsFL401(respondent).state(State.AWAITING_SUBMISSION_TO_HMCTS).citizenUploadedDocumentList(
+                listOfUploadedDocuments)
+            .build();
         Map<String, Object> stringObjectMap = casedata.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(
             Long.parseLong("1656350492135029")).state("AWAITING_SUBMISSION_TO_HMCTS").data(stringObjectMap).build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata);
-        when(coreCaseDataApi.getCase(authToken, s2sToken, "1656350492135029")).thenReturn(
+        when(coreCaseDataApi.getCase(AUTH_TOKEN, S2S_TOKEN, "1656350492135029")).thenReturn(
             caseDetails);
-        String deleteStatus = caseDocumentController.deleteCitizenStatementDocument(deleteDocumentRequest,authToken,s2sToken);
+        String deleteStatus = caseDocumentController.deleteCitizenStatementDocument(
+            deleteDocumentRequest,
+            AUTH_TOKEN, S2S_TOKEN
+        );
         assertNotNull(deleteStatus);
     }
 
-    @Test (expected = RuntimeException.class)
-    public void testDocumentUploadNotAuthorised() throws IOException {
+    @Test
+    void testDocumentUploadNotAuthorised() {
         MultipartFile mockFile = mock(MultipartFile.class);
 
-        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
+        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Boolean.FALSE);
 
-        caseDocumentController
-            .uploadCitizenDocument(authToken, s2sToken, mockFile);
+        assertThrows(
+            RuntimeException.class,
+            () -> caseDocumentController.uploadCitizenDocument(AUTH_TOKEN, S2S_TOKEN, mockFile)
+        );
     }
 
     @Test
-    public void testDeleteDocument() {
+    void testDeleteDocument() {
         //Given
         DocumentResponse documentResponse = DocumentResponse
-                .builder()
-                .status("SUCCESS")
-                .build();
+            .builder()
+            .status("SUCCESS")
+            .build();
 
-        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
-        when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
-        when(documentGenService.deleteDocument(authToken, "TEST_DOCUMENT_ID")).thenReturn(documentResponse);
+        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Boolean.TRUE);
+        when(authorisationService.authoriseService(S2S_TOKEN)).thenReturn(Boolean.TRUE);
+        when(documentGenService.deleteDocument(AUTH_TOKEN, "TEST_DOCUMENT_ID")).thenReturn(documentResponse);
 
         //When
-        ResponseEntity<?> response = caseDocumentController
-                .deleteDocument(authToken, s2sToken, "TEST_DOCUMENT_ID");
+        ResponseEntity<?> response = caseDocumentController.deleteDocument(AUTH_TOKEN, S2S_TOKEN, "TEST_DOCUMENT_ID");
         //Then
         assertEquals(documentResponse, response.getBody());
     }
 
-    @Test (expected = RuntimeException.class)
-    public void testDeleteDocumentNotAuthorised() {
-        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
+    @Test
+    void testDeleteDocumentNotAuthorised() {
+        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Boolean.FALSE);
 
-        caseDocumentController
-            .deleteDocument(authToken, s2sToken, "TEST_DOCUMENT_ID");
+        assertThrows(
+            RuntimeException.class, () -> caseDocumentController.deleteDocument(
+                AUTH_TOKEN, S2S_TOKEN,
+                "TEST_DOCUMENT_ID"
+            )
+        );
     }
 
     @Test
-    public void testDownloadDocument() throws Exception {
+    void testDownloadDocument() throws Exception {
         //Given
         Resource expectedResource = new ClassPathResource("documents/document.pdf");
         HttpHeaders headers = new HttpHeaders();
         ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, OK);
 
-        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
-        when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
-        when(documentGenService.downloadDocument(authToken, "TEST_DOCUMENT_ID")).thenReturn(expectedResponse);
+        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Boolean.TRUE);
+        when(authorisationService.authoriseService(S2S_TOKEN)).thenReturn(Boolean.TRUE);
+        when(documentGenService.downloadDocument(AUTH_TOKEN, "TEST_DOCUMENT_ID")).thenReturn(expectedResponse);
 
         //When
         ResponseEntity<?> response = caseDocumentController
-            .downloadDocument(authToken, s2sToken, "TEST_DOCUMENT_ID");
+            .downloadDocument(AUTH_TOKEN, S2S_TOKEN, "TEST_DOCUMENT_ID");
         //Then
         assertEquals(OK, response.getStatusCode());
     }
 
-    @Test (expected = RuntimeException.class)
-    public void testDownloadDocumentNotAuthorised() throws Exception {
-        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
+    @Test
+    void testDownloadDocumentNotAuthorised() {
+        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Boolean.FALSE);
 
-        caseDocumentController
-            .downloadDocument(authToken, s2sToken, "TEST_DOCUMENT_ID");
-    }
-
-    @Test (expected = RuntimeException.class)
-    public void testGenerateDocumentThrowInvalidClientException() {
-        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
-
-        caseDocumentController.citizenGenerateDocument(authToken, s2sToken, DocumentRequest.builder().build());
+        assertThrows(
+            RuntimeException.class, () -> caseDocumentController.downloadDocument(
+                AUTH_TOKEN, S2S_TOKEN,
+                "TEST_DOCUMENT_ID"
+            )
+        );
     }
 
     @Test
-    public void testGenerateDocumentThrowDocumentGenerationException() {
-        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
-        when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
-        when(caseDocumentController.citizenGenerateDocument(authToken, s2sToken, DocumentRequest.builder().build()))
+    void testGenerateDocumentThrowInvalidClientException() {
+        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Boolean.FALSE);
+
+        DocumentRequest documentRequest = DocumentRequest.builder().build();
+        assertThrows(
+            RuntimeException.class, () -> caseDocumentController.citizenGenerateDocument(
+                AUTH_TOKEN, S2S_TOKEN,
+                documentRequest
+            )
+        );
+    }
+
+    @Test
+    void testGenerateDocumentThrowDocumentGenerationException() {
+        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Boolean.TRUE);
+        when(authorisationService.authoriseService(S2S_TOKEN)).thenReturn(Boolean.TRUE);
+        when(caseDocumentController.citizenGenerateDocument(AUTH_TOKEN, S2S_TOKEN, DocumentRequest.builder().build()))
             .thenThrow(DocumentGenerationException.class);
 
-        ResponseEntity<Object> responseEntity = caseDocumentController.citizenGenerateDocument(authToken, s2sToken,
-                                                                                               DocumentRequest.builder().build());
+        ResponseEntity<Object> responseEntity = caseDocumentController.citizenGenerateDocument(
+            AUTH_TOKEN, S2S_TOKEN,
+            DocumentRequest.builder().build()
+        );
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
         assertEquals("Error in generating a document", responseEntity.getBody());
     }
 
     @Test
-    public void testGenerateDocument() throws DocumentGenerationException {
+    void testGenerateDocument() throws DocumentGenerationException {
         //Given
         DocumentRequest documentRequest = DocumentRequest.builder()
             .caseId("123")
@@ -544,12 +556,19 @@ public class CaseDocumentControllerTest {
             .document(Document.builder().build()).build();
 
         //When
-        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
-        when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
-        when(documentGenService.generateAndUploadDocument(authToken, documentRequest)).thenReturn(mockDocumentResponse);
+        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Boolean.TRUE);
+        when(authorisationService.authoriseService(S2S_TOKEN)).thenReturn(Boolean.TRUE);
+        when(documentGenService.generateAndUploadDocument(
+            AUTH_TOKEN,
+            documentRequest
+        )).thenReturn(mockDocumentResponse);
 
         //Action
-        ResponseEntity<?> response = caseDocumentController.citizenGenerateDocument(authToken, s2sToken, documentRequest);
+        ResponseEntity<?> response = caseDocumentController.citizenGenerateDocument(
+            AUTH_TOKEN,
+            S2S_TOKEN,
+            documentRequest
+        );
 
         //Then
         assertEquals(OK, response.getStatusCode());
@@ -557,15 +576,21 @@ public class CaseDocumentControllerTest {
         assertNotNull(response.getBody());
     }
 
-    @Test (expected = RuntimeException.class)
-    public void testSubmitCitizenDocumentsThrowInvalidClientException() {
-        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
+    @Test
+    void testSubmitCitizenDocumentsThrowInvalidClientException() {
+        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Boolean.FALSE);
 
-        caseDocumentController.citizenSubmitDocuments(authToken, s2sToken, DocumentRequest.builder().build());
+        DocumentRequest documentRequest = DocumentRequest.builder().build();
+        assertThrows(
+            RuntimeException.class, () -> caseDocumentController.citizenSubmitDocuments(
+                AUTH_TOKEN, S2S_TOKEN,
+                documentRequest
+            )
+        );
     }
 
     @Test
-    public void testUploadAndMoveDocumentsToQuarantine() {
+    void testUploadAndMoveDocumentsToQuarantine() {
         //Given
         DocumentRequest documentRequest = DocumentRequest.builder()
             .caseId("123")
@@ -575,12 +600,16 @@ public class CaseDocumentControllerTest {
         CaseDetails caseDetails = CaseDetails.builder().id(123L).build();
 
         //When
-        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
-        when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
-        when(citizenDocumentService.citizenSubmitDocuments(authToken, documentRequest)).thenReturn(caseDetails);
+        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Boolean.TRUE);
+        when(authorisationService.authoriseService(S2S_TOKEN)).thenReturn(Boolean.TRUE);
+        when(citizenDocumentService.citizenSubmitDocuments(AUTH_TOKEN, documentRequest)).thenReturn(caseDetails);
 
         //Action
-        ResponseEntity<?> response = caseDocumentController.citizenSubmitDocuments(authToken, s2sToken, documentRequest);
+        ResponseEntity<?> response = caseDocumentController.citizenSubmitDocuments(
+            AUTH_TOKEN,
+            S2S_TOKEN,
+            documentRequest
+        );
 
         //Then
         assertEquals(OK, response.getStatusCode());
