@@ -90,6 +90,7 @@ import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
+import uk.gov.hmcts.reform.prl.services.DfjLookupService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.EventService;
@@ -106,6 +107,7 @@ import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessClient;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -309,6 +311,12 @@ public class CallbackControllerTest {
     private C100IssueCaseService c100IssueCaseService;
 
     @Mock
+    private DfjLookupService dfjLookupService;
+
+    @Mock
+    private CafcassDateTimeService cafcassDateTimeService;
+
+    @Mock
     private  EventService eventPublisher;
 
     public static final String authToken = "Bearer TestAuthToken";
@@ -364,6 +372,9 @@ public class CallbackControllerTest {
         when(locationRefDataService.getCourtDetailsFromEpimmsId(Mockito.anyString(),Mockito.anyString()))
             .thenReturn(Optional.of(courtVenue));
         when(c100IssueCaseService.getFactCourtId(courtVenue)).thenReturn("123");
+        when(dfjLookupService.getDfjAreaFieldsByCourtName("Swansea Civil Justice Centre")).thenReturn(
+            Map.of("dfjArea", "SWANSEA", "swanseaDFJCourt", "123")
+        );
     }
 
     @Test
@@ -1631,6 +1642,7 @@ public class CallbackControllerTest {
             .childrenKnownToLocalAuthorityTextArea("Test")
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .applicants(applicantList)
+            .courtName("Swansea Civil Justice Centre")
             .caseTypeOfApplication(C100_CASE_TYPE)
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder().mpuClaimingExemptionMiam(Yes).build())
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
@@ -1743,6 +1755,8 @@ public class CallbackControllerTest {
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1ADocument"));
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1AWelshDocument"));
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("finalWelshDocument"));
+        Assertions.assertEquals(aboutToStartOrSubmitCallbackResponse.getData().get("dfjArea"), "SWANSEA");
+        Assertions.assertEquals(aboutToStartOrSubmitCallbackResponse.getData().get("swanseaDFJCourt"), "123");
     }
 
 

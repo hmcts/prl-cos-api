@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AllegationOfHarmRevisedService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -37,6 +38,9 @@ public class AllegationOfHarmRevisedControllerTest {
 
     @Mock
     private AuthorisationService authorisationService;
+
+    @Mock
+    private CafcassDateTimeService cafcassDateTimeService;
 
     private CaseDetails caseDetails;
 

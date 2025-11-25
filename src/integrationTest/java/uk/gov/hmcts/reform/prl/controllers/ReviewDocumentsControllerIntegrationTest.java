@@ -54,7 +54,7 @@ public class ReviewDocumentsControllerIntegrationTest {
         String url = "/review-documents/about-to-start";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
-        when(reviewDocumentService.fetchDocumentDynamicListElements(any(), any())).thenReturn(new ArrayList<>());
+        when(reviewDocumentService.fetchDocumentDynamicListElements(any())).thenReturn(new ArrayList<>());
 
         mockMvc.perform(
                 post(url)

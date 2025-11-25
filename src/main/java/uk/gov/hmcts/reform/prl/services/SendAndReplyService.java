@@ -1971,7 +1971,7 @@ public class SendAndReplyService {
         dataMap.put("partyAddress", partyDetails.getAddress());
         dataMap.put("date", new SimpleDateFormat("dd/MM/yyyy").format(new Date()));
         dataMap.put("id", String.valueOf(caseData.getId()));
-        dataMap.put("messageContent", caseData.getMessageContent());
+        dataMap.put("messageContent", message.getMessageContent());
         dataMap.put("documentSize", isNotEmpty(attachedDocs) ? attachedDocs.size() : 0);
 
         String messageAbout = "";
@@ -2089,7 +2089,7 @@ public class SendAndReplyService {
             documentSize = allSelectedDocuments.size();
         }
         dynamicData.put("subject", message.getMessageSubject());
-        dynamicData.put("messageContent", caseData.getMessageContent());
+        dynamicData.put("messageContent", message.getMessageContent());
         dynamicData.put("attachmentType", "pdf");
         dynamicData.put("disposition", "attachment");
         dynamicData.put("documentSize", documentSize);
@@ -2140,7 +2140,7 @@ public class SendAndReplyService {
 
     }
 
-    public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmitted(CallbackRequest callbackRequest) {
+    public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmitted(CallbackRequest callbackRequest, String authorisation) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         if (REPLY.equals(caseData.getChooseSendOrReply())
@@ -2150,11 +2150,21 @@ public class SendAndReplyService {
             ).build());
         }
 
-        if (SEND.equals(caseData.getChooseSendOrReply()) && InternalExternalMessageEnum.EXTERNAL.equals(
-            caseData.getSendOrReplyMessage().getSendMessageObject().getInternalOrExternalMessage())) {
-            return ok(SubmittedCallbackResponse.builder().confirmationBody(
-                SEND_AND_CLOSE_EXTERNAL_MESSAGE
-            ).build());
+        if (SEND.equals(caseData.getChooseSendOrReply())) {
+            sendNotificationToExternalParties(
+                caseData,
+                authorisation
+            );
+
+            //send emails in case of sending to others with emails
+            sendNotificationEmailOther(caseData);
+
+            if (InternalExternalMessageEnum.EXTERNAL.equals(
+                caseData.getSendOrReplyMessage().getSendMessageObject().getInternalOrExternalMessage())) {
+                return ok(SubmittedCallbackResponse.builder().confirmationBody(
+                    SEND_AND_CLOSE_EXTERNAL_MESSAGE
+                ).build());
+            }
         }
 
         closeAwPTask(caseData);
