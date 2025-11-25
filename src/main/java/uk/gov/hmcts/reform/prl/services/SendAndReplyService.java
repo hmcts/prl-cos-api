@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -90,7 +89,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -126,7 +124,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_SEND_REPLY_MESSAGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.GATEKEEPING_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIARY;
@@ -138,7 +135,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLOCATED_JUDGE;
-import static uk.gov.hmcts.reform.prl.enums.Event.SEND_TO_GATEKEEPER;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
@@ -147,7 +143,6 @@ import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.models.documents.Document.buildFromDocument;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.formatDateTime;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getDynamicList;
-import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getIdamId;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -510,7 +505,6 @@ public class SendAndReplyService {
         String caseReference = String.valueOf(caseData.getId());
         DynamicList documentCategoryList = getCategoriesAndDocuments(authorization, caseReference);
         String s2sToken = authTokenGenerator.generate();
-        List<DynamicListElement> legalAdvisorRecipientList = refDataUserService.getLegalAdvisorList();
         final String loggedInUserEmail = getLoggedInUserEmail(authorization);
         return caseData.toBuilder().sendOrReplyMessage(
                 SendOrReplyMessage.builder()
@@ -530,9 +524,6 @@ public class SendAndReplyService {
                                            .ctscEmailList(getDynamicList(List.of(DynamicListElement.builder()
                                                                                      .label(loggedInUserEmail).code(
                                                    loggedInUserEmail).build())))
-                                           .legalAdviserList(DynamicList.builder().value(DynamicListElement.EMPTY)
-                                                                 .listItems(legalAdvisorRecipientList)
-                                                                     .build())
                                            .futureHearingsList(getFutureHearingDynamicList(
                                                authorization,
                                                s2sToken,
@@ -1516,27 +1507,12 @@ public class SendAndReplyService {
         return messages;
     }
 
-    private void setLegalAdviser(CallbackRequest callbackRequest, String authorisation, CaseData caseData) {
-        // Temp just to see if we can create role assignment for legal adviser
-        RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
-            .legalAdviserList(caseData.getLegalAdviserList())
-            .build();
-
-        roleAssignmentService.createRoleAssignment(
-            authorisation,
-            callbackRequest.getCaseDetails(),
-            roleAssignmentDto,
-            SEND_TO_GATEKEEPER.getName(),
-            false,
-            GATEKEEPING_JUDGE_ROLE
-        );
-    }
-
     private void allocateJudgeIfMessageSentToJudge(String authorisation,
                                                    CaseData caseData,
                                                    Message newMessage,
                                                    Map<String, Object> caseDataMap) {
-        if (isJudgeOrLegalAdivser(newMessage)) {
+        if (InternalMessageWhoToSendToEnum.JUDICIARY.equals(newMessage.getInternalMessageWhoToSendTo())
+            || InternalMessageReplyToEnum.JUDICIARY.equals(newMessage.getInternalMessageReplyTo())) {
             List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeForSendAndReply = caseData.getSendOrReplyDto()
                 .getAllocatedJudgeForSendAndReply();
             if (allocatedJudgeForSendAndReply == null) {
@@ -1598,25 +1574,10 @@ public class SendAndReplyService {
         }
     }
 
-    private boolean isJudgeOrLegalAdivser(Message messageRecipient) {
-        return (InternalMessageWhoToSendToEnum.JUDICIARY.equals(messageRecipient.getInternalMessageWhoToSendTo())
-            || InternalMessageReplyToEnum.JUDICIARY.equals(messageRecipient.getInternalMessageReplyTo())
-            || InternalMessageWhoToSendToEnum.LEGAL_ADVISER.equals(messageRecipient.getInternalMessageWhoToSendTo())
-            || InternalMessageReplyToEnum.LEGAL_ADVISER.equals(messageRecipient.getInternalMessageReplyTo()));
-    }
-
     private String getSendReplyJudgeIdamId(CaseData caseData) {
-        if (SEND.equals(caseData.getChooseSendOrReply())) {
-            if (null != caseData.getSendOrReplyMessage().getSendMessageObject().getSendReplyJudgeName()) {
-                return caseData.getSendOrReplyMessage().getSendMessageObject().getSendReplyJudgeName().getIdamId();
-            } else if (caseData.getSendOrReplyMessage().getSendMessageObject().getLegalAdviserList() != null) {
-                val tmpLegalAdviserTest = JudicialUser.builder().idamId(getIdamId(caseData.getSendOrReplyMessage()
-                                                                                      .getSendMessageObject().getLegalAdviserList()
-                                                                                      .getValue().getLabel())[0]).build();
-                log.info("tmpLA: {} ", tmpLegalAdviserTest);
-                return Arrays.toString(getIdamId(caseData.getSendOrReplyMessage().getSendMessageObject()
-                                                     .getLegalAdviserList().getValue().getLabel()));
-            }
+        if (SEND.equals(caseData.getChooseSendOrReply())
+            && null != caseData.getSendOrReplyMessage().getSendMessageObject().getSendReplyJudgeName()) {
+            return caseData.getSendOrReplyMessage().getSendMessageObject().getSendReplyJudgeName().getIdamId();
         } else if (REPLY.equals(caseData.getChooseSendOrReply())
             && null != caseData.getSendOrReplyMessage().getReplyMessageObject().getSendReplyJudgeName()) {
             return caseData.getSendOrReplyMessage().getReplyMessageObject().getSendReplyJudgeName().getIdamId();
