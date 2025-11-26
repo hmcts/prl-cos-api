@@ -223,13 +223,12 @@ public class OrganisationService {
                     userId.get()
                 ));
             } else {
-                log.error("Could not find user id when getting organisation {}", email);
+                String maskedEmail = maskEmail.mask(email);
+                log.error("Could not find user id when getting organisation {}", maskedEmail);
                 return Optional.empty();
             }
         } catch (FeignException exception) {
-            String message = String.join(
-                ":", "Error while fetching organisations by user id "
-            );
+            String message = "Error while fetching organisation by email";
             log.error(message, exception);
             throw new IllegalArgumentException(message);
         }

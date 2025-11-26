@@ -210,4 +210,107 @@ public class CaseInitiationServiceTest {
                 .containsKey(COURT_LIST)
         );
     }
+
+    @Test
+    public void testAssignRespondentSolicitorAccess_allValidationsPass() {
+        PartyDetails respondent = PartyDetails.builder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .solicitorEmail("sol@example.com")
+            .solicitorOrg(Organisation.builder().organisationID("ORG1").build())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(Long.parseLong(CASE_ID))
+            .respondents(List.of(Element.<PartyDetails>builder().value(respondent).build()))
+            .build();
+
+        caseDataMap.put("respondents", List.of(Element.<PartyDetails>builder().value(respondent).build()));
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+
+        when(organisationService.findUserByEmail("sol@example.com"))
+            .thenReturn(java.util.Optional.of("user-id"));
+
+        caseInitiationService.handleCaseInitiation(AUTHORISATION,
+                                                   CallbackRequest.builder().caseDetails(caseDetails).build());
+
+        verify(assignCaseAccessService, times(1))
+            .assignCaseAccessToUserWithRole(any(), any(), any(), any());
+    }
+
+    @Test
+    public void testAssignRespondentSolicitorAccess_emailInvalid() {
+        PartyDetails respondent = PartyDetails.builder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .solicitorEmail("") // invalid
+            .solicitorOrg(Organisation.builder().organisationID("ORG1").build())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(Long.parseLong(CASE_ID))
+            .respondents(List.of(Element.<PartyDetails>builder().value(respondent).build()))
+            .build();
+
+        caseDataMap.put("respondents", List.of(Element.<PartyDetails>builder().value(respondent).build()));
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+
+        when(organisationService.findUserByEmail("")).thenReturn(java.util.Optional.of("user-id"));
+
+        caseInitiationService.handleCaseInitiation(AUTHORISATION,
+                                                   CallbackRequest.builder().caseDetails(caseDetails).build());
+
+        verify(assignCaseAccessService, never())
+            .assignCaseAccessToUserWithRole(any(), any(), any(), any());
+    }
+
+    @Test
+    public void testAssignRespondentSolicitorAccess_orgIdInvalid() {
+        PartyDetails respondent = PartyDetails.builder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .solicitorEmail("sol@example.com")
+            .solicitorOrg(Organisation.builder().organisationID("").build()) // invalid
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(Long.parseLong(CASE_ID))
+            .respondents(List.of(Element.<PartyDetails>builder().value(respondent).build()))
+            .build();
+
+        caseDataMap.put("respondents", List.of(Element.<PartyDetails>builder().value(respondent).build()));
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+
+        when(organisationService.findUserByEmail("sol@example.com"))
+            .thenReturn(java.util.Optional.of("user-id"));
+
+        caseInitiationService.handleCaseInitiation(AUTHORISATION,
+                                                   CallbackRequest.builder().caseDetails(caseDetails).build());
+
+        verify(assignCaseAccessService, never())
+            .assignCaseAccessToUserWithRole(any(), any(), any(), any());
+    }
+
+    @Test
+    public void testAssignRespondentSolicitorAccess_userNotResolvable() {
+        PartyDetails respondent = PartyDetails.builder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .solicitorEmail("sol@example.com")
+            .solicitorOrg(Organisation.builder().organisationID("ORG1").build())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(Long.parseLong(CASE_ID))
+            .respondents(List.of(Element.<PartyDetails>builder().value(respondent).build()))
+            .build();
+
+        caseDataMap.put("respondents", List.of(Element.<PartyDetails>builder().value(respondent).build()));
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+
+        when(organisationService.findUserByEmail("sol@example.com"))
+            .thenReturn(java.util.Optional.empty()); // not resolvable
+
+        caseInitiationService.handleCaseInitiation(AUTHORISATION,
+                                                   CallbackRequest.builder().caseDetails(caseDetails).build());
+
+        verify(assignCaseAccessService, never())
+            .assignCaseAccessToUserWithRole(any(), any(), any(), any());
+    }
 }

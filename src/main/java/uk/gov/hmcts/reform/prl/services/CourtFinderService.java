@@ -131,12 +131,10 @@ public class CourtFinderService {
     }
 
     public String getCorrectPartyPostcode(CaseData caseData) throws NotFoundException {
-        log.info("taskListVersion on case {} is {}", caseData.getId(), caseData.getTaskListVersion());
         if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
             || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) {
             return getCorrectPartyPostcodeV2(caseData);
         }
-        log.info("falling thru as not v2 or v3  case {} is {}", caseData.getId(), caseData.getTaskListVersion());
 
         //current requirements use the first child if multiple children present
         Child child = Optional.ofNullable(caseData.getChildren())

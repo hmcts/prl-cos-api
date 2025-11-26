@@ -590,7 +590,7 @@ public class OrganisationServiceTest {
         // when / then
         assertThatThrownBy(() -> organisationService.getOrganisationByEmailDetail(email))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Error while fetching organisations by user id");
+            .hasMessageContaining("Error while fetching organisation by email");
     }
 
 }

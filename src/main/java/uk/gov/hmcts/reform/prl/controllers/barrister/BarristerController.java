@@ -84,7 +84,7 @@ public class BarristerController extends AbstractCallbackController {
         } catch (Exception e) {
             log.error("Error in handleAddAboutToStartEvent", e);
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .errors(List.of("An unexpected error occurred: " + e.getMessage()))
+                .errors(List.of("Error adding barrister"))
                 .data(callbackRequest.getCaseDetails().getData())
                 .build();
         }
