@@ -139,12 +139,23 @@ public class CaseDataService {
                     s2sToken,
                     cafCassSearchCaseTypeId
                 );
-                cafCassResponse = objectMapper.convertValue(
-                    searchResult,
-                    CafCassResponse.class
-                );
+                if (searchResult != null) {
+                    List<CafCassCaseDetail> cafCassCaseDetails = new ArrayList<>();
+                    searchResult.getCases().forEach(caseData -> {
+                        try {
+                            CafCassCaseDetail cafCassCaseDetail = objectMapper.convertValue(caseData, CafCassCaseDetail.class);
+                            cafCassCaseDetails.add(cafCassCaseDetail);
+                        } catch (Exception e) {
+                            log.error("Error while converting result case to Cafcass casedetails {} with exception", caseData.getId(), e);
+                        }
+                    });
+                    cafCassResponse.setCases(cafCassCaseDetails);
+                    cafCassResponse.setTotal(cafCassCaseDetails.size());
+                }
+
                 if (cafCassResponse.getCases() != null && !cafCassResponse.getCases().isEmpty()) {
-                    log.info("CCD Search Result Size --> {}", cafCassResponse.getTotal());
+                    log.info("CCD Search Result Size --> {} and Cafcass Response Size --> {}", searchResult.getTotal(),
+                             cafCassResponse.getTotal());
                     cafCassFilter.filter(cafCassResponse);
                     log.info("After applying filter Result Size --> {}", cafCassResponse.getTotal());
                     CafCassResponse filteredCafcassData = getHearingDetailsForAllCases(authorisation, cafCassResponse);
