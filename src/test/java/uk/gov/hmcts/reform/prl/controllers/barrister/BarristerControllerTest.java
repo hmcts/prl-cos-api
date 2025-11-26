@@ -459,7 +459,7 @@ public class BarristerControllerTest {
             .handleAddAboutToStartEvent(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
 
         assertEquals(1, response.getErrors().size());
-        assertEquals("An unexpected error occurred: Simulated NPE", response.getErrors().get(0));
+        assertEquals("Error adding barrister", response.getErrors().get(0));
         assertEquals(caseData, response.getData());
     }
 
