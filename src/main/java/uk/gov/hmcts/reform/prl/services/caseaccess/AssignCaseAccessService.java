@@ -73,5 +73,36 @@ public class AssignCaseAccessService {
             .build();
     }
 
+    public void assignCaseAccessToUserWithRole(
+        String caseId,
+        String assigneeUserId,
+        String caseRole,
+        String invokingUserAuth
+    ) {
+        if (!launchDarklyClient.isFeatureEnabled("share-a-case")
+        ) {
+            log.info("share-a-case flag disabled; skipping access assignment");
+            return;
+        }
+
+        String serviceToken = authTokenGenerator.generate();
+
+        AssignCaseAccessRequest request = AssignCaseAccessRequest.builder()
+            .caseId(caseId)
+            .assigneeId(assigneeUserId)
+            .caseTypeId(CASE_TYPE)
+            .caseRoles(List.of(caseRole))       // e.g. "[C100RESPONDENTSOLICITOR1]"
+            .build();
+
+        log.info("Assigning case {} to user {} with role {}", caseId, assigneeUserId, caseRole);
+
+        assignCaseAccessClient.assignCaseAccess(
+            invokingUserAuth,  // caseworker (invoker)
+            serviceToken,
+            true,
+            request
+        );
+    }
+
 
 }
