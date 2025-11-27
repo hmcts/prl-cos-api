@@ -400,7 +400,7 @@ public class ManageDocumentsService {
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList())
             || (CollectionUtils.isNotEmpty(caseData.getScannedDocuments())
             && caseData.getScannedDocuments().size() > 1)) {
-            updateCaseDataUpdatedByRole(caseDataUpdated, userRole);
+            caseDataUpdated.remove(MANAGE_DOCUMENTS_TRIGGERED_BY);
         } else {
             updateCaseDataUpdatedByRole(caseDataUpdated, userRole);
         }
