@@ -393,17 +393,7 @@ public class ManageDocumentsService {
         } else {
             caseDataUpdated.remove(MANAGE_DOCUMENTS_RESTRICTED_FLAG);
         }
-        if (CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList())
-            || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList())
-            || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList())
-            || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList())
-            || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList())
-            || (CollectionUtils.isNotEmpty(caseData.getScannedDocuments())
-            && caseData.getScannedDocuments().size() > 1)) {
-            caseDataUpdated.remove(MANAGE_DOCUMENTS_TRIGGERED_BY);
-        } else {
-            updateCaseDataUpdatedByRole(caseDataUpdated, userRole);
-        }
+        updateCaseDataUpdatedByRole(caseDataUpdated, userRole);
     }
 
     public void moveDocumentsToQuarantineTab(QuarantineLegalDoc quarantineLegalDoc,
