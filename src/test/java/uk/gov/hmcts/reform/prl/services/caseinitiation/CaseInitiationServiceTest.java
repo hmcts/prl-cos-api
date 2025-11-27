@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessService;
+import uk.gov.hmcts.reform.prl.utils.MaskEmail;
 
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +34,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -64,6 +66,8 @@ public class CaseInitiationServiceTest {
     private LocationRefDataService locationRefDataService;
     @Mock
     private OrganisationService organisationService;
+    @Mock
+    private MaskEmail maskEmail;
 
     private CaseData caseData;
     private CaseDetails caseDetails;
@@ -182,7 +186,7 @@ public class CaseInitiationServiceTest {
             .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(locationRefDataService.getCourtLocations(Mockito.anyString()))
+        when(locationRefDataService.getCourtLocations(anyString()))
             .thenReturn(List.of(DynamicListElement.EMPTY));
 
         Assertions.assertTrue(
@@ -202,7 +206,7 @@ public class CaseInitiationServiceTest {
         when(locationRefDataService.getDaCourtLocations(AUTHORISATION))
             .thenReturn(courts);
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(locationRefDataService.getDaCourtLocations(Mockito.anyString()))
+        when(locationRefDataService.getDaCourtLocations(anyString()))
             .thenReturn(courts);
 
         Assertions.assertTrue(
@@ -303,7 +307,7 @@ public class CaseInitiationServiceTest {
 
         caseDataMap.put("respondents", List.of(Element.<PartyDetails>builder().value(respondent).build()));
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-
+        when(maskEmail.mask(anyString())).thenReturn("s**l@example.com");
         when(organisationService.findUserByEmail("sol@example.com"))
             .thenReturn(java.util.Optional.empty()); // not resolvable
 
