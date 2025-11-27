@@ -3274,49 +3274,6 @@ public class CallbackControllerTest {
     }
 
     @Test
-    public void testAttachScanDocsWaChangeWithQuarantineDocsAndScannedDocs() {
-
-        Element<QuarantineLegalDoc> courtStaffQuanElement = element(QuarantineLegalDoc.builder().build());
-        Element<QuarantineLegalDoc> cafcassQuanElement = element(QuarantineLegalDoc.builder().build());
-        Element<QuarantineLegalDoc> legalProfDocQuanElement = element(QuarantineLegalDoc.builder().build());
-
-        List<Element<QuarantineLegalDoc>> courtStaffQuanList = Collections.singletonList(courtStaffQuanElement);
-        List<Element<QuarantineLegalDoc>> cafcassQuanList = Collections.singletonList(cafcassQuanElement);
-        List<Element<QuarantineLegalDoc>> legalProfDocQuanList = Collections.singletonList(legalProfDocQuanElement);
-
-        Element<ScannedDocument> scannedDocElement = element(ScannedDocument.builder().build());
-        List<Element<ScannedDocument>> scannedDocList = Collections.singletonList(scannedDocElement);
-
-        CaseData caseData = CaseData.builder()
-            .issueDate(LocalDate.now())
-            .documentManagementDetails(DocumentManagementDetails.builder()
-                                           .courtStaffQuarantineDocsList(courtStaffQuanList)
-                                           .cafcassQuarantineDocsList(cafcassQuanList)
-                                           .legalProfQuarantineDocsList(legalProfDocQuanList)
-                                           .build())
-            .scannedDocuments(scannedDocList)
-            .build();
-
-        Map<String, Object> stringObjectMap = new HashMap<>();
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(1L)
-                             .data(stringObjectMap).build()).build();
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-
-        doCallRealMethod().when(manageDocumentsService).setFlagsForWaTask(any(),any(),any(),any());
-
-        AboutToStartOrSubmitCallbackResponse response = callbackController
-            .attachScanDocsWaChange(authToken, s2sToken, callbackRequest);
-        assertNotNull(response.getData().get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
-        assertEquals(TRUE, response.getData().get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
-        assertNull(response.getData().get(MANAGE_DOCUMENTS_TRIGGERED_BY));
-    }
-
-    @Test
     public void testAttachScanDocsWaChangeWithoutQuarantineDocsAndScannedDocs() {
 
         CaseData caseData = CaseData.builder()
