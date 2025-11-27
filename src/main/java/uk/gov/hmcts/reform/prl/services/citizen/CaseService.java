@@ -105,6 +105,8 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_RESPONSE;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.TRANSCRIPTS_OF_JUDGEMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_LOWER_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWAITING_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
@@ -119,6 +121,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTY_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTY_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTY_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU;
@@ -1505,7 +1509,8 @@ public class CaseService {
                     .categoryId(PartyEnum.applicant.equals(awp.getPartyType())
                         ? APPLICATIONS_WITHIN_PROCEEDINGS : APPLICATIONS_FROM_OTHER_PROCEEDINGS)
                     .document(document.getDocument())
-                    .uploadedDate(LocalDateTime.parse(awp.getUploadedDateTime(),
+                    .uploadedDate(LocalDateTime.parse(awp.getUploadedDateTime().replace(AM_LOWER_CASE, AM_UPPER_CASE)
+                                                          .replace(PM_LOWER_CASE, PM_UPPER_CASE),
                         DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS_AM_PM))
                     .build()
             ).toList();
@@ -1536,7 +1541,9 @@ public class CaseService {
                          .categoryId(PartyEnum.applicant.equals(awp.getPartyType())
                                          ? APPLICATIONS_WITHIN_PROCEEDINGS : APPLICATIONS_FROM_OTHER_PROCEEDINGS)
                          .document(document)
-                         .uploadedDate(LocalDateTime.parse(awp.getUploadedDateTime(),
+                         .uploadedDate(LocalDateTime.parse(awp.getUploadedDateTime()
+                                                               .replace(AM_LOWER_CASE, AM_UPPER_CASE)
+                                                               .replace(PM_LOWER_CASE, PM_UPPER_CASE),
                                                            DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS_AM_PM))
                          .build()
             ).toList();
