@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessService;
+import uk.gov.hmcts.reform.prl.utils.MaskEmail;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -43,6 +44,7 @@ public class CaseInitiationService {
     private final LocationRefDataService locationRefDataService;
     private final OrganisationService organisationService;
     public static final String COURT_LIST = "submitCountyCourtSelection";
+    private final MaskEmail maskEmail;
 
     public void handleCaseInitiation(String authorisation, CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -89,7 +91,6 @@ public class CaseInitiationService {
         return caseDataUpdated;
     }
 
-    // Java
     private void assignRespondentSolicitorsAccess(String caseId,
                                                   String invokingAuth,
                                                   CaseData caseData) {
@@ -114,18 +115,26 @@ public class CaseInitiationService {
             Optional<String> userIdOpt = organisationService.findUserByEmail(solicitorEmail);
 
             if (isSolicitorEmailValid(solicitorEmail, caseId, i)
-                && isSolicitorOrgIdValid(solicitorOrgId, caseId)
-                && isSolicitorUserResolvable(userIdOpt, solicitorEmail)) {
+                && isSolicitorOrgIdValid(solicitorOrgId, caseId)) {
 
-                String assigneeUserId = userIdOpt.get();
-                CaseRole role = CaseRole.respondentSolicitors().get(i);
+                if (userIdOpt.isPresent()) {
+                    String assigneeUserId = userIdOpt.get();
+                    CaseRole role = CaseRole.respondentSolicitors().get(i);
 
-                assignCaseAccessService.assignCaseAccessToUserWithRole(
-                    caseId,
-                    assigneeUserId,
-                    role.formattedName(),
-                    invokingAuth
-                );
+                    assignCaseAccessService.assignCaseAccessToUserWithRole(
+                        caseId,
+                        assigneeUserId,
+                        role.formattedName(),
+                        invokingAuth
+                    );
+                } else {
+                    log.warn(
+                        "Unable to resolve IDAM user for respondent sol {} on case {}",
+                        maskEmail.mask(solicitorEmail), caseId
+                    );
+                    //just return for now could add exception
+                    return;
+                }
             }
         }
     }
@@ -141,14 +150,6 @@ public class CaseInitiationService {
     private boolean isSolicitorOrgIdValid(String orgId, String caseId) {
         if (orgId == null || orgId.isBlank()) {
             log.warn("Respondent solicitor org missing on case {}; skipping", caseId);
-            return false;
-        }
-        return true;
-    }
-
-    private boolean isSolicitorUserResolvable(Optional<String> userIdOpt, String email) {
-        if (userIdOpt.isEmpty()) {
-            log.warn("Unable to resolve IDAM user for respondent sol {}", email);
             return false;
         }
         return true;
