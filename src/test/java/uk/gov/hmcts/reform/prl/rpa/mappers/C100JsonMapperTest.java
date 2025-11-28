@@ -28,6 +28,10 @@ public class C100JsonMapperTest {
     @Mock
     CombinedMapper combinedMapper;
     @Mock
+    ApplicantsMapper applicantsMapper;
+    @Mock
+    RespondentsMapper respondentsMapper;
+    @Mock
     ChildrenMapper childrenMapper;
 
     @Mock
