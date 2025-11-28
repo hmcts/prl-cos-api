@@ -1048,7 +1048,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testCitizenOrdersWithLowerCaseUploadedDateTimeFL401() {
+    public void testCitizenOrdersWithSolicitorUploadedApplicationFL401() {
         //Given
         orderDetails = orderDetails.toBuilder()
             .serveOrderDetails(orderDetails.getServeOrderDetails().toBuilder()
@@ -1064,7 +1064,7 @@ public class CaseServiceTest {
             .orderCollection(List.of(element(orderDetails)))
             .additionalApplicationsBundle(List.of(element(AdditionalApplicationsBundle
                                                               .builder()
-                                                              .uploadedDateTime("04-Sep-2024 01:38:33 am")
+                                                              .uploadedDateTime("04-Sept-2024 18:38:33 pm")
                                                               .partyType(PartyEnum.applicant)
                                                               .selectedParties(List.of(element(ServedParties.builder().partyId(
                                                                   testUuid.toString()).build())))
@@ -1092,7 +1092,6 @@ public class CaseServiceTest {
         assertTrue(citizenDocumentsManagement.getCitizenOtherDocuments().stream().anyMatch(
             el -> el.getDocument().getDocumentUrl().equals("c2")));
     }
-
 
     @Test
     public void testCitizenOrdersSosCompletedFL401ForOccupationOrder() {
