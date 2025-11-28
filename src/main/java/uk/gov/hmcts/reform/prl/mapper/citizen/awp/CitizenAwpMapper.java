@@ -41,6 +41,7 @@ import java.util.Optional;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
+import static uk.gov.hmcts.reform.prl.services.citizen.CaseService.DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS_AM_PM;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCitizenAwpPaymentIfPresent;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -48,8 +49,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 @Slf4j
 @Component
 public class CitizenAwpMapper {
-    private static final String DATE_FORMAT = "dd-MMM-yyyy hh:mm:ss a";
-
     private static final String CAT_AWP_APPLICANT   = "applicationsWithinProceedings";
     private static final String CAT_AWP_RESPONDENT = "applicationsWithinProceedingsRes";
     private static final String CAT_AWP_UNDEFINED = "undefined";
@@ -89,7 +88,7 @@ public class CitizenAwpMapper {
         AdditionalApplicationsBundle additionalApplicationsBundle = AdditionalApplicationsBundle.builder()
             .author(citizenAwpRequest.getPartyName())
             .uploadedDateTime(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE))
-                                  .format(DateTimeFormatter.ofPattern(DATE_FORMAT, Locale.ENGLISH)))
+                                  .format(DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS_AM_PM))
             .partyType(PartyEnum.valueOf(citizenAwpRequest.getPartyType()))
             .selectedParties(getSelectedParties(citizenAwpRequest))
             .c2DocumentBundle(getC2ApplicationBundle(citizenAwpRequest))
@@ -199,7 +198,7 @@ public class CitizenAwpMapper {
                     .applicantName(citizenAwpRequest.getPartyName())
                     .author(citizenAwpRequest.getPartyName())
                     .uploadedDateTime(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE))
-                                          .format(DateTimeFormatter.ofPattern(DATE_FORMAT, Locale.ENGLISH)))
+                                          .format(DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS_AM_PM))
                     .documentRelatedToCase(YesOrNo.Yes)
                     .finalDocument(toDocElementsWithCategory(citizenAwpRequest.getUploadedApplicationForms(), cat))
                     .supportingEvidenceBundle(YesOrNo.Yes.equals(citizenAwpRequest.getHasSupportingDocuments())
@@ -237,7 +236,7 @@ public class CitizenAwpMapper {
                 .applicantName(citizenAwpRequest.getPartyName())
                 .author(citizenAwpRequest.getPartyName())
                 .uploadedDateTime(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE))
-                                      .format(DateTimeFormatter.ofPattern(DATE_FORMAT, Locale.ENGLISH)))
+                                      .format(DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS_AM_PM))
                 .documentRelatedToCase(YesOrNo.Yes)
                 .finalDocument(getDocuments(citizenAwpRequest.getUploadedApplicationForms()))
                 .supportingEvidenceBundle(YesOrNo.Yes.equals(citizenAwpRequest.getHasSupportingDocuments())
