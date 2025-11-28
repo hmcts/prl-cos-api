@@ -160,7 +160,7 @@ public class CaseService {
         DateTimeFormatter.ofPattern("d-MMM-yyyy hh:mm:ss a", Locale.ENGLISH);
     public static final List<DateTimeFormatter> POSSIBLE_DATE_FORMATTERS = List.of(
         DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS_AM_PM,
-        DateTimeFormatter.ofPattern("d-MMM-yyyy HH:mm:ss a", Locale.UK)
+        DateTimeFormatter.ofPattern("dd-MMM-yyyy HH:mm:ss a", Locale.UK)
     );
     public static final String IS_NEW = "isNew";
     public static final String IS_FINAL = "isFinal";
