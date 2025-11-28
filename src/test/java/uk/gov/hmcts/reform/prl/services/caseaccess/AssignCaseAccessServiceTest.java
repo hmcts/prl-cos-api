@@ -123,5 +123,32 @@ public class AssignCaseAccessServiceTest {
         roleAssignmentServiceResponse.setRoleAssignmentResponse(listOfRoleAssignmentResponses);
         return roleAssignmentServiceResponse;
     }
+
+    @Test
+    public void testAssignCaseAccessToUserWithRole_featureEnabled() {
+        when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(true);
+        when(authTokenGenerator.generate()).thenReturn("service-token");
+        doNothing().when(assignCaseAccessClient)
+            .assignCaseAccess(Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(), Mockito.any());
+
+        assignCaseAccessService.assignCaseAccessToUserWithRole(
+            "42", "user-id", "[C100RESPONDENTSOLICITOR1]", "invoker-auth"
+        );
+
+        verify(assignCaseAccessClient, times(1))
+            .assignCaseAccess(Mockito.eq("invoker-auth"), Mockito.eq("service-token"), Mockito.eq(true), Mockito.any());
+    }
+
+    @Test
+    public void testAssignCaseAccessToUserWithRole_featureDisabled() {
+        when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(false);
+
+        assignCaseAccessService.assignCaseAccessToUserWithRole(
+            "42", "user-id", "[C100RESPONDENTSOLICITOR1]", "invoker-auth"
+        );
+
+        verifyNoMoreInteractions(assignCaseAccessClient);
+    }
+
 }
 

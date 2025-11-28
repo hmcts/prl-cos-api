@@ -70,6 +70,7 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.DocumentListForLa;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
+import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
@@ -79,6 +80,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
+import uk.gov.hmcts.reform.prl.utils.MaskEmail;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -88,6 +90,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
@@ -96,6 +99,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -200,6 +204,15 @@ public class ServiceOfApplicationServiceTest {
 
     @Mock
     private HearingService hearingService;
+
+    @Mock
+    private OrganisationService organisationService;
+
+    @Mock
+    private MaskEmail maskEmail;
+
+    @Mock
+    private AssignCaseAccessService assignCaseAccessService;
 
     private final String authorization = "authToken";
     private final String testString = "test";
@@ -5218,5 +5231,85 @@ public class ServiceOfApplicationServiceTest {
 
     }
 
+    @Test
+    public void testAssignAccessWithValidSolicitorDetails() {
+        PartyDetails party = PartyDetails.builder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .solicitorEmail("solicitor@example.com")
+            .solicitorOrg(Organisation.builder().organisationID("ORG123").build())
+            .build();
+        Element<PartyDetails> respondent = Element.<PartyDetails>builder().value(party).build();
+        CaseData caseData = CaseData.builder().id(123L).respondents(List.of(respondent)).build();
+
+        when(organisationService.findUserByEmail("solicitor@example.com")).thenReturn(Optional.of("userId"));
+        when(maskEmail.mask("solicitor@example.com")).thenReturn("masked@example.com");
+
+        serviceOfApplicationService.assignRespondentSolicitorsAccess("auth-token", caseData);
+
+        verify(assignCaseAccessService).assignCaseAccessToUserWithRole(
+            any(), eq("userId"), eq("[C100RESPONDENTSOLICITOR1]"), any());
+    }
+
+    @Test
+    public void testAssignAccessWithMissingSolicitorEmail() {
+        PartyDetails party = PartyDetails.builder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .solicitorEmail("")
+            .solicitorOrg(Organisation.builder().organisationID("ORG123").build())
+            .build();
+        Element<PartyDetails> respondent = Element.<PartyDetails>builder().value(party).build();
+        CaseData caseData = CaseData.builder().id(123L).respondents(List.of(respondent)).build();
+
+        serviceOfApplicationService.assignRespondentSolicitorsAccess("auth-token", caseData);
+
+        verifyNoInteractions(assignCaseAccessService);
+    }
+
+    @Test
+    public void testAssignAccessWithMissingSolicitorOrgId() {
+        PartyDetails party = PartyDetails.builder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .solicitorEmail("solicitor@example.com")
+            .solicitorOrg(Organisation.builder().organisationID("").build())
+            .build();
+        Element<PartyDetails> respondent = Element.<PartyDetails>builder().value(party).build();
+        CaseData caseData = CaseData.builder().id(123L).respondents(List.of(respondent)).build();
+
+        serviceOfApplicationService.assignRespondentSolicitorsAccess("auth-token", caseData);
+
+        verifyNoInteractions(assignCaseAccessService);
+    }
+
+    @Test
+    public void testAssignAccessWithNoLegalRepresentation() {
+        PartyDetails party = PartyDetails.builder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .solicitorEmail("solicitor@example.com")
+            .solicitorOrg(Organisation.builder().organisationID("ORG123").build())
+            .build();
+        Element<PartyDetails> respondent = Element.<PartyDetails>builder().value(party).build();
+        CaseData caseData = CaseData.builder().id(123L).respondents(List.of(respondent)).build();
+
+        serviceOfApplicationService.assignRespondentSolicitorsAccess("auth-token", caseData);
+
+        verifyNoInteractions(assignCaseAccessService);
+    }
+
+    @Test
+    public void testAssignAccessWhenOrganisationServiceReturnsEmpty() {
+        PartyDetails party = PartyDetails.builder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .solicitorEmail("solicitor@example.com")
+            .solicitorOrg(Organisation.builder().organisationID("ORG123").build())
+            .build();
+        Element<PartyDetails> respondent = Element.<PartyDetails>builder().value(party).build();
+        CaseData caseData = CaseData.builder().id(123L).respondents(List.of(respondent)).build();
+
+        when(organisationService.findUserByEmail("solicitor@example.com")).thenReturn(Optional.empty());
+
+        serviceOfApplicationService.assignRespondentSolicitorsAccess("auth-token", caseData);
+
+        verifyNoInteractions(assignCaseAccessService);
+    }
 
 }
