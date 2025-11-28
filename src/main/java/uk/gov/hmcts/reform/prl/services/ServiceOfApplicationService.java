@@ -28,9 +28,11 @@ import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.noticeofchange.CaseRole;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.exception.ServiceOfApplicationException;
@@ -61,6 +63,7 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.AccessCode;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.DocumentListForLa;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
+import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
@@ -71,6 +74,7 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
+import uk.gov.hmcts.reform.prl.utils.MaskEmail;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -308,6 +312,9 @@ public class ServiceOfApplicationService {
     private final LaunchDarklyClient launchDarklyClient;
     private final ConfidentialityCheckService confidentialityCheckService;
     private final HearingService hearingService;
+    private final OrganisationService organisationService;
+    private final MaskEmail maskEmail;
+    private final AssignCaseAccessService assignCaseAccessService;
 
     @Value("${citizen.url}")
     private String citizenUrl;
@@ -1729,6 +1736,9 @@ public class ServiceOfApplicationService {
         caseDataMap.put("fm5RemindersSent", "NO");
         //PRL-3466 - auto link citizen case if conf check is not required
         autoLinkCitizenCase(caseData, caseDataMap, callbackRequest.getEventId());
+
+        // respondents access I shold put this behind a launchdarkly flag
+        assignRespondentSolicitorsAccess(authorisation, caseData);
 
         //PRL-5335 - WA fields for bundling lip case
         String isAllApplicantsAreLiP = (String) caseDataMap.get(WA_IS_APPLICANT_REPRESENTED);
@@ -4288,5 +4298,69 @@ public class ServiceOfApplicationService {
             && isNotEmpty(party.getValue().getEmail())
             && party.getValue().getEmail().equalsIgnoreCase(
             caseData.getUserInfo().get(0).getValue().getEmailAddress());
+    }
+
+    void assignRespondentSolicitorsAccess(String invokingAuth,
+                                                  CaseData caseData) {
+
+        if (caseData.getRespondents() == null) {
+            return;
+        }
+
+        List<Element<PartyDetails>> respondents = caseData.getRespondents();
+
+        for (int i = 0; i < respondents.size(); i++) {
+            PartyDetails party = respondents.get(i).getValue();
+
+            if (!YesNoDontKnow.yes.equals(party.getDoTheyHaveLegalRepresentation())) {
+                continue;
+            }
+
+            var solicitorOrgObj = party.getSolicitorOrg();
+            String solicitorOrgId = solicitorOrgObj != null ? solicitorOrgObj.getOrganisationID() : null;
+            String solicitorEmail = party.getSolicitorEmail();
+
+            Optional<String> userIdOpt = organisationService.findUserByEmail(solicitorEmail);
+
+            String caseId = String.valueOf(caseData.getId());
+            if (isSolicitorEmailValid(solicitorEmail, caseId, i)
+                && isSolicitorOrgIdValid(solicitorOrgId, caseId)) {
+
+                if (userIdOpt.isPresent()) {
+                    String assigneeUserId = userIdOpt.get();
+                    CaseRole role = CaseRole.respondentSolicitors().get(i);
+
+                    assignCaseAccessService.assignCaseAccessToUserWithRole(
+                        caseId,
+                        assigneeUserId,
+                        role.formattedName(),
+                        invokingAuth
+                    );
+                } else {
+                    log.warn(
+                        "Unable to resolve IDAM user for respondent sol {} on case {}",
+                        maskEmail.mask(solicitorEmail), caseId
+                    );
+                    //just return for now could add exception
+                    return;
+                }
+            }
+        }
+    }
+
+    private boolean isSolicitorEmailValid(String email, String caseId, int index) {
+        if (email == null || email.isBlank()) {
+            log.warn("Respondent solicitor email missing on case {} for respondent index {}; skipping", caseId, index);
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isSolicitorOrgIdValid(String orgId, String caseId) {
+        if (orgId == null || orgId.isBlank()) {
+            log.warn("Respondent solicitor org missing on case {}; skipping", caseId);
+            return false;
+        }
+        return true;
     }
 }
