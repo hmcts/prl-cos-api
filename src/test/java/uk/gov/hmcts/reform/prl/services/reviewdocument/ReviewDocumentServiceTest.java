@@ -319,7 +319,7 @@ public class ReviewDocumentServiceTest {
 
             .citizenUploadedDocumentList(List.of(element(UploadedDocuments.builder().build()))).build();
 
-        Assert.assertTrue(!reviewDocumentService.fetchDocumentDynamicListElements(caseData, caseDataUpdated).isEmpty());
+        Assert.assertTrue(!reviewDocumentService.fetchDocumentDynamicListElements(caseData).isEmpty());
     }
 
     @Test
@@ -341,7 +341,7 @@ public class ReviewDocumentServiceTest {
             .citizenUploadedDocumentList(List.of(element(UploadedDocuments.builder().build()))).build();
         when(objectMapper.convertValue((Object) any(), (Class<Object>) any()))
             .thenReturn(quarantineConfidentialDoc);
-        Assert.assertTrue(!reviewDocumentService.fetchDocumentDynamicListElements(caseData, caseDataUpdated).isEmpty());
+        Assert.assertTrue(!reviewDocumentService.fetchDocumentDynamicListElements(caseData).isEmpty());
     }
 
     @Test
@@ -364,7 +364,7 @@ public class ReviewDocumentServiceTest {
             )))
             .build();
 
-        Assert.assertTrue(!reviewDocumentService.fetchDocumentDynamicListElements(caseData, caseDataUpdated).isEmpty());
+        Assert.assertTrue(!reviewDocumentService.fetchDocumentDynamicListElements(caseData).isEmpty());
     }
 
     @Test
@@ -385,7 +385,7 @@ public class ReviewDocumentServiceTest {
             )
             .citizenUploadedDocumentList(List.of(element(UploadedDocuments.builder().build()))).build();
 
-        Assert.assertTrue(!reviewDocumentService.fetchDocumentDynamicListElements(caseData, caseDataUpdated).isEmpty());
+        Assert.assertTrue(!reviewDocumentService.fetchDocumentDynamicListElements(caseData).isEmpty());
     }
 
     @Test
@@ -406,7 +406,7 @@ public class ReviewDocumentServiceTest {
             )
             .citizenUploadedDocumentList(List.of(element(UploadedDocuments.builder().build()))).build();
 
-        Assert.assertTrue(!reviewDocumentService.fetchDocumentDynamicListElements(caseData, caseDataUpdated).isEmpty());
+        Assert.assertTrue(!reviewDocumentService.fetchDocumentDynamicListElements(caseData).isEmpty());
     }
 
     @Test
@@ -414,14 +414,12 @@ public class ReviewDocumentServiceTest {
         HashMap<String, Object> caseDataUpdated = new HashMap<>();
         Assert.assertTrue(reviewDocumentService.fetchDocumentDynamicListElements(
             CaseData.builder()
-                .documentManagementDetails(DocumentManagementDetails.builder().build()).build(),
-            caseDataUpdated
+                .documentManagementDetails(DocumentManagementDetails.builder().build()).build()
         ).isEmpty());
     }
 
     @Test
     public void testGetDocumentDetailsWhenUploadedByLegalProfessional() {
-
         quarantineLegalDoc = quarantineLegalDoc.toBuilder()
             .document(document)
             .restrictedDetails("test details")
@@ -431,7 +429,7 @@ public class ReviewDocumentServiceTest {
         CaseData caseData = CaseData.builder()
             .documentManagementDetails(
                 DocumentManagementDetails.builder()
-                    .tempQuarantineDocumentList(List.of(element(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),
+                    .legalProfQuarantineDocsList(List.of(element(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),
                                                                 quarantineLegalDoc)))
                     .build()
             )
@@ -453,7 +451,6 @@ public class ReviewDocumentServiceTest {
 
     @Test
     public void testGetDocumentDetailsWhenUploadedByCafcassProfessional() {
-
         quarantineLegalDoc = quarantineLegalDoc.toBuilder()
             .cafcassQuarantineDocument(document)
             .restrictedDetails("test details")
@@ -463,7 +460,7 @@ public class ReviewDocumentServiceTest {
         CaseData caseData = CaseData.builder()
             .documentManagementDetails(
                 DocumentManagementDetails.builder()
-                    .tempQuarantineDocumentList(List.of(element(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),
+                    .cafcassQuarantineDocsList(List.of(element(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),
                                                                 quarantineLegalDoc)))
                     .build()
             )
@@ -493,7 +490,7 @@ public class ReviewDocumentServiceTest {
         CaseData caseData = CaseData.builder()
             .documentManagementDetails(
                 DocumentManagementDetails.builder()
-                    .tempQuarantineDocumentList(List.of(element(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),
+                    .courtStaffQuarantineDocsList(List.of(element(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),
                                                                 quarantineLegalDoc)))
                     .build()
             )
@@ -513,13 +510,6 @@ public class ReviewDocumentServiceTest {
 
     @Test
     public void testGetDocumentDetailsWhenUploadedByCitizen() {
-        Element element = Element.builder().id(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
-            .value(UploadedDocuments.builder()
-                       .citizenDocument(Document.builder()
-                                            .build())
-                       .uploadedBy("Citizen")
-                       .partyName("test")
-                       .documentType("test").build()).build();
         QuarantineLegalDoc quarantineLegalDoc1 = QuarantineLegalDoc.builder().uploadedBy("Citizen").build();
         Element<QuarantineLegalDoc> quarantineLegalDocElement = Element.<QuarantineLegalDoc>builder()
             .id(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
@@ -527,8 +517,7 @@ public class ReviewDocumentServiceTest {
         CaseData caseData = CaseData.builder()
             .documentManagementDetails(
                 DocumentManagementDetails.builder()
-                    .citizenUploadQuarantineDocsList(List.of(element))
-                    .tempQuarantineDocumentList(List.of(quarantineLegalDocElement))
+                    .citizenQuarantineDocsList(List.of(quarantineLegalDocElement))
                     .build()
             )
             .reviewDocuments(ReviewDocuments.builder()
@@ -546,11 +535,6 @@ public class ReviewDocumentServiceTest {
 
     @Test
     public void testGetDocumentDetailsWhenUploadedByBulkscan() {
-        QuarantineLegalDoc quarantineLegalDoc1 = QuarantineLegalDoc.builder().uploaderRole("Legal professional").build();
-        Element<QuarantineLegalDoc> quarantineLegalDocElement = Element.<QuarantineLegalDoc>builder()
-            .id(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
-            .value(quarantineLegalDoc1).build();
-
         Element element1 = Element.builder().id(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
             .value(ScannedDocument.builder()
                        .scannedDate(LocalDateTime.now())
@@ -564,8 +548,7 @@ public class ReviewDocumentServiceTest {
                        .build()).build();
         CaseData caseData = CaseData.builder()
             .scannedDocuments(List.of(element1))
-            .documentManagementDetails(DocumentManagementDetails.builder()
-                                           .tempQuarantineDocumentList(List.of(quarantineLegalDocElement)).build())
+            .documentManagementDetails(DocumentManagementDetails.builder().build())
             .reviewDocuments(ReviewDocuments.builder()
                                  .reviewDocsDynamicList(DynamicList.builder().value(
                                      DynamicListElement.builder()
@@ -1364,7 +1347,7 @@ public class ReviewDocumentServiceTest {
             )
             .courtNavUploadedDocs(List.of(element(UploadedDocuments.builder().build()))).build();
 
-        Assert.assertTrue(!reviewDocumentService.fetchDocumentDynamicListElements(caseData, caseDataUpdated).isEmpty());
+        Assert.assertTrue(!reviewDocumentService.fetchDocumentDynamicListElements(caseData).isEmpty());
     }
 
     @Test
@@ -1385,8 +1368,7 @@ public class ReviewDocumentServiceTest {
         CaseData caseData = CaseData.builder()
             .documentManagementDetails(
                 DocumentManagementDetails.builder()
-                    .courtNavQuarantineDocumentList(List.of(element))
-                    .tempQuarantineDocumentList(List.of(quarantineLegalDocElement))
+                    .courtNavQuarantineDocumentList(List.of(quarantineLegalDocElement))
                     .build()
             )
             .reviewDocuments(ReviewDocuments.builder()
@@ -1714,7 +1696,7 @@ public class ReviewDocumentServiceTest {
             .documentManagementDetails(
                 DocumentManagementDetails.builder()
                     .courtNavQuarantineDocumentList(List.of(element))
-                    .tempQuarantineDocumentList(List.of(quarantineLegalDocElement))
+                    .legalProfQuarantineDocsList(List.of(quarantineLegalDocElement))
                     .build()
             )
             .reviewDocuments(ReviewDocuments.builder()
@@ -1742,7 +1724,7 @@ public class ReviewDocumentServiceTest {
         CaseData caseData = CaseData.builder()
             .documentManagementDetails(
                 DocumentManagementDetails.builder()
-                    .tempQuarantineDocumentList(List.of(element(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),
+                    .legalProfQuarantineDocsList(List.of(element(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),
                                                                 quarantineLegalDoc)))
                     .build()
             )

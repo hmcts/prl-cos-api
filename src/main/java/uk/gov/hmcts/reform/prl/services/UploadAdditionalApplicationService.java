@@ -148,7 +148,7 @@ public class UploadAdditionalApplicationService {
             author = getAuthor(caseData.getUploadAdditionalApplicationData(), userDetails, partyName);
             String currentDateTime = LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).format(DateTimeFormatter.ofPattern(
                 "dd-MMM-yyyy HH:mm:ss a",
-                Locale.UK
+                Locale.ENGLISH
             ));
 
             C2DocumentBundle c2DocumentBundle = getC2DocumentBundle(caseData, author, currentDateTime, partyName);
