@@ -21,14 +21,12 @@ public class CombinedMapper {
     private final ApplicantsMapper applicantsMapper;
     private final RespondentsMapper respondentsMapper;
     private final SolicitorsMapper solicitorsMapper;
-    private JsonArray applicantArray;
-    private JsonArray respondentArray;
 
     public JsonArray map(CaseData caseData) {
         Map<String, PartyDetails> solicitorMap = new HashMap<>();
         Map<String, PartyDetails> respondentMap = new HashMap<>();
-        applicantArray = applicantsMapper.map(caseData.getApplicants(), solicitorMap);
-        respondentArray = respondentsMapper.map(caseData.getRespondents(), respondentMap);
+        applicantsMapper.map(caseData.getApplicants(), solicitorMap);
+        respondentsMapper.map(caseData.getRespondents(), respondentMap);
         solicitorMap.putAll(respondentMap);
         return solicitorsMapper.mapSolicitorList(solicitorMap);
     }

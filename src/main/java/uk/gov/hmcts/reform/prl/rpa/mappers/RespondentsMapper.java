@@ -28,26 +28,27 @@ public class RespondentsMapper {
 
     private final AddressMapper addressMapper;
 
-    public JsonArray map(List<Element<PartyDetails>> respondents, Map<String, PartyDetails> respondentSolicitorMap) {
+    public void map(List<Element<PartyDetails>> respondents, Map<String, PartyDetails> respondentSolicitorMap) {
         Optional<List<Element<PartyDetails>>> respondentElementsCheck = ofNullable(respondents);
         if (respondentElementsCheck.isEmpty()) {
-            return JsonValue.EMPTY_JSON_ARRAY;
+            log.info("No respondents found, skipping mapping to respondent solicitor map");
+            return;
         }
-        List<PartyDetails> respondentList = respondents.stream()
-            .map(Element::getValue)
-            .toList();
+
         AtomicInteger counter = new AtomicInteger(1);
-        return respondentList.stream().map(respondent -> getRespondent(counter, respondent,
-                                                                       respondentSolicitorMap
-        )).collect(JsonCollectors.toJsonArray());
+        for (Element<PartyDetails> respondent : respondents) {
+            addRespondentToRespondentsMap(counter.getAndIncrement(), respondent.getValue(), respondentSolicitorMap);
+        }
     }
 
-    private JsonObject getRespondent(AtomicInteger counter, PartyDetails respondent,
-                                     Map<String, PartyDetails> respondentSolicitorMap) {
+    private void addRespondentToRespondentsMap(int counter, PartyDetails respondent, Map<String, PartyDetails> respondentSolicitorMap) {
         if (null != respondent.getDoTheyHaveLegalRepresentation()
             && respondent.getDoTheyHaveLegalRepresentation().equals(YesNoDontKnow.yes)) {
             respondentSolicitorMap.put("RES_SOL_" + counter, respondent);
         }
+    }
+
+    private JsonObject getRespondent(AtomicInteger counter, PartyDetails respondent) {
         return new NullAwareJsonObjectBuilder()
             .add("firstName", respondent.getFirstName())
             .add("lastName", respondent.getLastName())
@@ -86,4 +87,14 @@ public class RespondentsMapper {
             .build();
     }
 
+    public JsonArray getRespondentArray(List<Element<PartyDetails>> respondentList) {
+        Optional<List<Element<PartyDetails>>> respondentElementsCheck = ofNullable(respondentList);
+        if (respondentElementsCheck.isEmpty()) {
+            return JsonValue.EMPTY_JSON_ARRAY;
+        }
+
+        AtomicInteger counter = new AtomicInteger(1);
+        return respondentList.stream().map(respondent -> getRespondent(counter, respondent.getValue())).collect(
+            JsonCollectors.toJsonArray());
+    }
 }
