@@ -896,7 +896,7 @@ public class ServiceOfApplicationServiceTest {
             .respondents(partyList)
             .applicantCaseName("Test Case 45678")
             .caseInvites(caseInvites)
-            .finalDocument(Document.builder().documentFileName("").build())
+            .finalDocument(Document.builder().categoryId("finalDocument").documentFileName("").build())
             .finalWelshDocument(Document.builder().documentFileName("").build())
             .c1AWelshDocument(Document.builder().documentFileName("").build())
             .orderCollection(List.of(Element.<OrderDetails>builder().value(OrderDetails.builder()
@@ -933,6 +933,16 @@ public class ServiceOfApplicationServiceTest {
         assertNotNull(servedApplicationDetails);
         assertEquals("By email and post", servedApplicationDetails.getModeOfService());
         assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
+        servedApplicationDetails.getEmailNotificationDetails().forEach(emailNotificationDetail -> {
+            emailNotificationDetail.getValue().getDocs().forEach(documentElement -> {
+                assertNull(documentElement.getValue().getCategoryId());
+            });
+        });
+        servedApplicationDetails.getBulkPrintDetails().forEach(bulkPrintDetailsElement -> {
+            bulkPrintDetailsElement.getValue().getPrintDocs().forEach(documentElement -> {
+                assertNull(documentElement.getValue().getCategoryId());
+            });
+        });
     }
 
     @Test

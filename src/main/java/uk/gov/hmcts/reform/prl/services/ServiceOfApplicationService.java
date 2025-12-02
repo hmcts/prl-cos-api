@@ -420,12 +420,41 @@ public class ServiceOfApplicationService {
             );
         }
 
+        removeServedDocumentCategories(emailNotificationDetails, bulkPrintDetails);
+
         return ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
             .servedBy(userService.getUserDetails(authorization).getFullName())
             .servedAt(CaseUtils.getCurrentDate())
             .modeOfService(CaseUtils.getModeOfService(emailNotificationDetails, bulkPrintDetails))
             .whoIsResponsible(whoIsResponsibleForServing)
             .bulkPrintDetails(bulkPrintDetails).build();
+    }
+
+    private void removeServedDocumentCategories(List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                              List<Element<BulkPrintDetails>> bulkPrintDetails) {
+        emailNotificationDetails.forEach(element -> {
+            List<Element<Document>> docs = element.getValue().getDocs();
+            element.getValue().setDocs(docs.stream()
+                                           .map(docEl ->
+                                                    element(
+                                                        docEl.getId(),
+                                                        docEl.getValue().toBuilder().categoryId(null).build()
+                                                    ))
+                                           .toList()
+            );
+        });
+
+        bulkPrintDetails.forEach(element -> {
+            List<Element<Document>> docs = element.getValue().getPrintDocs();
+            element.getValue().setPrintDocs(docs.stream()
+                                           .map(docEl ->
+                                                    element(
+                                                        docEl.getId(),
+                                                        docEl.getValue().toBuilder().categoryId(null).build()
+                                                    ))
+                                           .toList()
+            );
+        });
     }
 
     private String sendNotificationsSoaFl401(CaseData caseData, String authorization, Map<String, Object> caseDataMap,
