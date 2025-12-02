@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
 import java.util.ArrayList;
@@ -49,7 +50,8 @@ public class AssignCaseAccessServiceTest {
     @Mock
     private RoleAssignmentApi roleAssignmentApi;
 
-
+    @Mock
+    private SystemUserService systemUserService;
 
     @Test
     public void testAssignCaseAccess() {
@@ -128,15 +130,16 @@ public class AssignCaseAccessServiceTest {
     public void testAssignCaseAccessToUserWithRole_featureEnabled() {
         when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(true);
         when(authTokenGenerator.generate()).thenReturn("service-token");
+        when(systemUserService.getSysUserToken()).thenReturn("sysToken");
+
         doNothing().when(assignCaseAccessClient)
             .assignCaseAccess(Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(), Mockito.any());
 
         assignCaseAccessService.assignCaseAccessToUserWithRole(
-            "42", "user-id", "[C100RESPONDENTSOLICITOR1]", "invoker-auth"
-        );
+            "42", "user-id", "[C100RESPONDENTSOLICITOR1]");
 
         verify(assignCaseAccessClient, times(1))
-            .assignCaseAccess(Mockito.eq("invoker-auth"), Mockito.eq("service-token"), Mockito.eq(true), Mockito.any());
+            .assignCaseAccess(Mockito.eq("sysToken"), Mockito.eq("service-token"), Mockito.eq(true), Mockito.any());
     }
 
     @Test
@@ -144,8 +147,7 @@ public class AssignCaseAccessServiceTest {
         when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(false);
 
         assignCaseAccessService.assignCaseAccessToUserWithRole(
-            "42", "user-id", "[C100RESPONDENTSOLICITOR1]", "invoker-auth"
-        );
+            "42", "user-id", "[C100RESPONDENTSOLICITOR1]");
 
         verifyNoMoreInteractions(assignCaseAccessClient);
     }
