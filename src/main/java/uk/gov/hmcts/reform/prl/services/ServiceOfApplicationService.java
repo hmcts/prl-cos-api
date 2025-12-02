@@ -4333,8 +4333,7 @@ public class ServiceOfApplicationService {
                     assignCaseAccessService.assignCaseAccessToUserWithRole(
                         caseId,
                         assigneeUserId,
-                        role.formattedName(),
-                        invokingAuth
+                        role.formattedName()
                     );
                 } else {
                     log.warn(
