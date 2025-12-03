@@ -6,7 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import uk.gov.hmcts.reform.prl.clients.OsCourtFinderApi;
+import uk.gov.hmcts.reform.prl.clients.os.OsCourtFinderApi;
 import uk.gov.hmcts.reform.prl.models.ordnancesurvey.Dpa;
 import uk.gov.hmcts.reform.prl.models.ordnancesurvey.OsPlacesResponse;
 import uk.gov.hmcts.reform.prl.models.ordnancesurvey.Result;

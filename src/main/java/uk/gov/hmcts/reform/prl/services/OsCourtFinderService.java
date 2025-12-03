@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import uk.gov.hmcts.reform.prl.clients.OsCourtFinderApi;
+import uk.gov.hmcts.reform.prl.clients.os.OsCourtFinderApi;
 import uk.gov.hmcts.reform.prl.models.ordnancesurvey.OsPlacesResponse;
 
 @Service

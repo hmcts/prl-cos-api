@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.clients;
+package uk.gov.hmcts.reform.prl.clients.os;
 
 
 import org.springframework.cloud.openfeign.FeignClient;
