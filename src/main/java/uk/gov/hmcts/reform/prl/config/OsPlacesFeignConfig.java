@@ -18,6 +18,7 @@ public class OsPlacesFeignConfig {
             @Override
             public void apply(RequestTemplate template) {
                 template.query("key", apiKey);
+                template.query("maxresults", "1");
             }
         };
     }
