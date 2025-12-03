@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.clients.os;
 
 import feign.RequestInterceptor;
-import feign.RequestTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +12,7 @@ import uk.gov.hmcts.reform.prl.models.ordnancesurvey.OsPlacesResponse;
     configuration = OsCourtFinderApi.FeignClientConfiguration.class)
 public interface OsCourtFinderApi {
 
+    // Nested configuration class ensures it is only used for this client
     class FeignClientConfiguration {
 
         @Value("${postcodelookup.api.key}")
@@ -21,12 +21,9 @@ public interface OsCourtFinderApi {
         @Bean
         public RequestInterceptor osPlacesRequestInterceptor() {
 
-            return new RequestInterceptor() {
-                @Override
-                public void apply(RequestTemplate template) {
-                    template.query("key", apiKey);
-                    template.query("maxresults", "1");
-                }
+            return template -> {
+                template.query("key", apiKey);
+                template.query("maxresults", "1");
             };
         }
     }
