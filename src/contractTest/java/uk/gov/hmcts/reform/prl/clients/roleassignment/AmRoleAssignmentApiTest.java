@@ -44,7 +44,8 @@ import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
             "pba.validation.service.api.baseurl=",
             "staffDetails.api.url=",
             "amRoleAssignment.api.url=http://localhost:8999",
-            "core_case_data.api.url="
+            "core_case_data.api.url=",
+            "postcodelookup.api.url="
         }
 )
 
