@@ -24,7 +24,7 @@ public class OsCourtFinderService {
         }
         if (osPlacesResponse != null
             && !CollectionUtils.isEmpty(osPlacesResponse.getResults())) {
-            return osPlacesResponse.getResults().get(0).getDpa().getLocalCustodianCode();
+            return osPlacesResponse.getResults().getFirst().getDpa().getLocalCustodianCode();
         }
         return null;
     }
