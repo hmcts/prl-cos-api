@@ -47,8 +47,7 @@ import java.math.BigDecimal;
         "pba.validation.service.api.baseurl=",
         "staffDetails.api.url=",
         "amRoleAssignment.api.url=",
-        "core_case_data.api.url=",
-        "postcodelookup.api.url="
+        "core_case_data.api.url="
     }
 )
 

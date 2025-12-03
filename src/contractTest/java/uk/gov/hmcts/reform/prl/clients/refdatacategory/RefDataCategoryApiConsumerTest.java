@@ -41,8 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
         "pba.validation.service.api.baseurl=",
         "staffDetails.api.url=http://localhost:8899",
         "amRoleAssignment.api.url=",
-        "core_case_data.api.url=",
-        "postcodelookup.api.url="
+        "core_case_data.api.url="
     }
 )
 @ContextConfiguration(
