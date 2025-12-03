@@ -19,7 +19,7 @@ public interface OsCourtFinderApi {
         private String apiKey;
 
         @Bean
-        public RequestInterceptor osPlacesRequestInterceptor() {
+        public RequestInterceptor osCourtFinderRequestInterceptor() {
 
             return template -> {
                 template.query("key", apiKey);
