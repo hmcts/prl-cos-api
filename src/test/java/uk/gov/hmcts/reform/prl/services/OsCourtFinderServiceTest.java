@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.ordnancesurvey.Result;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,7 +29,7 @@ class OsCourtFinderServiceTest {
     private OsCourtFinderService osCourtFinderService;
 
     @Test
-    void getLocalCustodianCodeByPostCode() throws NotFoundException {
+    void shouldReturnLocalCustodianCodeByPostCode() throws NotFoundException {
         String expectedValue = "123";
         OsPlacesResponse osPlacesResponse = OsPlacesResponse.builder()
             .results(List.of(Result.builder()
@@ -41,6 +42,28 @@ class OsCourtFinderServiceTest {
         String result = osCourtFinderService.getLocalCustodianCodeByPostCode("EC2A2AB");
 
         assertEquals(expectedValue, result);
+        verify(osCourtFinderApi).findCouncilByPostcode(anyString());
+    }
+
+    @Test
+    void shouldReturnNullIfOsApiReturnNoResultByPostCode() throws NotFoundException {
+
+        when(osCourtFinderApi.findCouncilByPostcode("EC2A2AB")).thenReturn(OsPlacesResponse.builder().build());
+
+        String result = osCourtFinderService.getLocalCustodianCodeByPostCode("EC2A2AB");
+
+        assertNull(result);
+        verify(osCourtFinderApi).findCouncilByPostcode(anyString());
+    }
+
+    @Test
+    void shouldReturnNullIfOsApiReturnNull() throws NotFoundException {
+
+        when(osCourtFinderApi.findCouncilByPostcode("EC2A2AB")).thenReturn(null);
+
+        String result = osCourtFinderService.getLocalCustodianCodeByPostCode("EC2A2AB");
+
+        assertNull(result);
         verify(osCourtFinderApi).findCouncilByPostcode(anyString());
     }
 }
