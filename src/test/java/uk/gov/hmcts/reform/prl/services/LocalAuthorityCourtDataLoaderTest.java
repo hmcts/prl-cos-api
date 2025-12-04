@@ -23,7 +23,7 @@ class LocalAuthorityCourtDataLoaderTest {
     private LocalAuthorityCourtDataLoader dataLoader;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         dataLoader = new LocalAuthorityCourtDataLoader(csvReader);
 
         when(csvReader.read(anyString())).thenReturn(List.of(Map.of("Local Authorities", "Central Court",
