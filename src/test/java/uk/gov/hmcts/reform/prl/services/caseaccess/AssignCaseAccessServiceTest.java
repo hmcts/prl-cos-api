@@ -139,7 +139,7 @@ public class AssignCaseAccessServiceTest {
             "42", "user-id", "[C100RESPONDENTSOLICITOR1]");
 
         verify(assignCaseAccessClient, times(1))
-            .assignCaseAccess(Mockito.eq("sysToken"), Mockito.eq("service-token"), Mockito.eq(true), Mockito.any());
+            .assignCaseAccess(Mockito.eq("sysToken"), Mockito.eq("service-token"), Mockito.eq(false), Mockito.any());
     }
 
     @Test
