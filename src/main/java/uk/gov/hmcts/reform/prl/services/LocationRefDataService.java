@@ -195,6 +195,16 @@ public class LocationRefDataService {
         return DynamicListElement.builder().code(key).label(value).build();
     }
 
+    public DynamicListElement getDisplayEntryFromEpimmsId(String baseLocationId, String authToken) {
+        Optional<CourtVenue> optionalCourtVenue = getCourtDetailsFromEpimmsId(baseLocationId, authToken);
+        DynamicListElement selectedElement = null;
+        if (optionalCourtVenue.isPresent()) {
+            selectedElement = getDisplayEntry(optionalCourtVenue.get());
+        }
+
+        return  selectedElement;
+    }
+
     public Optional<CourtVenue> getCourtDetailsFromEpimmsId(String baseLocationId, String authToken) {
         CourtDetails courtDetails = locationRefDataApi.getCourtDetailsByService(
             authToken,

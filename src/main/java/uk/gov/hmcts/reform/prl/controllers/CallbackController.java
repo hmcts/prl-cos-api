@@ -116,6 +116,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ACCESS_CAT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CREATED_BY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_LIST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -145,7 +147,6 @@ import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 @RestController
 @RequiredArgsConstructor
 public class CallbackController {
-    public static final String COURT_LIST = "courtList";
     private static final String CONFIRMATION_HEADER = "# Case transferred to another court ";
     private static final String CONFIRMATION_BODY_PREFIX = "The case has been transferred to ";
     private static final String CONFIRMATION_BODY_SUFFIX = " \n\n Local court admin have been notified ";
@@ -469,7 +470,11 @@ public class CallbackController {
             } else {
                 courtList = locationRefDataService.getCourtLocations(authorisation);
             }
-            caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
+            String selectedCourtId = String.valueOf(caseDataUpdated.get(COURT_ID_FIELD));
+            DynamicListElement courtElement = locationRefDataService
+                .getDisplayEntryFromEpimmsId(selectedCourtId, authorisation);
+            DynamicListElement selectedElement = courtElement != null ? courtElement :  DynamicListElement.EMPTY;
+            caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(selectedElement).listItems(courtList)
                 .build());
             caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();

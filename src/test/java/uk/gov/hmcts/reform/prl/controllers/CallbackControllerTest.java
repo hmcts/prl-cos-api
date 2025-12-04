@@ -2298,18 +2298,25 @@ public class CallbackControllerTest {
 
     @Test
     public void testAmendCourtAboutToStart() throws Exception {
-        CaseData caseData = CaseData.builder().build();
+        String courtId = "1234";
+        CaseData caseData = CaseData.builder().courtId(courtId).build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(locationRefDataService.getCourtLocations(Mockito.anyString())).thenReturn(List.of(DynamicListElement.EMPTY));
+        DynamicListElement dle = DynamicListElement.builder()
+            .code(courtId).label("courtLabel").build();
+        List<DynamicListElement> allCourts = List.of(dle);
+        when(locationRefDataService.getCourtLocations(anyString())).thenReturn(allCourts);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(locationRefDataService.getDisplayEntryFromEpimmsId(courtId, authToken)).thenReturn(dle);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =  callbackController
             .amendCourtAboutToStart(authToken,s2sToken,callbackRequest);
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("courtList"));
+        Assertions.assertEquals("1234", ((DynamicList)aboutToStartOrSubmitCallbackResponse.getData().get("courtList"))
+            .getValue().getCode());
     }
 
     @Test
