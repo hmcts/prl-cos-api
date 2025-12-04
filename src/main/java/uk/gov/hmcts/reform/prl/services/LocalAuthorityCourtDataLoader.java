@@ -22,7 +22,7 @@ public class LocalAuthorityCourtDataLoader {
 
     private final List<LocalAuthorityCourt> localAuthorityCourtList = new ArrayList<>();
 
-    protected List<LocalAuthorityCourt> loadCsv() {
+    private List<LocalAuthorityCourt> loadCsv() {
         List<Map<String, String>> rows = csvReader.read(LOCAL_AUTHORITY_CSV_FILE_PATH);
 
         rows.forEach(line -> localAuthorityCourtList.add(LocalAuthorityCourt.map(line)));

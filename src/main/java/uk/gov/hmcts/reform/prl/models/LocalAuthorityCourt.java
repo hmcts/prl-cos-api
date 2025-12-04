@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 @Value
@@ -15,7 +17,7 @@ public class LocalAuthorityCourt {
     String familyCourtName;
     String refDataCourtName;
     String localCustodianCode;
-    String specificPostCodes;
+    List<String> specificPostCodes;
     String excludes;
     String epimmsId;
     String address;
@@ -29,7 +31,7 @@ public class LocalAuthorityCourt {
             .familyCourtName(row.getOrDefault("Designated Family Ct", ""))
             .refDataCourtName(row.getOrDefault("RefData Court Name", ""))
             .localCustodianCode(row.getOrDefault("Local Custodian code", ""))
-            .specificPostCodes(row.getOrDefault("Specific PostCodes", ""))
+            .specificPostCodes(Arrays.asList(row.getOrDefault("Specific PostCodes", "").split(";")))
             .excludes(row.getOrDefault("Excludes", ""))
             .epimmsId(row.getOrDefault("epimms", ""))
             .address(row.getOrDefault("Address", ""))
