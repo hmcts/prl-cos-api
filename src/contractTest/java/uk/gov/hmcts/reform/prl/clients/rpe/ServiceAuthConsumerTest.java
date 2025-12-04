@@ -41,7 +41,8 @@ import static org.assertj.core.api.Assertions.assertThat;
         "payments.api.url=",
         "pba.validation.service.api.baseurl=",
         "staffDetails.api.url=",
-        "idam.s2s-auth.url=localhost:5000"
+        "idam.s2s-auth.url=localhost:5000",
+        "postcodelookup.api.url="
     }
 )
 @EnableAutoConfiguration

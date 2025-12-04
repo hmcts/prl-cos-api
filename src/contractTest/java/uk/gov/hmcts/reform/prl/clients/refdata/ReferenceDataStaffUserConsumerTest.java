@@ -48,7 +48,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RD_STAFF_PAGE_S
         "pba.validation.service.api.baseurl=",
         "staffDetails.api.url=http://localhost:8899",
         "amRoleAssignment.api.url=",
-        "core_case_data.api.url="
+        "core_case_data.api.url=",
+        "postcodelookup.api.url="
     }
 )
 @PactFolder("pacts")
