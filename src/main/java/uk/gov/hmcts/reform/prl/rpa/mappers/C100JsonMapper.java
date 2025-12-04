@@ -43,6 +43,8 @@ public class C100JsonMapper {
     private final AttendingTheHearingMapper attendingTheHearingMapper;
     private final InternationalElementMapper internationalElementMapper;
     private final LitigationCapacityMapper litigationCapacityMapper;
+    private final ApplicantsMapper applicantsMapper;
+    private final RespondentsMapper respondentsMapper;
     private final CombinedMapper combinedMapper;
     private final ChildrenAndApplicantsMapper childrenAndApplicantsMapper;
     private final ChildrenAndRespondentsMapper childrenAndRespondentsMapper;
@@ -61,8 +63,8 @@ public class C100JsonMapper {
                         ? childrenAndRespondentsMapper.map(caseData.getRelations().getChildAndRespondentRelations()) : JsonValue.EMPTY_JSON_ARRAY)
             .add("childAndOtherPeopleRelations", isTaskListV2OrV3(caseData)
                 ? childrenAndOtherPeopleMapper.map(caseData.getRelations().getChildAndOtherPeopleRelations()) : JsonValue.EMPTY_JSON_ARRAY)
-            .add("applicants", combinedMapper.getApplicantArray())
-            .add("respondents", combinedMapper.getRespondentArray())
+            .add("applicants", applicantsMapper.getApplicantArray(caseData.getApplicants()))
+            .add("respondents", respondentsMapper.getRespondentArray(caseData.getRespondents()))
             .add("typeOfApplication", typeOfApplicantionMapper.map(caseData))
             .add("hearingUrgency", hearingUrgencyMapper.map(caseData))
             .add("miam", TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())

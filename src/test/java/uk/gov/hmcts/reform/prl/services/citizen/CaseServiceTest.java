@@ -1048,6 +1048,52 @@ public class CaseServiceTest {
     }
 
     @Test
+    public void testCitizenOrdersWithSolicitorUploadedApplicationFL401() {
+        //Given
+        orderDetails = orderDetails.toBuilder()
+            .serveOrderDetails(orderDetails.getServeOrderDetails().toBuilder()
+                                   .serveOnRespondent(YesNoNotApplicable.Yes)
+                                   .whoIsResponsibleToServe(SoaCitizenServingRespondentsEnum.courtAdmin.getId())
+                                   .build())
+            .sosStatus(SOS_COMPLETED)
+            .build();
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(partyDetails)
+            .respondentsFL401(partyDetails)
+            .orderCollection(List.of(element(orderDetails)))
+            .additionalApplicationsBundle(List.of(element(AdditionalApplicationsBundle
+                                                              .builder()
+                                                              .uploadedDateTime("04-Sept-2024 18:38:33 pm")
+                                                              .partyType(PartyEnum.applicant)
+                                                              .selectedParties(List.of(element(ServedParties.builder().partyId(
+                                                                  testUuid.toString()).build())))
+                                                              .c2DocumentBundle(C2DocumentBundle
+                                                                                    .builder()
+                                                                                    .finalDocument(
+                                                                                        List.of(element(
+                                                                                            Document.builder()
+                                                                                                .documentUrl("c2")
+                                                                                                .build())))
+                                                                                    .supportingEvidenceBundle(List.of(
+                                                                                        element(SupportingEvidenceBundle
+                                                                                                    .builder()
+                                                                                                    .build())))
+                                                                                    .build())
+                                                              .build())))
+            .state(State.DECISION_OUTCOME)
+            .build();
+
+        //Action
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+
+        //Assert
+        assertNotNull(citizenDocumentsManagement);
+        assertTrue(citizenDocumentsManagement.getCitizenOtherDocuments().stream().anyMatch(
+            el -> el.getDocument().getDocumentUrl().equals("c2")));
+    }
+
+    @Test
     public void testCitizenOrdersSosCompletedFL401ForOccupationOrder() {
 
         //Given

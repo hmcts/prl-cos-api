@@ -56,7 +56,6 @@ import uk.gov.hmcts.reform.prl.utils.UploadAdditionalApplicationUtils;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -87,6 +86,7 @@ import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Represe
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
+import static uk.gov.hmcts.reform.prl.services.citizen.CaseService.DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS_AM_PM;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
@@ -146,10 +146,8 @@ public class UploadAdditionalApplicationService {
             List<Element<ServedParties>> selectedParties = getSelectedParties(caseData);
             String partyName = getSelectedPartyName(selectedParties);
             author = getAuthor(caseData.getUploadAdditionalApplicationData(), userDetails, partyName);
-            String currentDateTime = LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).format(DateTimeFormatter.ofPattern(
-                "dd-MMM-yyyy HH:mm:ss a",
-                Locale.UK
-            ));
+            String currentDateTime = LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE))
+                .format(DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS_AM_PM);
 
             C2DocumentBundle c2DocumentBundle = getC2DocumentBundle(caseData, author, currentDateTime, partyName);
             OtherApplicationsBundle otherApplicationsBundle = getOtherApplicationsBundle(caseData,
