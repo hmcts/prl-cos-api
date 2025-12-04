@@ -889,5 +889,28 @@
       }
     ],
     "overrideAll": true
+  },
+  {
+    "email": "prl-system-update@mailinator.com",
+    "id": "540b6fed-6454-4ea2-bf23-06ab4b113e2f",
+    "roleAssignments": [
+      {
+        "id": "81a7a40f-5af9-4f7f-badb-e6a9a3695ccb",
+        "actorIdType": "IDAM",
+        "actorId": "540b6fed-6454-4ea2-bf23-06ab4b113e2f",
+        "roleType": "ORGANISATION",
+        "roleName": "case-allocator",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "SYSTEM",
+        "readOnly": true,
+        "created": "2024-02-14T09:00:38.638392Z",
+        "attributes": {
+          "substantive": "N",
+          "jurisdiction": "PRIVATELAW",
+          "caseType": "PRLAPPS"
+        }
+      }
+    ]
   }
 ]

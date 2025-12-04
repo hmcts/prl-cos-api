@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
 import java.util.ArrayList;
@@ -49,7 +50,8 @@ public class AssignCaseAccessServiceTest {
     @Mock
     private RoleAssignmentApi roleAssignmentApi;
 
-
+    @Mock
+    private SystemUserService systemUserService;
 
     @Test
     public void testAssignCaseAccess() {
@@ -123,5 +125,32 @@ public class AssignCaseAccessServiceTest {
         roleAssignmentServiceResponse.setRoleAssignmentResponse(listOfRoleAssignmentResponses);
         return roleAssignmentServiceResponse;
     }
+
+    @Test
+    public void testAssignCaseAccessToUserWithRole_featureEnabled() {
+        when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(true);
+        when(authTokenGenerator.generate()).thenReturn("service-token");
+        when(systemUserService.getSysUserToken()).thenReturn("sysToken");
+
+        doNothing().when(assignCaseAccessClient)
+            .assignCaseAccess(Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(), Mockito.any());
+
+        assignCaseAccessService.assignCaseAccessToUserWithRole(
+            "42", "user-id", "[C100RESPONDENTSOLICITOR1]");
+
+        verify(assignCaseAccessClient, times(1))
+            .assignCaseAccess(Mockito.eq("sysToken"), Mockito.eq("service-token"), Mockito.eq(false), Mockito.any());
+    }
+
+    @Test
+    public void testAssignCaseAccessToUserWithRole_featureDisabled() {
+        when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(false);
+
+        assignCaseAccessService.assignCaseAccessToUserWithRole(
+            "42", "user-id", "[C100RESPONDENTSOLICITOR1]");
+
+        verifyNoMoreInteractions(assignCaseAccessClient);
+    }
+
 }
 
