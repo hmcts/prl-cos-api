@@ -385,6 +385,7 @@ public class ManageDocumentsService {
 
     public void setFlagsForWaTask(CaseData caseData, Map<String, Object> caseDataUpdated, String userRole, QuarantineLegalDoc quarantineLegalDoc) {
         //Setting this flag for WA task
+        // Maybe try here
         if (userRole.equals(CITIZEN)
             || quarantineLegalDoc.getIsConfidential() != null
             || quarantineLegalDoc.getIsRestricted() != null) {
