@@ -33,7 +33,7 @@ public class OsCourtFinderService {
             throw new IllegalArgumentException("postcode is null or empty");
         }
         List<LocalAuthorityCourt> localAuthorityCourtList = localAuthorityCourtDataLoader.getLocalAuthorityCourtList();
-        // first check if the postcode from specific post codes otherwise use os api to get local custodian code
+        // first check if the postcode is from specific post codes otherwise use os api to get local custodian code
         Optional<LocalAuthorityCourt> selectedLocalAuthorityCourt = localAuthorityCourtList.stream()
             .filter(court -> court.getSpecificPostCodes().stream().anyMatch(postcode::startsWith))
             .findFirst();

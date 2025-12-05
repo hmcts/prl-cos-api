@@ -16,7 +16,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class LocalAuthorityCourtDataLoader {
 
-    private static final String LOCAL_AUTHORITY_CSV_FILE_PATH = "council_court_epims_csv/Local_Authority_to_Court_Nov_25.csv";
+    private static final String LOCAL_AUTHORITY_CSV_FILE_PATH = "Local_Authority_to_Court_Nov_25.csv";
 
     private final CsvReader csvReader;
 
