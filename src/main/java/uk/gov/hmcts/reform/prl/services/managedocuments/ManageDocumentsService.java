@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
@@ -743,14 +744,14 @@ public class ManageDocumentsService {
             startAllTabsUpdateDataContent.caseData()
         );
 
-        val currentCaseDetails = allTabService.submitAllTabsUpdate(
+        CaseDetails currentCaseDetails = allTabService.submitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),
             String.valueOf(callbackRequest.getCaseDetails().getId()),
             startAllTabsUpdateDataContent.startEventResponse(),
             startAllTabsUpdateDataContent.eventRequestData(),
             updatedCaseDataMap
         );
-        val currentCaseData = CaseUtils.getCaseData(currentCaseDetails, objectMapper);
+        CaseData currentCaseData = CaseUtils.getCaseData(currentCaseDetails, objectMapper);
 
         updateDocConfDetails(authorisation, currentCaseData, startAllTabsUpdateDataContent.caseData());
     }
