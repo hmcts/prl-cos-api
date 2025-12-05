@@ -42,6 +42,7 @@ public class CourtFinderService {
     public static final String C_100_APPLICATIONS = "C100 applications";
     public static final String CHILD = "child";
     private final CourtFinderApi courtFinderApi;
+    private final OsCourtFinderService osCourtFinderService;
 
     public Court getNearestFamilyCourt(CaseData caseData) throws NotFoundException {
         ServiceArea serviceArea = null;
@@ -50,25 +51,24 @@ public class CourtFinderService {
                 serviceArea = courtFinderApi
                   .findClosestDomesticAbuseCourtByPostCode(
                       getPostcodeFromWrappedParty(caseData.getApplicantsFL401()));
+                if (serviceArea != null && !serviceArea.getCourts().isEmpty()) {
+                    return getCourtDetails(serviceArea.getCourts()
+                                               .get(0)
+                                               .getCourtSlug());
+                }
             } else {
-                serviceArea = courtFinderApi
-                    .findClosestChildArrangementsCourtByPostcode(
+                // need to add feature flag
+                return osCourtFinderService.getC100NearestFamilyCourt(
                             nonNull(caseData.getC100RebuildData())
                                     && nonNull(caseData.getC100RebuildData().getC100RebuildChildPostCode())
                             ? caseData.getC100RebuildData().getC100RebuildChildPostCode()
                             : getCorrectPartyPostcode(caseData));
+
             }
         } catch (Exception e) {
             log.info("CourtFinderService.getNearestFamilyCourt() method is throwing exception : {}",e);
         }
-        if (serviceArea != null
-            && !serviceArea.getCourts().isEmpty()) {
-            return getCourtDetails(serviceArea.getCourts()
-                                       .get(0)
-                                       .getCourtSlug());
-        } else {
-            return null;
-        }
+        return null;
     }
 
     public Court getCourtDetails(String courtSlug) {
