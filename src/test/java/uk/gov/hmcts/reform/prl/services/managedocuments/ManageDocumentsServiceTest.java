@@ -990,9 +990,14 @@ public class ManageDocumentsServiceTest {
         when(allTabService.getStartAllTabsUpdate(Mockito.anyString()))
             .thenReturn(startAllTabsUpdateDataContent);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
-        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(Map.of()).build();
+        CaseData caseData = CaseData.builder().id(12345L).build();
+        when(allTabService.submitAllTabsUpdate(any(), any(), any(), any(), any()))
+            .thenReturn(caseDetails);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        manageDocumentsService.appendConfidentialDocumentNameForCourtAdminAndUpdate(callbackRequest,auth);
+        manageDocumentsService.appendConfidentialDocumentNameForCourtAdminAndUpdate(callbackRequest, auth);
         verify(allTabService, times(1)).getStartAllTabsUpdate(Mockito.anyString());
     }
 
@@ -2363,19 +2368,6 @@ public class ManageDocumentsServiceTest {
 
     }
 
-    @Test
-    public void testDownloadAndDeleteDocumentWhenExceptionOccurs() {
-        assertExpectedException(
-            () -> {
-                manageDocumentsService.downloadAndDeleteDocument(
-                    uk.gov.hmcts.reform.prl.models.documents
-                        .Document.builder().documentFileName("CONFIDENTIAL_doc").build(),
-                    "sysAuth");
-            }, IllegalStateException.class,"Failed to move document to confidential tab please retry"
-        );
-
-    }
-
     protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
                                                                  String expectedMessage) {
         T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
@@ -2384,11 +2376,11 @@ public class ManageDocumentsServiceTest {
 
     @Test
     public void testDownloadAndDeleteDocument() {
-        assertNotNull(manageDocumentsService.downloadAndDeleteDocument(
+        assertNotNull(manageDocumentsService.renameAndReuploadFileToBeConfidential(
             uk.gov.hmcts.reform.prl.models.documents
                 .Document.builder().documentFileName("Confidential_doc")
-                .build(),
-            "sysAuth"
+                .documentUrl("http://some.link/00000000-0000-0000-0000-000000000000")
+                .build()
         ));
     }
 
