@@ -174,6 +174,19 @@ public class LocationRefDataServiceTest {
     }
 
     @Test
+    public void testGetCourtDisplayEntryFromEpimmsId() {
+        when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(CourtDetails.builder()
+                            .courtVenues(List.of(CourtVenue.builder().region("r").regionId("id").courtName("1")
+                                                     .region("test").siteName("test").postcode("123")
+                                                     .courtEpimmsId("2")
+                                                     .courtTypeId(FAMILY_COURT_TYPE_ID).build()))
+                            .build());
+        DynamicListElement dynamicListElement = locationRefDataService.getDisplayEntryFromEpimmsId("2", "test");
+        assertEquals("2:email", dynamicListElement.getCode());
+    }
+
+    @Test
     public void testGetCourtDetailsFromEpimmsId() {
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
             .thenReturn(CourtDetails.builder()
