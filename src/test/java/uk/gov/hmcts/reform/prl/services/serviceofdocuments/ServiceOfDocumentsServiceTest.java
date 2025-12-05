@@ -49,7 +49,7 @@ import uk.gov.hmcts.reform.prl.models.serviceofdocuments.ServiceOfDocuments;
 import uk.gov.hmcts.reform.prl.services.BulkPrintService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityCheckService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
-import uk.gov.hmcts.reform.prl.services.SendAndReplyService;
+import uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationEmailService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationPostService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
