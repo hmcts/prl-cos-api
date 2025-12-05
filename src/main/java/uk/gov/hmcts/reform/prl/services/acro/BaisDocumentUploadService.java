@@ -34,6 +34,7 @@ public class BaisDocumentUploadService {
     private final AcroZipService acroZipService;
     private final CsvWriter csvWriter;
     private final PdfExtractorService pdfExtractorService;
+    private final SftpService sftpService;
 
     @Value("${acro.source-directory}")
     private String sourceDirectory;
@@ -57,12 +58,12 @@ public class BaisDocumentUploadService {
                 log.info("Search has resulted empty cases with Final FL404a orders, creating empty CSV file");
                 csvWriter.appendCsvRowToFile(csvFile, CsvData.builder().build(), null);
             } else {
-                processCasesAndCreateCsvRows(csvFile, acroResponse, sysUserToken);
+                createCsvRowsForFl404aOrders(csvFile, acroResponse, sysUserToken);
             }
 
             log.info("All FL404a documents and manifest files prepared. Creating zip archive...");
-            acroZipService.zip();
-
+            String archivePath = acroZipService.zip();
+            sftpService.uploadFile(new File(archivePath));
             log.info(
                 "*** Total time taken to run Bais Document upload task - {}s ***",
                 TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime)
@@ -73,7 +74,7 @@ public class BaisDocumentUploadService {
         }
     }
 
-    private void processCasesAndCreateCsvRows(File csvFile, AcroResponse acroResponse, String sysUserToken) {
+    private void createCsvRowsForFl404aOrders(File csvFile, AcroResponse acroResponse, String sysUserToken) {
         log.info(
             "Processing {} cases for FL404a document extraction and CSV generation",
             acroResponse.getCases().size()
