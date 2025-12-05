@@ -319,8 +319,7 @@ public class CallbackController {
                 log.info("Court email not found for case id {}", caseData.getId());
             }
             List<DynamicListElement> courtList = locationRefDataService.getCourtLocations(authorisation);
-            caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
-                .build());
+            addAndSelectCourtList(caseDataUpdated, courtList, authorisation);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -470,17 +469,22 @@ public class CallbackController {
             } else {
                 courtList = locationRefDataService.getCourtLocations(authorisation);
             }
-            String selectedCourtId = String.valueOf(caseDataUpdated.get(COURT_ID_FIELD));
-            DynamicListElement courtElement = locationRefDataService
-                .getDisplayEntryFromEpimmsId(selectedCourtId, authorisation);
-            DynamicListElement selectedElement = courtElement != null ? courtElement :  DynamicListElement.EMPTY;
-            caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(selectedElement).listItems(courtList)
-                .build());
+            addAndSelectCourtList(caseDataUpdated, courtList, authorisation);
             caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    private void addAndSelectCourtList(Map<String, Object> caseDataUpdated, List<DynamicListElement> courtList,
+                                       String authorisation) {
+        String selectedCourtId = String.valueOf(caseDataUpdated.get(COURT_ID_FIELD));
+        DynamicListElement courtElement = locationRefDataService
+            .getDisplayEntryFromEpimmsId(selectedCourtId, authorisation);
+        DynamicListElement selectedElement = courtElement != null ? courtElement :  DynamicListElement.EMPTY;
+        caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(selectedElement).listItems(courtList)
+            .build());
     }
 
 
