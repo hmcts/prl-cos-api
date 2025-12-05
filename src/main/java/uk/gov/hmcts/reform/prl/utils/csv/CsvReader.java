@@ -2,9 +2,9 @@ package uk.gov.hmcts.reform.prl.utils.csv;
 
 import com.opencsv.CSVReaderHeaderAware;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ResourceUtils;
 
 import java.io.FileReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +14,7 @@ public class CsvReader {
     public List<Map<String, String>> read(String filePath) {
 
         try (CSVReaderHeaderAware reader =
-                 new CSVReaderHeaderAware(new FileReader(filePath, StandardCharsets.UTF_8))) {
+                 new CSVReaderHeaderAware(new FileReader(ResourceUtils.getFile(filePath)))) {
 
             List<Map<String, String>> result = new ArrayList<>();
             Map<String, String> row;
