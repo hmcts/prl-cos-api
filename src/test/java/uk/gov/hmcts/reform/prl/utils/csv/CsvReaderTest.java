@@ -1,35 +1,42 @@
 package uk.gov.hmcts.reform.prl.utils.csv;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
-import java.io.FileWriter;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class CsvReaderTest {
-    @TempDir
-    Path tempDir;
+
+    private final CsvReader csvReader = new CsvReader();
 
     @Test
-    void shouldReadCsvIntoHeaderMappedRows() throws Exception {
-        Path csv = tempDir.resolve("test.csv");
+    void shouldReadCsvFromClasspathResource() {
+        List<Map<String, String>> results =
+            csvReader.read("sample.csv");
 
-        try (FileWriter writer = new FileWriter(csv.toFile())) {
-            writer.write("Local Authorities,epimms,Status\n");
-            writer.write("LA1,1001,Open\n");
-        }
+        assertThat(results).hasSize(2);
 
-        CsvReader reader = new CsvReader();
-        List<Map<String, String>> rows = reader.read(csv.toString());
+        Map<String, String> first = results.get(0);
+        assertThat(first.get("Local Authorities")).isEqualTo("LA1");
+        assertThat(first.get("epimms")).isEqualTo("1001");
+        assertThat(first.get("Status")).isEqualTo("Open");
 
-        assertThat(rows).hasSize(1);
-        assertThat(rows.get(0).get("Local Authorities")).isEqualTo("LA1");
-        assertThat(rows.get(0).get("epimms")).isEqualTo("1001");
-        assertThat(rows.get(0).get("Status")).isEqualTo("Open");
+        Map<String, String> second = results.get(1);
+        assertThat(second.get("Local Authorities")).isEqualTo("LA2");
+        assertThat(second.get("epimms")).isEqualTo("1002");
+        assertThat(second.get("Status")).isEqualTo("Closed");
+    }
+
+    @Test
+    void shouldThrowWhenCsvIsMalformed() {
+        assertThatThrownBy(() ->
+                               csvReader.read("sampleBad.csv")
+        )
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("Failed to read resource CSV");
     }
 
 }
