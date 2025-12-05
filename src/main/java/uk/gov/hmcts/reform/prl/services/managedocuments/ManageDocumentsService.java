@@ -282,6 +282,11 @@ public class ManageDocumentsService {
                     loggedInUserType,
                     quarantineLegalDoc
                 );
+                if (quarantineLegalDoc != null) {
+                    quarantineLegalDoc = quarantineLegalDoc.toBuilder()
+                        .originalDocumentId(DocumentUtils.getDocumentId(document.getDocumentUrl()))
+                        .build();
+                }
             }
             if (quarantineLegalDoc != null) {
                 QuarantineLegalDoc finalConfidentialDocument = convertQuarantineDocumentToRightCategoryDocument(
@@ -323,6 +328,7 @@ public class ManageDocumentsService {
 
             //This is for both events manage documents & review documents for non-confidential documents
             //Epic-PRL-5842 - notifications to lips, solicitors, cafcass cymru
+            // TODO MOVE THIS TO THE SUBMITTED CALLBACK
             notificationService.sendNotificationsAsync(caseData,
                                                   quarantineLegalDoc,
                                                   userRole);
@@ -343,6 +349,7 @@ public class ManageDocumentsService {
             .documentParty(quarantineLegalDoc.getDocumentParty())
             .documentType(COURTNAV.equals(quarantineLegalDoc.getUploadedBy()) ? quarantineLegalDoc.getDocumentType() : null)
             .documentUploadedDate(quarantineLegalDoc.getDocumentUploadedDate())
+            .originalDocumentId(quarantineLegalDoc.getOriginalDocumentId())
             .categoryId(quarantineLegalDoc.getCategoryId())
             .categoryName(quarantineLegalDoc.getCategoryName())
             //PRL-4320 - Manage documents redesign
@@ -469,20 +476,24 @@ public class ManageDocumentsService {
         return document;
     }
 
-    public Document deleteDocument(Document document, String systemAuthorisation) {
-        UUID documentId = UUID.fromString(DocumentUtils.getDocumentId(document.getDocumentUrl()));
+    public void deleteDocumentById(String documentId) {
         try {
+            log.info("Attempting to delete document {}", documentId);
             caseDocumentClient.deleteDocument(
-                systemAuthorisation,
+                systemUserService.getSysUserToken(),
                 authTokenGenerator.generate(),
-                documentId, true
+                UUID.fromString(documentId), true
             );
             log.info("Successfully deleted document {}", documentId);
 
         } catch (Exception e) {
             log.error("Failed to delete document {} ", documentId);
         }
-        return document;
+
+    }
+
+    public void deleteDocument(Document document) {
+        deleteDocumentById(DocumentUtils.getDocumentId(document.getDocumentUrl()));
     }
 
     public QuarantineLegalDoc addQuarantineDocumentFields(QuarantineLegalDoc legalProfUploadDoc,
@@ -724,17 +735,21 @@ public class ManageDocumentsService {
 
     public void appendConfidentialDocumentNameForCourtAdminAndUpdate(CallbackRequest callbackRequest, String authorisation) {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
-                = allTabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
+            = allTabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
         Map<String, Object> updatedCaseDataMap
-                = appendConfidentialDocumentNameForCourtAdmin(authorisation,
-                startAllTabsUpdateDataContent.caseDataMap(),
-                startAllTabsUpdateDataContent.caseData());
-        //update all tabs
-       val currentCaseDetails = allTabService.submitAllTabsUpdate(startAllTabsUpdateDataContent.authorisation(),
-                String.valueOf(callbackRequest.getCaseDetails().getId()),
-                startAllTabsUpdateDataContent.startEventResponse(),
-                startAllTabsUpdateDataContent.eventRequestData(),
-                updatedCaseDataMap);
+            = appendConfidentialDocumentNameForCourtAdmin(
+            authorisation,
+            startAllTabsUpdateDataContent.caseDataMap(),
+            startAllTabsUpdateDataContent.caseData()
+        );
+
+        val currentCaseDetails = allTabService.submitAllTabsUpdate(
+            startAllTabsUpdateDataContent.authorisation(),
+            String.valueOf(callbackRequest.getCaseDetails().getId()),
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            updatedCaseDataMap
+        );
         val currentCaseData = CaseUtils.getCaseData(currentCaseDetails, objectMapper);
 
         updateDocConfDetails(authorisation, currentCaseData, startAllTabsUpdateDataContent.caseData());
@@ -795,7 +810,7 @@ public class ManageDocumentsService {
                                 objectMapper.convertValue(previousDocElement.get().getValue(), Map.class).get(attributeName),
                                 Document.class
                             );
-                            deleteDocument(docToDelete, systemUserService.getSysUserToken());
+                            deleteDocument(docToDelete);
                         }
                     }
                 } catch (Exception e) {
