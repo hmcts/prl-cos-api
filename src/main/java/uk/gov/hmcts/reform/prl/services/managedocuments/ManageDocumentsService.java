@@ -54,6 +54,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
@@ -528,7 +529,7 @@ public class ManageDocumentsService {
             Resource resource = caseDocumentClient.getDocumentBinary(sysUserToken, serviceToken,
                                                                      documentId
             ).getBody();
-            docData = IOUtils.toByteArray(resource.getInputStream());
+            docData = IOUtils.toByteArray(Objects.requireNonNull(resource).getInputStream());
             UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
                 sysUserToken,
                 serviceToken,
@@ -542,7 +543,7 @@ public class ManageDocumentsService {
                         docData
                     ))
             );
-            newUploadedDocument = Document.buildFromDocument(uploadResponse.getDocuments().get(0));
+            newUploadedDocument = Document.buildFromDocument(uploadResponse.getDocuments().getFirst());
         } catch (Exception ex) {
             log.error("Failed to upload new document {}", ex.getMessage(), ex);
         }
