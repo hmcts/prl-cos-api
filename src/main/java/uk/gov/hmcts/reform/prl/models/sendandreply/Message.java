@@ -85,6 +85,7 @@ public class Message extends MessageMetaData {
     private DynamicList futureHearingsList;
     private DynamicList submittedDocumentsList;
     private DynamicList ctscEmailList;
+    private DynamicList legalAdviserList;
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<Element<MessageHistory>> replyHistory;
