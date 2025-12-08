@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,11 +13,14 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
+import uk.gov.hmcts.reform.prl.enums.RoleCategory;
+import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.roleassignment.RoleAssignmentDto;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentQueryRequest;
+import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 
@@ -28,9 +30,11 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -329,7 +333,7 @@ public class RoleAssignmentServiceTest {
         stringObjectMap.put("judgeName", JudicialUser.builder().idamId("123").personalCode("123456").build());
         callbackRequest = CallbackRequest.builder().caseDetails(caseDetails.toBuilder().data(stringObjectMap).build()).build();
         Map<String, String> rolesResponse = roleAssignmentService.fetchIdamAmRoles(auth, emailId);
-        Assert.assertFalse(rolesResponse.isEmpty());
+        assertFalse(rolesResponse.isEmpty());
     }
 
     @Test
@@ -344,5 +348,72 @@ public class RoleAssignmentServiceTest {
         roleAssignmentService.getRoleAssignmentForCase("1234");
         verify(roleAssignmentApi).queryRoleAssignments(anyString(), anyString(), any(), isA(
             RoleAssignmentQueryRequest.class));
+    }
+
+    @Test
+    public void testCreateRoleAssignment() {
+        when(systemUserService.getSysUserToken()).thenReturn("auth");
+        when(authTokenGenerator.generate()).thenReturn("test");
+
+        roleAssignmentService.createRoleAssignment(
+            "1234", "idamId-123", RoleCategory.LEGAL_OPERATIONS,
+            Roles.ALLOCATED_LEGAL_ADVISER.getValue(), true
+        );
+
+        verify(roleAssignmentApi).updateRoleAssignment(
+            anyString(),
+            anyString(),
+            eq(null),
+            any(RoleAssignmentRequest.class)
+        );
+    }
+
+    @Test
+    public void givenUserNotAllocated_whenIsUserAllocatedToCase_thenReturnFalse() {
+        List<RoleAssignmentResponse> roleAssignments = List.of(
+            roleAssignmentResponse("some-other-idam-id", "some-other-role"),
+            roleAssignmentResponse("some-other-idam-id-2", "some-other-role-2")
+        );
+        RoleAssignmentServiceResponse response = RoleAssignmentServiceResponse.builder()
+            .roleAssignmentResponse(roleAssignments)
+            .build();
+        when(systemUserService.getSysUserToken()).thenReturn("some-token");
+        when(authTokenGenerator.generate()).thenReturn("some-service-auth-token");
+        when(roleAssignmentApi.queryRoleAssignments(
+            eq("some-token"), eq("some-service-auth-token"), eq(null),
+            any(RoleAssignmentQueryRequest.class)
+        )).thenReturn(response);
+
+        boolean result = roleAssignmentService.isUserAllocatedRoleForCase("1234", "user-123", "some-role");
+
+        assertFalse(result);
+    }
+
+    @Test
+    public void givenUserAlreadyAllocated_whenIsUserAllocatedToCase_thenReturnTrue() {
+        List<RoleAssignmentResponse> roleAssignments = List.of(
+            roleAssignmentResponse("some-other-idam-id", "some-other-role"),
+            roleAssignmentResponse("user-123", "some-role")
+        );
+        RoleAssignmentServiceResponse response = RoleAssignmentServiceResponse.builder()
+            .roleAssignmentResponse(roleAssignments)
+            .build();
+        when(systemUserService.getSysUserToken()).thenReturn("some-token");
+        when(authTokenGenerator.generate()).thenReturn("some-service-auth-token");
+        when(roleAssignmentApi.queryRoleAssignments(
+            eq("some-token"), eq("some-service-auth-token"), eq(null),
+            any(RoleAssignmentQueryRequest.class)
+        )).thenReturn(response);
+
+        boolean result = roleAssignmentService.isUserAllocatedRoleForCase("1234", "user-123", "some-role");
+
+        assertTrue(result);
+    }
+
+    private RoleAssignmentResponse roleAssignmentResponse(String idamId, String roleName) {
+        RoleAssignmentResponse response = new RoleAssignmentResponse();
+        response.setActorId(idamId);
+        response.setRoleName(roleName);
+        return response;
     }
 }
