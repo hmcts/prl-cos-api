@@ -63,7 +63,7 @@ public class OsCourtFinderService {
     public Court getC100NearestFamilyCourt(String postcode) throws NotFoundException {
         ImmutablePair<CourtVenue, Court> courtCourtVenueMap = getC100NearestFamilyCourtAndVenue(postcode);
         if (courtCourtVenueMap != null) {
-            return courtCourtVenueMap.getValue();
+            return courtCourtVenueMap.getRight();
         }
         return null;
     }
