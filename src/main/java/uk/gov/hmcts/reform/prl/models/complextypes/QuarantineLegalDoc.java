@@ -119,7 +119,8 @@ public class QuarantineLegalDoc {
     public static String[] quarantineCategoriesToRemove() {
         return new String [] {
             "citizenQuarantine", "legalProfQuarantine", "cafcassQuarantine", "courtStaffQuarantine", "confidential",
-            "applicationsWithinProceedings", "applicationsWithinProceedingsRes", "applicationsFromOtherProceedings", "courtnavQuarantine"
+            "applicationsWithinProceedings", "applicationsWithinProceedingsRes", "applicationsFromOtherProceedings",
+            "courtnavQuarantine", "c8ArchivedDocuments"
         };
     }
 }
