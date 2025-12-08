@@ -50,6 +50,10 @@ public class LocationRefDataServiceTest {
     @Mock
     private AuthTokenGenerator authTokenGenerator;
 
+    @Mock
+    private FeatureToggleService featureToggleService;
+
+
     @Before
     public void setUp() {
         when(authTokenGenerator.generate()).thenReturn("");
@@ -174,7 +178,8 @@ public class LocationRefDataServiceTest {
     }
 
     @Test
-    public void testGetCourtDisplayEntryFromEpimmsId() {
+    public void testGetCourtDisplayEntryFromEpimmsIdForFeatureEnabled() {
+        when(featureToggleService.isOsCourtLookupFeatureEnabled()).thenReturn(true);
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
             .thenReturn(CourtDetails.builder()
                             .courtVenues(List.of(CourtVenue.builder().region("r").regionId("id").courtName("1")
@@ -184,6 +189,20 @@ public class LocationRefDataServiceTest {
                             .build());
         DynamicListElement dynamicListElement = locationRefDataService.getDisplayEntryFromEpimmsId("2", "test");
         assertEquals("2:email", dynamicListElement.getCode());
+    }
+
+    @Test
+    public void testGetCourtDisplayEntryFromEpimmsIdForFeatureDisabled() {
+        when(featureToggleService.isOsCourtLookupFeatureEnabled()).thenReturn(false);
+        when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(CourtDetails.builder()
+                            .courtVenues(List.of(CourtVenue.builder().region("r").regionId("id").courtName("1")
+                                                     .region("test").siteName("test").postcode("123")
+                                                     .courtEpimmsId("2")
+                                                     .courtTypeId(FAMILY_COURT_TYPE_ID).build()))
+                            .build());
+        DynamicListElement dynamicListElement = locationRefDataService.getDisplayEntryFromEpimmsId("2", "test");
+        assertEquals(DynamicListElement.EMPTY.getCode(), dynamicListElement.getCode());
     }
 
     @Test

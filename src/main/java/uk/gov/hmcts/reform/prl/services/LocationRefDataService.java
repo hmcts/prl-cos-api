@@ -34,6 +34,7 @@ public class LocationRefDataService {
     public static final String LOCATION_REFERENCE_DATA_LOOKUP_FAILED = "Location Reference Data Lookup Failed - ";
     private final AuthTokenGenerator authTokenGenerator;
     private final LocationRefDataApi locationRefDataApi;
+    private final FeatureToggleService featureToggleService;
 
     public static final String SCOTLAND = "Scotland";
     public static final String MIDLANDS = "Midlands";
@@ -196,10 +197,14 @@ public class LocationRefDataService {
     }
 
     public DynamicListElement getDisplayEntryFromEpimmsId(String baseLocationId, String authToken) {
-        Optional<CourtVenue> optionalCourtVenue = getCourtDetailsFromEpimmsId(baseLocationId, authToken);
         DynamicListElement selectedElement = null;
-        if (optionalCourtVenue.isPresent()) {
-            selectedElement = getDisplayEntry(optionalCourtVenue.get());
+        if (featureToggleService.isOsCourtLookupFeatureEnabled()) {
+            Optional<CourtVenue> optionalCourtVenue = getCourtDetailsFromEpimmsId(baseLocationId, authToken);
+            if (optionalCourtVenue.isPresent()) {
+                selectedElement = getDisplayEntry(optionalCourtVenue.get());
+            }
+        } else {
+            selectedElement = DynamicListElement.EMPTY;
         }
 
         return  selectedElement;

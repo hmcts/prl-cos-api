@@ -62,11 +62,10 @@ public class CaseInitiationService {
 
         if (C100_CASE_TYPE.equalsIgnoreCase(String.valueOf(caseDataUpdated.get(CASE_TYPE_OF_APPLICATION)))) {
             String selectedCourtId = String.valueOf(caseDataUpdated.get(COURT_ID_FIELD));
-            DynamicListElement courtElement = locationRefDataService
+            DynamicListElement selectedCourtElement = locationRefDataService
                 .getDisplayEntryFromEpimmsId(selectedCourtId, authorisation);
-            DynamicListElement selectedElement = courtElement != null ? courtElement :  DynamicListElement.EMPTY;
             List<DynamicListElement> courtList = locationRefDataService.getCourtLocations(authorisation);
-            caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(selectedElement).listItems(courtList)
+            caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(selectedCourtElement).listItems(courtList)
                     .build());
         } else {
             caseDataUpdated.put(COURT_LIST, DynamicList.builder()

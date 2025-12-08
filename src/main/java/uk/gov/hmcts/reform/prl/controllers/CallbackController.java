@@ -480,13 +480,11 @@ public class CallbackController {
     private void addAndSelectCourtList(Map<String, Object> caseDataUpdated, List<DynamicListElement> courtList,
                                        String authorisation) {
         String selectedCourtId = String.valueOf(caseDataUpdated.get(COURT_ID_FIELD));
-        DynamicListElement courtElement = locationRefDataService
+        DynamicListElement selectedCourtElement = locationRefDataService
             .getDisplayEntryFromEpimmsId(selectedCourtId, authorisation);
-        DynamicListElement selectedElement = courtElement != null ? courtElement :  DynamicListElement.EMPTY;
-        caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(selectedElement).listItems(courtList)
+        caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(selectedCourtElement).listItems(courtList)
             .build());
     }
-
 
     @PostMapping(path = "/transfer-court/validate-court-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to validate court fields")
