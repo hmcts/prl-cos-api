@@ -16,6 +16,8 @@ import uk.gov.hmcts.reform.prl.clients.CommonDataRefApi;
 import uk.gov.hmcts.reform.prl.clients.JudicialUserDetailsApi;
 import uk.gov.hmcts.reform.prl.clients.StaffResponseDetailsApi;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.mapper.staffresponse.StaffResponseToDynamicListElementFilter;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.datamigration.caseflag.CaseFlag;
 import uk.gov.hmcts.reform.prl.models.dto.datamigration.caseflag.Flag;
@@ -30,11 +32,14 @@ import uk.gov.hmcts.reform.prl.models.dto.legalofficer.StaffResponse;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGCHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGTYPE;
@@ -111,6 +116,23 @@ public class RefDataUserServiceTest {
     }
 
     @Test
+    public void testStaffDynamicListWithNullStaffData() {
+        when(staffResponseDetailsApi.getAllStaffResponseDetails(
+            idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword),
+            authTokenGenerator.generate(),
+            SERVICENAME,
+            STAFFSORTCOLUMN,
+            STAFFORDERASC,
+            RD_STAFF_PAGE_SIZE,
+            RD_STAFF_FIRST_PAGE
+        )).thenReturn(null);
+        StaffResponseToDynamicListElementFilter filter = mock(StaffResponseToDynamicListElementFilter.class);
+        DynamicList staffDetails = refDataUserService.getStaffDynamicList(filter);
+        assertTrue(staffDetails.getListItems().isEmpty());
+        assertNull(staffDetails.getValue());
+    }
+
+    @Test
     public void testGetStaffDetailsWithException() {
         when(staffResponseDetailsApi.getAllStaffResponseDetails(
             idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword),
@@ -124,6 +146,25 @@ public class RefDataUserServiceTest {
             .thenThrow(FeignException.class);
         List<DynamicListElement> legalAdvisor = refDataUserService.getLegalAdvisorList();
         assertNull(legalAdvisor.get(0).getCode());
+    }
+
+    @Test
+    public void testStaffDynamicListWithException() {
+        when(staffResponseDetailsApi.getAllStaffResponseDetails(
+            idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword),
+            authTokenGenerator.generate(),
+            SERVICENAME,
+            STAFFSORTCOLUMN,
+            STAFFORDERASC,
+            RD_STAFF_PAGE_SIZE,
+            RD_STAFF_FIRST_PAGE
+        ))
+            .thenThrow(FeignException.class);
+
+        StaffResponseToDynamicListElementFilter filter = mock(StaffResponseToDynamicListElementFilter.class);
+        DynamicList staffDetails = refDataUserService.getStaffDynamicList(filter);
+        assertTrue(staffDetails.getListItems().isEmpty());
+        assertNull(staffDetails.getValue());
     }
 
     @Test
@@ -157,6 +198,52 @@ public class RefDataUserServiceTest {
         assertNotNull(legalAdvisorList.get(0).getCode());
         assertEquals("David(test2@com)",legalAdvisorList.get(0).getCode());
 
+    }
+
+    @Test
+    public void testStaffDynamicListWithData() {
+        StaffProfile staffProfile1 = StaffProfile.builder()
+            .id("idam-id-1")
+            .userType(LEGALOFFICE)
+            .firstName("Bob")
+            .lastName("David")
+            .emailId("test2@com")
+            .build();
+        StaffProfile staffProfile2 = StaffProfile.builder()
+            .id("idam-id-2")
+            .userType(LEGALOFFICE)
+            .firstName("Alice")
+            .lastName("John")
+            .emailId("test1@com")
+            .build();
+
+        StaffResponse staffResponse1 = StaffResponse.builder().ccdServiceName("PRIVATELAW").staffProfile(staffProfile1).build();
+        StaffResponse staffResponse2 = StaffResponse.builder().ccdServiceName("PRIVATELAW").staffProfile(staffProfile2).build();
+        List<StaffResponse> listOfStaffResponse = new ArrayList<>();
+        listOfStaffResponse.add(staffResponse1);
+        listOfStaffResponse.add(staffResponse2);
+        ResponseEntity<List<StaffResponse>> staffResponse = ResponseEntity.ok().body(listOfStaffResponse);
+        when(idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword)).thenReturn(authToken);
+        when(authTokenGenerator.generate()).thenReturn("s2sToken");
+        when(staffResponseDetailsApi.getAllStaffResponseDetails(
+            idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword),
+            authTokenGenerator.generate(),
+            SERVICENAME,
+            STAFFSORTCOLUMN,
+            STAFFORDERASC,
+            RD_STAFF_PAGE_SIZE,
+            RD_STAFF_FIRST_PAGE
+        )).thenReturn(staffResponse);
+
+        StaffResponseToDynamicListElementFilter filter = mock(StaffResponseToDynamicListElementFilter.class);
+        DynamicListElement mockDynamicListElement = mock(DynamicListElement.class);
+        when(filter.filter(staffResponse1)).thenReturn(Optional.of(mockDynamicListElement));
+        when(filter.filter(staffResponse2)).thenReturn(Optional.empty());
+
+        DynamicList staffDetails = refDataUserService.getStaffDynamicList(filter);
+        assertEquals(1, staffDetails.getListItems().size());
+        assertEquals(mockDynamicListElement, staffDetails.getListItems().getFirst());
+        assertNull(staffDetails.getValue());
     }
 
     @Test
@@ -396,6 +483,41 @@ public class RefDataUserServiceTest {
     }
 
     @Test
+    public void testGetStaffDynamicListDataSizeLtPageSize() {
+        StaffProfile staffProfile1 = StaffProfile.builder().userType(LEGALOFFICE)
+            .lastName("David").emailId("test2@com").build();
+        StaffResponse staffResponse = StaffResponse.builder().ccdServiceName("PRIVATELAW").staffProfile(staffProfile1).build();
+        List<StaffResponse> listOfStaffFirstPage = new ArrayList<>();
+        listOfStaffFirstPage.add(staffResponse);
+        //add a response header for total entries
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(RD_STAFF_TOTAL_RECORDS_HEADER, "45");
+        ResponseEntity<List<StaffResponse>> staffResponseFirstPage = ResponseEntity.ok().headers(headers).body(listOfStaffFirstPage);
+
+        when(idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword)).thenReturn(authToken);
+        when(authTokenGenerator.generate()).thenReturn("s2sToken");
+        when(staffResponseDetailsApi.getAllStaffResponseDetails(
+            idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword),
+            authTokenGenerator.generate(),
+            SERVICENAME,
+            STAFFSORTCOLUMN,
+            STAFFORDERASC,
+            RD_STAFF_PAGE_SIZE,
+            RD_STAFF_FIRST_PAGE
+        )).thenReturn(staffResponseFirstPage);
+
+        StaffResponseToDynamicListElementFilter filter = mock(StaffResponseToDynamicListElementFilter.class);
+        DynamicListElement mockDynamicListElement = mock(DynamicListElement.class);
+        when(filter.filter(staffResponse)).thenReturn(Optional.of(mockDynamicListElement));
+
+        DynamicList staffDetails = refDataUserService.getStaffDynamicList(filter);
+
+        assertEquals(1, staffDetails.getListItems().size());
+        assertEquals(mockDynamicListElement, staffDetails.getListItems().getFirst());
+        assertNull(staffDetails.getValue());
+    }
+
+    @Test
     public void testGetStaffDetailsDataSizeGtPageSize() {
 
         StaffProfile staffProfile1 = StaffProfile.builder().userType(LEGALOFFICE)
@@ -440,6 +562,59 @@ public class RefDataUserServiceTest {
         assertNotNull(legalAdvisorList.get(0).getCode());
         assertEquals("David(test2@com)",legalAdvisorList.get(0).getCode());
         assertEquals(1, legalAdvisorList.size());
+    }
+
+    @Test
+    public void testGetStaffDynamicListDataSizeGtPageSize() {
+        StaffProfile staffProfile1 = StaffProfile.builder().userType(LEGALOFFICE)
+            .lastName("David").emailId("test2@com").build();
+        StaffProfile staffProfile2 = StaffProfile.builder().userType(LEGALOFFICE)
+            .lastName("John").emailId("test1@com").build();
+        StaffResponse staffResponse1 = StaffResponse.builder().ccdServiceName("PRIVATELAW").staffProfile(staffProfile1).build();
+        StaffResponse staffResponse2 = StaffResponse.builder().ccdServiceName("PRIVATELAW").staffProfile(staffProfile2).build();
+        List<StaffResponse> listOfStaffFirstPage = new ArrayList<>();
+        List<StaffResponse> listOfStaffSecondPage = new ArrayList<>();
+        listOfStaffFirstPage.add(staffResponse1);
+        listOfStaffSecondPage.add(staffResponse2);
+        //add a response header for total entries
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(RD_STAFF_TOTAL_RECORDS_HEADER, String.valueOf(RD_STAFF_PAGE_SIZE + 10));
+        ResponseEntity<List<StaffResponse>> staffResponseFirstPage = ResponseEntity.ok().headers(headers).body(listOfStaffFirstPage);
+        ResponseEntity<List<StaffResponse>> staffResponseSecondPage = ResponseEntity.ok().headers(headers).body(listOfStaffSecondPage);
+
+        when(idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword)).thenReturn(authToken);
+        when(authTokenGenerator.generate()).thenReturn("s2sToken");
+        when(staffResponseDetailsApi.getAllStaffResponseDetails(
+            idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword),
+            authTokenGenerator.generate(),
+            SERVICENAME,
+            STAFFSORTCOLUMN,
+            STAFFORDERASC,
+            RD_STAFF_PAGE_SIZE,
+            RD_STAFF_FIRST_PAGE
+        )).thenReturn(staffResponseFirstPage);
+        when(staffResponseDetailsApi.getAllStaffResponseDetails(
+            idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword),
+            authTokenGenerator.generate(),
+            SERVICENAME,
+            STAFFSORTCOLUMN,
+            STAFFORDERASC,
+            RD_STAFF_PAGE_SIZE,
+            RD_STAFF_SECOND_PAGE
+        )).thenReturn(staffResponseSecondPage);
+
+        StaffResponseToDynamicListElementFilter filter = mock(StaffResponseToDynamicListElementFilter.class);
+        DynamicListElement mockDynamicListElement1 = mock(DynamicListElement.class);
+        DynamicListElement mockDynamicListElement2 = mock(DynamicListElement.class);
+        when(filter.filter(staffResponse1)).thenReturn(Optional.of(mockDynamicListElement1));
+        when(filter.filter(staffResponse2)).thenReturn(Optional.of(mockDynamicListElement2));
+
+        DynamicList staffDetails = refDataUserService.getStaffDynamicList(filter);
+
+        assertEquals(2, staffDetails.getListItems().size());
+        assertEquals(mockDynamicListElement1, staffDetails.getListItems().getFirst());
+        assertEquals(mockDynamicListElement2, staffDetails.getListItems().getLast());
+        assertNull(staffDetails.getValue());
     }
 
     @Test
