@@ -121,7 +121,7 @@ public class ReviewDocumentsController {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         CaseData oldCaseData = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
 
-        reviewDocumentService.cleanupDocuments(caseData, oldCaseData);
+        reviewDocumentService.cleanupOldCopyOfDocuments(caseData, oldCaseData);
 
         return reviewDocumentService.getReviewResult(caseData);
     }

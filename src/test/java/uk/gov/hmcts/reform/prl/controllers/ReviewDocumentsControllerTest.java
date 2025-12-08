@@ -125,7 +125,7 @@ public class ReviewDocumentsControllerTest {
             .caseDetailsBefore(caseDetailsBefore)
             .build();
         reviewDocumentsController.handleSubmitted(auth, callbackRequest);
-        verify(reviewDocumentService).cleanupDocuments(caseData, caseDataBefore);
+        verify(reviewDocumentService).cleanupOldCopyOfDocuments(caseData, caseDataBefore);
         verify(reviewDocumentService).getReviewResult(caseData);
         verifyNoMoreInteractions(reviewDocumentService);
     }

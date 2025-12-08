@@ -330,7 +330,6 @@ public class ManageDocumentsService {
 
             //This is for both events manage documents & review documents for non-confidential documents
             //Epic-PRL-5842 - notifications to lips, solicitors, cafcass cymru
-            // TODO MOVE THIS TO THE SUBMITTED CALLBACK
             notificationService.sendNotificationsAsync(caseData,
                                                   quarantineLegalDoc,
                                                   userRole);
@@ -752,20 +751,20 @@ public class ManageDocumentsService {
         );
         CaseData currentCaseData = CaseUtils.getCaseData(currentCaseDetails, objectMapper);
 
-        updateDocConfDetails(authorisation, currentCaseData, startAllTabsUpdateDataContent.caseData());
+        cleanupOldCopyOfConfidentialDocuments(authorisation, currentCaseData, startAllTabsUpdateDataContent.caseData());
     }
 
-    public void updateDocConfDetails(String authorization, CaseData currentCaseData, CaseData previousCaseData) {
+    void cleanupOldCopyOfConfidentialDocuments(String authorization, CaseData currentCaseData, CaseData previousCaseData) {
         List<String> userRole = getLoggedInUserType(authorization);
         if (userRole.contains(COURT_ADMIN_ROLE) || userRole.contains(COURT_STAFF)) {
             if (CollectionUtils.isNotEmpty(currentCaseData.getReviewDocuments().getConfidentialDocuments())) {
-                deleteRenamedConfDocument(
+                deleteCopyOfRenamedConfidentialDocument(
                     previousCaseData.getReviewDocuments().getConfidentialDocuments(),
                     currentCaseData.getReviewDocuments().getConfidentialDocuments()
                 );
             }
             if (CollectionUtils.isNotEmpty(currentCaseData.getReviewDocuments().getRestrictedDocuments())) {
-                deleteRenamedConfDocument(
+                deleteCopyOfRenamedConfidentialDocument(
                     previousCaseData.getReviewDocuments().getRestrictedDocuments(),
                     currentCaseData.getReviewDocuments().getRestrictedDocuments()
                 );
@@ -791,7 +790,7 @@ public class ManageDocumentsService {
         return caseDataMap;
     }
 
-    private void deleteRenamedConfDocument(List<Element<QuarantineLegalDoc>> previousConfidentialDocuments,
+    private void deleteCopyOfRenamedConfidentialDocument(List<Element<QuarantineLegalDoc>> previousConfidentialDocuments,
                                            List<Element<QuarantineLegalDoc>> currentConfidentialDocuments) {
 
         currentConfidentialDocuments.forEach(

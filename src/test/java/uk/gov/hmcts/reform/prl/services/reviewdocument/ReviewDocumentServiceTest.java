@@ -1773,7 +1773,7 @@ public class ReviewDocumentServiceTest {
         when(objectMapper.convertValue(any(), eq(Map.class))).thenReturn(docMap);
         when(objectMapper.convertValue(any(), eq(Document.class))).thenReturn(CONFIDENTIAL_DOCUMENT);
 
-        reviewDocumentService.cleanupDocuments(currentCaseData, previousCaseData);
+        reviewDocumentService.cleanupOldCopyOfDocuments(currentCaseData, previousCaseData);
 
         verify(manageDocumentsService, times(1))
             .deleteDocumentById("00000000-0000-0000-0000-000000000000");
@@ -1795,7 +1795,7 @@ public class ReviewDocumentServiceTest {
         when(objectMapper.convertValue(any(), eq(Map.class))).thenReturn(docMap);
         when(objectMapper.convertValue(any(), eq(Document.class))).thenReturn(CONFIDENTIAL_DOCUMENT);
 
-        reviewDocumentService.cleanupDocuments(currentCaseData, previousCaseData);
+        reviewDocumentService.cleanupOldCopyOfDocuments(currentCaseData, previousCaseData);
 
         verify(manageDocumentsService, times(1))
             .deleteDocumentById("00000000-0000-0000-0000-000000000000");
@@ -1822,7 +1822,7 @@ public class ReviewDocumentServiceTest {
         when(objectMapper.convertValue(any(), eq(Map.class))).thenReturn(docMap);
         when(objectMapper.convertValue(any(), eq(Document.class))).thenReturn(CONFIDENTIAL_DOCUMENT);
 
-        reviewDocumentService.cleanupDocuments(currentCaseData, previousCaseData);
+        reviewDocumentService.cleanupOldCopyOfDocuments(currentCaseData, previousCaseData);
 
         verifyNoInteractions(manageDocumentsService);
     }
@@ -1846,7 +1846,7 @@ public class ReviewDocumentServiceTest {
         when(objectMapper.convertValue(any(), eq(Map.class))).thenReturn(docMap);
         when(objectMapper.convertValue(any(), eq(Document.class))).thenReturn(CONFIDENTIAL_DOCUMENT);
 
-        reviewDocumentService.cleanupDocuments(currentCaseData, previousCaseData);
+        reviewDocumentService.cleanupOldCopyOfDocuments(currentCaseData, previousCaseData);
 
         verifyNoInteractions(manageDocumentsService);
     }

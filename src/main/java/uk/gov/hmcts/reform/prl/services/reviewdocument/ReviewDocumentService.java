@@ -641,7 +641,13 @@ public class ReviewDocumentService {
         }
     }
 
-    public void cleanupDocuments(CaseData currentCaseData, CaseData previousCaseData) {
+    /**
+     * This method deletes any previous - old - documents that have been replaced by a version that has been
+     * prefixed with 'Confidential'.
+     * @param currentCaseData This is the updated data that holds the renamed copy of the reviewed document.
+     * @param previousCaseData This is the data that contains documents ready to be reviewed.
+     */
+    public void cleanupOldCopyOfDocuments(CaseData currentCaseData, CaseData previousCaseData) {
         Optional<ReviewDocuments> currentReviewDocs = Optional.ofNullable(currentCaseData.getReviewDocuments());
         Optional<ReviewDocuments> previousReviewDocs = Optional.ofNullable(previousCaseData.getReviewDocuments());
 

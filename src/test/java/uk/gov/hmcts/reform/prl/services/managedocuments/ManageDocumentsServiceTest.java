@@ -2617,7 +2617,7 @@ public class ManageDocumentsServiceTest {
             .thenReturn(CONFIDENTIAL_DOCUMENT);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtAdminRole);
 
-        manageDocumentsService.updateDocConfDetails(auth, currentCaseData, previousCaseData);
+        manageDocumentsService.cleanupOldCopyOfConfidentialDocuments(auth, currentCaseData, previousCaseData);
 
         verify(caseDocumentClient).deleteDocument(
             any(),
@@ -2650,7 +2650,7 @@ public class ManageDocumentsServiceTest {
             .thenReturn(CONFIDENTIAL_DOCUMENT);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtAdminRole);
 
-        manageDocumentsService.updateDocConfDetails(auth, currentCaseData, previousCaseData);
+        manageDocumentsService.cleanupOldCopyOfConfidentialDocuments(auth, currentCaseData, previousCaseData);
 
         verify(caseDocumentClient).deleteDocument(
             any(),
@@ -2685,7 +2685,7 @@ public class ManageDocumentsServiceTest {
             .thenReturn(CONFIDENTIAL_DOCUMENT);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtAdminRole);
 
-        manageDocumentsService.updateDocConfDetails(auth, currentCaseData, previousCaseData);
+        manageDocumentsService.cleanupOldCopyOfConfidentialDocuments(auth, currentCaseData, previousCaseData);
 
         verifyNoInteractions(caseDocumentClient);
     }
@@ -2715,7 +2715,7 @@ public class ManageDocumentsServiceTest {
             .thenReturn(CONFIDENTIAL_DOCUMENT);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtAdminRole);
 
-        manageDocumentsService.updateDocConfDetails(auth, currentCaseData, previousCaseData);
+        manageDocumentsService.cleanupOldCopyOfConfidentialDocuments(auth, currentCaseData, previousCaseData);
 
         verifyNoInteractions(caseDocumentClient);
     }
