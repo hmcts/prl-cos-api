@@ -308,7 +308,7 @@ public class RoleAssignmentServiceTest {
         stringObjectMap.put("judgeName", JudicialUser.builder().idamId("123").personalCode("123456").build());
         callbackRequest = CallbackRequest.builder().caseDetails(caseDetails.toBuilder().data(stringObjectMap).build()).build();
         boolean bool = roleAssignmentService.validateIfUserHasRightRoles(auth, callbackRequest);
-        assertEquals(false, bool);
+        assertFalse(bool);
     }
 
     @Test

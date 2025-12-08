@@ -45,6 +45,7 @@ import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicationType;
+import uk.gov.hmcts.reform.prl.mapper.staffresponse.LegalAdviserDynamicListElementFilter;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
@@ -97,6 +98,8 @@ import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
+import uk.gov.hmcts.reform.prl.services.sendandreply.messagehandler.MessageRequest;
+import uk.gov.hmcts.reform.prl.services.sendandreply.messagehandler.SendAndReplyMessageHandlerService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -128,6 +131,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -190,6 +194,10 @@ public class SendAndReplyServiceTest {
 
     @Mock
     RoleAssignmentApi roleAssignmentApi;
+    @Mock
+    LegalAdviserDynamicListElementFilter legalAdviserDynamicListElementConverter;
+    @Mock
+    SendAndReplyMessageHandlerService sendAndReplyMessageHandlerService;
 
     private static final String randomAlphaNumeric = "Abc123EFGH";
 
@@ -808,12 +816,15 @@ public class SendAndReplyServiceTest {
         caseData = caseData.toBuilder().additionalApplicationsBundle(additionalApplicationsBundle).build();
         when(refDataService.getRefDataCategoryValueMap(anyString(), anyString(), anyString(), anyString())).thenReturn(
             refDataCategoryValueMap);
+        DynamicList legalAdviserList = mock(DynamicList.class);
+        when(refDataUserService.getStaffDynamicList(legalAdviserDynamicListElementConverter)).thenReturn(legalAdviserList);
 
         CaseData updatedCaseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, auth);
 
         assertNotNull(updatedCaseData);
         assertEquals("123 - hearingType1", updatedCaseData.getSendOrReplyMessage().getSendMessageObject()
-            .getFutureHearingsList().getListItems().get(0).getCode());
+            .getFutureHearingsList().getListItems().getFirst().getCode());
+        assertEquals(legalAdviserList, updatedCaseData.getSendOrReplyMessage().getSendMessageObject().getLegalAdviserList());
     }
 
     @Test
@@ -1534,6 +1545,7 @@ public class SendAndReplyServiceTest {
         List<Element<Message>> updatedMessageList = sendAndReplyService.addMessage(caseData, auth, caseDataMap);
 
         assertEquals(2,updatedMessageList.size());
+        verify(sendAndReplyMessageHandlerService).handleMessage(any(MessageRequest.class));
     }
 
     @Test

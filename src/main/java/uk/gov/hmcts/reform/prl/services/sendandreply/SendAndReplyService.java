@@ -36,6 +36,7 @@ import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.exception.SendGridNotificationException;
+import uk.gov.hmcts.reform.prl.mapper.staffresponse.LegalAdviserDynamicListElementFilter;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.CodeAndLabel;
@@ -85,6 +86,8 @@ import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
+import uk.gov.hmcts.reform.prl.services.sendandreply.messagehandler.MessageRequest;
+import uk.gov.hmcts.reform.prl.services.sendandreply.messagehandler.SendAndReplyMessageHandlerService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -183,7 +186,6 @@ public class SendAndReplyService {
     private final HearingDataService hearingDataService;
 
     private final RefDataService refDataService;
-
     private final BulkPrintService bulkPrintService;
     private final DocumentGenService documentGenService;
     private final DocumentLanguageService documentLanguageService;
@@ -216,6 +218,8 @@ public class SendAndReplyService {
     private final RoleAssignmentApi roleAssignmentApi;
 
     private final LaunchDarklyClient launchDarklyClient;
+    private final LegalAdviserDynamicListElementFilter legalAdviserDynamicListElementConverter;
+    private final SendAndReplyMessageHandlerService sendAndReplyMessageHandlerService;
 
     private static final String TABLE_BEGIN = "<table>";
     private static final String TABLE_END = "</table>";
@@ -515,6 +519,9 @@ public class SendAndReplyService {
         DynamicList documentCategoryList = getCategoriesAndDocuments(authorization, caseReference);
         String s2sToken = authTokenGenerator.generate();
         final String loggedInUserEmail = getLoggedInUserEmail(authorization);
+
+        DynamicList legalAdviserList = getLegalAdviserList();
+
         return caseData.toBuilder().sendOrReplyMessage(
                 SendOrReplyMessage.builder()
                     .sendMessageObject(Message.builder()
@@ -538,6 +545,7 @@ public class SendAndReplyService {
                                                s2sToken,
                                                caseReference
                                            ))
+                                           .legalAdviserList(legalAdviserList)
                                            .build())
                     .externalMessageAttachDocsList(List.of(element(SendAndReplyDynamicDoc.builder()
                                                                        .submittedDocsRefList(
@@ -548,6 +556,10 @@ public class SendAndReplyService {
                                                                        .build())))
                     .build())
             .build();
+    }
+
+    private DynamicList getLegalAdviserList() {
+        return refDataUserService.getStaffDynamicList(legalAdviserDynamicListElementConverter);
     }
 
     private List<DynamicMultiselectListElement> getExternalMessageRecipientEligibleList(CaseData caseData) {
@@ -1509,11 +1521,22 @@ public class SendAndReplyService {
             messages.addAll(caseData.getSendOrReplyMessage().getMessages());
         }
         allocateJudgeIfMessageSentToJudge(authorisation, caseData, newMessage, caseDataMap);
+        applyMessageHandlers(caseData, caseDataMap, newMessage);
 
         messages.add(element(newMessage));
         messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
 
         return messages;
+    }
+
+    private void applyMessageHandlers(CaseData caseData, Map<String, Object> caseDataMap, Message newMessage) {
+        MessageRequest request = MessageRequest.builder()
+            .caseDataMap(caseDataMap)
+            .caseData(caseData)
+            .message(newMessage)
+            .build();
+
+        sendAndReplyMessageHandlerService.handleMessage(request);
     }
 
     private void allocateJudgeIfMessageSentToJudge(String authorisation,
@@ -1640,7 +1663,6 @@ public class SendAndReplyService {
             .anyMatch(i -> i.getJudgeIdamId().equals(idamId)
                 && i.getMessageIdentifier().equals(messageIdentifier));
     }
-
 
     private RoleAssignmentResponse checkIfCaseIsAlreadyAllocatedJudge(String caseId, String judgeIdamId) {
         List<RoleAssignmentResponse> roleAssignmentResponseList = roleAssignmentService.getRoleAssignmentForActorId(
