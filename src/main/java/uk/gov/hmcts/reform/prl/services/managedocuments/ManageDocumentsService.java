@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.managedocuments;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -486,11 +487,9 @@ public class ManageDocumentsService {
                 UUID.fromString(documentId), true
             );
             log.info("Successfully deleted document {}", documentId);
-
-        } catch (Exception e) {
-            log.error("Failed to delete document {} ", documentId);
+        } catch (FeignException e) {
+            log.error("Failed to delete document {} ", documentId, e);
         }
-
     }
 
     public void deleteDocument(Document document) {
