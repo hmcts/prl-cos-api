@@ -574,7 +574,7 @@ public class HearingDataService {
         }
     }
 
-    List<DynamicListElement> getLinkedCasesDynamicList(String authorisation, String caseId) {
+    public List<DynamicListElement> getLinkedCasesDynamicList(String authorisation, String caseId) {
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
         try {
             CaseLinkedRequest caseLinkedRequest = CaseLinkedRequest.caseLinkedRequestWith()

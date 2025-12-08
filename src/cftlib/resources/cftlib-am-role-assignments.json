@@ -912,5 +912,111 @@
         }
       }
     ]
+  },
+  {
+    "email": "prl_legaladvisor_swansea@justice.gov.uk",
+    "id": "5c1194cf-8b46-4b42-9c5d-ee686ced8b83",
+    "roleAssignments": [
+      {
+        "id": "2007e776-cfde-4cf1-81c7-e7f3c0e7aa16",
+        "actorIdType": "IDAM",
+        "actorId": "5c1194cf-8b46-4b42-9c5d-ee686ced8b83",
+        "roleType": "ORGANISATION",
+        "roleName": "tribunal-caseworker",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "LEGAL_OPERATIONS",
+        "readOnly": false,
+        "created": "2024-02-14T09:00:38.638392Z",
+        "attributes": {
+          "substantive": "Y",
+          "primaryLocation": "234946",
+          "jurisdiction": "PRIVATELAW",
+          "region": "7",
+          "workTypes": "routine_work,hearing_work,applications,decision_making_work"
+        },
+        "authorisations": [
+          "SKILL:ABA5:ORDERMANAGEMENTC100",
+          "SKILL:ABA5:ORDERMANAGEMENTFL401",
+          "SKILL:ABA5:GATEKEEPING",
+          "SKILL:ABA5:GATEKEEPINGC100",
+          "SKILL:ABA5:GATEKEEPINGFL401"
+        ]
+      },
+      {
+        "id": "e6a6ce5d-8d9e-4b65-8e91-27cf11cde034",
+        "actorIdType": "IDAM",
+        "actorId": "5c1194cf-8b46-4b42-9c5d-ee686ced8b83",
+        "roleType": "ORGANISATION",
+        "roleName": "hmcts-legal-operations",
+        "classification": "PRIVATE",
+        "grantType": "BASIC",
+        "roleCategory": "LEGAL_OPERATIONS",
+        "readOnly": true,
+        "created": "2024-02-14T09:00:38.638392Z",
+        "attributes": {
+          "substantive": "N"
+        }
+      },
+      {
+        "id": "c80a0344-c4b8-4f63-9520-ed3651f2b2e5",
+        "actorIdType": "IDAM",
+        "actorId": "5c1194cf-8b46-4b42-9c5d-ee686ced8b83",
+        "roleType": "ORGANISATION",
+        "roleName": "hearing-manager",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "LEGAL_OPERATIONS",
+        "readOnly": false,
+        "created": "2024-02-14T09:00:38.638392Z",
+        "attributes": {
+          "substantive": "N",
+          "primaryLocation": "234946",
+          "jurisdiction": "PRIVATELAW"
+        }
+      },
+      {
+        "id": "24d2a3e5-a3a0-42fd-95f5-239b195b4857",
+        "actorIdType": "IDAM",
+        "actorId": "5c1194cf-8b46-4b42-9c5d-ee686ced8b83",
+        "roleType": "ORGANISATION",
+        "roleName": "hearing-viewer",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "LEGAL_OPERATIONS",
+        "readOnly": false,
+        "created": "2024-02-14T09:00:38.638392Z",
+        "attributes": {
+          "substantive": "N",
+          "primaryLocation": "234946",
+          "jurisdiction": "PRIVATELAW"
+        }
+      },
+      {
+        "id": "b5caf040-9b0e-490e-a015-478dc1adcaa2",
+        "actorIdType": "IDAM",
+        "actorId": "5c1194cf-8b46-4b42-9c5d-ee686ced8b83",
+        "roleType": "ORGANISATION",
+        "roleName": "case-allocator",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "LEGAL_OPERATIONS",
+        "readOnly": false,
+        "created": "2024-02-14T09:00:38.638392Z",
+        "attributes": {
+          "substantive": "N",
+          "primaryLocation": "234946",
+          "jurisdiction": "PRIVATELAW",
+          "region": "7"
+        },
+        "authorisations": [
+          "SKILL:ABA5:ORDERMANAGEMENTC100",
+          "SKILL:ABA5:ORDERMANAGEMENTFL401",
+          "SKILL:ABA5:GATEKEEPING",
+          "SKILL:ABA5:GATEKEEPINGC100",
+          "SKILL:ABA5:GATEKEEPINGFL401"
+        ]
+      }
+    ]
   }
 ]
