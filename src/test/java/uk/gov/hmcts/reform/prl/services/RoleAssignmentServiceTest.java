@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isA;
@@ -65,16 +66,14 @@ public class RoleAssignmentServiceTest {
 
     @Before
     public void init() {
-
         Map<String, Object> dataMap = new HashMap<>();
         caseDetails = CaseDetails.builder().data(dataMap).id(123L).build();
-        roleAssignmentService.setEnvironment("aat");
     }
 
     @Test
     public void testCreateRoleAssignmentActorIdIsNull() {
         Map<String, Object> caseDetailsMap = new HashMap<>();
-        List<String> roles = new ArrayList();
+        List<String> roles = new ArrayList<>();
         roles.add("caseworker-privatelaw-judge");
         userDetails = UserDetails.builder().id("1").roles(roles).build();
         caseDetails.setData(caseDetailsMap);
@@ -104,7 +103,7 @@ public class RoleAssignmentServiceTest {
         Map<String, Object> caseDetailsMap = new HashMap<>();
         caseDetailsMap.put("isJudgeOrLegalAdviser", "judge");
         caseDetailsMap.put("judgeName", "test");
-        List<String> roles = new ArrayList();
+        List<String> roles = new ArrayList<>();
         roles.add("caseworker-privatelaw-judge");
         userDetails = UserDetails.builder().id("1").roles(roles).build();
         caseDetails.setData(caseDetailsMap);
@@ -131,7 +130,7 @@ public class RoleAssignmentServiceTest {
         Map<String, Object> caseDetailsMap = new HashMap<>();
         caseDetailsMap.put("isJudgeOrLegalAdviser", "judge");
         caseDetailsMap.put("judgeNameAndEmail", "test");
-        List<String> roles = new ArrayList();
+        List<String> roles = new ArrayList<>();
         roles.add("caseworker-privatelaw-judge");
         userDetails = UserDetails.builder().id("1").roles(roles).build();
         caseDetails.setData(caseDetailsMap);
@@ -149,7 +148,7 @@ public class RoleAssignmentServiceTest {
     public void testCreateRoleAssignmentJudgeGatekeeping() {
         Map<String, Object> caseDetailsMap = new HashMap<>();
         caseDetailsMap.put("isJudgeOrLegalAdviserGatekeeping", "test");
-        List<String> roles = new ArrayList();
+        List<String> roles = new ArrayList<>();
         roles.add("caseworker-privatelaw-judge");
         userDetails = UserDetails.builder().id("1").roles(roles).build();
         caseDetails.setData(caseDetailsMap);
@@ -173,7 +172,7 @@ public class RoleAssignmentServiceTest {
         Map<String, Object> caseDetailsMap = new HashMap<>();
         caseDetailsMap.put("isJudgeOrLegalAdviserGatekeeping", "judge");
         caseDetailsMap.put("judgeNameAndEmail", "test");
-        List<String> roles = new ArrayList();
+        List<String> roles = new ArrayList<>();
         roles.add("caseworker-privatelaw-judge");
         userDetails = UserDetails.builder().id("1").roles(roles).build();
         caseDetails.setData(caseDetailsMap);
@@ -191,7 +190,7 @@ public class RoleAssignmentServiceTest {
         Map<String, Object> caseDetailsMap = new HashMap<>();
         caseDetailsMap.put("isJudgeOrLegalAdviserGatekeeping", "judge");
         caseDetailsMap.put("judgeName", "test");
-        List<String> roles = new ArrayList();
+        List<String> roles = new ArrayList<>();
         roles.add("caseworker-privatelaw-judge");
         userDetails = UserDetails.builder().id("1").roles(roles).build();
         caseDetails.setData(caseDetailsMap);
@@ -209,7 +208,7 @@ public class RoleAssignmentServiceTest {
         Map<String, Object> caseDetailsMap = new HashMap<>();
         caseDetailsMap.put("isJudgeOrLegalAdviser", "");
         caseDetailsMap.put("legalAdviserList", "");
-        List<String> roles = new ArrayList();
+        List<String> roles = new ArrayList<>();
         roles.add("caseworker-privatelaw-judge");
         userDetails = UserDetails.builder().id("1").roles(roles).build();
         caseDetails.setData(caseDetailsMap);
@@ -231,7 +230,7 @@ public class RoleAssignmentServiceTest {
     public void testCreateRoleAssignmentNameOfJudgeToReviewOrderNotNull() {
         Map<String, Object> caseDetailsMap = new HashMap<>();
         caseDetailsMap.put("nameOfJudgeToReviewOrder", "Test");
-        List<String> roles = new ArrayList();
+        List<String> roles = new ArrayList<>();
         roles.add("caseworker-privatelaw-judge");
         userDetails = UserDetails.builder().id("1").roles(roles).build();
         caseDetails.setData(caseDetailsMap);
@@ -254,7 +253,7 @@ public class RoleAssignmentServiceTest {
         Map<String, Object> caseDetailsMap = new HashMap<>();
         caseDetailsMap.put("isJudgeOrLegalAdviserGatekeeping", "Yes");
         caseDetailsMap.put("legalAdviserList", "");
-        List<String> roles = new ArrayList();
+        List<String> roles = new ArrayList<>();
         roles.add("caseworker-privatelaw-judge");
         userDetails = UserDetails.builder().id("1").roles(roles).build();
         caseDetails.setData(caseDetailsMap);
@@ -287,7 +286,7 @@ public class RoleAssignmentServiceTest {
         stringObjectMap.put("judgeName", JudicialUser.builder().idamId("123").personalCode("123456").build());
         callbackRequest = CallbackRequest.builder().caseDetails(caseDetails.toBuilder().data(stringObjectMap).build()).build();
         boolean bool = roleAssignmentService.validateIfUserHasRightRoles(auth, callbackRequest);
-        assertEquals(true, bool);
+        assertTrue(bool);
     }
 
     @Test
@@ -310,9 +309,7 @@ public class RoleAssignmentServiceTest {
 
     @Test
     public void testFetchIdamAmRoles() {
-        Map<String, String> amRoles = new HashMap<>();
-        amRoles.put("amRoles","case-worker");
-        List<String> roles = new ArrayList();
+        List<String> roles = new ArrayList<>();
         roles.add("caseworker-privatelaw-judge");
         userDetails = UserDetails.builder().id("1").roles(roles).build();
         String emailId = "test@email.com";
