@@ -158,8 +158,7 @@ public class RefDataUserServiceTest {
             STAFFORDERASC,
             RD_STAFF_PAGE_SIZE,
             RD_STAFF_FIRST_PAGE
-        ))
-            .thenThrow(FeignException.class);
+        )).thenThrow(FeignException.class);
 
         StaffResponseToDynamicListElementFilter filter = mock(StaffResponseToDynamicListElementFilter.class);
         DynamicList staffDetails = refDataUserService.getStaffDynamicList(filter);
