@@ -6,10 +6,10 @@ import uk.gov.hmcts.reform.prl.models.dto.legalofficer.StaffProfile;
 
 /**
  * Converter class to transform StaffProfile objects into DynamicListElement objects.
- * <p>
- * The DynamicListElement's code is set to the staff member's IdamID.
- * <p>
- * The DynamicListElement's label is formatted to include the staff member's first name,
+ *
+ * <p>The DynamicListElement's code is set to the staff member's Idam ID.
+ *
+ * <p>The DynamicListElement's label is formatted to include the staff member's first name,
  * last name, and email address in brackets.
  */
 @Component
