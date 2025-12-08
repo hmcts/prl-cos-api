@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import javassist.NotFoundException;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -75,14 +76,19 @@ class OsCourtFinderServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(USER_TOKEN);
         when(localAuthorityCourtDataLoader.getLocalAuthorityCourtList())
             .thenReturn(localAuthorityCourtList);
+        CourtVenue courtVenue = CourtVenue.builder().factUrl(FACT_URL + COURT_SLUG).build();
         when(locationRefDataService.getCourtDetailsFromEpimmsId(epimmsId, USER_TOKEN))
-            .thenReturn(Optional.of(CourtVenue.builder().factUrl(FACT_URL + COURT_SLUG).build()));
+            .thenReturn(Optional.of(courtVenue));
 
-        when(courtFinderApi.getCourtDetails(COURT_SLUG)).thenReturn(Court.builder().build());
+        when(courtFinderApi.getCourtDetails(COURT_SLUG)).thenReturn(Court.builder().courtSlug(COURT_SLUG).build());
 
-        Court court = osCourtFinderService.getC100NearestFamilyCourt(postcode);
+        ImmutablePair<CourtVenue, Court> courtPair = osCourtFinderService.getC100NearestFamilyCourtAndVenue(postcode);
 
-        assertNotNull(court);
+        assertNotNull(courtPair);
+        assertNotNull(courtPair.getLeft());
+        assertNotNull(courtPair.getRight());
+        assertEquals(courtVenue, courtPair.getLeft());
+        assertEquals(COURT_SLUG, courtPair.getRight().getCourtSlug());
 
     }
 
@@ -102,14 +108,19 @@ class OsCourtFinderServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(USER_TOKEN);
         when(localAuthorityCourtDataLoader.getLocalAuthorityCourtList())
             .thenReturn(localAuthorityCourtList);
+        CourtVenue courtVenue = CourtVenue.builder().factUrl(FACT_URL + COURT_SLUG).build();
         when(locationRefDataService.getCourtDetailsFromEpimmsId(epimmsId, USER_TOKEN))
-            .thenReturn(Optional.of(CourtVenue.builder().factUrl(FACT_URL + COURT_SLUG).build()));
+            .thenReturn(Optional.of(courtVenue));
 
-        when(courtFinderApi.getCourtDetails(COURT_SLUG)).thenReturn(Court.builder().build());
+        when(courtFinderApi.getCourtDetails(COURT_SLUG)).thenReturn(Court.builder().courtSlug(COURT_SLUG).build());
 
-        Court court = osCourtFinderService.getC100NearestFamilyCourt("N111JD");
+        ImmutablePair<CourtVenue, Court> courtPair = osCourtFinderService.getC100NearestFamilyCourtAndVenue("N111JD");
 
-        assertNotNull(court);
+        assertNotNull(courtPair);
+        assertNotNull(courtPair.getLeft());
+        assertNotNull(courtPair.getRight());
+        assertEquals(courtVenue, courtPair.getLeft());
+        assertEquals(COURT_SLUG, courtPair.getRight().getCourtSlug());
 
         verifyNoInteractions(osCourtFinderApi);
 

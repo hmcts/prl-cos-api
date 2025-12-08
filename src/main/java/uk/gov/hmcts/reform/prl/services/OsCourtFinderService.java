@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
@@ -28,7 +29,7 @@ public class OsCourtFinderService {
     private final LocationRefDataService locationRefDataService;
     private final CourtFinderApi courtFinderApi;
 
-    public Court getC100NearestFamilyCourt(String postcode) throws NotFoundException {
+    public ImmutablePair<CourtVenue, Court> getC100NearestFamilyCourtAndVenue(String postcode) throws NotFoundException {
         if (postcode == null || postcode.isEmpty()) {
             throw new IllegalArgumentException("postcode is null or empty");
         }
@@ -52,10 +53,18 @@ public class OsCourtFinderService {
                 systemUserService.getSysUserToken()
             );
             if (courtVenue.isPresent()) {
-                return getFactCourtDetails(courtVenue.get());
+                return ImmutablePair.of(courtVenue.get(), getFactCourtDetails(courtVenue.get()));
             }
         }
 
+        return null;
+    }
+
+    public Court getC100NearestFamilyCourt(String postcode) throws NotFoundException {
+        ImmutablePair<CourtVenue, Court> courtCourtVenueMap = getC100NearestFamilyCourtAndVenue(postcode);
+        if (courtCourtVenueMap != null) {
+            return courtCourtVenueMap.getValue();
+        }
         return null;
     }
 

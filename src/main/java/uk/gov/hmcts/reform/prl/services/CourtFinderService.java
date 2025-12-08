@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.court.ServiceArea;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -69,6 +71,14 @@ public class CourtFinderService {
             log.info("CourtFinderService.getNearestFamilyCourt() method is throwing exception : {}",e);
         }
         return null;
+    }
+
+    public ImmutablePair<CourtVenue, Court> getC100NearestFamilyCourtAndVenue(CaseData caseData) throws NotFoundException {
+        return osCourtFinderService.getC100NearestFamilyCourtAndVenue(
+            nonNull(caseData.getC100RebuildData())
+                && nonNull(caseData.getC100RebuildData().getC100RebuildChildPostCode())
+                ? caseData.getC100RebuildData().getC100RebuildChildPostCode()
+                : getCorrectPartyPostcode(caseData));
     }
 
     public Court getCourtDetails(String courtSlug) {
