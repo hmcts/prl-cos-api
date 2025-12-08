@@ -128,9 +128,9 @@ public class CaseInitiationServiceTest {
         when(locationRefDataService.getDisplayEntryFromEpimmsId(courtId, AUTHORISATION)).thenReturn(element);
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
         when(locationRefDataService.getCourtLocations(Mockito.anyString())).thenReturn(List.of(DynamicListElement.EMPTY));
-        Map<String, Object> caseDataMap = caseInitiationService.prePopulateCourtDetails(AUTHORISATION, this.caseDataMap);
-        Assertions.assertTrue(caseDataMap.containsKey(COURT_LIST));
-        Assertions.assertEquals(randUid.toString(), ((DynamicList)caseDataMap.get(COURT_LIST)).getValue().getCode());
+        Map<String, Object> caseDataMapReturned = caseInitiationService.prePopulateCourtDetails(AUTHORISATION, this.caseDataMap);
+        Assertions.assertTrue(caseDataMapReturned.containsKey(COURT_LIST));
+        Assertions.assertEquals(randUid.toString(), ((DynamicList)caseDataMapReturned.get(COURT_LIST)).getValue().getCode());
     }
 
     @Test
