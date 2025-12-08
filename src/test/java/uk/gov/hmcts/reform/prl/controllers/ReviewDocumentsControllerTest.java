@@ -116,9 +116,16 @@ public class ReviewDocumentsControllerTest {
 
     @Test
     public void testHandleSubmitted() {
+        CaseDetails caseDetailsBefore = CaseDetails.builder().id(123L).build();
+        CaseData caseDataBefore = CaseData.builder().id(123L).build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(objectMapper.convertValue(caseDetailsBefore.getData(), CaseData.class)).thenReturn(caseDataBefore);
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetailsBefore)
+            .build();
         reviewDocumentsController.handleSubmitted(auth, callbackRequest);
+        verify(reviewDocumentService).cleanupDocuments(caseData, caseDataBefore);
         verify(reviewDocumentService).getReviewResult(caseData);
         verifyNoMoreInteractions(reviewDocumentService);
     }

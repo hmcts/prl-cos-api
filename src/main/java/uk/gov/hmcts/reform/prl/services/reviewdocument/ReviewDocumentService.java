@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.ScannedDocument;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -33,6 +34,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static java.lang.String.format;
+import static java.util.Collections.emptyList;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -640,10 +642,16 @@ public class ReviewDocumentService {
     }
 
     public void cleanupDocuments(CaseData currentCaseData, CaseData previousCaseData) {
-        cleanupConfidentialDocumentsList(currentCaseData.getReviewDocuments().getConfidentialDocuments(),
-                                         previousCaseData.getReviewDocuments().getConfidentialDocuments());
-        cleanupConfidentialDocumentsList(currentCaseData.getReviewDocuments().getRestrictedDocuments(),
-                                         previousCaseData.getReviewDocuments().getRestrictedDocuments());
+        Optional<ReviewDocuments> currentReviewDocs = Optional.ofNullable(currentCaseData.getReviewDocuments());
+        Optional<ReviewDocuments> previousReviewDocs = Optional.ofNullable(previousCaseData.getReviewDocuments());
+
+        cleanupConfidentialDocumentsList(
+            currentReviewDocs.map(ReviewDocuments::getConfidentialDocuments).orElse(emptyList()),
+            previousReviewDocs.map(ReviewDocuments::getConfidentialDocuments).orElse(emptyList()));
+
+        cleanupConfidentialDocumentsList(
+            currentReviewDocs.map(ReviewDocuments::getRestrictedDocuments).orElse(emptyList()),
+            previousReviewDocs.map(ReviewDocuments::getRestrictedDocuments).orElse(emptyList()));
     }
 
     private void cleanupConfidentialDocumentsList(List<Element<QuarantineLegalDoc>> currentConfidentialDocuments,

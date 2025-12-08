@@ -70,8 +70,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_APPLICATION;
@@ -106,6 +110,17 @@ public class ReviewDocumentServiceTest {
         + System.lineSeparator()
         + "If you are not sure, you can use <a href=\"/cases/case-details/123/trigger/sendOrReplyToMessages/sendOrReplyToMessages1\">Send and reply to messages</a> to get further information about whether"
         + " the document needs to be restricted.";
+
+    private static final Document CONFIDENTIAL_DOCUMENT = Document.builder()
+        .documentFileName("confidential.pdf")
+        .documentUrl("http://doc-url/11111111-1111-1111-1111-111111111111")
+        .build();
+
+    private static final QuarantineLegalDoc QUARANTINE_LEGAL_DOC = QuarantineLegalDoc.builder()
+        .categoryId("applicantApplication")
+        .applicantApplicationDocument(CONFIDENTIAL_DOCUMENT)
+        .originalDocumentId("00000000-0000-0000-0000-000000000000")
+        .build();
 
     private final UUID testUuid = UUID.fromString(TEST_UUID);
 
@@ -858,7 +873,6 @@ public class ReviewDocumentServiceTest {
 
     //LegalProfessional
     @Test
-
     public void testReviewForLegalProfDocsMoveToConfidentialDocsInConfTab() {
         List<Element<QuarantineLegalDoc>> quarantineDocsList = new ArrayList<>();
         quarantineLegalDoc = quarantineLegalDoc.toBuilder()
@@ -1741,5 +1755,99 @@ public class ReviewDocumentServiceTest {
         Assert.assertNotNull(caseDataMap.get("reviewDoc"));
         Document reviewDoc = (Document) caseDataMap.get("reviewDoc");
         Assert.assertEquals("test.pdf", reviewDoc.getDocumentFileName());
+    }
+
+    @Test
+    public void shouldHardDeleteConfidentialDocumentWhenReviewed() {
+        List<Element<QuarantineLegalDoc>> confidentialDocs = new ArrayList<>();
+        confidentialDocs.add(element(UUID.randomUUID(), QUARANTINE_LEGAL_DOC));
+        CaseData currentCaseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                           .confidentialDocuments(confidentialDocs)
+                                           .build())
+            .build();
+        CaseData previousCaseData = CaseData.builder()
+            .build();
+
+        Map<String, Object> docMap = Map.of("applicantApplicationDocument", CONFIDENTIAL_DOCUMENT);
+        when(objectMapper.convertValue(any(), eq(Map.class))).thenReturn(docMap);
+        when(objectMapper.convertValue(any(), eq(Document.class))).thenReturn(CONFIDENTIAL_DOCUMENT);
+
+        reviewDocumentService.cleanupDocuments(currentCaseData, previousCaseData);
+
+        verify(manageDocumentsService, times(1))
+            .deleteDocumentById("00000000-0000-0000-0000-000000000000");
+    }
+
+    @Test
+    public void shouldHardDeleteRestrictedDocumentWhenReviewed() {
+        List<Element<QuarantineLegalDoc>> restrictedDocuments = new ArrayList<>();
+        restrictedDocuments.add(element(UUID.randomUUID(), QUARANTINE_LEGAL_DOC));
+        CaseData currentCaseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .restrictedDocuments(restrictedDocuments)
+                                 .build())
+            .build();
+        CaseData previousCaseData = CaseData.builder()
+            .build();
+
+        Map<String, Object> docMap = Map.of("applicantApplicationDocument", CONFIDENTIAL_DOCUMENT);
+        when(objectMapper.convertValue(any(), eq(Map.class))).thenReturn(docMap);
+        when(objectMapper.convertValue(any(), eq(Document.class))).thenReturn(CONFIDENTIAL_DOCUMENT);
+
+        reviewDocumentService.cleanupDocuments(currentCaseData, previousCaseData);
+
+        verify(manageDocumentsService, times(1))
+            .deleteDocumentById("00000000-0000-0000-0000-000000000000");
+    }
+
+    @Test
+    public void shouldSkipHardDeleteIfCurrentDocumentIdSameAsOriginal() {
+        QuarantineLegalDoc unchangedQuarantineDoc = QuarantineLegalDoc.builder()
+            .categoryId("applicantApplication")
+            .applicantApplicationDocument(CONFIDENTIAL_DOCUMENT)
+            .originalDocumentId("11111111-1111-1111-1111-111111111111")
+            .build();
+        List<Element<QuarantineLegalDoc>> restrictedDocuments = new ArrayList<>();
+        restrictedDocuments.add(element(UUID.randomUUID(), unchangedQuarantineDoc));
+        CaseData currentCaseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .restrictedDocuments(restrictedDocuments)
+                                 .build())
+            .build();
+        CaseData previousCaseData = CaseData.builder()
+            .build();
+
+        Map<String, Object> docMap = Map.of("applicantApplicationDocument", CONFIDENTIAL_DOCUMENT);
+        when(objectMapper.convertValue(any(), eq(Map.class))).thenReturn(docMap);
+        when(objectMapper.convertValue(any(), eq(Document.class))).thenReturn(CONFIDENTIAL_DOCUMENT);
+
+        reviewDocumentService.cleanupDocuments(currentCaseData, previousCaseData);
+
+        verifyNoInteractions(manageDocumentsService);
+    }
+
+    @Test
+    public void shouldSkipDocumentIfInPreviousCaseData() {
+        List<Element<QuarantineLegalDoc>> confidentialDocs = new ArrayList<>();
+        confidentialDocs.add(element(UUID.randomUUID(), QUARANTINE_LEGAL_DOC));
+        CaseData currentCaseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .confidentialDocuments(confidentialDocs)
+                                 .build())
+            .build();
+        CaseData previousCaseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .confidentialDocuments(confidentialDocs)
+                                 .build())
+            .build();
+
+        Map<String, Object> docMap = Map.of("applicantApplicationDocument", CONFIDENTIAL_DOCUMENT);
+        when(objectMapper.convertValue(any(), eq(Map.class))).thenReturn(docMap);
+        when(objectMapper.convertValue(any(), eq(Document.class))).thenReturn(CONFIDENTIAL_DOCUMENT);
+
+        reviewDocumentService.cleanupDocuments(currentCaseData, previousCaseData);
+
+        verifyNoInteractions(manageDocumentsService);
     }
 }
