@@ -73,17 +73,11 @@ public class CourtFinderService {
         Court court = null;
         if (featureToggleService.isOsCourtLookupFeatureEnabled()) {
             court = osCourtFinderService.getC100NearestFamilyCourt(
-                nonNull(caseData.getC100RebuildData())
-                    && nonNull(caseData.getC100RebuildData().getC100RebuildChildPostCode())
-                    ? caseData.getC100RebuildData().getC100RebuildChildPostCode()
-                    : getCorrectPartyPostcode(caseData));
+                getPostcode(caseData));
         } else {
             ServiceArea serviceArea = courtFinderApi
                 .findClosestChildArrangementsCourtByPostcode(
-                    nonNull(caseData.getC100RebuildData())
-                        && nonNull(caseData.getC100RebuildData().getC100RebuildChildPostCode())
-                        ? caseData.getC100RebuildData().getC100RebuildChildPostCode()
-                        : getCorrectPartyPostcode(caseData));
+                    getPostcode(caseData));
             if (serviceArea != null && !serviceArea.getCourts().isEmpty()) {
                 court = getCourtDetails(serviceArea.getCourts()
                                            .get(0)
@@ -93,12 +87,16 @@ public class CourtFinderService {
         return court;
     }
 
+    private String getPostcode(CaseData caseData) throws NotFoundException {
+        return nonNull(caseData.getC100RebuildData())
+            && nonNull(caseData.getC100RebuildData().getC100RebuildChildPostCode())
+            ? caseData.getC100RebuildData().getC100RebuildChildPostCode()
+            : getCorrectPartyPostcode(caseData);
+    }
+
     public ImmutablePair<CourtVenue, Court> getC100NearestFamilyCourtAndVenue(CaseData caseData) throws NotFoundException {
         return osCourtFinderService.getC100NearestFamilyCourtAndVenue(
-            nonNull(caseData.getC100RebuildData())
-                && nonNull(caseData.getC100RebuildData().getC100RebuildChildPostCode())
-                ? caseData.getC100RebuildData().getC100RebuildChildPostCode()
-                : getCorrectPartyPostcode(caseData));
+            getPostcode(caseData));
     }
 
     public Court getCourtDetails(String courtSlug) {
