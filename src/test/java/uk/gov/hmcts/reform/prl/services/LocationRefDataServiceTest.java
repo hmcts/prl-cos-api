@@ -192,6 +192,15 @@ public class LocationRefDataServiceTest {
     }
 
     @Test
+    public void testGetCourtDisplayEntryFromEpimmsIdForFeatureEnabledAndNoCourtFound() {
+        when(featureToggleService.isOsCourtLookupFeatureEnabled()).thenReturn(true);
+        when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(null);
+        DynamicListElement dynamicListElement = locationRefDataService.getDisplayEntryFromEpimmsId("2", "test");
+        assertEquals(DynamicListElement.EMPTY.getCode(), dynamicListElement.getCode());
+    }
+
+    @Test
     public void testGetCourtDisplayEntryFromEpimmsIdForFeatureDisabled() {
         when(featureToggleService.isOsCourtLookupFeatureEnabled()).thenReturn(false);
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))

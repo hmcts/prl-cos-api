@@ -197,14 +197,12 @@ public class LocationRefDataService {
     }
 
     public DynamicListElement getDisplayEntryFromEpimmsId(String baseLocationId, String authToken) {
-        DynamicListElement selectedElement = null;
+        DynamicListElement selectedElement = DynamicListElement.EMPTY;
         if (featureToggleService.isOsCourtLookupFeatureEnabled()) {
             Optional<CourtVenue> optionalCourtVenue = getCourtDetailsFromEpimmsId(baseLocationId, authToken);
             if (optionalCourtVenue.isPresent()) {
                 selectedElement = getDisplayEntry(optionalCourtVenue.get());
             }
-        } else {
-            selectedElement = DynamicListElement.EMPTY;
         }
 
         return  selectedElement;
