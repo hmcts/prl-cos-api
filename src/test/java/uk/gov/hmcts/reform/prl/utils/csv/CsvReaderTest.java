@@ -20,14 +20,14 @@ class CsvReaderTest {
         assertThat(results).hasSize(2);
 
         Map<String, String> first = results.get(0);
-        assertThat(first).containsEntry("Local Authorities","LA1");
-        assertThat(first).containsEntry("epimms","1001");
-        assertThat(first).containsEntry("Status","Open");
+        assertThat(first).containsEntry("Local Authorities","LA1")
+            .containsEntry("epimms","1001")
+            .containsEntry("Status","Open");
 
         Map<String, String> second = results.get(1);
-        assertThat(second).containsEntry("Local Authorities","LA2");
-        assertThat(second).containsEntry("epimms","1002");
-        assertThat(second).containsEntry("Status","Closed");
+        assertThat(second).containsEntry("Local Authorities","LA2")
+            .containsEntry("epimms","1002")
+            .containsEntry("Status","Closed");
     }
 
     @Test

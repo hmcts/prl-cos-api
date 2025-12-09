@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import javassist.NotFoundException;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.court.AreaOfLaw;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtAddress;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.court.ServiceArea;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
@@ -40,6 +42,7 @@ import java.util.Optional;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -1035,5 +1038,24 @@ public class CourtFinderServiceTest {
             .address(Address.builder().postCode("G511TQ").build())
             .build();
         Assert.assertNotNull(courtFinderService.getPostCodeOtherPerson(partyDetails));
+    }
+
+    @Test
+    public void testGetC100NearestFamilyCourtAndVenue() throws NotFoundException {
+
+        CaseData updatedCaseData = CaseData.builder()
+            .c100RebuildData(C100RebuildData.builder().c100RebuildChildPostCode("TS11ST").build())
+            .build();
+
+        ImmutablePair<CourtVenue, Court> courtVenueCourtImmutablePair = ImmutablePair
+            .of(CourtVenue.builder().build(), Court.builder().build());
+        when(osCourtFinderService.getC100NearestFamilyCourtAndVenue(anyString()))
+            .thenReturn(courtVenueCourtImmutablePair);
+
+        ImmutablePair<CourtVenue, Court> actual = courtFinderService.getC100NearestFamilyCourtAndVenue(updatedCaseData);
+
+        assertNotNull(actual);
+        Assert.assertEquals(courtVenueCourtImmutablePair, actual);
+
     }
 }
