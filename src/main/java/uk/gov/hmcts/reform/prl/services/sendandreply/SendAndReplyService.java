@@ -241,6 +241,8 @@ public class SendAndReplyService {
     public static final String JUDICIAL_OR_MAGISTRATE_TIER = "Judicial or magistrate Tier";
     public static final String JUDGE_NAME = "Judge name";
     public static final String JUDGE_EMAIL = "Judge email";
+    public static final String LEGAL_ADVISER_NAME = "Legal Adviser name";
+    public static final String LEGAL_ADVISER_EMAIL = "Legal Adviser email";
     public static final String URGENCY = "Urgency";
     public static final String MESSAGE_SUBJECT = "Subject";
     public static final String MESSAGE_ABOUT = "What is it about";
@@ -945,7 +947,6 @@ public class SendAndReplyService {
         return Collections.emptyList();
     }
 
-
     private String getValueCode(DynamicList dynamicListObj) {
         if (dynamicListObj != null) {
             return dynamicListObj.getValueCode();
@@ -1163,6 +1164,7 @@ public class SendAndReplyService {
         String messageReply = renderMessageTable(previousMessage.get());
         //PRL-4411 - consolidate & add docs to display in reply history
         List<Element<SendReplyTempDoc>> sendReplyTempDocs = getSendReplyTempDocs(previousMessage.get());
+        DynamicList legalAdviserList = getLegalAdviserList();
 
         final String loggedInUserEmail = getLoggedInUserEmail(authorization);
         return caseData.toBuilder()
@@ -1179,6 +1181,7 @@ public class SendAndReplyService {
                             ))
                             .ctscEmailList(getDynamicList(List.of(DynamicListElement.builder()
                                                                       .label(loggedInUserEmail).code(loggedInUserEmail).build())))
+                            .legalAdviserList(legalAdviserList)
                             .build())
                     .internalMessageAttachDocsList(isNotEmpty(sendReplyTempDocs) ? sendReplyTempDocs : null)
                     .build())
@@ -1200,6 +1203,8 @@ public class SendAndReplyService {
         addRowToMessageTable(lines, JUDICIAL_OR_MAGISTRATE_TIER, message.getJudicialOrMagistrateTierValue());
         addRowToMessageTable(lines, JUDGE_NAME, message.getJudgeName());
         addRowToMessageTable(lines, JUDGE_EMAIL, message.getJudgeEmail());
+        addRowToMessageTable(lines, LEGAL_ADVISER_NAME, message.getLegalAdviserName());
+        addRowToMessageTable(lines, LEGAL_ADVISER_EMAIL, message.getLegalAdviserEmail());
         addRowToMessageTable(lines, URGENCY, message.getInternalMessageUrgent() != null
             ? message.getInternalMessageUrgent().getDisplayedValue() : null);
         addRowToMessageTable(lines, MESSAGE_ABOUT, message.getMessageAbout() != null
@@ -1233,6 +1238,8 @@ public class SendAndReplyService {
                     );
                     addRowToMessageTable(lines, JUDGE_NAME, history.getJudgeName());
                     addRowToMessageTable(lines, JUDGE_EMAIL, history.getJudgeEmail());
+                    addRowToMessageTable(lines, LEGAL_ADVISER_NAME, history.getLegalAdviserName());
+                    addRowToMessageTable(lines, LEGAL_ADVISER_EMAIL, history.getLegalAdviserEmail());
                     addRowToMessageTable(lines, URGENCY, history.getIsUrgent() != null
                         ? history.getIsUrgent().getDisplayedValue() : null);
                     addRowToMessageTable(lines, MESSAGE_ABOUT, history.getMessageAbout());
@@ -1315,6 +1322,8 @@ public class SendAndReplyService {
             authorization
         );
 
+        applyMessageHandlers(caseData, caseDataMap, replyMessage);
+
         List<Element<MessageHistory>> messageHistoryList = new ArrayList<>();
         //append history
         List<Element<Message>> messages = caseData.getSendOrReplyMessage()
@@ -1378,6 +1387,8 @@ public class SendAndReplyService {
             .judicialOrMagistrateTierValue(message.getJudicialOrMagistrateTierValue())
             .selectedDocument(message.getSelectedDocument())
             .judgeEmail(message.getJudgeEmail())
+            .legalAdviserName(message.getLegalAdviserName())
+            .legalAdviserEmail(message.getLegalAdviserEmail())
             .senderName(message.getSenderName())
             .senderRole(message.getSenderRole())
             .updatedTime(message.getUpdatedTime())
