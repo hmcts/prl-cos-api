@@ -63,6 +63,9 @@ public class CourtFinderServiceTest {
     @Mock
     private CaseData caseDataMock;
 
+    @Mock
+    private FeatureToggleService featureToggleService;
+
     private Court londonCourt;
     private Court westLondonCourt;
     private Court newcastleCourt;
@@ -208,6 +211,7 @@ public class CourtFinderServiceTest {
             .applicants(Collections.singletonList(wrappedApplicant))
             .respondents(Collections.singletonList(wrappedRespondent))
             .build();
+        when(featureToggleService.isOsCourtLookupFeatureEnabled()).thenReturn(true);
         when(osCourtFinderService.getC100NearestFamilyCourt(anyString())).thenReturn(westLondonCourt);
         assertThat(courtFinderService.getNearestFamilyCourt(caseData), is(westLondonCourt));
     }
@@ -237,6 +241,7 @@ public class CourtFinderServiceTest {
             .respondents(Collections.singletonList(wrappedRespondent))
             .build();
 
+        when(featureToggleService.isOsCourtLookupFeatureEnabled()).thenReturn(true);
         when(osCourtFinderService.getC100NearestFamilyCourt(anyString())).thenReturn(newcastleCourt);
 
         assertThat(courtFinderService.getNearestFamilyCourt(caseData), is(newcastleCourt));
@@ -266,6 +271,7 @@ public class CourtFinderServiceTest {
             .respondents(Collections.singletonList(wrappedRespondent))
             .build();
 
+        when(featureToggleService.isOsCourtLookupFeatureEnabled()).thenReturn(true);
         when(osCourtFinderService.getC100NearestFamilyCourt(anyString())).thenReturn(newcastleCourt);
 
         assertThat(courtFinderService.getNearestFamilyCourt(caseData), is(newcastleCourt));
@@ -353,6 +359,7 @@ public class CourtFinderServiceTest {
             .respondents(Collections.singletonList(wrappedRespondent))
             .build();
 
+        when(featureToggleService.isOsCourtLookupFeatureEnabled()).thenReturn(true);
         when(osCourtFinderService.getC100NearestFamilyCourt(anyString())).thenReturn(londonCourt);
 
         assertThat(courtFinderService.getNearestFamilyCourt(caseData), is(londonCourt));
@@ -375,6 +382,7 @@ public class CourtFinderServiceTest {
             .respondents(Collections.singletonList(wrappedRespondent))
             .build();
 
+        when(featureToggleService.isOsCourtLookupFeatureEnabled()).thenReturn(true);
         when(osCourtFinderService.getC100NearestFamilyCourt(anyString())).thenReturn(newcastleCourt);
 
         assertThat(courtFinderService.getNearestFamilyCourt(caseData), is(newcastleCourt));
@@ -400,6 +408,7 @@ public class CourtFinderServiceTest {
             .respondents(Collections.singletonList(wrappedRespondent))
             .build();
 
+        when(featureToggleService.isOsCourtLookupFeatureEnabled()).thenReturn(true);
         when(osCourtFinderService.getC100NearestFamilyCourt(anyString())).thenReturn(newcastleCourt);
 
         assertThat(courtFinderService.getNearestFamilyCourt(caseData), is(newcastleCourt));

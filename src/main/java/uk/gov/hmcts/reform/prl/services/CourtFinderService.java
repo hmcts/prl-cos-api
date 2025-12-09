@@ -45,6 +45,7 @@ public class CourtFinderService {
     public static final String CHILD = "child";
     private final CourtFinderApi courtFinderApi;
     private final OsCourtFinderService osCourtFinderService;
+    private final FeatureToggleService featureToggleService;
 
     public Court getNearestFamilyCourt(CaseData caseData) throws NotFoundException {
         ServiceArea serviceArea = null;
@@ -59,18 +60,37 @@ public class CourtFinderService {
                                                .getCourtSlug());
                 }
             } else {
-                // need to add feature flag
-                return osCourtFinderService.getC100NearestFamilyCourt(
-                            nonNull(caseData.getC100RebuildData())
-                                    && nonNull(caseData.getC100RebuildData().getC100RebuildChildPostCode())
-                            ? caseData.getC100RebuildData().getC100RebuildChildPostCode()
-                            : getCorrectPartyPostcode(caseData));
+                return getC100NearestFamilyCourt(caseData);
 
             }
         } catch (Exception e) {
             log.info("CourtFinderService.getNearestFamilyCourt() method is throwing exception : {}",e);
         }
         return null;
+    }
+
+    private Court getC100NearestFamilyCourt(CaseData caseData) throws NotFoundException {
+        Court court = null;
+        if (featureToggleService.isOsCourtLookupFeatureEnabled()) {
+            court = osCourtFinderService.getC100NearestFamilyCourt(
+                nonNull(caseData.getC100RebuildData())
+                    && nonNull(caseData.getC100RebuildData().getC100RebuildChildPostCode())
+                    ? caseData.getC100RebuildData().getC100RebuildChildPostCode()
+                    : getCorrectPartyPostcode(caseData));
+        } else {
+            ServiceArea serviceArea = courtFinderApi
+                .findClosestChildArrangementsCourtByPostcode(
+                    nonNull(caseData.getC100RebuildData())
+                        && nonNull(caseData.getC100RebuildData().getC100RebuildChildPostCode())
+                        ? caseData.getC100RebuildData().getC100RebuildChildPostCode()
+                        : getCorrectPartyPostcode(caseData));
+            if (serviceArea != null && !serviceArea.getCourts().isEmpty()) {
+                court = getCourtDetails(serviceArea.getCourts()
+                                           .get(0)
+                                           .getCourtSlug());
+            }
+        }
+        return court;
     }
 
     public ImmutablePair<CourtVenue, Court> getC100NearestFamilyCourtAndVenue(CaseData caseData) throws NotFoundException {
@@ -96,7 +116,7 @@ public class CourtFinderService {
             throw new NotFoundException("No child details found");
         }
 
-        Optional<List<Element<PartyDetails>>> othersPerson = Optional.ofNullable(caseData.getOtherPartyInTheCaseRevised());
+        Optional<List<Element<PartyDetails>>> othersPerson = ofNullable(caseData.getOtherPartyInTheCaseRevised());
 
         Optional<PartyDetails> partyDetails = othersPerson.flatMap(elements -> elements.stream()
                 .map(Element::getValue)
@@ -113,8 +133,8 @@ public class CourtFinderService {
                 .stream()
                 .map(Element::getValue)
                 .findFirst();
-        Optional<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelation = Optional
-                .ofNullable(caseData.getRelations().getChildAndOtherPeopleRelations())
+        Optional<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelation = ofNullable(caseData.getRelations()
+                                                                                                 .getChildAndOtherPeopleRelations())
                 .isPresent() ? caseData.getRelations().getChildAndOtherPeopleRelations()
                 .stream()
                 .map(Element::getValue)
