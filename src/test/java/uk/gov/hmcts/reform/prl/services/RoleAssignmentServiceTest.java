@@ -369,7 +369,7 @@ public class RoleAssignmentServiceTest {
     }
 
     @Test
-    public void givenUserNotAllocated_whenIsUserAllocatedToCase_thenReturnFalse() {
+    public void givenUserNotAllocated_whenIsUserAllocatedRoleForCase_thenReturnFalse() {
         List<RoleAssignmentResponse> roleAssignments = List.of(
             roleAssignmentResponse("some-other-idam-id", "some-other-role"),
             roleAssignmentResponse("some-other-idam-id-2", "some-other-role-2")
@@ -390,7 +390,7 @@ public class RoleAssignmentServiceTest {
     }
 
     @Test
-    public void givenUserAlreadyAllocated_whenIsUserAllocatedToCase_thenReturnTrue() {
+    public void givenUserAlreadyAllocated_whenIsUserAllocatedRoleForCase_thenReturnTrue() {
         List<RoleAssignmentResponse> roleAssignments = List.of(
             roleAssignmentResponse("some-other-idam-id", "some-other-role"),
             roleAssignmentResponse("user-123", "some-role")
