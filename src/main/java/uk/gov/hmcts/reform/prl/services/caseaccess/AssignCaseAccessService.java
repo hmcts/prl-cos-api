@@ -77,8 +77,7 @@ public class AssignCaseAccessService {
 
     public void assignCaseAccessToUserWithRole(
         String caseId,
-        String assigneeUserId,
-        String caseRole
+        String assigneeUserId
     ) {
         if (!launchDarklyClient.isFeatureEnabled("share-a-case")
         ) {
@@ -94,7 +93,7 @@ public class AssignCaseAccessService {
             .caseTypeId(CASE_TYPE)
             .build();
 
-        log.info("Assigning case {} to user {} with role {}", caseId, assigneeUserId, caseRole);
+        log.info("Assigning case {} to user {}", caseId, assigneeUserId);
 
 
         String sysUserToken = systemUserService.getSysUserToken();

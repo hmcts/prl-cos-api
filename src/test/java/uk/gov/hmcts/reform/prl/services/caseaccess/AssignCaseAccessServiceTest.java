@@ -136,7 +136,7 @@ public class AssignCaseAccessServiceTest {
             .assignCaseAccess(Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(), Mockito.any());
 
         assignCaseAccessService.assignCaseAccessToUserWithRole(
-            "42", "user-id", "[C100RESPONDENTSOLICITOR1]");
+            "42", "user-id");
 
         verify(assignCaseAccessClient, times(1))
             .assignCaseAccess(Mockito.eq("sysToken"), Mockito.eq("service-token"), Mockito.eq(false), Mockito.any());
@@ -147,7 +147,7 @@ public class AssignCaseAccessServiceTest {
         when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(false);
 
         assignCaseAccessService.assignCaseAccessToUserWithRole(
-            "42", "user-id", "[C100RESPONDENTSOLICITOR1]");
+            "42", "user-id");
 
         verifyNoMoreInteractions(assignCaseAccessClient);
     }

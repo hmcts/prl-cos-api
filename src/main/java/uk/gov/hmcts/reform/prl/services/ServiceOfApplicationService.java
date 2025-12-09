@@ -4329,12 +4329,10 @@ public class ServiceOfApplicationService {
 
                 if (userIdOpt.isPresent()) {
                     String assigneeUserId = userIdOpt.get();
-                    CaseRole role = CaseRole.respondentSolicitors().get(i);
 
                     assignCaseAccessService.assignCaseAccessToUserWithRole(
                         caseId,
-                        assigneeUserId,
-                        role.formattedName()
+                        assigneeUserId
                     );
                 } else {
                     log.warn(
