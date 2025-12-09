@@ -92,7 +92,6 @@ public class AssignCaseAccessService {
             .caseId(caseId)
             .assigneeId(assigneeUserId)
             .caseTypeId(CASE_TYPE)
-            .caseRoles(List.of(caseRole))       // e.g. "[C100RESPONDENTSOLICITOR1]"
             .build();
 
         log.info("Assigning case {} to user {} with role {}", caseId, assigneeUserId, caseRole);
@@ -102,7 +101,7 @@ public class AssignCaseAccessService {
         assignCaseAccessClient.assignCaseAccess(
             sysUserToken,  // sysuser
             serviceToken,
-            false,
+            true,
             request
         );
     }

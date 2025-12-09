@@ -5,8 +5,6 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
-import java.util.List;
-
 @Builder
 @Getter
 @EqualsAndHashCode
@@ -20,6 +18,4 @@ public class AssignCaseAccessRequest {
     @JsonProperty("case_type_id")
     private String caseTypeId;
 
-    @JsonProperty("case_roles")
-    private final List<String> caseRoles;
 }
