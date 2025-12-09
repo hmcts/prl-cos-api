@@ -5248,7 +5248,7 @@ public class ServiceOfApplicationServiceTest {
         serviceOfApplicationService.assignRespondentSolicitorsAccess("auth-token", caseData);
 
         verify(assignCaseAccessService).assignCaseAccessToUserWithRole(
-            any(), eq("userId"), eq("[C100RESPONDENTSOLICITOR1]"));
+            any(), eq("userId"));
     }
 
     @Test
