@@ -87,7 +87,7 @@ class LegalAdviserMessageHandlerTest {
     }
 
     private static MessageRequest messageRequest(SendOrReply sendOrReply, InternalMessageWhoToSendToEnum whoToSendTo,
-                                                 boolean legalAdvisorList, boolean selectedLegalAdviser ) {
+                                                 boolean legalAdvisorList, boolean selectedLegalAdviser) {
         DynamicList legalAdviserList = legalAdviserList(legalAdvisorList, selectedLegalAdviser);
 
         return MessageRequest.builder()

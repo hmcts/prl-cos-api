@@ -10,10 +10,10 @@ import java.util.regex.Pattern;
 /**
  * Converter class for converting between StaffProfile and LegalAdviserIdamId
  * using DynamicListElement as an intermediary representation.
- * <p>
- * The DynamicListElement's label is formatted as "FirstName LastName (Email)".
- * <p>
- * The DynamicListElement's code is the StaffProfile's Idam ID.
+ *
+ * <p>The DynamicListElement's label is formatted as "FirstName LastName (Email)".
+ *
+ * <p>The DynamicListElement's code is the StaffProfile's Idam ID.
  */
 @Component
 public class LegalAdviserDynamicListElementBiConverter implements DynamicListElementBiConverter<StaffProfile, LegalAdviserIdamId> {

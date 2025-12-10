@@ -17,7 +17,7 @@ import uk.gov.hmcts.reform.prl.services.sendandreply.roleallocation.LegalAdviser
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class LegalAdviserMessageHandler implements MessageHandler{
+public class LegalAdviserMessageHandler implements MessageHandler {
 
     private final LegalAdviserRoleAllocator legalAdviserRoleAllocator;
     private final LegalAdviserDynamicListElementBiConverter legalAdviserDynamicListElementBiConverter;
