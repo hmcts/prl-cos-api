@@ -100,7 +100,7 @@ public class AssignCaseAccessService {
         assignCaseAccessClient.assignCaseAccess(
             sysUserToken,  // sysuser
             serviceToken,
-            true,
+            false,
             request
         );
     }
