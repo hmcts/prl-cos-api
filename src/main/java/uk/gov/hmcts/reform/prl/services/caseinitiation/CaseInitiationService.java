@@ -48,8 +48,9 @@ public class CaseInitiationService {
             "supplementary_data_updates",
             Map.of("$set", Map.of("HMCTSServiceId", "ABA5"))
         );
-        coreCaseDataApi.submitSupplementaryData(authorisation, authTokenGenerator.generate(), caseId,
-                                                supplementaryData
+        coreCaseDataApi.submitSupplementaryData(
+            authorisation, authTokenGenerator.generate(), caseId,
+            supplementaryData
         );
 
         eventPublisher.publishEvent(new CaseDataChanged(caseData));
@@ -59,15 +60,23 @@ public class CaseInitiationService {
 
         if (C100_CASE_TYPE.equalsIgnoreCase(String.valueOf(caseDataUpdated.get("caseTypeOfApplication")))) {
             List<DynamicListElement> courtList = locationRefDataService.getCourtLocations(authorisation);
-            caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
-                    .build());
+            caseDataUpdated.put(
+                COURT_LIST, DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
+                    .build()
+            );
         } else {
-            caseDataUpdated.put(COURT_LIST, DynamicList.builder()
+            caseDataUpdated.put(
+                COURT_LIST, DynamicList.builder()
                     .listItems(locationRefDataService.getDaCourtLocations(authorisation).stream()
-                            .sorted(Comparator.comparing(DynamicListElement::getLabel, Comparator.naturalOrder()))
-                            .toList())
-                    .build());
+                                   .sorted(Comparator.comparing(
+                                       DynamicListElement::getLabel,
+                                       Comparator.naturalOrder()
+                                   ))
+                                   .toList())
+                    .build()
+            );
         }
         return caseDataUpdated;
     }
+
 }
