@@ -110,6 +110,58 @@ public class RoleAssignmentService {
         }
     }
 
+    /**
+     * Create a role assignment on a case for a user. The role assignment request is made by the system user.
+     *
+     * @param caseId          the case id
+     * @param idamId          the idam id of the user to assign the role to
+     * @param roleCategory    the role category
+     * @param roleName        the role name
+     * @param replaceExisting whether to replace existing role assignments
+     */
+    public void createRoleAssignment(String caseId, String idamId, RoleCategory roleCategory, String roleName,
+                                     boolean replaceExisting) {
+        String systemUserToken = systemUserService.getSysUserToken();
+        String systemUserId = systemUserService.getUserId(systemUserToken);
+        String reference = caseId + "-" + systemUserId;
+
+        RoleRequest roleRequest = RoleRequest.roleRequest()
+            .assignerId(systemUserId)
+            .process("CCD")
+            .reference(reference)
+            .replaceExisting(replaceExisting)
+            .build();
+
+        RequestedRoles requestedRoles = RequestedRoles.requestedRoles()
+            .actorIdType("IDAM")
+            .actorId(idamId)
+            .roleType(RoleType.CASE.name())
+            .roleName(roleName)
+            .classification(Classification.RESTRICTED.name())
+            .grantType(GrantType.SPECIFIC.name())
+            .roleCategory(roleCategory.name())
+            .readOnly(false)
+            .beginTime(Instant.now())
+            .attributes(Attributes.attributes()
+                            .jurisdiction(JURISDICTION)
+                            .caseType(CASE_TYPE)
+                            .caseId(caseId)
+                            .build())
+            .build();
+
+        RoleAssignmentRequest roleAssignmentRequest = RoleAssignmentRequest.roleAssignmentRequest()
+            .roleRequest(roleRequest)
+            .requestedRoles(List.of(requestedRoles))
+            .build();
+
+        roleAssignmentApi.updateRoleAssignment(
+            systemUserToken,
+            authTokenGenerator.generate(),
+            null,
+            roleAssignmentRequest
+        );
+    }
+
     private String populateActorIdFromDto(String authorization, RoleAssignmentDto roleAssignmentDto) {
         if (null != roleAssignmentDto.getLegalAdviserList()) {
             return fetchActorIdFromSelectedLegalAdviser(authorization, roleAssignmentDto.getLegalAdviserList());
@@ -235,59 +287,7 @@ public class RoleAssignmentService {
     }
 
     /**
-     * Create a role assignment on a case for a user. The role request is made by the system user.
-     *
-     * @param caseId          the case id
-     * @param idamId          the idam id of the user to assign the role to
-     * @param roleCategory    the role category
-     * @param roleName        the role name
-     * @param replaceExisting whether to replace existing role assignments
-     */
-    public void createRoleAssignment(String caseId, String idamId, RoleCategory roleCategory, String roleName,
-                                     boolean replaceExisting) {
-        String systemUserToken = systemUserService.getSysUserToken();
-        String systemUserId = systemUserService.getUserId(systemUserToken);
-        String reference = caseId + "-" + systemUserId;
-
-        RoleRequest roleRequest = RoleRequest.roleRequest()
-            .assignerId(systemUserId)
-            .process("CCD")
-            .reference(reference)
-            .replaceExisting(replaceExisting)
-            .build();
-
-        RequestedRoles requestedRoles = RequestedRoles.requestedRoles()
-            .actorIdType("IDAM")
-            .actorId(idamId)
-            .roleType(RoleType.CASE.name())
-            .roleName(roleName)
-            .classification(Classification.RESTRICTED.name())
-            .grantType(GrantType.SPECIFIC.name())
-            .roleCategory(roleCategory.name())
-            .readOnly(false)
-            .beginTime(Instant.now())
-            .attributes(Attributes.attributes()
-                            .jurisdiction(JURISDICTION)
-                            .caseType(CASE_TYPE)
-                            .caseId(caseId)
-                            .build())
-            .build();
-
-        RoleAssignmentRequest roleAssignmentRequest = RoleAssignmentRequest.roleAssignmentRequest()
-            .roleRequest(roleRequest)
-            .requestedRoles(List.of(requestedRoles))
-            .build();
-
-        roleAssignmentApi.updateRoleAssignment(
-            systemUserToken,
-            authTokenGenerator.generate(),
-            null,
-            roleAssignmentRequest
-        );
-    }
-
-    /**
-     * Check if user is allocated a specific role for a case
+     * Check if user is allocated a specific role for a case.
      *
      * @param caseId   the case id
      * @param idamId   the idam id of the user
