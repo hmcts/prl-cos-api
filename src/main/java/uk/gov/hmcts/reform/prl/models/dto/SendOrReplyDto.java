@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.sendandreply.AllocatedJudgeForSendAndReply;
-import uk.gov.hmcts.reform.prl.models.sendandreply.AllocatedUserForSendAndReply;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 
@@ -21,8 +20,6 @@ public class SendOrReplyDto {
     private final List<Element<Message>> closedMessages;
     @JsonProperty("allocatedJudgeForSendAndReply")
     private final List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeForSendAndReply;
-    @JsonProperty("allocatedUserForSendAndReply")
-    private final List<Element<AllocatedUserForSendAndReply>> allocatedUserForSendAndReply;
     @JsonProperty("messageObject")
     MessageMetaData messageMetaData;
 }

@@ -6,6 +6,7 @@ import uk.gov.hmcts.reform.prl.mapper.dynamiclistelement.LegalAdviserDynamicList
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.legalofficer.StaffResponse;
 
+import java.util.List;
 import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGALOFFICE;
