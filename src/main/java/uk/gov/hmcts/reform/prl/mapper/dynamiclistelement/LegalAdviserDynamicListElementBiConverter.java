@@ -34,7 +34,7 @@ public class LegalAdviserDynamicListElementBiConverter implements DynamicListEle
     public LegalAdviserIdamId convertFromDynamicListElement(DynamicListElement element) {
         String label = element.getLabel();
 
-        Pattern pattern = Pattern.compile("^(.*) \\(([^)]+)\\)$");
+        Pattern pattern = Pattern.compile("^(.+?) \\(([^)]+)\\)$");
         Matcher matcher = pattern.matcher(label);
         String fullName;
         String email;
