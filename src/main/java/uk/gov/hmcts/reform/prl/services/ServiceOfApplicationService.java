@@ -149,6 +149,7 @@ import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasDashboardAccess;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasLegalRepresentation;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeList;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
@@ -432,28 +433,32 @@ public class ServiceOfApplicationService {
 
     private void removeServedDocumentCategories(List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                               List<Element<BulkPrintDetails>> bulkPrintDetails) {
-        emailNotificationDetails.forEach(element -> {
-            List<Element<Document>> docs = element.getValue().getDocs();
-            element.getValue().setDocs(docs.stream()
-                                           .map(docEl ->
-                                                    element(
-                                                        docEl.getId(),
-                                                        docEl.getValue().toBuilder().categoryId(null).build()
-                                                    ))
-                                           .toList()
-            );
+        nullSafeList(emailNotificationDetails).forEach(element -> {
+            if (isNotEmpty(element.getValue())) {
+                List<Element<Document>> docs = nullSafeList(element.getValue().getDocs());
+                element.getValue().setDocs(docs.stream()
+                                               .map(docEl ->
+                                                        element(
+                                                            docEl.getId(),
+                                                            docEl.getValue().toBuilder().categoryId(null).build()
+                                                        ))
+                                               .toList()
+                );
+            }
         });
 
-        bulkPrintDetails.forEach(element -> {
-            List<Element<Document>> docs = element.getValue().getPrintDocs();
-            element.getValue().setPrintDocs(docs.stream()
-                                           .map(docEl ->
-                                                    element(
-                                                        docEl.getId(),
-                                                        docEl.getValue().toBuilder().categoryId(null).build()
-                                                    ))
-                                           .toList()
-            );
+        nullSafeList(bulkPrintDetails).forEach(element -> {
+            List<Element<Document>> docs = nullSafeList(element.getValue().getPrintDocs());
+            if (isNotEmpty(element.getValue())) {
+                element.getValue().setPrintDocs(docs.stream()
+                                                    .map(docEl ->
+                                                             element(
+                                                                 docEl.getId(),
+                                                                 docEl.getValue().toBuilder().categoryId(null).build()
+                                                             ))
+                                                    .toList()
+                );
+            }
         });
     }
 

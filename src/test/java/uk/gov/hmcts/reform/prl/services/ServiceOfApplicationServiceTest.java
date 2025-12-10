@@ -56,6 +56,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.CoverLet
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.RespondentC8Document;
@@ -263,7 +264,14 @@ public class ServiceOfApplicationServiceTest {
                                                                                                   .isGenWelsh(true).build());
         when(authTokenGenerator.generate()).thenReturn("");
         when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(), Mockito.any())).thenReturn(DynamicList.builder().build());
-
+        when(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(Mockito.anyString(),Mockito.anyString(),
+                                                                                    Mockito.any(),Mockito.any(),Mockito.any(),
+                                                                                    Mockito.anyString()))
+            .thenReturn(EmailNotificationDetails.builder().build());
+        when(serviceOfApplicationEmailService.sendEmailNotificationToCafcass(any(), anyString(), anyString()))
+            .thenReturn(EmailNotificationDetails.builder().build());
+        when(serviceOfApplicationPostService.sendPostNotificationToParty(any(), anyString(), any(), any(), anyString()))
+            .thenReturn(BulkPrintDetails.builder().build());
 
 
         partyIdsSoa = new ArrayList<>();
@@ -5226,6 +5234,173 @@ public class ServiceOfApplicationServiceTest {
                                                         caseDataMap1,Event.SOA.getId());
         assertNull(caseDataMap1.get(APPLICANTS));
 
+    }
+
+    @Test
+    public void shouldNotHaveCategoriesOnEmailNotificationDocuments() {
+        EmailNotificationDetails emailNotification = EmailNotificationDetails.builder()
+                        .docs(List.of(
+                            element(Document.builder().documentFileName("doc1.pdf").categoryId("cat1").build()),
+                            element(Document.builder().documentFileName("doc2.pdf").categoryId("cat2").build())
+                        ))
+                        .build();
+
+        when(serviceOfApplicationEmailService.sendEmailNotificationToCafcass(any(), anyString(), anyString()))
+            .thenReturn(emailNotification);
+
+        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
+            .representativeLastName("repLastName")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .partyId(UUID.randomUUID())
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .address(Address.builder().addressLine1("line1").build())
+            .build();
+
+
+        List<Element<PartyDetails>> applicants = new ArrayList<>();
+        UUID uuid = UUID.randomUUID();
+        Element applicantElement = element(uuid, partyDetails);
+        applicants.add(applicantElement);
+
+        List<Element<PartyDetails>> respondents = new ArrayList<>();
+        Element respondentElement = element(uuid, partyDetails);
+        respondents.add(respondentElement);
+
+        DynamicMultiSelectList soaRecipientsOptions = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.builder()
+                               .code(uuid.toString())
+                               .label("recipient1")
+                               .build()))
+            .build();
+
+        List<Element<CaseInvite>> caseInvites = new ArrayList<>();
+        caseInvites.add(element(CaseInvite.builder().partyId(uuid).build()));
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicants(applicants)
+            .respondents(respondents)
+            .othersToNotify(respondents)
+            .caseCreatedBy(CaseCreatedBy.CITIZEN)
+            .applicantCaseName("Test Case 45678")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
+                                      .soaCafcassCymruServedOptions(Yes)
+                                      .soaCafcassEmailId("cymruemail@test.com")
+                                      .soaCafcassCymruEmail("cymruemail@test.com")
+                                      .soaServingRespondentsOptions(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                                      .soaRecipientsOptions(soaRecipientsOptions)
+                                      .soaOtherParties(soaRecipientsOptions)
+                                      .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseInvites(caseInvites)
+            .build();
+
+        when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder().forename("first").surname("test").build());
+
+        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
+            caseData,
+            authorization,
+            new HashMap<>()
+        );
+
+        servedApplicationDetails.getEmailNotificationDetails().forEach(emailNotificationDetail -> {
+            assertEquals(2, emailNotificationDetail.getValue().getDocs().size());
+            emailNotificationDetail.getValue().getDocs().forEach(docElement -> {
+                assertNull(docElement.getValue().getCategoryId());
+            });
+        });
+    }
+
+    @Test
+    public void shouldNotHaveCategoriesOnBulkPrintNotificationDocuments() {
+        BulkPrintDetails bulkPrintDetails = BulkPrintDetails.builder()
+            .printDocs(List.of(
+                element(Document.builder().documentFileName("doc1.pdf").categoryId("cat1").build()),
+                element(Document.builder().documentFileName("doc2.pdf").categoryId("cat2").build())
+            ))
+            .build();
+
+        when(serviceOfApplicationPostService.sendPostNotificationToParty(any(), anyString(), any(), any(), anyString()))
+            .thenReturn(bulkPrintDetails);
+
+        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
+            .representativeLastName("repLastName")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .partyId(UUID.randomUUID())
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .address(Address.builder().addressLine1("line1").build())
+            .build();
+
+
+        List<Element<PartyDetails>> applicants = new ArrayList<>();
+        UUID uuid = UUID.randomUUID();
+        Element applicantElement = element(uuid, partyDetails);
+        applicants.add(applicantElement);
+
+        List<Element<PartyDetails>> respondents = new ArrayList<>();
+        Element respondentElement = element(uuid, partyDetails);
+        respondents.add(respondentElement);
+
+        DynamicMultiSelectList soaRecipientsOptions = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.builder()
+                               .code(uuid.toString())
+                               .label("recipient1")
+                               .build()))
+            .build();
+
+        List<Element<CaseInvite>> caseInvites = new ArrayList<>();
+        caseInvites.add(element(CaseInvite.builder().partyId(uuid).build()));
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicants(applicants)
+            .respondents(respondents)
+            .othersToNotify(respondents)
+            .caseCreatedBy(CaseCreatedBy.CITIZEN)
+            .applicantCaseName("Test Case 45678")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
+                                      .soaServingRespondentsOptions(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                                      .soaRecipientsOptions(soaRecipientsOptions)
+                                      .soaOtherParties(soaRecipientsOptions)
+                                      .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseInvites(caseInvites)
+            .build();
+
+        when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder().forename("first").surname("test").build());
+
+        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
+            caseData,
+            authorization,
+            new HashMap<>()
+        );
+
+        servedApplicationDetails.getBulkPrintDetails().forEach(bulkPrintDetailsElement -> {
+            assertEquals(2, bulkPrintDetailsElement.getValue().getPrintDocs().size());
+            bulkPrintDetailsElement.getValue().getPrintDocs().forEach(docElement -> {
+                assertNull(docElement.getValue().getCategoryId());
+            });
+        });
     }
 
 
