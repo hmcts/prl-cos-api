@@ -13,13 +13,15 @@ import java.util.List;
 @Data
 @Builder(toBuilder = true)
 public class SendOrReplyDto {
-
     @JsonProperty("openMessages")
     private final List<Element<Message>> openMessages;
+
     @JsonProperty("closedMessages")
     private final List<Element<Message>> closedMessages;
+
     @JsonProperty("allocatedJudgeForSendAndReply")
     private final List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeForSendAndReply;
+
     @JsonProperty("messageObject")
     MessageMetaData messageMetaData;
 }
