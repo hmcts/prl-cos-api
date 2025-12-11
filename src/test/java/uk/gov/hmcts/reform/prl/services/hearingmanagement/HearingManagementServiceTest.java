@@ -1,8 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.hearingmanagement;
 
 import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.AppenderBase;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
@@ -18,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.controllers.testingsupport.TestLogAppender;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -36,7 +35,6 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -244,18 +242,8 @@ public class HearingManagementServiceTest {
 
     @Test
     public void testCaseStateChangeForHearingManagementUnhandledCaseStateLogsWarning() {
-
-        class TestAppender extends AppenderBase<ILoggingEvent> {
-            final List<ILoggingEvent> events = new ArrayList<>();
-
-            @Override
-            protected void append(ILoggingEvent eventObject) {
-                events.add(eventObject);
-            }
-        }
-
         ch.qos.logback.classic.Logger logger = (Logger) LoggerFactory.getLogger(HearingManagementService.class);
-        TestAppender appender = new TestAppender();
+        TestLogAppender appender = new TestLogAppender();
         appender.start();
         logger.addAppender(appender);
 
@@ -263,7 +251,7 @@ public class HearingManagementServiceTest {
         State unhandledState = State.valueOf("SUBMITTED_NOT_PAID");
 
         verifyNoInteractions(ccdCoreCaseDataService);
-        assertTrue(appender.events.stream().anyMatch(
+        assertTrue(appender.getEvents().stream().anyMatch(
             e -> e.getFormattedMessage().contains("Unhandled caseState: "
                                                       + unhandledState + " for case " + hearingRequest.getCaseRef()
             )
