@@ -70,6 +70,7 @@ public class HearingManagementService {
         if (hearingRequest.getNextHearingDateRequest() != null
             && hearingRequest.getNextHearingDateRequest().getNextHearingDetails() != null
             && hearingRequest.getNextHearingDateRequest().getNextHearingDetails().getHearingDateTime() != null) {
+            fields.put("nextHearingDetails", hearingRequest.getNextHearingDateRequest().getNextHearingDetails());
             fields.put(NEXT_HEARING_DATE, hearingRequest.getNextHearingDateRequest().getNextHearingDetails()
                 .getHearingDateTime().toLocalDate());
         }
