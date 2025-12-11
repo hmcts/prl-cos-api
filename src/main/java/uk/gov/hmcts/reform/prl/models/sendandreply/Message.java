@@ -98,6 +98,10 @@ public class Message extends MessageMetaData {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<Element<Document>> internalMessageAttachDocs;
 
+    private DynamicList legalAdviserList;
+    private String legalAdviserEmail;
+    private String legalAdviserName;
+
     @JsonIgnore
     public String getLabelForDynamicList() {
         return String.format(
