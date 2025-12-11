@@ -1,5 +1,8 @@
 package uk.gov.hmcts.reform.prl.services.hearingmanagement;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.AppenderBase;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
@@ -9,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
@@ -32,6 +36,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +45,7 @@ import java.util.Map;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
@@ -227,27 +233,62 @@ public class HearingManagementServiceTest {
             Mockito.any(),
             Mockito.anyBoolean()
         )).thenReturn(caseDetails);
-        when(ccdCoreCaseDataService.startSubmitCreate(Mockito.anyString(),
-                                                      Mockito.anyString(),
-                                                      Mockito.any(),
-                                                      Mockito.anyBoolean())).thenReturn(startEventResponse);
+        when(ccdCoreCaseDataService.startSubmitCreate(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.anyBoolean()
+        )).thenReturn(startEventResponse);
 
+    }
+
+    @Test
+    public void testCaseStateChangeForHearingManagementUnhandledCaseStateLogsWarning() {
+
+        class TestAppender extends AppenderBase<ILoggingEvent> {
+            final List<ILoggingEvent> events = new ArrayList<>();
+
+            @Override
+            protected void append(ILoggingEvent eventObject) {
+                events.add(eventObject);
+            }
+        }
+
+        ch.qos.logback.classic.Logger logger = (Logger) LoggerFactory.getLogger(HearingManagementService.class);
+        TestAppender appender = new TestAppender();
+        appender.start();
+        logger.addAppender(appender);
+
+        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest, State.SUBMITTED_NOT_PAID);
+        State unhandledState = State.valueOf("SUBMITTED_NOT_PAID");
+
+        verifyNoInteractions(ccdCoreCaseDataService);
+        assertTrue(appender.events.stream().anyMatch(
+            e -> e.getFormattedMessage().contains("Unhandled caseState: "
+                                                      + unhandledState + " for case " + hearingRequest.getCaseRef()
+            )
+        ));
+
+        logger.detachAppender(appender);
     }
 
     @Test
     public void testHmcStateAsListedAndStateChangeAndNotificationForC100() throws Exception {
         caseDetails = caseDetails.toBuilder().data(stringObjectMap).build();
-        when(objectMapper.convertValue(stringObjectMap,CaseData.class)).thenReturn(c100CaseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(c100CaseData);
 
-        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest,DECISION_OUTCOME);
+        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest, DECISION_OUTCOME);
 
-        verify(ccdCoreCaseDataService, times(1)).startUpdate(Mockito.anyString(),
-                                                             Mockito.any(),
-                                                             Mockito.anyString(),
-                                                             Mockito.anyBoolean()
+        verify(ccdCoreCaseDataService, times(1)).startUpdate(
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.anyString(),
+            Mockito.anyBoolean()
         );
-        verify(ccdCoreCaseDataService, times(1)).submitUpdate(Mockito.anyString(), Mockito.any(),
-                                                              Mockito.any(), Mockito.anyString(), Mockito.anyBoolean());
+        verify(ccdCoreCaseDataService, times(1)).submitUpdate(
+            Mockito.anyString(), Mockito.any(),
+            Mockito.any(), Mockito.anyString(), Mockito.anyBoolean()
+        );
     }
 
     @Test
@@ -269,15 +310,18 @@ public class HearingManagementServiceTest {
                                .build())
             .nextHearingDateRequest(nextHearingDateRequest)
             .build();
-        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1,DECISION_OUTCOME);
+        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1, DECISION_OUTCOME);
 
-        verify(ccdCoreCaseDataService, times(1)).startUpdate(Mockito.anyString(),
-                                                             Mockito.any(),
-                                                             Mockito.anyString(),
-                                                             Mockito.anyBoolean()
+        verify(ccdCoreCaseDataService, times(1)).startUpdate(
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.anyString(),
+            Mockito.anyBoolean()
         );
-        verify(ccdCoreCaseDataService, times(1)).submitUpdate(Mockito.anyString(), Mockito.any(),
-                                                              Mockito.any(), Mockito.anyString(), Mockito.anyBoolean());
+        verify(ccdCoreCaseDataService, times(1)).submitUpdate(
+            Mockito.anyString(), Mockito.any(),
+            Mockito.any(), Mockito.anyString(), Mockito.anyBoolean()
+        );
 
         assertTrue(true);
     }
@@ -303,13 +347,16 @@ public class HearingManagementServiceTest {
             .build();
         hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1, DECISION_OUTCOME);
 
-        verify(ccdCoreCaseDataService, times(1)).startUpdate(Mockito.anyString(),
-                                                             Mockito.any(),
-                                                             Mockito.anyString(),
-                                                             Mockito.anyBoolean()
+        verify(ccdCoreCaseDataService, times(1)).startUpdate(
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.anyString(),
+            Mockito.anyBoolean()
         );
-        verify(ccdCoreCaseDataService, times(1)).submitUpdate(Mockito.anyString(), Mockito.any(),
-                                                              Mockito.any(), Mockito.anyString(), Mockito.anyBoolean());
+        verify(ccdCoreCaseDataService, times(1)).submitUpdate(
+            Mockito.anyString(), Mockito.any(),
+            Mockito.any(), Mockito.anyString(), Mockito.anyBoolean()
+        );
 
         assertTrue(true);
     }
@@ -388,13 +435,16 @@ public class HearingManagementServiceTest {
 
         hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1, DECISION_OUTCOME);
 
-        verify(ccdCoreCaseDataService, times(1)).startUpdate(Mockito.anyString(),
-                                                             Mockito.any(),
-                                                             Mockito.anyString(),
-                                                             Mockito.anyBoolean()
+        verify(ccdCoreCaseDataService, times(1)).startUpdate(
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.anyString(),
+            Mockito.anyBoolean()
         );
-        verify(ccdCoreCaseDataService, times(1)).submitUpdate(Mockito.anyString(), Mockito.any(),
-                                                              Mockito.any(), Mockito.anyString(), Mockito.anyBoolean());
+        verify(ccdCoreCaseDataService, times(1)).submitUpdate(
+            Mockito.anyString(), Mockito.any(),
+            Mockito.any(), Mockito.anyString(), Mockito.anyBoolean()
+        );
 
         assertTrue(true);
     }
@@ -461,13 +511,16 @@ public class HearingManagementServiceTest {
             .build();
         hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1, DECISION_OUTCOME);
 
-        verify(ccdCoreCaseDataService, times(1)).startUpdate(Mockito.anyString(),
-                                                             Mockito.any(),
-                                                             Mockito.anyString(),
-                                                             Mockito.anyBoolean()
+        verify(ccdCoreCaseDataService, times(1)).startUpdate(
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.anyString(),
+            Mockito.anyBoolean()
         );
-        verify(ccdCoreCaseDataService, times(1)).submitUpdate(Mockito.anyString(), Mockito.any(),
-                                                              Mockito.any(), Mockito.anyString(), Mockito.anyBoolean());
+        verify(ccdCoreCaseDataService, times(1)).submitUpdate(
+            Mockito.anyString(), Mockito.any(),
+            Mockito.any(), Mockito.anyString(), Mockito.anyBoolean()
+        );
 
         assertTrue(true);
     }
@@ -528,15 +581,21 @@ public class HearingManagementServiceTest {
                                .build())
             .nextHearingDateRequest(nextHearingDateRequest)
             .build();
-        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1, PREPARE_FOR_HEARING_CONDUCT_HEARING);
-
-        verify(ccdCoreCaseDataService, times(1)).startUpdate(Mockito.anyString(),
-                                                             Mockito.any(),
-                                                             Mockito.anyString(),
-                                                             Mockito.anyBoolean()
+        hearingManagementService.caseStateChangeForHearingManagement(
+            hearingRequest1,
+            PREPARE_FOR_HEARING_CONDUCT_HEARING
         );
-        verify(ccdCoreCaseDataService, times(1)).submitUpdate(Mockito.anyString(), Mockito.any(),
-                                                              Mockito.any(), Mockito.anyString(), Mockito.anyBoolean());
+
+        verify(ccdCoreCaseDataService, times(1)).startUpdate(
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.anyString(),
+            Mockito.anyBoolean()
+        );
+        verify(ccdCoreCaseDataService, times(1)).submitUpdate(
+            Mockito.anyString(), Mockito.any(),
+            Mockito.any(), Mockito.anyString(), Mockito.anyBoolean()
+        );
 
         assertTrue(true);
     }
@@ -547,13 +606,16 @@ public class HearingManagementServiceTest {
 
         hearingManagementService.caseNextHearingDateChangeForHearingManagement(nextHearingDateRequest);
 
-        verify(ccdCoreCaseDataService, times(1)).startUpdate(Mockito.anyString(),
-                                                             Mockito.any(),
-                                                             Mockito.anyString(),
-                                                             Mockito.anyBoolean()
+        verify(ccdCoreCaseDataService, times(1)).startUpdate(
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.anyString(),
+            Mockito.anyBoolean()
         );
-        verify(ccdCoreCaseDataService, times(1)).submitUpdate(Mockito.anyString(), Mockito.any(),
-                                                              Mockito.any(), Mockito.anyString(), Mockito.anyBoolean());
+        verify(ccdCoreCaseDataService, times(1)).submitUpdate(
+            Mockito.anyString(), Mockito.any(),
+            Mockito.any(), Mockito.anyString(), Mockito.anyBoolean()
+        );
 
 
         assertTrue(true);
@@ -562,7 +624,7 @@ public class HearingManagementServiceTest {
     @Test
     public void testValidateHearingState() {
         CaseData caseData = CaseData.builder().hearingTaskData(HearingTaskData.builder().currentHearingId("id")
-                .currentHearingStatus("LISTED").build()).build();
+                                                                   .currentHearingStatus("LISTED").build()).build();
         Map<String, Object> caseDataUpdated = new HashMap<>();
         hearingManagementService.validateHearingState(caseDataUpdated, caseData);
         Assert.assertTrue(caseDataUpdated.containsKey("hearingListed"));
@@ -572,10 +634,10 @@ public class HearingManagementServiceTest {
     @Test
     public void testValidateHearingState_2() {
         CaseData caseData = CaseData.builder().hearingTaskData(HearingTaskData.builder().currentHearingId("id")
-                .currentHearingStatus("Listed1").build()).build();
+                                                                   .currentHearingStatus("Listed1").build()).build();
         Map<String, Object> caseDataUpdated = new HashMap<>();
         hearingManagementService.validateHearingState(caseDataUpdated, caseData);
-        Assert.assertEquals("false",caseDataUpdated.get("hearingListed"));
+        Assert.assertEquals("false", caseDataUpdated.get("hearingListed"));
 
     }
 
