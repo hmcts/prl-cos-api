@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
@@ -107,11 +108,29 @@ public class CaseInitiationServiceTest {
     @Test
     public void testHandlePrePopulateCourtDetailsC100() {
         caseData = CaseData.builder()
-                .caseTypeOfApplication(C100_CASE_TYPE)
-                .build();
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .build();
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
         when(locationRefDataService.getCourtLocations(Mockito.anyString())).thenReturn(List.of(DynamicListElement.EMPTY));
         Assertions.assertTrue(caseInitiationService.prePopulateCourtDetails(AUTHORISATION, caseDataMap).containsKey(COURT_LIST));
+    }
+
+    @Test
+    public void testHandlePrePopulateCourtDetailsC100WithAutoSelectedCourt() {
+        String courtId = "1234";
+        caseDataMap.put("courtId", courtId);
+        caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .courtId(courtId)
+            .build();
+        UUID randUid = UUID.randomUUID();
+        DynamicListElement element = DynamicListElement.builder().code(randUid).label("label").build();
+        when(locationRefDataService.getDisplayEntryFromEpimmsId(courtId, AUTHORISATION)).thenReturn(element);
+        when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
+        when(locationRefDataService.getCourtLocations(Mockito.anyString())).thenReturn(List.of(DynamicListElement.EMPTY));
+        Map<String, Object> caseDataMapReturned = caseInitiationService.prePopulateCourtDetails(AUTHORISATION, this.caseDataMap);
+        Assertions.assertTrue(caseDataMapReturned.containsKey(COURT_LIST));
+        Assertions.assertEquals(randUid.toString(), ((DynamicList)caseDataMapReturned.get(COURT_LIST)).getValue().getCode());
     }
 
     @Test
