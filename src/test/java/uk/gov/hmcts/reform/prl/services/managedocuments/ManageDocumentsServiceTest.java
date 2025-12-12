@@ -78,6 +78,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_ROLE;
@@ -100,6 +101,20 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ManageDocumentsServiceTest {
+
+    private static final uk.gov.hmcts.reform.prl.models.documents.Document CONFIDENTIAL_DOCUMENT =
+        uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .documentFileName("confidential.pdf")
+            .documentUrl("http://doc-url/11111111-1111-1111-1111-111111111111")
+            .build();
+
+    private static final UUID ELEMENT_ID = UUID.randomUUID();
+    private static final QuarantineLegalDoc OLD_QUARANTINE_DOCUMENT = QuarantineLegalDoc.builder()
+        .categoryId("applicantApplication")
+        .hasTheConfidentialDocumentBeenRenamed(YesOrNo.No)
+        .applicantApplicationDocument(CONFIDENTIAL_DOCUMENT)
+        .build();
+
 
     @Spy
     @InjectMocks
@@ -990,9 +1005,14 @@ public class ManageDocumentsServiceTest {
         when(allTabService.getStartAllTabsUpdate(Mockito.anyString()))
             .thenReturn(startAllTabsUpdateDataContent);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
-        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(Map.of()).build();
+        CaseData caseData = CaseData.builder().id(12345L).build();
+        when(allTabService.submitAllTabsUpdate(any(), any(), any(), any(), any()))
+            .thenReturn(caseDetails);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        manageDocumentsService.appendConfidentialDocumentNameForCourtAdminAndUpdate(callbackRequest,auth);
+        manageDocumentsService.appendConfidentialDocumentNameForCourtAdminAndUpdate(callbackRequest, auth);
         verify(allTabService, times(1)).getStartAllTabsUpdate(Mockito.anyString());
     }
 
@@ -2363,19 +2383,6 @@ public class ManageDocumentsServiceTest {
 
     }
 
-    @Test
-    public void testDownloadAndDeleteDocumentWhenExceptionOccurs() {
-        assertExpectedException(
-            () -> {
-                manageDocumentsService.downloadAndDeleteDocument(
-                    uk.gov.hmcts.reform.prl.models.documents
-                        .Document.builder().documentFileName("CONFIDENTIAL_doc").build(),
-                    "sysAuth");
-            }, IllegalStateException.class,"Failed to move document to confidential tab please retry"
-        );
-
-    }
-
     protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
                                                                  String expectedMessage) {
         T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
@@ -2384,11 +2391,11 @@ public class ManageDocumentsServiceTest {
 
     @Test
     public void testDownloadAndDeleteDocument() {
-        assertNotNull(manageDocumentsService.downloadAndDeleteDocument(
+        assertNotNull(manageDocumentsService.renameAndReuploadFileToBeConfidential(
             uk.gov.hmcts.reform.prl.models.documents
                 .Document.builder().documentFileName("Confidential_doc")
-                .build(),
-            "sysAuth"
+                .documentUrl("http://some.link/00000000-0000-0000-0000-000000000000")
+                .build()
         ));
     }
 
@@ -2587,5 +2594,129 @@ public class ManageDocumentsServiceTest {
         verify(caseDocumentClient, never()).uploadDocuments(eq("userToken"), eq("sysToken"), any(), any(), any());
     }
 
-}
+    @Test
+    public void shouldCleanupRenamedConfidentialDocument() {
+        when(systemUserService.getSysUserToken()).thenReturn("userToken");
+        when(authTokenGenerator.generate()).thenReturn("sysToken");
+        final CaseData currentCaseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .confidentialDocuments(List.of(element(ELEMENT_ID, OLD_QUARANTINE_DOCUMENT.toBuilder()
+                                     .hasTheConfidentialDocumentBeenRenamed(YesOrNo.Yes)
+                                     .build())))
+                                 .build())
+            .build();
+        final CaseData previousCaseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .confidentialDocuments(List.of(element(ELEMENT_ID, OLD_QUARANTINE_DOCUMENT)))
+                                 .build())
+            .build();
 
+        Map<String, Object> docMap = Map.of("applicantApplicationDocument", CONFIDENTIAL_DOCUMENT);
+        when(objectMapper.convertValue(any(), eq(Map.class))).thenReturn(docMap);
+        when(objectMapper.convertValue(any(), eq(uk.gov.hmcts.reform.prl.models.documents.Document.class)))
+            .thenReturn(CONFIDENTIAL_DOCUMENT);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtAdminRole);
+
+        manageDocumentsService.cleanupOldCopyOfConfidentialDocuments(auth, currentCaseData, previousCaseData);
+
+        verify(caseDocumentClient).deleteDocument(
+            any(),
+            any(),
+            eq(UUID.fromString("11111111-1111-1111-1111-111111111111")),
+            eq(true)
+        );
+    }
+
+    @Test
+    public void shouldCleanupRenamedRestrictedDocument() {
+        when(systemUserService.getSysUserToken()).thenReturn("userToken");
+        when(authTokenGenerator.generate()).thenReturn("sysToken");
+        final CaseData currentCaseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .restrictedDocuments(List.of(element(ELEMENT_ID, OLD_QUARANTINE_DOCUMENT.toBuilder()
+                                     .hasTheConfidentialDocumentBeenRenamed(YesOrNo.Yes)
+                                     .build())))
+                                 .build())
+            .build();
+        final CaseData previousCaseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .restrictedDocuments(List.of(element(ELEMENT_ID, OLD_QUARANTINE_DOCUMENT)))
+                                 .build())
+            .build();
+
+        Map<String, Object> docMap = Map.of("applicantApplicationDocument", CONFIDENTIAL_DOCUMENT);
+        when(objectMapper.convertValue(any(), eq(Map.class))).thenReturn(docMap);
+        when(objectMapper.convertValue(any(), eq(uk.gov.hmcts.reform.prl.models.documents.Document.class)))
+            .thenReturn(CONFIDENTIAL_DOCUMENT);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtAdminRole);
+
+        manageDocumentsService.cleanupOldCopyOfConfidentialDocuments(auth, currentCaseData, previousCaseData);
+
+        verify(caseDocumentClient).deleteDocument(
+            any(),
+            any(),
+            eq(UUID.fromString("11111111-1111-1111-1111-111111111111")),
+            eq(true)
+        );
+    }
+
+    @Test
+    public void shouldNotCleanupConfidentialDocumentThatHasAlreadyBeenRenamed() {
+        when(systemUserService.getSysUserToken()).thenReturn("userToken");
+        when(authTokenGenerator.generate()).thenReturn("sysToken");
+        final CaseData currentCaseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .restrictedDocuments(List.of(element(ELEMENT_ID, OLD_QUARANTINE_DOCUMENT.toBuilder()
+                                     .hasTheConfidentialDocumentBeenRenamed(YesOrNo.Yes)
+                                     .build())))
+                                 .build())
+            .build();
+        final CaseData previousCaseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .restrictedDocuments(List.of(element(ELEMENT_ID, OLD_QUARANTINE_DOCUMENT.toBuilder()
+                                     .hasTheConfidentialDocumentBeenRenamed(YesOrNo.Yes)
+                                     .build())))
+                                 .build())
+            .build();
+
+        Map<String, Object> docMap = Map.of("applicantApplicationDocument", CONFIDENTIAL_DOCUMENT);
+        when(objectMapper.convertValue(any(), eq(Map.class))).thenReturn(docMap);
+        when(objectMapper.convertValue(any(), eq(uk.gov.hmcts.reform.prl.models.documents.Document.class)))
+            .thenReturn(CONFIDENTIAL_DOCUMENT);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtAdminRole);
+
+        manageDocumentsService.cleanupOldCopyOfConfidentialDocuments(auth, currentCaseData, previousCaseData);
+
+        verifyNoInteractions(caseDocumentClient);
+    }
+
+    @Test
+    public void shouldNotTryToCleanupConfidentialDocumentThatHasFailedToBeRenamed() {
+        when(systemUserService.getSysUserToken()).thenReturn("userToken");
+        when(authTokenGenerator.generate()).thenReturn("sysToken");
+        final CaseData currentCaseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .restrictedDocuments(List.of(element(ELEMENT_ID, OLD_QUARANTINE_DOCUMENT.toBuilder()
+                                     .hasTheConfidentialDocumentBeenRenamed(YesOrNo.No)
+                                     .build())))
+                                 .build())
+            .build();
+        final CaseData previousCaseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .restrictedDocuments(List.of(element(ELEMENT_ID, OLD_QUARANTINE_DOCUMENT.toBuilder()
+                                     .hasTheConfidentialDocumentBeenRenamed(YesOrNo.No)
+                                     .build())))
+                                 .build())
+            .build();
+
+        Map<String, Object> docMap = Map.of("applicantApplicationDocument", CONFIDENTIAL_DOCUMENT);
+        when(objectMapper.convertValue(any(), eq(Map.class))).thenReturn(docMap);
+        when(objectMapper.convertValue(any(), eq(uk.gov.hmcts.reform.prl.models.documents.Document.class)))
+            .thenReturn(CONFIDENTIAL_DOCUMENT);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtAdminRole);
+
+        manageDocumentsService.cleanupOldCopyOfConfidentialDocuments(auth, currentCaseData, previousCaseData);
+
+        verifyNoInteractions(caseDocumentClient);
+    }
+}

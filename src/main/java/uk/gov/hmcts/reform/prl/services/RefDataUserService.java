@@ -14,6 +14,8 @@ import uk.gov.hmcts.reform.prl.clients.JudicialUserDetailsApi;
 import uk.gov.hmcts.reform.prl.clients.StaffResponseDetailsApi;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.exception.NoStaffResponseException;
+import uk.gov.hmcts.reform.prl.mapper.staffresponse.StaffResponseToDynamicListElementFilter;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.datamigration.caseflag.CaseFlag;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CategorySubValues;
@@ -23,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.dto.legalofficer.StaffResponse;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -60,6 +63,44 @@ public class RefDataUserService {
     private CommonDataResponse commonDataResponse;
 
     private CaseFlag caseFlag;
+
+    /**
+     * Gets all staff filtered by the provided filter and returns them as a dynamic list.
+     *
+     * @param filter the filter to apply to the staff responses
+     * @return a dynamic list of staff
+     */
+    public DynamicList getStaffDynamicList(StaffResponseToDynamicListElementFilter filter) {
+        List<DynamicListElement> listItems = new ArrayList<>();
+        try {
+            ResponseEntity<List<StaffResponse>> response = getStaffResponse(RD_STAFF_FIRST_PAGE);
+            listItems.addAll(applyStaffResponseFilter(response.getBody(), filter));
+
+            Optional<String> totalRecordsStr = Optional.ofNullable(response.getHeaders()
+                                                                       .getFirst(RD_STAFF_TOTAL_RECORDS_HEADER));
+            int totalRecords = totalRecordsStr.map(Integer::parseInt).orElse(0);
+            if (totalRecords > RD_STAFF_PAGE_SIZE) {
+                int noOfPages = (int) Math.ceil(totalRecords / (double) RD_STAFF_PAGE_SIZE);
+                for (int pageNumber = RD_STAFF_SECOND_PAGE; pageNumber < noOfPages; pageNumber++) {
+                    listItems.addAll(applyStaffResponseFilter(getStaffResponse(pageNumber).getBody(), filter));
+                }
+            }
+        } catch (Exception e) {
+            log.error("Error retrieving staff list - {}", e.getMessage());
+        }
+        return DynamicList.builder()
+            .listItems(listItems)
+            .build();
+    }
+
+    private List<DynamicListElement> applyStaffResponseFilter(List<StaffResponse> listOfStaffResponse,
+                                                              StaffResponseToDynamicListElementFilter filter) {
+        return listOfStaffResponse.stream()
+            .map(filter::filter)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .toList();
+    }
 
     public List<DynamicListElement> getLegalAdvisorList() {
         try {
