@@ -829,8 +829,8 @@ public class ManageOrderEmailService {
             }
         } else {
             log.info(
-                "Couldn't post orders to party address, as address is null/empty for {}",
-                partyElement.getId());
+                "Couldn't post orders to party address, as address is null/empty for {} on {}",
+                partyElement.getId(), caseData.getId());
         }
     }
 
