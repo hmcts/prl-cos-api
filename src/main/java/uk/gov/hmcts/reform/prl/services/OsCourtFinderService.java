@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,7 @@ public class OsCourtFinderService {
         List<LocalAuthorityCourt> localAuthorityCourtList = localAuthorityCourtDataLoader.getLocalAuthorityCourtList();
         // first check if the postcode is from specific post codes otherwise use os api to get local custodian code
         Optional<LocalAuthorityCourt> selectedLocalAuthorityCourt = localAuthorityCourtList.stream()
+            .filter(court -> CollectionUtils.isNotEmpty(court.getSpecificPostCodes()))
             .filter(court -> court.getSpecificPostCodes().stream().anyMatch(postcode::startsWith))
             .findFirst();
 
@@ -53,6 +55,7 @@ public class OsCourtFinderService {
                 systemUserService.getSysUserToken()
             );
             if (courtVenue.isPresent()) {
+                log.info("Found court venue epimmsId {} for postcode {}", courtVenue.get().getCourtEpimmsId(), postcode);
                 return ImmutablePair.of(courtVenue.get(), getFactCourtDetails(courtVenue.get()));
             }
         }
