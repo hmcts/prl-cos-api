@@ -116,6 +116,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ACCESS_CAT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CREATED_BY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_LIST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -145,7 +147,6 @@ import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 @RestController
 @RequiredArgsConstructor
 public class CallbackController {
-    public static final String COURT_LIST = "courtList";
     private static final String CONFIRMATION_HEADER = "# Case transferred to another court ";
     private static final String CONFIRMATION_BODY_PREFIX = "The case has been transferred to ";
     private static final String CONFIRMATION_BODY_SUFFIX = " \n\n Local court admin have been notified ";
@@ -318,8 +319,7 @@ public class CallbackController {
                 log.info("Court email not found for case id {}", caseData.getId());
             }
             List<DynamicListElement> courtList = locationRefDataService.getCourtLocations(authorisation);
-            caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
-                .build());
+            addAndSelectCourtList(caseDataUpdated, courtList, authorisation);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -469,8 +469,7 @@ public class CallbackController {
             } else {
                 courtList = locationRefDataService.getCourtLocations(authorisation);
             }
-            caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
-                .build());
+            addAndSelectCourtList(caseDataUpdated, courtList, authorisation);
             caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
@@ -478,6 +477,14 @@ public class CallbackController {
         }
     }
 
+    private void addAndSelectCourtList(Map<String, Object> caseDataUpdated, List<DynamicListElement> courtList,
+                                       String authorisation) {
+        String selectedCourtId = String.valueOf(caseDataUpdated.get(COURT_ID_FIELD));
+        DynamicListElement selectedCourtElement = locationRefDataService
+            .getDisplayEntryFromEpimmsId(selectedCourtId, authorisation);
+        caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(selectedCourtElement).listItems(courtList)
+            .build());
+    }
 
     @PostMapping(path = "/transfer-court/validate-court-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to validate court fields")
