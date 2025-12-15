@@ -216,6 +216,7 @@ public class ServiceOfApplicationService {
     public static final String CONFIRMATION_HEADER = "confirmationHeader";
     public static final String TEMPLATE = "template";
     public static final String PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE = "Please select at least one party to serve";
+    public static final String IS_CITIZEN = "isCitizen";
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -315,6 +316,7 @@ public class ServiceOfApplicationService {
     private final OrganisationService organisationService;
     private final MaskEmail maskEmail;
     private final AssignCaseAccessService assignCaseAccessService;
+    private final RespondentOrgPolicyService respondentOrgPolicyService;
 
     @Value("${citizen.url}")
     private String citizenUrl;
@@ -1737,8 +1739,8 @@ public class ServiceOfApplicationService {
         //PRL-3466 - auto link citizen case if conf check is not required
         autoLinkCitizenCase(caseData, caseDataMap, callbackRequest.getEventId());
 
-        // respondents access I shold put this behind a launchdarkly flag
-        assignRespondentSolicitorsAccess(authorisation, caseData);
+        // respondents access
+        caseDataMap = assignRespondentSolicitorsAccess(authorisation, caseDataMap, caseData);
 
         //PRL-5335 - WA fields for bundling lip case
         String isAllApplicantsAreLiP = (String) caseDataMap.get(WA_IS_APPLICANT_REPRESENTED);
@@ -3041,15 +3043,15 @@ public class ServiceOfApplicationService {
         if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
             dataMap.put("applicantName", caseData.getApplicants().get(0).getValue().getLabelForDynamicList());
         }
-        dataMap.put("isCitizen", false);
+        dataMap.put(IS_CITIZEN, false);
         if (launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)) {
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                dataMap.put("isCitizen", !CaseUtils.hasLegalRepresentation(party.getValue()));
+                dataMap.put(IS_CITIZEN, !CaseUtils.hasLegalRepresentation(party.getValue()));
             }
             // This check is added to disable or enable DA citizen journey as needed
             if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
                 && launchDarklyClient.isFeatureEnabled(PrlAppsConstants.CITIZEN_ALLOW_DA_JOURNEY)) {
-                dataMap.put("isCitizen", !CaseUtils.hasLegalRepresentation(party.getValue()));
+                dataMap.put(IS_CITIZEN, !CaseUtils.hasLegalRepresentation(party.getValue()));
             }
         }
         return dataMap;
@@ -4300,14 +4302,18 @@ public class ServiceOfApplicationService {
             caseData.getUserInfo().get(0).getValue().getEmailAddress());
     }
 
-    void assignRespondentSolicitorsAccess(String invokingAuth,
+    Map<String, Object> assignRespondentSolicitorsAccess(String invokingAuth, Map<String, Object> caseDataMap,
                                                   CaseData caseData) {
 
         if (caseData.getRespondents() == null) {
-            return;
+            return caseDataMap;
         }
 
         List<Element<PartyDetails>> respondents = caseData.getRespondents();
+
+        caseDataMap = respondentOrgPolicyService.populateRespondentOrganisations(caseDataMap,
+                                                                                 respondents,
+                                                                                 caseData.getCaseTypeOfApplication());
 
         for (int i = 0; i < respondents.size(); i++) {
             PartyDetails party = respondents.get(i).getValue();
@@ -4338,11 +4344,10 @@ public class ServiceOfApplicationService {
                         "Unable to resolve IDAM user for respondent sol {} on case {}",
                         maskEmail.mask(solicitorEmail), caseId
                     );
-                    //just return for now could add exception
-                    return;
                 }
             }
         }
+        return caseDataMap;
     }
 
     private boolean isSolicitorEmailValid(String email, String caseId, int index) {
