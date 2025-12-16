@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.reviewdocument.ReviewDocumentService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -42,6 +43,7 @@ import static uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments.reviewDocTe
 public class ReviewDocumentsController {
     private final ObjectMapper objectMapper;
     private final ReviewDocumentService reviewDocumentService;
+    private final SystemUserService systemUserService;
 
     @PostMapping(path = "/review-documents/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiResponses(value = {
@@ -117,6 +119,10 @@ public class ReviewDocumentsController {
                                                                      @RequestBody CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        CaseData oldCaseData = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
+
+        reviewDocumentService.cleanupOldCopyOfDocuments(caseData, oldCaseData);
+
         return reviewDocumentService.getReviewResult(caseData);
     }
 }
