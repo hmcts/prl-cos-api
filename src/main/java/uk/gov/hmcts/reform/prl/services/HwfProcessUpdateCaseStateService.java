@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.PaymentStatus;
 import uk.gov.hmcts.reform.prl.models.SearchResultResponse;
-import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.DateOfSubmission;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Bool;
@@ -88,7 +87,6 @@ public class HwfProcessUpdateCaseStateService {
                     log.info("PaymentGroupReferenceStatusResponse - " + serviceRequestReferenceStatusResponse.getServiceRequestStatus());
                     if (PaymentStatus.PAID.getDisplayedValue().equals(serviceRequestReferenceStatusResponse.getServiceRequestStatus())) {
                         Map<String, Object> caseDataUpdated = new HashMap<>();
-                        caseDataUpdated.put("caseStatus", CaseStatus.builder().state(State.SUBMITTED_PAID.getLabel()).build());
                         if (caseData.getDateSubmitted() == null) {
                             ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
                             log.info("DateTimeFormatter Date is {} ", DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
