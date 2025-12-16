@@ -1712,10 +1712,8 @@ public class SendAndReplyService {
 
 
     public void sendNotificationToExternalParties(CaseData caseData, String auth) {
-
         Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
         if (!InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())) {
-            log.error("Send or reply is not external message.");
             return;
         }
         List<Element<PartyDetails>> applicantsRespondentInCase = getAllApplicantsRespondentInCase(caseData);
