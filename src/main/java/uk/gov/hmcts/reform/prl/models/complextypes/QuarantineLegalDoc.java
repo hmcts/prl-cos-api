@@ -18,6 +18,7 @@ public class QuarantineLegalDoc {
     private final String documentName;
     private final String notes;
     private final Document document;
+    private final String originalDocumentId;
     private final String documentType;
     private final String categoryId;
     private final String categoryName;
@@ -120,7 +121,7 @@ public class QuarantineLegalDoc {
         return new String [] {
             "citizenQuarantine", "legalProfQuarantine", "cafcassQuarantine", "courtStaffQuarantine", "confidential",
             "applicationsWithinProceedings", "applicationsWithinProceedingsRes", "applicationsFromOtherProceedings",
-            "courtnavQuarantine", "c8ArchivedDocuments"
+            "courtnavQuarantine", "c8ArchivedDocuments", "bulkScanQuarantine"
         };
     }
 }
