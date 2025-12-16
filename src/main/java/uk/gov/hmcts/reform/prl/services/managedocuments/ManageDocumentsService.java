@@ -529,9 +529,11 @@ public class ManageDocumentsService {
         try {
             String sysUserToken = systemUserService.getSysUserToken();
             String serviceToken = authTokenGenerator.generate();
+            // Extrapolate to new service. And add retry logic if.
             Resource resource = caseDocumentClient.getDocumentBinary(sysUserToken, serviceToken,
                                                                      documentId
             ).getBody();
+
             docData = IOUtils.toByteArray(resource.getInputStream());
             UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
                 sysUserToken,

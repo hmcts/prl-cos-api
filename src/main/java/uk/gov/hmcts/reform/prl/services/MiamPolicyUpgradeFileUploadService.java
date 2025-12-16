@@ -289,6 +289,7 @@ public class MiamPolicyUpgradeFileUploadService {
         }
     }
 
+    // Tweak this logic with current case data.
     public void deleteOldMiamPolicyUpgradeDocuments(CaseData caseData, String systemAuthorisation) {
         if (CollectionUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons())) {
             deletePreviousDomesticAbuseDocument(caseData, systemAuthorisation);
@@ -298,6 +299,7 @@ public class MiamPolicyUpgradeFileUploadService {
         }
     }
 
+    // Tweak this logic
     private void deletePreviousDomesticAbuseDocument(CaseData caseData, String systemAuthorisation) {
         if (hasMpuDomesticAbuseEvidence(caseData)) {
             caseData.getMiamPolicyUpgradeDetails().getMpuDomesticAbuseEvidenceDocument()
@@ -312,6 +314,7 @@ public class MiamPolicyUpgradeFileUploadService {
         }
     }
 
+    // Tweak this logic
     private void deletePreviousMiamAttendanceDocument(CaseData caseData, String systemAuthorisation) {
         String authToken = authTokenGenerator.generate();
         if (hasPreviousMpuMiamAttendanceReasons(caseData)) {
