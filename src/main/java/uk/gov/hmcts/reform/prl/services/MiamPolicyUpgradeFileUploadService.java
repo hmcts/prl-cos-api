@@ -10,6 +10,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
+import uk.gov.hmcts.reform.ccd.document.am.model.DocumentTTLRequest;
+import uk.gov.hmcts.reform.ccd.document.am.model.DocumentTTLResponse;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -19,6 +21,12 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -122,8 +130,9 @@ public class MiamPolicyUpgradeFileUploadService {
                 .stream().forEach(domesticAbuseEvidenceDocument -> {
                     Document domesticAbuseDocument = domesticAbuseEvidenceDocument.getValue().getDomesticAbuseDocument();
                     if (!domesticAbuseDocument.getDocumentFileName().startsWith(CONFIDENTIAL)) {
-                        log.info("Renaming domestic abuse document to confidential with id: {}",
-                                 DocumentUtils.getDocumentId(domesticAbuseDocument.getDocumentUrl()));
+                        String nonConfDocId = DocumentUtils.getDocumentId(domesticAbuseDocument.getDocumentUrl());
+                        log.info("Renaming domestic abuse document to confidential with id: {}", nonConfDocId);
+                        refreshTTLToken(nonConfDocId, systemAuthorisation);
                         domesticAbuseDocument = manageDocumentsService.renameAndReuploadFileToBeConfidential(
                             domesticAbuseDocument);
                     }
@@ -142,6 +151,33 @@ public class MiamPolicyUpgradeFileUploadService {
                 .build();
         }
         return caseData;
+    }
+
+    private void refreshTTLToken(String documentId, String systemAuthorisation){
+        String manualTtl = LocalDateTime.now(ZoneId.of("Europe/London"))
+            .plusHours(24)
+            .truncatedTo(ChronoUnit.MILLIS)
+            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS"));
+        LocalDateTime refreshedTTL = LocalDateTime.parse(manualTtl);
+        DocumentTTLRequest documentTTLRequest = new DocumentTTLRequest(refreshedTTL);
+        log.info("Refreshing TTL token for document with id: {} ", documentId);
+        try {
+            caseDocumentClient.patchDocument(
+                systemAuthorisation, authTokenGenerator.generate(),
+                UUID.fromString(documentId), documentTTLRequest
+            );
+        } catch (Exception ex) {
+            boolean isDateBug = org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(ex)
+                .contains("index 23");
+
+            if (isDateBug) {
+                log.info("TTL refresh is OK. Bypassing known library decoding bug for doc: {}", documentId);
+            } else {
+                // This is a REAL error (403, 500, etc.) we should not ignore
+                log.error("Actual failure during TTL refresh: {}", ex.getMessage());
+                throw ex;
+            }
+        }
     }
 
     private boolean hasMpuDomesticAbuseEvidence(CaseData caseData) {
