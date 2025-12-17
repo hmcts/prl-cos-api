@@ -154,30 +154,16 @@ public class MiamPolicyUpgradeFileUploadService {
     }
 
     private void refreshTTLToken(String documentId, String systemAuthorisation){
-        String manualTtl = LocalDateTime.now(ZoneId.of("Europe/London"))
+        LocalDateTime refreshedTTL = LocalDateTime.now(ZoneId.of("Europe/London"))
             .plusHours(24)
-            .truncatedTo(ChronoUnit.MILLIS)
-            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS"));
-        LocalDateTime refreshedTTL = LocalDateTime.parse(manualTtl);
+            .truncatedTo(ChronoUnit.MILLIS);
         DocumentTTLRequest documentTTLRequest = new DocumentTTLRequest(refreshedTTL);
         log.info("Refreshing TTL token for document with id: {} ", documentId);
-        try {
-            caseDocumentClient.patchDocument(
-                systemAuthorisation, authTokenGenerator.generate(),
-                UUID.fromString(documentId), documentTTLRequest
-            );
-        } catch (Exception ex) {
-            boolean isDateBug = org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(ex)
-                .contains("index 23");
-
-            if (isDateBug) {
-                log.info("TTL refresh is OK. Bypassing known library decoding bug for doc: {}", documentId);
-            } else {
-                // This is a REAL error (403, 500, etc.) we should not ignore
-                log.error("Actual failure during TTL refresh: {}", ex.getMessage());
-                throw ex;
-            }
-        }
+        caseDocumentClient.patchDocument(
+            systemAuthorisation, authTokenGenerator.generate(),
+            UUID.fromString(documentId), documentTTLRequest
+        );
+        log.info("TTL token successfully refreshed for document with id: {} ", documentId);
     }
 
     private boolean hasMpuDomesticAbuseEvidence(CaseData caseData) {
