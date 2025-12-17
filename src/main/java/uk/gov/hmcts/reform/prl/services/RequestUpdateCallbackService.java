@@ -265,6 +265,7 @@ public class RequestUpdateCallbackService {
     }
 
     private boolean shouldUpdateCaseState(CaseData caseData) {
-        return caseData.getState() == State.SUBMITTED_NOT_PAID;
+        return caseData.getState() == State.SUBMITTED_NOT_PAID 
+            || caseData.getState() == State.CASE_WITHDRAWN;
     }
 }
