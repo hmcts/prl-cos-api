@@ -58,17 +58,21 @@ public class LinkCitizenCaseService {
     public static final String LINKED = "Linked";
     public static final String YES = "Yes";
     public static final String CASE_INVITES = "caseInvites";
+    public static final String USERID_ALREADY_USED = "Email Already linked";
 
     public Optional<CaseDetails> linkCitizenToCase(String authorisation, String caseId, String accessCode) {
         Optional<CaseDetails> caseDetails = Optional.empty();
         CaseData dbCaseData = findAndGetCase(caseId);
+        UserDetails userDetails = idamClient.getUserDetails(authorisation);
 
         if (VALID.equalsIgnoreCase(findAccessCodeStatus(accessCode, dbCaseData))) {
+            if(isCodeAlreadyUsed(dbCaseData, userDetails)){
+                throw (new RuntimeException(USERID_ALREADY_USED));
+            }
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
                 = allTabService.getStartUpdateForSpecificEvent(caseId, CaseEvent.LINK_CITIZEN.getValue());
-
             CaseData caseData = startAllTabsUpdateDataContent.caseData();
-            UserDetails userDetails = idamClient.getUserDetails(authorisation);
+
             Map<String, Object> caseDataUpdated = getCaseDataMapToLinkCitizen(accessCode, caseData, userDetails);
 
             caseAccessApi.grantAccessToCase(
@@ -90,6 +94,14 @@ public class LinkCitizenCaseService {
             ));
         }
         return caseDetails;
+    }
+
+    private boolean  isCodeAlreadyUsed(CaseData dbCaseData, UserDetails userDetails) {
+        return Optional.ofNullable(dbCaseData.getCaseInvites())
+            .stream()
+            .flatMap(List::stream)
+            .map(Element::getValue)
+            .anyMatch(invite -> userDetails.getId().equals(invite.getInvitedUserId()));
     }
 
     private CaseData findAndGetCase(String caseId) {
