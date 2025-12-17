@@ -4318,8 +4318,7 @@ public class ServiceOfApplicationService {
     Map<String, Object> assignRespondentSolicitorsAccess(String invokingAuth, Map<String, Object> caseDataMap,
                                                   CaseData caseData) {
 
-        if (caseData.getRespondents() == null)
-        {
+        if (caseData.getRespondents() == null) {
             log.warn("No respondents on case id {}", caseData.getId());
             return caseDataMap;
         }
