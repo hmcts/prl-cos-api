@@ -168,7 +168,7 @@ public class RequestUpdateCallbackService {
                 && serviceRequestReference.equalsIgnoreCase(caseData.getPaymentServiceRequestReferenceNumber());
     }
 
-    private CaseData getCaseDataWithStateAndDateSubmitted(ServiceRequestUpdateDto serviceRequestUpdateDto,
+    public CaseData getCaseDataWithStateAndDateSubmitted(ServiceRequestUpdateDto serviceRequestUpdateDto,
                                                           CaseData caseData) {
         try {
             Court closestChildArrangementsCourt = courtFinderService.getNearestFamilyCourt(caseData);
@@ -265,7 +265,7 @@ public class RequestUpdateCallbackService {
     }
 
     private boolean shouldUpdateCaseState(CaseData caseData) {
-        return caseData.getState() == State.SUBMITTED_NOT_PAID 
+        return caseData.getState() == State.SUBMITTED_NOT_PAID
             || caseData.getState() == State.CASE_WITHDRAWN;
     }
 }
