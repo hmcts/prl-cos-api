@@ -37,6 +37,8 @@ public class MessageHistory {
     private String selectedSubmittedDocumentValue;
     private Document selectedDocument;
     private String judgeEmail;
+    private String legalAdviserName;
+    private String legalAdviserEmail;
     private String hearingsLink;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     private LocalDateTime updatedTime;

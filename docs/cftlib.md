@@ -63,3 +63,11 @@ You will need the following environment variables set:
 - PRL_COS_CLIENT_SECRET_AAT
 - CCD_IMPORT_USERNAME_AAT
 - CCD_IMPORT_PASSWORD_AAT
+
+## Reindex Elasticsearch
+
+You will need the environment variables set as above.
+
+```bash
+./bin/cftlib/reindex-elasticsearch.sh
+```
