@@ -43,7 +43,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.ADDRESS_MISSED_FOR_OTHER_PARTIES;
 
@@ -352,7 +352,7 @@ public class ServiceOfApplicationControllerFT {
             .contentType("application/json")
             .post("/service-of-application/about-to-submit")
             .then()
-            .body("data.isApplicantRepresented", equalTo(EMPTY_STRING))
+            .body("data.isApplicantRepresented", equalTo(NO))
             .extract().as(AboutToStartOrSubmitCallbackResponse.class);
 
     }
@@ -376,7 +376,7 @@ public class ServiceOfApplicationControllerFT {
             .contentType("application/json")
             .post("/service-of-application/about-to-submit")
             .then()
-            .body("data.isApplicantRepresented", equalTo("No"))
+            .body("data.isApplicantRepresented", equalTo(NO))
             .extract().as(AboutToStartOrSubmitCallbackResponse.class);
 
     }
@@ -385,11 +385,10 @@ public class ServiceOfApplicationControllerFT {
     /**
      * Service of Application journey.
      * When Soa being done for second time onwards for citizen created case
-     * Then isApplicantRepresented should be an empty string value.
+     * Then isApplicantRepresented should be No
      */
     @Test
     public void givenRequestWithCaseData_Response_isApplicantRepresented_citizen_secondTimeOnwards() throws Exception {
-
         String requestBody = ResourceLoader.loadJson(BODY_FOR_CITIZEN_CREATED_CASE_FROM_SECOND_TIME);
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
@@ -399,7 +398,7 @@ public class ServiceOfApplicationControllerFT {
             .contentType("application/json")
             .post("/service-of-application/about-to-submit")
             .then()
-            .body("data.isApplicantRepresented", equalTo(EMPTY_STRING))
+            .body("data.isApplicantRepresented", equalTo(NO))
             .extract().as(AboutToStartOrSubmitCallbackResponse.class);
 
     }
