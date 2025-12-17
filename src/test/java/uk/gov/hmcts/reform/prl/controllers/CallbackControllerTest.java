@@ -2243,7 +2243,7 @@ public class CallbackControllerTest {
             .code(courtId).label("courtLabel").build();
         List<DynamicListElement> allCourts = List.of(dle);
         when(locationRefDataService.getCourtLocations(anyString())).thenReturn(allCourts);
-        when(locationRefDataService.getDisplayEntryFromEpimmsId(courtId, authToken)).thenReturn(dle);
+        when(locationRefDataService.getDisplayEntryFromEpimmsId(courtId, AUTH_TOKEN)).thenReturn(dle);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =  callbackController
             .prePopulateCourtDetails(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
@@ -2284,7 +2284,7 @@ public class CallbackControllerTest {
         List<DynamicListElement> allCourts = List.of(dle);
         when(locationRefDataService.getCourtLocations(anyString())).thenReturn(allCourts);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(locationRefDataService.getDisplayEntryFromEpimmsId(courtId, authToken)).thenReturn(dle);
+        when(locationRefDataService.getDisplayEntryFromEpimmsId(courtId, AUTH_TOKEN)).thenReturn(dle);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =  callbackController
             .amendCourtAboutToStart(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("courtList"));
