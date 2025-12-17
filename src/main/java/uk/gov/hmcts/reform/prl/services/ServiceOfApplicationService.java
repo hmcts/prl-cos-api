@@ -1739,8 +1739,17 @@ public class ServiceOfApplicationService {
         //PRL-3466 - auto link citizen case if conf check is not required
         autoLinkCitizenCase(caseData, caseDataMap, callbackRequest.getEventId());
 
-        // respondents access
-        caseDataMap = assignRespondentSolicitorsAccess(authorisation, caseDataMap, caseData);
+        //fill in the organisation details for respondents where assign case expects to see it
+        if (caseData.getRespondents() != null) {
+            List<Element<PartyDetails>> respondents = caseData.getRespondents();
+
+            caseDataMap = respondentOrgPolicyService.populateRespondentOrganisations(
+                caseDataMap,
+                respondents,
+                caseData.getCaseTypeOfApplication()
+            );
+
+        }
 
         //PRL-5335 - WA fields for bundling lip case
         String isAllApplicantsAreLiP = (String) caseDataMap.get(WA_IS_APPLICANT_REPRESENTED);
@@ -1834,16 +1843,20 @@ public class ServiceOfApplicationService {
             //TEMP SOLUTION TO GET ACCESS CODES - GENERATE AND SEND ACCESS CODE TO APPLICANTS & RESPONDENTS OVER EMAIL
         }
 
+        // respondent sols access
+        caseDataMap = assignRespondentSolicitorsAccess(authorisation, caseDataMap, caseData);
+
         if (isRespondentDetailsConfidential(caseData) || CaseUtils.isC8Present(caseData)) {
             return processConfidentialDetailsSoa(authorisation, caseDataMap, caseData, startAllTabsUpdateDataContent);
+        } else {
+            return processNonConfidentialSoa(
+                authorisation,
+                caseData,
+                caseDataMap,
+                startAllTabsUpdateDataContent,
+                String.valueOf(callbackRequest.getCaseDetails().getId())
+            );
         }
-        return processNonConfidentialSoa(
-            authorisation,
-            caseData,
-            caseDataMap,
-            startAllTabsUpdateDataContent,
-            String.valueOf(callbackRequest.getCaseDetails().getId())
-        );
     }
 
     private ResponseEntity<SubmittedCallbackResponse> processNonConfidentialSoa(String authorisation, CaseData caseData,
@@ -4305,18 +4318,13 @@ public class ServiceOfApplicationService {
     Map<String, Object> assignRespondentSolicitorsAccess(String invokingAuth, Map<String, Object> caseDataMap,
                                                   CaseData caseData) {
 
-        if (caseData.getRespondents() == null) {
+        if(caseData.getRespondents() == null)
+        {
+            log.warn("No respondents on case id {}", caseData.getId());
             return caseDataMap;
         }
-
-        List<Element<PartyDetails>> respondents = caseData.getRespondents();
-
-        caseDataMap = respondentOrgPolicyService.populateRespondentOrganisations(caseDataMap,
-                                                                                 respondents,
-                                                                                 caseData.getCaseTypeOfApplication());
-
-        for (int i = 0; i < respondents.size(); i++) {
-            PartyDetails party = respondents.get(i).getValue();
+        for (int i = 0; i < caseData.getRespondents().size(); i++) {
+            PartyDetails party = caseData.getRespondents().get(i).getValue();
 
             if (!YesNoDontKnow.yes.equals(party.getDoTheyHaveLegalRepresentation())) {
                 continue;

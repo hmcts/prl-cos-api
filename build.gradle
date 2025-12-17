@@ -721,6 +721,11 @@ bootWithCCD {
       def value = it.substring(index + 1)
       environment key, value
     }
+    environment 'CITIZEN_UPDATE_CASE_STATE_ENABLED', 'true'
+    environment 'LOGGING_LEVEL_UK_GOV_HMCTS_DIVORCE', 'info'
+    environment 'ROLE_ASSIGNMENT_URL', 'http://localhost:4096'
+    environment 'CASE_DATA_STORE_BASEURL', 'http://localhost:4452'
+    environment 'CREATE_PAPER_CASE_MOCK_NOTIFICATION', 'true'
   }
 
   environment("spring.profiles.active", "local")
