@@ -27,11 +27,6 @@ public class RespondentOrgPolicyService {
     public Map<String, Object> populateRespondentOrganisations(Map<String, Object> caseDataMap,
                                                                List<Element<PartyDetails>> respondents,
                                                                String caseType) {
-        Map<String, Object> updates = new HashMap<>();
-
-        if (respondents == null || caseDataMap == null) {
-            return updates;
-        }
 
         for (int i = 0; i < respondents.size() && i < MAX_RESPONDENTS; i++) {
             PartyDetails respondent = respondents.get(i).getValue();
@@ -62,11 +57,11 @@ public class RespondentOrgPolicyService {
                 Map<String, Object> updatedPolicy = new HashMap<>(existingPolicy);
                 updatedPolicy.put("Organisation", organisation);
 
-                updates.put(policyKey, updatedPolicy);
+                caseDataMap.put(policyKey, updatedPolicy);
             }
         }
 
-        return updates;
+        return caseDataMap;
     }
 
     private String policyKey(String caseType, int index1Based) {
