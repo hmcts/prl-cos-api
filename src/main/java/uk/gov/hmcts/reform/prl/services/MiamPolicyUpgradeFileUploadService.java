@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.DocumentTTLRequest;
-import uk.gov.hmcts.reform.ccd.document.am.model.DocumentTTLResponse;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -23,13 +22,9 @@ import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -46,7 +41,6 @@ import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPreviousAttend
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.TypeOfMiamAttendanceEvidenceEnum.miamCertificate;
 import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.findElement;
 
 @Service
 @Slf4j
@@ -78,9 +72,9 @@ public class MiamPolicyUpgradeFileUploadService {
                 CONFIDENTIAL)) {
                 Document originalMpuDocFromResolutionProvider = caseData.getMiamPolicyUpgradeDetails()
                     .getMpuDocFromDisputeResolutionProvider();
-                String nonConfMPUDocId = DocumentUtils.getDocumentId(originalMpuDocFromResolutionProvider.getDocumentUrl());
-                log.info("Renaming mpu document from resolution provider to confidential with id: {}", nonConfMPUDocId);
-                refreshTTLToken(nonConfMPUDocId, systemAuthorisation);
+                String nonConfMpuDocId = DocumentUtils.getDocumentId(originalMpuDocFromResolutionProvider.getDocumentUrl());
+                log.info("Renaming mpu document from resolution provider to confidential with id: {}", nonConfMpuDocId);
+                refreshTtlValue(nonConfMpuDocId, systemAuthorisation);
                 Document mpuDocFromDisputeResolutionProvider = manageDocumentsService
                     .renameAndReuploadFileToBeConfidential(originalMpuDocFromResolutionProvider);
                 caseData = caseData.toBuilder()
@@ -96,7 +90,7 @@ public class MiamPolicyUpgradeFileUploadService {
                 Document originalMediatorDoc = caseData.getMiamPolicyUpgradeDetails().getMpuCertificateByMediator();
                 String mpuCertNonConfDoc = DocumentUtils.getDocumentId(originalMediatorDoc.getDocumentUrl());
                 log.info("Renaming mpu certificate from mediator to confidential with id: {}", mpuCertNonConfDoc);
-                refreshTTLToken(mpuCertNonConfDoc, systemAuthorisation);
+                refreshTtlValue(mpuCertNonConfDoc, systemAuthorisation);
                 Document mpuCertificateByMediator = manageDocumentsService.renameAndReuploadFileToBeConfidential(
                     originalMediatorDoc
                 );
@@ -136,7 +130,7 @@ public class MiamPolicyUpgradeFileUploadService {
                     if (!domesticAbuseDocument.getDocumentFileName().startsWith(CONFIDENTIAL)) {
                         String nonConfDocId = DocumentUtils.getDocumentId(domesticAbuseDocument.getDocumentUrl());
                         log.info("Renaming domestic abuse document to confidential with id: {}", nonConfDocId);
-                        refreshTTLToken(nonConfDocId, systemAuthorisation);
+                        refreshTtlValue(nonConfDocId, systemAuthorisation);
                         domesticAbuseDocument = manageDocumentsService.renameAndReuploadFileToBeConfidential(
                             domesticAbuseDocument);
                     }
@@ -158,15 +152,15 @@ public class MiamPolicyUpgradeFileUploadService {
         return caseData;
     }
 
-    private void refreshTTLToken(String documentId, String systemAuthorisation){
-        LocalDateTime refreshedTTL = LocalDateTime.now(ZoneId.of("Europe/London"))
+    private void refreshTtlValue(String documentId, String systemAuthorisation) {
+        LocalDateTime refreshedTtl = LocalDateTime.now(ZoneId.of("Europe/London"))
             .plusHours(24)
             .truncatedTo(ChronoUnit.MILLIS);
-        DocumentTTLRequest documentTTLRequest = new DocumentTTLRequest(refreshedTTL);
+        DocumentTTLRequest documentTtlRequest = new DocumentTTLRequest(refreshedTtl);
         log.info("Refreshing TTL token for document with id: {} ", documentId);
         caseDocumentClient.patchDocument(
             systemAuthorisation, authTokenGenerator.generate(),
-            UUID.fromString(documentId), documentTTLRequest
+            UUID.fromString(documentId), documentTtlRequest
         );
         log.info("TTL token successfully refreshed for document with id: {} ", documentId);
     }
@@ -322,17 +316,15 @@ public class MiamPolicyUpgradeFileUploadService {
         }
     }
 
-    // Tweak this logic with current case data.
-    public void deleteOldMiamPolicyUpgradeDocuments(CaseData previousCaseDate, CaseData currentCaseData, String systemAuthorisation) {
-        if (CollectionUtils.isNotEmpty(previousCaseDate.getMiamPolicyUpgradeDetails().getMpuExemptionReasons())) {
-            deletePreviousDomesticAbuseDocument(previousCaseDate, currentCaseData, systemAuthorisation);
-            deletePreviousMiamAttendanceDocument(previousCaseDate, currentCaseData, systemAuthorisation);
+    public void deleteOldMiamPolicyUpgradeDocuments(CaseData previousCaseData, CaseData currentCaseData, String systemAuthorisation) {
+        if (CollectionUtils.isNotEmpty(previousCaseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons())) {
+            deletePreviousDomesticAbuseDocument(previousCaseData, currentCaseData, systemAuthorisation);
+            deletePreviousMiamAttendanceDocument(previousCaseData, currentCaseData, systemAuthorisation);
         } else {
             log.info("No old files to delete for MIAM Policy Upgrade with Confidential prefix for Exemptions");
         }
     }
 
-    // Tweak this logic
     private void deletePreviousDomesticAbuseDocument(CaseData previousCaseData, CaseData currentCaseData, String systemAuthorisation) {
         if (hasMpuDomesticAbuseEvidence(previousCaseData)) {
             previousCaseData.getMiamPolicyUpgradeDetails().getMpuDomesticAbuseEvidenceDocument()
@@ -342,8 +334,7 @@ public class MiamPolicyUpgradeFileUploadService {
                         currentDocEl -> currentDocEl.getValue().getDomesticAbuseDocument().getDocumentUrl().equals(
                             docUrlToDelete));
                     Document domesticAbuseDocument = domesticAbuseEvidenceDocument.getValue().getDomesticAbuseDocument();
-                    if (!isStillOnCase &&
-                        !domesticAbuseDocument.getDocumentFileName().startsWith(CONFIDENTIAL)) {
+                    if (!isStillOnCase && !domesticAbuseDocument.getDocumentFileName().startsWith(CONFIDENTIAL)) {
                         UUID docId = UUID.fromString(
                             DocumentUtils.getDocumentId(domesticAbuseDocument.getDocumentUrl()));
                         deleteDocument(systemAuthorisation, authTokenGenerator.generate(), docId);
@@ -352,24 +343,31 @@ public class MiamPolicyUpgradeFileUploadService {
         }
     }
 
-    // Tweak this logic
-    private void deletePreviousMiamAttendanceDocument(CaseData previoudCaseData, CaseData currentCaseData, String systemAuthorisation) {
+    private void deletePreviousMiamAttendanceDocument(CaseData previousCaseData, CaseData currentCaseData, String systemAuthorisation) {
         String authToken = authTokenGenerator.generate();
-        if (hasPreviousMpuMiamAttendanceReasons(previoudCaseData)) {
-            if (hasMpuMiamDocFromDisputeResolutionProvider(previoudCaseData)
-                && !previoudCaseData.getMiamPolicyUpgradeDetails().getMpuDocFromDisputeResolutionProvider().getDocumentFileName().startsWith(
+        if (hasPreviousMpuMiamAttendanceReasons(previousCaseData)) {
+            if (hasMpuMiamDocFromDisputeResolutionProvider(previousCaseData)
+                && !previousCaseData.getMiamPolicyUpgradeDetails().getMpuDocFromDisputeResolutionProvider().getDocumentFileName().startsWith(
                 CONFIDENTIAL)) {
-                UUID docId = UUID.fromString(
-                    DocumentUtils.getDocumentId(previoudCaseData.getMiamPolicyUpgradeDetails()
-                                                    .getMpuDocFromDisputeResolutionProvider().getDocumentUrl()));
-                deleteDocument(systemAuthorisation, authToken, docId);
-            } else if (hasMpuMiamCertificateFromMediator(previoudCaseData)
-                && !previoudCaseData.getMiamPolicyUpgradeDetails().getMpuCertificateByMediator().getDocumentFileName().startsWith(
+                String docUrlToDelete = previousCaseData.getMiamPolicyUpgradeDetails().getMpuDocFromDisputeResolutionProvider().getDocumentUrl();
+                boolean isStillOnCase = currentCaseData.getMiamPolicyUpgradeDetails().getMpuDocFromDisputeResolutionProvider().getDocumentUrl()
+                    .equals(docUrlToDelete);
+
+                if (!isStillOnCase) {
+                    UUID docId = UUID.fromString(DocumentUtils.getDocumentId(docUrlToDelete));
+                    deleteDocument(systemAuthorisation, authToken, docId);
+                }
+            } else if (hasMpuMiamCertificateFromMediator(previousCaseData)
+                && !previousCaseData.getMiamPolicyUpgradeDetails().getMpuCertificateByMediator().getDocumentFileName().startsWith(
                 CONFIDENTIAL)) {
-                UUID docId = UUID.fromString(
-                    DocumentUtils.getDocumentId(previoudCaseData.getMiamPolicyUpgradeDetails()
-                                                    .getMpuCertificateByMediator().getDocumentUrl()));
-                deleteDocument(systemAuthorisation, authToken, docId);
+                String docUrlToDelete = previousCaseData.getMiamPolicyUpgradeDetails().getMpuCertificateByMediator().getDocumentUrl();
+                boolean isStillOnCase = currentCaseData.getMiamPolicyUpgradeDetails().getMpuCertificateByMediator().getDocumentUrl().equals(
+                    docUrlToDelete);
+
+                if (!isStillOnCase) {
+                    UUID docId = UUID.fromString(DocumentUtils.getDocumentId(docUrlToDelete));
+                    deleteDocument(systemAuthorisation, authToken, docId);
+                }
             }
         }
     }
