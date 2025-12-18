@@ -98,6 +98,7 @@ public class LinkCitizenCaseService {
     private boolean  isEmailAlreadyUsedInCase(CaseData dbCaseData, UserDetails userDetails) {
         return Optional.ofNullable(dbCaseData.getCaseInvites())
             .stream()
+            .flatMap(List::stream)
             .map(Element::getValue)
             .anyMatch(invite -> userDetails.getId().equals(invite.getInvitedUserId()));
     }
