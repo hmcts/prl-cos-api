@@ -337,16 +337,12 @@ public class MiamPolicyUpgradeFileUploadService {
         if (hasMpuDomesticAbuseEvidence(previousCaseData)) {
             previousCaseData.getMiamPolicyUpgradeDetails().getMpuDomesticAbuseEvidenceDocument()
                 .stream().forEach(domesticAbuseEvidenceDocument -> {
-                    Optional<DomesticAbuseEvidenceDocument> currentDoc = findElement(
-                        domesticAbuseEvidenceDocument.getId(),
-                        currentCaseData.getMiamPolicyUpgradeDetails()
-                            .getMpuDomesticAbuseEvidenceDocument()
-                    )
-                        .map(Element::getValue);
+                    String docUrlToDelete = domesticAbuseEvidenceDocument.getValue().getDomesticAbuseDocument().getDocumentUrl();
+                    boolean isStillOnCase = currentCaseData.getMiamPolicyUpgradeDetails().getMpuDomesticAbuseEvidenceDocument().stream().anyMatch(
+                        currentDocEl -> currentDocEl.getValue().getDomesticAbuseDocument().getDocumentUrl().equals(
+                            docUrlToDelete));
                     Document domesticAbuseDocument = domesticAbuseEvidenceDocument.getValue().getDomesticAbuseDocument();
-                    if (currentDoc.isPresent()
-                        && !domesticAbuseEvidenceDocument.getValue().getDomesticAbuseDocument().getDocumentUrl()
-                        .equals(currentDoc.get().getDomesticAbuseDocument().getDocumentUrl()) &&
+                    if (!isStillOnCase &&
                         !domesticAbuseDocument.getDocumentFileName().startsWith(CONFIDENTIAL)) {
                         UUID docId = UUID.fromString(
                             DocumentUtils.getDocumentId(domesticAbuseDocument.getDocumentUrl()));
