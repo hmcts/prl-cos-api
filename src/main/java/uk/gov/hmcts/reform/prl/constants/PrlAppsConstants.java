@@ -1145,4 +1145,7 @@ public class PrlAppsConstants {
     public static final String IS_INVOKED_FROM_TASK = "isInvokedFromTask";
     public static final String ALLOCATED_BARRISTER = "allocatedBarrister";
     public static final String CAFCASS_DATE_TIME = "cafcassDateTime";
+
+    public static final String EMAIL_ALREADY_USED_IN_CASE_ENG = "The email address used has already been linked to an account, please register with a different email and try the access code again.";
+    public static final String EMAIL_ALREADY_USED_IN_CASE_WEL = "Get the Welsh translation from business";
 }
