@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.SearchResultResponse;
-import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.DateOfSubmission;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.QueryParam;
@@ -48,7 +47,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_STATUS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_OF_SUBMISSION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
@@ -302,71 +300,5 @@ public class HwfProcessUpdateCaseStateServiceTest {
             .fetchServiceRequestReferenceStatus(anyString(), anyString());
 
         verify(allTabService, times(15)).getStartUpdateForSpecificEvent(any(), any());
-    }
-
-    @Test
-    public void shouldUpdateCaseStateToSubmittedWhenCurrentStateIsPending() {
-        caseData = CaseData.builder()
-            .id(123L)
-            .state(State.SUBMITTED_NOT_PAID)
-            .dateSubmitted("2024-01-01")
-            .helpWithFeesNumber("HWF-1BC-AF")
-            .paymentServiceRequestReferenceNumber("2024-1709204678984")
-            .build();
-        caseDetails = CaseDetails.builder()
-            .id(123L)
-            .data(caseData.toMap(objectMapper))
-            .build();
-
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-
-        hwfProcessUpdateCaseStateService.checkHwfPaymentStatusAndUpdateCaseState();
-        Map<String, Object> caseUpdated = caseDataUpdatedCaptor.getValue();
-
-        assertEquals(CaseStatus.builder().state(State.SUBMITTED_PAID.getLabel()).build(), caseUpdated.get(CASE_STATUS));
-    }
-
-    @Test
-    public void shouldUpdateCaseStateToSubmittedWhenCurrentStateIsWithdrawn() {
-        caseData = CaseData.builder()
-            .id(123L)
-            .state(State.CASE_WITHDRAWN)
-            .dateSubmitted("2024-01-01")
-            .helpWithFeesNumber("HWF-1BC-AF")
-            .paymentServiceRequestReferenceNumber("2024-1709204678984")
-            .build();
-        caseDetails = CaseDetails.builder()
-            .id(123L)
-            .data(caseData.toMap(objectMapper))
-            .build();
-
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-
-        hwfProcessUpdateCaseStateService.checkHwfPaymentStatusAndUpdateCaseState();
-        Map<String, Object> caseUpdated = caseDataUpdatedCaptor.getValue();
-
-        assertEquals(CaseStatus.builder().state(State.SUBMITTED_PAID.getLabel()).build(), caseUpdated.get(CASE_STATUS));
-    }
-
-    @Test
-    public void shouldNotUpdateCaseStateToSubmittedWhenCurrentStateIsCaseIssued() {
-        caseData = CaseData.builder()
-            .id(123L)
-            .state(State.CASE_ISSUED)
-            .dateSubmitted("2024-01-01")
-            .helpWithFeesNumber("HWF-1BC-AF")
-            .paymentServiceRequestReferenceNumber("2024-1709204678984")
-            .build();
-        caseDetails = CaseDetails.builder()
-            .id(123L)
-            .data(caseData.toMap(objectMapper))
-            .build();
-
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-
-        hwfProcessUpdateCaseStateService.checkHwfPaymentStatusAndUpdateCaseState();
-        Map<String, Object> caseUpdated = caseDataUpdatedCaptor.getValue();
-
-        assertEquals(CaseStatus.builder().state(State.CASE_ISSUED.getLabel()).build(), caseUpdated.get(CASE_STATUS));
     }
 }
