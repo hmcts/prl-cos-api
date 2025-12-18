@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
-import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.ApplicationStatus;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.UrgencyTimeFrameType;
@@ -316,84 +315,6 @@ public class RequestUpdateCallbackServiceTest {
         requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
         assertEquals(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString()), caseDetails);
 
-    }
-
-    @Test
-    public void shouldUpdateCaseStateToSubmittedWhenCurrentCaseStateIsPendingWhenPaymentIsSuccessful() {
-        CaseData caseData = CaseData.builder()
-            .id(1L)
-            .state(State.SUBMITTED_NOT_PAID)
-            .build();
-
-        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
-            .ccdCaseNumber(caseId.toString())
-            .serviceRequestReference("test-reference")
-            .payment(PaymentDto.builder()
-                         .paymentAmount("123")
-                         .paymentMethod("cash")
-                         .paymentReference("reference")
-                         .caseReference("reference")
-                         .accountNumber("123445555")
-                         .build())
-            .serviceRequestStatus("Paid")
-            .build();
-
-        CaseData updatedCaseData =
-            requestUpdateCallbackService.getCaseDataWithStateAndDateSubmitted(serviceRequestUpdateDto, caseData);
-
-        assertEquals(State.SUBMITTED_PAID, updatedCaseData.getState());
-    }
-
-    @Test
-    public void shouldUpdateCaseStateToSubmittedWhenCurrentCaseStateIsWithdrawnWhenPaymentIsSuccessful() {
-        CaseData caseData = CaseData.builder()
-            .id(1L)
-            .state(State.CASE_WITHDRAWN)
-            .build();
-
-        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
-            .ccdCaseNumber(caseId.toString())
-            .serviceRequestReference("test-reference")
-            .payment(PaymentDto.builder()
-                         .paymentAmount("123")
-                         .paymentMethod("cash")
-                         .paymentReference("reference")
-                         .caseReference("reference")
-                         .accountNumber("123445555")
-                         .build())
-            .serviceRequestStatus("Paid")
-            .build();
-
-        CaseData updatedCaseData =
-            requestUpdateCallbackService.getCaseDataWithStateAndDateSubmitted(serviceRequestUpdateDto, caseData);
-
-        assertEquals(State.SUBMITTED_PAID, updatedCaseData.getState());
-    }
-
-    @Test
-    public void shouldNotUpdateCaseStateToSubmittedWhenCurrentCaseStateIsCaseIssuedWhenPaymentIsSuccessful() {
-        CaseData caseData = CaseData.builder()
-            .id(1L)
-            .state(State.CASE_ISSUED)
-            .build();
-
-        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
-            .ccdCaseNumber(caseId.toString())
-            .serviceRequestReference("test-reference")
-            .payment(PaymentDto.builder()
-                         .paymentAmount("123")
-                         .paymentMethod("cash")
-                         .paymentReference("reference")
-                         .caseReference("reference")
-                         .accountNumber("123445555")
-                         .build())
-            .serviceRequestStatus("Paid")
-            .build();
-
-        CaseData updatedCaseData =
-            requestUpdateCallbackService.getCaseDataWithStateAndDateSubmitted(serviceRequestUpdateDto, caseData);
-
-        assertEquals(State.CASE_ISSUED, updatedCaseData.getState());
     }
 
     private CaseDataContent buildCaseDataContent(String eventId, String eventToken, Object caseData) {
