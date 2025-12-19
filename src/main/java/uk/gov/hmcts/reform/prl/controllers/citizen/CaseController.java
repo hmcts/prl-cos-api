@@ -25,11 +25,13 @@ import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
+import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.UiCitizenCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -55,6 +57,7 @@ public class CaseController {
     private final AuthorisationService authorisationService;
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
     private final AuthTokenGenerator authTokenGenerator;
+    private final CourtFinderService courtFinderService;
     private static final String INVALID_CLIENT = "Invalid Client";
     private final LaunchDarklyClient launchDarklyClient;
     private static final String CASE_LINKING_FAILED = "Case Linking has failed";
@@ -213,6 +216,24 @@ public class CaseController {
         boolean isAuthorised = authorisationService.authoriseUser(authorisation);
         if (isAuthorised) {
             return caseService.fetchIdamAmRoles(authorisation, emailId);
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @GetMapping(value = "/search/{postcode}/results")
+    @Operation(description = "Find court by postcode")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "success"),
+        @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
+    })
+    public String findCourtByPostCodeAndService(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+                                     @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+                                     @PathVariable("postcode") String postcode) throws Exception {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            Court court = courtFinderService.getC100NearestFamilyCourt(postcode);
+            return court == null ? "" : court.getCourtName();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
