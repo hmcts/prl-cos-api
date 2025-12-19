@@ -168,20 +168,20 @@ public class RequestUpdateCallbackService {
                 && serviceRequestReference.equalsIgnoreCase(caseData.getPaymentServiceRequestReferenceNumber());
     }
 
-    private CaseData getCaseDataWithStateAndDateSubmitted(ServiceRequestUpdateDto serviceRequestUpdateDto,
+    public CaseData getCaseDataWithStateAndDateSubmitted(ServiceRequestUpdateDto serviceRequestUpdateDto,
                                                           CaseData caseData) {
         try {
             Court closestChildArrangementsCourt = courtFinderService.getNearestFamilyCourt(caseData);
             if (serviceRequestUpdateDto.getServiceRequestStatus().equalsIgnoreCase(PAID)) {
                 ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
                 caseData = caseData.toBuilder()
-                    .state(State.SUBMITTED_PAID)
+                    .state(shouldUpdateCaseState(caseData) ? State.SUBMITTED_PAID : caseData.getState())
                     .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
                     .build();
 
             } else {
                 caseData = caseData.toBuilder()
-                    .state(State.SUBMITTED_NOT_PAID)
+                    .state(shouldUpdateCaseState(caseData) ? State.SUBMITTED_NOT_PAID : caseData.getState())
                     .build();
             }
             if (closestChildArrangementsCourt != null) {
@@ -262,5 +262,10 @@ public class RequestUpdateCallbackService {
             }
         }
         return caseDataUpdated;
+    }
+
+    private boolean shouldUpdateCaseState(CaseData caseData) {
+        return caseData.getState() == State.SUBMITTED_NOT_PAID
+            || caseData.getState() == State.CASE_WITHDRAWN;
     }
 }
