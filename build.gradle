@@ -410,6 +410,9 @@ dependencies {
   implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.21')
   implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version:'7.4'
   implementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.5'
+  implementation group: 'com.opencsv', name: 'opencsv', version: '5.12.0', {
+    exclude group: 'commons-collections', module: 'commons-collections'
+  }
 
   runtimeOnly('org.springframework.boot:spring-boot-devtools')
 

@@ -11,7 +11,10 @@ import uk.gov.hmcts.reform.prl.clients.os.OsCourtFinderApi;
 import uk.gov.hmcts.reform.prl.models.ordnancesurvey.Dpa;
 import uk.gov.hmcts.reform.prl.models.ordnancesurvey.OsPlacesResponse;
 import uk.gov.hmcts.reform.prl.models.ordnancesurvey.Result;
+import uk.gov.hmcts.reform.prl.services.LocalAuthorityCourtDataLoader;
+import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.OsCourtFinderService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
 import java.util.List;
 
@@ -22,13 +25,23 @@ public class OsCourtFinderApiClientIntegrationTest {
     private MockMvc mockMvc;
 
     @MockBean
+    private SystemUserService systemUserService;
+    @MockBean
     private OsCourtFinderApi osCourtFinderApi;
+
+    @MockBean
+    private LocalAuthorityCourtDataLoader localAuthorityCourtDataLoader;
+    @MockBean
+    private LocationRefDataService locationRefDataService;
+    @MockBean
+    private CourtFinderApi courtFinderApi;
 
     private OsCourtFinderService osCourtFinderService;
 
     @BeforeEach
     public void setUp() throws Exception {
-        osCourtFinderService = new OsCourtFinderService(osCourtFinderApi);
+        osCourtFinderService = new OsCourtFinderService(systemUserService, osCourtFinderApi, localAuthorityCourtDataLoader,
+                                                        locationRefDataService, courtFinderApi);
     }
 
     @Test
