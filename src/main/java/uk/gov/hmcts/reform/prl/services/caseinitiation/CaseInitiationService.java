@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 
 @Slf4j
@@ -57,9 +59,13 @@ public class CaseInitiationService {
 
     public Map<String, Object> prePopulateCourtDetails(String authorisation, Map<String, Object> caseDataUpdated) {
 
-        if (C100_CASE_TYPE.equalsIgnoreCase(String.valueOf(caseDataUpdated.get("caseTypeOfApplication")))) {
+
+        if (C100_CASE_TYPE.equalsIgnoreCase(String.valueOf(caseDataUpdated.get(CASE_TYPE_OF_APPLICATION)))) {
+            String selectedCourtId = String.valueOf(caseDataUpdated.get(COURT_ID_FIELD));
+            DynamicListElement selectedCourtElement = locationRefDataService
+                .getDisplayEntryFromEpimmsId(selectedCourtId, authorisation);
             List<DynamicListElement> courtList = locationRefDataService.getCourtLocations(authorisation);
-            caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
+            caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(selectedCourtElement).listItems(courtList)
                     .build());
         } else {
             caseDataUpdated.put(COURT_LIST, DynamicList.builder()

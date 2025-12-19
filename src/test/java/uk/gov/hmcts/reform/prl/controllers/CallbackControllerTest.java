@@ -90,6 +90,7 @@ import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
+import uk.gov.hmcts.reform.prl.services.DfjLookupService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.EventService;
@@ -310,6 +311,9 @@ public class CallbackControllerTest {
     private C100IssueCaseService c100IssueCaseService;
 
     @Mock
+    private DfjLookupService dfjLookupService;
+
+    @Mock
     private CafcassDateTimeService cafcassDateTimeService;
 
     @Mock
@@ -368,6 +372,9 @@ public class CallbackControllerTest {
         when(locationRefDataService.getCourtDetailsFromEpimmsId(Mockito.anyString(),Mockito.anyString()))
             .thenReturn(Optional.of(courtVenue));
         when(c100IssueCaseService.getFactCourtId(courtVenue)).thenReturn("123");
+        when(dfjLookupService.getDfjAreaFieldsByCourtName("Swansea Civil Justice Centre")).thenReturn(
+            Map.of("dfjArea", "SWANSEA", "swanseaDFJCourt", "123")
+        );
     }
 
     @Test
@@ -1212,7 +1219,7 @@ public class CallbackControllerTest {
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
             .addCaseNumberSubmitted(authToken, s2sToken, callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("issueDate"));
-        assertEquals(No,aboutToStartOrSubmitCallbackResponse.getData().get("isAddCaseNumberAdded"));
+        assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("isAddCaseNumberAdded"));
     }
 
     @Test
@@ -1237,7 +1244,7 @@ public class CallbackControllerTest {
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
                 .addCaseNumberSubmitted(authToken, s2sToken, callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("issueDate"));
-        assertEquals(Yes,aboutToStartOrSubmitCallbackResponse.getData().get("isAddCaseNumberAdded"));
+        assertEquals(Yes.getDisplayedValue(),aboutToStartOrSubmitCallbackResponse.getData().get("isAddCaseNumberAdded"));
     }
 
     @Test
@@ -1635,6 +1642,7 @@ public class CallbackControllerTest {
             .childrenKnownToLocalAuthorityTextArea("Test")
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .applicants(applicantList)
+            .courtName("Swansea Civil Justice Centre")
             .caseTypeOfApplication(C100_CASE_TYPE)
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder().mpuClaimingExemptionMiam(Yes).build())
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
@@ -1747,6 +1755,8 @@ public class CallbackControllerTest {
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1ADocument"));
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1AWelshDocument"));
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("finalWelshDocument"));
+        Assertions.assertEquals(aboutToStartOrSubmitCallbackResponse.getData().get("dfjArea"), "SWANSEA");
+        Assertions.assertEquals(aboutToStartOrSubmitCallbackResponse.getData().get("swanseaDFJCourt"), "123");
     }
 
 
@@ -2252,21 +2262,27 @@ public class CallbackControllerTest {
 
     @Test
     public void testPrePopulateCourtDetails() throws NotFoundException {
-
-        CaseData caseData = CaseData.builder().build();
+        String courtId = "1234";
+        CaseData caseData = CaseData.builder().courtId(courtId).build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
         when(courtLocatorService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(Court.builder().build());
-        when(courtLocatorService.getEmailAddress(Mockito.any(Court.class))).thenReturn(Optional.of(CourtEmailAddress.builder()
-                                                                                                       .address("123@gamil.com").build()));
+        when(courtLocatorService.getEmailAddress(Mockito.any(Court.class))).thenReturn(
+            Optional.of(CourtEmailAddress.builder().address("123@gamil.com").build()));
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(locationRefDataService.getCourtLocations(Mockito.anyString())).thenReturn(List.of(DynamicListElement.EMPTY));
+        DynamicListElement dle = DynamicListElement.builder()
+            .code(courtId).label("courtLabel").build();
+        List<DynamicListElement> allCourts = List.of(dle);
+        when(locationRefDataService.getCourtLocations(anyString())).thenReturn(allCourts);
+        when(locationRefDataService.getDisplayEntryFromEpimmsId(courtId, authToken)).thenReturn(dle);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =  callbackController
             .prePopulateCourtDetails(authToken, s2sToken, callbackRequest);
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("localCourtAdmin"));
+        Assertions.assertEquals("1234", ((DynamicList)aboutToStartOrSubmitCallbackResponse.getData().get("courtList"))
+            .getValue().getCode());
     }
 
     @Test
@@ -2288,18 +2304,25 @@ public class CallbackControllerTest {
 
     @Test
     public void testAmendCourtAboutToStart() throws Exception {
-        CaseData caseData = CaseData.builder().build();
+        String courtId = "1234";
+        CaseData caseData = CaseData.builder().courtId(courtId).build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(locationRefDataService.getCourtLocations(Mockito.anyString())).thenReturn(List.of(DynamicListElement.EMPTY));
+        DynamicListElement dle = DynamicListElement.builder()
+            .code(courtId).label("courtLabel").build();
+        List<DynamicListElement> allCourts = List.of(dle);
+        when(locationRefDataService.getCourtLocations(anyString())).thenReturn(allCourts);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(locationRefDataService.getDisplayEntryFromEpimmsId(courtId, authToken)).thenReturn(dle);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =  callbackController
             .amendCourtAboutToStart(authToken,s2sToken,callbackRequest);
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("courtList"));
+        Assertions.assertEquals("1234", ((DynamicList)aboutToStartOrSubmitCallbackResponse.getData().get("courtList"))
+            .getValue().getCode());
     }
 
     @Test

@@ -1,10 +1,11 @@
-package uk.gov.hmcts.reform.prl.services;
+package uk.gov.hmcts.reform.prl.services.sendandreply;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationService;
 
 import java.util.Map;
 
@@ -78,13 +79,13 @@ public class SendAndReplyCommonService {
             );
         }
 
-        sendAndReplyService.sendNotificationToExternalParties(
-            caseData,
-            authorisation
+        // ensure the message content is set in sendMessageObject for access in submitted cb
+        caseDataMap.put("sendMessageObject", caseData.getSendOrReplyMessage().getSendMessageObject()
+            .toBuilder()
+                .messageContent(caseData.getMessageContent())
+            .build()
         );
 
-        //send emails in case of sending to others with emails
-        sendAndReplyService.sendNotificationEmailOther(caseData);
         //WA - clear reply field in case of SEND
         sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
     }

@@ -44,6 +44,7 @@ import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
@@ -68,6 +69,7 @@ import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
+import uk.gov.hmcts.reform.prl.services.DfjLookupService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeFileUploadService;
@@ -114,6 +116,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ACCESS_CAT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CREATED_BY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_LIST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -136,7 +140,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.TAS
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.TASK_LIST_V3_FLAG;
 import static uk.gov.hmcts.reform.prl.enums.Event.SEND_TO_GATEKEEPER;
 import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 
@@ -144,7 +147,6 @@ import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 @RestController
 @RequiredArgsConstructor
 public class CallbackController {
-    public static final String COURT_LIST = "courtList";
     private static final String CONFIRMATION_HEADER = "# Case transferred to another court ";
     private static final String CONFIRMATION_BODY_PREFIX = "The case has been transferred to ";
     private static final String CONFIRMATION_BODY_SUFFIX = " \n\n Local court admin have been notified ";
@@ -182,7 +184,9 @@ public class CallbackController {
     private final MiamPolicyUpgradeService miamPolicyUpgradeService;
     private final MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
     private final SystemUserService systemUserService;
+    private final DfjLookupService dfjLookupService;
     private final CafcassDateTimeService cafcassDateTimeService;
+
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(summary = "Callback to validate application consideration timetable. Returns error messages if validation fails.")
@@ -315,8 +319,7 @@ public class CallbackController {
                 log.info("Court email not found for case id {}", caseData.getId());
             }
             List<DynamicListElement> courtList = locationRefDataService.getCourtLocations(authorisation);
-            caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
-                .build());
+            addAndSelectCourtList(caseDataUpdated, courtList, authorisation);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -393,7 +396,13 @@ public class CallbackController {
                 );
             }
             //Assign default court to all c100 cases for work allocation.
-            caseDataUpdated.put("caseManagementLocation", locationRefDataService.getDefaultCourtForCA(authorisation));
+            CaseManagementLocation location = locationRefDataService.getDefaultCourtForCA(authorisation);
+            caseDataUpdated.put("caseManagementLocation", location);
+
+            // add DFJ filter info based on the Court Name, as the default "court" is likely the CTSC offices
+            caseDataUpdated.keySet().removeAll(dfjLookupService.getAllCourtFields());
+            caseDataUpdated.putAll(dfjLookupService.getDfjAreaFieldsByCourtName(caseData.getCourtName()));
+
             caseDataUpdated.put("caseFlags", Flags.builder().build());
             confidentialityC8RefugeService.processRefugeDocumentsOnSubmit(
                 caseDataUpdated,
@@ -460,8 +469,7 @@ public class CallbackController {
             } else {
                 courtList = locationRefDataService.getCourtLocations(authorisation);
             }
-            caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
-                .build());
+            addAndSelectCourtList(caseDataUpdated, courtList, authorisation);
             caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
@@ -469,6 +477,14 @@ public class CallbackController {
         }
     }
 
+    private void addAndSelectCourtList(Map<String, Object> caseDataUpdated, List<DynamicListElement> courtList,
+                                       String authorisation) {
+        String selectedCourtId = String.valueOf(caseDataUpdated.get(COURT_ID_FIELD));
+        DynamicListElement selectedCourtElement = locationRefDataService
+            .getDisplayEntryFromEpimmsId(selectedCourtId, authorisation);
+        caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(selectedCourtElement).listItems(courtList)
+            .build());
+    }
 
     @PostMapping(path = "/transfer-court/validate-court-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to validate court fields")
@@ -828,7 +844,7 @@ public class CallbackController {
                 .findFirst();
             previousState.ifPresent(s -> caseDataUpdated.put(
                 VERIFY_CASE_NUMBER_ADDED,
-                SUBMITTED_PAID.getValue().equalsIgnoreCase(s) ? Yes : No
+                SUBMITTED_PAID.getValue().equalsIgnoreCase(s) ? Yes.getDisplayedValue() : null
             ));
             caseDataUpdated.put(ISSUE_DATE_FIELD, LocalDate.now());
             return AboutToStartOrSubmitCallbackResponse.builder()
