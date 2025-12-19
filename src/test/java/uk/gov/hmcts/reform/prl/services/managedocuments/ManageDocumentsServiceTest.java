@@ -139,6 +139,9 @@ public class ManageDocumentsServiceTest {
     CaseDocumentClient caseDocumentClient;
 
     @Mock
+    MiamDocumentRetryService miamDocumentRetryService;
+
+    @Mock
     private CaseDocumentClientApi caseDocumentClientApi;
 
     @Mock
@@ -337,8 +340,8 @@ public class ManageDocumentsServiceTest {
         Resource expectedResource = new ClassPathResource("task-list-markdown.md");
         HttpHeaders headers = new HttpHeaders();
         ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, HttpStatus.OK);
-        when(caseDocumentClient
-                 .getDocumentBinary(Mockito.anyString(), Mockito.anyString(), Mockito.any(UUID.class)))
+        when(miamDocumentRetryService
+                 .getMiamDocumentWithRetry(Mockito.anyString(), Mockito.anyString(), Mockito.any(UUID.class)))
             .thenReturn(expectedResponse);
 
         uk.gov.hmcts.reform.ccd.document.am.model.Document document = testDocument();
@@ -2575,7 +2578,7 @@ public class ManageDocumentsServiceTest {
                 .build());
 
         verify(caseDocumentClient, never()).deleteDocument(any(), any(), any(), anyBoolean());
-        verify(caseDocumentClient).getDocumentBinary(eq("userToken"), eq("sysToken"), any(UUID.class));
+        verify(miamDocumentRetryService).getMiamDocumentWithRetry(eq("userToken"), eq("sysToken"), any(UUID.class));
         verify(caseDocumentClient).uploadDocuments(eq("userToken"), eq("sysToken"), any(), any(), any());
     }
 

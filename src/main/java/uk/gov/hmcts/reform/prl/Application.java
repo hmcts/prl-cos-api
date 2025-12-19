@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import uk.gov.hmcts.reform.prl.tasks.ScheduledTaskRunner;
@@ -35,6 +36,7 @@ import uk.gov.hmcts.reform.prl.tasks.ScheduledTaskRunner;
 @EnableAutoConfiguration
 @EnableCaching
 @EnableScheduling
+@EnableRetry
 @ComponentScan(basePackages = {  "uk.gov.hmcts.reform.prl", "uk.gov.hmcts.reform.prl.services",
     "uk.gov.hmcts.reform.prl.config","uk.gov.hmcts.reform.ccd.document","uk.gov.hmcts.reform.prl.repositories",
     "uk.gov.hmcts.reform.prl.mapper","uk.gov.hmcts.reform.idam.client",
