@@ -171,7 +171,6 @@ public class MiamPolicyUpgradeFileUploadService {
             && isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuDomesticAbuseEvidenceDocument());
     }
 
-    // Maybe rename this method
     public CaseData renameMiamPolicyUpgradeDocumentWithoutConfidential(CaseData caseData) {
         if (CollectionUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons())) {
             String systemAuthorisation = systemUserService.getSysUserToken();
@@ -183,7 +182,6 @@ public class MiamPolicyUpgradeFileUploadService {
         return caseData;
     }
 
-    // Maybe rename this method
     private CaseData renamePreviousMiamAttendanceDocumentWithoutConfidential(CaseData caseData, String systemAuthorisation) {
         if (hasPreviousMpuMiamAttendanceReasons(caseData)) {
             if (hasMpuMiamDocFromDisputeResolutionProvider(caseData)
@@ -218,7 +216,6 @@ public class MiamPolicyUpgradeFileUploadService {
         return caseData;
     }
 
-    // Do we need to add ttl logic here?
     private CaseData renameDomesticAbuseDocumentWithoutConfidential(CaseData caseData, String systemAuthorisation) {
         if (hasMpuDomesticAbuseEvidence(caseData)) {
             List<Element<DomesticAbuseEvidenceDocument>> mpuConfidentialDomesticAbuseEvidenceDocument = new ArrayList<>();
