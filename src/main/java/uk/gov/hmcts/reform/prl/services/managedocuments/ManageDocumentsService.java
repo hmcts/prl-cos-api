@@ -109,6 +109,7 @@ public class ManageDocumentsService {
     private final LaunchDarklyClient launchDarklyClient;
     private final RoleAssignmentApi roleAssignmentApi;
     private final NotificationService notificationService;
+    private final MiamDocumentUploadService miamDocumentUploadService;
 
     public static final String CONFIDENTIAL = "Confidential_";
 
@@ -530,7 +531,7 @@ public class ManageDocumentsService {
             String sysUserToken = systemUserService.getSysUserToken();
             String serviceToken = authTokenGenerator.generate();
             // Extrapolate to new service. And add retry logic if.
-            Resource resource = caseDocumentClient.getDocumentBinary(sysUserToken, serviceToken,
+            Resource resource = miamDocumentUploadService.getMiamDocumentWithRetry(sysUserToken, serviceToken,
                                                                      documentId
             ).getBody();
 
