@@ -76,7 +76,8 @@ java:
     CCD_CASE_DOCS_AM_API: ${CCD_CASE_DOCS_AM_API}
     ACA_SERVICE_API_BASEURL: ${ACA_SERVICE_API_BASEURL}
     BUNDLE_URL: http://em-ccd-orchestrator-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
-    AM_ROLE_ASSIGNMENT_API_URL: http://am-role-assignment-service-aat.service.core-compute-aat.internal
+    AM_ROLE_ASSIGNMENT_API_URL: https://am-role-assignment-service-prl-ccd-definitions-pr-2970.preview.platform.hmcts.net
+    #AM_ROLE_ASSIGNMENT_API_URL: http://am-role-assignment-service-aat.service.core-compute-aat.internal
     AUTH_IDAM_CLIENT_BASEURL: https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net
     AUTH_PROVIDER_SERVICE_CLIENT_BASEURL: http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     DOCMOSIS_SERVICE_BASE_URL: https://docmosis.aat.platform.hmcts.net

@@ -41,6 +41,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
@@ -218,7 +223,6 @@ public class CourtFinderServiceTest {
             .childLiveWith(Collections.singletonList(LiveWithEnum.respondent))
             .build();
         Element<Child> wrappedChild = Element.<Child>builder().value(child).build();
-        ;
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
         CaseData caseData = CaseData.builder()
@@ -245,7 +249,6 @@ public class CourtFinderServiceTest {
             .address(respondentAddressWithoutPostCode)
             .build();
         Element<Child> wrappedChild = Element.<Child>builder().value(child).build();
-        ;
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondentNoPostcode).build();
         CaseData caseData = CaseData.builder()
@@ -290,7 +293,6 @@ public class CourtFinderServiceTest {
             .childLiveWith(Collections.singletonList(LiveWithEnum.respondent))
             .build();
         Element<Child> wrappedChild = Element.<Child>builder().value(child).build();
-        ;
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
         CaseData caseData = CaseData.builder()
@@ -330,7 +332,6 @@ public class CourtFinderServiceTest {
             .childLiveWith(Collections.singletonList(LiveWithEnum.respondent))
             .build();
         Element<Child> wrappedChild = Element.<Child>builder().value(child).build();
-        ;
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(inValidApplicant).build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(inValidRespondent).build();
         CaseData caseData = CaseData.builder()
@@ -373,7 +374,6 @@ public class CourtFinderServiceTest {
             .childLiveWith(Collections.singletonList(LiveWithEnum.applicant))
             .build();
         Element<Child> wrappedChild = Element.<Child>builder().value(child).build();
-        ;
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
 
@@ -392,7 +392,6 @@ public class CourtFinderServiceTest {
             .childLiveWith(Collections.singletonList(LiveWithEnum.applicant))
             .build();
         Element<Child> wrappedChild = Element.<Child>builder().value(child).build();
-        ;
         Element<PartyDetails> wrappedApplicant1 = Element.<PartyDetails>builder().value(applicant).build();
         Element<PartyDetails> wrappedApplicant2 = Element.<PartyDetails>builder().value(applicant2).build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
@@ -435,7 +434,6 @@ public class CourtFinderServiceTest {
             .childLiveWith(Collections.singletonList(LiveWithEnum.applicant))
             .build();
         Element<Child> wrappedChild = Element.<Child>builder().value(child).build();
-        ;
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
         CaseData caseData = CaseData.builder()
@@ -992,7 +990,6 @@ public class CourtFinderServiceTest {
         courtFinderService.getCorrectPartyPostcode(caseData);
     }
 
-
     @Test
     public void givenC100ApplicationsMatchedInExplanationReturnCourtEmailAddress() {
 
@@ -1030,5 +1027,21 @@ public class CourtFinderServiceTest {
             .address(Address.builder().postCode("G511TQ").build())
             .build();
         Assert.assertNotNull(courtFinderService.getPostCodeOtherPerson(partyDetails));
+    }
+
+    @Test
+    public void shouldCallGetCorrectPartyPostcodeV2WhenTaskListVersionIsV2() throws Exception {
+        CourtFinderService spyService = spy(new CourtFinderService(courtFinderApi));
+        CaseData caseData = CaseData.builder()
+            .taskListVersion("v3")
+            .build();
+
+        // Stub getCorrectPartyPostcodeV2 to avoid NotFoundException
+        doReturn("SOME_POSTCODE").when(spyService).getCorrectPartyPostcodeV2(any());
+
+        String result = spyService.getCorrectPartyPostcode(caseData);
+
+        verify(spyService, times(1)).getCorrectPartyPostcodeV2(caseData);
+        assertEquals("SOME_POSTCODE", result);
     }
 }
