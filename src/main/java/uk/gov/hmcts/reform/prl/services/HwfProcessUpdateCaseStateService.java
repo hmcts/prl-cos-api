@@ -88,9 +88,9 @@ public class HwfProcessUpdateCaseStateService {
                     log.info("PaymentGroupReferenceStatusResponse - " + serviceRequestReferenceStatusResponse.getServiceRequestStatus());
                     if (PaymentStatus.PAID.getDisplayedValue().equals(serviceRequestReferenceStatusResponse.getServiceRequestStatus())) {
                         Map<String, Object> caseDataUpdated = new HashMap<>();
-                        caseDataUpdated.put("caseStatus", 
-                            CaseStatus.builder().state(shouldUpdateCaseState(caseData) 
-                            ? State.SUBMITTED_PAID.getLabel() 
+                        caseDataUpdated.put("caseStatus",
+                            CaseStatus.builder().state(shouldUpdateCaseState(caseData)
+                            ? State.SUBMITTED_PAID.getLabel()
                             : caseData.getState().getLabel()).build());
                         if (caseData.getDateSubmitted() == null) {
                             ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
@@ -154,6 +154,10 @@ public class HwfProcessUpdateCaseStateService {
             int totalCases = searchCases.getTotal();
             int pages = (int) Math.ceil((double) totalCases / PAGE_SIZE);
             log.info("Search result size {}, split across {} pages", totalCases, pages);
+            if (totalCases == 0) {
+                return caseDetailsList;
+            }
+
             SearchResultResponse searchResultResponse = objectMapper.convertValue(
                 searchCases,
                 SearchResultResponse.class
