@@ -72,8 +72,9 @@ class HwfProcessUpdateCaseStateServiceTest {
         Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
         objectMapper = builder.createXmlMapper(false).build();
 
-        hwfProcessUpdateCaseStateService = new HwfProcessUpdateCaseStateService(systemUserService,
-                                                                                authTokenGenerator, coreCaseDataApi, paymentRequestService, allTabService, objectMapper);
+        hwfProcessUpdateCaseStateService = new HwfProcessUpdateCaseStateService(systemUserService, authTokenGenerator,
+                                                                                coreCaseDataApi, paymentRequestService,
+                                                                                allTabService, objectMapper);
     }
 
     @Test
