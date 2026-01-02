@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -64,6 +65,9 @@ public class HwfProcessUpdateCaseStateService {
     private final PaymentRequestService paymentRequestService;
     private final AllTabServiceImpl allTabService;
     private final ObjectMapper objectMapper;
+
+    @Value("${hwf-update-case-state-task.last-modified-days-threshold:3}")
+    private int lastModifiedDaysThreshold;
 
     private static final int PAGE_SIZE = 10;
 
@@ -224,7 +228,9 @@ public class HwfProcessUpdateCaseStateService {
             .build();
         Must mustFilter = Must.builder().stateFilter(stateFilter).build();
 
-        LastModified lastModified = LastModified.builder().gte(LocalDateTime.now().minusDays(3).toString()).build();
+        LastModified lastModified = LastModified.builder()
+            .gte(LocalDateTime.now().minusDays(lastModifiedDaysThreshold).toString())
+            .build();
         Range range = Range.builder().lastModified(lastModified).build();
         Filter filter = Filter.builder().range(range).build();
 
