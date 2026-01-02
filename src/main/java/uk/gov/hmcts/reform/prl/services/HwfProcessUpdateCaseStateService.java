@@ -63,7 +63,6 @@ public class HwfProcessUpdateCaseStateService {
     private final CoreCaseDataApi coreCaseDataApi;
     private final PaymentRequestService paymentRequestService;
     private final AllTabServiceImpl allTabService;
-
     private final ObjectMapper objectMapper;
 
     private static final int PAGE_SIZE = 10;
@@ -75,7 +74,7 @@ public class HwfProcessUpdateCaseStateService {
         List<CaseDetails> caseDetailsList = retrieveCasesWithHelpWithFeesInPendingState();
         if (isNotEmpty(caseDetailsList)) {
             caseDetailsList.forEach(caseDetails -> {
-                log.info("caseDetails caseId - " + caseDetails.getId());
+                log.info("caseDetails caseId - {}", caseDetails.getId());
                 CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class);
                 if (StringUtils.isNotEmpty(caseData.getHelpWithFeesNumber())
                     && StringUtils.isNotEmpty(caseData.getPaymentServiceRequestReferenceNumber())) {
@@ -85,7 +84,7 @@ public class HwfProcessUpdateCaseStateService {
                         systemUserService.getSysUserToken(),
                         caseData.getPaymentServiceRequestReferenceNumber()
                     );
-                    log.info("PaymentGroupReferenceStatusResponse - " + serviceRequestReferenceStatusResponse.getServiceRequestStatus());
+                    log.info("PaymentGroupReferenceStatusResponse {}", serviceRequestReferenceStatusResponse.getServiceRequestStatus());
                     if (PaymentStatus.PAID.getDisplayedValue().equals(serviceRequestReferenceStatusResponse.getServiceRequestStatus())) {
                         Map<String, Object> caseDataUpdated = new HashMap<>();
                         caseDataUpdated.put("caseStatus", CaseStatus.builder()
@@ -93,7 +92,7 @@ public class HwfProcessUpdateCaseStateService {
                             .build());
                         if (caseData.getDateSubmitted() == null) {
                             ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
-                            log.info("DateTimeFormatter Date is {} ", DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
+                            log.info("DateTimeFormatter Date is {}", DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
                             caseDataUpdated.put(DATE_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
                             caseDataUpdated.put(
                                 DATE_OF_SUBMISSION,
@@ -116,6 +115,7 @@ public class HwfProcessUpdateCaseStateService {
                             startAllTabsUpdateDataContent.eventRequestData(),
                             caseDataUpdated
                         );
+                        log.info("caseDetails caseId - {} updated", caseDetails.getId());
                     }
                 }
             });
