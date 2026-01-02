@@ -815,3 +815,7 @@ acro:
   search-case-type-id: PRLAPPS
   cronjob:
     enabled: false
+
+hwf-update-case-state-task:
+  last-modified-days-threshold: ${HWF_UPDATE_CASE_STATE_TASK_LAST_MODIFIED_DAYS_THRESHOLD:3}
+
