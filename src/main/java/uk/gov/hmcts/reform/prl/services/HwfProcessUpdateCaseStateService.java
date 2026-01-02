@@ -88,10 +88,13 @@ public class HwfProcessUpdateCaseStateService {
                     log.info("PaymentGroupReferenceStatusResponse - " + serviceRequestReferenceStatusResponse.getServiceRequestStatus());
                     if (PaymentStatus.PAID.getDisplayedValue().equals(serviceRequestReferenceStatusResponse.getServiceRequestStatus())) {
                         Map<String, Object> caseDataUpdated = new HashMap<>();
-                        caseDataUpdated.put("caseStatus", 
-                            CaseStatus.builder().state(shouldUpdateCaseState(caseData) 
-                            ? State.SUBMITTED_PAID.getLabel() 
-                            : caseData.getState().getLabel()).build());
+                        State currentState = State.fromValue(caseDetails.getState());
+                        caseDataUpdated.put("caseStatus", CaseStatus.builder()
+                            .state(shouldUpdateCaseState(currentState)
+                                       ? State.SUBMITTED_PAID.getLabel()
+                                       : currentState.getLabel()).build()
+                        );
+
                         if (caseData.getDateSubmitted() == null) {
                             ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
                             log.info("DateTimeFormatter Date is {} ", DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
@@ -154,6 +157,10 @@ public class HwfProcessUpdateCaseStateService {
             int totalCases = searchCases.getTotal();
             int pages = (int) Math.ceil((double) totalCases / PAGE_SIZE);
             log.info("Search result size {}, split across {} pages", totalCases, pages);
+            if (totalCases == 0) {
+                return caseDetailsList;
+            }
+
             SearchResultResponse searchResultResponse = objectMapper.convertValue(
                 searchCases,
                 SearchResultResponse.class
@@ -238,8 +245,7 @@ public class HwfProcessUpdateCaseStateService {
             .build();
     }
 
-    private boolean shouldUpdateCaseState(CaseData caseData) {
-        return caseData.getState() == State.SUBMITTED_NOT_PAID
-            || caseData.getState() == State.CASE_WITHDRAWN;
+    private boolean shouldUpdateCaseState(State state) {
+        return State.SUBMITTED_NOT_PAID.equals(state) || State.CASE_WITHDRAWN.equals(state);
     }
 }
