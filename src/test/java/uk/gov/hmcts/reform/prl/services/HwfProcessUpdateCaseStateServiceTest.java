@@ -139,7 +139,7 @@ class HwfProcessUpdateCaseStateServiceTest {
     }
 
     @Test
-    void givenCaseWithHwfNumberAndPaid_whenCheck_thenHandles() {
+    void givenCaseWithHwfNumberAndPaid_whenCheck_thenUpdates() {
         CaseData caseData = caseData("HWF-12345", "2025-1750002799132", "2025-12-31");
 
         SearchResult searchResult = SearchResult.builder()
