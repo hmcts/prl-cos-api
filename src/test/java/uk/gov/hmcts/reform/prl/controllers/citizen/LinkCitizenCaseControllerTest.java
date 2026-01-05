@@ -101,6 +101,16 @@ public class LinkCitizenCaseControllerTest {
         linkCitizenCaseController.linkCitizenToCase(authToken, s2sToken, accessCodeRequest);
     }
 
+    @Test(expected = RuntimeException.class)
+    public void testLinkCitizenToCaseThrowsExceptionIfEmailLinkedAlready() {
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(linkCitizenCaseService.linkCitizenToCase(authToken,
+                                                      accessCodeRequest.getCaseId(),
+                                                      accessCodeRequest.getAccessCode())).thenThrow(new RuntimeException());
+
+        linkCitizenCaseController.linkCitizenToCase(authToken, s2sToken, accessCodeRequest);
+    }
+
     @Test
     public void testLinkCitizenToCaseWithHearing() {
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
