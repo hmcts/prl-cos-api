@@ -63,15 +63,18 @@ public class LinkCitizenCaseService {
     public Optional<CaseDetails> linkCitizenToCase(String authorisation, String caseId, String accessCode) {
         Optional<CaseDetails> caseDetails = Optional.empty();
         CaseData dbCaseData = findAndGetCase(caseId);
+
         if (VALID.equalsIgnoreCase(findAccessCodeStatus(accessCode, dbCaseData))) {
-            UserDetails userDetails = idamClient.getUserDetails(authorisation);
-            if(isEmailAlreadyUsedInCase(dbCaseData, userDetails)){
-                throw (new RuntimeException(PrlAppsConstants.EMAIL_ALREADY_USED_IN_CASE_ENG)); // TODO, need to work out, how the runtime exception is propogated to UI
+
+            if (isEmailAlreadyUsedInCase(dbCaseData, userDetails)) {
+                throw (new RuntimeException(PrlAppsConstants.EMAIL_ALREADY_USED_IN_CASE_ENG));
             }
+
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
                 = allTabService.getStartUpdateForSpecificEvent(caseId, CaseEvent.LINK_CITIZEN.getValue());
-            CaseData caseData = startAllTabsUpdateDataContent.caseData();
 
+            CaseData caseData = startAllTabsUpdateDataContent.caseData();
+            UserDetails userDetails = idamClient.getUserDetails(authorisation);
             Map<String, Object> caseDataUpdated = getCaseDataMapToLinkCitizen(accessCode, caseData, userDetails);
 
             caseAccessApi.grantAccessToCase(
