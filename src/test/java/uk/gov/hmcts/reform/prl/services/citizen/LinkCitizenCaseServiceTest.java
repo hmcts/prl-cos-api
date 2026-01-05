@@ -80,6 +80,7 @@ public class LinkCitizenCaseServiceTest {
     CaseData caseData;
     CaseData caseDataAlreadyLinked;
     CaseData caseDataEmptyCaseInvites;
+    CaseData caseDataEmailAlreadyLinked;
 
     CaseData caseDataNullCaseInvites;
     UserDetails userDetails;
@@ -110,6 +111,16 @@ public class LinkCitizenCaseServiceTest {
                                                                          .hasLinked("Yes")
                                                                          .accessCode(accessCode).build()).build()))
             .build();
+
+        caseDataEmailAlreadyLinked = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .applicants(applicantList)
+            .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.Yes)
+                                                                         .partyId(testUuid)
+                                                                         .accessCode(accessCode)
+                                                                         .invitedUserId("123").build()).build()))
+            .build();
+
         caseDataEmptyCaseInvites = CaseData.builder()
             .applicants(applicantList)
             .caseInvites(new ArrayList<>())
@@ -138,6 +149,19 @@ public class LinkCitizenCaseServiceTest {
 
         Optional<CaseDetails> returnedCaseDetails = linkCitizenCaseService.linkCitizenToCase(authToken, caseId, accessCode);
         Assert.assertNotNull(returnedCaseDetails);
+    }
+
+    @Test
+    public void testLinkCitizenToCaseThrowsExceptionWhenEmailAlreadyLinked() {
+        when(systemUserService.getSysUserToken()).thenReturn(s2sToken);
+        when(ccdCoreCaseDataService.findCaseById(s2sToken, caseId)).thenReturn(caseDetails);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDataEmailAlreadyLinked);
+        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
+        RuntimeException rte = Assert.assertThrows(RuntimeException.class, () ->
+            linkCitizenCaseService.linkCitizenToCase(authToken, caseId, accessCode)
+        );
+
+        Assert.assertEquals(PrlAppsConstants.EMAIL_ALREADY_USED_IN_CASE_ENG, rte.getMessage());
     }
 
     @Test
