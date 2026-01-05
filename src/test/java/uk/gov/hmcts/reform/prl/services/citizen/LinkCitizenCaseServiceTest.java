@@ -157,6 +157,7 @@ public class LinkCitizenCaseServiceTest {
         when(ccdCoreCaseDataService.findCaseById(s2sToken, caseId)).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDataEmailAlreadyLinked);
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
+
         RuntimeException rte = Assert.assertThrows(RuntimeException.class, () ->
             linkCitizenCaseService.linkCitizenToCase(authToken, caseId, accessCode)
         );
