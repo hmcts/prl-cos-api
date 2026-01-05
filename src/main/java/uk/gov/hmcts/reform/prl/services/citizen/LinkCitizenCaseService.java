@@ -59,7 +59,6 @@ public class LinkCitizenCaseService {
     public static final String YES = "Yes";
     public static final String CASE_INVITES = "caseInvites";
 
-
     public Optional<CaseDetails> linkCitizenToCase(String authorisation, String caseId, String accessCode) {
         Optional<CaseDetails> caseDetails = Optional.empty();
         CaseData dbCaseData = findAndGetCase(caseId);
