@@ -709,6 +709,21 @@ task buildCCDXlsx(type: Exec) {
   commandLine './bin/cftlib/build-ccd-xlsx-definitions.sh'
 }
 
+bootWithCCDNoWA {
+  dependsOn(loadEnvSecrets)
+  dependsOn(buildCCDXlsx)
+  doFirst() {
+    project.file('./.aat-env').readLines().each() {
+      def index = it.indexOf("=")
+      def key = it.substring(0, index)
+      def value = it.substring(index + 1)
+      environment key, value
+    }
+  }
+
+  environment("spring.profiles.active", "local")
+}
+
 bootWithCCD {
   dependsOn(loadEnvSecrets)
   dependsOn(buildCCDXlsx)
