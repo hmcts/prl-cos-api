@@ -1741,12 +1741,10 @@ public class ServiceOfApplicationService {
 
         //fill in the organisation details for respondents where assign case expects to see it
         if (caseData.getRespondents() != null) {
-            List<Element<PartyDetails>> respondents = caseData.getRespondents();
 
             caseDataMap = respondentOrgPolicyService.populateRespondentOrganisations(
                 caseDataMap,
-                respondents,
-                caseData.getCaseTypeOfApplication()
+                caseData
             );
 
         }
@@ -1843,8 +1841,6 @@ public class ServiceOfApplicationService {
             //TEMP SOLUTION TO GET ACCESS CODES - GENERATE AND SEND ACCESS CODE TO APPLICANTS & RESPONDENTS OVER EMAIL
         }
 
-        // respondent sols access
-        caseDataMap = assignRespondentSolicitorsAccess(authorisation, caseDataMap, caseData);
 
         if (isRespondentDetailsConfidential(caseData) || CaseUtils.isC8Present(caseData)) {
             return processConfidentialDetailsSoa(authorisation, caseDataMap, caseData, startAllTabsUpdateDataContent);
@@ -1892,6 +1888,9 @@ public class ServiceOfApplicationService {
                 updatedCaseDataContent.eventRequestData(),
                 caseDataMap
         );
+        // respondent sols access
+        caseDataMap = assignRespondentSolicitorsAccess(authorisation, caseDataMap, caseData);
+
         return ok(SubmittedCallbackResponse.builder()
                       .confirmationHeader(confirmationBanner.get(CONFIRMATION_HEADER))
                       .confirmationBody(confirmationBody).build());
@@ -1968,6 +1967,9 @@ public class ServiceOfApplicationService {
                                                 manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId()
                                                     + SERVICE_OF_APPLICATION_ENDPOINT);
         log.info("Confidential details are present, case needs to be reviewed and served later");
+        // respondent sols access
+        caseDataMap = assignRespondentSolicitorsAccess(authorisation, caseDataMap, caseData);
+
         return ok(SubmittedCallbackResponse.builder()
                       .confirmationHeader(CONFIDENTIAL_CONFIRMATION_HEADER)
                       .confirmationBody(confirmationBody).build());
@@ -4336,10 +4338,12 @@ public class ServiceOfApplicationService {
             Optional<String> userIdOpt = organisationService.findUserByEmail(solicitorEmail);
 
             String caseId = String.valueOf(caseData.getId());
+
             if (isSolicitorEmailValid(solicitorEmail, caseId, i)
                 && isSolicitorOrgIdValid(solicitorOrgId, caseId)) {
 
                 if (userIdOpt.isPresent()) {
+
                     String assigneeUserId = userIdOpt.get();
                     assignCaseAccessService.assignCaseAccessToUserWithRole(
                         caseId,

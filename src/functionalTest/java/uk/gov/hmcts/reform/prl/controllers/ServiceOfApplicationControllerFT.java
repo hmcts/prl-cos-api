@@ -11,7 +11,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -37,13 +36,14 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.ADDRESS_MISSED_FOR_OTHER_PARTIES;
 
@@ -66,13 +66,9 @@ public class ServiceOfApplicationControllerFT {
 
     private static final String VALID_REQUEST_BODY_WITH_OUT_C6A_ORDERS = "requests/soa-with-out-c6a-orders.json";
 
-    private static final String FL401_VALID_REQUEST_BODY_PERSONAL_SERVICE_CA_CB = "requests/fl401-service-of-application-personal-service-ca.json";
-
     private static final String FL401_VALID_REQUEST_BODY_PERSONAL_SERVICE_LR = "requests/fl401-service-of-application-personal-service-lr.json";
 
     private static final String VALID_CAFCASS_REQUEST_JSON = "requests/cafcass-cymru-send-email-request.json";
-    private static final String VALID_CAFCASS_REQUEST_JSON_FL401 = "requests/soa-fl401-cafcass-cymru-send-email-request.json";
-
 
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;
@@ -272,9 +268,9 @@ public class ServiceOfApplicationControllerFT {
         EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder()
             .servedParty("ApplicantSolicitor")
             .build();
-        when(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(Mockito.anyString(), Mockito.anyString(),
-                                                                                    Mockito.any(), Mockito.any(), Mockito.any(),
-                                                                                    Mockito.anyString()))
+        when(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(anyString(), anyString(),
+                                                                                    any(), any(), any(),
+                                                                                    anyString()))
             .thenReturn(emailNotificationDetails);
         MvcResult res = mockMvc.perform(post("/service-of-application/submitted")
                                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
@@ -352,7 +348,7 @@ public class ServiceOfApplicationControllerFT {
             .contentType("application/json")
             .post("/service-of-application/about-to-submit")
             .then()
-            .body("data.isApplicantRepresented", equalTo(NO))
+            .body("data.isApplicantRepresented", equalTo(EMPTY_STRING))
             .extract().as(AboutToStartOrSubmitCallbackResponse.class);
 
     }
@@ -376,7 +372,7 @@ public class ServiceOfApplicationControllerFT {
             .contentType("application/json")
             .post("/service-of-application/about-to-submit")
             .then()
-            .body("data.isApplicantRepresented", equalTo(NO))
+            .body("data.isApplicantRepresented", equalTo("No"))
             .extract().as(AboutToStartOrSubmitCallbackResponse.class);
 
     }
@@ -385,10 +381,11 @@ public class ServiceOfApplicationControllerFT {
     /**
      * Service of Application journey.
      * When Soa being done for second time onwards for citizen created case
-     * Then isApplicantRepresented should be No
+     * Then isApplicantRepresented should be an empty string value.
      */
     @Test
     public void givenRequestWithCaseData_Response_isApplicantRepresented_citizen_secondTimeOnwards() throws Exception {
+
         String requestBody = ResourceLoader.loadJson(BODY_FOR_CITIZEN_CREATED_CASE_FROM_SECOND_TIME);
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
@@ -398,7 +395,7 @@ public class ServiceOfApplicationControllerFT {
             .contentType("application/json")
             .post("/service-of-application/about-to-submit")
             .then()
-            .body("data.isApplicantRepresented", equalTo(NO))
+            .body("data.isApplicantRepresented", equalTo(EMPTY_STRING))
             .extract().as(AboutToStartOrSubmitCallbackResponse.class);
 
     }
