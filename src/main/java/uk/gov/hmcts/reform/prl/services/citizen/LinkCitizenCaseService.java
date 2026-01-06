@@ -64,7 +64,7 @@ public class LinkCitizenCaseService {
         CaseData dbCaseData = findAndGetCase(caseId);
 
         if (VALID.equalsIgnoreCase(findAccessCodeStatus(accessCode, dbCaseData))) {
-
+            UserDetails userDetails = idamClient.getUserDetails(authorisation);
             if (isEmailAlreadyUsedInCase(dbCaseData, userDetails)) {
                 throw (new RuntimeException(PrlAppsConstants.EMAIL_ALREADY_USED_IN_CASE_ENG));
             }
@@ -73,7 +73,7 @@ public class LinkCitizenCaseService {
                 = allTabService.getStartUpdateForSpecificEvent(caseId, CaseEvent.LINK_CITIZEN.getValue());
 
             CaseData caseData = startAllTabsUpdateDataContent.caseData();
-            UserDetails userDetails = idamClient.getUserDetails(authorisation);
+
             Map<String, Object> caseDataUpdated = getCaseDataMapToLinkCitizen(accessCode, caseData, userDetails);
 
             caseAccessApi.grantAccessToCase(
