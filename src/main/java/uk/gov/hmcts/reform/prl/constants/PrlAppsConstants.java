@@ -1147,5 +1147,5 @@ public class PrlAppsConstants {
     public static final String CAFCASS_DATE_TIME = "cafcassDateTime";
 
     public static final String EMAIL_ALREADY_USED_IN_CASE_ENG = "The email address used has already been linked to an account, please register with a different email and try the access code again.";
-    public static final String EMAIL_ALREADY_USED_IN_CASE_WEL = "TODO Get the Welsh translation from business";//TODO change to appropriate Welsh message
+    public static final String EMAIL_ALREADY_USED_IN_CASE_WEL = "TODO Mae'r cyfeiriad e-bost a ddefnyddiwyd eisoes wedi'i gysylltu â chyfrif, cofrestrwch gydag e-bost gwahanol a rhowch gynnig arall ar y cod mynediad.";//TODO change to appropriate Welsh message
 }
