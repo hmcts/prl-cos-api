@@ -1,10 +1,9 @@
 package uk.gov.hmcts.reform.prl.services.managedocuments;
 
-import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
-import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
@@ -23,41 +22,27 @@ public class MiamDocumentRetryService {
 
     @Retryable(
         retryFor = {
-            ConcurrencyException.class,
-            ForbiddenException.class
-        },
+            feign.FeignException.Conflict.class},
         maxAttempts = 4,
         backoff = @Backoff(
             delay = 300,
             maxDelay = 2000,
             multiplier = 2)
     )
+
     public ResponseEntity<Resource> getMiamDocumentWithRetry(String authorisation, String serviceAuth, UUID documentId) {
-        try {
-            return caseDocumentClient.getDocumentBinary(authorisation, serviceAuth, documentId);
-        } catch (FeignException.Forbidden fex) {
-            throw new ForbiddenException(
-                "Access denied when trying to fetch MIAM document with id: "
-                    + documentId, fex
-            );
-        } catch (FeignException.Conflict fex) {
-            throw new ConcurrencyException(
-                "Concurrency issue when trying to fetch MIAM document with id:  "
-                    + documentId, fex
-            );
-        }
+        log.info("Getting MIAM document id: {} with retry", documentId);
+        return caseDocumentClient.getDocumentBinary(authorisation, serviceAuth, documentId);
     }
 
     @Recover
-    public ResponseEntity<Resource> recover(Exception ex, String authorisation, String serviceAuth, UUID documentId) {
-        log.error("Failed to fetch MIAM document with id: {} after 4 attempts. Auth: {}, ServiceAuth: {}",
-                  documentId,
-                  authorisation != null ? "PRESENT" : "MISSING",
-                  serviceAuth != null ? "PRESENT" : "MISSING",
-                  ex);
-        throw new RuntimeException(
-            "Failed to fetch MIAM document with id: " + documentId + " after multiple attempts.",
-            ex
-        );
+    public ResponseEntity<Resource> recover(feign.FeignException.Conflict ex,
+                                            String authorisation,
+                                            String serviceAuth,
+                                            UUID documentId) {
+
+
+        log.warn("Exhausted retries for MIAM document id: {} due to 409 Conflict: {}", documentId, ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).build();
     }
 }

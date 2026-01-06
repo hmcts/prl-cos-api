@@ -8,9 +8,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -48,6 +50,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -530,12 +533,32 @@ public class ManageDocumentsService {
         try {
             String sysUserToken = systemUserService.getSysUserToken();
             String serviceToken = authTokenGenerator.generate();
-            // Extrapolate to new service. And add retry logic if.
-            Resource resource = miamDocumentRetryService.getMiamDocumentWithRetry(sysUserToken, serviceToken,
-                                                                                  documentId
-            ).getBody();
 
-            docData = IOUtils.toByteArray(resource.getInputStream());
+            ResponseEntity<Resource> resp = miamDocumentRetryService
+                .getMiamDocumentWithRetry(sysUserToken, serviceToken, documentId);
+
+            HttpStatusCode httpStatusCode = resp.getStatusCode();
+
+            if (httpStatusCode == HttpStatus.CONFLICT) {
+                log.warn("409 concurrency after retries for docId: {}; skipping upload.", documentId);
+                return null;
+            }
+
+            if (!httpStatusCode.is2xxSuccessful()) {
+                throw new IllegalStateException("Unexpected status "
+                                                    + httpStatusCode
+                                                    + " when fetching MIAM document with id=" + documentId);
+            }
+
+            Resource resource = java.util.Objects.requireNonNull(
+                resp.getBody(), "Empty response body for docId: " + documentId);
+
+            try (var in = resource.getInputStream()) {
+                docData = in.readAllBytes();
+            } catch (IOException ex) {
+                throw new IllegalStateException("Failed to fetch MIAM document with id: " + documentId, ex);
+            }
+
             UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
                 sysUserToken,
                 serviceToken,
@@ -549,7 +572,14 @@ public class ManageDocumentsService {
                         docData
                     ))
             );
-            newUploadedDocument = Document.buildFromDocument(uploadResponse.getDocuments().get(0));
+
+            if (uploadResponse == null
+                || uploadResponse.getDocuments() == null
+                || uploadResponse.getDocuments().isEmpty()) {
+                throw new IllegalStateException("Upload returned no documents for id: " + documentId);
+            }
+
+            newUploadedDocument = Document.buildFromDocument(uploadResponse.getDocuments().getFirst());
         } catch (Exception ex) {
             log.error("Failed to upload new document {}", ex.getMessage(), ex);
         }
