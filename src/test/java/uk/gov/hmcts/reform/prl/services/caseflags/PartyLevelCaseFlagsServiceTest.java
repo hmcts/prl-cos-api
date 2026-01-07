@@ -850,6 +850,36 @@ class PartyLevelCaseFlagsServiceTest {
     }
 
     @Test
+    void givenApplicantNameChangesWhenAmendCaseFlagsThenFlagUpdatedForFL401Case() {
+        CaseData caseDataBefore = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(createUnrepresentedParty("oldFirstName", "oldLastName"))
+            .allPartyFlags(AllPartyFlags.builder()
+                .daApplicantExternalFlags(createFlags("daApplicant1", "Applicant 1", VISIBILITY_EXTERNAL))
+                .daApplicantInternalFlags(createFlags("daApplicant1", "Applicant 1", VISIBILITY_INTERNAL))
+                .build())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(createUnrepresentedParty("newFirstName", "newLastName"))
+            .allPartyFlags(AllPartyFlags.builder()
+                .daApplicantExternalFlags(createFlags("daApplicant1", "Applicant 1", VISIBILITY_EXTERNAL))
+                .daApplicantInternalFlags(createFlags("daApplicant1", "Applicant 1", VISIBILITY_INTERNAL))
+                .build())
+            .build();
+
+        Map<String, Object> caseDataMapBefore = objectMapper.convertValue(caseDataBefore, new TypeReference<>() {});
+        Map<String, Object> caseDataMap = objectMapper.convertValue(caseData, new TypeReference<>() {});
+
+        partyLevelCaseFlagsService.amendCaseFlags(caseDataMapBefore, caseDataMap, AMEND_APPLICANTS_DETAILS.getValue());
+
+        verifyFlags(caseDataMap.get("daApplicantExternalFlags"), "newFirstName newLastName", "daApplicant1",
+                    "Applicant 1", VISIBILITY_EXTERNAL);
+        verifyFlags(caseDataMap.get("daApplicantInternalFlags"), "newFirstName newLastName", "daApplicant1",
+                    "Applicant 1", VISIBILITY_INTERNAL);
+    }
+
+    @Test
     void givenRespondentNameChangesWhenAmendCaseFlagsThenFlagUpdated() {
         CaseData caseDataBefore = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
