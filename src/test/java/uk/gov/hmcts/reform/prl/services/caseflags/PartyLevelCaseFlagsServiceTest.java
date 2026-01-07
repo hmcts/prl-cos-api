@@ -1504,6 +1504,10 @@ class PartyLevelCaseFlagsServiceTest {
         Flags caApplicant3InternalFlags = generateCaseFlag("Applicant 3", "caApplicant3", flagDetail);
         Flags caRespondent1ExternalFlags = generateCaseFlag("Applicant 1", "caApplicant1", flagDetail);
         Flags caRespondent1InternalFlags = generateCaseFlag("Applicant 1", "caApplicant1", flagDetail);
+        Flags daApplicantExternalFlags = generateCaseFlag("Applicant 1", "daApplicant1", flagDetail);
+        Flags daApplicantInternalFlags = generateCaseFlag("Applicant 1", "daApplicant1", flagDetail);
+        Flags daRespondentExternalFlags = generateCaseFlag("Applicant 1", "daApplicant1", flagDetail);
+        Flags daRespondentInternalFlags = generateCaseFlag("Applicant 1", "daApplicant1", flagDetail);
         return AllPartyFlags.builder()
             .caApplicant1InternalFlags(caApplicant1InternalFlags)
             .caApplicant1ExternalFlags(caApplicant1ExternalFlags)
@@ -1531,6 +1535,22 @@ class PartyLevelCaseFlagsServiceTest {
             .caApplicantBarrister3InternalFlags(Flags.builder().build())
             .caRespondentBarrister1ExternalFlags(Flags.builder().build())
             .caRespondentBarrister1InternalFlags(Flags.builder().build())
+
+            .daApplicantExternalFlags(daApplicantExternalFlags)
+            .daApplicantInternalFlags(daApplicantInternalFlags)
+            .daRespondentExternalFlags(daRespondentExternalFlags)
+            .daRespondentInternalFlags(daRespondentInternalFlags)
+
+            .daApplicantSolicitorExternalFlags(Flags.builder().build())
+            .daApplicantSolicitorInternalFlags(Flags.builder().build())
+            .daRespondentSolicitorExternalFlags(Flags.builder().build())
+            .daRespondentSolicitorInternalFlags(Flags.builder().build())
+
+            .daApplicantBarristerExternalFlags(Flags.builder().build())
+            .daApplicantBarristerInternalFlags(Flags.builder().build())
+            .daRespondentSolicitorExternalFlags(Flags.builder().build())
+            .daRespondentSolicitorInternalFlags(Flags.builder().build())
+
             .build();
     }
 
