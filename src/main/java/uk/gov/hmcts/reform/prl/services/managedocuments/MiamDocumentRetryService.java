@@ -6,9 +6,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.retry.RetryContext;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.retry.support.RetrySynchronizationManager;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 
@@ -31,8 +33,15 @@ public class MiamDocumentRetryService {
             multiplier = 2)
     )
 
-    public ResponseEntity<Resource> getMiamDocumentWithRetry(String authorisation, String serviceAuth, UUID documentId) {
-        log.info("Getting MIAM document id: {} with retry", documentId);
+    public ResponseEntity<Resource> getMiamDocumentWithRetry(String authorisation,
+                                                             String serviceAuth,
+                                                             UUID documentId) {
+
+        var retryContext = RetrySynchronizationManager.getContext();
+        int attempt = (retryContext != null ? retryContext.getRetryCount() : 0) + 1;
+
+        log.info("Getting MIAM document id: {} with retry attempt {}", documentId, attempt);
+
         return caseDocumentClient.getDocumentBinary(authorisation, serviceAuth, documentId);
     }
 

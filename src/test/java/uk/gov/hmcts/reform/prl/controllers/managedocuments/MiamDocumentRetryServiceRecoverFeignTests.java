@@ -153,7 +153,6 @@ class MiamDocumentRetryServiceRecoverFeignTests {
         assertThat(res.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         assertNoBody(res);
 
-
         var last = logAppender.getEvents().getLast();
         assertThat(last.getLevel()).isEqualTo(Level.ERROR);
         assertThat(last.getFormattedMessage())
@@ -172,7 +171,6 @@ class MiamDocumentRetryServiceRecoverFeignTests {
         assertThat(last.getFormattedMessage())
             .contains("HTTP 429");
     }
-
 
     // -----------------------
     // Helpers

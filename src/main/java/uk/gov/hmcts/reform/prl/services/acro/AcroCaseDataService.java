@@ -61,11 +61,6 @@ public class AcroCaseDataService {
     private final HearingService hearingService;
     private final AcroDatesService acroDatesService;
 
-    @Retryable(
-        retryFor = {Exception.class},
-        maxAttempts = 4,
-        backoff = @Backoff(delay = 2000, multiplier = 2)
-    )
     public AcroResponse getNonMolestationData(String authorisation) throws IOException {
 
         AcroResponse acroResponse;

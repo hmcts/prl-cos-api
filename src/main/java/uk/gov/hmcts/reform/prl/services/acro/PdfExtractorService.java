@@ -24,11 +24,6 @@ public class PdfExtractorService {
     private final AuthTokenGenerator authTokenGenerator;
     private final CaseDocumentClient caseDocumentClient;
 
-
-    @Retryable(
-            retryFor = {Exception.class},
-            backoff = @Backoff(delay = 1000, multiplier = 2)
-    )
     public File downloadPdf(String fileName, String caseId, Document document, String sysUserToken) {
         if (document == null || document.getDocumentBinaryUrl() == null) {
             log.info("Skipping download for case {} - document is null or has no URL", caseId);

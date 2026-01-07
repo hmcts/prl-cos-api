@@ -6,6 +6,7 @@ import feign.FeignException;
 import feign.Request;
 import feign.RequestTemplate;
 import feign.Response;
+import lombok.Getter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,7 +41,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = MiamDocumentRetryServiceTest.TestConfig.class)
 class MiamDocumentRetryServiceTest {
@@ -62,16 +62,13 @@ class MiamDocumentRetryServiceTest {
         }
     }
 
+    @Getter
     static class CapturingSleeper implements Sleeper {
         private final List<Long> delays = new CopyOnWriteArrayList<>();
 
         @Override
         public void sleep(long millis) {
             delays.add(millis);
-        }
-
-        public List<Long> getDelays() {
-            return delays;
         }
 
         public void clear() {
