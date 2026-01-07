@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.managedocuments;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
@@ -42,7 +43,40 @@ public class MiamDocumentRetryService {
                                             UUID documentId) {
 
 
-        log.warn("Exhausted retries for MIAM document id: {} due to 409 Conflict: {}", documentId, ex.getMessage());
+        log.warn("Exhausted {} retries for MIAM document id: {} "
+                     + "due to 409 Conflict. Last error: {}", 4, documentId, ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).build();
+    }
+
+    @Recover
+    public ResponseEntity<Resource> recover(
+        FeignException ex,
+        String authorisation,
+        String serviceAuth,
+        UUID documentId
+    ) {
+
+        HttpStatus status = HttpStatus.resolve(ex.status());
+        if (status == null) {
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+
+        log.error("Upstream error for MIAM document id {}: {} (HTTP {})",
+                  documentId, ex.getMessage(), ex.status(), ex);
+
+        return ResponseEntity.status(status).build();
+    }
+
+    @Recover
+    public ResponseEntity<Resource> recover(
+        Throwable ex,
+        String authorisation,
+        String serviceAuth,
+        UUID documentId) {
+
+        log.error("Unexpected error for MIAM document id {}: {}",
+                  documentId, ex.getMessage(), ex);
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 }
