@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.court.ServiceArea;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -43,6 +45,8 @@ public class CourtFinderService {
     public static final String C_100_APPLICATIONS = "C100 applications";
     public static final String CHILD = "child";
     private final CourtFinderApi courtFinderApi;
+    private final OsCourtFinderService osCourtFinderService;
+    private final FeatureToggleService featureToggleService;
 
     public Court getNearestFamilyCourt(CaseData caseData) throws NotFoundException {
         ServiceArea serviceArea = null;
@@ -51,25 +55,49 @@ public class CourtFinderService {
                 serviceArea = courtFinderApi
                   .findClosestDomesticAbuseCourtByPostCode(
                       getPostcodeFromWrappedParty(caseData.getApplicantsFL401()));
+                if (serviceArea != null && !serviceArea.getCourts().isEmpty()) {
+                    return getCourtDetails(serviceArea.getCourts()
+                                               .get(0)
+                                               .getCourtSlug());
+                }
             } else {
-                serviceArea = courtFinderApi
-                    .findClosestChildArrangementsCourtByPostcode(
-                            nonNull(caseData.getC100RebuildData())
-                                    && nonNull(caseData.getC100RebuildData().getC100RebuildChildPostCode())
-                            ? caseData.getC100RebuildData().getC100RebuildChildPostCode()
-                            : getCorrectPartyPostcode(caseData));
+                return getC100NearestFamilyCourt(caseData);
+
             }
         } catch (Exception e) {
             log.info("CourtFinderService.getNearestFamilyCourt() method is throwing exception : {}",e);
         }
-        if (serviceArea != null
-            && !serviceArea.getCourts().isEmpty()) {
-            return getCourtDetails(serviceArea.getCourts()
-                                       .get(0)
-                                       .getCourtSlug());
+        return null;
+    }
+
+    private Court getC100NearestFamilyCourt(CaseData caseData) throws NotFoundException {
+        Court court = null;
+        if (featureToggleService.isOsCourtLookupFeatureEnabled()) {
+            court = osCourtFinderService.getC100NearestFamilyCourt(
+                getPostcode(caseData));
         } else {
-            return null;
+            ServiceArea serviceArea = courtFinderApi
+                .findClosestChildArrangementsCourtByPostcode(
+                    getPostcode(caseData));
+            if (serviceArea != null && !serviceArea.getCourts().isEmpty()) {
+                court = getCourtDetails(serviceArea.getCourts()
+                                           .get(0)
+                                           .getCourtSlug());
+            }
         }
+        return court;
+    }
+
+    private String getPostcode(CaseData caseData) throws NotFoundException {
+        return nonNull(caseData.getC100RebuildData())
+            && nonNull(caseData.getC100RebuildData().getC100RebuildChildPostCode())
+            ? caseData.getC100RebuildData().getC100RebuildChildPostCode()
+            : getCorrectPartyPostcode(caseData);
+    }
+
+    public ImmutablePair<CourtVenue, Court> getC100NearestFamilyCourtAndVenue(CaseData caseData) throws NotFoundException {
+        return osCourtFinderService.getC100NearestFamilyCourtAndVenue(
+            getPostcode(caseData));
     }
 
     public Court getCourtDetails(String courtSlug) {
@@ -87,7 +115,7 @@ public class CourtFinderService {
             throw new NotFoundException("No child details found");
         }
 
-        Optional<List<Element<PartyDetails>>> othersPerson = Optional.ofNullable(caseData.getOtherPartyInTheCaseRevised());
+        Optional<List<Element<PartyDetails>>> othersPerson = ofNullable(caseData.getOtherPartyInTheCaseRevised());
 
         Optional<PartyDetails> partyDetails = othersPerson.flatMap(elements -> elements.stream()
                 .map(Element::getValue)
@@ -104,8 +132,8 @@ public class CourtFinderService {
                 .stream()
                 .map(Element::getValue)
                 .findFirst();
-        Optional<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelation = Optional
-                .ofNullable(caseData.getRelations().getChildAndOtherPeopleRelations())
+        Optional<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelation = ofNullable(caseData.getRelations()
+                                                                                                 .getChildAndOtherPeopleRelations())
                 .isPresent() ? caseData.getRelations().getChildAndOtherPeopleRelations()
                 .stream()
                 .map(Element::getValue)
