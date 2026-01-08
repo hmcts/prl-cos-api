@@ -45,11 +45,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
@@ -1039,7 +1039,8 @@ public class CourtFinderServiceTest {
 
     @Test
     public void shouldCallGetCorrectPartyPostcodeV2WhenTaskListVersionIsV2() throws Exception {
-        CourtFinderService spyService = spy(new CourtFinderService(courtFinderApi));
+        CourtFinderService spyService = spy(new CourtFinderService(courtFinderApi,
+                                                                   osCourtFinderService, featureToggleService));
         CaseData caseData = CaseData.builder()
             .taskListVersion("v3")
             .build();
@@ -1051,6 +1052,9 @@ public class CourtFinderServiceTest {
 
         verify(spyService, times(1)).getCorrectPartyPostcodeV2(caseData);
         assertEquals("SOME_POSTCODE", result);
+    }
+
+    @Test
     public void testGetC100NearestFamilyCourtAndVenue() throws NotFoundException {
 
         CaseData updatedCaseData = CaseData.builder()
