@@ -931,7 +931,6 @@ public class CitizenPartyDetailsMapper {
                 "applicantCaseName",
                 buildApplicantAndRespondentForCaseName(citizenUpdatedCaseData.getC100RebuildData())
             );
-
             caseDataMapToBeUpdated.put(
                 "miamDocumentsCopy",
                 getMiamDocuments(citizenUpdatedCaseData.getC100RebuildData().getC100RebuildMaim()));
@@ -941,15 +940,17 @@ public class CitizenPartyDetailsMapper {
 
     private List<Element<Document>> getMiamDocuments(String jsonData) throws JsonProcessingException {
         List<Element<Document>> miamDocuments = new ArrayList<>();
-        C100RebuildMiamElements miamDataObject = objectMapper.readValue(jsonData, C100RebuildMiamElements.class);
-        if (isNotEmpty(miamDataObject.getMiamDomesticAbuseEvidenceDocs())) {
-            miamDocuments.addAll(wrapElements(miamDataObject.getMiamDomesticAbuseEvidenceDocs()));
-        }
-        if (isNotEmpty(miamDataObject.getMiamPreviousAttendanceEvidenceDoc())) {
-            miamDocuments.add(element(miamDataObject.getMiamPreviousAttendanceEvidenceDoc()));
-        }
-        if (isNotEmpty(miamDataObject.getMiamCertificate())) {
-            miamDocuments.add(element(buildDocument(miamDataObject.getMiamCertificate())));
+        if (jsonData != null) {
+            C100RebuildMiamElements miamDataObject = objectMapper.readValue(jsonData, C100RebuildMiamElements.class);
+            if (isNotEmpty(miamDataObject.getMiamDomesticAbuseEvidenceDocs())) {
+                miamDocuments.addAll(wrapElements(miamDataObject.getMiamDomesticAbuseEvidenceDocs()));
+            }
+            if (isNotEmpty(miamDataObject.getMiamPreviousAttendanceEvidenceDoc())) {
+                miamDocuments.add(element(miamDataObject.getMiamPreviousAttendanceEvidenceDoc()));
+            }
+            if (isNotEmpty(miamDataObject.getMiamCertificate())) {
+                miamDocuments.add(element(buildDocument(miamDataObject.getMiamCertificate())));
+            }
         }
 
         return miamDocuments;

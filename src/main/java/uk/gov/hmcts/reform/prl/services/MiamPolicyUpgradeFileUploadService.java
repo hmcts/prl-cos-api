@@ -10,7 +10,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
-import uk.gov.hmcts.reform.ccd.document.am.model.DocumentTTLRequest;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -20,9 +19,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -72,9 +68,8 @@ public class MiamPolicyUpgradeFileUploadService {
                 CONFIDENTIAL)) {
                 Document originalMpuDocFromResolutionProvider = caseData.getMiamPolicyUpgradeDetails()
                     .getMpuDocFromDisputeResolutionProvider();
-                String nonConfMpuDocId = DocumentUtils.getDocumentId(originalMpuDocFromResolutionProvider.getDocumentUrl());
-                log.info("Renaming mpu document from resolution provider to confidential with id: {}", nonConfMpuDocId);
-                refreshTtlValue(nonConfMpuDocId, systemAuthorisation);
+                log.info("Renaming mpu document from resolution provider to confidential with id: {}",
+                         DocumentUtils.getDocumentId(originalMpuDocFromResolutionProvider.getDocumentUrl()));
                 Document mpuDocFromDisputeResolutionProvider = manageDocumentsService
                     .renameAndReuploadFileToBeConfidential(originalMpuDocFromResolutionProvider);
                 caseData = caseData.toBuilder()
@@ -88,9 +83,8 @@ public class MiamPolicyUpgradeFileUploadService {
                 && !caseData.getMiamPolicyUpgradeDetails().getMpuCertificateByMediator().getDocumentFileName().startsWith(
                 CONFIDENTIAL)) {
                 Document originalMediatorDoc = caseData.getMiamPolicyUpgradeDetails().getMpuCertificateByMediator();
-                String mpuCertNonConfDoc = DocumentUtils.getDocumentId(originalMediatorDoc.getDocumentUrl());
-                log.info("Renaming mpu certificate from mediator to confidential with id: {}", mpuCertNonConfDoc);
-                refreshTtlValue(mpuCertNonConfDoc, systemAuthorisation);
+                log.info("Renaming mpu certificate from mediator to confidential with id: {}",
+                         DocumentUtils.getDocumentId(originalMediatorDoc.getDocumentUrl()));
                 Document mpuCertificateByMediator = manageDocumentsService.renameAndReuploadFileToBeConfidential(
                     originalMediatorDoc
                 );
