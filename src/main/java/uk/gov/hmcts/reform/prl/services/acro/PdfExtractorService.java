@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
@@ -22,6 +24,11 @@ public class PdfExtractorService {
     private final AuthTokenGenerator authTokenGenerator;
     private final CaseDocumentClient caseDocumentClient;
 
+
+    @Retryable(
+            retryFor = {Exception.class},
+            backoff = @Backoff(delay = 1000, multiplier = 2)
+    )
     public File downloadPdf(String fileName, String caseId, Document document, String sysUserToken) {
         if (document == null || document.getDocumentBinaryUrl() == null) {
             log.info("Skipping download for case {} - document is null or has no URL", caseId);

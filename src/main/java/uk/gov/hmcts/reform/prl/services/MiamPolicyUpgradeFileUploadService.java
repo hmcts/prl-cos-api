@@ -128,14 +128,12 @@ public class MiamPolicyUpgradeFileUploadService {
                 .stream().forEach(domesticAbuseEvidenceDocument -> {
                     Document domesticAbuseDocument = domesticAbuseEvidenceDocument.getValue().getDomesticAbuseDocument();
                     if (!domesticAbuseDocument.getDocumentFileName().startsWith(CONFIDENTIAL)) {
-                        String nonConfDocId = DocumentUtils.getDocumentId(domesticAbuseDocument.getDocumentUrl());
-                        log.info("Renaming domestic abuse document to confidential with id: {}", nonConfDocId);
-                        refreshTtlValue(nonConfDocId, systemAuthorisation);
+                        log.info("Renaming domestic abuse document to confidential with id: {}",
+                                 DocumentUtils.getDocumentId(domesticAbuseDocument.getDocumentUrl()));
                         domesticAbuseDocument = manageDocumentsService.renameAndReuploadFileToBeConfidential(
                             domesticAbuseDocument);
                     }
-                    mpuConfidentialDomesticAbuseEvidenceDocument.add(element(domesticAbuseEvidenceDocument.getId(),
-                                                                             DomesticAbuseEvidenceDocument.builder().domesticAbuseDocument(
+                    mpuConfidentialDomesticAbuseEvidenceDocument.add(element(DomesticAbuseEvidenceDocument.builder().domesticAbuseDocument(
                         domesticAbuseDocument).build()));
                 });
             caseData = caseData.toBuilder()
@@ -150,19 +148,6 @@ public class MiamPolicyUpgradeFileUploadService {
                 .build();
         }
         return caseData;
-    }
-
-    private void refreshTtlValue(String documentId, String systemAuthorisation) {
-        LocalDateTime refreshedTtl = LocalDateTime.now(ZoneId.of("Europe/London"))
-            .plusHours(24)
-            .truncatedTo(ChronoUnit.MILLIS);
-        DocumentTTLRequest documentTtlRequest = new DocumentTTLRequest(refreshedTtl);
-        log.info("Refreshing TTL token for document with id: {} ", documentId);
-        caseDocumentClient.patchDocument(
-            systemAuthorisation, authTokenGenerator.generate(),
-            UUID.fromString(documentId), documentTtlRequest
-        );
-        log.info("TTL token successfully refreshed for document with id: {} ", documentId);
     }
 
     private boolean hasMpuDomesticAbuseEvidence(CaseData caseData) {
@@ -226,11 +211,8 @@ public class MiamPolicyUpgradeFileUploadService {
                         domesticAbuseDocument = downloadAndUploadDocumentWithoutConfidential(
                             domesticAbuseDocument, systemAuthorisation);
                     }
-                    mpuConfidentialDomesticAbuseEvidenceDocument.add(element(
-                        domesticAbuseEvidenceDocument.getId(),
-                        DomesticAbuseEvidenceDocument.builder().domesticAbuseDocument(
-                            domesticAbuseDocument).build()
-                    ));
+                    mpuConfidentialDomesticAbuseEvidenceDocument.add(element(DomesticAbuseEvidenceDocument.builder().domesticAbuseDocument(
+                        domesticAbuseDocument).build()));
                 });
             caseData = caseData.toBuilder()
                 .miamPolicyUpgradeDetails(caseData.getMiamPolicyUpgradeDetails()
