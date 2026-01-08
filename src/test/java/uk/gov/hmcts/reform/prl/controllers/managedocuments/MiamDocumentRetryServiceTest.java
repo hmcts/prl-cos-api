@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers.managedocuments;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import feign.FeignException;
 import feign.Request;
 import feign.RequestTemplate;
@@ -120,7 +121,7 @@ class MiamDocumentRetryServiceTest {
         assertTrue(sleeper.getDelays().isEmpty(), "No backoff should occur when there is no failure");
 
 
-        var last = logAppender.getEvents().getLast();
+        ILoggingEvent last = logAppender.getEvents().getLast();
         assertThat(last.getLevel()).isEqualTo(Level.INFO);
         assertThat(last.getFormattedMessage())
             .contains("Getting MIAM document id:");
@@ -172,7 +173,7 @@ class MiamDocumentRetryServiceTest {
         assertEquals(4, attempts.get(), "Should exhaust all retry attempts (maxAttempts=4)");
         assertEquals(List.of(300L, 600L, 1200L), sleeper.getDelays(), "Backoff sequence should be 300, 600, 1200");
 
-        var warn = logAppender.getEvents().stream()
+        ILoggingEvent warn = logAppender.getEvents().stream()
             .filter(e -> e.getLevel() == Level.WARN)
             .reduce((first, second) -> second)
             .orElseThrow();
@@ -209,6 +210,11 @@ class MiamDocumentRetryServiceTest {
         );
         verify(caseDocumentClient, times(1)).getDocumentBinary(AUTH, S2S, DOC_ID);
         assertTrue(sleeper.getDelays().isEmpty(), "No backoff for non-retryable exception");
+
+        ILoggingEvent last = logAppender.getEvents().getLast();
+        assertThat(last.getLevel()).isEqualTo(Level.ERROR);
+        assertThat(last.getFormattedMessage())
+            .contains("Unexpected error for MIAM document id " + DOC_ID);
     }
 
     @Test
@@ -235,6 +241,11 @@ class MiamDocumentRetryServiceTest {
         );
         assertEquals(2, attempts.get(), "Should stop after second attempt (non-retryable)");
         assertEquals(List.of(300L), sleeper.getDelays(), "Only one backoff (after first failure)");
+
+        ILoggingEvent last = logAppender.getEvents().getLast();
+        assertThat(last.getLevel()).isEqualTo(Level.ERROR);
+        assertThat(last.getFormattedMessage())
+            .contains("Unexpected error for MIAM document id " + DOC_ID);
     }
 
     @Test

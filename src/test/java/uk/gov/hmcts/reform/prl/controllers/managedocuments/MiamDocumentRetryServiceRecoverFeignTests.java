@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers.managedocuments;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import feign.FeignException;
 import feign.Request;
 import feign.RequestTemplate;
@@ -60,7 +61,7 @@ class MiamDocumentRetryServiceRecoverFeignTests {
         assertThat(res.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
         assertNoBody(res);
 
-        var last = logAppender.getEvents().getLast();
+        ILoggingEvent last = logAppender.getEvents().getLast();
         assertThat(last.getLevel()).isEqualTo(Level.ERROR);
         assertThat(last.getFormattedMessage())
             .contains("Upstream error for MIAM document id")
@@ -75,7 +76,7 @@ class MiamDocumentRetryServiceRecoverFeignTests {
         assertThat(res.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
         assertNoBody(res);
 
-        var last = logAppender.getEvents().getLast();
+        ILoggingEvent last = logAppender.getEvents().getLast();
         assertThat(last.getLevel()).isEqualTo(Level.ERROR);
         assertThat(last.getFormattedMessage())
             .contains("HTTP 403");
@@ -88,7 +89,7 @@ class MiamDocumentRetryServiceRecoverFeignTests {
         assertThat(res.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertNoBody(res);
 
-        var last = logAppender.getEvents().getLast();
+        ILoggingEvent last = logAppender.getEvents().getLast();
         assertThat(last.getLevel()).isEqualTo(Level.ERROR);
         assertThat(last.getFormattedMessage())
             .contains("HTTP 404");
@@ -101,7 +102,7 @@ class MiamDocumentRetryServiceRecoverFeignTests {
         assertThat(res.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         assertNoBody(res);
 
-        var last = logAppender.getEvents().getLast();
+        ILoggingEvent last = logAppender.getEvents().getLast();
         assertThat(last.getLevel()).isEqualTo(Level.ERROR);
         assertThat(last.getFormattedMessage())
             .contains("HTTP 500");
@@ -114,7 +115,7 @@ class MiamDocumentRetryServiceRecoverFeignTests {
         assertThat(res.getStatusCode()).isEqualTo(HttpStatus.BAD_GATEWAY);
         assertNoBody(res);
 
-        var last = logAppender.getEvents().getLast();
+        ILoggingEvent last = logAppender.getEvents().getLast();
         assertThat(last.getLevel()).isEqualTo(Level.ERROR);
         assertThat(last.getFormattedMessage())
             .contains("HTTP 502");
@@ -127,7 +128,7 @@ class MiamDocumentRetryServiceRecoverFeignTests {
         assertThat(res.getStatusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
         assertNoBody(res);
 
-        var last = logAppender.getEvents().getLast();
+        ILoggingEvent last = logAppender.getEvents().getLast();
         assertThat(last.getLevel()).isEqualTo(Level.ERROR);
         assertThat(last.getFormattedMessage())
             .contains("HTTP 503");
@@ -140,7 +141,7 @@ class MiamDocumentRetryServiceRecoverFeignTests {
         assertThat(res.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         assertNoBody(res);
 
-        var last = logAppender.getEvents().getLast();
+        ILoggingEvent last = logAppender.getEvents().getLast();
         assertThat(last.getLevel()).isEqualTo(Level.ERROR);
         assertThat(last.getFormattedMessage())
             .contains("HTTP 599");
@@ -153,10 +154,10 @@ class MiamDocumentRetryServiceRecoverFeignTests {
         assertThat(res.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         assertNoBody(res);
 
-        var last = logAppender.getEvents().getLast();
+        ILoggingEvent last = logAppender.getEvents().getLast();
         assertThat(last.getLevel()).isEqualTo(Level.ERROR);
         assertThat(last.getFormattedMessage())
-            .contains("409");
+            .contains("HTTP 409");
     }
 
     @Test
@@ -166,7 +167,7 @@ class MiamDocumentRetryServiceRecoverFeignTests {
         assertThat(res.getStatusCode()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS);
         assertNoBody(res);
 
-        var last = logAppender.getEvents().getLast();
+        ILoggingEvent last = logAppender.getEvents().getLast();
         assertThat(last.getLevel()).isEqualTo(Level.ERROR);
         assertThat(last.getFormattedMessage())
             .contains("HTTP 429");
