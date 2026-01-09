@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.hearingmanagement;
 
+import ch.qos.logback.classic.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
@@ -9,11 +10,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.controllers.testingsupport.TestLogAppender;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -40,6 +43,7 @@ import java.util.Map;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
@@ -227,11 +231,33 @@ public class HearingManagementServiceTest {
             Mockito.any(),
             Mockito.anyBoolean()
         )).thenReturn(caseDetails);
-        when(ccdCoreCaseDataService.startSubmitCreate(Mockito.anyString(),
-                                                      Mockito.anyString(),
-                                                      Mockito.any(),
-                                                      Mockito.anyBoolean())).thenReturn(startEventResponse);
+        when(ccdCoreCaseDataService.startSubmitCreate(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.anyBoolean()
+        )).thenReturn(startEventResponse);
 
+    }
+
+    @Test
+    public void testCaseStateChangeForHearingManagementUnhandledCaseStateLogsWarning() {
+        ch.qos.logback.classic.Logger logger = (Logger) LoggerFactory.getLogger(HearingManagementService.class);
+        TestLogAppender appender = new TestLogAppender();
+        appender.start();
+        logger.addAppender(appender);
+
+        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest, State.SUBMITTED_NOT_PAID);
+        State unhandledState = State.valueOf("SUBMITTED_NOT_PAID");
+
+        verifyNoInteractions(ccdCoreCaseDataService);
+        assertTrue(appender.getEvents().stream().anyMatch(
+            e -> e.getFormattedMessage().contains("Unhandled caseState: "
+                                                      + unhandledState + " for case " + hearingRequest.getCaseRef()
+            )
+        ));
+
+        logger.detachAppender(appender);
     }
 
     @Test
