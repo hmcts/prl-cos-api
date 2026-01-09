@@ -163,9 +163,9 @@ public class LinkCitizenCaseServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDataEmailAlreadyLinked);
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
 
-       /* RuntimeException rte = Assert.assertThrows(RuntimeException.class, () ->
-            linkCitizenCaseService.linkCitizenToCase(authToken, caseId, accessCode)
-        );*/
+        // RuntimeException rte = Assert.assertThrows(RuntimeException.class, () ->
+        //     linkCitizenCaseService.linkCitizenToCase(authToken, caseId, accessCode)
+        // );
         Optional<CaseDetails> returnedCaseDetails = linkCitizenCaseService.linkCitizenToCase(authToken, caseId, accessCode);
         Assert.assertNotNull(returnedCaseDetails);
 
