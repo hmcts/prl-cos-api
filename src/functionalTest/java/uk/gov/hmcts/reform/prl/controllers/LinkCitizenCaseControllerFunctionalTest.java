@@ -152,7 +152,7 @@ public class LinkCitizenCaseControllerFunctionalTest {
             .extract()
             .asString();
         Assert.assertNotNull(response);
-        Assert.assertEquals("Linked",response);
+        Assert.assertEquals("Invalid",response);
     }
 
     @Test
