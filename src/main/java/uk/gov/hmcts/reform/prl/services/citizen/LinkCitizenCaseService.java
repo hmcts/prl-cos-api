@@ -66,12 +66,12 @@ public class LinkCitizenCaseService {
 
         if (VALID.equalsIgnoreCase(findAccessCodeStatus(accessCode, dbCaseData, authorisation))) {
             UserDetails userDetails = idamClient.getUserDetails(authorisation);
-//            log.info("Validating Email already in use for case {}", caseId);
-//
-//            if (isEmailAlreadyUsedInCase(dbCaseData, userDetails)) {
-//                log.info("Email already in use for case {}", caseId);
-//                throw (new RuntimeException(PrlAppsConstants.EMAIL_ALREADY_USED_IN_CASE_ENG));
-//            }
+            /*log.info("Validating Email already in use for case {}", caseId);
+
+            if (isEmailAlreadyUsedInCase(dbCaseData, userDetails)) {
+                log.info("Email already in use for case {}", caseId);
+                throw (new RuntimeException(PrlAppsConstants.EMAIL_ALREADY_USED_IN_CASE_ENG));
+            }*/
 
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
                 = allTabService.getStartUpdateForSpecificEvent(caseId, CaseEvent.LINK_CITIZEN.getValue());
