@@ -161,7 +161,10 @@ public class LinkCitizenCaseControllerTest {
     public void testValidateAccessCode() {
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
 
-        when(linkCitizenCaseService.validateAccessCode(accessCodeRequest.getCaseId(), accessCodeRequest.getAccessCode()))
+        when(linkCitizenCaseService.validateAccessCode(accessCodeRequest.getCaseId(),
+                                                       accessCodeRequest.getAccessCode(),
+                                                       authToken
+        ))
             .thenReturn("test");
         String accessCode = linkCitizenCaseController.validateAccessCode(authToken, s2sToken, accessCodeRequest);
         Assert.assertEquals("test", accessCode);
