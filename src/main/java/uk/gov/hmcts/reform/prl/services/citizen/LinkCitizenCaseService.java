@@ -229,7 +229,8 @@ public class LinkCitizenCaseService {
         log.info("Validating Email already in use for case {}", caseId);
         if (isEmailAlreadyUsedInCase(caseData, userInfo)) {
             log.info("Email already in use for case {}", caseId);
-            throw (new RuntimeException(PrlAppsConstants.EMAIL_ALREADY_USED_IN_CASE_ENG));
+            //throw (new RuntimeException(PrlAppsConstants.EMAIL_ALREADY_USED_IN_CASE_ENG));
+            accessCodeStatus = INVALID;
         }
 
         return accessCodeStatus;
