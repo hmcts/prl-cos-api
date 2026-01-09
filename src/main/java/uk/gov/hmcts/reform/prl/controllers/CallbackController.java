@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -55,6 +56,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
@@ -71,6 +73,7 @@ import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.DfjLookupService;
 import uk.gov.hmcts.reform.prl.services.EventService;
+import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeFileUploadService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
@@ -186,6 +189,7 @@ public class CallbackController {
     private final SystemUserService systemUserService;
     private final DfjLookupService dfjLookupService;
     private final CafcassDateTimeService cafcassDateTimeService;
+    private final FeatureToggleService featureToggleService;
 
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -306,8 +310,18 @@ public class CallbackController {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            Court closestChildArrangementsCourt = courtLocatorService
-                .getNearestFamilyCourt(caseData);
+
+            Court closestChildArrangementsCourt;
+            if (featureToggleService.isOsCourtLookupFeatureEnabled()) {
+                ImmutablePair<CourtVenue, Court> courtCourtVenueMap = courtLocatorService.getC100NearestFamilyCourtAndVenue(caseData);
+                closestChildArrangementsCourt = courtCourtVenueMap.getRight();
+                if (courtCourtVenueMap.getLeft() != null) {
+                    caseDataUpdated.put(COURT_ID_FIELD, courtCourtVenueMap.getLeft().getCourtEpimmsId());
+                }
+            } else {
+                closestChildArrangementsCourt = courtLocatorService.getNearestFamilyCourt(caseData);
+            }
+
             Optional<CourtEmailAddress> courtEmailAddress = closestChildArrangementsCourt == null ? Optional.empty() : courtLocatorService
                 .getEmailAddress(closestChildArrangementsCourt);
             if (courtEmailAddress.isPresent()) {

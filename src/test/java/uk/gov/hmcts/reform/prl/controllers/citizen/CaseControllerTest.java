@@ -26,11 +26,13 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
+import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.UiCitizenCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -81,6 +83,9 @@ public class CaseControllerTest {
 
     @Mock
     private LaunchDarklyClient launchDarklyClient;
+
+    @Mock
+    private CourtFinderService courtFinderService;
 
     private CaseData caseData;
     Address address;
@@ -431,6 +436,32 @@ public class CaseControllerTest {
 
         //Then
         assertThat(actualCaseData).isEqualTo(caseData);
+    }
+
+    @Test
+    public void testFindCourtByPostCodeAndService() throws Exception {
+        String postcode = "SA1 3TU";
+        String courtName = "Court Name";
+
+        when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(true);
+        when(authTokenGenerator.generate()).thenReturn(servAuthToken);
+        when(courtFinderService.getC100NearestFamilyCourt(postcode)).thenReturn(Court.builder()
+                                                                                            .courtName(courtName).build());
+        String actualCourtName = caseController.findCourtByPostCodeAndService(authToken, servAuthToken, postcode);
+        Assert.assertEquals(courtName, actualCourtName);
+    }
+
+    @Test
+    public void testFindCourtByPostCodeAndServiceFails() throws Exception {
+
+        expectedEx.expect(RuntimeException.class);
+        expectedEx.expectMessage("Invalid Client");
+
+        String postcode = "TS1 1ST";
+        Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
+
+        String actualCourtName = caseController.findCourtByPostCodeAndService(authToken, servAuthToken, postcode);
+
     }
 
 }
