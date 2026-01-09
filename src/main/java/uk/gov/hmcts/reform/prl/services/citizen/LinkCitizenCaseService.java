@@ -65,7 +65,10 @@ public class LinkCitizenCaseService {
 
         if (VALID.equalsIgnoreCase(findAccessCodeStatus(accessCode, dbCaseData))) {
             UserDetails userDetails = idamClient.getUserDetails(authorisation);
+            log.info("Validating Email already in use for case {}", caseId);
+
             if (isEmailAlreadyUsedInCase(dbCaseData, userDetails)) {
+                log.info("Email already in use for case {}", caseId);
                 throw (new RuntimeException(PrlAppsConstants.EMAIL_ALREADY_USED_IN_CASE_ENG));
             }
 
