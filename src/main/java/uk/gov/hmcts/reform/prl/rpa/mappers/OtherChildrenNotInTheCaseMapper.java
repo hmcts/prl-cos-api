@@ -7,11 +7,11 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherChildrenNotInTheCase;
 import uk.gov.hmcts.reform.prl.rpa.mappers.json.NullAwareJsonObjectBuilder;
 
+import java.util.List;
+import java.util.Optional;
 import javax.json.JsonArray;
 import javax.json.JsonValue;
 import javax.json.stream.JsonCollectors;
-import java.util.List;
-import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 
