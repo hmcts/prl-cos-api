@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.models.caseaccess.AssignCaseAccessRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -31,6 +32,7 @@ public class AssignCaseAccessService {
     private final LaunchDarklyClient launchDarklyClient;
 
     private final RoleAssignmentApi roleAssignmentApi;
+    private final SystemUserService systemUserService;
 
 
     public void assignCaseAccess(String caseId, String authorisation) {
@@ -71,6 +73,36 @@ public class AssignCaseAccessService {
             .assigneeId(userId)
             .caseTypeId(caseTypeId)
             .build();
+    }
+
+    public void assignCaseAccessToUserWithRole(
+        String caseId,
+        String assigneeUserId
+    ) {
+        if (!launchDarklyClient.isFeatureEnabled("share-a-case")
+        ) {
+            log.info("share-a-case flag disabled; skipping access assignment");
+            return;
+        }
+
+        String serviceToken = authTokenGenerator.generate();
+
+        AssignCaseAccessRequest request = AssignCaseAccessRequest.builder()
+            .caseId(caseId)
+            .assigneeId(assigneeUserId)
+            .caseTypeId(CASE_TYPE)
+            .build();
+
+        log.info("Assigning case {} to user {}", caseId, assigneeUserId);
+
+
+        String sysUserToken = systemUserService.getSysUserToken();
+        assignCaseAccessClient.assignCaseAccess(
+            sysUserToken,  // sysuser
+            serviceToken,
+            false,
+            request
+        );
     }
 
 

@@ -116,12 +116,10 @@ import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.ApplicantsListGenerator;
-import uk.gov.hmcts.reform.prl.utils.CaseDetailsProvider;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -319,8 +317,8 @@ public class CallbackControllerTest {
     @Mock
     private  EventService eventPublisher;
 
-    public static final String authToken = "Bearer TestAuthToken";
-    public static final String s2sToken = "s2s AuthToken";
+    public static final String AUTH_TOKEN = "Bearer TestAuthToken";
+    public static final String S2S_TOKEN = "s2s AuthToken";
 
     private static final Map<String, Object> c100DraftMap = new HashMap<>();
     private static final Map<String, Object> c100DocsMap = new HashMap<>();
@@ -345,6 +343,7 @@ public class CallbackControllerTest {
             .forename("solicitor@example.com")
             .surname("Solicitor")
             .roles(ROLES)
+            .email("solicitor@example.com")
             .build();
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -379,13 +378,12 @@ public class CallbackControllerTest {
 
     @Test
     public void testConfirmMiamApplicationOrExemption() throws WorkflowException {
-        CaseDetails caseDetails = CaseDetailsProvider.full();
 
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
         when(applicationConsiderationTimetableValidationWorkflow.run(callbackRequest))
             .thenReturn(workflowResult);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        callbackController.validateApplicationConsiderationTimetable(authToken, s2sToken, callbackRequest);
+        callbackController.validateApplicationConsiderationTimetable(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
 
         verify(applicationConsiderationTimetableValidationWorkflow).run(callbackRequest);
         verifyNoMoreInteractions(applicationConsiderationTimetableValidationWorkflow);
@@ -394,13 +392,12 @@ public class CallbackControllerTest {
 
     @Test
     public void testValidateApplicationConsiderationTimetable() throws WorkflowException {
-        CaseDetails caseDetails = CaseDetailsProvider.full();
 
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
         when(validateMiamApplicationOrExemptionWorkflow.run(callbackRequest))
             .thenReturn(workflowResult);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        callbackController.validateMiamApplicationOrExemption(authToken, s2sToken, PrlAppsConstants.ENGLISH, callbackRequest);
+        callbackController.validateMiamApplicationOrExemption(AUTH_TOKEN, S2S_TOKEN, PrlAppsConstants.ENGLISH, callbackRequest);
 
         verify(validateMiamApplicationOrExemptionWorkflow).run(callbackRequest);
         verifyNoMoreInteractions(validateMiamApplicationOrExemptionWorkflow);
@@ -410,18 +407,6 @@ public class CallbackControllerTest {
     @Test
     public void testGenerateAndStoreDocument() throws Exception {
 
-        List<FL401OrderTypeEnum> orderList = new ArrayList<>();
-        orderList.add(FL401OrderTypeEnum.occupationOrder);
-        orderList.add(FL401OrderTypeEnum.nonMolestationOrder);
-
-        TypeOfApplicationOrders orders = TypeOfApplicationOrders.builder()
-            .orderType(orderList)
-            .build();
-
-        LinkToCA linkToCA = LinkToCA.builder()
-            .linkToCaApplication(YesOrNo.Yes)
-            .caApplicationNumber("123")
-            .build();
         PartyDetails applicant = PartyDetails.builder().representativeFirstName("Abc")
             .representativeLastName("Xyz")
             .gender(Gender.male)
@@ -483,8 +468,8 @@ public class CallbackControllerTest {
             .build();
 
         AboutToStartOrSubmitCallbackResponse response = callbackController.generateAndStoreDocument(
-            authToken,
-            s2sToken,
+            AUTH_TOKEN,
+            S2S_TOKEN,
             callbackRequest
         );
 
@@ -546,8 +531,6 @@ public class CallbackControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
-
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -563,8 +546,8 @@ public class CallbackControllerTest {
             .build();
 
         AboutToStartOrSubmitCallbackResponse response = callbackController.generateAndStoreDocument(
-            authToken,
-            s2sToken,
+            AUTH_TOKEN,
+            S2S_TOKEN,
             callbackRequest
         );
 
@@ -626,7 +609,6 @@ public class CallbackControllerTest {
 
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentGenService.generateDraftDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
             fl401DraftMap);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
@@ -641,8 +623,8 @@ public class CallbackControllerTest {
             .build();
 
         AboutToStartOrSubmitCallbackResponse response = callbackController.generateAndStoreDocument(
-            authToken,
-            s2sToken,
+            AUTH_TOKEN,
+            S2S_TOKEN,
             callbackRequest
         );
 
@@ -704,7 +686,6 @@ public class CallbackControllerTest {
 
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(documentGenService.generateDraftDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
@@ -719,8 +700,8 @@ public class CallbackControllerTest {
             .build();
 
         AboutToStartOrSubmitCallbackResponse response = callbackController.generateAndStoreDocument(
-            authToken,
-            s2sToken,
+            AUTH_TOKEN,
+            S2S_TOKEN,
             callbackRequest
         );
 
@@ -778,7 +759,7 @@ public class CallbackControllerTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        callbackController.updateApplication(authToken, s2sToken, callbackRequest);
+        callbackController.updateApplication(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
 
         verify(allTabsService, times(1)).updateAllTabsIncludingConfTab(anyString());
     }
@@ -815,17 +796,17 @@ public class CallbackControllerTest {
                                                        .state(ISSUED_STATE)
                                                        .data(stringObjectMap).build()).build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        assertNotNull(callbackController.caseWithdrawAboutToSubmit(authToken, s2sToken, callbackRequest));
+        assertNotNull(callbackController.caseWithdrawAboutToSubmit(AUTH_TOKEN, S2S_TOKEN, callbackRequest));
     }
 
     @Test
-    public void testSendCaseWithdrawNotificationNotInCaseIssuedState() throws Exception {
+    public void testSendCaseWithdrawNotificationNotInCaseIssuedState() {
         WithdrawApplication withdrawApplication = WithdrawApplication.builder()
             .withDrawApplication(YesOrNo.Yes)
             .withDrawApplicationReason("Test data")
             .build();
 
-        sendEmail(SOLICITOR_EMAIL, withdrawApplication, 1);
+        sendEmail(SOLICITOR_EMAIL, withdrawApplication);
     }
 
     @Test
@@ -867,13 +848,13 @@ public class CallbackControllerTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(caseDataUpdated).build()).build();
         when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
-        when(updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest,authToken)).thenReturn(
+        when(updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest,AUTH_TOKEN)).thenReturn(
             caseDetailsUpdatedwithName);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             callbackController.updatePartyDetails(
-                authToken,
-                s2sToken,
+                AUTH_TOKEN,
+                S2S_TOKEN,
                 callbackRequest
             );
         Map<String, Object> caseDetailsResponse = aboutToStartOrSubmitCallbackResponse.getData();
@@ -881,15 +862,15 @@ public class CallbackControllerTest {
     }
 
     @Test
-    public void testSendCaseWithdrawNotificationNo() throws Exception {
+    public void testSendCaseWithdrawNotificationNo() {
         WithdrawApplication withdrawApplication = WithdrawApplication.builder()
             .withDrawApplication(YesOrNo.No)
             .withDrawApplicationReason("Test data No")
             .build();
-        sendEmail(SOLICITOR_EMAIL, withdrawApplication, 0);
+        sendEmail(SOLICITOR_EMAIL, withdrawApplication);
     }
 
-    private void sendEmail(String solicitorEmail, WithdrawApplication withdrawApplication, int timesCalled) {
+    private void sendEmail(String solicitorEmail, WithdrawApplication withdrawApplication) {
         PartyDetails applicant = PartyDetails.builder().solicitorEmail(solicitorEmail).build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
@@ -913,7 +894,7 @@ public class CallbackControllerTest {
                                                        .state(SUBMITTED_STATE)
                                                        .data(stringObjectMap).build()).build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        assertNotNull(callbackController.caseWithdrawAboutToSubmit(authToken,s2sToken, callbackRequest));
+        assertNotNull(callbackController.caseWithdrawAboutToSubmit(AUTH_TOKEN,S2S_TOKEN, callbackRequest));
     }
 
     @Test
@@ -931,7 +912,7 @@ public class CallbackControllerTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        assertNotNull(callbackController.caseWithdrawAboutToSubmit(authToken, s2sToken, callbackRequest));
+        assertNotNull(callbackController.caseWithdrawAboutToSubmit(AUTH_TOKEN, S2S_TOKEN, callbackRequest));
     }
 
     @Test
@@ -957,7 +938,7 @@ public class CallbackControllerTest {
                              .data(stringObjectMap).build())
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        assertNotNull(callbackController.caseWithdrawAboutToSubmit(authToken, s2sToken,callbackRequest));
+        assertNotNull(callbackController.caseWithdrawAboutToSubmit(AUTH_TOKEN, S2S_TOKEN,callbackRequest));
     }
 
     @Test
@@ -969,7 +950,6 @@ public class CallbackControllerTest {
             .isPhoneNumberConfidential(YesOrNo.No)
             .build();
 
-        String applicantNames = "TestFirst TestLast";
 
         Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant1).build();
         List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
@@ -978,15 +958,8 @@ public class CallbackControllerTest {
             .isChildAddressConfidential(YesOrNo.No)
             .build();
 
-        String childNames = "child1 child2";
-
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
-
-        String isConfidential = "No";
-        if (applicant1.hasConfidentialInfo() || child.hasConfidentialInfo()) {
-            isConfidential = "Yes";
-        }
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -996,8 +969,6 @@ public class CallbackControllerTest {
             .isCaseUrgent(YesOrNo.No)
             .build();
 
-        LocalDate issueDate = LocalDate.now();
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         Map<String, Object> stringObjectMap = new HashMap<>();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -1030,7 +1001,7 @@ public class CallbackControllerTest {
                              .build())
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        callbackController.resendNotificationToRpa(authToken, s2sToken, callbackRequest);
+        callbackController.resendNotificationToRpa(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         verify(sendgridService, times(1)).sendEmail(JsonValue.EMPTY_JSON_OBJECT);
     }
 
@@ -1045,6 +1016,8 @@ public class CallbackControllerTest {
         caseDetails.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
         Organisations org = Organisations.builder().name("testOrg").organisationIdentifier("abcd").build();
+        when(organisationService.getOrganisationByEmailDetail(Mockito.anyString()))
+            .thenReturn(Optional.of(org));
         when(organisationService.findUserOrganisation(Mockito.anyString()))
             .thenReturn(Optional.of(org));
         CaseData caseData = CaseData.builder().id(123L).applicantCaseName("abcd").applicantOrganisationPolicy(
@@ -1055,10 +1028,9 @@ public class CallbackControllerTest {
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(1L)
                              .data(caseDetails).build()).build();
-        when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(true);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
-            .aboutToSubmitCaseCreation(authToken,s2sToken, callbackRequest);
+            .aboutToSubmitCaseCreation(AUTH_TOKEN,S2S_TOKEN, callbackRequest);
         assertEquals("test", aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorName"));
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorOrgName"));
@@ -1083,7 +1055,7 @@ public class CallbackControllerTest {
                              .data(caseDetails).build()).build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
-            .aboutToSubmitCaseCreation(authToken,s2sToken, callbackRequest);
+            .aboutToSubmitCaseCreation(AUTH_TOKEN,S2S_TOKEN, callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("CaseAccessCategory"));
         assertEquals(aboutToStartOrSubmitCallbackResponse.getData().get("caseTypeOfApplication"),
                      aboutToStartOrSubmitCallbackResponse.getData().get("CaseAccessCategory"));
@@ -1100,6 +1072,8 @@ public class CallbackControllerTest {
         Organisations org = Organisations.builder().name("testOrg").organisationIdentifier("abcd").build();
         when(organisationService.findUserOrganisation(Mockito.anyString()))
             .thenReturn(Optional.of(org));
+        when(organisationService.getOrganisationByEmailDetail(Mockito.anyString()))
+            .thenReturn(Optional.of(org));
         CaseData caseData = CaseData.builder().id(123L)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicantCaseName("abcd").build();
@@ -1111,11 +1085,10 @@ public class CallbackControllerTest {
                              .id(1L)
                              .caseTypeId(C100_CASE_TYPE)
                              .data(caseDetails).build()).build();
-        when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(true);
         when(launchDarklyClient.isFeatureEnabled(TASK_LIST_V2_FLAG)).thenReturn(true);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
-            .aboutToSubmitCaseCreation(authToken,s2sToken, callbackRequest);
+            .aboutToSubmitCaseCreation(AUTH_TOKEN,S2S_TOKEN, callbackRequest);
         assertEquals("test", aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorName"));
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorOrgName"));
@@ -1133,6 +1106,8 @@ public class CallbackControllerTest {
         caseDetails.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
         Organisations org = Organisations.builder().name("testOrg").organisationIdentifier("abcd").build();
+        when(organisationService.getOrganisationByEmailDetail(Mockito.anyString()))
+            .thenReturn(Optional.of(org));
         when(organisationService.findUserOrganisation(Mockito.anyString()))
             .thenReturn(Optional.of(org));
         CaseData caseData = CaseData.builder().id(123L).applicantCaseName("abcd")
@@ -1141,8 +1116,7 @@ public class CallbackControllerTest {
             applicantOrganisationPolicy).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
 
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
-        when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(true);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
         when(launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)).thenReturn(true);
         List<RoleAssignmentResponse> listOfRoleAssignmentResponses = new ArrayList<>();
         RoleAssignmentResponse roleAssignmentResponse = new RoleAssignmentResponse();
@@ -1159,7 +1133,7 @@ public class CallbackControllerTest {
                              .id(1L)
                              .data(caseDetails).build()).build();
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
-            .aboutToSubmitCaseCreation(authToken,s2sToken, callbackRequest);
+            .aboutToSubmitCaseCreation(AUTH_TOKEN,S2S_TOKEN, callbackRequest);
         assertEquals("test", aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorName"));
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorOrgName"));
@@ -1169,16 +1143,18 @@ public class CallbackControllerTest {
     @Test
     public void aboutToSubmitCaseCreationToC100ForNullCaseName() {
 
-        Map<String, Object> caseData = new HashMap<>();
         Organisations org = Organisations.builder().name("testOrg")
             .organisationIdentifier("abcd")
             .build();
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        when(organisationService.getOrganisationByEmailDetail(Mockito.anyString()))
+            .thenReturn(Optional.of(org));
         when(organisationService.findUserOrganisation(Mockito.anyString()))
             .thenReturn(Optional.of(org));
         OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
             .orgPolicyReference("jfljsd")
             .orgPolicyCaseAssignedRole("APPLICANTSOLICITOR").build();
+        Map<String, Object> caseData = new HashMap<>();
         caseData.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -1188,10 +1164,9 @@ public class CallbackControllerTest {
         CaseData caseDataUpdated = CaseData.builder().id(123L)
             .applicantCaseName("abcd").applicantOrganisationPolicy(applicantOrganisationPolicy).build();
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseDataUpdated);
-        when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(false);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
-            .aboutToSubmitCaseCreation(authToken, s2sToken, callbackRequest);
+            .aboutToSubmitCaseCreation(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorName"));
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorOrgName"));
@@ -1217,7 +1192,7 @@ public class CallbackControllerTest {
                              .data(stringObjectMap).build()).build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
-            .addCaseNumberSubmitted(authToken, s2sToken, callbackRequest);
+            .addCaseNumberSubmitted(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("issueDate"));
         assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("isAddCaseNumberAdded"));
     }
@@ -1242,7 +1217,7 @@ public class CallbackControllerTest {
                         .data(stringObjectMap).build()).build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
-                .addCaseNumberSubmitted(authToken, s2sToken, callbackRequest);
+                .addCaseNumberSubmitted(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("issueDate"));
         assertEquals(Yes.getDisplayedValue(),aboutToStartOrSubmitCallbackResponse.getData().get("isAddCaseNumberAdded"));
     }
@@ -1251,9 +1226,7 @@ public class CallbackControllerTest {
     public void aboutToSubmitCaseCreationToC100ForNullCaseNameWithException() {
 
         Map<String, Object> caseData = new HashMap<>();
-        Organisations org = Organisations.builder().name("testOrg")
-            .organisationIdentifier("abcd")
-            .build();
+
         OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
             .orgPolicyReference("jfljsd")
             .orgPolicyCaseAssignedRole("APPLICANTSOLICITOR").build();
@@ -1272,10 +1245,9 @@ public class CallbackControllerTest {
         when(authTokenGenerator.generate()).thenReturn("Generate");
         doNothing().when(assignCaseAccessClient)
             .assignCaseAccess(anyString(), anyString(), anyBoolean(), any());
-        when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(true);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
-            .aboutToSubmitCaseCreation(authToken, s2sToken, callbackRequest);
+            .aboutToSubmitCaseCreation(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
         assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorName"));
         assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorOrgName"));
@@ -1294,7 +1266,7 @@ public class CallbackControllerTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
-            .copyManageDocsForTabs(authToken, s2sToken, callbackRequest);
+            .copyManageDocsForTabs(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("furtherEvidences"));
     }
 
@@ -1330,7 +1302,7 @@ public class CallbackControllerTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
-            .copyManageDocsForTabs(authToken, s2sToken, callbackRequest);
+            .copyManageDocsForTabs(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("legalProfQuarantineDocsList"));
     }
 
@@ -1347,7 +1319,6 @@ public class CallbackControllerTest {
             .solicitorEmail("testing@solicitor.com")
             .build();
 
-        String applicantFullName = fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName();
         UserDetails userDetails = UserDetails.builder()
             .forename("userFirst")
             .surname("userLast")
@@ -1357,8 +1328,6 @@ public class CallbackControllerTest {
         Map<String, Object> data = new HashMap<>();
         data.put("applicantSolicitorEmailAddress", fl401Applicant.getSolicitorEmail());
 
-        String email = fl401Applicant.getSolicitorEmail() != null ? fl401Applicant.getSolicitorEmail() :
-            userDetails.getEmail();
 
         CaseData caseData = CaseData.builder()
             .courtEmailAddress("test@gmail.com")
@@ -1380,7 +1349,7 @@ public class CallbackControllerTest {
                                                        .data(stringObjectMap).build()).build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = callbackController.caseWithdrawAboutToSubmit(
-            authToken, s2sToken, callbackRequest);
+            AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         assertNotNull(response);
         assertEquals(WITHDRAWN_STATE, response.getData().get("state"));
 
@@ -1398,8 +1367,6 @@ public class CallbackControllerTest {
             .surname("userLast")
             .email("testing@solicitor.com")
             .build();
-
-        Map<String, Object> data = new HashMap<>();
 
         CaseData caseData = CaseData.builder()
             .id(1L)
@@ -1421,7 +1388,7 @@ public class CallbackControllerTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        assertNotNull(callbackController.caseWithdrawAboutToSubmit(authToken,s2sToken, callbackRequest));
+        assertNotNull(callbackController.caseWithdrawAboutToSubmit(AUTH_TOKEN,S2S_TOKEN, callbackRequest));
     }
 
     @Test
@@ -1580,8 +1547,8 @@ public class CallbackControllerTest {
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             callbackController.generateDocumentSubmitApplication(
-                authToken,
-                s2sToken,
+                AUTH_TOKEN,
+                S2S_TOKEN,
                 callbackRequest
             );
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c8Document"));
@@ -1730,11 +1697,11 @@ public class CallbackControllerTest {
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
@@ -1747,8 +1714,8 @@ public class CallbackControllerTest {
         );
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             callbackController.generateDocumentSubmitApplication(
-                authToken,
-                    s2sToken,
+                AUTH_TOKEN,
+                    S2S_TOKEN,
                 callbackRequest
             );
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c8Document"));
@@ -1853,14 +1820,14 @@ public class CallbackControllerTest {
             PaymentServiceResponse.builder().serviceRequestReference("1234").build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(any(), anyMap())).thenReturn(caseData);
-        when(systemUserService.getSysUserToken()).thenReturn(s2sToken);
-        when(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(caseData, s2sToken))
+        when(systemUserService.getSysUserToken()).thenReturn(S2S_TOKEN);
+        when(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(caseData, S2S_TOKEN))
             .thenReturn(caseData);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             callbackController.generateDocumentSubmitApplication(
-                authToken,
-                s2sToken,
+                AUTH_TOKEN,
+                S2S_TOKEN,
                 callbackRequest
             );
         Assertions.assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("c8Document"));
@@ -2055,8 +2022,8 @@ public class CallbackControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             callbackController.generateDocumentSubmitApplication(
-                authToken,
-                s2sToken,
+                AUTH_TOKEN,
+                S2S_TOKEN,
                 callbackRequest
             );
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1ADocument"));
@@ -2210,8 +2177,8 @@ public class CallbackControllerTest {
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
 
-        when(systemUserService.getSysUserToken()).thenReturn(s2sToken);
-        when(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(caseData, s2sToken))
+        when(systemUserService.getSysUserToken()).thenReturn(S2S_TOKEN);
+        when(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(caseData, S2S_TOKEN))
             .thenReturn(caseData);
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -2232,7 +2199,7 @@ public class CallbackControllerTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -2250,8 +2217,8 @@ public class CallbackControllerTest {
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             callbackController.generateDocumentSubmitApplication(
-                authToken,
-                    s2sToken,
+                AUTH_TOKEN,
+                    S2S_TOKEN,
                 callbackRequest
             );
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1ADocument"));
@@ -2276,10 +2243,10 @@ public class CallbackControllerTest {
             .code(courtId).label("courtLabel").build();
         List<DynamicListElement> allCourts = List.of(dle);
         when(locationRefDataService.getCourtLocations(anyString())).thenReturn(allCourts);
-        when(locationRefDataService.getDisplayEntryFromEpimmsId(courtId, authToken)).thenReturn(dle);
+        when(locationRefDataService.getDisplayEntryFromEpimmsId(courtId, AUTH_TOKEN)).thenReturn(dle);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =  callbackController
-            .prePopulateCourtDetails(authToken, s2sToken, callbackRequest);
+            .prePopulateCourtDetails(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("localCourtAdmin"));
         Assertions.assertEquals("1234", ((DynamicList)aboutToStartOrSubmitCallbackResponse.getData().get("courtList"))
             .getValue().getCode());
@@ -2298,7 +2265,7 @@ public class CallbackControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(locationRefDataService.getCourtLocations(Mockito.anyString())).thenReturn(List.of(DynamicListElement.EMPTY));
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =  callbackController
-            .prePopulateCourtDetails(authToken,s2sToken,callbackRequest);
+            .prePopulateCourtDetails(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
         Assertions.assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("localCourtAdmin"));
     }
 
@@ -2317,9 +2284,9 @@ public class CallbackControllerTest {
         List<DynamicListElement> allCourts = List.of(dle);
         when(locationRefDataService.getCourtLocations(anyString())).thenReturn(allCourts);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(locationRefDataService.getDisplayEntryFromEpimmsId(courtId, authToken)).thenReturn(dle);
+        when(locationRefDataService.getDisplayEntryFromEpimmsId(courtId, AUTH_TOKEN)).thenReturn(dle);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =  callbackController
-            .amendCourtAboutToStart(authToken,s2sToken,callbackRequest);
+            .amendCourtAboutToStart(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("courtList"));
         Assertions.assertEquals("1234", ((DynamicList)aboutToStartOrSubmitCallbackResponse.getData().get("courtList"))
             .getValue().getCode());
@@ -2340,7 +2307,7 @@ public class CallbackControllerTest {
             .thenReturn(List.of(DynamicListElement.EMPTY));
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =  callbackController
-            .amendCourtAboutToStart(authToken,s2sToken,callbackRequest);
+            .amendCourtAboutToStart(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("courtList"));
     }
 
@@ -2363,7 +2330,7 @@ public class CallbackControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =  callbackController
-            .amendCourtAboutToSubmit(authToken,s2sToken,callbackRequest);
+            .amendCourtAboutToSubmit(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("courtName"));
     }
@@ -2382,6 +2349,8 @@ public class CallbackControllerTest {
         Organisations org = Organisations.builder().name("testOrg").organisationIdentifier("abcd").build();
         when(organisationService.findUserOrganisation(Mockito.anyString()))
             .thenReturn(Optional.of(org));
+        when(organisationService.getOrganisationByEmailDetail(Mockito.anyString()))
+            .thenReturn(Optional.of(org));
         CaseData caseData = CaseData.builder().id(123L).applicantCaseName("testName").applicantOrganisationPolicy(
             applicantOrganisationPolicy).caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
@@ -2390,10 +2359,9 @@ public class CallbackControllerTest {
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(1L)
                              .data(caseDetails).build()).build();
-        when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(true);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
-            .aboutToSubmitCaseCreation(authToken, s2sToken, callbackRequest);
+            .aboutToSubmitCaseCreation(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         assertEquals("test", aboutToStartOrSubmitCallbackResponse.getData().get("caseNameHmctsInternal"));
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
     }
@@ -2411,6 +2379,8 @@ public class CallbackControllerTest {
         Organisations org = Organisations.builder().name("testOrg").organisationIdentifier("abcd").build();
         when(organisationService.findUserOrganisation(Mockito.anyString()))
             .thenReturn(Optional.of(org));
+        when(organisationService.getOrganisationByEmailDetail(Mockito.anyString()))
+            .thenReturn(Optional.of(org));
         CaseData caseData = CaseData.builder().id(123L).applicantCaseName("testName").applicantOrganisationPolicy(
             applicantOrganisationPolicy).caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
@@ -2419,10 +2389,9 @@ public class CallbackControllerTest {
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(1L)
                              .data(caseDetails).build()).build();
-        when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(true);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
-            .aboutToSubmitCaseCreation(authToken, s2sToken, callbackRequest);
+            .aboutToSubmitCaseCreation(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         assertEquals("test", aboutToStartOrSubmitCallbackResponse.getData().get("caseNameHmctsInternal"));
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("applicantOrRespondentCaseName"));
     }
@@ -2517,8 +2486,8 @@ public class CallbackControllerTest {
             .build();
         when(gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap, null,
             refDataUserService)).thenReturn(gatekeepingDetails);
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
-        AboutToStartOrSubmitCallbackResponse response = callbackController.sendToGatekeeper(authToken,s2sToken,callbackRequest);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse response = callbackController.sendToGatekeeper(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
         assertEquals(SendToGatekeeperTypeEnum.judge,gatekeepingDetails.getIsJudgeOrLegalAdviserGatekeeping());
         assertEquals(gatekeepingDetails,response.getData().get("gatekeepingDetails"));
 
@@ -2612,8 +2581,8 @@ public class CallbackControllerTest {
             .build();
         when(gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap, null,
             refDataUserService)).thenReturn(gatekeepingDetails);
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
-        AboutToStartOrSubmitCallbackResponse response = callbackController.sendToGatekeeper(authToken,s2sToken,callbackRequest);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse response = callbackController.sendToGatekeeper(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
         assertEquals(gatekeepingDetails,response.getData().get("gatekeepingDetails"));
 
     }
@@ -2704,8 +2673,8 @@ public class CallbackControllerTest {
             .build();
         when(gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap, null,
             refDataUserService)).thenReturn(gatekeepingDetails);
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
-        AboutToStartOrSubmitCallbackResponse response = callbackController.sendToGatekeeper(authToken,s2sToken,callbackRequest);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse response = callbackController.sendToGatekeeper(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
         assertEquals(SendToGatekeeperTypeEnum.judge,gatekeepingDetails.getIsJudgeOrLegalAdviserGatekeeping());
         assertEquals(gatekeepingDetails,response.getData().get("gatekeepingDetails"));
 
@@ -2776,8 +2745,6 @@ public class CallbackControllerTest {
             .id(123L)
             .build();
 
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(false).isGenWelsh(false).build();
-
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         final uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
@@ -2800,8 +2767,8 @@ public class CallbackControllerTest {
             .build();
         when(gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap, null,
             refDataUserService)).thenReturn(gatekeepingDetails);
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
-        AboutToStartOrSubmitCallbackResponse response = callbackController.sendToGatekeeper(authToken,s2sToken,callbackRequest);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse response = callbackController.sendToGatekeeper(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
         assertEquals(SendToGatekeeperTypeEnum.judge,gatekeepingDetails.getIsJudgeOrLegalAdviserGatekeeping());
         assertEquals(gatekeepingDetails,response.getData().get("gatekeepingDetails"));
 
@@ -2815,13 +2782,13 @@ public class CallbackControllerTest {
         when(amendCourtService.handleAmendCourtSubmission(Mockito.anyString(), Mockito.any(), Mockito.any()))
             .thenReturn(new HashMap<>());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
 
         assertExpectedException(() -> {
-            callbackController.validateApplicationConsiderationTimetable(authToken,s2sToken,callbackRequest);
+            callbackController.validateApplicationConsiderationTimetable(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 
@@ -2833,13 +2800,13 @@ public class CallbackControllerTest {
         when(amendCourtService.handleAmendCourtSubmission(Mockito.anyString(), Mockito.any(), Mockito.any()))
             .thenReturn(new HashMap<>());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
 
         assertExpectedException(() -> {
-            callbackController.validateMiamApplicationOrExemption(authToken,s2sToken, PrlAppsConstants.ENGLISH, callbackRequest);
+            callbackController.validateMiamApplicationOrExemption(AUTH_TOKEN,S2S_TOKEN, PrlAppsConstants.ENGLISH, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 
@@ -2851,13 +2818,13 @@ public class CallbackControllerTest {
         when(amendCourtService.handleAmendCourtSubmission(Mockito.anyString(), Mockito.any(), Mockito.any()))
             .thenReturn(new HashMap<>());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
 
         assertExpectedException(() -> {
-            callbackController.generateAndStoreDocument(authToken,s2sToken,callbackRequest);
+            callbackController.generateAndStoreDocument(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 
@@ -2869,13 +2836,13 @@ public class CallbackControllerTest {
         when(amendCourtService.handleAmendCourtSubmission(Mockito.anyString(), Mockito.any(), Mockito.any()))
             .thenReturn(new HashMap<>());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
 
         assertExpectedException(() -> {
-            callbackController.prePopulateCourtDetails(authToken,s2sToken,callbackRequest);
+            callbackController.prePopulateCourtDetails(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 
@@ -2887,13 +2854,13 @@ public class CallbackControllerTest {
         when(amendCourtService.handleAmendCourtSubmission(Mockito.anyString(), Mockito.any(), Mockito.any()))
             .thenReturn(new HashMap<>());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
 
         assertExpectedException(() -> {
-            callbackController.generateDocumentSubmitApplication(authToken,s2sToken,callbackRequest);
+            callbackController.generateDocumentSubmitApplication(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 
@@ -2909,9 +2876,9 @@ public class CallbackControllerTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
 
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         assertExpectedException(() -> {
-            callbackController.amendCourtAboutToStart(authToken,s2sToken,callbackRequest);
+            callbackController.amendCourtAboutToStart(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 
@@ -2923,13 +2890,13 @@ public class CallbackControllerTest {
         when(amendCourtService.handleAmendCourtSubmission(Mockito.anyString(), Mockito.any(), Mockito.any()))
             .thenReturn(new HashMap<>());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
 
         assertExpectedException(() -> {
-            callbackController.amendCourtAboutToSubmit(authToken,s2sToken,callbackRequest);
+            callbackController.amendCourtAboutToSubmit(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 
@@ -2941,13 +2908,13 @@ public class CallbackControllerTest {
         when(amendCourtService.handleAmendCourtSubmission(Mockito.anyString(), Mockito.any(), Mockito.any()))
             .thenReturn(new HashMap<>());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
 
         assertExpectedException(() -> {
-            callbackController.updateApplication(authToken,s2sToken,callbackRequest);
+            callbackController.updateApplication(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 
@@ -2959,13 +2926,13 @@ public class CallbackControllerTest {
         when(amendCourtService.handleAmendCourtSubmission(Mockito.anyString(), Mockito.any(), Mockito.any()))
             .thenReturn(new HashMap<>());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
 
         assertExpectedException(() -> {
-            callbackController.caseWithdrawAboutToSubmit(authToken,s2sToken,callbackRequest);
+            callbackController.caseWithdrawAboutToSubmit(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 
@@ -2981,9 +2948,9 @@ public class CallbackControllerTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
 
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         assertExpectedException(() -> {
-            callbackController.sendToGatekeeper(authToken,s2sToken,callbackRequest);
+            callbackController.sendToGatekeeper(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 
@@ -2995,13 +2962,13 @@ public class CallbackControllerTest {
         when(amendCourtService.handleAmendCourtSubmission(Mockito.anyString(), Mockito.any(), Mockito.any()))
             .thenReturn(new HashMap<>());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
 
         assertExpectedException(() -> {
-            callbackController.resendNotificationToRpa(authToken,s2sToken,callbackRequest);
+            callbackController.resendNotificationToRpa(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 
@@ -3013,13 +2980,13 @@ public class CallbackControllerTest {
         when(amendCourtService.handleAmendCourtSubmission(Mockito.anyString(), Mockito.any(), Mockito.any()))
             .thenReturn(new HashMap<>());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
 
         assertExpectedException(() -> {
-            callbackController.updatePartyDetails(authToken,s2sToken,callbackRequest);
+            callbackController.updatePartyDetails(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 
@@ -3031,13 +2998,13 @@ public class CallbackControllerTest {
         when(amendCourtService.handleAmendCourtSubmission(Mockito.anyString(), Mockito.any(), Mockito.any()))
             .thenReturn(new HashMap<>());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
 
         assertExpectedException(() -> {
-            callbackController.aboutToSubmitCaseCreation(authToken,s2sToken,callbackRequest);
+            callbackController.aboutToSubmitCaseCreation(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 
@@ -3049,13 +3016,13 @@ public class CallbackControllerTest {
         when(amendCourtService.handleAmendCourtSubmission(Mockito.anyString(), Mockito.any(), Mockito.any()))
             .thenReturn(new HashMap<>());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
 
         assertExpectedException(() -> {
-            callbackController.addCaseNumberSubmitted(authToken,s2sToken,callbackRequest);
+            callbackController.addCaseNumberSubmitted(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 
@@ -3172,8 +3139,8 @@ public class CallbackControllerTest {
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             callbackController.generateDocumentSubmitApplication(
-                authToken,
-                s2sToken,
+                AUTH_TOKEN,
+                S2S_TOKEN,
                 callbackRequest
             );
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c8Document"));
@@ -3202,7 +3169,7 @@ public class CallbackControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(allTabsService.updateAllTabsIncludingConfTab(any())).thenReturn(callbackRequest.getCaseDetails());
         ResponseEntity<SubmittedCallbackResponse> responseEntity =  callbackController
-            .transferCourtConfirmation(authToken, callbackRequest);
+            .transferCourtConfirmation(AUTH_TOKEN, callbackRequest);
         Assertions.assertNotNull(responseEntity);
     }
 
@@ -3252,18 +3219,19 @@ public class CallbackControllerTest {
         Organisations org = Organisations.builder().name("testOrg").organisationIdentifier("abcd").build();
         when(organisationService.findUserOrganisation(Mockito.anyString()))
             .thenReturn(Optional.of(org));
+        when(organisationService.getOrganisationByEmailDetail(Mockito.anyString()))
+            .thenReturn(Optional.of(org));
         CaseData caseData = CaseData.builder().id(123L).applicantCaseName("abcd").taskListVersion(TASK_LIST_VERSION_V2)
             .applicantOrganisationPolicy(applicantOrganisationPolicy).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(1L)
                              .data(caseDetails).build()).build();
-        when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
-            .aboutToSubmitCaseCreation(authToken,s2sToken, callbackRequest);
+            .aboutToSubmitCaseCreation(AUTH_TOKEN,S2S_TOKEN, callbackRequest);
         assertEquals("test", aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorName"));
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorOrgName"));
@@ -3271,18 +3239,18 @@ public class CallbackControllerTest {
 
     @Test
     public void fetchRoleAssignmentUserDoesntHaveRightRoles() {
-        when(roleAssignmentService.validateIfUserHasRightRoles(authToken, CallbackRequest.builder().build())).thenReturn(false);
+        when(roleAssignmentService.validateIfUserHasRightRoles(AUTH_TOKEN, CallbackRequest.builder().build())).thenReturn(false);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
-            .fetchRoleAssignmentForUser(authToken, CallbackRequest.builder().build());
+            .fetchRoleAssignmentForUser(AUTH_TOKEN, CallbackRequest.builder().build());
         assertEquals("The selected user does not have right roles to assign this case",
             aboutToStartOrSubmitCallbackResponse.getErrors().get(0));
     }
 
     @Test
     public void fetchRoleAssignmentUserHasRightRoles() {
-        when(roleAssignmentService.validateIfUserHasRightRoles(authToken, CallbackRequest.builder().build())).thenReturn(true);
+        when(roleAssignmentService.validateIfUserHasRightRoles(AUTH_TOKEN, CallbackRequest.builder().build())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
-            .fetchRoleAssignmentForUser(authToken, CallbackRequest.builder().build());
+            .fetchRoleAssignmentForUser(AUTH_TOKEN, CallbackRequest.builder().build());
         assertNotNull(aboutToStartOrSubmitCallbackResponse);
     }
 
@@ -3323,7 +3291,7 @@ public class CallbackControllerTest {
         doCallRealMethod().when(manageDocumentsService).setFlagsForWaTask(any(),any(),any(),any());
 
         AboutToStartOrSubmitCallbackResponse response = callbackController
-            .attachScanDocsWaChange(authToken, s2sToken, callbackRequest);
+            .attachScanDocsWaChange(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         assertNotNull(response.getData().get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
         assertEquals(TRUE, response.getData().get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
         assertNull(response.getData().get(MANAGE_DOCUMENTS_TRIGGERED_BY));
@@ -3351,7 +3319,7 @@ public class CallbackControllerTest {
         doCallRealMethod().when(manageDocumentsService).setFlagsForWaTask(any(),any(),any(),any());
 
         AboutToStartOrSubmitCallbackResponse response = callbackController
-            .attachScanDocsWaChange(authToken, s2sToken, callbackRequest);
+            .attachScanDocsWaChange(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         assertNotNull(response.getData().get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
         assertNotNull(response.getData().get(MANAGE_DOCUMENTS_TRIGGERED_BY));
         assertEquals(TRUE, response.getData().get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
@@ -3366,12 +3334,12 @@ public class CallbackControllerTest {
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(1L)
                              .data(stringObjectMap).build()).build();
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
 
         doCallRealMethod().when(manageDocumentsService).setFlagsForWaTask(any(),any(),any(),any());
 
         assertExpectedException(() -> {
-            callbackController.attachScanDocsWaChange(authToken, s2sToken, callbackRequest);
+            callbackController.attachScanDocsWaChange(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 
@@ -3385,10 +3353,12 @@ public class CallbackControllerTest {
         Organisations org = Organisations.builder().name("testOrg").organisationIdentifier("abcd").build();
         when(organisationService.findUserOrganisation(Mockito.anyString()))
             .thenReturn(Optional.of(org));
+        when(organisationService.getOrganisationByEmailDetail(Mockito.anyString()))
+            .thenReturn(Optional.of(org));
         CaseData caseData = CaseData.builder().id(123L).applicantCaseName("abcd").taskListVersion(TASK_LIST_VERSION_V2)
             .caseTypeOfApplication(C100_CASE_TYPE).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -3413,7 +3383,7 @@ public class CallbackControllerTest {
         when(updatePartyDetailsService.setDefaultEmptyApplicantForC100(caseData)).thenReturn(
             caseDetailsWithApplicants);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
-            .populatePartyInformation(authToken, callbackRequest);
+            .populatePartyInformation(AUTH_TOKEN, callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("applicants"));
     }
 
@@ -3427,10 +3397,12 @@ public class CallbackControllerTest {
         Organisations org = Organisations.builder().name("testOrg").organisationIdentifier("abcd").build();
         when(organisationService.findUserOrganisation(Mockito.anyString()))
             .thenReturn(Optional.of(org));
+        when(organisationService.getOrganisationByEmailDetail(Mockito.anyString()))
+            .thenReturn(Optional.of(org));
         CaseData caseData = CaseData.builder().id(123L).applicantCaseName("abcd").taskListVersion(TASK_LIST_VERSION_V2)
             .caseTypeOfApplication(C100_CASE_TYPE).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
         PartyDetails applicant = PartyDetails.builder().representativeFirstName("Abc")
             .representativeLastName("Xyz")
             .gender(Gender.male)
@@ -3456,7 +3428,7 @@ public class CallbackControllerTest {
         when(updatePartyDetailsService.setDefaultEmptyApplicantForC100(caseData)).thenReturn(
             caseDetailsWithApplicants);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
-            .populatePartyInformation(authToken, callbackRequest);
+            .populatePartyInformation(AUTH_TOKEN, callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("applicants"));
     }
 
@@ -3485,7 +3457,7 @@ public class CallbackControllerTest {
         when(launchDarklyClient.isFeatureEnabled(CREATE_URGENT_CASES_FLAG)).thenReturn(true);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
-            .validateUrgentCaseCreation(authToken, s2sToken, callbackRequest);
+            .validateUrgentCaseCreation(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
         assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorName"));
         assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorOrgName"));
@@ -3495,7 +3467,7 @@ public class CallbackControllerTest {
     public void validateUrgentCaseCreationError() {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
-            .validateUrgentCaseCreation(authToken, s2sToken, CallbackRequest.builder().build());
+            .validateUrgentCaseCreation(AUTH_TOKEN, S2S_TOKEN, CallbackRequest.builder().build());
         assertEquals("Sorry unable to create any urgent cases now",
                      aboutToStartOrSubmitCallbackResponse.getErrors().get(0));
     }
@@ -3509,10 +3481,12 @@ public class CallbackControllerTest {
         Organisations org = Organisations.builder().name("testOrg").organisationIdentifier("abcd").build();
         when(organisationService.findUserOrganisation(Mockito.anyString()))
             .thenReturn(Optional.of(org));
+        when(organisationService.getOrganisationByEmailDetail(Mockito.anyString()))
+            .thenReturn(Optional.of(org));
         CaseData caseData = CaseData.builder().id(123L).applicantCaseName("abcd").taskListVersion(TASK_LIST_VERSION_V2)
             .caseTypeOfApplication(C100_CASE_TYPE).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -3538,7 +3512,7 @@ public class CallbackControllerTest {
             caseDetailsWithChildren);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
-            .populateChildInformation(authToken, callbackRequest);
+            .populateChildInformation(AUTH_TOKEN, callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("children"));
     }
 
@@ -3558,7 +3532,7 @@ public class CallbackControllerTest {
             .thenReturn(List.of(DynamicListElement.EMPTY));
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =  callbackController
-            .amendCourtAboutToStart(authToken,s2sToken,callbackRequest);
+            .amendCourtAboutToStart(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("courtList"));
     }
 
@@ -3568,7 +3542,7 @@ public class CallbackControllerTest {
         caseDetails.put("applicantOrRespondentCaseName", "test");
         caseDetails.put("caseTypeOfApplication", "C100");
 
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -3605,7 +3579,7 @@ public class CallbackControllerTest {
             caseDetailsWithOtherPerson);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
-            .updateOtherPeoplePartyDetails(authToken, s2sToken, callbackRequest);
+            .updateOtherPeoplePartyDetails(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("otherPartyInTheCaseRevised"));
     }
 
@@ -3613,7 +3587,7 @@ public class CallbackControllerTest {
     public void testExceptionForupdateOtherPeoplePartyDetails() {
         Map<String, Object> caseDetails = new HashMap<>();
 
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -3621,7 +3595,7 @@ public class CallbackControllerTest {
                              .data(caseDetails).build()).build();
 
         assertExpectedException(() -> {
-            callbackController.updateOtherPeoplePartyDetails(authToken, s2sToken, callbackRequest);
+            callbackController.updateOtherPeoplePartyDetails(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 
@@ -3632,11 +3606,11 @@ public class CallbackControllerTest {
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().build())
             .build();
 
-        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
         when(updatePartyDetailsService.validateUpdatePartyDetails(callbackRequest)).thenReturn(new ArrayList<>());
 
         AboutToStartOrSubmitCallbackResponse response = callbackController
-            .handleUpdatePartyDetailsMidEvent(authToken, s2sToken, callbackRequest);
+            .handleUpdatePartyDetailsMidEvent(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
 
         assertNotNull(response);
         assertTrue(response.getErrors().isEmpty());
@@ -3651,11 +3625,11 @@ public class CallbackControllerTest {
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().build())
             .build();
 
-        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
         when(updatePartyDetailsService.validateUpdatePartyDetails(callbackRequest)).thenReturn(List.of("Barrister"));
 
         AboutToStartOrSubmitCallbackResponse response = callbackController
-            .handleUpdatePartyDetailsMidEvent(authToken, s2sToken, callbackRequest);
+            .handleUpdatePartyDetailsMidEvent(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
 
         assertNotNull(response);
         assertTrue(response.getErrors().contains("Barrister"));
