@@ -64,7 +64,7 @@ public class LinkCitizenCaseService {
         Optional<CaseDetails> caseDetails = Optional.empty();
         CaseData dbCaseData = findAndGetCase(caseId);
 
-        if (VALID.equalsIgnoreCase(findAccessCodeStatus(accessCode, dbCaseData, authorisation))) {
+        if (VALID.equalsIgnoreCase(findAccessCodeStatus(accessCode, dbCaseData))) {
             UserDetails userDetails = idamClient.getUserDetails(authorisation);
             log.info("Validating Email already in use for case {}", caseId);
 
@@ -201,7 +201,7 @@ public class LinkCitizenCaseService {
         return caseDataUpdated;
     }
 
-    private String findAccessCodeStatus(String accessCode, CaseData caseData, String authorisation) {
+    private String findAccessCodeStatus(String accessCode, CaseData caseData) {
         String accessCodeStatus = INVALID;
         if (null == caseData.getCaseInvites() || caseData.getCaseInvites().isEmpty()
             || (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
@@ -224,23 +224,14 @@ public class LinkCitizenCaseService {
             }
         }
 
-        UserInfo userInfo = idamClient.getUserInfo(authorisation);
-        long caseId = caseData.getId();
-
-        /*log.info("Validating Email already in use for case {}", caseId);
-        if (isEmailAlreadyUsedInCase(caseData, userInfo)) {
-            log.info("Email already in use for case {}", caseId);
-            throw (new RuntimeException(PrlAppsConstants.EMAIL_ALREADY_USED_IN_CASE_ENG));
-        }*/
-
         return accessCodeStatus;
     }
 
-    public String validateAccessCode(String caseId, String accessCode, String authorisation) {
+    public String validateAccessCode(String caseId, String accessCode) {
         CaseData caseData = findAndGetCase(caseId);
         if (null == caseData) {
             return INVALID;
         }
-        return findAccessCodeStatus(accessCode, caseData, authorisation);
+        return findAccessCodeStatus(accessCode, caseData);
     }
 }

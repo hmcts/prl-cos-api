@@ -117,7 +117,7 @@ public class LinkCitizenCaseControllerIntegrationTest {
         String jsonRequest = "{ \"caseId\": \"12345\", \"accessCode\": \"testAccessCode\" }";
 
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
-        when(linkCitizenCaseService.validateAccessCode(anyString(), anyString(), anyString())).thenReturn("Valid");
+        when(linkCitizenCaseService.validateAccessCode(anyString(), anyString())).thenReturn("Valid");
 
         mockMvc.perform(
                 post(url)

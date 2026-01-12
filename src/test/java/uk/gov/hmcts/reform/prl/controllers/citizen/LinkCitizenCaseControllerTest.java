@@ -162,8 +162,7 @@ public class LinkCitizenCaseControllerTest {
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
 
         when(linkCitizenCaseService.validateAccessCode(accessCodeRequest.getCaseId(),
-                                                       accessCodeRequest.getAccessCode(),
-                                                       authToken
+                                                       accessCodeRequest.getAccessCode()
         ))
             .thenReturn("test");
         String accessCode = linkCitizenCaseController.validateAccessCode(authToken, s2sToken, accessCodeRequest);
