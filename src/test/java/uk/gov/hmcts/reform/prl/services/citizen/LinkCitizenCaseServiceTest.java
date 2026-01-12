@@ -163,10 +163,10 @@ public class LinkCitizenCaseServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDataEmailAlreadyLinked);
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
 
-         RuntimeException rte = Assert.assertThrows(RuntimeException.class, () ->
-             linkCitizenCaseService.linkCitizenToCase(authToken, caseId, accessCode)
-         );
-         Assert.assertEquals(PrlAppsConstants.EMAIL_ALREADY_USED_IN_CASE_ENG, rte.getMessage());
+        RuntimeException rte = Assert.assertThrows(RuntimeException.class, () ->
+            linkCitizenCaseService.linkCitizenToCase(authToken, caseId, accessCode)
+        );
+        Assert.assertEquals(PrlAppsConstants.EMAIL_ALREADY_USED_IN_CASE_ENG, rte.getMessage());
     }
 
     @Test
