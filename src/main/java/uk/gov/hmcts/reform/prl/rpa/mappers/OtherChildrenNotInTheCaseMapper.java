@@ -1,22 +1,20 @@
 package uk.gov.hmcts.reform.prl.rpa.mappers;
 
 import lombok.RequiredArgsConstructor;
-import org.junit.Ignore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherChildrenNotInTheCase;
 import uk.gov.hmcts.reform.prl.rpa.mappers.json.NullAwareJsonObjectBuilder;
 
-import java.util.List;
-import java.util.Optional;
 import javax.json.JsonArray;
 import javax.json.JsonValue;
 import javax.json.stream.JsonCollectors;
+import java.util.List;
+import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 
-@Ignore
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OtherChildrenNotInTheCaseMapper {
@@ -38,5 +36,4 @@ public class OtherChildrenNotInTheCaseMapper {
             .add("otherGender", child.getOtherGender())
             .build()).collect(JsonCollectors.toJsonArray());
     }
-
 }
