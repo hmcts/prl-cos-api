@@ -166,9 +166,6 @@ public class LinkCitizenCaseServiceTest {
          RuntimeException rte = Assert.assertThrows(RuntimeException.class, () ->
              linkCitizenCaseService.linkCitizenToCase(authToken, caseId, accessCode)
          );
-        //Optional<CaseDetails> returnedCaseDetails = linkCitizenCaseService.linkCitizenToCase(authToken, caseId, accessCode);
-        //Assert.assertNotNull(returnedCaseDetails);
-
          Assert.assertEquals(PrlAppsConstants.EMAIL_ALREADY_USED_IN_CASE_ENG, rte.getMessage());
     }
 
