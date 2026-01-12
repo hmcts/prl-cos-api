@@ -311,11 +311,13 @@ public class CallbackController {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-            Court closestChildArrangementsCourt;
+            Court closestChildArrangementsCourt = null;
             if (featureToggleService.isOsCourtLookupFeatureEnabled()) {
                 ImmutablePair<CourtVenue, Court> courtCourtVenueMap = courtLocatorService.getC100NearestFamilyCourtAndVenue(caseData);
-                closestChildArrangementsCourt = courtCourtVenueMap.getRight();
-                if (courtCourtVenueMap.getLeft() != null) {
+                if (courtCourtVenueMap != null && courtCourtVenueMap.getRight() != null) {
+                    closestChildArrangementsCourt = courtCourtVenueMap.getRight();
+                }
+                if (courtCourtVenueMap != null && courtCourtVenueMap.getLeft() != null) {
                     caseDataUpdated.put(COURT_ID_FIELD, courtCourtVenueMap.getLeft().getCourtEpimmsId());
                 }
             } else {
