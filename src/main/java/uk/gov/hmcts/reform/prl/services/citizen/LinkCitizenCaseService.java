@@ -66,12 +66,12 @@ public class LinkCitizenCaseService {
 
         if (VALID.equalsIgnoreCase(findAccessCodeStatus(accessCode, dbCaseData, authorisation))) {
             UserDetails userDetails = idamClient.getUserDetails(authorisation);
-            /*log.info("Validating Email already in use for case {}", caseId);
+            log.info("Validating Email already in use for case {}", caseId);
 
-            if (isEmailAlreadyUsedInCase(dbCaseData, userDetails)) {
+            if (isEmailAlreadyUsedInCase(dbCaseData, authorisation)) {
                 log.info("Email already in use for case {}", caseId);
                 throw (new RuntimeException(PrlAppsConstants.EMAIL_ALREADY_USED_IN_CASE_ENG));
-            }*/
+            }
 
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
                 = allTabService.getStartUpdateForSpecificEvent(caseId, CaseEvent.LINK_CITIZEN.getValue());
@@ -101,7 +101,8 @@ public class LinkCitizenCaseService {
         return caseDetails;
     }
 
-    private boolean  isEmailAlreadyUsedInCase(CaseData dbCaseData, UserInfo userInfo) {
+    private boolean  isEmailAlreadyUsedInCase(CaseData dbCaseData, String authorisation) {
+        UserInfo userInfo = idamClient.getUserInfo(authorisation);
         return Optional.ofNullable(dbCaseData.getCaseInvites())
             .stream()
             .flatMap(List::stream)
@@ -226,11 +227,11 @@ public class LinkCitizenCaseService {
         UserInfo userInfo = idamClient.getUserInfo(authorisation);
         long caseId = caseData.getId();
 
-        log.info("Validating Email already in use for case {}", caseId);
+        /*log.info("Validating Email already in use for case {}", caseId);
         if (isEmailAlreadyUsedInCase(caseData, userInfo)) {
             log.info("Email already in use for case {}", caseId);
             throw (new RuntimeException(PrlAppsConstants.EMAIL_ALREADY_USED_IN_CASE_ENG));
-        }
+        }*/
 
         return accessCodeStatus;
     }
