@@ -22,6 +22,8 @@ public enum DocTypeOtherDocumentsEnum {
     respondentReports("respondentReports", "Respondent reports"),
     @JsonProperty("otherReports")
     otherReports("otherReports", "Other reports"),
+    @JsonProperty("draftOrders")
+    draftOrders("draftOrders", "Draft orders"),
 
     @JsonProperty("approvedOrders")
     approvedOrders("approvedOrders", "Finalised order"),
