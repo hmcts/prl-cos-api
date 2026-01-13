@@ -1158,18 +1158,42 @@ public class ServiceOfApplicationService {
             if (CaseUtils.hasLegalRepresentation(respondent.getValue())) {
                 sendEmailToRespondentSolicitorNonPersonal(caseData, authorization, emailNotificationDetails, packSdocs, respondent);
             } else if (!CaseUtils.hasLegalRepresentation(respondent.getValue())) {
-                if (respondent.getValue().getAddress() != null && StringUtils.isNotEmpty(respondent.getValue().getAddress().getAddressLine1())) {
-                    log.info(
-                        "Sending the notification in post to respondent for C100 Application for caseId {}",
-                        caseData.getId()
-                    );
-                    List<Document> finalDocs = removeCoverLettersFromThePacks(packRdocs);
-                    List<Document> coverLetters = generateCoverLetterBasedOnCaseAccess(authorization, caseData, respondent, PRL_LET_ENG_C100_RE5);
-                    sendPostWithAccessCodeLetterToParty(caseData, authorization, finalDocs, bulkPrintDetails, respondent,
-                                                        coverLetters, SERVED_PARTY_RESPONDENT);
+                ContactPreferences respondentContactPreference = respondent.getValue().getContactPreferences();
+                if (respondentContactPreference == null || ContactPreferences.post.equals(respondentContactPreference) || (ContactPreferences.email.equals(
+                    respondentContactPreference) && respondent.getValue().getEmail() == null)) {
+                    log.info("Sending post to respondent, if NO preferences set or set to POST or the email is empty");
+                    if (respondent.getValue().getAddress() != null && StringUtils.isNotEmpty(respondent.getValue().getAddress().getAddressLine1())) {
+                        log.info(
+                            "Sending the notification in post to respondent for C100 Application for caseId {}",
+                            caseData.getId()
+                        );
+                        List<Document> finalDocs = removeCoverLettersFromThePacks(packRdocs);
+
+                        List<Document> coverLetters = generateCoverLetterBasedOnCaseAccess(
+                            authorization,
+                            caseData,
+                            respondent,
+                            PRL_LET_ENG_C100_RE5
+                        );
+                        sendPostWithAccessCodeLetterToParty(
+                            caseData, authorization, finalDocs, bulkPrintDetails, respondent,
+                            coverLetters, SERVED_PARTY_RESPONDENT
+                        );
+                    } else {
+                        log.info(
+                            "Unable to send any notification to respondent for C100 Application for caseId {} "
+                                + "as no address available", caseData.getId()
+                        );
+                    }
                 } else {
-                    log.info("Unable to send any notification to respondent for C100 Application for caseId {} "
-                                 + "as no address available", caseData.getId());
+                    log.info("Sending email to respondent if preferences set to email and email address populated");
+                    sendEmailToRespondentNonPersonal(
+                        caseData,
+                        authorization,
+                        emailNotificationDetails,
+                        packRdocs,
+                        respondent
+                    );
                 }
             }
         });
@@ -1224,6 +1248,40 @@ public class ServiceOfApplicationService {
                 EmailNotificationDetails emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
                     authorization,
                     party.getValue().getSolicitorEmail(),
+                    finalDocs,
+                    SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
+                    dynamicData,
+                    PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR
+                );
+                if (null != emailNotification) {
+                    emailNotificationDetails.add(element(emailNotification));
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void sendEmailToRespondentNonPersonal(CaseData caseData, String authorization,
+                                                  List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                                  List<Document> packRdocs, Element<PartyDetails> party) {
+        if (party.getValue().getEmail() != null) {
+            try {
+                log.info(
+                    "Sending the email notification to respondent for C100 Application for caseId {}",
+                    caseData.getId()
+                );
+                Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+                //what name should be used
+                dynamicData.put("name", party.getValue().getFirstName() + " " +party.getValue().getLastName());
+                dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
+                dynamicData.put("respondent", true);
+                populateLanguageMap(caseData, dynamicData);
+                List<Document> finalDocs = removeCoverLettersFromThePacks(packRdocs);
+                //find the right template and served party details and use it here
+                EmailNotificationDetails emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
+                    authorization,
+                    party.getValue().getEmail(),
                     finalDocs,
                     SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
                     dynamicData,
