@@ -547,9 +547,7 @@ public class ManageDocumentsService {
                     ))
             );
 
-            if (uploadResponse == null
-                || uploadResponse.getDocuments() == null
-                || uploadResponse.getDocuments().isEmpty()) {
+            if (uploadResponse == null || CollectionUtils.isEmpty(uploadResponse.getDocuments())) {
                 throw new IllegalStateException("Upload returned no documents for id: " + documentId);
             }
 
