@@ -1159,8 +1159,8 @@ public class ServiceOfApplicationService {
                 sendEmailToRespondentSolicitorNonPersonal(caseData, authorization, emailNotificationDetails, packSdocs, respondent);
             } else if (!CaseUtils.hasLegalRepresentation(respondent.getValue())) {
                 ContactPreferences respondentContactPreference = respondent.getValue().getContactPreferences();
-                if (respondentContactPreference == null || ContactPreferences.post.equals(respondentContactPreference) || (ContactPreferences.email.equals(
-                    respondentContactPreference) && respondent.getValue().getEmail() == null)) {
+                if (respondentContactPreference == null || ContactPreferences.post.equals(respondentContactPreference)
+                    || (ContactPreferences.email.equals(respondentContactPreference) && respondent.getValue().getEmail() == null)) {
                     log.info("Sending post to respondent, if NO preferences set or set to POST or the email is empty");
                     if (respondent.getValue().getAddress() != null && StringUtils.isNotEmpty(respondent.getValue().getAddress().getAddressLine1())) {
                         log.info(
