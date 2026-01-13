@@ -57,6 +57,7 @@ public class LinkCitizenCaseService {
     public static final String INVALID = "Invalid";
     public static final String VALID = "Valid";
     public static final String LINKED = "Linked";
+    public static final String DUPLICATE = "Duplicate";
     public static final String YES = "Yes";
     public static final String CASE_INVITES = "caseInvites";
 
@@ -64,14 +65,14 @@ public class LinkCitizenCaseService {
         Optional<CaseDetails> caseDetails = Optional.empty();
         CaseData dbCaseData = findAndGetCase(caseId);
 
-        if (VALID.equalsIgnoreCase(findAccessCodeStatus(accessCode, dbCaseData))) {
+        if (VALID.equalsIgnoreCase(findAccessCodeStatus(accessCode, dbCaseData, authorisation))) {
             UserDetails userDetails = idamClient.getUserDetails(authorisation);
-            log.info("Validating Email already in use for case {}", caseId);
+            /*log.info("Validating Email already in use for case {}", caseId);
 
             if (isEmailAlreadyUsedInCase(dbCaseData, authorisation)) {
                 log.info("Email already in use for case {}", caseId);
                 throw (new RuntimeException(PrlAppsConstants.EMAIL_ALREADY_USED_IN_CASE_ENG));
-            }
+            }*/
 
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
                 = allTabService.getStartUpdateForSpecificEvent(caseId, CaseEvent.LINK_CITIZEN.getValue());
@@ -201,7 +202,7 @@ public class LinkCitizenCaseService {
         return caseDataUpdated;
     }
 
-    private String findAccessCodeStatus(String accessCode, CaseData caseData) {
+    private String findAccessCodeStatus(String accessCode, CaseData caseData, String authorisation) {
         String accessCodeStatus = INVALID;
         if (null == caseData.getCaseInvites() || caseData.getCaseInvites().isEmpty()
             || (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
@@ -224,14 +225,21 @@ public class LinkCitizenCaseService {
             }
         }
 
+        log.info("Validating Email already in use for case {}", caseData.getId());
+
+        if (isEmailAlreadyUsedInCase(caseData, authorisation)) {
+            log.info("Email already in use for case {}", caseData.getId());
+            accessCodeStatus = DUPLICATE;
+        }
+
         return accessCodeStatus;
     }
 
-    public String validateAccessCode(String caseId, String accessCode) {
+    public String validateAccessCode(String caseId, String accessCode, String authorisation) {
         CaseData caseData = findAndGetCase(caseId);
         if (null == caseData) {
             return INVALID;
         }
-        return findAccessCodeStatus(accessCode, caseData);
+        return findAccessCodeStatus(accessCode, caseData, authorisation);
     }
 }
