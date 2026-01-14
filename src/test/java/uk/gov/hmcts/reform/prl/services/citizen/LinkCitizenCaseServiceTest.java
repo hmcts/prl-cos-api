@@ -120,6 +120,7 @@ public class LinkCitizenCaseServiceTest {
             .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.Yes)
                                                                          .partyId(testUuid)
                                                                          .accessCode(accessCode)
+                                                                         .hasLinked("Yes")
                                                                          .invitedUserId("123").build()).build()))
             .build();
 
