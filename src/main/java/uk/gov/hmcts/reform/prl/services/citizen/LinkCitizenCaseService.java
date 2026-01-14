@@ -97,7 +97,7 @@ public class LinkCitizenCaseService {
 
     private boolean  isEmailAlreadyUsedInCase(CaseData dbCaseData, String authorisation) {
         UserInfo userInfo = idamClient.getUserInfo(authorisation);
-        log.info("user id being checked is "+userInfo.getUid());
+        log.info("user id being checked is " + userInfo.getUid());
         return Optional.ofNullable(dbCaseData.getCaseInvites())
             .stream()
             .flatMap(List::stream)
