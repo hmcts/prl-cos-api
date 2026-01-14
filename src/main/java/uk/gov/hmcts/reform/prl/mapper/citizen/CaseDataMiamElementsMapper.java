@@ -299,7 +299,7 @@ public class CaseDataMiamElementsMapper {
         }
     }
 
-    private static Document buildDocument(uk.gov.hmcts.reform.prl.models.c100rebuild.Document maimDocument) {
+    static Document buildDocument(uk.gov.hmcts.reform.prl.models.c100rebuild.Document maimDocument) {
         if (isNotEmpty(maimDocument)) {
             return Document.builder()
                 .documentUrl(maimDocument.getUrl())

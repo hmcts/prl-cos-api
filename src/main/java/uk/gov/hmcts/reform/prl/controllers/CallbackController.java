@@ -380,6 +380,7 @@ public class CallbackController {
                 } else if (launchDarklyClient.isFeatureEnabled(TASK_LIST_V2_FLAG)) {
                     caseDataUpdated.put(TASK_LIST_VERSION, TASK_LIST_VERSION_V2);
                 }
+                caseDataUpdated.remove("miamDocumentsCopy");
             } else if (CaseCreatedBy.COURT_ADMIN.equals(caseData.getCaseCreatedBy())) {
                 caseDataUpdated.put("caseStatus", CaseStatus.builder()
                     .state(SUBMITTED_PAID.getLabel())
