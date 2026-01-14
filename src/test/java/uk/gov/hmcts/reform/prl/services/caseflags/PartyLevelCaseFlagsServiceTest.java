@@ -850,6 +850,36 @@ class PartyLevelCaseFlagsServiceTest {
     }
 
     @Test
+    void givenApplicantNameChangesWhenAmendCaseFlagsThenFlagUpdatedForFl401Case() {
+        CaseData caseDataBefore = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(createUnrepresentedParty("oldFirstName", "oldLastName"))
+            .allPartyFlags(AllPartyFlags.builder()
+                .daApplicantExternalFlags(createFlags("daApplicant1", "Applicant 1", VISIBILITY_EXTERNAL))
+                .daApplicantInternalFlags(createFlags("daApplicant1", "Applicant 1", VISIBILITY_INTERNAL))
+                .build())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(createUnrepresentedParty("newFirstName", "newLastName"))
+            .allPartyFlags(AllPartyFlags.builder()
+                .daApplicantExternalFlags(createFlags("daApplicant1", "Applicant 1", VISIBILITY_EXTERNAL))
+                .daApplicantInternalFlags(createFlags("daApplicant1", "Applicant 1", VISIBILITY_INTERNAL))
+                .build())
+            .build();
+
+        Map<String, Object> caseDataMapBefore = objectMapper.convertValue(caseDataBefore, new TypeReference<>() {});
+        Map<String, Object> caseDataMap = objectMapper.convertValue(caseData, new TypeReference<>() {});
+
+        partyLevelCaseFlagsService.amendCaseFlags(caseDataMapBefore, caseDataMap, AMEND_APPLICANTS_DETAILS.getValue());
+
+        verifyFlags(caseDataMap.get("daApplicantExternalFlags"), "newFirstName newLastName", "daApplicant1",
+                    "Applicant 1", VISIBILITY_EXTERNAL);
+        verifyFlags(caseDataMap.get("daApplicantInternalFlags"), "newFirstName newLastName", "daApplicant1",
+                    "Applicant 1", VISIBILITY_INTERNAL);
+    }
+
+    @Test
     void givenRespondentNameChangesWhenAmendCaseFlagsThenFlagUpdated() {
         CaseData caseDataBefore = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -882,6 +912,36 @@ class PartyLevelCaseFlagsServiceTest {
         verifyFlags(caseDataMap.get("caRespondent1ExternalFlags"), "newFirstName newLastName", "caRespondent1",
                     "Respondent 1", VISIBILITY_EXTERNAL);
         verifyFlags(caseDataMap.get("caRespondent1InternalFlags"), "newFirstName newLastName", "caRespondent1",
+                    "Respondent 1", VISIBILITY_INTERNAL);
+    }
+
+    @Test
+    void givenRespondentNameChangesWhenAmendCaseFlagsThenFlagUpdatedForFl401Case() {
+        CaseData caseDataBefore = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .respondentsFL401(createUnrepresentedParty("oldFirstName", "oldLastName"))
+            .allPartyFlags(AllPartyFlags.builder()
+                .daRespondentExternalFlags(createFlags("daRespondent1", "Respondent 1", VISIBILITY_EXTERNAL))
+                .daRespondentInternalFlags(createFlags("daRespondent1", "Respondent 1", VISIBILITY_INTERNAL))
+                .build())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .respondentsFL401(createUnrepresentedParty("newFirstName", "newLastName"))
+            .allPartyFlags(AllPartyFlags.builder()
+                .daRespondentExternalFlags(createFlags("daRespondent1", "Respondent 1", VISIBILITY_EXTERNAL))
+                .daRespondentInternalFlags(createFlags("daRespondent1", "Respondent 1", VISIBILITY_INTERNAL))
+                .build())
+            .build();
+
+        Map<String, Object> caseDataMapBefore = objectMapper.convertValue(caseDataBefore, new TypeReference<>() {});
+        Map<String, Object> caseDataMap = objectMapper.convertValue(caseData, new TypeReference<>() {});
+
+        partyLevelCaseFlagsService.amendCaseFlags(caseDataMapBefore, caseDataMap, AMEND_RESPONDENTS_DETAILS.getValue());
+
+        verifyFlags(caseDataMap.get("daRespondentExternalFlags"), "newFirstName newLastName", "daRespondent1",
+                    "Respondent 1", VISIBILITY_EXTERNAL);
+        verifyFlags(caseDataMap.get("daRespondentInternalFlags"), "newFirstName newLastName", "daRespondent1",
                     "Respondent 1", VISIBILITY_INTERNAL);
     }
 
@@ -983,6 +1043,36 @@ class PartyLevelCaseFlagsServiceTest {
     }
 
     @Test
+    void givenApplicantCaseFlagsDataMissingWhenAmendCaseFlagsThenFlagUpdatedForFl401Case() {
+        CaseData caseDataBefore = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(createUnrepresentedParty("oldFirstName", "oldLastName"))
+            .allPartyFlags(AllPartyFlags.builder()
+                .daApplicantExternalFlags(Flags.builder().build())
+                .daApplicantInternalFlags(Flags.builder().build())
+                .build())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(createUnrepresentedParty("newFirstName", "newLastName"))
+            .allPartyFlags(AllPartyFlags.builder()
+                .daApplicantExternalFlags(Flags.builder().build())
+                .daApplicantInternalFlags(Flags.builder().build())
+                .build())
+            .build();
+
+        Map<String, Object> caseDataMapBefore = objectMapper.convertValue(caseDataBefore, new TypeReference<>() {});
+        Map<String, Object> caseDataMap = objectMapper.convertValue(caseData, new TypeReference<>() {});
+
+        partyLevelCaseFlagsService.amendCaseFlags(caseDataMapBefore, caseDataMap, AMEND_APPLICANTS_DETAILS.getValue());
+
+        verifyFlags(caseDataMap.get("daApplicantExternalFlags"), "newFirstName newLastName", "Applicant",
+                    "daApplicant", VISIBILITY_EXTERNAL);
+        verifyFlags(caseDataMap.get("daApplicantInternalFlags"), "newFirstName newLastName", "Applicant",
+                    "daApplicant", VISIBILITY_INTERNAL);
+    }
+
+    @Test
     void givenRespondentCaseFlagsDataMissingWhenAmendCaseFlagsThenFlagUpdated() {
         CaseData caseDataBefore = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -1040,6 +1130,36 @@ class PartyLevelCaseFlagsServiceTest {
                     "caRespondent1", VISIBILITY_EXTERNAL);
         verifyFlags(caseDataMap.get("caRespondent1InternalFlags"), "respFirstName respLastName", "Respondent 1",
                     "caRespondent1", VISIBILITY_INTERNAL);
+    }
+
+    @Test
+    void givenRespondentCaseFlagsDataMissingWhenAmendCaseFlagsThenFlagUpdatedForFl401Case() {
+        CaseData caseDataBefore = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .respondentsFL401(createUnrepresentedParty("oldFirstName", "oldLastName"))
+            .allPartyFlags(AllPartyFlags.builder()
+                .daRespondentExternalFlags(Flags.builder().build())
+                .daRespondentInternalFlags(Flags.builder().build())
+                .build())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .respondentsFL401(createUnrepresentedParty("newFirstName", "newLastName"))
+            .allPartyFlags(AllPartyFlags.builder()
+                .daRespondentExternalFlags(Flags.builder().build())
+                .daRespondentInternalFlags(Flags.builder().build())
+                .build())
+            .build();
+
+        Map<String, Object> caseDataMapBefore = objectMapper.convertValue(caseDataBefore, new TypeReference<>() {});
+        Map<String, Object> caseDataMap = objectMapper.convertValue(caseData, new TypeReference<>() {});
+
+        partyLevelCaseFlagsService.amendCaseFlags(caseDataMapBefore, caseDataMap, AMEND_RESPONDENTS_DETAILS.getValue());
+
+        verifyFlags(caseDataMap.get("daRespondentExternalFlags"), "newFirstName newLastName", "Respondent",
+                    "daRespondent", VISIBILITY_EXTERNAL);
+        verifyFlags(caseDataMap.get("daRespondentInternalFlags"), "newFirstName newLastName", "Respondent",
+                    "daRespondent", VISIBILITY_INTERNAL);
     }
 
     @Test
@@ -1474,6 +1594,10 @@ class PartyLevelCaseFlagsServiceTest {
         Flags caApplicant3InternalFlags = generateCaseFlag("Applicant 3", "caApplicant3", flagDetail);
         Flags caRespondent1ExternalFlags = generateCaseFlag("Applicant 1", "caApplicant1", flagDetail);
         Flags caRespondent1InternalFlags = generateCaseFlag("Applicant 1", "caApplicant1", flagDetail);
+        Flags daApplicantExternalFlags = generateCaseFlag("Applicant 1", "daApplicant1", flagDetail);
+        Flags daApplicantInternalFlags = generateCaseFlag("Applicant 1", "daApplicant1", flagDetail);
+        Flags daRespondentExternalFlags = generateCaseFlag("Applicant 1", "daApplicant1", flagDetail);
+        Flags daRespondentInternalFlags = generateCaseFlag("Applicant 1", "daApplicant1", flagDetail);
         return AllPartyFlags.builder()
             .caApplicant1InternalFlags(caApplicant1InternalFlags)
             .caApplicant1ExternalFlags(caApplicant1ExternalFlags)
@@ -1501,6 +1625,22 @@ class PartyLevelCaseFlagsServiceTest {
             .caApplicantBarrister3InternalFlags(Flags.builder().build())
             .caRespondentBarrister1ExternalFlags(Flags.builder().build())
             .caRespondentBarrister1InternalFlags(Flags.builder().build())
+
+            .daApplicantExternalFlags(daApplicantExternalFlags)
+            .daApplicantInternalFlags(daApplicantInternalFlags)
+            .daRespondentExternalFlags(daRespondentExternalFlags)
+            .daRespondentInternalFlags(daRespondentInternalFlags)
+
+            .daApplicantSolicitorExternalFlags(Flags.builder().build())
+            .daApplicantSolicitorInternalFlags(Flags.builder().build())
+            .daRespondentSolicitorExternalFlags(Flags.builder().build())
+            .daRespondentSolicitorInternalFlags(Flags.builder().build())
+
+            .daApplicantBarristerExternalFlags(Flags.builder().build())
+            .daApplicantBarristerInternalFlags(Flags.builder().build())
+            .daRespondentSolicitorExternalFlags(Flags.builder().build())
+            .daRespondentSolicitorInternalFlags(Flags.builder().build())
+
             .build();
     }
 

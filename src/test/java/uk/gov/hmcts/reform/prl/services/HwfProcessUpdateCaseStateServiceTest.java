@@ -1,17 +1,14 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatcher;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -19,133 +16,142 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.models.SearchResultResponse;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
-import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.DateOfSubmission;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.request.QueryParam;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestReferenceStatusResponse;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
-import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_STATUS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_OF_SUBMISSION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.HWF_PROCESS_CASE_UPDATE;
 
-@Slf4j
-@RunWith(MockitoJUnitRunner.Silent.class)
-public class HwfProcessUpdateCaseStateServiceTest {
+@ExtendWith(MockitoExtension.class)
+class HwfProcessUpdateCaseStateServiceTest {
+    private static final String AUTH_TOKEN = "authToken";
+    private static final String S2S_TOKEN = "s2sToken";
 
-    private final String authToken = "authToken";
-    private final String s2sAuthToken = "s2sAuthToken";
-    private CaseDetails caseDetails;
-    private CaseData caseData;
-
-
-    @InjectMocks
     private HwfProcessUpdateCaseStateService hwfProcessUpdateCaseStateService;
-
+    private ObjectMapper objectMapper;
     @Mock
-    ObjectMapper objectMapper;
-
+    private SystemUserService systemUserService;
     @Mock
-    SystemUserService systemUserService;
-
+    private AuthTokenGenerator authTokenGenerator;
     @Mock
-    AuthTokenGenerator authTokenGenerator;
-
+    private CoreCaseDataApi coreCaseDataApi;
     @Mock
-    CoreCaseDataApi coreCaseDataApi;
-
+    private AllTabServiceImpl allTabService;
     @Mock
-    AllTabServiceImpl allTabService;
-
-    @Mock
-    PaymentRequestService paymentRequestService;
+    private PaymentRequestService paymentRequestService;
 
     @Captor
     private ArgumentCaptor<Map<String, Object>> caseDataUpdatedCaptor;
 
-    @Before
-    public void setUp() {
-        when(systemUserService.getSysUserToken()).thenReturn(authToken);
-        when(authTokenGenerator.generate()).thenReturn(s2sAuthToken);
+    @BeforeEach
+    void setUp() {
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
+        when(authTokenGenerator.generate()).thenReturn(S2S_TOKEN);
 
-        caseData = CaseData.builder()
-            .id(123L)
-            .state(State.SUBMITTED_NOT_PAID)
-            .helpWithFeesNumber("HWF-1BC-AF")
-            .paymentServiceRequestReferenceNumber("2024-1709204678984")
-            .build();
+        Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
+        objectMapper = builder.createXmlMapper(false).build();
 
-        caseDetails = CaseDetails.builder()
-            .id(123L)
-            .data(caseData.toMap(objectMapper))
-            .build();
-
-        SearchResult searchResult = SearchResult.builder()
-            .total(1)
-            .cases(List.of(caseDetails))
-            .build();
-        when(coreCaseDataApi.searchCases(authToken, s2sAuthToken, CASE_TYPE, null)).thenReturn(searchResult);
-
-        SearchResultResponse response = SearchResultResponse.builder()
-            .total(1)
-            .cases(List.of(caseDetails))
-            .build();
-        when(objectMapper.convertValue(searchResult, SearchResultResponse.class)).thenReturn(response);
-
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
-            s2sAuthToken,
-            EventRequestData.builder().build(),
-            StartEventResponse.builder().build(),
-            caseData.toMap(objectMapper),
-            caseData,
-            null
-        );
-        when(allTabService.getStartUpdateForSpecificEvent(any(), any())).thenReturn(startAllTabsUpdateDataContent);
-        when(allTabService.submitAllTabsUpdate(
-            anyString(),
-            anyString(),
-            any(),
-            any(),
-            caseDataUpdatedCaptor.capture()
-        )).thenReturn(caseDetails);
-        when(paymentRequestService.fetchServiceRequestReferenceStatus(anyString(), anyString())).thenReturn(
-            ServiceRequestReferenceStatusResponse.builder().serviceRequestStatus("Paid").build());
+        hwfProcessUpdateCaseStateService = new HwfProcessUpdateCaseStateService(systemUserService, authTokenGenerator,
+                                                                                coreCaseDataApi, paymentRequestService,
+                                                                                allTabService, objectMapper);
     }
 
     @Test
-    public void testCheckHwfPaymentStatusAndUpdateCaseState() {
+    void givenNoCases_whenCheck_thenNoUpdates() {
+        SearchResult searchResult = SearchResult.builder()
+            .total(0)
+            .build();
+        mockSearchCases(searchResult);
 
         hwfProcessUpdateCaseStateService.checkHwfPaymentStatusAndUpdateCaseState();
-        verify(paymentRequestService, times(1))
-            .fetchServiceRequestReferenceStatus(anyString(), anyString());
-        verify(allTabService).getStartUpdateForSpecificEvent(any(), any());
+        verifyNoInteractions(paymentRequestService);
+        verifyNoInteractions(allTabService);
+    }
+
+    @Test
+    void givenCaseWithNoHwfNumber_whenCheck_thenNoUpdate() {
+        CaseData caseData = caseData(null, null, null);
+
+        SearchResult searchResult = SearchResult.builder()
+            .total(1)
+            .cases(List.of(caseDetails(1234764578342789L, caseData)))
+            .build();
+        mockSearchCases(searchResult);
+
+        hwfProcessUpdateCaseStateService.checkHwfPaymentStatusAndUpdateCaseState();
+        verifyNoInteractions(paymentRequestService);
+        verifyNoInteractions(allTabService);
+    }
+
+    @Test
+    void givenMultiplePageResults_whenCheck_thenRetrievesAllCases() {
+        CaseData caseData = caseData(null, null, null);
+        CaseDetails caseDetails = caseDetails(1234764578342789L, caseData);
+
+        SearchResult searchResult1 = SearchResult.builder()
+            .total(15)
+            .cases(Collections.nCopies(10, caseDetails))
+            .build();
+        SearchResult searchResult2 = SearchResult.builder()
+            .total(15)
+            .cases(Collections.nCopies(5, caseDetails))
+            .build();
+        mockSearchCases(searchResult1, searchResult2);
+
+        hwfProcessUpdateCaseStateService.checkHwfPaymentStatusAndUpdateCaseState();
+        verifyNoInteractions(paymentRequestService);
+        verifyNoInteractions(allTabService);
+    }
+
+    @Test
+    void givenCaseWithHwfNumberAndNotPaid_whenCheck_thenNoUpdates() {
+        CaseData caseData = caseData("HWF-12345", "2025-1750002799132", "2025-12-31");
+
+        SearchResult searchResult = SearchResult.builder()
+            .total(1)
+            .cases(List.of(caseDetails(1234764578342789L, caseData)))
+            .build();
+        mockSearchCases(searchResult);
+
+        mockPaymentRequestService("2025-1750002799132", "PENDING");
+
+        hwfProcessUpdateCaseStateService.checkHwfPaymentStatusAndUpdateCaseState();
+        verifyNoInteractions(allTabService);
+    }
+
+    @Test
+    void givenCaseWithHwfNumberAndPaid_whenCheck_thenUpdates() {
+        CaseData caseData = caseData("HWF-12345", "2025-1750002799132", "2025-12-31");
+
+        SearchResult searchResult = SearchResult.builder()
+            .total(1)
+            .cases(List.of(caseDetails(1234764578342789L, caseData)))
+            .build();
+        mockSearchCases(searchResult);
+
+        mockPaymentRequestService("2025-1750002799132", "Paid");
+        mockAllTabService(1234764578342789L);
+
+        hwfProcessUpdateCaseStateService.checkHwfPaymentStatusAndUpdateCaseState();
         verify(allTabService).submitAllTabsUpdate(
             anyString(),
             anyString(),
@@ -153,220 +159,145 @@ public class HwfProcessUpdateCaseStateServiceTest {
             any(),
             caseDataUpdatedCaptor.capture()
         );
-        Map<String, Object> caseUpdated = caseDataUpdatedCaptor.getValue();
-        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
-        assertEquals(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime), caseUpdated.get(DATE_SUBMITTED_FIELD));
-        assertEquals(
-            DateOfSubmission.builder().dateOfSubmission(CommonUtils.getIsoDateToSpecificFormat(
-                DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime),
-                CommonUtils.DATE_OF_SUBMISSION_FORMAT
-            ).replace("-", " ")).build(), caseUpdated.get(DATE_OF_SUBMISSION)
+        Map<String, Object> caseDataUpdated = caseDataUpdatedCaptor.getValue();
+        CaseStatus expectedCaseStatus = CaseStatus.builder()
+            .state(State.SUBMITTED_PAID.getLabel())
+            .build();
+        assertThat(caseDataUpdated)
+            .containsEntry("caseStatus", expectedCaseStatus)
+            .doesNotContainKey("dateOfSubmission");
+    }
+
+    @Test
+    void givenCaseWithNoSubmissionDate_whenCheck_thenUpdatesSubmissionDate() {
+        CaseData caseData = caseData("HWF-12345", "2025-1750002799132", null);
+
+        SearchResult searchResult = SearchResult.builder()
+            .total(1)
+            .cases(List.of(caseDetails(1234764578342789L, caseData)))
+            .build();
+        mockSearchCases(searchResult);
+
+        mockPaymentRequestService("2025-1750002799132", "Paid");
+        mockAllTabService(1234764578342789L);
+
+        hwfProcessUpdateCaseStateService.checkHwfPaymentStatusAndUpdateCaseState();
+        verify(allTabService).submitAllTabsUpdate(
+            anyString(),
+            anyString(),
+            any(),
+            any(),
+            caseDataUpdatedCaptor.capture()
         );
-
+        Map<String, Object> caseDataUpdated = caseDataUpdatedCaptor.getValue();
+        CaseStatus expectedCaseStatus = CaseStatus.builder()
+            .state(State.SUBMITTED_PAID.getLabel())
+            .build();
+        assertThat(caseDataUpdated)
+            .containsEntry("caseStatus", expectedCaseStatus)
+            .containsKey("dateOfSubmission");
     }
 
     @Test
-    public void shouldOnlySetDateOfSubmissionIfNull() {
-        // Setup a case with a dateSubmitted already set
-        caseData = CaseData.builder()
-            .id(123L)
-            .state(State.SUBMITTED_NOT_PAID)
-            .dateSubmitted("2024-01-01")
-            .helpWithFeesNumber("HWF-1BC-AF")
-            .paymentServiceRequestReferenceNumber("2024-1709204678984")
-            .build();
-        caseDetails = CaseDetails.builder()
-            .id(123L)
-            .data(caseData.toMap(objectMapper))
-            .build();
-        SearchResult searchResult = SearchResult.builder()
-            .total(1)
-            .cases(List.of(caseDetails))
-            .build();
-        when(coreCaseDataApi.searchCases(authToken, s2sAuthToken, CASE_TYPE, null)).thenReturn(searchResult);
-
-        SearchResultResponse response = SearchResultResponse.builder()
-            .total(1)
-            .cases(List.of(caseDetails))
-            .build();
-        when(objectMapper.convertValue(searchResult, SearchResultResponse.class)).thenReturn(response);
-
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-
-
-        hwfProcessUpdateCaseStateService.checkHwfPaymentStatusAndUpdateCaseState();
-        Map<String, Object> caseUpdated = caseDataUpdatedCaptor.getValue();
-
-        assertFalse(caseUpdated.containsKey(DATE_SUBMITTED_FIELD));
-    }
-
-    @Test
-    public void testCheckHwfPaymentStatusAndUpdateCaseStateWithoutServiceRequest() {
-
-        caseData = CaseData.builder()
-            .id(123L)
-            .state(State.SUBMITTED_NOT_PAID)
-            .helpWithFeesNumber("HWF-1BC-AF")
-            .build();
-
-        caseDetails = CaseDetails.builder()
-            .id(123L)
-            .data(caseData.toMap(objectMapper))
-            .build();
+    void givenMultipleCases_whenCheck_thenHandlesAllCases() {
+        CaseData caseData1 = caseData("HWF-12345", "ref1", "2025-12-31");
+        CaseData caseData2 = caseData("HWF-12345", "ref2", null);
 
         SearchResult searchResult = SearchResult.builder()
-            .total(1)
-            .cases(List.of(caseDetails))
+            .total(2)
+            .cases(List.of(
+                caseDetails(1234764578342789L, caseData1),
+                caseDetails(1234764578342790L, caseData2))
+            )
             .build();
-        when(coreCaseDataApi.searchCases(authToken, s2sAuthToken, CASE_TYPE, null)).thenReturn(searchResult);
-        when(objectMapper.convertValue(searchResult, SearchResultResponse.class)).thenReturn(null);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        mockSearchCases(searchResult);
 
-        hwfProcessUpdateCaseStateService.checkHwfPaymentStatusAndUpdateCaseState();
-        verify(paymentRequestService, times(0))
-            .fetchServiceRequestReferenceStatus(anyString(), anyString());
-        verifyNoInteractions(allTabService);
-    }
-
-    @Test
-    public void testCheckHwfPaymentStatusAndUpdateCaseStateWithEmptyList() {
-        SearchResult searchResult = SearchResult.builder()
-            .total(0)
-            .build();
-        when(coreCaseDataApi.searchCases(authToken, s2sAuthToken, CASE_TYPE, null)).thenReturn(searchResult);
-        when(objectMapper.convertValue(searchResult, SearchResultResponse.class)).thenReturn(null);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        mockPaymentRequestService("ref1", "Paid");
+        mockPaymentRequestService("ref2", "Paid");
+        mockAllTabService(1234764578342789L);
+        mockAllTabService(1234764578342790L);
 
         hwfProcessUpdateCaseStateService.checkHwfPaymentStatusAndUpdateCaseState();
 
-        //verify
-        verify(paymentRequestService, times(0))
-            .fetchServiceRequestReferenceStatus(anyString(), anyString());
-        verifyNoInteractions(allTabService);
+        verify(allTabService, times(2)).submitAllTabsUpdate(
+            anyString(),
+            anyString(),
+            any(),
+            any(),
+            caseDataUpdatedCaptor.capture()
+        );
+        List<Map<String, Object>> capturedCaseDataList = caseDataUpdatedCaptor.getAllValues();
+        assertThat(capturedCaseDataList).hasSize(2);
+
+        Map<String, Object> caseDataUpdated1 = capturedCaseDataList.get(0);
+        Map<String, Object> caseDataUpdated2 = capturedCaseDataList.get(1);
+        CaseStatus expectedCaseStatus = CaseStatus.builder()
+            .state(State.SUBMITTED_PAID.getLabel())
+            .build();
+        assertThat(caseDataUpdated1)
+            .containsEntry("caseStatus", expectedCaseStatus)
+            .doesNotContainKey("dateOfSubmission");
+        assertThat(caseDataUpdated2)
+            .containsEntry("caseStatus", expectedCaseStatus)
+            .containsKey("dateOfSubmission");
     }
 
-    @Test
-    public void shouldProcessMultiplePagesWhenRequired() {
-        SearchResult page1 = SearchResult.builder()
-            .total(15)
-            .cases(Collections.nCopies(10, caseDetails))
-            .build();
-        SearchResult page2 = SearchResult.builder()
-            .total(15)
-            .cases(Collections.nCopies(5, caseDetails))
+    private void mockPaymentRequestService(String serviceRequestReferenceNumber, String serviceRequestStatus) {
+        ServiceRequestReferenceStatusResponse response = ServiceRequestReferenceStatusResponse.builder()
+            .serviceRequestStatus(serviceRequestStatus)
             .build();
 
-        try {
-            when(objectMapper.writeValueAsString(argThat(
-                (ArgumentMatcher<QueryParam>) argument -> isNotEmpty(argument) && argument.getFrom().equals("10"))))
-                .thenReturn("{\"from\" : \"10\"}");
+        when(paymentRequestService.fetchServiceRequestReferenceStatus(AUTH_TOKEN, serviceRequestReferenceNumber))
+            .thenReturn(response);
+    }
 
-            when(objectMapper.writeValueAsString(argThat(
-                (ArgumentMatcher<QueryParam>) argument -> isNotEmpty(argument) && argument.getFrom().equals("0"))))
-                .thenReturn("{\"from\" : \"0\"}");
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+    private void mockAllTabService(long caseId) {
+        EventRequestData eventRequestData = mock(EventRequestData.class);
+        StartEventResponse startEventResponse = mock(StartEventResponse.class);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = mock(StartAllTabsUpdateDataContent.class);
+        when(startAllTabsUpdateDataContent.authorisation()).thenReturn("auth");
+        when(startAllTabsUpdateDataContent.eventRequestData()).thenReturn(eventRequestData);
+        when(startAllTabsUpdateDataContent.startEventResponse()).thenReturn(startEventResponse);
+        when(allTabService.getStartUpdateForSpecificEvent(
+            String.valueOf(caseId),
+            HWF_PROCESS_CASE_UPDATE.getValue())
+        ).thenReturn(startAllTabsUpdateDataContent);
+    }
 
-
+    private void mockSearchCases(SearchResult searchResult) {
         when(coreCaseDataApi.searchCases(
-            eq(authToken),
-            eq(s2sAuthToken),
+            eq(AUTH_TOKEN),
+            eq(S2S_TOKEN),
             eq(CASE_TYPE),
-            contains("\"from\" : \"0\"")
-        )).thenReturn(page1);
+            anyString()
+        )).thenReturn(searchResult);
+    }
+
+    private void mockSearchCases(SearchResult searchResult1, SearchResult searchResult2) {
         when(coreCaseDataApi.searchCases(
-            eq(authToken),
-            eq(s2sAuthToken),
+            eq(AUTH_TOKEN),
+            eq(S2S_TOKEN),
             eq(CASE_TYPE),
-            contains("\"from\" : \"10\"")
-        )).thenReturn(page2);
-        when(objectMapper.convertValue(page1, SearchResultResponse.class)).thenReturn(
-            SearchResultResponse.builder()
-                .total(15)
-                .cases(Collections.nCopies(10, caseDetails))
-                .build()
-        );
-        when(objectMapper.convertValue(page2, SearchResultResponse.class)).thenReturn(
-            SearchResultResponse.builder()
-                .total(15)
-                .cases(Collections.nCopies(5, caseDetails))
-                .build()
-        );
-
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-
-        hwfProcessUpdateCaseStateService.checkHwfPaymentStatusAndUpdateCaseState();
-
-        verify(paymentRequestService, times(15))
-            .fetchServiceRequestReferenceStatus(anyString(), anyString());
-
-        verify(allTabService, times(15)).getStartUpdateForSpecificEvent(any(), any());
+            anyString()
+        )).thenReturn(searchResult1).thenReturn(searchResult2);
     }
 
-    @Test
-    public void shouldUpdateCaseStateToSubmittedWhenCurrentStateIsPending() {
-        caseData = CaseData.builder()
-            .id(123L)
-            .state(State.SUBMITTED_NOT_PAID)
-            .dateSubmitted("2024-01-01")
-            .helpWithFeesNumber("HWF-1BC-AF")
-            .paymentServiceRequestReferenceNumber("2024-1709204678984")
+    private CaseDetails caseDetails(long caseId, CaseData caseData) {
+        return CaseDetails.builder()
+            .id(caseId)
+            .state(State.SUBMITTED_NOT_PAID.getLabel())
+            .data(objectMapper.convertValue(caseData, Map.class))
             .build();
-        caseDetails = CaseDetails.builder()
-            .id(123L)
-            .data(caseData.toMap(objectMapper))
-            .build();
-
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-
-        hwfProcessUpdateCaseStateService.checkHwfPaymentStatusAndUpdateCaseState();
-        Map<String, Object> caseUpdated = caseDataUpdatedCaptor.getValue();
-
-        assertEquals(CaseStatus.builder().state(State.SUBMITTED_PAID.getLabel()).build(), caseUpdated.get(CASE_STATUS));
     }
 
-    @Test
-    public void shouldUpdateCaseStateToSubmittedWhenCurrentStateIsWithdrawn() {
-        caseData = CaseData.builder()
-            .id(123L)
-            .state(State.CASE_WITHDRAWN)
-            .dateSubmitted("2024-01-01")
-            .helpWithFeesNumber("HWF-1BC-AF")
-            .paymentServiceRequestReferenceNumber("2024-1709204678984")
+    private CaseData caseData(String hwfNumber, String paymentReferenceNumber, String dateSubmitted) {
+        return CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .caseCreatedBy(CaseCreatedBy.CITIZEN)
+            .helpWithFees(YesOrNo.Yes)
+            .helpWithFeesNumber(hwfNumber)
+            .paymentServiceRequestReferenceNumber(paymentReferenceNumber)
+            .dateSubmitted(dateSubmitted)
             .build();
-        caseDetails = CaseDetails.builder()
-            .id(123L)
-            .data(caseData.toMap(objectMapper))
-            .build();
-
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-
-        hwfProcessUpdateCaseStateService.checkHwfPaymentStatusAndUpdateCaseState();
-        Map<String, Object> caseUpdated = caseDataUpdatedCaptor.getValue();
-
-        assertEquals(CaseStatus.builder().state(State.SUBMITTED_PAID.getLabel()).build(), caseUpdated.get(CASE_STATUS));
-    }
-
-    @Test
-    public void shouldNotUpdateCaseStateToSubmittedWhenCurrentStateIsCaseIssued() {
-        caseData = CaseData.builder()
-            .id(123L)
-            .state(State.CASE_ISSUED)
-            .dateSubmitted("2024-01-01")
-            .helpWithFeesNumber("HWF-1BC-AF")
-            .paymentServiceRequestReferenceNumber("2024-1709204678984")
-            .build();
-        caseDetails = CaseDetails.builder()
-            .id(123L)
-            .data(caseData.toMap(objectMapper))
-            .build();
-
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-
-        hwfProcessUpdateCaseStateService.checkHwfPaymentStatusAndUpdateCaseState();
-        Map<String, Object> caseUpdated = caseDataUpdatedCaptor.getValue();
-
-        assertEquals(CaseStatus.builder().state(State.CASE_ISSUED.getLabel()).build(), caseUpdated.get(CASE_STATUS));
     }
 }
