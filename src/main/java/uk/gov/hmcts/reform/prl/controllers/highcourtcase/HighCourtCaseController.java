@@ -56,12 +56,12 @@ public class HighCourtCaseController  extends AbstractCallbackController {
         @RequestBody CallbackRequest callbackRequest) {
 
         log.info("High court case about-to-submit");
-        List<String> errors = new ArrayList<>();
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         log.info("High court case caseDataMap retrieved");
         log.info("caseDataMap {}", caseDataMap);
         printCaseDataReceivedFromXui(callbackRequest);
 
+        List<String> errors = new ArrayList<>();
         return AboutToStartOrSubmitCallbackResponse.builder()
             .errors(errors)
             .data(caseDataMap)
