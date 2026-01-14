@@ -1,10 +1,13 @@
 package uk.gov.hmcts.reform.prl.services.courtnav;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -98,8 +101,9 @@ public class CourtNavCaseService {
         );
     }
 
+    @Retryable(retryFor = {FeignException.Conflict.class}, recover = "uploadDocumentRecover")
     public void uploadDocument(String authorisation, MultipartFile document, String typeOfDocument, String caseId) {
-
+        log.info("Uploading document of type {} to Court Nav Case {}", typeOfDocument, caseId);
         if (null != document && null != document.getOriginalFilename()
             && checkFileFormat(document.getOriginalFilename())
             && checkTypeOfDocument(typeOfDocument)) {
@@ -162,6 +166,7 @@ public class CourtNavCaseService {
                            .build())
                 .data(fields).build();
 
+            log.info("Submitting case update on {}", caseId);
             coreCaseDataService.submitUpdate(
                 authorisation,
                 eventRequestData,
@@ -175,6 +180,13 @@ public class CourtNavCaseService {
             log.error("Un acceptable format/type of document {}", typeOfDocument);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @Recover
+    public void uploadDocumentRecover(Exception ex, String authorisation, MultipartFile document,
+                                      String typeOfDocument, String caseId) throws Exception {
+        log.error("Failed to upload courtnav document on case {}", caseId, ex);
+        throw ex;
     }
 
     private static int getAlreadyUploadedCourtNavDocsSize(CaseData tempCaseData) {
