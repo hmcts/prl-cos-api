@@ -1273,7 +1273,7 @@ public class ServiceOfApplicationService {
                 );
                 Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                 //what name should be used
-                dynamicData.put("name", party.getValue().getFirstName() + " " +party.getValue().getLastName());
+                dynamicData.put("name", party.getValue().getFirstName());
                 dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
                 dynamicData.put("respondent", true);
                 populateLanguageMap(caseData, dynamicData);
