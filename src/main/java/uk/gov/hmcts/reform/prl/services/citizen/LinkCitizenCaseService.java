@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.UserId;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
@@ -56,6 +57,7 @@ public class LinkCitizenCaseService {
     public static final String INVALID = "Invalid";
     public static final String VALID = "Valid";
     public static final String LINKED = "Linked";
+    public static final String DUPLICATE = "Duplicate";
     public static final String YES = "Yes";
     public static final String CASE_INVITES = "caseInvites";
 
@@ -63,12 +65,13 @@ public class LinkCitizenCaseService {
         Optional<CaseDetails> caseDetails = Optional.empty();
         CaseData dbCaseData = findAndGetCase(caseId);
 
-        if (VALID.equalsIgnoreCase(findAccessCodeStatus(accessCode, dbCaseData))) {
+        if (VALID.equalsIgnoreCase(findAccessCodeStatus(accessCode, dbCaseData, authorisation))) {
+            UserDetails userDetails = idamClient.getUserDetails(authorisation);
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
                 = allTabService.getStartUpdateForSpecificEvent(caseId, CaseEvent.LINK_CITIZEN.getValue());
 
             CaseData caseData = startAllTabsUpdateDataContent.caseData();
-            UserDetails userDetails = idamClient.getUserDetails(authorisation);
+
             Map<String, Object> caseDataUpdated = getCaseDataMapToLinkCitizen(accessCode, caseData, userDetails);
 
             caseAccessApi.grantAccessToCase(
@@ -90,6 +93,17 @@ public class LinkCitizenCaseService {
             ));
         }
         return caseDetails;
+    }
+
+    private boolean  isEmailAlreadyUsedInCase(CaseData dbCaseData, String authorisation) {
+        UserInfo userInfo = idamClient.getUserInfo(authorisation);
+        log.info("user id being checked is " + userInfo.getUid());
+        return Optional.ofNullable(dbCaseData.getCaseInvites())
+            .stream()
+            .flatMap(List::stream)
+            .map(Element::getValue)
+            .filter(invite -> invite.getHasLinked() != null && invite.getHasLinked().equals(YES))
+            .anyMatch(invite -> userInfo.getUid().equals(invite.getInvitedUserId()));
     }
 
     private CaseData findAndGetCase(String caseId) {
@@ -183,7 +197,7 @@ public class LinkCitizenCaseService {
         return caseDataUpdated;
     }
 
-    private String findAccessCodeStatus(String accessCode, CaseData caseData) {
+    private String findAccessCodeStatus(String accessCode, CaseData caseData, String authorisation) {
         String accessCodeStatus = INVALID;
         if (null == caseData.getCaseInvites() || caseData.getCaseInvites().isEmpty()
             || (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
@@ -204,15 +218,22 @@ public class LinkCitizenCaseService {
                     break;
                 }
             }
+            log.info("Validating Email already in use for case {}", caseData.getId());
+
+            if (isEmailAlreadyUsedInCase(caseData, authorisation)) {
+                log.info("Email already in use for case {}", caseData.getId());
+                accessCodeStatus = DUPLICATE;
+            }
         }
+
         return accessCodeStatus;
     }
 
-    public String validateAccessCode(String caseId, String accessCode) {
+    public String validateAccessCode(String caseId, String accessCode, String authorisation) {
         CaseData caseData = findAndGetCase(caseId);
         if (null == caseData) {
             return INVALID;
         }
-        return findAccessCodeStatus(accessCode, caseData);
+        return findAccessCodeStatus(accessCode, caseData, authorisation);
     }
 }
