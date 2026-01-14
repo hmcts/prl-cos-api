@@ -41,15 +41,15 @@ public class HighCourtCaseController  extends AbstractCallbackController {
         super(objectMapper, eventPublisher);
     }
 
-    @PostMapping("/about-to-start")
-    public AboutToStartOrSubmitCallbackResponse handleAboutToStart(@RequestHeader("Authorization")
-                                                                   @Parameter(hidden = true) String authorisation,
-                                                                   @RequestBody CallbackRequest callbackRequest) {
-        final Map<String, Object> data = printCaseDataReceivedFromXui(callbackRequest);
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(data)
-            .build();
-    }
+//    @PostMapping("/about-to-start")
+//    public AboutToStartOrSubmitCallbackResponse handleAboutToStart(@RequestHeader("Authorization")
+//                                                                   @Parameter(hidden = true) String authorisation,
+//                                                                   @RequestBody CallbackRequest callbackRequest) {
+//        final Map<String, Object> data = printCaseDataReceivedFromXui(callbackRequest);
+//        return AboutToStartOrSubmitCallbackResponse.builder()
+//            .data(data)
+//            .build();
+//    }
 
 
     @PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
