@@ -55,9 +55,11 @@ public class HighCourtCaseController  extends AbstractCallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
 
+        log.info("High court case about-to-submit");
         List<String> errors = new ArrayList<>();
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
-
+        log.info("High court case caseDataMap retrieved");
+        log.info("caseDataMap {}", caseDataMap);
         printCaseDataReceivedFromXui(callbackRequest);
 
         return AboutToStartOrSubmitCallbackResponse.builder()
@@ -91,6 +93,8 @@ public class HighCourtCaseController  extends AbstractCallbackController {
                     log.info("High Court Case data map has null key for value {}", entry.getValue().toString());
                 }
             }
+        } else {
+            log.info("High Court Case data map is null");
         }
         return data;
     }
