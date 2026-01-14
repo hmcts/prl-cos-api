@@ -101,6 +101,7 @@ public class LinkCitizenCaseService {
             .stream()
             .flatMap(List::stream)
             .map(Element::getValue)
+            .filter(invite-> invite.getHasLinked().equals(YES))
             .anyMatch(invite -> userInfo.getUid().equals(invite.getInvitedUserId()));
     }
 
@@ -216,13 +217,12 @@ public class LinkCitizenCaseService {
                     break;
                 }
             }
-        }
+            log.info("Validating Email already in use for case {}", caseData.getId());
 
-        log.info("Validating Email already in use for case {}", caseData.getId());
-
-        if (isEmailAlreadyUsedInCase(caseData, authorisation)) {
-            log.info("Email already in use for case {}", caseData.getId());
-            accessCodeStatus = DUPLICATE;
+            if (isEmailAlreadyUsedInCase(caseData, authorisation)) {
+                log.info("Email already in use for case {}", caseData.getId());
+                accessCodeStatus = DUPLICATE;
+            }
         }
 
         return accessCodeStatus;
