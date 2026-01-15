@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.services.EventService;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
