@@ -1228,8 +1228,8 @@ public class ServiceOfApplicationService {
                 if (respondentContactPreference == null || ContactPreferences.post.equals(respondentContactPreference)
                     || (ContactPreferences.email.equals(respondentContactPreference) && party.get().getValue().getEmail() == null)) {
                     log.info("Sending post to respondent conf check success, if NO preferences set or set to POST or the email is empty");
-                    if (party.get().getValue().getAddress() != null &&
-                        StringUtils.isNotEmpty(party.get().getValue().getAddress().getAddressLine1())) {
+                    if (party.get().getValue().getAddress() != null
+                        && StringUtils.isNotEmpty(party.get().getValue().getAddress().getAddressLine1())) {
                         log.info(
                             "Sending the notification in post to respondent conf check success for C100 Application for caseId {}",
                             caseData.getId()
