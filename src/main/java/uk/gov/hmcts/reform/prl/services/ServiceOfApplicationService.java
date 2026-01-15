@@ -1155,6 +1155,13 @@ public class ServiceOfApplicationService {
                                                                     List<Document> packSdocs, List<Document> packRdocs) {
         log.info("Sending notification to respondent or solicitor");
         selectedRespondents.forEach(respondent -> {
+            if (respondent != null) {
+                log.info("Has Legal rep : " + CaseUtils.hasLegalRepresentation(respondent.getValue()));
+                log.info("respondent Preference : " + respondent.getValue().getContactPreferences());
+                log.info("respondent Email : " + respondent.getValue().getEmail());
+            } else {
+                log.info("No respondent");
+            }
             if (CaseUtils.hasLegalRepresentation(respondent.getValue())) {
                 sendEmailToRespondentSolicitorNonPersonal(caseData, authorization, emailNotificationDetails, packSdocs, respondent);
             } else if (!CaseUtils.hasLegalRepresentation(respondent.getValue())) {
@@ -1207,6 +1214,13 @@ public class ServiceOfApplicationService {
         log.info("Sending notification to respondent or solicitor conf check success");
         selectedRespondents.forEach(respondentc100 -> {
             Optional<Element<PartyDetails>> party = getParty(respondentc100.getCode(), caseData.getRespondents());
+            if (party.isPresent()) {
+                log.info("Has Legal rep conf success check: " + CaseUtils.hasLegalRepresentation(party.get().getValue()));
+                log.info("Party Preference conf success check: " + party.get().getValue().getContactPreferences());
+                log.info("Party Email conf success check: " + party.get().getValue().getEmail());
+            } else {
+                log.info("No party on conf success check");
+            }
             if (party.isPresent() && CaseUtils.hasLegalRepresentation(party.get().getValue())) {
                 sendEmailToRespondentSolicitorNonPersonal(caseData, authorization, emailNotificationDetails, packSdocs, party.get());
             } else if (party.isPresent() && (!CaseUtils.hasLegalRepresentation(party.get().getValue()))) {
@@ -1214,7 +1228,8 @@ public class ServiceOfApplicationService {
                 if (respondentContactPreference == null || ContactPreferences.post.equals(respondentContactPreference)
                     || (ContactPreferences.email.equals(respondentContactPreference) && party.get().getValue().getEmail() == null)) {
                     log.info("Sending post to respondent conf check success, if NO preferences set or set to POST or the email is empty");
-                    if (party.get().getValue().getAddress() != null && StringUtils.isNotEmpty(party.get().getValue().getAddress().getAddressLine1())) {
+                    if (party.get().getValue().getAddress() != null &&
+                        StringUtils.isNotEmpty(party.get().getValue().getAddress().getAddressLine1())) {
                         log.info(
                             "Sending the notification in post to respondent conf check success for C100 Application for caseId {}",
                             caseData.getId()
@@ -1236,8 +1251,7 @@ public class ServiceOfApplicationService {
                                 + "as no address available", caseData.getId()
                         );
                     }
-                }
-                else {
+                } else {
                     log.info("Sending email to respondent conf check success if preferences set to email and email address populated");
                     sendEmailToRespondentNonPersonal(
                         caseData,
