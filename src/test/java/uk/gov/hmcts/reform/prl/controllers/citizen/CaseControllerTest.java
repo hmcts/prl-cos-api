@@ -452,6 +452,29 @@ public class CaseControllerTest {
     }
 
     @Test
+    public void testFindCourtByPostCodeAndServiceWhenNoCourtFetched() throws Exception {
+
+        String postcode = "SA";
+
+        when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(true);
+        when(authTokenGenerator.generate()).thenReturn(servAuthToken);
+        when(courtFinderService.getC100NearestFamilyCourt(postcode)).thenReturn(null);
+        String actualCourtName = caseController.findCourtByPostCodeAndService(authToken, servAuthToken, postcode);
+        Assert.assertEquals("No Court Fetched", actualCourtName);
+
+    }
+
+    @Test
+    public void testFindCourtByPostCodeAndServiceWhenReturnNull() throws Exception {
+        String postcode = "SA";
+        when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(true);
+        when(authTokenGenerator.generate()).thenReturn(servAuthToken);
+        when(courtFinderService.getC100NearestFamilyCourt(postcode)).thenThrow(NotFoundException.class);
+        String actualCourtName = caseController.findCourtByPostCodeAndService(authToken, servAuthToken, postcode);
+        Assert.assertNull(actualCourtName);
+    }
+
+    @Test
     public void testFindCourtByPostCodeAndServiceFails() throws Exception {
 
         expectedEx.expect(RuntimeException.class);
