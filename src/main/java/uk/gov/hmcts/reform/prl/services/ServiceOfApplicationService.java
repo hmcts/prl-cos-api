@@ -1204,27 +1204,48 @@ public class ServiceOfApplicationService {
                                                                     List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                                     List<DynamicMultiselectListElement> selectedRespondents,
                                                                     List<Document> packSdocs, List<Document> packRdocs) {
-        log.info("Sending notification to respondent or solicitor");
+        log.info("Sending notification to respondent or solicitor conf check success");
         selectedRespondents.forEach(respondentc100 -> {
             Optional<Element<PartyDetails>> party = getParty(respondentc100.getCode(), caseData.getRespondents());
             if (party.isPresent() && CaseUtils.hasLegalRepresentation(party.get().getValue())) {
                 sendEmailToRespondentSolicitorNonPersonal(caseData, authorization, emailNotificationDetails, packSdocs, party.get());
             } else if (party.isPresent() && (!CaseUtils.hasLegalRepresentation(party.get().getValue()))) {
-                if (party.get().getValue().getAddress() != null && StringUtils.isNotEmpty(party.get().getValue().getAddress().getAddressLine1())) {
-                    log.info(
-                        "Sending the notification in post to respondent for C100 Application for caseId {}",
-                        caseData.getId()
+                ContactPreferences respondentContactPreference = party.get().getValue().getContactPreferences();
+                if (respondentContactPreference == null || ContactPreferences.post.equals(respondentContactPreference)
+                    || (ContactPreferences.email.equals(respondentContactPreference) && party.get().getValue().getEmail() == null)) {
+                    log.info("Sending post to respondent conf check success, if NO preferences set or set to POST or the email is empty");
+                    if (party.get().getValue().getAddress() != null && StringUtils.isNotEmpty(party.get().getValue().getAddress().getAddressLine1())) {
+                        log.info(
+                            "Sending the notification in post to respondent conf check success for C100 Application for caseId {}",
+                            caseData.getId()
+                        );
+                        List<Document> finalDocs = removeCoverLettersFromThePacks(packRdocs);
+                        sendPostWithAccessCodeLetterToParty(
+                            caseData, authorization, finalDocs, bulkPrintDetails, party.get(),
+                            CaseUtils.getCoverLettersForParty(
+                                party.get().getId(),
+                                caseData.getServiceOfApplication()
+                                    .getUnServedRespondentPack()
+                                    .getCoverLettersMap()
+                            ),
+                            SERVED_PARTY_RESPONDENT
+                        );
+                    } else {
+                        log.info(
+                            "Unable to send any notification to respondent for C100 Application for caseId {} "
+                                + "as no address available", caseData.getId()
+                        );
+                    }
+                }
+                else {
+                    log.info("Sending email to respondent conf check success if preferences set to email and email address populated");
+                    sendEmailToRespondentNonPersonal(
+                        caseData,
+                        authorization,
+                        emailNotificationDetails,
+                        packRdocs,
+                        party.get()
                     );
-                    List<Document> finalDocs = removeCoverLettersFromThePacks(packRdocs);
-                    sendPostWithAccessCodeLetterToParty(caseData, authorization, finalDocs, bulkPrintDetails, party.get(),
-                                                        CaseUtils.getCoverLettersForParty(party.get().getId(),
-                                                                                          caseData.getServiceOfApplication()
-                                                                                              .getUnServedRespondentPack()
-                                                                                              .getCoverLettersMap()),
-                                                        SERVED_PARTY_RESPONDENT);
-                } else {
-                    log.info("Unable to send any notification to respondent for C100 Application for caseId {} "
-                                 + "as no address available", caseData.getId());
                 }
             }
         });
