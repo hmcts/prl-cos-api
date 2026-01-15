@@ -140,7 +140,7 @@ allprojects {
       }
 
         // solves CVE-2014-3488, CVE-2015-2156, CVE-2019-16869, CVE-2021-21409,CVE-2025-25193
-        dependencySet(group: 'io.netty', version: '4.2.7.Final') {
+        dependencySet(group: 'io.netty', version: '4.2.9.Final') {
             entry 'netty-buffer'
             entry 'netty-codec'
             entry 'netty-codec-http'
@@ -290,8 +290,8 @@ configurations.configureEach {
     force 'org.bouncycastle:bcpkix-jdk18on:1.82'
     force 'org.springframework.security:spring-security-rsa:1.1.5'
     force 'org.springframework.security:spring-security-crypto:5.8.16'
-    force 'ch.qos.logback:logback-classic:1.5.21'
-    force 'ch.qos.logback:logback-core:1.5.21'
+    force 'ch.qos.logback:logback-classic:1.5.24'
+    force 'ch.qos.logback:logback-core:1.5.24'
   }
 }
 
@@ -373,12 +373,12 @@ dependencies {
   implementation(group: 'org.bouncycastle', name: 'bcpkix-jdk18on', version: versions.bcpkixJdk18on)
   implementation(group: 'org.springframework.security', name: 'spring-security-rsa', version: versions.springSecurityRsa)
   implementation(group: 'org.springframework.security', name: 'spring-security-crypto', version: versions.springSecurityCrypto)
-  implementation group: 'io.netty', name: 'netty-transport-native-epoll', version: '4.2.7.Final'
+  implementation group: 'io.netty', name: 'netty-transport-native-epoll', version: '4.2.9.Final'
   constraints{
     implementation group: 'com.warrenstrange', name: 'googleauth', version: '1.5.0'
   }
-  implementation(group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.21')
-  implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.21')
+  implementation(group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.24')
+  implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.24')
   implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version:'7.4'
   implementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.5'
   implementation group: 'com.opencsv', name: 'opencsv', version: '5.12.0', {
