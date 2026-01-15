@@ -63,7 +63,8 @@ public class HighCourtCaseController  extends AbstractCallbackController {
 
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-
+            Object highCourtCase = caseDetails.getData().get("isHighCourtCase");
+            log.info("about-to-submit highCourtCase {}", highCourtCase);
 
             List<String> errors = new ArrayList<>();
             return AboutToStartOrSubmitCallbackResponse.builder()
@@ -83,6 +84,9 @@ public class HighCourtCaseController  extends AbstractCallbackController {
         @RequestBody CallbackRequest callbackRequest) {
 
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            final CaseDetails caseDetails = callbackRequest.getCaseDetails();
+            Object highCourtCase = caseDetails.getData().get("isHighCourtCase");
+            log.info("submitted highCourtCase {}", highCourtCase);
             return ok(SubmittedCallbackResponse.builder().build());
         }  else {
             throw (new RuntimeException(INVALID_CLIENT));
