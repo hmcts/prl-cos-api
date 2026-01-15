@@ -18,9 +18,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.EventService;
 
 import java.util.ArrayList;
@@ -56,15 +58,15 @@ public class HighCourtCaseController  extends AbstractCallbackController {
         @RequestBody CallbackRequest callbackRequest) {
 
         log.info("High court case about-to-submit");
-        Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
-        log.info("High court case caseDataMap retrieved");
-        log.info("caseDataMap {}", caseDataMap);
-        printCaseDataReceivedFromXui(callbackRequest);
+        final CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        final CaseData caseData = getCaseData(caseDetails);
+        log.info("about-to-submit IsHighCourtCase {}", caseData.getIsHighCourtCase());
+
 
         List<String> errors = new ArrayList<>();
         return AboutToStartOrSubmitCallbackResponse.builder()
             .errors(errors)
-            .data(caseDataMap)
+            .data(caseDetails.getData())
             .build();
     }
 
@@ -73,7 +75,10 @@ public class HighCourtCaseController  extends AbstractCallbackController {
     public ResponseEntity<SubmittedCallbackResponse> handleSubmitted(@RequestHeader("Authorization")
                                                                      @Parameter(hidden = true) String authorisation,
                                                                      @RequestBody CallbackRequest callbackRequest) {
-        printCaseDataReceivedFromXui(callbackRequest);
+        log.info("High court case submitted");
+        final CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        final CaseData caseData = getCaseData(caseDetails);
+        log.info("submitted IsHighCourtCase {}", caseData.getIsHighCourtCase());
         return ok(SubmittedCallbackResponse.builder().build());
     }
 
