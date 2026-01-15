@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.services;
+package uk.gov.hmcts.reform.prl.services.sendandreply;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
@@ -45,6 +45,7 @@ import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicationType;
+import uk.gov.hmcts.reform.prl.mapper.staffresponse.LegalAdviserDynamicListElementFilter;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
@@ -84,10 +85,21 @@ import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendAndReplyDynamicDoc;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendReplyTempDoc;
+import uk.gov.hmcts.reform.prl.services.BulkPrintService;
+import uk.gov.hmcts.reform.prl.services.DgsService;
+import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
+import uk.gov.hmcts.reform.prl.services.EmailService;
+import uk.gov.hmcts.reform.prl.services.HearingDataService;
+import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
+import uk.gov.hmcts.reform.prl.services.SendgridService;
+import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
+import uk.gov.hmcts.reform.prl.services.sendandreply.messagehandler.MessageRequest;
+import uk.gov.hmcts.reform.prl.services.sendandreply.messagehandler.SendAndReplyMessageHandlerService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -119,6 +131,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -181,8 +194,10 @@ public class SendAndReplyServiceTest {
 
     @Mock
     RoleAssignmentApi roleAssignmentApi;
-
-    private static final String randomAlphaNumeric = "Abc123EFGH";
+    @Mock
+    LegalAdviserDynamicListElementFilter legalAdviserDynamicListElementConverter;
+    @Mock
+    SendAndReplyMessageHandlerService sendAndReplyMessageHandlerService;
 
     private static final String TEST_UUID = "00000000-0000-0000-0000-000000000000";
 
@@ -335,8 +350,10 @@ public class SendAndReplyServiceTest {
             .latestMessage("Message 4 latest message")
             .messageHistory("")
             .replyHistory(messageHistoryList)
-            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.LEGAL_ADVISER)
             .internalMessageUrgent(YesOrNo.Yes)
+            .legalAdviserName("Armitage Shanks")
+            .legalAdviserEmail("armitage.shanks@justice.gov.uk")
             .build();
 
         metaData = MessageMetaData.builder()
@@ -799,12 +816,15 @@ public class SendAndReplyServiceTest {
         caseData = caseData.toBuilder().additionalApplicationsBundle(additionalApplicationsBundle).build();
         when(refDataService.getRefDataCategoryValueMap(anyString(), anyString(), anyString(), anyString())).thenReturn(
             refDataCategoryValueMap);
+        DynamicList legalAdviserList = mock(DynamicList.class);
+        when(refDataUserService.getStaffDynamicList(legalAdviserDynamicListElementConverter)).thenReturn(legalAdviserList);
 
         CaseData updatedCaseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, auth);
 
         assertNotNull(updatedCaseData);
         assertEquals("123 - hearingType1", updatedCaseData.getSendOrReplyMessage().getSendMessageObject()
-            .getFutureHearingsList().getListItems().get(0).getCode());
+            .getFutureHearingsList().getListItems().getFirst().getCode());
+        assertEquals(legalAdviserList, updatedCaseData.getSendOrReplyMessage().getSendMessageObject().getLegalAdviserList());
     }
 
     @Test
@@ -1525,6 +1545,7 @@ public class SendAndReplyServiceTest {
         List<Element<Message>> updatedMessageList = sendAndReplyService.addMessage(caseData, auth, caseDataMap);
 
         assertEquals(2,updatedMessageList.size());
+        verify(sendAndReplyMessageHandlerService).handleMessage(any(MessageRequest.class));
     }
 
     @Test
@@ -1707,7 +1728,6 @@ public class SendAndReplyServiceTest {
         assertNotNull(data);
     }
 
-
     @Test
     public void testPopulateMessageReplyFieldsWithPrevMsgWithoutReplyHistory() {
         CaseData caseData = CaseData.builder()
@@ -1721,15 +1741,18 @@ public class SendAndReplyServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             dynamicList,
             objectMapper
-        )).thenReturn(listOfOpenMessages.get(0).getId());
-        CaseData data = sendAndReplyService.populateMessageReplyFields(caseData, auth);
-        assertNotNull(data.getSendOrReplyMessage().getMessageReplyTable());
+        )).thenReturn(listOfOpenMessages.getFirst().getId());
+        DynamicList legalAdviserList = mock(DynamicList.class);
+        when(refDataUserService.getStaffDynamicList(legalAdviserDynamicListElementConverter)).thenReturn(legalAdviserList);
 
+        CaseData data = sendAndReplyService.populateMessageReplyFields(caseData, auth);
+
+        assertNotNull(data.getSendOrReplyMessage().getMessageReplyTable());
+        assertEquals(legalAdviserList, data.getSendOrReplyMessage().getReplyMessageObject().getLegalAdviserList());
     }
 
     @Test
     public void testPopulateMessageReplyFieldsWithPrevMsgWithReplyHistory() {
-
         List<Element<Message>> openMessagesListWithReplyHistory = new ArrayList<>();
         openMessagesListWithReplyHistory.add(element(messageWithReplyHistory));
         openMessagesListWithReplyHistory.add(element(message1));
@@ -1744,12 +1767,20 @@ public class SendAndReplyServiceTest {
                     .build())
             .build();
         when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(
-            openMessagesListWithReplyHistory.get(0).getId());
+            openMessagesListWithReplyHistory.getFirst().getId());
+        DynamicList legalAdviserList = mock(DynamicList.class);
+        when(refDataUserService.getStaffDynamicList(legalAdviserDynamicListElementConverter)).thenReturn(legalAdviserList);
+
         CaseData updatedCaseData = sendAndReplyService.populateMessageReplyFields(caseData, auth);
+
+        SendOrReplyMessage sendOrReplyMessage = updatedCaseData.getSendOrReplyMessage();
         String messageTo = updatedCaseData.getSendOrReplyMessage().getMessages()
             .get(0).getValue().getReplyHistory().get(0).getValue().getMessageTo();
 
         assertEquals("testRecipient1@email.com", messageTo);
+        assertEquals(legalAdviserList, sendOrReplyMessage.getReplyMessageObject().getLegalAdviserList());
+        assertTrue(sendOrReplyMessage.getMessageReplyTable().contains("Armitage Shanks"));
+        assertTrue(sendOrReplyMessage.getMessageReplyTable().contains("armitage.shanks@justice.gov.uk"));
     }
 
     @Test
@@ -1808,7 +1839,6 @@ public class SendAndReplyServiceTest {
 
     @Test
     public void testReplyAndAppendMessageHistoryForReply() {
-
         List<Element<Message>> openMessagesList = new ArrayList<>();
 
         openMessagesList.add(element(message1));
@@ -1841,6 +1871,7 @@ public class SendAndReplyServiceTest {
         List<Element<Message>> msgList = sendAndReplyService.replyAndAppendMessageHistory(caseData, auth, caseDataMap);
 
         assertEquals(1,msgList.get(0).getValue().getReplyHistory().size());
+        verify(sendAndReplyMessageHandlerService).handleMessage(any(MessageRequest.class));
     }
 
     @Test
@@ -1910,6 +1941,7 @@ public class SendAndReplyServiceTest {
         List<Element<Message>> msgList = sendAndReplyService.replyAndAppendMessageHistory(caseData7, auth, caseDataMap);
 
         assertEquals(1, msgList.get(0).getValue().getReplyHistory().size());
+        verify(sendAndReplyMessageHandlerService).handleMessage(any(MessageRequest.class));
     }
 
     @Test
@@ -1947,6 +1979,7 @@ public class SendAndReplyServiceTest {
         List<Element<Message>> msgList = sendAndReplyService.replyAndAppendMessageHistory(caseData, auth, caseDataMap);
 
         assertEquals(2, msgList.get(0).getValue().getReplyHistory().size());
+        verify(sendAndReplyMessageHandlerService).handleMessage(any(MessageRequest.class));
     }
 
     @Test
@@ -2991,7 +3024,6 @@ public class SendAndReplyServiceTest {
 
     @Test
     public void testPopulateMessageReplyFieldsWithPrevMsgWithReplyHistoryAndDocuments() {
-
         List<Element<uk.gov.hmcts.reform.prl.models.documents.Document>> internalMessageDocs = new ArrayList<>();
         internalMessageDocs.add(element(internalMessageDoc));
         messageWithReplyHistoryAndDocuments.setInternalMessageAttachDocs(internalMessageDocs);
@@ -3011,6 +3043,9 @@ public class SendAndReplyServiceTest {
             .build();
 
         when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesListWithReplyHistory.get(0).getId());
+        DynamicList legalAdviserList = mock(DynamicList.class);
+        when(refDataUserService.getStaffDynamicList(legalAdviserDynamicListElementConverter)).thenReturn(legalAdviserList);
+
         CaseData updatedCaseData = sendAndReplyService.populateMessageReplyFields(data, auth);
 
         SendReplyTempDoc expectedSendReplyTempDocument = SendReplyTempDoc.builder().attachedTime(dateTime).document(internalMessageDoc).build();
@@ -3018,11 +3053,11 @@ public class SendAndReplyServiceTest {
         assertEquals("testRecipient1@email.com", updatedCaseData.getSendOrReplyMessage().getMessages()
             .get(0).getValue().getReplyHistory().get(0).getValue().getMessageTo());
         assertEquals(expectedSendReplyTempDocument, updatedCaseData.getSendOrReplyMessage().getInternalMessageAttachDocsList().get(0).getValue());
+        assertEquals(legalAdviserList, updatedCaseData.getSendOrReplyMessage().getReplyMessageObject().getLegalAdviserList());
     }
 
     @Test
     public void testPopulateMessageReplyFieldsWithPrevMsgWithReplyHistoryWithDocuments() {
-
         List<Element<uk.gov.hmcts.reform.prl.models.documents.Document>> internalMessageDocs = new ArrayList<>();
         internalMessageDocs.add(element(internalMessageDoc));
 
@@ -3064,6 +3099,9 @@ public class SendAndReplyServiceTest {
             .build();
 
         when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesListWithReplyHistory.get(0).getId());
+        DynamicList legalAdviserList = mock(DynamicList.class);
+        when(refDataUserService.getStaffDynamicList(legalAdviserDynamicListElementConverter)).thenReturn(legalAdviserList);
+
         CaseData updatedCaseData = sendAndReplyService.populateMessageReplyFields(data, auth);
 
         SendReplyTempDoc expectedSendReplyTempDocument = SendReplyTempDoc.builder().attachedTime(dateTime).document(internalMessageDoc).build();
@@ -3071,6 +3109,7 @@ public class SendAndReplyServiceTest {
         assertEquals("testRecipient1@email.com", updatedCaseData.getSendOrReplyMessage().getMessages()
             .get(0).getValue().getReplyHistory().get(0).getValue().getMessageTo());
         assertEquals(expectedSendReplyTempDocument, updatedCaseData.getSendOrReplyMessage().getInternalMessageAttachDocsList().get(0).getValue());
+        assertEquals(legalAdviserList, updatedCaseData.getSendOrReplyMessage().getReplyMessageObject().getLegalAdviserList());
     }
 
     @Test
@@ -3484,6 +3523,8 @@ public class SendAndReplyServiceTest {
 
         caseData = CaseData.builder().id(12345L)
             .chooseSendOrReply(SEND)
+            .applicantsFL401(getApplicant())
+            .respondentsFL401(getRespondent())
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
                     .respondToMessage(YesOrNo.No)
@@ -3499,7 +3540,7 @@ public class SendAndReplyServiceTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyService.sendAndReplySubmitted(callbackRequest);
+        ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyService.sendAndReplySubmitted(callbackRequest, auth);
         Assertions.assertThat(response.getStatusCode().value()).isEqualTo(200);
     }
 
@@ -3522,7 +3563,7 @@ public class SendAndReplyServiceTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyService.sendAndReplySubmitted(callbackRequest);
+        ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyService.sendAndReplySubmitted(callbackRequest, auth);
         Assertions.assertThat(response.getStatusCode().value()).isEqualTo(200);
     }
 
@@ -3544,7 +3585,7 @@ public class SendAndReplyServiceTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyService.sendAndReplySubmitted(callbackRequest);
+        ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyService.sendAndReplySubmitted(callbackRequest, auth);
         Assertions.assertThat(response.getStatusCode().value()).isEqualTo(200);
 
     }

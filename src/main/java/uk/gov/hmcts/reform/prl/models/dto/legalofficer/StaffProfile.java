@@ -13,6 +13,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StaffProfile {
+    // idamId
+    private String id;
 
     @JsonProperty("first_name")
     private String firstName;

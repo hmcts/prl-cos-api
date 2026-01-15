@@ -80,6 +80,7 @@ feature:
   toggle:
     barristerFeatureEnabled: ${BARRISTER_FEATURE_ENABLED:false}
     cafcassDateTimeFeatureEnabled: ${CAFCASS_DATE_TIME_FEATURE_ENABLED:false}
+    osCourtLookupEnabled: ${OS_COURT_LOOKUP_ENABLED:false}
 
 xui:
   url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}
@@ -829,3 +830,7 @@ acro:
     allow-unknown-keys: true
     remote-directory: /
     password: ${ACRO_SFTP_USER_PASSWORD:test_password}
+
+hwf-update-case-state-task:
+  last-modified-days-threshold: ${HWF_UPDATE_CASE_STATE_TASK_LAST_MODIFIED_DAYS_THRESHOLD:3}
+

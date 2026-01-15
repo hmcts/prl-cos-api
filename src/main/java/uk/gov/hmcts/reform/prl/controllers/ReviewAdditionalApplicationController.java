@@ -29,8 +29,8 @@ import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.ReviewAdditionalApplicationService;
-import uk.gov.hmcts.reform.prl.services.SendAndReplyCommonService;
-import uk.gov.hmcts.reform.prl.services.SendAndReplyService;
+import uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyCommonService;
+import uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
@@ -176,7 +176,7 @@ public class ReviewAdditionalApplicationController extends AbstractCallbackContr
     public ResponseEntity<SubmittedCallbackResponse> handleSubmittedSendAndReply(@RequestHeader("Authorization")
                                                                                  @Parameter(hidden = true) String authorisation,
                                                                                  @RequestBody CallbackRequest callbackRequest) {
-        return sendAndReplyService.sendAndReplySubmitted(callbackRequest);
+        return sendAndReplyService.sendAndReplySubmitted(callbackRequest, authorisation);
     }
 
     @PostMapping("/review-additional-application/clear-dynamic-lists")

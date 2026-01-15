@@ -27,7 +27,6 @@ import static org.hamcrest.Matchers.hasItems;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_C1A_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_C1A_RESPONSE;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.C8_ARCHIVED_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CASE_SUMMARY;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT1;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT2;
@@ -143,7 +142,7 @@ public class ManageDocumentsControllerFunctionalTest {
                            RESPONDENT_C1A_APPLICATION, RESPONDENT_C1A_RESPONSE, ORDERS_FROM_OTHER_PROCEEDINGS,
                            NOTICE_OF_HEARING, COURT_BUNDLE, CASE_SUMMARY, CHILD_IMPACT_REPORT1, CHILD_IMPACT_REPORT2,
                            SAFEGUARDING_LETTER, SECTION7_REPORT, SECTION_37_REPORT, SIXTEEN_A_RISK_ASSESSMENT, GUARDIAN_REPORT,
-                           SPECIAL_GUARDIANSHIP_REPORT, OTHER_DOCS, C8_ARCHIVED_DOCUMENTS, EMAILS_TO_COURT_TO_REQUEST_HEARINGS_ADJOURNED,
+                           SPECIAL_GUARDIANSHIP_REPORT, OTHER_DOCS, EMAILS_TO_COURT_TO_REQUEST_HEARINGS_ADJOURNED,
                            PUBLIC_FUNDING_CERTIFICATES, NOTICES_OF_ACTING_DISCHARGE, REQUEST_FOR_FAS_FORMS_TO_BE_CHANGED,
                            WITNESS_AVAILABILITY, LETTERS_OF_COMPLAINTS, SPIP_REFERRAL_REQUESTS,
                            HOME_OFFICE_DWP_RESPONSES)

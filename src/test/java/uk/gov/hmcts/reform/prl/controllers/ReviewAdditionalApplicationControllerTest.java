@@ -31,8 +31,8 @@ import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.ReviewAdditionalApplicationService;
-import uk.gov.hmcts.reform.prl.services.SendAndReplyCommonService;
-import uk.gov.hmcts.reform.prl.services.SendAndReplyService;
+import uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyCommonService;
+import uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -409,10 +409,10 @@ public class ReviewAdditionalApplicationControllerTest {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        when(sendAndReplyService.sendAndReplySubmitted(callbackRequest)).thenReturn(ok(SubmittedCallbackResponse.builder().build()));
+        when(sendAndReplyService.sendAndReplySubmitted(callbackRequest, auth)).thenReturn(ok(SubmittedCallbackResponse.builder().build()));
         ResponseEntity<SubmittedCallbackResponse> response  = controller.handleSubmittedSendAndReply(auth, callbackRequest);
         Assertions.assertThat(response.getStatusCode().value()).isEqualTo(200);
-        verify(sendAndReplyService).sendAndReplySubmitted(callbackRequest);
+        verify(sendAndReplyService).sendAndReplySubmitted(callbackRequest, auth);
 
     }
 
