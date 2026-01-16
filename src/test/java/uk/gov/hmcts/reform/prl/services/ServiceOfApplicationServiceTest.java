@@ -5629,6 +5629,7 @@ public class ServiceOfApplicationServiceTest {
         assertNull(caseDataMap1.get(APPLICANTS));
 
     }
+
     @Test
     public void testEmailToRespondentSolicitorNonPersonalAfterConfSuccess() {
 
@@ -5717,6 +5718,7 @@ public class ServiceOfApplicationServiceTest {
         );
 
     }
+    
     @Test
     public void testPostToRespondentNonPersonalAfterConfSuccessWhenPreferenceIsPost() {
 
