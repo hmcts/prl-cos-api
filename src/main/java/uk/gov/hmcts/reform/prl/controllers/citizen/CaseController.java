@@ -232,8 +232,12 @@ public class CaseController {
                                      @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
                                      @PathVariable("postcode") String postcode) throws Exception {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            Court court = courtFinderService.getC100NearestFamilyCourt(postcode);
-            return court == null ? "" : court.getCourtName();
+            try {
+                Court court = courtFinderService.getC100NearestFamilyCourt(postcode);
+                return court == null ? "No Court Fetched" : court.getCourtName();
+            } catch (Exception e) {
+                return null;
+            }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
