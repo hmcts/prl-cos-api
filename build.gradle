@@ -592,8 +592,7 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/mapper/citizen/awp/CitizenAwpMapper.java',
   '**uk/gov/hmcts/reform/prl/mapper/citizen/CitizenPartyDetailsMapper.java',
   '**uk/gov/hmcts/reform/prl/services/DraftAnOrderService.java',
-  '**uk/gov/hmcts/reform/prl/services/ManageOrderService.java',
-  '**uk/gov/hmcts/reform/prl/services/ServiceOfApplicationService.java'
+  '**uk/gov/hmcts/reform/prl/services/ManageOrderService.java'
 ]
 
 sonarqube {
@@ -695,7 +694,6 @@ bootWithCCD {
   environment("FEATURE_WORKALLOCATION_ENABLED", "true")
   environment("SERVICES_WORK_ALLOCATION_TASK_API", "http://host.docker.internal:9193")
   environment("HEALTH_WORK_ALLOCATION_TASK_API", "http://host.docker.internal:9193/health")
-
 }
 
 test {
