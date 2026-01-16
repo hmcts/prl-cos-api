@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
-import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
+import uk.gov.hmcts.reform.prl.services.payment.PaymentRequestService;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
