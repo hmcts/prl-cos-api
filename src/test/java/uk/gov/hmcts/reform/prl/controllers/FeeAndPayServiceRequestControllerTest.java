@@ -24,9 +24,9 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.UploadAdditionalApplicationData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
-import uk.gov.hmcts.reform.prl.services.FeeAndPayServiceRequestService;
-import uk.gov.hmcts.reform.prl.services.FeeService;
-import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
+import uk.gov.hmcts.reform.prl.services.payment.FeeAndPayServiceRequestService;
+import uk.gov.hmcts.reform.prl.services.payment.FeeService;
+import uk.gov.hmcts.reform.prl.services.payment.PaymentRequestService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 
 import java.util.ArrayList;

@@ -26,7 +26,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
-import uk.gov.hmcts.reform.prl.services.FeeAndPayServiceRequestService;
+import uk.gov.hmcts.reform.prl.services.payment.FeeAndPayServiceRequestService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
