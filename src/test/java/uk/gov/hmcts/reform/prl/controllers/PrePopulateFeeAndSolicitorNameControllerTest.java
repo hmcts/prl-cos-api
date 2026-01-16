@@ -34,11 +34,11 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
-import uk.gov.hmcts.reform.prl.services.payment.FeeService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.C100DocumentTemplateFinderService;
+import uk.gov.hmcts.reform.prl.services.payment.FeeService;
 import uk.gov.hmcts.reform.prl.services.validators.SubmitAndPayChecker;
 
 import java.math.BigDecimal;
