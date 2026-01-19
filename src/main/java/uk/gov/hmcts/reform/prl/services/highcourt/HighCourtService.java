@@ -1,0 +1,30 @@
+package uk.gov.hmcts.reform.prl.services.highcourt;
+
+import lombok.AllArgsConstructor;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+
+@AllArgsConstructor
+public class HighCourtService {
+
+    public void setCaseAccess(CaseDetails caseDetails) {
+        if (isHighCourtCase(caseDetails)) {
+            addJudiciaryAccess();
+        } else {
+            revokeJudiciaryAccess();
+        }
+    }
+
+    private void addJudiciaryAccess() {
+        // implement
+    }
+
+    private void revokeJudiciaryAccess() {
+        // implement
+    }
+
+    private boolean isHighCourtCase(CaseDetails caseDetails) {
+        Object highCourtCase = caseDetails.getData().get("isHighCourtCase");
+        return highCourtCase.equals(YesOrNo.Yes);
+    }
+}
