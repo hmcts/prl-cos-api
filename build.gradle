@@ -179,7 +179,7 @@ allprojects {
       dependency group: 'org.springframework.security', name: 'spring-security-crypto', version: '5.8.16'
 
       //CVE-2023-42795, CVE-2023-45648
-      dependencySet(group: 'org.apache.tomcat.embed', version: '10.1.49') {
+      dependencySet(group: 'org.apache.tomcat.embed', version: '10.1.50') {
         entry 'tomcat-embed-core'
         entry 'tomcat-embed-websocket'
       }
@@ -350,7 +350,7 @@ dependencies {
   implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
   implementation group: 'org.apache.commons', name: 'commons-csv', version: '1.14.1'
   implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '7.10.2'
-  implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '8.19.9'
+  implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '8.19.10'
   implementation group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
   implementation group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
   implementation group: 'com.sendgrid', name: 'sendgrid-java', version: '4.10.3'
