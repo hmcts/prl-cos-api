@@ -83,7 +83,12 @@ class CallbackRequestLoggingAspectTest {
     }
 
     // Used for reflection in test
-    private void dummyMethod(CallbackRequest callbackRequest, String other) {}
-    private void noParamMethod() {}
-    private void noCallbackRequestParamMethod(String a, Integer b) {}
+    private void dummyMethod(CallbackRequest callbackRequest, String other) {
+    }
+
+    private void noParamMethod() {
+    }
+
+    private void noCallbackRequestParamMethod(String a, Integer b) {
+    }
 }
