@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.services;
+package uk.gov.hmcts.reform.prl.services.payment;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -32,6 +33,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Range;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Should;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.StateFilter;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestReferenceStatusResponse;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
@@ -63,8 +65,10 @@ public class HwfProcessUpdateCaseStateService {
     private final CoreCaseDataApi coreCaseDataApi;
     private final PaymentRequestService paymentRequestService;
     private final AllTabServiceImpl allTabService;
-
     private final ObjectMapper objectMapper;
+
+    @Value("${hwf-update-case-state-task.last-modified-days-threshold:3}")
+    private int lastModifiedDaysThreshold;
 
     private static final int PAGE_SIZE = 10;
 
@@ -75,7 +79,7 @@ public class HwfProcessUpdateCaseStateService {
         List<CaseDetails> caseDetailsList = retrieveCasesWithHelpWithFeesInPendingState();
         if (isNotEmpty(caseDetailsList)) {
             caseDetailsList.forEach(caseDetails -> {
-                log.info("caseDetails caseId - " + caseDetails.getId());
+                log.info("caseDetails caseId - {}", caseDetails.getId());
                 CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class);
                 if (StringUtils.isNotEmpty(caseData.getHelpWithFeesNumber())
                     && StringUtils.isNotEmpty(caseData.getPaymentServiceRequestReferenceNumber())) {
@@ -85,16 +89,15 @@ public class HwfProcessUpdateCaseStateService {
                         systemUserService.getSysUserToken(),
                         caseData.getPaymentServiceRequestReferenceNumber()
                     );
-                    log.info("PaymentGroupReferenceStatusResponse - " + serviceRequestReferenceStatusResponse.getServiceRequestStatus());
+                    log.info("PaymentGroupReferenceStatusResponse {}", serviceRequestReferenceStatusResponse.getServiceRequestStatus());
                     if (PaymentStatus.PAID.getDisplayedValue().equals(serviceRequestReferenceStatusResponse.getServiceRequestStatus())) {
                         Map<String, Object> caseDataUpdated = new HashMap<>();
-                        caseDataUpdated.put("caseStatus", 
-                            CaseStatus.builder().state(shouldUpdateCaseState(caseData) 
-                            ? State.SUBMITTED_PAID.getLabel() 
-                            : caseData.getState().getLabel()).build());
+                        caseDataUpdated.put("caseStatus", CaseStatus.builder()
+                            .state(State.SUBMITTED_PAID.getLabel())
+                            .build());
                         if (caseData.getDateSubmitted() == null) {
                             ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
-                            log.info("DateTimeFormatter Date is {} ", DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
+                            log.info("DateTimeFormatter Date is {}", DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
                             caseDataUpdated.put(DATE_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
                             caseDataUpdated.put(
                                 DATE_OF_SUBMISSION,
@@ -117,6 +120,7 @@ public class HwfProcessUpdateCaseStateService {
                             startAllTabsUpdateDataContent.eventRequestData(),
                             caseDataUpdated
                         );
+                        log.info("caseDetails caseId - {} updated", caseDetails.getId());
                     }
                 }
             });
@@ -154,6 +158,10 @@ public class HwfProcessUpdateCaseStateService {
             int totalCases = searchCases.getTotal();
             int pages = (int) Math.ceil((double) totalCases / PAGE_SIZE);
             log.info("Search result size {}, split across {} pages", totalCases, pages);
+            if (totalCases == 0) {
+                return caseDetailsList;
+            }
+
             SearchResultResponse searchResultResponse = objectMapper.convertValue(
                 searchCases,
                 SearchResultResponse.class
@@ -221,7 +229,9 @@ public class HwfProcessUpdateCaseStateService {
             .build();
         Must mustFilter = Must.builder().stateFilter(stateFilter).build();
 
-        LastModified lastModified = LastModified.builder().gte(LocalDateTime.now().minusDays(3).toString()).build();
+        LastModified lastModified = LastModified.builder()
+            .gte(LocalDateTime.now().minusDays(lastModifiedDaysThreshold).toString())
+            .build();
         Range range = Range.builder().lastModified(lastModified).build();
         Filter filter = Filter.builder().range(range).build();
 
@@ -236,10 +246,5 @@ public class HwfProcessUpdateCaseStateService {
             .from(String.valueOf(from))
             .query(Query.builder().bool(finalFilter).build())
             .build();
-    }
-
-    private boolean shouldUpdateCaseState(CaseData caseData) {
-        return caseData.getState() == State.SUBMITTED_NOT_PAID
-            || caseData.getState() == State.CASE_WITHDRAWN;
     }
 }

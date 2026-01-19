@@ -50,8 +50,12 @@ import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.CAO
 import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.CARESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.CARESPONDENTBARRISTER;
 import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.CARESPONDENTSOLICITOR;
+import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.DAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.DAAPPLICANTBARRISTER;
+import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.DAAPPLICANTSOLICITOR;
+import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.DARESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.DARESPONDENTBARRISTER;
+import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.DARESPONDENTSOLICITOR;
 import static uk.gov.hmcts.reform.prl.utils.caseflags.PartyLevelCaseFlagsGenerator.VISIBILITY_EXTERNAL;
 import static uk.gov.hmcts.reform.prl.utils.caseflags.PartyLevelCaseFlagsGenerator.VISIBILITY_INTERNAL;
 
@@ -67,7 +71,8 @@ public class PartyLevelCaseFlagsService {
     private static final List<PartyRole.Representing> REPRESENTING_REFRESHABLE_PARTY_FLAG_LIST = List.of(
         CAAPPLICANT, CAAPPLICANTSOLICITOR, CAAPPLICANTBARRISTER,
         CARESPONDENT, CARESPONDENTSOLICITOR, CARESPONDENTBARRISTER,
-        CAOTHERPARTY
+        CAOTHERPARTY, DAAPPLICANT, DAAPPLICANTBARRISTER, DAAPPLICANTSOLICITOR,
+        DARESPONDENT, DARESPONDENTBARRISTER, DARESPONDENTSOLICITOR
     );
 
     private final ObjectMapper objectMapper;
@@ -147,11 +152,11 @@ public class PartyLevelCaseFlagsService {
                 data.putAll(generateC100PartyCaseFlags(caseData, CARESPONDENTBARRISTER));
             }
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DAAPPLICANT));
-            data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DAAPPLICANTSOLICITOR));
+            data.putAll(generateFl401PartyCaseFlags(caseData, DAAPPLICANT));
+            data.putAll(generateFl401PartyCaseFlags(caseData, DAAPPLICANTSOLICITOR));
             data.putAll(generateFl401PartyCaseFlags(caseData, DAAPPLICANTBARRISTER));
-            data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DARESPONDENT));
-            data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DARESPONDENTSOLICITOR));
+            data.putAll(generateFl401PartyCaseFlags(caseData, DARESPONDENT));
+            data.putAll(generateFl401PartyCaseFlags(caseData, DARESPONDENTSOLICITOR));
             data.putAll(generateFl401PartyCaseFlags(caseData, DARESPONDENTBARRISTER));
         }
         return data;
@@ -743,12 +748,23 @@ public class PartyLevelCaseFlagsService {
                 updateCaseFlagDataIfPartiesRemoved(updatedCaseDataMap, oldPartyIdToIndex, partyToIndex,
                                                    getRepresentingForEventId(eventId), parties
                 );
-                refreshPartyFlags(updatedCaseDataMap, getPartiesBaseOnEventID(updatedCaseData, eventId),
+                refreshPartyFlagsForC100(updatedCaseDataMap, getPartiesBaseOnEventID(updatedCaseData, eventId),
                                   getRepresentingForEventId(eventId)
                 );
-
             }
 
+        } else if (FL401_CASE_TYPE.equals(updatedCaseData.getCaseTypeOfApplication())
+            && Arrays.asList(AMEND_APPLICANTS_DETAILS,
+                             AMEND_RESPONDENT_DETAILS,
+                             AMEND_OTHER_PEOPLE_IN_THE_CASE,
+                             ADMIN_ADD_BARRISTER,
+                             SOLICITOR_ADD_BARRISTER).contains(eventId)) {
+            List<Element<PartyDetails>> parties = getPartiesBaseOnEventID(updatedCaseData, eventId);
+            if (CollectionUtils.isNotEmpty(parties)) {
+                refreshPartyFlagsForFl401(updatedCaseDataMap, parties.getFirst().getValue(),
+                                  getRepresentingForEventId(eventId)
+                );
+            }
         }
     }
 
@@ -758,12 +774,15 @@ public class PartyLevelCaseFlagsService {
             case AMEND_APPLICANTS_DETAILS -> {
                 return Arrays.asList(
                     CAAPPLICANT, CAAPPLICANTSOLICITOR,
-                    CAAPPLICANTBARRISTER);
+                    CAAPPLICANTBARRISTER, DAAPPLICANT,
+                    DAAPPLICANTSOLICITOR, DAAPPLICANTBARRISTER
+                    );
             }
             case AMEND_RESPONDENT_DETAILS -> {
                 return Arrays.asList(
                     CARESPONDENT, CARESPONDENTSOLICITOR,
-                    CARESPONDENTBARRISTER);
+                    CARESPONDENTBARRISTER, DARESPONDENT,
+                    DARESPONDENTSOLICITOR, DARESPONDENTBARRISTER);
             }
             case AMEND_OTHER_PEOPLE_IN_THE_CASE -> {
                 return List.of(CAOTHERPARTY);
@@ -787,10 +806,14 @@ public class PartyLevelCaseFlagsService {
 
         switch (eventId) {
             case AMEND_APPLICANTS_DETAILS -> {
-                return caseData.getApplicants();
+                return C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())
+                    ? caseData.getApplicants()
+                    : List.of(Element.<PartyDetails>builder().value(caseData.getApplicantsFL401()).build());
             }
             case AMEND_RESPONDENT_DETAILS -> {
-                return caseData.getRespondents();
+                return C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())
+                    ? caseData.getRespondents()
+                    : List.of(Element.<PartyDetails>builder().value(caseData.getRespondentsFL401()).build());
             }
             case AMEND_OTHER_PEOPLE_IN_THE_CASE -> {
                 return caseData.getOtherPartyInTheCaseRevised();
@@ -801,7 +824,7 @@ public class PartyLevelCaseFlagsService {
         }
     }
 
-    private void refreshPartyFlags(Map<String, Object> updatedCaseDataMap, List<Element<PartyDetails>> parties,
+    private void refreshPartyFlagsForC100(Map<String, Object> updatedCaseDataMap, List<Element<PartyDetails>> parties,
                                    List<PartyRole.Representing> representing) {
         representing.forEach(representing1 -> {
             List<String> caseFlagsToBeUpdated = Arrays.asList(
@@ -821,6 +844,15 @@ public class PartyLevelCaseFlagsService {
                         refreshPartyFlags(updatedCaseDataMap, representing1, parties.get(i).getValue(), i);
                     }
                 }
+            }
+        });
+    }
+
+    private void refreshPartyFlagsForFl401(Map<String, Object> updatedCaseDataMap, PartyDetails party,
+                                   List<PartyRole.Representing> representing) {
+        representing.forEach(representing1 -> {
+            if (REPRESENTING_REFRESHABLE_PARTY_FLAG_LIST.contains(representing1)) {
+                refreshPartyFlags(updatedCaseDataMap, representing1, party, 0);
             }
         });
     }
@@ -965,10 +997,11 @@ public class PartyLevelCaseFlagsService {
 
     private String getPartyName(PartyDetails applicant, PartyRole.Representing representing) {
         switch (representing) {
-            case CAAPPLICANT,CARESPONDENT,CAOTHERPARTY -> {
+            case CAAPPLICANT,CARESPONDENT,CAOTHERPARTY,DAAPPLICANT,DARESPONDENT -> {
                 return applicant.getLabelForDynamicList();
             }
-            case CAAPPLICANTSOLICITOR,CARESPONDENTSOLICITOR,CAAPPLICANTBARRISTER,CARESPONDENTBARRISTER -> {
+            case CAAPPLICANTSOLICITOR,CARESPONDENTSOLICITOR,CAAPPLICANTBARRISTER,CARESPONDENTBARRISTER,
+                 DAAPPLICANTSOLICITOR,DARESPONDENTSOLICITOR,DAAPPLICANTBARRISTER,DARESPONDENTBARRISTER -> {
                 return applicant.getRepresentativeFullNameForCaseFlags();
             }
             default -> {
@@ -976,5 +1009,4 @@ public class PartyLevelCaseFlagsService {
             }
         }
     }
-
 }
