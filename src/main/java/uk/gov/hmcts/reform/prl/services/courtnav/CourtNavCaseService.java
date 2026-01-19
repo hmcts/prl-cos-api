@@ -6,8 +6,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.retry.RetryContext;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.retry.support.RetrySynchronizationManager;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -103,7 +105,10 @@ public class CourtNavCaseService {
 
     @Retryable(retryFor = {FeignException.Conflict.class}, recover = "uploadDocumentRecover")
     public void uploadDocument(String authorisation, MultipartFile document, String typeOfDocument, String caseId) {
-        log.info("Uploading document of type {} to Court Nav Case {}", typeOfDocument, caseId);
+        RetryContext retryContext = RetrySynchronizationManager.getContext();
+        int attempt = (retryContext != null ? retryContext.getRetryCount() : 0) + 1;
+
+        log.info("Uploading document of type {} to Court Nav Case {}, attempt {}", typeOfDocument, caseId, attempt);
         if (null != document && null != document.getOriginalFilename()
             && checkFileFormat(document.getOriginalFilename())
             && checkTypeOfDocument(typeOfDocument)) {
