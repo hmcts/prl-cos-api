@@ -1167,7 +1167,7 @@ public class ServiceOfApplicationService {
                 sendEmailToRespondentSolicitorNonPersonal(caseData, authorization, emailNotificationDetails, packSdocs, respondent);
             } else if (!CaseUtils.hasLegalRepresentation(respondent.getValue())) {
                 ContactPreferences respondentContactPreference = respondent.getValue().getContactPreferences();
-                if(ContactPreferences.email.equals(respondentContactPreference)) {
+                if (ContactPreferences.email.equals(respondentContactPreference)) {
                     log.info("Sending email to respondent if preferences set to email and email address populated");
                     Map<String, String> fieldsMap = new HashMap<>();
                     fieldsMap.put(AUTHORIZATION, authorization);
@@ -1236,7 +1236,7 @@ public class ServiceOfApplicationService {
                 sendEmailToRespondentSolicitorNonPersonal(caseData, authorization, emailNotificationDetails, packSdocs, party.get());
             } else if (party.isPresent() && (!CaseUtils.hasLegalRepresentation(party.get().getValue()))) {
                 ContactPreferences respondentContactPreference = party.get().getValue().getContactPreferences();
-                if(ContactPreferences.email.equals(respondentContactPreference)) {
+                if (ContactPreferences.email.equals(respondentContactPreference)) {
                     log.info("Sending email to respondent conf check success if preferences set to email and email address populated");
                     Map<String, String> fieldsMap = new HashMap<>();
                     fieldsMap.put(AUTHORIZATION, authorization);
