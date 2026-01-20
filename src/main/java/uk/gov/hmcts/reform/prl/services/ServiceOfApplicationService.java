@@ -175,6 +175,7 @@ public class ServiceOfApplicationService {
     public static final String PERSONAL_SERVICE_SERVED_BY_CA = "Court - court admin";
     public static final String PERSONAL_SERVICE_SERVED_BY_BAILIFF = "Court - court bailiff";
     public static final String DA_APPLICANT_NAME = "daApplicantName";
+    public static final String DA_RESPONDENT_NAME = "daRespondentName";
     public static final String PROCEED_TO_SERVING = "proceedToServing";
     public static final String ADDRESS_MISSED_FOR_RESPONDENT_AND_OTHER_PARTIES = WARNING_TEXT_DIV
         + "</span><strong class='govuk-warning-text__text'>There is no postal address for a respondent and "
@@ -1166,8 +1167,28 @@ public class ServiceOfApplicationService {
                 sendEmailToRespondentSolicitorNonPersonal(caseData, authorization, emailNotificationDetails, packSdocs, respondent);
             } else if (!CaseUtils.hasLegalRepresentation(respondent.getValue())) {
                 ContactPreferences respondentContactPreference = respondent.getValue().getContactPreferences();
-                if (respondentContactPreference == null || ContactPreferences.post.equals(respondentContactPreference)
-                    || (ContactPreferences.email.equals(respondentContactPreference) && respondent.getValue().getEmail() == null)) {
+                if(ContactPreferences.email.equals(respondentContactPreference)) {
+                    log.info("Sending email to respondent if preferences set to email and email address populated");
+                    Map<String, String> fieldsMap = new HashMap<>();
+                    fieldsMap.put(AUTHORIZATION, authorization);
+                    List<Document> coverLetters = generateCoverLetterBasedOnCaseAccessRespondent(
+                        authorization,
+                        caseData,
+                        respondent,
+                        PRL_LET_ENG_C100_RE5
+                    );
+                    sendEmailToCitizenRespondentNonPersonal(
+                        caseData,
+                        emailNotificationDetails,
+                        respondent,
+                        packRdocs,
+                        SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
+                        fieldsMap,
+                        EmailTemplateNames.SOA_UNREPRESENTED_APPLICANT_SERVED_BY_COURT,
+                        coverLetters
+                    );
+                }
+                else {
                     log.info("Sending post to respondent, if NO preferences set or set to POST or the email is empty");
                     if (respondent.getValue().getAddress() != null && StringUtils.isNotEmpty(respondent.getValue().getAddress().getAddressLine1())) {
                         log.info(
@@ -1192,15 +1213,6 @@ public class ServiceOfApplicationService {
                                 + "as no address available", caseData.getId()
                         );
                     }
-                } else {
-                    log.info("Sending email to respondent if preferences set to email and email address populated");
-                    sendEmailToRespondentNonPersonal(
-                        caseData,
-                        authorization,
-                        emailNotificationDetails,
-                        packRdocs,
-                        respondent
-                    );
                 }
             }
         });
@@ -1225,8 +1237,28 @@ public class ServiceOfApplicationService {
                 sendEmailToRespondentSolicitorNonPersonal(caseData, authorization, emailNotificationDetails, packSdocs, party.get());
             } else if (party.isPresent() && (!CaseUtils.hasLegalRepresentation(party.get().getValue()))) {
                 ContactPreferences respondentContactPreference = party.get().getValue().getContactPreferences();
-                if (respondentContactPreference == null || ContactPreferences.post.equals(respondentContactPreference)
-                    || (ContactPreferences.email.equals(respondentContactPreference) && party.get().getValue().getEmail() == null)) {
+                if(ContactPreferences.email.equals(respondentContactPreference)) {
+                    log.info("Sending email to respondent conf check success if preferences set to email and email address populated");
+                    Map<String, String> fieldsMap = new HashMap<>();
+                    fieldsMap.put(AUTHORIZATION, authorization);
+                    List<Document> coverLetters = CaseUtils.getCoverLettersForParty(
+                        party.get().getId(),
+                        caseData.getServiceOfApplication()
+                            .getUnServedRespondentPack()
+                            .getCoverLettersMap()
+                    );
+                    sendEmailToCitizenRespondentNonPersonal(
+                        caseData,
+                        emailNotificationDetails,
+                        party.get(),
+                        packRdocs,
+                        SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
+                        fieldsMap,
+                        EmailTemplateNames.SOA_UNREPRESENTED_APPLICANT_SERVED_BY_COURT,
+                        coverLetters
+                    );
+                }
+                else {
                     log.info("Sending post to respondent conf check success, if NO preferences set or set to POST or the email is empty");
                     if (party.get().getValue().getAddress() != null
                         && StringUtils.isNotEmpty(party.get().getValue().getAddress().getAddressLine1())) {
@@ -1247,19 +1279,10 @@ public class ServiceOfApplicationService {
                         );
                     } else {
                         log.info(
-                            "Unable to send any notification to respondent for C100 Application for caseId {} "
+                            "Unable to send any notification to respondent for C100 Application for caseId conf check success {} "
                                 + "as no address available", caseData.getId()
                         );
                     }
-                } else {
-                    log.info("Sending email to respondent conf check success if preferences set to email and email address populated");
-                    sendEmailToRespondentNonPersonal(
-                        caseData,
-                        authorization,
-                        emailNotificationDetails,
-                        packRdocs,
-                        party.get()
-                    );
                 }
             }
         });
@@ -1297,37 +1320,37 @@ public class ServiceOfApplicationService {
         }
     }
 
-    private void sendEmailToRespondentNonPersonal(CaseData caseData, String authorization,
-                                                  List<Element<EmailNotificationDetails>> emailNotificationDetails,
-                                                  List<Document> packRdocs, Element<PartyDetails> party) {
-        if (party.getValue().getEmail() != null) {
-            try {
-                log.info(
-                    "Sending the email notification to respondent for C100 Application for caseId {}",
-                    caseData.getId()
-                );
-                Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
-                //what name should be used
-                dynamicData.put("name", party.getValue().getFirstName());
-                dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
-                dynamicData.put("respondent", true);
-                populateLanguageMap(caseData, dynamicData);
-                List<Document> finalDocs = removeCoverLettersFromThePacks(packRdocs);
-                //find the right template and served party details and use it here
-                EmailNotificationDetails emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
-                    authorization,
-                    party.getValue().getEmail(),
-                    finalDocs,
-                    SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
-                    dynamicData,
-                    PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR
-                );
-                if (null != emailNotification) {
-                    emailNotificationDetails.add(element(emailNotification));
-                }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+    private void sendEmailToCitizenRespondentNonPersonal(CaseData caseData,
+                                                          List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                                          Element<PartyDetails> party,
+                                                          List<Document> docs,
+                                                          SendgridEmailTemplateNames emailTemplate,
+                                                          Map<String, String> fieldMap,
+                                                          EmailTemplateNames notifyTemplate,
+                                                          List<Document> coverLetters) {
+        EmailNotificationDetails emailNotification;
+        if (CaseUtils.isCitizenAccessEnabled(party.getValue())) {
+            log.debug("Respondent has access to dashboard -> send gov notify email for {}", party.getId());
+            emailNotification = sendEmailToUnrepresentedRespondent(fieldMap.get(AUTHORIZATION),
+                                                                  caseData,
+                                                                  docs,
+                                                                  party,
+                                                                  notifyTemplate,
+                                                                  coverLetters);
+        } else {
+            log.debug("Respondent does not access to dashboard -> send packs via sendgrid email for {}", party.getId());
+            emailNotification = sendSoaPacksToPartyViaEmailRespondent(fieldMap.get(AUTHORIZATION),
+                                                            caseData,
+                                                            docs,
+                                                            party,
+                                                            emailTemplate,
+                                                            coverLetters);
+        }
+
+        if (emailNotification != null) {
+            emailNotificationDetails.add(element(emailNotification.toBuilder()
+                                                     .partyIds(String.valueOf(party.getId()))
+                                                     .build()));
         }
     }
 
@@ -1623,6 +1646,29 @@ public class ServiceOfApplicationService {
             .build();
     }
 
+    private EmailNotificationDetails sendEmailToUnrepresentedRespondent(String authorization,
+                                                                       CaseData caseData,
+                                                                       List<Document> packDocs,
+                                                                       Element<PartyDetails> party,
+                                                                       EmailTemplateNames emailTemplate,
+                                                                       List<Document> coverLetters) {
+
+        //Send a gov notify email
+        sendGovNotifyEmail(caseData, party, emailTemplate);
+        //Generate cover letter without access code for respondent who has access to dashboard
+        List<Document> packsWithCoverLetters = new ArrayList<>(coverLetters);
+        packsWithCoverLetters.addAll(packDocs);
+
+        //Create email notification with packs
+        return EmailNotificationDetails.builder()
+            .emailAddress(party.getValue().getEmail())
+            .servedParty(SERVED_PARTY_RESPONDENT)
+            .docs(wrapElements(packsWithCoverLetters))
+            .attachedDocs(CITIZEN_CAN_VIEW_ONLINE)
+            .timeStamp(CaseUtils.getCurrentDate())
+            .build();
+    }
+
     private void sendGovNotifyEmail(CaseData caseData, Element<PartyDetails> party, EmailTemplateNames emailTemplate) {
         serviceOfApplicationEmailService.sendGovNotifyEmail(
             LanguagePreference.getPreferenceLanguage(caseData),
@@ -1633,6 +1679,24 @@ public class ServiceOfApplicationService {
                 party.getValue(),
                 YesOrNo.Yes.equals(doesC1aExists(caseData)) ? "Yes" : null
             )
+        );
+    }
+
+    private EmailNotificationDetails sendSoaPacksToPartyViaEmailRespondent(String authorization,
+                                                                 CaseData caseData,
+                                                                 List<Document> packDocs,
+                                                                 Element<PartyDetails> party,
+                                                                 SendgridEmailTemplateNames emailTemplate,
+                                                                 List<Document> coverLetters) {
+        //Generate access code if party does not have access to dashboard
+        List<Document> packsWithCoverLetters = new ArrayList<>(coverLetters);
+        return sendEmailViaSendGridWithAttachedDocsToParty(
+            authorization,
+            caseData,
+            packDocs,
+            party,
+            emailTemplate,
+            packsWithCoverLetters
         );
     }
 
@@ -3139,6 +3203,34 @@ public class ServiceOfApplicationService {
         return dataMap;
     }
 
+    public Map<String, Object> populateAccessCodeMapRespondent(CaseData caseData, Element<PartyDetails> party, CaseInvite caseInvite) {
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("id", caseData.getId());
+        dataMap.put("serviceUrl", citizenUrl);
+        dataMap.put("address", party.getValue().getAddress());
+        dataMap.put("name", party.getValue().getFirstName() + " " + party.getValue().getLastName());
+        dataMap.put("accessCode", getAccessCode(caseInvite, party.getValue().getAddress(), party.getValue().getLabelForDynamicList()));
+        dataMap.put("c1aExists", doesC1aExists(caseData));
+        if (FL401_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            dataMap.put(DA_RESPONDENT_NAME, caseData.getRespondentsFL401().getLabelForDynamicList());
+        }
+        if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            dataMap.put("respondentName", caseData.getRespondents().get(0).getValue().getLabelForDynamicList());
+        }
+        dataMap.put("isCitizen", false);
+        if (launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)) {
+            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                dataMap.put("isCitizen", !CaseUtils.hasLegalRepresentation(party.getValue()));
+            }
+            // This check is added to disable or enable DA citizen journey as needed
+            if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                && launchDarklyClient.isFeatureEnabled(PrlAppsConstants.CITIZEN_ALLOW_DA_JOURNEY)) {
+                dataMap.put("isCitizen", !CaseUtils.hasLegalRepresentation(party.getValue()));
+            }
+        }
+        return dataMap;
+    }
+
     private AccessCode getAccessCode(CaseInvite caseInvite, Address address, String name) {
         String code = null;
         String isLinked = null;
@@ -3409,6 +3501,20 @@ public class ServiceOfApplicationService {
             caseInvite = CaseUtils.getCaseInvite(party.getId(), caseData.getCaseInvites());
         }
         dataMap = populateAccessCodeMap(caseData, party, caseInvite);
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        return fetchCoverLetter(authorization, template, dataMap, documentLanguage.isGenEng(), documentLanguage.isGenWelsh());
+    }
+
+    public List<Document> generateCoverLetterBasedOnCaseAccessRespondent(String authorization,
+                                                               CaseData caseData,
+                                                               Element<PartyDetails> party,
+                                                               String template) {
+        Map<String, Object> dataMap;
+        CaseInvite caseInvite = null;
+        if (!CaseUtils.isCitizenAccessEnabled(party.getValue()) && !CaseUtils.hasLegalRepresentation(party.getValue())) {
+            caseInvite = CaseUtils.getCaseInvite(party.getId(), caseData.getCaseInvites());
+        }
+        dataMap = populateAccessCodeMapRespondent(caseData, party, caseInvite);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         return fetchCoverLetter(authorization, template, dataMap, documentLanguage.isGenEng(), documentLanguage.isGenWelsh());
     }
