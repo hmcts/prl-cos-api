@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.enums.reopenclosedcases.ValidReopenClosedCasesSta
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.RemovableDocument;
 import uk.gov.hmcts.reform.prl.models.complextypes.refuge.RefugeConfidentialDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CourtIdentifier;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.closingcases.ClosingCaseOptions;
@@ -156,6 +157,9 @@ public class BaseCaseData {
 
     @JsonProperty("isHighCourtCase")
     private YesOrNo isHighCourtCase;
+
+    @JsonProperty("courtIdentifier")
+    private CourtIdentifier courtIdentifier;
 
     @JsonProperty("TTL")
     private TTL retainAndDisposeTimeToLive;

@@ -23,11 +23,15 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CourtIdentifier;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
+import uk.gov.hmcts.reform.prl.services.tab.summary.generator.CourtIdentifierGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
@@ -39,12 +43,15 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 public class HighCourtCaseController  extends AbstractCallbackController {
 
     private final AuthorisationService authorisationService;
+    private final CourtIdentifierGenerator courtIdentifierGenerator;
 
     @Autowired
     public HighCourtCaseController(ObjectMapper objectMapper, EventService eventPublisher,
-                                   AuthorisationService authorisationService) {
+                                   AuthorisationService authorisationService,
+                                   CourtIdentifierGenerator courtIdentifierGenerator) {
         super(objectMapper, eventPublisher);
         this.authorisationService = authorisationService;
+        this.courtIdentifierGenerator = courtIdentifierGenerator;
     }
 
 
@@ -63,13 +70,16 @@ public class HighCourtCaseController  extends AbstractCallbackController {
 
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-            Object highCourtCase = caseDetails.getData().get("isHighCourtCase");
+            Map<String, Object> data = caseDetails.getData();
+            Object highCourtCase = data.get("isHighCourtCase");
             log.info("about-to-submit highCourtCase {}", highCourtCase);
-
+            CaseData caseData = getCaseData(caseDetails);
+            CourtIdentifier courtIdentifier = courtIdentifierGenerator.courtIdentifierFromCaseData(caseData);
+            data.put("courtIdentifier", courtIdentifier);
             List<String> errors = new ArrayList<>();
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .errors(errors)
-                .data(caseDetails.getData())
+                .data(data)
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

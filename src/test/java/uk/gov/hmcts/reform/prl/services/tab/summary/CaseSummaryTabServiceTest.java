@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.generator.AllocatedJudgeDeta
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.CaseClosedDateGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.CaseStatusGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.ConfidentialDetailsGenerator;
+import uk.gov.hmcts.reform.prl.services.tab.summary.generator.CourtIdentifierGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.DateOfSubmissionGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.OrderAppliedForGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.OtherProceedingsGenerator;
@@ -40,43 +41,46 @@ import static org.mockito.Mockito.when;
 public class CaseSummaryTabServiceTest {
 
     @InjectMocks
-    CaseSummaryTabService caseSummaryTabService;
+    private CaseSummaryTabService caseSummaryTabService;
 
     @Mock
-    AllocatedJudgeDetailsGenerator allocatedJudgeDetailsGenerator;
+    private AllocatedJudgeDetailsGenerator allocatedJudgeDetailsGenerator;
 
     @Mock
-    RefugeCaseGenerator refugeCaseGenerator;
+    private RefugeCaseGenerator refugeCaseGenerator;
 
     @Mock
-    CaseStatusGenerator caseStatusGenerator;
+    private CaseStatusGenerator caseStatusGenerator;
 
     @Mock
-    ConfidentialDetailsGenerator confidentialDetailsGenerator;
+    private ConfidentialDetailsGenerator confidentialDetailsGenerator;
 
     @Mock
-    OrderAppliedForGenerator orderAppliedForGenerator;
+    private OrderAppliedForGenerator orderAppliedForGenerator;
 
     @Mock
-    OtherProceedingsGenerator otherProceedingsGenerator;
+    private OtherProceedingsGenerator otherProceedingsGenerator;
 
     @Mock
-    SpecialArrangementsGenerator specialArrangementsGenerator;
+    private SpecialArrangementsGenerator specialArrangementsGenerator;
 
     @Mock
-    UrgencyGenerator urgencyGenerator;
+    private UrgencyGenerator urgencyGenerator;
 
     @Mock
-    AllegationOfHarmGenerator allegationOfHarmGenerator;
+    private AllegationOfHarmGenerator allegationOfHarmGenerator;
 
     @Mock
-    DateOfSubmissionGenerator dateOfSubmissionGenerator;
+    private DateOfSubmissionGenerator dateOfSubmissionGenerator;
 
     @Mock
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
     @Mock
-    CaseClosedDateGenerator caseClosedDateGenerator;
+    private CaseClosedDateGenerator caseClosedDateGenerator;
+
+    @Mock
+    private CourtIdentifierGenerator courtIdentifierGenerator;
 
     private static final CaseData CASE_DATA = mock(CaseData.class);
     private static final CaseSummary CASE_SUMMARY0 = mock(CaseSummary.class);
@@ -106,6 +110,7 @@ public class CaseSummaryTabServiceTest {
         when(dateOfSubmissionGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY8);
         when(otherProceedingsGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY9);
         when(caseClosedDateGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY9);
+        when(courtIdentifierGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY9);
         when(otherProceedingsGenerator.getOtherProceedingsDetails(CASE_DATA)).thenReturn(new ArrayList<>());
 
         when(objectMapper.convertValue(eq(CASE_SUMMARY0),

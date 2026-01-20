@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.generator.AllocatedJudgeDeta
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.CaseClosedDateGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.CaseStatusGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.ConfidentialDetailsGenerator;
+import uk.gov.hmcts.reform.prl.services.tab.summary.generator.CourtIdentifierGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.DateOfSubmissionGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.FieldGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.OrderAppliedForGenerator;
@@ -55,7 +56,7 @@ public class CaseSummaryTabService implements TabService {
     private final ObjectMapper objectMapper;
     private final TypeOfApplicationGenerator typeOfApplicationGenerator;
     private final RefugeCaseGenerator refugeCaseGenerator;
-
+    private final CourtIdentifierGenerator courtIdentifierGenerator;
     private final CaseClosedDateGenerator caseClosedDateGenerator;
 
     @Override
@@ -93,7 +94,7 @@ public class CaseSummaryTabService implements TabService {
             return List.of(allocatedJudgeDetailsGenerator,
                            refugeCaseGenerator,
                     caseStatusGenerator, confidentialDetailsGenerator, urgencyGenerator, typeOfApplicationGenerator,
-                    specialArrangementsGenerator, dateOfSubmissionGenerator, caseClosedDateGenerator);
+                    specialArrangementsGenerator, dateOfSubmissionGenerator, caseClosedDateGenerator, courtIdentifierGenerator);
 
         }
 
@@ -109,7 +110,8 @@ public class CaseSummaryTabService implements TabService {
                         || TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion()) ? allegationOfHarmRevisedGenerator
                         : allegationOfHarmGenerator,
                 dateOfSubmissionGenerator,
-                caseClosedDateGenerator
+                caseClosedDateGenerator,
+                courtIdentifierGenerator
         );
     }
 
