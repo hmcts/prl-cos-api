@@ -25,7 +25,7 @@ public class HighCourtControllerFunctionalTest {
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
-    private static final String VALID_REQUEST_BODY = "controller/high-court-request-casedata-body.json";
+    private static final String VALID_REQUEST_BODY = "controller/valid-request-casedata-body.json";
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(

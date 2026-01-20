@@ -9,18 +9,19 @@ public class HighCourtService {
 
     public void setCaseAccess(CaseDetails caseDetails) {
         if (isHighCourtCase(caseDetails)) {
-            addJudiciaryAccess();
+            grantJudiciaryAccess();
         } else {
             revokeJudiciaryAccess();
         }
     }
 
-    private void addJudiciaryAccess() {
+    private void grantJudiciaryAccess() {
         // implement
     }
 
     private void revokeJudiciaryAccess() {
         // implement
+        // removeRoleAssignment("")
     }
 
     private boolean isHighCourtCase(CaseDetails caseDetails) {
