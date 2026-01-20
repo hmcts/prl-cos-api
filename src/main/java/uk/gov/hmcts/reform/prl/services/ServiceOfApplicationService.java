@@ -1187,8 +1187,7 @@ public class ServiceOfApplicationService {
                         EmailTemplateNames.SOA_UNREPRESENTED_APPLICANT_SERVED_BY_COURT,
                         coverLetters
                     );
-                }
-                else {
+                } else {
                     log.info("Sending post to respondent, if NO preferences set or set to POST or the email is empty");
                     if (respondent.getValue().getAddress() != null && StringUtils.isNotEmpty(respondent.getValue().getAddress().getAddressLine1())) {
                         log.info(
@@ -1257,8 +1256,7 @@ public class ServiceOfApplicationService {
                         EmailTemplateNames.SOA_UNREPRESENTED_APPLICANT_SERVED_BY_COURT,
                         coverLetters
                     );
-                }
-                else {
+                } else {
                     log.info("Sending post to respondent conf check success, if NO preferences set or set to POST or the email is empty");
                     if (party.get().getValue().getAddress() != null
                         && StringUtils.isNotEmpty(party.get().getValue().getAddress().getAddressLine1())) {
