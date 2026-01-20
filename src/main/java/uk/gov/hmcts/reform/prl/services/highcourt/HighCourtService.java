@@ -21,6 +21,8 @@ public class HighCourtService {
 
     private void revokeJudiciaryAccess() {
         // implement
+        // check if an admin assigned a task to a specific high court judge so the judge wouldn't be removed in that case
+        // - will this prevent the case from being set to normal or will it be set to normal but that specific judge will have access?
         // removeRoleAssignment("")
     }
 

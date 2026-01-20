@@ -44,7 +44,7 @@ public class HighCourtControllerFunctionalTest {
             .body(requestBody)
             .when()
             .contentType("application/json")
-            .post("/submittedHighCourt")
+            .post("/high-court-case/submittedHighCourt")
             .then()
             .assertThat().statusCode(200);
     }
