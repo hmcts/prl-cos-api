@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.prl.services.highcourt;
 
-import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 
-@AllArgsConstructor
+@Service
 public class HighCourtService {
 
     public void setCaseAccess(CaseDetails caseDetails) {
