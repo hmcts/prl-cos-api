@@ -163,4 +163,6 @@ public class BaseCaseData {
 
     @JsonProperty("TTL")
     private TTL retainAndDisposeTimeToLive;
+
+    private List<Element<Document>> miamDocumentsCopy;
 }

@@ -26,6 +26,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UploadAdditionalApplicationData;
+import uk.gov.hmcts.reform.prl.services.payment.ApplicationsFeeCalculator;
+import uk.gov.hmcts.reform.prl.services.payment.FeeService;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

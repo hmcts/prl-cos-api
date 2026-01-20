@@ -165,7 +165,7 @@ public class CitizenCallbackControllerTest {
         citizenCallbackController.updateCitizenApplication(authToken, callbackRequest);
 
         verify(allTabsService, times(1)).updateAllTabsIncludingConfTab(anyString());
-        verify(miamPolicyUpgradeFileUploadService).deleteOldMiamPolicyUpgradeDocuments(caseData, "sysToken");
+        verify(miamPolicyUpgradeFileUploadService).deleteOldMiamPolicyUpgradeDocuments(caseData, caseData, "sysToken");
     }
 
     @Test
