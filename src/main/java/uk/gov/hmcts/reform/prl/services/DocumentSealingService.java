@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -27,6 +28,7 @@ import static org.apache.pdfbox.pdmodel.PDPageContentStream.AppendMode.APPEND;
 import static org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject.createFromByteArray;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DUMMY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REGION_WALES;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ResourceReader.readBytes;
 
 @Service
@@ -43,6 +45,7 @@ public class DocumentSealingService {
     private static final String USER_IMAGE_COURT_SEAL_BILINGUAL = "[userImage:familycourtseal-bilingual.png]";
     private static final String USER_IMAGE_COURT_SEAL = "[userImage:familycourtseal.png]";
     private static final String COURT_SEAL_BILINGUAL = "/familycourtseal-bilingual.png";
+    private static final String HIGH_COURT_SEAL = "/familycourtsealColourTest.png";
     private static final String COURT_SEAL = "/familycourtseal.png";
 
     private final DgsApiClient dgsApiClient;
@@ -61,7 +64,7 @@ public class DocumentSealingService {
             s2sToken
         );
 
-        byte[] seal = readBytes(getCourtSealImage(caseData.getCaseManagementLocation().getRegion()));
+        byte[] seal = readBytes(getCourtSealImage(caseData.getCaseManagementLocation().getRegion(), caseData.getIsHighCourtCase()));
         byte[] sealedDocument = addSealToDocument(downloadedPdf, seal);
 
         Map<String, Object> tempCaseDetails = new HashMap<>();
@@ -115,13 +118,15 @@ public class DocumentSealingService {
         return Math.round(POINTS_PER_MM * mm);
     }
 
-    private static String getCourtSealImage(String region) {
-        String courtSeal = "";
-        if (region.equals(REGION_WALES)) {
-            courtSeal = COURT_SEAL_BILINGUAL;
-        } else {
-            courtSeal = COURT_SEAL;
+    private static String getCourtSealImage(String region, YesOrNo isHighCourtCase) {
+        if (isHighCourtCase == Yes) {
+            return HIGH_COURT_SEAL;
         }
-        return courtSeal;
+
+        if (REGION_WALES.equals(region)) {
+            return COURT_SEAL_BILINGUAL;
+        }
+
+        return COURT_SEAL;
     }
 }
