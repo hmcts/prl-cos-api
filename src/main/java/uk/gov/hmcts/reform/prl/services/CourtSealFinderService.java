@@ -12,4 +12,8 @@ public class CourtSealFinderService {
         return "7".equals(regionId) ? "[userImage:familycourtseal-bilingual.png]" : "[userImage:familycourtseal.png]";
     }
 
+    public String getHighCourtSeal() {
+        return "[userImage:familycourtsealColourTest.png]";
+    }
+
 }

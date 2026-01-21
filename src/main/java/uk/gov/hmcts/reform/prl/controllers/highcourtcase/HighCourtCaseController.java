@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ import java.util.Map;
 import static java.util.Objects.nonNull;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
 @RestController
@@ -39,8 +41,11 @@ import static org.springframework.http.ResponseEntity.ok;
 public class HighCourtCaseController  extends AbstractCallbackController {
 
 
-    public HighCourtCaseController(ObjectMapper objectMapper, EventService eventPublisher) {
+    private final CourtSealFinderService courtSealFinderService;
+
+    public HighCourtCaseController(ObjectMapper objectMapper, EventService eventPublisher, CourtSealFinderService courtSealFinderService) {
         super(objectMapper, eventPublisher);
+        this.courtSealFinderService = courtSealFinderService;
     }
 
 
@@ -79,6 +84,16 @@ public class HighCourtCaseController  extends AbstractCallbackController {
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
         final CaseData caseData = getCaseData(caseDetails);
         log.info("submitted IsHighCourtCase {}", caseData.getIsHighCourtCase());
+
+        if (caseData.getIsHighCourtCase() == Yes) {
+            caseData.toBuilder()
+                .courtSeal(courtSealFinderService.getHighCourtSeal())
+                .build();
+        } else {
+            caseData.toBuilder()
+                .courtSeal(courtSealFinderService.getCourtSeal(caseData.getCourtId()))
+                .build();
+        }
         return ok(SubmittedCallbackResponse.builder().build());
     }
 
