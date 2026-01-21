@@ -327,7 +327,7 @@ public class Fm5ReminderService {
 
     public boolean isFirstListedHearingAwayForDays(Hearings hearings, long days) {
         if (hearings == null || CollectionUtils.isEmpty(hearings.getCaseHearings())) {
-            log.info("hearingsToProcess is null");
+            log.info("hearingsToProcess is null or empty");
             return false;
         }
 
