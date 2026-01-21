@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,6 +12,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.CitizenUpdatePartyDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
@@ -54,6 +56,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static java.util.Collections.emptyList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -96,8 +99,9 @@ public class CitizenPartyDetailsMapperTest {
     C8ArchiveService c8ArchiveService;
     @Mock
     CaseNameService caseNameService;
-    @Mock
-    ObjectMapper objectMapper;
+
+    @Spy
+    ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     public void setUpCA() throws IOException {
@@ -503,6 +507,59 @@ public class CitizenPartyDetailsMapperTest {
     public void testGetC100RebuildCaseDataMap() throws IOException {
         Map<String, Object> caseDataResult = citizenPartyDetailsMapper.getC100RebuildCaseDataMap(caseData);
         assertNotNull(caseDataResult);
+    }
+
+    @Test
+    void testMiamDocIsNotPresent() throws IOException {
+        CaseData miamCaseData = CaseData.builder()
+            .id(1234567891234567L)
+            .c100RebuildData(C100RebuildData.builder().build())
+            .build();
+
+        Map<String, Object> caseDataResult = citizenPartyDetailsMapper.getC100RebuildCaseDataMap(miamCaseData);
+        Assertions.assertEquals(emptyList(), caseDataResult.get("miamDocumentsCopy"));
+    }
+
+    @Test
+    void testMiamDomesticAbuseDocIsPresent() throws IOException {
+        CaseData miamDaCaseData = CaseData.builder()
+            .id(1234567891234567L)
+            .c100RebuildData(C100RebuildData.builder()
+                                 .c100RebuildMaim(TestUtil.readFileFrom("classpath:c100-rebuild/miamDAAbuse.json"))
+                                 .build()).build();
+
+        Map<String, Object> caseDataResult = citizenPartyDetailsMapper.getC100RebuildCaseDataMap(miamDaCaseData);
+        List<Element<Document>> miamDocumentsCopy = (List<Element<Document>>) (caseDataResult.get("miamDocumentsCopy"));
+        Assertions.assertEquals(1, miamDocumentsCopy.size());
+        Assertions.assertEquals("miamDAAbuseDoc.pdf", miamDocumentsCopy.getFirst().getValue().getDocumentFileName());
+    }
+
+    @Test
+    void testPreviousMaimAttendanceDocIsPresent() throws IOException {
+        CaseData miamCertCaseData = CaseData.builder()
+            .id(1234567891234567L)
+            .c100RebuildData(C100RebuildData.builder()
+                                 .c100RebuildMaim(TestUtil.readFileFrom("classpath:c100-rebuild/miamPrevious.json"))
+                                 .build()).build();
+
+        Map<String, Object> caseDataResult = citizenPartyDetailsMapper.getC100RebuildCaseDataMap(miamCertCaseData);
+        List<Element<Document>> miamDocumentsCopy = (List<Element<Document>>) (caseDataResult.get("miamDocumentsCopy"));
+        Assertions.assertEquals(1, miamDocumentsCopy.size());
+        Assertions.assertEquals("miamPrevioiusAttendance.pdf", miamDocumentsCopy.getFirst().getValue().getDocumentFileName());
+    }
+
+    @Test
+    void testMiamCertificateDocIsPresent() throws IOException {
+        CaseData miamCertCaseData = CaseData.builder()
+            .id(1234567891234567L)
+            .c100RebuildData(C100RebuildData.builder()
+                                 .c100RebuildMaim(TestUtil.readFileFrom("classpath:c100-rebuild/miamCert.json"))
+                                 .build()).build();
+
+        Map<String, Object> caseDataResult = citizenPartyDetailsMapper.getC100RebuildCaseDataMap(miamCertCaseData);
+        List<Element<Document>> miamDocumentsCopy = (List<Element<Document>>) (caseDataResult.get("miamDocumentsCopy"));
+        Assertions.assertEquals(1, miamDocumentsCopy.size());
+        Assertions.assertEquals("applicant__miam_certificate__08012026.pdf", miamDocumentsCopy.getFirst().getValue().getDocumentFileName());
     }
 
     @Test

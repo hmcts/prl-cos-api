@@ -179,7 +179,7 @@ allprojects {
       dependency group: 'org.springframework.security', name: 'spring-security-crypto', version: '5.8.16'
 
       //CVE-2023-42795, CVE-2023-45648
-      dependencySet(group: 'org.apache.tomcat.embed', version: '10.1.49') {
+      dependencySet(group: 'org.apache.tomcat.embed', version: '10.1.50') {
         entry 'tomcat-embed-core'
         entry 'tomcat-embed-websocket'
       }
@@ -290,8 +290,8 @@ configurations.configureEach {
     force 'org.bouncycastle:bcpkix-jdk18on:1.82'
     force 'org.springframework.security:spring-security-rsa:1.1.5'
     force 'org.springframework.security:spring-security-crypto:5.8.16'
-    force 'ch.qos.logback:logback-classic:1.5.24'
-    force 'ch.qos.logback:logback-core:1.5.24'
+    force 'ch.qos.logback:logback-classic:1.5.25'
+    force 'ch.qos.logback:logback-core:1.5.25'
   }
 }
 
@@ -350,7 +350,7 @@ dependencies {
   implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
   implementation group: 'org.apache.commons', name: 'commons-csv', version: '1.14.1'
   implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '7.10.2'
-  implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '8.19.9'
+  implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '8.19.10'
   implementation group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
   implementation group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
   implementation group: 'com.sendgrid', name: 'sendgrid-java', version: '4.10.3'
@@ -377,8 +377,8 @@ dependencies {
   constraints{
     implementation group: 'com.warrenstrange', name: 'googleauth', version: '1.5.0'
   }
-  implementation(group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.24')
-  implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.24')
+  implementation(group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.25')
+  implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.25')
   implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version:'7.4'
   implementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.5'
   implementation group: 'com.opencsv', name: 'opencsv', version: '5.12.0', {
@@ -404,9 +404,9 @@ dependencies {
   testRuntimeOnly 'org.junit.vintage:junit-vintage-engine'
   testImplementation 'org.testng:testng:7.11.0'
   testImplementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
-  testImplementation group: 'io.rest-assured', name: 'rest-assured', version: '5.5.6'
-  testImplementation group: 'io.rest-assured', name: 'json-path', version: '5.5.6'
-  testImplementation group: 'io.rest-assured', name: 'xml-path', version: '5.5.6'
+  testImplementation group: 'io.rest-assured', name: 'rest-assured', version: '5.5.7'
+  testImplementation group: 'io.rest-assured', name: 'json-path', version: '5.5.7'
+  testImplementation group: 'io.rest-assured', name: 'xml-path', version: '5.5.7'
   testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   testImplementation group: 'net.serenity-bdd', name: 'serenity-core', version: versions.serenity
   testImplementation group: 'net.serenity-bdd', name: 'serenity-cucumber', version: versions.serenityCucumber

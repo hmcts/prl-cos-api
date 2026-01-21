@@ -109,7 +109,7 @@ public class CitizenCallbackController extends AbstractCallbackController {
             && TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())
             && isNotEmpty(caseDataBefore.getMiamPolicyUpgradeDetails())) {
             miamPolicyUpgradeFileUploadService
-                .deleteOldMiamPolicyUpgradeDocuments(caseDataBefore, systemUserService.getSysUserToken());
+                .deleteOldMiamPolicyUpgradeDocuments(caseDataBefore, caseData, systemUserService.getSysUserToken());
         }
     }
 
