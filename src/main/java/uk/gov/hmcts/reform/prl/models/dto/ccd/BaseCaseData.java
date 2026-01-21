@@ -159,7 +159,7 @@ public class BaseCaseData {
     private YesOrNo isHighCourtCase;
 
     @JsonProperty("courtIdentifier")
-    private CourtIdentifier courtIdentifier;
+    protected CourtIdentifier courtIdentifier;
 
     @JsonProperty("TTL")
     private TTL retainAndDisposeTimeToLive;
