@@ -1688,7 +1688,7 @@ public class ServiceOfApplicationService {
                                                                  List<Document> coverLetters) {
         //Generate access code if party does not have access to dashboard
         List<Document> packsWithCoverLetters = new ArrayList<>(coverLetters);
-        return sendEmailViaSendGridWithAttachedDocsToParty(
+        return sendEmailViaSendGridWithAttachedDocsToPartyRespondent(
             authorization,
             caseData,
             packDocs,
@@ -1719,6 +1719,28 @@ public class ServiceOfApplicationService {
             emailTemplate,
             packsWithCoverLetters
         );
+    }
+
+    private EmailNotificationDetails sendEmailViaSendGridWithAttachedDocsToPartyRespondent(String authorization, CaseData caseData,
+                                                                                 List<Document> packDocs, Element<PartyDetails> party,
+                                                                                 SendgridEmailTemplateNames emailTemplate,
+                                                                                 List<Document> coverLetters) {
+        List<Document> packsWithCoverLetter = new ArrayList<>(coverLetters);
+        packsWithCoverLetter.addAll(packDocs);
+        Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+        dynamicData.put("name", party.getValue().getLabelForDynamicList());
+        dynamicData.put(DASH_BOARD_LINK, citizenUrl);
+        populateLanguageMap(caseData, dynamicData);
+
+        return serviceOfApplicationEmailService
+            .sendEmailUsingTemplateWithAttachments(
+                authorization,
+                party.getValue().getEmail(),
+                packsWithCoverLetter,
+                emailTemplate,
+                dynamicData,
+                SERVED_PARTY_RESPONDENT
+            );
     }
 
     private EmailNotificationDetails sendEmailViaSendGridWithAttachedDocsToParty(String authorization, CaseData caseData,
