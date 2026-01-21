@@ -65,13 +65,20 @@ public class HighCourtCaseController  extends AbstractCallbackController {
         log.info("High court case about-to-submit");
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
         final CaseData caseData = getCaseData(caseDetails);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         log.info("about-to-submit IsHighCourtCase {}", caseData.getIsHighCourtCase());
 
+
+        if (caseData.getIsHighCourtCase() == Yes) {
+            caseDataUpdated.put("courtSeal", courtSealFinderService.getHighCourtSeal());
+        } else {
+            caseDataUpdated.put("courtSeal", courtSealFinderService.getCourtSeal(caseData.getCourtId()));
+        }
 
         List<String> errors = new ArrayList<>();
         return AboutToStartOrSubmitCallbackResponse.builder()
             .errors(errors)
-            .data(caseDetails.getData())
+            .data(caseDataUpdated)
             .build();
     }
 
@@ -84,16 +91,6 @@ public class HighCourtCaseController  extends AbstractCallbackController {
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
         final CaseData caseData = getCaseData(caseDetails);
         log.info("submitted IsHighCourtCase {}", caseData.getIsHighCourtCase());
-
-        if (caseData.getIsHighCourtCase() == Yes) {
-            caseData.toBuilder()
-                .courtSeal(courtSealFinderService.getHighCourtSeal())
-                .build();
-        } else {
-            caseData.toBuilder()
-                .courtSeal(courtSealFinderService.getCourtSeal(caseData.getCourtId()))
-                .build();
-        }
         return ok(SubmittedCallbackResponse.builder().build());
     }
 
