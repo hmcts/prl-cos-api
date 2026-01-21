@@ -175,7 +175,6 @@ public class ServiceOfApplicationService {
     public static final String PERSONAL_SERVICE_SERVED_BY_CA = "Court - court admin";
     public static final String PERSONAL_SERVICE_SERVED_BY_BAILIFF = "Court - court bailiff";
     public static final String DA_APPLICANT_NAME = "daApplicantName";
-    public static final String DA_RESPONDENT_NAME = "daRespondentName";
     public static final String PROCEED_TO_SERVING = "proceedToServing";
     public static final String ADDRESS_MISSED_FOR_RESPONDENT_AND_OTHER_PARTIES = WARNING_TEXT_DIV
         + "</span><strong class='govuk-warning-text__text'>There is no postal address for a respondent and "
@@ -1171,7 +1170,8 @@ public class ServiceOfApplicationService {
                     log.info("Sending email to respondent if preferences set to email and email address populated");
                     Map<String, String> fieldsMap = new HashMap<>();
                     fieldsMap.put(AUTHORIZATION, authorization);
-                    List<Document> coverLetters = generateCoverLetterBasedOnCaseAccessRespondent(
+
+                    List<Document> coverLetters = generateCoverLetterBasedOnCaseAccess(
                         authorization,
                         caseData,
                         respondent,
@@ -1182,9 +1182,9 @@ public class ServiceOfApplicationService {
                         emailNotificationDetails,
                         respondent,
                         packRdocs,
-                        SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
+                        SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT,
                         fieldsMap,
-                        EmailTemplateNames.SOA_UNREPRESENTED_APPLICANT_SERVED_BY_COURT,
+                        EmailTemplateNames.SOA_UNREPRESENTED_RESPONDENT_SERVED_BY_COURT,
                         coverLetters
                     );
                 } else {
@@ -1251,9 +1251,9 @@ public class ServiceOfApplicationService {
                         emailNotificationDetails,
                         party.get(),
                         packRdocs,
-                        SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
+                        SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT,
                         fieldsMap,
-                        EmailTemplateNames.SOA_UNREPRESENTED_APPLICANT_SERVED_BY_COURT,
+                        EmailTemplateNames.SOA_UNREPRESENTED_RESPONDENT_SERVED_BY_COURT,
                         coverLetters
                     );
                 } else {
@@ -3201,34 +3201,6 @@ public class ServiceOfApplicationService {
         return dataMap;
     }
 
-    public Map<String, Object> populateAccessCodeMapRespondent(CaseData caseData, Element<PartyDetails> party, CaseInvite caseInvite) {
-        Map<String, Object> dataMap = new HashMap<>();
-        dataMap.put("id", caseData.getId());
-        dataMap.put("serviceUrl", citizenUrl);
-        dataMap.put("address", party.getValue().getAddress());
-        dataMap.put("name", party.getValue().getFirstName() + " " + party.getValue().getLastName());
-        dataMap.put("accessCode", getAccessCode(caseInvite, party.getValue().getAddress(), party.getValue().getLabelForDynamicList()));
-        dataMap.put("c1aExists", doesC1aExists(caseData));
-        if (FL401_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            dataMap.put(DA_RESPONDENT_NAME, caseData.getRespondentsFL401().getLabelForDynamicList());
-        }
-        if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            dataMap.put("respondentName", caseData.getRespondents().get(0).getValue().getLabelForDynamicList());
-        }
-        dataMap.put("isCitizen", false);
-        if (launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)) {
-            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                dataMap.put("isCitizen", !CaseUtils.hasLegalRepresentation(party.getValue()));
-            }
-            // This check is added to disable or enable DA citizen journey as needed
-            if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-                && launchDarklyClient.isFeatureEnabled(PrlAppsConstants.CITIZEN_ALLOW_DA_JOURNEY)) {
-                dataMap.put("isCitizen", !CaseUtils.hasLegalRepresentation(party.getValue()));
-            }
-        }
-        return dataMap;
-    }
-
     private AccessCode getAccessCode(CaseInvite caseInvite, Address address, String name) {
         String code = null;
         String isLinked = null;
@@ -3499,20 +3471,6 @@ public class ServiceOfApplicationService {
             caseInvite = CaseUtils.getCaseInvite(party.getId(), caseData.getCaseInvites());
         }
         dataMap = populateAccessCodeMap(caseData, party, caseInvite);
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        return fetchCoverLetter(authorization, template, dataMap, documentLanguage.isGenEng(), documentLanguage.isGenWelsh());
-    }
-
-    public List<Document> generateCoverLetterBasedOnCaseAccessRespondent(String authorization,
-                                                               CaseData caseData,
-                                                               Element<PartyDetails> party,
-                                                               String template) {
-        Map<String, Object> dataMap;
-        CaseInvite caseInvite = null;
-        if (!CaseUtils.isCitizenAccessEnabled(party.getValue()) && !CaseUtils.hasLegalRepresentation(party.getValue())) {
-            caseInvite = CaseUtils.getCaseInvite(party.getId(), caseData.getCaseInvites());
-        }
-        dataMap = populateAccessCodeMapRespondent(caseData, party, caseInvite);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         return fetchCoverLetter(authorization, template, dataMap, documentLanguage.isGenEng(), documentLanguage.isGenWelsh());
     }
