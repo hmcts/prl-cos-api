@@ -171,7 +171,7 @@ public class AllTabServiceImpl implements AllTabsService {
                                            StartEventResponse startEventResponse,
                                            EventRequestData eventRequestData,
                                            Map<String, Object> combinedFieldsMap) {
-        try{
+        try {
             return ccdCoreCaseDataService.submitUpdate(
                 systemAuthorisation,
                 eventRequestData,
