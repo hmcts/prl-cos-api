@@ -667,7 +667,7 @@ public class ReviewDocumentService {
             if (findElement(currentConfidentialDoc.getId(), previousConfidentialDocuments).isEmpty()) {
                 log.info("Checking if we need to delete document {}",  currentConfidentialDoc.getId());
                 // new document, do check if we need to delete
-                log.error("DATA INTEGRITY ISSUE: Found NULL categoryId. Doc: " + currentConfidentialDoc.getValue());
+                log.info("Doc category ID: " + currentConfidentialDoc.getValue().getCategoryId());
                 String attributeName = DocumentUtils.populateAttributeNameFromCategoryId(
                     currentConfidentialDoc.getValue().getCategoryId(),
                     null

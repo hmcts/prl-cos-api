@@ -560,7 +560,6 @@ public class CaseDataService {
         quarantineLegalDocs.parallelStream().forEach(quarantineLegalDocElement -> {
             uk.gov.hmcts.reform.prl.models.documents.Document document = null;
             if (!StringUtils.isEmpty(quarantineLegalDocElement.getValue().getCategoryId())) {
-                log.error("DATA INTEGRITY ISSUE: Found NULL categoryId. Doc: " + quarantineLegalDocElement.getValue());
                 String attributeName = DocumentUtils.populateAttributeNameFromCategoryId(
                     quarantineLegalDocElement.getValue().getCategoryId(),
                     null
