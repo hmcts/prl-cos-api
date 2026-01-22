@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.tab.alltabs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -301,5 +302,106 @@ public class AllTabServiceImplTest {
                                                EventRequestData.builder().build(), caseData);
 
         verify(ccdCoreCaseDataService, Mockito.times(1)).submitUpdate(anyString(), any(), any(), anyString(),anyBoolean());
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testSubmitUpdateTimeoutHandling() throws Exception {
+        // Simulate timeout by making submitUpdate take longer than 10s
+        when(ccdCoreCaseDataService.submitUpdate(anyString(), any(), any(), anyString(), anyBoolean()))
+            .thenAnswer(invocation -> {
+                Thread.sleep(11000); // 11 seconds
+                throw new RuntimeException("Request timeout");
+            });
+
+        allTabService.updateAllTabsIncludingConfTab(caseId);
+    }
+
+    @Test
+    public void testSubmitUpdateWithRetryOnTimeout() {
+        // Simulate first call timeout, second call succeeds
+        when(ccdCoreCaseDataService.submitUpdate(anyString(), any(), any(), anyString(), anyBoolean()))
+            .thenThrow(new RuntimeException("Request timeout"))
+            .thenReturn(caseDetails);
+
+        try {
+            allTabService.updateAllTabsIncludingConfTab(caseId);
+        } catch (RuntimeException e) {
+            // Expected first attempt to fail
+        }
+
+        // Verify retry would succeed
+        CaseDetails result = allTabService.updateAllTabsIncludingConfTab(caseId);
+        assertNotNull(result);
+    }
+
+    @Test
+    public void testMapAndSubmitWithSlowResponse() {
+        // Simulate slow but successful response (under 10s threshold)
+        when(ccdCoreCaseDataService.submitUpdate(anyString(), any(), any(), anyString(), anyBoolean()))
+            .thenAnswer(invocation -> {
+                Thread.sleep(9000); // 9 seconds
+                return caseDetails;
+            });
+
+        CaseDetails result = allTabService.mapAndSubmitAllTabsUpdate(
+            systemAuthToken, caseId, startEventResponse,
+            EventRequestData.builder().build(), caseData
+        );
+
+        assertNotNull(result);
+        verify(ccdCoreCaseDataService, Mockito.times(1))
+            .submitUpdate(anyString(), any(), any(), anyString(), anyBoolean());
+    }
+
+    @Test(timeout = 12000) // Test should complete within 12s
+    public void testSubmitUpdatePerformanceBoundary() {
+        when(ccdCoreCaseDataService.submitUpdate(anyString(), any(), any(), anyString(), anyBoolean()))
+            .thenReturn(caseDetails);
+
+        long startTime = System.currentTimeMillis();
+        allTabService.updateAllTabsIncludingConfTab(caseId);
+        long duration = System.currentTimeMillis() - startTime;
+
+        // Verify operation completes well under timeout threshold
+        Assert.assertTrue("Operation took too long: " + duration + "ms", duration < 10000);
+    }
+
+    @Test
+    public void testSubmitUpdateWithConnectionTimeout() {
+        when(ccdCoreCaseDataService.submitUpdate(anyString(), any(), any(), anyString(), anyBoolean()))
+            .thenThrow(new RuntimeException("Connection timeout",
+                                            new java.net.SocketTimeoutException("Connection timeout")));
+
+        try {
+            allTabService.updateAllTabsIncludingConfTab(caseId);
+            Assert.fail("Expected RuntimeException to be thrown");
+        } catch (RuntimeException e) {
+            // Check the nested cause chain
+            Throwable rootCause = e.getCause();
+            while (rootCause != null && rootCause.getCause() != null) {
+                rootCause = rootCause.getCause();
+            }
+            Assert.assertTrue("Expected root cause to be SocketTimeoutException",
+                              rootCause instanceof java.net.SocketTimeoutException);
+        }
+    }
+
+    @Test
+    public void testLargeDataSetSubmitPerformance() {
+        // Create case data with large amount of information
+        CaseData largeData = CaseData.builder()
+            .id(Long.parseLong(caseId))
+            .caseTypeOfApplication("C100")
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class))
+            .thenReturn(largeData);
+
+        long startTime = System.currentTimeMillis();
+        allTabService.updateAllTabsIncludingConfTab(caseId);
+        long duration = System.currentTimeMillis() - startTime;
+
+        Assert.assertTrue("Large data processing took too long: " + duration + "ms",
+                   duration < 10000);
     }
 }

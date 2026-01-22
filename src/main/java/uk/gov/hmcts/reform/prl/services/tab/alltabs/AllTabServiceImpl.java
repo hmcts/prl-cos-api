@@ -7,6 +7,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
@@ -25,6 +27,7 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -157,21 +160,37 @@ public class AllTabServiceImpl implements AllTabsService {
         return submitAllTabsUpdate(systemAuthorisation, caseId, startEventResponse, eventRequestData, combinedFieldsMap);
     }
 
+    @Retryable(
+        retryFor = {SocketTimeoutException.class, RuntimeException.class},
+        noRetryFor = {IllegalArgumentException.class},
+        maxAttempts = 3,
+        backoff = @Backoff(delay = 2000, multiplier = 2)
+    )
     public CaseDetails submitAllTabsUpdate(String systemAuthorisation,
                                            String caseId,
                                            StartEventResponse startEventResponse,
                                            EventRequestData eventRequestData,
                                            Map<String, Object> combinedFieldsMap) {
-        return ccdCoreCaseDataService.submitUpdate(
+        try{
+            return ccdCoreCaseDataService.submitUpdate(
                 systemAuthorisation,
                 eventRequestData,
                 ccdCoreCaseDataService.createCaseDataContent(
-                        startEventResponse,
-                        combinedFieldsMap
+                    startEventResponse,
+                    combinedFieldsMap
                 ),
                 caseId,
                 true
-        );
+            );
+        } catch (Exception e) {
+            log.error("Failed to submit update for case {}: {}", caseId, e.getMessage());
+            if (e.getCause() instanceof java.net.SocketTimeoutException
+                || e.getMessage().contains("timeout")) {
+                throw new RuntimeException("Update submission timed out for case: " + caseId, e);
+            }
+            throw e;
+        }
+
     }
 
     private Map<String, Object> getDocumentsMap(CaseData caseData, Map<String, Object> documentMap) {
