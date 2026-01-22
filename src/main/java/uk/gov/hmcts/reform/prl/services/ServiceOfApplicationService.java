@@ -1166,7 +1166,7 @@ public class ServiceOfApplicationService {
                 sendEmailToRespondentSolicitorNonPersonal(caseData, authorization, emailNotificationDetails, packSdocs, respondent);
             } else if (!CaseUtils.hasLegalRepresentation(respondent.getValue())) {
                 ContactPreferences respondentContactPreference = respondent.getValue().getContactPreferences();
-                if (ContactPreferences.email.equals(respondentContactPreference)) {
+                if (ContactPreferences.email.equals(respondentContactPreference) && respondent.getValue().getEmail() != null) {
                     log.info("Sending email to respondent if preferences set to email and email address populated");
                     Map<String, String> fieldsMap = new HashMap<>();
                     fieldsMap.put(AUTHORIZATION, authorization);
@@ -1236,7 +1236,7 @@ public class ServiceOfApplicationService {
                 sendEmailToRespondentSolicitorNonPersonal(caseData, authorization, emailNotificationDetails, packSdocs, party.get());
             } else if (party.isPresent() && (!CaseUtils.hasLegalRepresentation(party.get().getValue()))) {
                 ContactPreferences respondentContactPreference = party.get().getValue().getContactPreferences();
-                if (ContactPreferences.email.equals(respondentContactPreference)) {
+                if (ContactPreferences.email.equals(respondentContactPreference) && party.get().getValue().getEmail() != null) {
                     log.info("Sending email to respondent conf check success if preferences set to email and email address populated");
                     Map<String, String> fieldsMap = new HashMap<>();
                     fieldsMap.put(AUTHORIZATION, authorization);
@@ -1328,6 +1328,7 @@ public class ServiceOfApplicationService {
                                                           List<Document> coverLetters) {
         EmailNotificationDetails emailNotification;
         if (CaseUtils.isCitizenAccessEnabled(party.getValue())) {
+            log.info("Respondent has access to dashboard -> send gov notify email for {}", party.getId());
             log.debug("Respondent has access to dashboard -> send gov notify email for {}", party.getId());
             emailNotification = sendEmailToUnrepresentedRespondent(fieldMap.get(AUTHORIZATION),
                                                                   caseData,
@@ -1336,6 +1337,7 @@ public class ServiceOfApplicationService {
                                                                   notifyTemplate,
                                                                   coverLetters);
         } else {
+            log.info("Respondent does not access to dashboard -> send packs via sendgrid email for {}", party.getId());
             log.debug("Respondent does not access to dashboard -> send packs via sendgrid email for {}", party.getId());
             emailNotification = sendSoaPacksToPartyViaEmailRespondent(fieldMap.get(AUTHORIZATION),
                                                             caseData,
@@ -1651,6 +1653,9 @@ public class ServiceOfApplicationService {
                                                                        EmailTemplateNames emailTemplate,
                                                                        List<Document> coverLetters) {
 
+        log.info("inside sendEmailToUnrepresentedRespondent party id {}", party.getId());
+        log.info("inside sendEmailToUnrepresentedRespondent notify template{}", emailTemplate);
+
         //Send a gov notify email
         sendGovNotifyEmail(caseData, party, emailTemplate);
         //Generate cover letter without access code for respondent who has access to dashboard
@@ -1668,6 +1673,7 @@ public class ServiceOfApplicationService {
     }
 
     private void sendGovNotifyEmail(CaseData caseData, Element<PartyDetails> party, EmailTemplateNames emailTemplate) {
+        log.info("Inside sendGovNotifyEmail called..");
         serviceOfApplicationEmailService.sendGovNotifyEmail(
             LanguagePreference.getPreferenceLanguage(caseData),
             party.getValue().getEmail(),
@@ -1686,6 +1692,7 @@ public class ServiceOfApplicationService {
                                                                  Element<PartyDetails> party,
                                                                  SendgridEmailTemplateNames emailTemplate,
                                                                  List<Document> coverLetters) {
+        log.debug("inside sendSoaPacksToPartyViaEmailRespondent {}", emailTemplate);
         //Generate access code if party does not have access to dashboard
         List<Document> packsWithCoverLetters = new ArrayList<>(coverLetters);
         return sendEmailViaSendGridWithAttachedDocsToPartyRespondent(
@@ -1725,13 +1732,16 @@ public class ServiceOfApplicationService {
                                                                                  List<Document> packDocs, Element<PartyDetails> party,
                                                                                  SendgridEmailTemplateNames emailTemplate,
                                                                                  List<Document> coverLetters) {
+
+        log.info("inside sendEmailViaSendGridWithAttachedDocsToPartyRespondent {}", party.getValue().getEmail());
+        log.info("inside sendEmailViaSendGridWithAttachedDocsToPartyRespondent emailTemplate {}", emailTemplate);
         List<Document> packsWithCoverLetter = new ArrayList<>(coverLetters);
         packsWithCoverLetter.addAll(packDocs);
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         dynamicData.put("name", party.getValue().getLabelForDynamicList());
         dynamicData.put(DASH_BOARD_LINK, citizenUrl);
         populateLanguageMap(caseData, dynamicData);
-
+        log.info("sendEmailViaSendGridWithAttachedDocsToPartyRespondent email fired  ");
         return serviceOfApplicationEmailService
             .sendEmailUsingTemplateWithAttachments(
                 authorization,
