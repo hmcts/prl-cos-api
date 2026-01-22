@@ -24,7 +24,6 @@ public class CourtIdentifierGenerator  implements FieldGenerator {
     public CourtIdentifier courtIdentifierFromCaseData(CaseData caseData) {
         YesOrNo isHighCourtCase = caseData.getIsHighCourtCase();
         String courtIdentifier = YesOrNo.Yes.equals(isHighCourtCase) ? HIGH_COURT : null;
-        log.info("courtIdentifier {}", courtIdentifier);
         return CourtIdentifier.builder()
             .courtIdentifier(courtIdentifier)
             .build();

@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.generator.AllocatedJudgeDeta
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.CaseClosedDateGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.CaseStatusGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.ConfidentialDetailsGenerator;
-import uk.gov.hmcts.reform.prl.services.tab.summary.generator.CourtIdentifierGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.DateOfSubmissionGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.OrderAppliedForGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.OtherProceedingsGenerator;
@@ -79,8 +78,6 @@ public class CaseSummaryTabServiceTest {
     @Mock
     private CaseClosedDateGenerator caseClosedDateGenerator;
 
-    @Mock
-    private CourtIdentifierGenerator courtIdentifierGenerator;
 
     private static final CaseData CASE_DATA = mock(CaseData.class);
     private static final CaseSummary CASE_SUMMARY0 = mock(CaseSummary.class);
@@ -95,8 +92,6 @@ public class CaseSummaryTabServiceTest {
 
     private static final CaseSummary CASE_SUMMARY9 = mock(CaseSummary.class);
 
-    private static final String[] EMPTY_ARRAY = {};
-
     @Before
     public void setUp() {
         when(allocatedJudgeDetailsGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY0);
@@ -110,7 +105,6 @@ public class CaseSummaryTabServiceTest {
         when(dateOfSubmissionGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY8);
         when(otherProceedingsGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY9);
         when(caseClosedDateGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY9);
-        when(courtIdentifierGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY9);
         when(otherProceedingsGenerator.getOtherProceedingsDetails(CASE_DATA)).thenReturn(new ArrayList<>());
 
         when(objectMapper.convertValue(eq(CASE_SUMMARY0),
@@ -141,7 +135,7 @@ public class CaseSummaryTabServiceTest {
 
         final Map<String, Object> actual = caseSummaryTabService.updateTab(CASE_DATA);
 
-        Map<String, Object> fields = new HashMap<String, Object>();
+        Map<String, Object> fields = new HashMap<>();
         fields.put("field0", "value0");
         fields.put("fieldR", "valueR");
         fields.put("field1", "value1");

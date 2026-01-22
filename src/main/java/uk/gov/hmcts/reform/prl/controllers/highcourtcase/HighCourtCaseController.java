@@ -29,8 +29,6 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.CourtIdentifierGenerator;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -69,16 +67,8 @@ public class HighCourtCaseController  extends AbstractCallbackController {
         @RequestBody CallbackRequest callbackRequest) {
 
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-            Map<String, Object> data = caseDetails.getData();
-            Object highCourtCase = data.get("isHighCourtCase");
-            log.info("about-to-submit highCourtCase {}", highCourtCase);
-            CaseData caseData = getCaseData(caseDetails);
-            CourtIdentifier courtIdentifier = courtIdentifierGenerator.courtIdentifierFromCaseData(caseData);
-            data.put("courtIdentifier", courtIdentifier);
-            List<String> errors = new ArrayList<>();
+            Map<String, Object> data = processHighCourtDecision(callbackRequest);
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .errors(errors)
                 .data(data)
                 .build();
         } else {
@@ -94,13 +84,19 @@ public class HighCourtCaseController  extends AbstractCallbackController {
         @RequestBody CallbackRequest callbackRequest) {
 
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-            Object highCourtCase = caseDetails.getData().get("isHighCourtCase");
-            log.info("submitted highCourtCase {}", highCourtCase);
             return ok(SubmittedCallbackResponse.builder().build());
         }  else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    private Map<String, Object> processHighCourtDecision(CallbackRequest callbackRequest) {
+        final CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        Map<String, Object> data = caseDetails.getData();
+        CaseData caseData = getCaseData(caseDetails);
+        CourtIdentifier courtIdentifier = courtIdentifierGenerator.courtIdentifierFromCaseData(caseData);
+        data.put("courtIdentifier", courtIdentifier);
+        return data;
     }
 
 }
