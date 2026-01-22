@@ -69,6 +69,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -989,10 +990,15 @@ public class NoticeOfChangePartiesService {
                             solicitorRepresentedParties.add(caseData.getRespondents().get(x.getIndex()));
                             break;
                         case DAAPPLICANT:
-                            solicitorRepresentedParties.add(ElementUtils.element(
-                                caseData.getApplicantsFL401().getPartyId(),
-                                caseData.getApplicantsFL401()
-                            ));
+                            PartyDetails applicantsFL401 = caseData.getApplicantsFL401();
+                            if (nonNull(applicantsFL401)) {
+                                solicitorRepresentedParties.add(ElementUtils.element(
+                                    applicantsFL401.getPartyId(),
+                                    applicantsFL401
+                                ));
+                            } else {
+                                log.info("applicant PartyDetails is null");
+                            }
                             break;
                         case DARESPONDENT:
                             solicitorRepresentedParties.add(ElementUtils.element(
