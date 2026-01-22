@@ -175,6 +175,7 @@ public class RemoveDocumentsService {
             // bulk scan documents use a url field not an "attribute name" field
             documentFieldName = "url";
         } else {
+            log.error("DATA INTEGRITY ISSUE: Found NULL categoryId. Doc: " + quarantineLegalDoc);
             documentFieldName = DocumentUtils.populateAttributeNameFromCategoryId(
                 quarantineLegalDoc.getCategoryId(),
                 null

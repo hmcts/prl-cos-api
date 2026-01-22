@@ -342,6 +342,7 @@ public class ManageDocumentsService {
         Document document = getQuarantineDocumentForUploader(loggedInUserType, quarantineLegalDoc);
 
         HashMap<String, Object> hashMap = new HashMap<>();
+        log.error("DATA INTEGRITY ISSUE: Found NULL categoryId. Doc: " + quarantineLegalDoc);
         hashMap.put(DocumentUtils.populateAttributeNameFromCategoryId(quarantineLegalDoc.getCategoryId(), loggedInUserType), document);
         objectMapper.registerModule(new ParameterNamesModule());
         QuarantineLegalDoc finalQuarantineDocument = objectMapper.convertValue(hashMap, QuarantineLegalDoc.class);
@@ -806,6 +807,7 @@ public class ManageDocumentsService {
                         val previousDocElement = findElement(elementId, previousConfidentialDocuments);
                         if (previousDocElement.isPresent() && YesOrNo.No.equals(previousDocElement.get().getValue()
                                                                                     .getHasTheConfidentialDocumentBeenRenamed())) {
+                            log.error("DATA INTEGRITY ISSUE: Found NULL categoryId. Doc: " + previousDocElement.get().getValue());
                             String attributeName = DocumentUtils.populateAttributeNameFromCategoryId(
                                 previousDocElement.get().getValue().getCategoryId(),
                                 null
@@ -830,6 +832,7 @@ public class ManageDocumentsService {
             element -> {
                 try {
                     if (YesOrNo.No.equals(element.getValue().getHasTheConfidentialDocumentBeenRenamed())) {
+                        log.error("DATA INTEGRITY ISSUE: Found NULL categoryId. Doc: " + element.getValue());
                         String attributeName = DocumentUtils.populateAttributeNameFromCategoryId(
                             element.getValue().getCategoryId(),
                             null

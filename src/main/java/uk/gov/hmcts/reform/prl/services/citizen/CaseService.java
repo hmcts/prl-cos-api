@@ -794,6 +794,7 @@ public class CaseService {
         if (quarantineDoc.getCitizenQuarantineDocument() != null && quarantineDoc.getCitizenQuarantineDocument().getDocumentUrl() != null) {
             existingDocument = quarantineDoc.getCitizenQuarantineDocument();
         } else {
+            log.error("DATA INTEGRITY ISSUE: Found NULL categoryId. Doc: " + quarantineDoc);
             String attributeName = DocumentUtils.populateAttributeNameFromCategoryId(
                 quarantineDoc.getCategoryId(),
                 quarantineDoc.getUploaderRole()
