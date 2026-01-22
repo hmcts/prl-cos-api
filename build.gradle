@@ -592,9 +592,7 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/mapper/citizen/awp/CitizenAwpMapper.java',
   '**uk/gov/hmcts/reform/prl/mapper/citizen/CitizenPartyDetailsMapper.java',
   '**uk/gov/hmcts/reform/prl/services/DraftAnOrderService.java',
-  '**uk/gov/hmcts/reform/prl/services/ManageOrderService.java',
-  '**uk/gov/hmcts/reform/prl/controllers/highcourtcase/HighCourtCaseController.java',
-  '**uk/gov/hmcts/reform/prl/services/tab/summary/generator/CourtIdentifierGenerator.java'
+  '**uk/gov/hmcts/reform/prl/services/ManageOrderService.java'
 
 ]
 
