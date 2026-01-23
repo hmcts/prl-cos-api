@@ -81,9 +81,8 @@ public class DocumentUtils {
             String[] splittedCategory = StringUtils.splitByCharacterTypeCamelCase(categoryId);
             String finalCategory = "";
 
-            if (categoryId == null) {
-                log.error("DATA INTEGRITY ERROR: Found Doc with NULL categoryId");
-                // return "Document";
+            if (splittedCategory == null) {
+                return "otherDocsDocument";
             }
 
             for (int i = 0; i < splittedCategory.length; i++) {

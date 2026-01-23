@@ -794,7 +794,6 @@ public class CaseService {
         if (quarantineDoc.getCitizenQuarantineDocument() != null && quarantineDoc.getCitizenQuarantineDocument().getDocumentUrl() != null) {
             existingDocument = quarantineDoc.getCitizenQuarantineDocument();
         } else {
-            log.info("Doc category ID: " + quarantineDoc.getCategoryId());
             String attributeName = DocumentUtils.populateAttributeNameFromCategoryId(
                 quarantineDoc.getCategoryId(),
                 quarantineDoc.getUploaderRole()

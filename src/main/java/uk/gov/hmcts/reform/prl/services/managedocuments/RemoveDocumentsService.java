@@ -175,7 +175,6 @@ public class RemoveDocumentsService {
             // bulk scan documents use a url field not an "attribute name" field
             documentFieldName = "url";
         } else {
-            log.info("Doc category ID: " + quarantineLegalDoc.getCategoryId());
             documentFieldName = DocumentUtils.populateAttributeNameFromCategoryId(
                 quarantineLegalDoc.getCategoryId(),
                 null
@@ -190,7 +189,6 @@ public class RemoveDocumentsService {
             log.error("Field {} did not exist in QuarantineLegalDoc", documentFieldName, e);
             return null;
         }
-
         // make a new element with the same ID
         return new Element<>(
             quarantineLegalDocElement.getId(), RemovableDocument.builder()

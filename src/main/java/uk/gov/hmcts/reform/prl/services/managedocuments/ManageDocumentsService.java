@@ -343,7 +343,6 @@ public class ManageDocumentsService {
 
         HashMap<String, Object> hashMap = new HashMap<>();
         hashMap.put(DocumentUtils.populateAttributeNameFromCategoryId(quarantineLegalDoc.getCategoryId(), loggedInUserType), document);
-        log.info("Doc category ID: " + quarantineLegalDoc.getCategoryId());
         objectMapper.registerModule(new ParameterNamesModule());
         QuarantineLegalDoc finalQuarantineDocument = objectMapper.convertValue(hashMap, QuarantineLegalDoc.class);
         return finalQuarantineDocument.toBuilder()
@@ -831,7 +830,6 @@ public class ManageDocumentsService {
             element -> {
                 try {
                     if (YesOrNo.No.equals(element.getValue().getHasTheConfidentialDocumentBeenRenamed())) {
-                        log.info("Doc category ID: " + element.getValue().getCategoryId());
                         String attributeName = DocumentUtils.populateAttributeNameFromCategoryId(
                             element.getValue().getCategoryId(),
                             null
