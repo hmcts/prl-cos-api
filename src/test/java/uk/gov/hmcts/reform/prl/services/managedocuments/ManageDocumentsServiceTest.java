@@ -10,7 +10,6 @@ import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -76,7 +75,6 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -102,7 +100,6 @@ import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsSe
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
-@Slf4j
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ManageDocumentsServiceTest {
 
@@ -2725,7 +2722,7 @@ public class ManageDocumentsServiceTest {
     }
 
     @Test
-    public void testReproduceNullPointerException() {
+    public void testThrowBadRequestWhenCategoryIdIsNull() {
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.APPLICANT)
             .documentCategories(DynamicList.builder().value(DynamicListElement.builder().code("test").label("test").build()).build())
@@ -2735,8 +2732,7 @@ public class ManageDocumentsServiceTest {
             .build();
 
         Map<String, Object> caseDataMapInitial = new HashMap<>();
-        caseDataMapInitial.put("manageDocuments",manageDocuments);
-
+        caseDataMapInitial.put("manageDocuments", manageDocuments);
         manageDocumentsElement = element(manageDocuments);
 
         uk.gov.hmcts.reform.prl.models.documents.Document doc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
@@ -2747,7 +2743,15 @@ public class ManageDocumentsServiceTest {
         HashMap hashMap = new HashMap();
         hashMap.put("testDocument", doc);
 
-        quarantineLegalDocElement = element(quarantineConfidentialDoc);
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .isConfidential(YesOrNo.Yes)
+            .courtNavQuarantineDocument(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                                            .documentFileName("testFileName")
+                                            .documentUrl("1accfb1e-2574-4084-b97e-1cd53fd14815").build())
+            .isRestricted(YesOrNo.No)
+            .categoryId(null)
+            .build();
+
         ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
         CaseData caseData = CaseData.builder()
             .reviewDocuments(reviewDocuments)
@@ -2763,36 +2767,27 @@ public class ManageDocumentsServiceTest {
         Resource expectedResource = new ClassPathResource("task-list-markdown.md");
         HttpHeaders headers = new HttpHeaders();
         ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, HttpStatus.OK);
-        when(caseDocumentClient
-                 .getDocumentBinary(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
-            .thenReturn(expectedResponse);
-        when(caseDocumentClientApi.getDocumentBinary(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-            .thenReturn(expectedResponse);
-        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
-            .isConfidential(YesOrNo.Yes)
-            .courtNavQuarantineDocument(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-                                            .documentFileName("testFileName").categoryId(null)
-                                            .documentUrl("1accfb1e-2574-4084-b97e-1cd53fd14815").build())
-            .isRestricted(YesOrNo.No).categoryId(null).build();
+
+        when(caseDocumentClient.getDocumentBinary(anyString(), anyString(), anyString())).thenReturn(expectedResponse);
+        when(caseDocumentClientApi.getDocumentBinary(anyString(), anyString(), any())).thenReturn(expectedResponse);
+
         when(objectMapper.convertValue(Mockito.any(Map.class), Mockito.eq(QuarantineLegalDoc.class)))
             .thenReturn(quarantineLegalDoc);
+
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtNavRole);
 
-        manageDocumentsService
-            .moveDocumentsToRespectiveCategoriesNew(quarantineLegalDoc, userDetailsCourtNavRole, caseData, caseDataMapInitial, "CourtNav");
-        List<Element<QuarantineLegalDoc>> confidentialDocuments = (List<Element<QuarantineLegalDoc>>) caseDataMapInitial.get("confidentialDocuments");
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
+                quarantineLegalDoc,
+                userDetailsCourtNavRole,
+                caseData,
+                caseDataMapInitial,
+                "CourtNav"
+            );
+        });
 
-        assertNotNull(confidentialDocuments);
-        assertEquals(1,confidentialDocuments.size());
-        assertEquals("testFileName",confidentialDocuments.get(0).getValue().getCourtNavQuarantineDocument().getDocumentFileName());
-        assertNotNull(quarantineLegalDoc);
-
-        ArgumentCaptor<Map> mapCaptor = ArgumentCaptor.forClass(Map.class);
-        verify(objectMapper, atLeastOnce()).convertValue(mapCaptor.capture(), eq(QuarantineLegalDoc.class));
-        boolean isMappedToOtherDocs = mapCaptor.getAllValues().stream()
-            .anyMatch(map -> map.containsKey("otherDocsDocument"));
-        assertTrue(isMappedToOtherDocs);
+        assertEquals("CategoryId cannot be null or empty", exception.getMessage());
     }
 }

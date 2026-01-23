@@ -79,12 +79,16 @@ public class DocumentUtils {
         String wierdAttributeName = returnAttributeNameForWierdCategories(categoryId);
         if (wierdAttributeName == null) {
             String[] splittedCategory = StringUtils.splitByCharacterTypeCamelCase(categoryId);
-            String finalCategory = "";
+            String finalCategory = getFinalCategory(splittedCategory);
+            return finalCategory + "Document";
+        }
+        return wierdAttributeName;
+    }
 
-            if (splittedCategory == null) {
-                return "otherDocsDocument";
-            }
+    private static String getFinalCategory(String[] splittedCategory) {
+        String finalCategory = "";
 
+        try {
             for (int i = 0; i < splittedCategory.length; i++) {
                 if (i == 0) {
                     finalCategory = finalCategory.concat(splittedCategory[i].toLowerCase());
@@ -92,9 +96,10 @@ public class DocumentUtils {
                     finalCategory = finalCategory.concat(splittedCategory[i]);
                 }
             }
-            return finalCategory + "Document";
+        } catch (NullPointerException e) {
+            throw new IllegalArgumentException("CategoryId cannot be null or empty");
         }
-        return wierdAttributeName;
+        return finalCategory;
     }
 
     private static String returnAttributeNameForWierdCategories(String categoryId) {

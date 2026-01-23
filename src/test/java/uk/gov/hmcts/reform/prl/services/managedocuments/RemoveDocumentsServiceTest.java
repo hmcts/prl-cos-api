@@ -27,6 +27,8 @@ import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -303,5 +305,23 @@ public class RemoveDocumentsServiceTest {
             eq(TEST_DOCUMENT_ID),
             eq(true)
         );
+    }
+
+    @Test
+    void testThrowBadRequestWhenCategoryIdIsNull() {
+        UUID elementId = UUID.randomUUID();
+        QuarantineLegalDoc quarantineDoc = QuarantineLegalDoc.builder()
+            .respondentStatementsDocument(TEST_DOCUMENT)
+            .categoryName("Respondent Statements")
+            .categoryId(null)
+            .build();
+
+        Element<QuarantineLegalDoc> element = new Element<>(elementId, quarantineDoc);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            removeDocumentsService.convertQuarantineDoc(element);
+        });
+
+        assertEquals("CategoryId cannot be null or empty", exception.getMessage());
     }
 }

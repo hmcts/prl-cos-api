@@ -189,6 +189,7 @@ public class RemoveDocumentsService {
             log.error("Field {} did not exist in QuarantineLegalDoc", documentFieldName, e);
             return null;
         }
+
         // make a new element with the same ID
         return new Element<>(
             quarantineLegalDocElement.getId(), RemovableDocument.builder()
