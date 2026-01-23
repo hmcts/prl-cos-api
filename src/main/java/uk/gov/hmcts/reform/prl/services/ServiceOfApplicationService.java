@@ -1251,7 +1251,8 @@ public class ServiceOfApplicationService {
                         emailNotificationDetails,
                         party.get(),
                         packRdocs,
-                        SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT,
+                        SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
+                        //SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT,
                         fieldsMap,
                         EmailTemplateNames.SOA_UNREPRESENTED_RESPONDENT_SERVED_BY_COURT,
                         coverLetters
