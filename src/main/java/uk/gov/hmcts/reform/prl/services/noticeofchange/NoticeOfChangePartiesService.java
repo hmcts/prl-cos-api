@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.noticeofchange;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -69,6 +70,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
@@ -603,7 +605,7 @@ public class NoticeOfChangePartiesService {
         DynamicMultiSelectList solicitorRepresentedParties
             = dynamicMultiSelectListService.getSolicitorRepresentedParties(partyElementList);
 
-        if (solicitorRepresentedParties.getListItems().isEmpty()) {
+        if (isNull(solicitorRepresentedParties) || CollectionUtils.isEmpty(solicitorRepresentedParties.getListItems())) {
             errorList.add(NO_REPRESENTATION_FOUND_ERROR);
         } else {
             caseDataUpdated.put(SOL_STOP_REP_CHOOSE_PARTIES, solicitorRepresentedParties);
