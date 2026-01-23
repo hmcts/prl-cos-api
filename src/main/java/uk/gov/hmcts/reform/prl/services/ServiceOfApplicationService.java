@@ -1696,8 +1696,8 @@ public class ServiceOfApplicationService {
         log.debug("inside sendSoaPacksToPartyViaEmailRespondent {}", emailTemplate);
         log.info("inside sendSoaPacksToPartyViaEmailRespondent {}", emailTemplate);
         //Generate access code if party does not have access to dashboard
-        log.info("inside sendSoaPacksToPartyViaEmailRespondent cover Letters {}", coverLetters != null ?  coverLetters.size(): 25);
-        log.info("inside sendSoaPacksToPartyViaEmailRespondent packs Letters {}", packDocs != null ?  packDocs.size(): 5);
+        log.info("inside sendSoaPacksToPartyViaEmailRespondent cover Letters {}", coverLetters != null ?  coverLetters.size() : 25);
+        log.info("inside sendSoaPacksToPartyViaEmailRespondent packs Letters {}", packDocs != null ?  packDocs.size() : 5);
         List<Document> packsWithCoverLetters = new ArrayList<>(coverLetters);
         log.info("inside sendSoaPacksToPartyViaEmailRespondent packsWithCoverLetters {}", packsWithCoverLetters);
         return sendEmailViaSendGridWithAttachedDocsToPartyRespondent(
