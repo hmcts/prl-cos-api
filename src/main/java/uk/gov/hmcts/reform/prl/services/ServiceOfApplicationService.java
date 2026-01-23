@@ -1251,8 +1251,7 @@ public class ServiceOfApplicationService {
                         emailNotificationDetails,
                         party.get(),
                         packRdocs,
-                        SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
-                        //SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT,
+                        SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT,
                         fieldsMap,
                         EmailTemplateNames.SOA_UNREPRESENTED_RESPONDENT_SERVED_BY_COURT,
                         coverLetters
@@ -1339,6 +1338,7 @@ public class ServiceOfApplicationService {
                                                                   coverLetters);
         } else {
             log.info("Respondent does not access to dashboard -> send packs via sendgrid email for {}", party.getId());
+            log.info("Respondent does not access to dashboard -> send packs via sendgrid email for template {}", emailTemplate);
             log.debug("Respondent does not access to dashboard -> send packs via sendgrid email for {}", party.getId());
             emailNotification = sendSoaPacksToPartyViaEmailRespondent(fieldMap.get(AUTHORIZATION),
                                                             caseData,
@@ -1694,8 +1694,12 @@ public class ServiceOfApplicationService {
                                                                  SendgridEmailTemplateNames emailTemplate,
                                                                  List<Document> coverLetters) {
         log.debug("inside sendSoaPacksToPartyViaEmailRespondent {}", emailTemplate);
+        log.info("inside sendSoaPacksToPartyViaEmailRespondent {}", emailTemplate);
         //Generate access code if party does not have access to dashboard
+        log.info("inside sendSoaPacksToPartyViaEmailRespondent cover Letters {}", coverLetters != null ?  coverLetters.size(): 25);
+        log.info("inside sendSoaPacksToPartyViaEmailRespondent packs Letters {}", packDocs != null ?  packDocs.size(): 5);
         List<Document> packsWithCoverLetters = new ArrayList<>(coverLetters);
+        log.info("inside sendSoaPacksToPartyViaEmailRespondent packsWithCoverLetters {}", packsWithCoverLetters);
         return sendEmailViaSendGridWithAttachedDocsToPartyRespondent(
             authorization,
             caseData,
@@ -1736,6 +1740,8 @@ public class ServiceOfApplicationService {
 
         log.info("inside sendEmailViaSendGridWithAttachedDocsToPartyRespondent {}", party.getValue().getEmail());
         log.info("inside sendEmailViaSendGridWithAttachedDocsToPartyRespondent emailTemplate {}", emailTemplate);
+        log.info("inside sendEmailViaSendGridWithAttachedDocsToPartyRespondent cover Letters {}", coverLetters != null ?  coverLetters.size(): 25);
+        log.info("inside sendEmailViaSendGridWithAttachedDocsToPartyRespondent packs Letters {}", packDocs != null ?  packDocs.size(): 5);
         List<Document> packsWithCoverLetter = new ArrayList<>(coverLetters);
         packsWithCoverLetter.addAll(packDocs);
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
