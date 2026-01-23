@@ -1168,6 +1168,113 @@ public class NoticeOfChangePartiesServiceTest {
 
 
     @Test
+    public void testPopulateAboutToStartStopRepresentationDaApplicant() {
+        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
+            .code(partyDetails.getPartyId().toString())
+            .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
+            .build();
+
+        List<Element<PartyDetails>> applicant = new ArrayList<>();
+        Element partyDetailsElement = element(partyDetails);
+        applicant.add(partyDetailsElement);
+
+
+        FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
+        findUserCaseRolesResponse.setCaseUsers(List.of(CaseUser.builder().caseId("12345678").caseRole(
+            "[APPLICANTSOLICITOR]").build()));
+
+        when(dynamicMultiSelectListService
+                 .getSolicitorRepresentedParties(applicant))
+            .thenReturn(DynamicMultiSelectList
+                            .builder().value(List.of(dynamicListElement)).listItems(List.of(dynamicListElement))
+                            .build());
+
+        CaseData caseData = CaseData.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(partyDetails)
+            .solStopRepChooseParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
+                dynamicListElement)).build())
+            .build();
+
+        when(ccdDataStoreService.findUserCaseRoles(anyString(), anyString()))
+            .thenReturn(findUserCaseRolesResponse);
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+
+        String authToken = "test";
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseData.toMap(realObjectMapper))
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetails)
+            .build();
+
+        Map<String, Object> caseDataUpdated = noticeOfChangePartiesService
+            .populateAboutToStartStopRepresentation(authToken, callbackRequest, new ArrayList<>());
+        assertNotNull(caseDataUpdated);
+    }
+
+    @Test
+    public void testPopulateAboutToStartStopRepresentationDaRespondent() {
+        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
+            .code(partyDetails.getPartyId().toString())
+            .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
+            .build();
+
+        List<Element<PartyDetails>> applicant = new ArrayList<>();
+        Element partyDetailsElement = element(partyDetails);
+        applicant.add(partyDetailsElement);
+
+
+        FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
+        findUserCaseRolesResponse.setCaseUsers(List.of(CaseUser.builder().caseId("12345678").caseRole(
+            "[FL401RESPONDENTSOLICITOR]").build()));
+
+        when(dynamicMultiSelectListService
+                 .getSolicitorRepresentedParties(applicant))
+            .thenReturn(DynamicMultiSelectList
+                            .builder().value(List.of(dynamicListElement)).listItems(List.of(dynamicListElement))
+                            .build());
+
+        CaseData caseData = CaseData.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .respondentsFL401(partyDetails)
+            .solStopRepChooseParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
+                dynamicListElement)).build())
+            .build();
+
+        when(ccdDataStoreService.findUserCaseRoles(anyString(), anyString()))
+            .thenReturn(findUserCaseRolesResponse);
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+
+        String authToken = "test";
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseData.toMap(realObjectMapper))
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetails)
+            .build();
+
+        Map<String, Object> caseDataUpdated = noticeOfChangePartiesService
+            .populateAboutToStartStopRepresentation(authToken, callbackRequest, new ArrayList<>());
+        assertNotNull(caseDataUpdated);
+    }
+
+
+    @Test
     public void testPopulateAboutToStartStopRepresentationCaRespondent() {
         DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
             .code(partyDetails.getPartyId().toString())
