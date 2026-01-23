@@ -402,7 +402,7 @@ dependencies {
   testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
   testCompileOnly 'junit:junit'
   testRuntimeOnly 'org.junit.vintage:junit-vintage-engine'
-  testImplementation 'org.testng:testng:7.11.0'
+  testImplementation 'org.testng:testng:7.12.0'
   testImplementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
   testImplementation group: 'io.rest-assured', name: 'rest-assured', version: '5.5.7'
   testImplementation group: 'io.rest-assured', name: 'json-path', version: '5.5.7'
