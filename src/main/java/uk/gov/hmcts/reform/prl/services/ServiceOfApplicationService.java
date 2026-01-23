@@ -1740,10 +1740,12 @@ public class ServiceOfApplicationService {
 
         log.info("inside sendEmailViaSendGridWithAttachedDocsToPartyRespondent {}", party.getValue().getEmail());
         log.info("inside sendEmailViaSendGridWithAttachedDocsToPartyRespondent emailTemplate {}", emailTemplate);
-        log.info("inside sendEmailViaSendGridWithAttachedDocsToPartyRespondent cover Letters {}", coverLetters != null ?  coverLetters.size(): 25);
-        log.info("inside sendEmailViaSendGridWithAttachedDocsToPartyRespondent packs Letters {}", packDocs != null ?  packDocs.size(): 5);
+        log.info("inside sendEmailViaSendGridWithAttachedDocsToPartyRespondent cover Letters {}", coverLetters != null ?  coverLetters.size() : 25);
+        log.info("inside sendEmailViaSendGridWithAttachedDocsToPartyRespondent packs Letters {}", packDocs != null ?  packDocs.size() : 25);
         List<Document> packsWithCoverLetter = new ArrayList<>(coverLetters);
+        log.info("packsWithCoverLetter 1 {}", packsWithCoverLetter.size());
         packsWithCoverLetter.addAll(packDocs);
+        log.info("packsWithCoverLetter 2 {}", packsWithCoverLetter.size());
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         dynamicData.put("name", party.getValue().getLabelForDynamicList());
         dynamicData.put(DASH_BOARD_LINK, citizenUrl);
