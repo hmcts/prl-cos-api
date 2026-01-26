@@ -4107,8 +4107,8 @@ public class ServiceOfApplicationService {
         } else {
             //No rejection reasons = not an actual rejection  since the user interface does not allow proceeding with
             //a rejection without writing at least one reason.
-            log.info("Reject reason list empty, therefore not an actual rejection but" +
-                         " likely timeout on update all tabs");
+            log.info("Reject reason list empty, therefore not an actual rejection but"
+                         + " likely timeout on update all tabs");
         }
 
         response = ok(SubmittedCallbackResponse.builder()
