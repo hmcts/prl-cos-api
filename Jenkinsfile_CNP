@@ -84,7 +84,6 @@ withPipeline(type, product, component) {
   pipelineConf = config;
   loadVaultSecrets(secrets)
   enableAksStagingDeployment()
-  enableMutationTest(150)
   enableSlackNotifications(channel)
   disableLegacyDeployment()
 
