@@ -4727,7 +4727,6 @@ public class ServiceOfApplicationServiceTest {
             new HashMap<>()
         );
         assertEquals(COURT, servedApplicationDetails.getWhoIsResponsible());
-        //Applicant && Respondent
         verify(serviceOfApplicationEmailService).sendGovNotifyEmail(Mockito.any(), Mockito.anyString(), Mockito.any(),Mockito.any());
     }
 
