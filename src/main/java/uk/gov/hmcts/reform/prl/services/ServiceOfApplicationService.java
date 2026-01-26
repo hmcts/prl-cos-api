@@ -1155,36 +1155,31 @@ public class ServiceOfApplicationService {
                                                                     List<Document> packSdocs, List<Document> packRdocs) {
         log.info("Sending notification to respondent or solicitor");
         selectedRespondents.forEach(respondent -> {
-            if (respondent != null) {
-                log.info("Has Legal rep : " + CaseUtils.hasLegalRepresentation(respondent.getValue()));
-                log.info("respondent Preference : " + respondent.getValue().getContactPreferences());
-                log.info("respondent Email : " + respondent.getValue().getEmail());
-            } else {
-                log.info("No respondent");
-            }
             if (CaseUtils.hasLegalRepresentation(respondent.getValue())) {
                 sendEmailToRespondentSolicitorNonPersonal(caseData, authorization, emailNotificationDetails, packSdocs, respondent);
             } else if (!CaseUtils.hasLegalRepresentation(respondent.getValue())) {
                 ContactPreferences respondentContactPreference = respondent.getValue().getContactPreferences();
+
+                List<Document> finalDocs = removeCoverLettersFromThePacks(packRdocs);
+
+                List<Document> coverLetters = generateCoverLetterBasedOnCaseAccess(
+                    authorization,
+                    caseData,
+                    respondent,
+                    PRL_LET_ENG_C100_RE5
+                );
+
                 if (ContactPreferences.email.equals(respondentContactPreference) && respondent.getValue().getEmail() != null) {
                     log.info("Sending email to respondent if preferences set to email and email address populated");
                     Map<String, String> fieldsMap = new HashMap<>();
                     fieldsMap.put(AUTHORIZATION, authorization);
-
-                    List<Document> coverLetters = generateCoverLetterBasedOnCaseAccess(
-                        authorization,
-                        caseData,
-                        respondent,
-                        PRL_LET_ENG_C100_RE5
-                    );
                     sendEmailToCitizenRespondentNonPersonal(
                         caseData,
                         emailNotificationDetails,
                         respondent,
-                        packRdocs,
+                        finalDocs,
                         SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT,
                         fieldsMap,
-                        EmailTemplateNames.SOA_UNREPRESENTED_RESPONDENT_SERVED_BY_COURT,
                         coverLetters
                     );
                 } else {
@@ -1194,14 +1189,7 @@ public class ServiceOfApplicationService {
                             "Sending the notification in post to respondent for C100 Application for caseId {}",
                             caseData.getId()
                         );
-                        List<Document> finalDocs = removeCoverLettersFromThePacks(packRdocs);
 
-                        List<Document> coverLetters = generateCoverLetterBasedOnCaseAccess(
-                            authorization,
-                            caseData,
-                            respondent,
-                            PRL_LET_ENG_C100_RE5
-                        );
                         sendPostWithAccessCodeLetterToParty(
                             caseData, authorization, finalDocs, bulkPrintDetails, respondent,
                             coverLetters, SERVED_PARTY_RESPONDENT
@@ -1225,35 +1213,32 @@ public class ServiceOfApplicationService {
         log.info("Sending notification to respondent or solicitor conf check success");
         selectedRespondents.forEach(respondentc100 -> {
             Optional<Element<PartyDetails>> party = getParty(respondentc100.getCode(), caseData.getRespondents());
-            if (party.isPresent()) {
-                log.info("Has Legal rep conf success check: " + CaseUtils.hasLegalRepresentation(party.get().getValue()));
-                log.info("Party Preference conf success check: " + party.get().getValue().getContactPreferences());
-                log.info("Party Email conf success check: " + party.get().getValue().getEmail());
-            } else {
-                log.info("No party on conf success check");
-            }
             if (party.isPresent() && CaseUtils.hasLegalRepresentation(party.get().getValue())) {
                 sendEmailToRespondentSolicitorNonPersonal(caseData, authorization, emailNotificationDetails, packSdocs, party.get());
             } else if (party.isPresent() && (!CaseUtils.hasLegalRepresentation(party.get().getValue()))) {
                 ContactPreferences respondentContactPreference = party.get().getValue().getContactPreferences();
+
+                List<Document> finalDocs = removeCoverLettersFromThePacks(packRdocs);
+
+                List<Document> coverLetters = CaseUtils.getCoverLettersForParty(
+                    party.get().getId(),
+                    caseData.getServiceOfApplication()
+                        .getUnServedRespondentPack()
+                        .getCoverLettersMap()
+                );
+
                 if (ContactPreferences.email.equals(respondentContactPreference) && party.get().getValue().getEmail() != null) {
                     log.info("Sending email to respondent conf check success if preferences set to email and email address populated");
                     Map<String, String> fieldsMap = new HashMap<>();
                     fieldsMap.put(AUTHORIZATION, authorization);
-                    List<Document> coverLetters = CaseUtils.getCoverLettersForParty(
-                        party.get().getId(),
-                        caseData.getServiceOfApplication()
-                            .getUnServedRespondentPack()
-                            .getCoverLettersMap()
-                    );
+
                     sendEmailToCitizenRespondentNonPersonal(
                         caseData,
                         emailNotificationDetails,
                         party.get(),
-                        packRdocs,
+                        finalDocs,
                         SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT,
                         fieldsMap,
-                        EmailTemplateNames.SOA_UNREPRESENTED_RESPONDENT_SERVED_BY_COURT,
                         coverLetters
                     );
                 } else {
@@ -1264,15 +1249,10 @@ public class ServiceOfApplicationService {
                             "Sending the notification in post to respondent conf check success for C100 Application for caseId {}",
                             caseData.getId()
                         );
-                        List<Document> finalDocs = removeCoverLettersFromThePacks(packRdocs);
+
                         sendPostWithAccessCodeLetterToParty(
                             caseData, authorization, finalDocs, bulkPrintDetails, party.get(),
-                            CaseUtils.getCoverLettersForParty(
-                                party.get().getId(),
-                                caseData.getServiceOfApplication()
-                                    .getUnServedRespondentPack()
-                                    .getCoverLettersMap()
-                            ),
+                            coverLetters,
                             SERVED_PARTY_RESPONDENT
                         );
                     } else {
@@ -1319,34 +1299,23 @@ public class ServiceOfApplicationService {
     }
 
     private void sendEmailToCitizenRespondentNonPersonal(CaseData caseData,
-                                                          List<Element<EmailNotificationDetails>> emailNotificationDetails,
-                                                          Element<PartyDetails> party,
-                                                          List<Document> docs,
-                                                          SendgridEmailTemplateNames emailTemplate,
-                                                          Map<String, String> fieldMap,
-                                                          EmailTemplateNames notifyTemplate,
-                                                          List<Document> coverLetters) {
+                                                         List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                                         Element<PartyDetails> party,
+                                                         List<Document> docs,
+                                                         SendgridEmailTemplateNames emailTemplate,
+                                                         Map<String, String> fieldMap,
+                                                         List<Document> coverLetters) {
         EmailNotificationDetails emailNotification;
-        if (CaseUtils.isCitizenAccessEnabled(party.getValue())) {
-            log.info("Respondent has access to dashboard -> send gov notify email for {}", party.getId());
-            log.debug("Respondent has access to dashboard -> send gov notify email for {}", party.getId());
-            emailNotification = sendEmailToUnrepresentedRespondent(fieldMap.get(AUTHORIZATION),
+
+        log.info("Respondent does not access to dashboard -> send packs via sendgrid email for {}", party.getId());
+
+
+        emailNotification = sendEmailViaSendGridWithAttachedDocsToPartyRespondent(fieldMap.get(AUTHORIZATION),
                                                                   caseData,
                                                                   docs,
                                                                   party,
-                                                                  notifyTemplate,
+                                                                  emailTemplate,
                                                                   coverLetters);
-        } else {
-            log.info("Respondent does not access to dashboard -> send packs via sendgrid email for {}", party.getId());
-            log.info("Respondent does not access to dashboard -> send packs via sendgrid email for template {}", emailTemplate);
-            log.debug("Respondent does not access to dashboard -> send packs via sendgrid email for {}", party.getId());
-            emailNotification = sendSoaPacksToPartyViaEmailRespondent(fieldMap.get(AUTHORIZATION),
-                                                            caseData,
-                                                            docs,
-                                                            party,
-                                                            emailTemplate,
-                                                            coverLetters);
-        }
 
         if (emailNotification != null) {
             emailNotificationDetails.add(element(emailNotification.toBuilder()
@@ -1647,34 +1616,7 @@ public class ServiceOfApplicationService {
             .build();
     }
 
-    private EmailNotificationDetails sendEmailToUnrepresentedRespondent(String authorization,
-                                                                       CaseData caseData,
-                                                                       List<Document> packDocs,
-                                                                       Element<PartyDetails> party,
-                                                                       EmailTemplateNames emailTemplate,
-                                                                       List<Document> coverLetters) {
-
-        log.info("inside sendEmailToUnrepresentedRespondent party id {}", party.getId());
-        log.info("inside sendEmailToUnrepresentedRespondent notify template{}", emailTemplate);
-
-        //Send a gov notify email
-        sendGovNotifyEmail(caseData, party, emailTemplate);
-        //Generate cover letter without access code for respondent who has access to dashboard
-        List<Document> packsWithCoverLetters = new ArrayList<>(coverLetters);
-        packsWithCoverLetters.addAll(packDocs);
-
-        //Create email notification with packs
-        return EmailNotificationDetails.builder()
-            .emailAddress(party.getValue().getEmail())
-            .servedParty(SERVED_PARTY_RESPONDENT)
-            .docs(wrapElements(packsWithCoverLetters))
-            .attachedDocs(CITIZEN_CAN_VIEW_ONLINE)
-            .timeStamp(CaseUtils.getCurrentDate())
-            .build();
-    }
-
     private void sendGovNotifyEmail(CaseData caseData, Element<PartyDetails> party, EmailTemplateNames emailTemplate) {
-        log.info("Inside sendGovNotifyEmail called..");
         serviceOfApplicationEmailService.sendGovNotifyEmail(
             LanguagePreference.getPreferenceLanguage(caseData),
             party.getValue().getEmail(),
@@ -1684,29 +1626,6 @@ public class ServiceOfApplicationService {
                 party.getValue(),
                 YesOrNo.Yes.equals(doesC1aExists(caseData)) ? "Yes" : null
             )
-        );
-    }
-
-    private EmailNotificationDetails sendSoaPacksToPartyViaEmailRespondent(String authorization,
-                                                                 CaseData caseData,
-                                                                 List<Document> packDocs,
-                                                                 Element<PartyDetails> party,
-                                                                 SendgridEmailTemplateNames emailTemplate,
-                                                                 List<Document> coverLetters) {
-        log.debug("inside sendSoaPacksToPartyViaEmailRespondent {}", emailTemplate);
-        log.info("inside sendSoaPacksToPartyViaEmailRespondent {}", emailTemplate);
-        //Generate access code if party does not have access to dashboard
-        log.info("inside sendSoaPacksToPartyViaEmailRespondent cover Letters {}", coverLetters != null ?  coverLetters.size() : 25);
-        log.info("inside sendSoaPacksToPartyViaEmailRespondent packs Letters {}", packDocs != null ?  packDocs.size() : 5);
-        List<Document> packsWithCoverLetters = new ArrayList<>(coverLetters);
-        log.info("inside sendSoaPacksToPartyViaEmailRespondent packsWithCoverLetters {}", packsWithCoverLetters);
-        return sendEmailViaSendGridWithAttachedDocsToPartyRespondent(
-            authorization,
-            caseData,
-            packDocs,
-            party,
-            emailTemplate,
-            packsWithCoverLetters
         );
     }
 
@@ -1738,19 +1657,15 @@ public class ServiceOfApplicationService {
                                                                                  SendgridEmailTemplateNames emailTemplate,
                                                                                  List<Document> coverLetters) {
 
-        log.info("inside sendEmailViaSendGridWithAttachedDocsToPartyRespondent {}", party.getValue().getEmail());
-        log.info("inside sendEmailViaSendGridWithAttachedDocsToPartyRespondent emailTemplate {}", emailTemplate);
-        log.info("inside sendEmailViaSendGridWithAttachedDocsToPartyRespondent cover Letters {}", coverLetters != null ?  coverLetters.size() : 25);
-        log.info("inside sendEmailViaSendGridWithAttachedDocsToPartyRespondent packs Letters {}", packDocs != null ?  packDocs.size() : 25);
+        log.info("inside sendEmailViaSendGridWithAttachedDocsToPartyRespondent {}", party.getId());
+
         List<Document> packsWithCoverLetter = new ArrayList<>(coverLetters);
-        log.info("packsWithCoverLetter 1 {}", packsWithCoverLetter.size());
         packsWithCoverLetter.addAll(packDocs);
-        log.info("packsWithCoverLetter 2 {}", packsWithCoverLetter.size());
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         dynamicData.put("name", party.getValue().getLabelForDynamicList());
         dynamicData.put(DASH_BOARD_LINK, citizenUrl);
         populateLanguageMap(caseData, dynamicData);
-        log.info("sendEmailViaSendGridWithAttachedDocsToPartyRespondent email fired  ");
+
         return serviceOfApplicationEmailService
             .sendEmailUsingTemplateWithAttachments(
                 authorization,

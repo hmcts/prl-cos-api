@@ -4728,7 +4728,7 @@ public class ServiceOfApplicationServiceTest {
         );
         assertEquals(COURT, servedApplicationDetails.getWhoIsResponsible());
         //Applicant && Respondent
-        verify(serviceOfApplicationEmailService, times(2)).sendGovNotifyEmail(Mockito.any(), Mockito.anyString(), Mockito.any(),Mockito.any());
+        verify(serviceOfApplicationEmailService).sendGovNotifyEmail(Mockito.any(), Mockito.anyString(), Mockito.any(),Mockito.any());
     }
 
     @Test
@@ -5234,91 +5234,6 @@ public class ServiceOfApplicationServiceTest {
             .address(Address.builder().addressLine1("line1").build())
             .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
             .contactPreferences(ContactPreferences.email)
-            .build();
-
-        List<Element<PartyDetails>> otherParities = new ArrayList<>();
-        Element<PartyDetails> partyDetailsElement = element(partyDetails);
-        otherParities.add(partyDetailsElement);
-        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
-            .code(partyDetailsElement.getId().toString())
-            .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
-            .build();
-        List<Element<PartyDetails>> partyList = new ArrayList<>();
-        partyList.add(element(UUID.fromString("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f"), partyDetails));
-
-        DynamicMultiSelectList soaRecipientsOptions = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiselectListElement.builder()
-                               .code("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f")
-                               .label("recipient1")
-                               .build()))
-            .build();
-
-        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiselectListElement.builder().code("Blank order or directions (C21) - to withdraw application")
-                               .label("Blank order or directions (C21) - to withdraw application").build())).build();
-        List<Element<CaseInvite>> caseInvites = new ArrayList<>();
-        caseInvites.add(element(CaseInvite.builder().partyId(UUID.fromString(TEST_UUID)).build()));
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .applicants(partyList)
-            .respondents(partyList)
-            .applicantCaseName("Test Case 45678")
-            .caseInvites(caseInvites)
-            .finalDocument(Document.builder().documentFileName("").build())
-            .finalWelshDocument(Document.builder().documentFileName("").build())
-            .c1AWelshDocument(Document.builder().documentFileName("").build())
-            .orderCollection(List.of(Element.<OrderDetails>builder().value(OrderDetails.builder()
-                                                                               .orderTypeId("Blank order or directions (C21)")
-                                                                               .build())
-                                         .build()))
-            .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
-                                      .soaCafcassCymruServedOptions(Yes)
-                                      .soaCafcassEmailId("cymruemail@test.com")
-                                      .soaCafcassCymruEmail("cymruemail@test.com")
-                                      .soaServingRespondentsOptions(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
-                                      .soaRecipientsOptions(soaRecipientsOptions)
-                                      .soaOtherParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).build()).build())
-            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
-            .othersToNotify(otherParities)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .serviceOfApplicationScreen1(dynamicMultiSelectList)
-            .c1ADocument(Document.builder().documentFileName("Blank_C7.pdf").build())
-            .build();
-        Map<String,Object> casedata = new HashMap<>();
-        casedata.put("caseTypeOfApplication","C100");
-        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
-        when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
-                                                                       .forename("first")
-                                                                       .surname("test").build());
-        when(c100CaseInviteService.generateCaseInvite(any(),any()))
-            .thenReturn(CaseInvite.builder().partyId(UUID.randomUUID()).build());
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            authorization,
-            casedata
-        );
-        assertNotNull(servedApplicationDetails);
-        assertEquals("By email and post", servedApplicationDetails.getModeOfService());
-        assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
-    }
-
-    @Test
-    public void testGovNotifyEmailWhenPreferenceSetToEmailForSoaToRespondentC100() {
-        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
-            .representativeLastName("repLastName")
-            .gender(Gender.male)
-            .email("abc@xyz.com")
-            .phoneNumber("1234567890")
-            .canYouProvideEmailAddress(Yes)
-            .isEmailAddressConfidential(Yes)
-            .isPhoneNumberConfidential(Yes)
-            .partyId(UUID.randomUUID())
-            .address(Address.builder().addressLine1("line1").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
-            .contactPreferences(ContactPreferences.email)
-            .user(User.builder()
-                      .idamId("4f854707-91bf-4fa0-98ec-893ae0025cae").build())
             .build();
 
         List<Element<PartyDetails>> otherParities = new ArrayList<>();
@@ -5971,98 +5886,6 @@ public class ServiceOfApplicationServiceTest {
             new StartAllTabsUpdateDataContent(authorization,
                                               EventRequestData.builder().build(),
                                               StartEventResponse.builder().build(), caseDetails, caseDataSoa, null);
-        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
-        CaseData updatedcaseData = serviceOfApplicationService
-            .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
-
-        assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
-        assertEquals(
-            "solicitorResp test",
-            updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy()
-        );
-        assertEquals(
-            "Court",
-            updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible()
-        );
-
-    }
-
-    @Test
-    public void testGovNotifyEmailToRespondentAfterConfSuccessWhenPreferenceIsEmail() {
-
-        PartyDetails partyDetails1 = PartyDetails.builder()
-            .user(User.builder()
-                      .idamId("4f854707-91bf-4fa0-98ec-893ae0025cae").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
-            .contactPreferences(ContactPreferences.email)
-            .email("abc@xyz.com")
-            .build();
-
-        Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder()
-            .id(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae"))
-            .value(partyDetails1)
-            .build();
-
-        List<Element<PartyDetails>> partyElementList = new ArrayList<>();
-        partyElementList.add(partyDetailsElement);
-
-        List<Element<String>> partyIds = new ArrayList<>();
-        partyIds.add(element(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae"),
-                             "4f854707-91bf-4fa0-98ec-893ae0025cae"));
-
-        caseInvite = caseInvite.toBuilder()
-            .partyId(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae")).build();
-
-        List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
-        caseInviteList.add(element(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae"), caseInvite));
-
-        CaseData caseData = CaseData.builder().id(12345L)
-            .caseCreatedBy(CaseCreatedBy.CITIZEN)
-            .caseTypeOfApplication("C100")
-            .respondents(partyElementList)
-            .caseInvites(caseInviteList)
-            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder()
-                                                .specialArrangementsLetter(Document.builder().build())
-                                                .pd36qLetter(Document.builder().build())
-                                                .additionalDocuments(Document.builder().build())
-                                                .specialArrangementsLetter(Document.builder().build())
-                                                .noticeOfSafetySupportLetter(Document.builder().build())
-                                                .build())
-            .serviceOfApplication(ServiceOfApplication.builder()
-                                      .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
-                                                                                .builder()
-                                                                                .confidentialityCheckRejectReason(
-                                                                                    "pack contain confidential info")
-                                                                                .build()))
-                                      .unServedApplicantPack(SoaPack.builder()
-                                                                 .partyIds(partyIds)
-                                                                 .personalServiceBy("courtAdmin")
-                                                                 .coverLettersMap(coverletterMap)
-                                                                 .build())
-                                      .unServedRespondentPack(SoaPack.builder()
-                                                                  .partyIds(partyIds)
-                                                                  .packDocument(List.of(element(Document.builder()
-                                                                  .documentFileName("").build())))
-                                                                  .build())
-                                      .applicationServedYesNo(No)
-                                      .rejectionReason("pack contain confidential address")
-                                      .build()).build();
-        Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
-        EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder().build();
-        when(serviceOfApplicationEmailService
-                 .sendEmailNotificationToLocalAuthority(
-                     anyString(),
-                     Mockito.any(),
-                     anyString(),
-                     Mockito.any(),
-                     anyString()
-                 )).thenReturn(emailNotificationDetails);
-
-        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
-            new StartAllTabsUpdateDataContent(authorization,
-                              EventRequestData.builder().build(),
-                              StartEventResponse.builder().build(), caseDetails, caseDataSoa, null);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         CaseData updatedcaseData = serviceOfApplicationService
             .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
