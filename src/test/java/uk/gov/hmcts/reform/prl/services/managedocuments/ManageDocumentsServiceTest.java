@@ -37,6 +37,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
+import uk.gov.hmcts.reform.prl.exception.MissingCaseDataFieldException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -2777,7 +2778,7 @@ public class ManageDocumentsServiceTest {
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtNavRole);
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+        MissingCaseDataFieldException exception = assertThrows(MissingCaseDataFieldException.class, () -> {
             manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
                 quarantineLegalDoc,
                 userDetailsCourtNavRole,

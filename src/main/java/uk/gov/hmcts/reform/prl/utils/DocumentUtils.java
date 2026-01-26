@@ -7,6 +7,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.Roles;
+import uk.gov.hmcts.reform.prl.exception.MissingCaseDataFieldException;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 
@@ -88,16 +89,16 @@ public class DocumentUtils {
     private static String getFinalCategory(String[] splittedCategory) {
         String finalCategory = "";
 
-        try {
-            for (int i = 0; i < splittedCategory.length; i++) {
-                if (i == 0) {
-                    finalCategory = finalCategory.concat(splittedCategory[i].toLowerCase());
-                } else {
-                    finalCategory = finalCategory.concat(splittedCategory[i]);
-                }
+        if (splittedCategory == null || splittedCategory.length == 0) {
+            throw new MissingCaseDataFieldException("CategoryId cannot be null or empty");
+        }
+
+        for (int i = 0; i < splittedCategory.length; i++) {
+            if (i == 0) {
+                finalCategory = finalCategory.concat(splittedCategory[i].toLowerCase());
+            } else {
+                finalCategory = finalCategory.concat(splittedCategory[i]);
             }
-        } catch (NullPointerException e) {
-            throw new IllegalArgumentException("CategoryId cannot be null or empty");
         }
         return finalCategory;
     }

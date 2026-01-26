@@ -11,6 +11,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
+import uk.gov.hmcts.reform.prl.exception.MissingCaseDataFieldException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.RemovableDocument;
@@ -318,7 +319,7 @@ public class RemoveDocumentsServiceTest {
 
         Element<QuarantineLegalDoc> element = new Element<>(elementId, quarantineDoc);
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+        MissingCaseDataFieldException exception = assertThrows(MissingCaseDataFieldException.class, () -> {
             removeDocumentsService.convertQuarantineDoc(element);
         });
 

@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotSure;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
+import uk.gov.hmcts.reform.prl.exception.MissingCaseDataFieldException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -1879,7 +1880,7 @@ public class ReviewDocumentServiceTest {
                                  .build())
             .build();
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+        MissingCaseDataFieldException exception = assertThrows(MissingCaseDataFieldException.class, () -> {
             reviewDocumentService.cleanupOldCopyOfDocuments(currentCaseData, previousCaseData);
         });
 
