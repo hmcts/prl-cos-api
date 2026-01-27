@@ -468,12 +468,10 @@ public class CaseService {
 
     public CitizenDocumentsManagement getAllCitizenDocumentsOrders(String authToken,
                                                                    CaseData caseData) {
-        log.info("Yogesh==>getAllCitizenDocumentsOrders");
         UserDetails userDetails = userService.getUserDetails(authToken);
         Map<String, String> partyIdAndType = findPartyIdAndType(caseData, userDetails);
 
         List<CitizenDocuments> otherDocuments = new ArrayList<>();
-        log.info("Yogesh==>getAllCitizenDocumentsOrders1");
         //Retrieve citizen documents with other docs segregated
         List<CitizenDocuments> citizenDocuments = getCitizenDocuments(userDetails, caseData, otherDocuments, partyIdAndType);
         //Retrieve citizen orders for the party
@@ -1660,7 +1658,6 @@ public class CaseService {
                 .filter(emailNotification -> {
 
                     String partyId = nonNull(partyIdAndType) ? partyIdAndType.get(PARTY_ID) : null;
-                    log.info("Yogesh==>partyId{}", partyId);
                     return nonNull(partyId) && partyId.equals(emailNotification.getPartyIds());
                 })
                 .map(emailNotification ->
