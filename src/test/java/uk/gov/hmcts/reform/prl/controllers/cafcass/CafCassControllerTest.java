@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.services.cafcass.CaseDataService;
 import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import static feign.Request.HttpMethod.GET;
@@ -249,7 +250,7 @@ public class CafCassControllerTest {
                                   "value": {"code": "TYPE_A", "label": "First Hearing"}
                                 },
                                 "confirmedHearingDates": {
-                                  "value": {"code": "Hearing1", "label": "2022-01-01T10:00:00"}
+                                  "value": {"code": "123", "label": "2022-01-01T10:00:00"}
                                 }
                               }
                             },
@@ -260,7 +261,7 @@ public class CafCassControllerTest {
                                   "value": {"code": "TYPE_B", "label": "Second Hearing"}
                                 },
                                 "confirmedHearingDates": {
-                                  "value": {"code": "Hearing2", "label": "2022-01-01T11:00:00"}
+                                  "value": {"code": "456", "label": "2022-01-01T11:00:00"}
                                 }
                               }
                             }
@@ -300,7 +301,8 @@ public class CafCassControllerTest {
         assertNotNull(order.getHearingDetails());
         assertEquals("TYPE_A", order.getHearingDetails().getHearingType()); // first one taken
         assertEquals("First Hearing", order.getHearingDetails().getHearingTypeValue());
-        assertEquals("Hearing1, Hearing2", order.getHearingId());
+        assertEquals("123, 456", order.getHearingId());
+        assertEquals(List.of(123L, 456L), order.getHearingIds());
     }
 
 }
