@@ -42,6 +42,7 @@ import uk.gov.hmcts.reform.prl.models.roleassignment.RoleAssignmentDto;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.AmendOrderService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.CustomOrderService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
@@ -55,7 +56,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 import uk.gov.hmcts.reform.prl.utils.TaskUtils;
-
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -63,7 +64,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 import javax.ws.rs.core.HttpHeaders;
-
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -82,6 +82,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createCustomOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.uploadAnOrder;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.cleanUpSelectedManageOrderOptions;
@@ -99,6 +100,7 @@ public class ManageOrdersController {
         "This feature is not currently available. Please refer to HMCTS guidance.";
     private final ObjectMapper objectMapper;
     private final ManageOrderService manageOrderService;
+    private final CustomOrderService customOrderService;
     private final ManageOrderEmailService manageOrderEmailService;
     private final AmendOrderService amendOrderService;
     private final RefDataUserService refDataUserService;
@@ -122,6 +124,27 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+            // Custom order flow - render the document for preview
+            if (caseData.getManageOrdersOptions().equals(createCustomOrder)) {
+                try {
+                    caseDataUpdated = customOrderService.renderUploadedCustomOrderAndStoreOnManageOrders(
+                        authorisation,
+                        callbackRequest.getCaseDetails().getId(),
+                        caseData,
+                        caseDataUpdated,
+                        manageOrderService::populateJudgeNames,
+                        manageOrderService::populatePartyDetailsOfNewParterForDocmosis
+                    );
+                } catch (Exception e) {
+                    log.error("Failed to render custom order for preview", e);
+                    return AboutToStartOrSubmitCallbackResponse.builder()
+                        .errors(List.of("Failed to render custom order: " + e.getMessage()))
+                        .build();
+                }
+                return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+            }
 
             String language = CaseUtils.getLanguage(clientContext);
             List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData, CaseUtils.getLanguage(clientContext));
@@ -259,6 +282,7 @@ public class ManageOrdersController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
+        log.info(">>> Submitted callback (case-order-email-notification) called");
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
                     = allTabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
@@ -266,6 +290,29 @@ public class ManageOrdersController {
             //SNI-4330 fix - this will set state in caseData
             //updating state in caseData so that caseSummaryTab is updated with latest state
             CaseData caseData = startAllTabsUpdateDataContent.caseData();
+
+            // Handle custom order transformation - only if not already rendered in mid-event
+            Object customOrderDoc = caseDataUpdated.get("customOrderDoc");
+            Object customOrderTransformedDoc = caseDataUpdated.get("customOrderTransformedDoc");
+            Long caseId = callbackRequest.getCaseDetails().getId();
+            log.info(">>> customOrderDoc present = {}, customOrderTransformedDoc present = {}, caseId = {}",
+                customOrderDoc != null, customOrderTransformedDoc != null, caseId);
+            if (customOrderDoc != null && customOrderTransformedDoc == null) {
+                try {
+                    log.info("Processing custom order transformation for case: {}", caseId);
+                    caseDataUpdated = customOrderService.renderUploadedCustomOrderAndStoreOnManageOrders(
+                        authorisation,
+                        caseId,
+                        caseData,
+                        caseDataUpdated,
+                        manageOrderService::populateJudgeNames,
+                        manageOrderService::populatePartyDetailsOfNewParterForDocmosis
+                    );
+                } catch (IOException e) {
+                    log.error("Error rendering custom order template", e);
+                }
+            }
+
             try {
                 log.info("Initiating court seal for the orders");
                 manageOrderService.addSealToOrders(authorisation, caseData, caseDataUpdated);
@@ -320,9 +367,19 @@ public class ManageOrdersController {
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             Map<String, Object> caseDataUpdated = caseDetails.getData();
-            setIsWithdrawnRequestSent(caseData, caseDataUpdated);
-            setHearingData(caseData, caseDataUpdated, authorisation);
 
+            setIsWithdrawnRequestSent(caseData, caseDataUpdated);
+            try {
+                setHearingData(caseData, caseDataUpdated, authorisation);
+            } catch (Exception e) {
+                String msg = (e.getMessage() == null || e.getMessage().isBlank())
+                    ? "An error occurred while processing the order. Please check the template placeholders and try again."
+                    : e.getMessage();
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .data(caseDataUpdated)
+                    .errors(List.of(msg))
+                    .build();
+            }
             manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
             //PRL-4216 - save server order additional documents if any
             manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
@@ -366,7 +423,15 @@ public class ManageOrdersController {
         return newDraftOrderCollectionId;
     }
 
-    private void setHearingData(CaseData caseData, Map<String, Object> caseDataUpdated, String authorisation) {
+    /*
+     *  setHearingData is a misnomer this does setHearingData but then goes on to other action based on selection
+     *  including serving an order
+     * @param caseData original
+     * @param caseDataUpdated updated
+     * @param authorisation need auth for changes
+     */
+    private void setHearingData(CaseData caseData, Map<String, Object> caseDataUpdated, String authorisation)
+        throws IOException {
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
         } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
