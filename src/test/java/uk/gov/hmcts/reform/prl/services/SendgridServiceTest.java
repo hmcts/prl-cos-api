@@ -295,12 +295,11 @@ public class SendgridServiceTest {
                 applicant.getSolicitorEmail())
             .languagePreference(LanguagePreference.english)
             .dynamicTemplateData(dynamicTemplateData).build();
-        sendgridService
-            .sendEmailUsingTemplateWithAttachments(
-                SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION,
-                TEST_AUTH,
-                sendgridEmailConfig
-            );
+        sendgridService.sendEmailUsingTemplateWithAttachments(
+            SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION,
+            TEST_AUTH,
+            sendgridEmailConfig
+        );
         verify(sendGrid, times(1)).api(any(Request.class));
     }
 
@@ -405,12 +404,11 @@ public class SendgridServiceTest {
                 applicant.getSolicitorEmail())
             .languagePreference(LanguagePreference.english)
             .dynamicTemplateData(dynamicTemplateData).build();
-        sendgridService
-            .sendEmailUsingTemplateWithAttachments(
-                SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION,
-                TEST_AUTH,
-                sendgridEmailConfig
-            );
+        sendgridService.sendEmailUsingTemplateWithAttachments(
+            SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION,
+            TEST_AUTH,
+            sendgridEmailConfig
+        );
         verify(sendGrid, times(1)).api(any(Request.class));
     }
 
