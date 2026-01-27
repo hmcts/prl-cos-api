@@ -68,12 +68,12 @@ public class PrepareHearingBundleService {
     private void createPrepareBundleWaTask(List<Long> caseIds) {
         caseIds.forEach(caseId ->
                             triggerSystemEventForWorkAllocationTask(caseId.toString(),
-                                                                    CaseEvent.ENABLE_UPDATE_HEARING_ACTUAL_TASK.getValue())
+                                                                    CaseEvent.ENABLE_PREPARE_HEARING_BUNDLE_TASK.getValue())
         );
     }
 
     private void triggerSystemEventForWorkAllocationTask(String caseId, String caseEvent) {
-        log.info("Creating initiation event for 'Prepare Hearing Bundle' Task for case id : {}", caseId);
+        log.info("Creating initiation event {} for case id : {}", caseEvent, caseId);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(caseId, caseEvent);
         allTabService.submitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),
