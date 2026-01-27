@@ -292,7 +292,7 @@ public class ManageOrdersController {
             CaseData caseData = startAllTabsUpdateDataContent.caseData();
 
             // Handle custom order transformation - only if not already rendered in mid-event
-            Object customOrderDoc = caseDataUpdated.get("customOrderDoc");
+            Object customOrderDoc = caseDataUpdated.remove("customOrderDoc");
             Object customOrderTransformedDoc = caseDataUpdated.get("customOrderTransformedDoc");
             Long caseId = callbackRequest.getCaseDetails().getId();
             log.info(">>> customOrderDoc present = {}, customOrderTransformedDoc present = {}, caseId = {}",
@@ -308,6 +308,8 @@ public class ManageOrdersController {
                         manageOrderService::populateJudgeNames,
                         manageOrderService::populatePartyDetailsOfNewParterForDocmosis
                     );
+                    // Remove the original uploaded doc after transformation
+                    caseDataUpdated.remove("customOrderDoc");
                 } catch (IOException e) {
                     log.error("Error rendering custom order template", e);
                 }

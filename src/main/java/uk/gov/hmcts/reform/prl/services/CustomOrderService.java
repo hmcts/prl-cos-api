@@ -133,7 +133,8 @@ public class CustomOrderService {
 
         // 5) Store the transformed doc
         caseDataUpdated.put("customOrderTransformedDoc", renderedDoc);
-
+        // Remove the original uploaded doc after transformation
+        caseDataUpdated.remove("customOrderDoc");
         return caseDataUpdated;
     }
 

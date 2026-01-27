@@ -60,8 +60,28 @@ class PoiTlDocxRendererTest {
 
 
         try (XWPFDocument doc = new XWPFDocument(new ByteArrayInputStream(outBytes))) {
-            String text = doc.getParagraphs().stream().map(p -> p.getText()).reduce("", (a,b) -> a + "\n" + b);
-            assertThat(text).contains("Example Family Court");
+            StringBuilder allText = new StringBuilder();
+            doc.getParagraphs().forEach(p -> allText.append(p.getText()).append("\n"));
+            doc.getTables().forEach(table ->
+                table.getRows().forEach(row ->
+                    row.getTableCells().forEach(cell ->
+                        allText.append(cell.getText()).append("\n")
+                    )
+                )
+            );
+            if (doc.getHeaderList() != null) {
+                doc.getHeaderList().forEach(header ->
+                    header.getParagraphs().forEach(p -> allText.append(p.getText()).append("\n"))
+                );
+            }
+            if (doc.getFooterList() != null) {
+                doc.getFooterList().forEach(footer ->
+                    footer.getParagraphs().forEach(p -> allText.append(p.getText()).append("\n"))
+                );
+            }
+            String allTextStr = allText.toString();
+            assertThat(allTextStr).contains("Example Family Court");
+            assertThat(allTextStr).contains("AB12C34567");
         }
     }
 }
