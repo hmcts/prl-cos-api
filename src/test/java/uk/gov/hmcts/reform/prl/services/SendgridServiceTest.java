@@ -78,13 +78,13 @@ public class SendgridServiceTest {
         Response response = new Response();
         response.setStatusCode(200);
         JsonObject jsonObject = new NullAwareJsonObjectBuilder()
-            .add("applicantCaseName","hello")
+            .add("applicantCaseName", "hello")
             .build();
         Request request = new Request();
         request.setMethod(Method.POST);
         request.setEndpoint("mail/send");
         sendgridService.sendEmail(jsonObject);
-        verify(sendGrid,times(1)).api(any(Request.class));
+        verify(sendGrid, times(1)).api(any(Request.class));
     }
 
 
@@ -144,8 +144,10 @@ public class SendgridServiceTest {
             .emailAddress("test@email.com")
             .servedParty(SERVED_PARTY_APPLICANT_SOLICITOR)
             .docs(documentList.stream().map(s -> element(s)).collect(Collectors.toList()))
-            .attachedDocs(String.join(",", documentList.stream().map(a -> a.getDocumentFileName()).collect(
-                Collectors.toList())))
+            .attachedDocs(String.join(
+                ",", documentList.stream().map(a -> a.getDocumentFileName()).collect(
+                    Collectors.toList())
+            ))
             .timeStamp(currentDate).build();
         when(launchDarklyClient.isFeatureEnabled("soa-sendgrid")).thenReturn(true);
 
@@ -156,16 +158,20 @@ public class SendgridServiceTest {
         when(sendgridEmailTemplatesConfig.getTemplates())
             .thenReturn(
                 ImmutableMap.of(
-                    LanguagePreference.english, ImmutableMap.of(SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION, "111"),
-                    LanguagePreference.welsh, ImmutableMap.of(SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION, "222")
+                    LanguagePreference.english,
+                    ImmutableMap.of(SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION, "111"),
+                    LanguagePreference.welsh,
+                    ImmutableMap.of(SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION, "222")
                 )
             );
 
         byte[] biteData = "test bytes".getBytes();
         for (Document d : documentList) {
-            when(documentGenService.getDocumentBytes(d.getDocumentUrl(),
-                                                     TEST_AUTH,
-                                                     s2sToken)).thenReturn(biteData);
+            when(documentGenService.getDocumentBytes(
+                d.getDocumentUrl(),
+                TEST_AUTH,
+                s2sToken
+            )).thenReturn(biteData);
         }
         final Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "test auth");
@@ -244,8 +250,10 @@ public class SendgridServiceTest {
             .emailAddress("test@email.com")
             .servedParty(SERVED_PARTY_APPLICANT_SOLICITOR)
             .docs(documentList.stream().map(s -> element(s)).collect(Collectors.toList()))
-            .attachedDocs(String.join(",", documentList.stream().map(a -> a.getDocumentFileName()).collect(
-                Collectors.toList())))
+            .attachedDocs(String.join(
+                ",", documentList.stream().map(a -> a.getDocumentFileName()).collect(
+                    Collectors.toList())
+            ))
             .timeStamp(currentDate).build();
         when(launchDarklyClient.isFeatureEnabled("soa-sendgrid")).thenReturn(true);
 
@@ -277,19 +285,22 @@ public class SendgridServiceTest {
         when(sendgridEmailTemplatesConfig.getTemplates())
             .thenReturn(
                 Map.of(
-                    LanguagePreference.english, Map.of(SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION, "111"),
-                    LanguagePreference.welsh, Map.of(SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION, "222")
+                    LanguagePreference.english,
+                    Map.of(SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION, "111"),
+                    LanguagePreference.welsh,
+                    Map.of(SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION, "222")
                 )
             );
         SendgridEmailConfig sendgridEmailConfig = SendgridEmailConfig.builder().listOfAttachments(documentList).toEmailAddress(
-            applicant.getSolicitorEmail())
+                applicant.getSolicitorEmail())
             .languagePreference(LanguagePreference.english)
             .dynamicTemplateData(dynamicTemplateData).build();
         sendgridService
             .sendEmailUsingTemplateWithAttachments(
                 SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION,
                 TEST_AUTH,
-                sendgridEmailConfig);
+                sendgridEmailConfig
+            );
         verify(sendGrid, times(1)).api(any(Request.class));
     }
 
@@ -349,8 +360,10 @@ public class SendgridServiceTest {
             .emailAddress("test@email.com")
             .servedParty(SERVED_PARTY_APPLICANT_SOLICITOR)
             .docs(documentList.stream().map(s -> element(s)).collect(Collectors.toList()))
-            .attachedDocs(String.join(",", documentList.stream().map(a -> a.getDocumentFileName()).collect(
-                Collectors.toList())))
+            .attachedDocs(String.join(
+                ",", documentList.stream().map(a -> a.getDocumentFileName()).collect(
+                    Collectors.toList())
+            ))
             .timeStamp(currentDate).build();
         when(launchDarklyClient.isFeatureEnabled("soa-sendgrid")).thenReturn(true);
 
@@ -382,24 +395,27 @@ public class SendgridServiceTest {
         when(sendgridEmailTemplatesConfig.getTemplates())
             .thenReturn(
                 ImmutableMap.of(
-                    LanguagePreference.english, ImmutableMap.of(SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION, "111"),
-                    LanguagePreference.welsh, ImmutableMap.of(SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION, "222")
+                    LanguagePreference.english,
+                    ImmutableMap.of(SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION, "111"),
+                    LanguagePreference.welsh,
+                    ImmutableMap.of(SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION, "222")
                 )
             );
         SendgridEmailConfig sendgridEmailConfig = SendgridEmailConfig.builder().listOfAttachments(documentList).toEmailAddress(
-            applicant.getSolicitorEmail())
+                applicant.getSolicitorEmail())
             .languagePreference(LanguagePreference.english)
             .dynamicTemplateData(dynamicTemplateData).build();
         sendgridService
             .sendEmailUsingTemplateWithAttachments(
                 SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION,
                 TEST_AUTH,
-                sendgridEmailConfig);
+                sendgridEmailConfig
+            );
         verify(sendGrid, times(1)).api(any(Request.class));
     }
 
     @Test
-    public void testTransferCourtEmailWithAttachments() throws Exception {
+    public void testTransferCourtEmailWithAttachmentsThrowsException() throws Exception {
 
         PartyDetails applicant = PartyDetails.builder()
             .solicitorEmail("test@gmail.com")
@@ -454,8 +470,10 @@ public class SendgridServiceTest {
             .emailAddress("test@email.com")
             .servedParty(SERVED_PARTY_APPLICANT_SOLICITOR)
             .docs(documentList.stream().map(s -> element(s)).collect(Collectors.toList()))
-            .attachedDocs(String.join(",", documentList.stream().map(a -> a.getDocumentFileName()).collect(
-                Collectors.toList())))
+            .attachedDocs(String.join(
+                ",", documentList.stream().map(a -> a.getDocumentFileName()).collect(
+                    Collectors.toList())
+            ))
             .timeStamp(currentDate).build();
         when(launchDarklyClient.isFeatureEnabled("transfer-case-sendgrid")).thenReturn(true);
 
@@ -466,9 +484,11 @@ public class SendgridServiceTest {
 
         byte[] biteData = "test bytes".getBytes();
         for (Document d : documentList) {
-            when(documentGenService.getDocumentBytes(d.getDocumentUrl(),
-                                                     TEST_AUTH,
-                                                     s2sToken)).thenReturn(biteData);
+            when(documentGenService.getDocumentBytes(
+                d.getDocumentUrl(),
+                TEST_AUTH,
+                s2sToken
+            )).thenReturn(biteData);
         }
         final Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "test auth");
@@ -482,8 +502,11 @@ public class SendgridServiceTest {
         assertThrows(
             IOException.class,
             () -> sendgridService
-                .sendTransferCourtEmailWithAttachments(TEST_AUTH, combinedMap, applicant.getSolicitorEmail(),
-                                                       documentList));
+                .sendTransferCourtEmailWithAttachments(
+                    TEST_AUTH, combinedMap, applicant.getSolicitorEmail(),
+                    documentList
+                )
+        );
 
 
     }
@@ -570,8 +593,12 @@ public class SendgridServiceTest {
         Response response = new Response();
         response.setBody("test response");
         response.setHeaders(headers);
-        response.setStatusCode(400);
-        when(sendGrid.api(any(Request.class))).thenThrow(new IOException("expected exception"));
+        response.setStatusCode(500);
+        when(sendGrid.api(any(Request.class))).thenReturn(new Response(
+            500,
+            "response body",
+            Map.of()
+        ));
         assertThrows(
             IOException.class,
             () -> sendgridService
@@ -580,7 +607,5 @@ public class SendgridServiceTest {
                     documentList
                 )
         );
-
     }
-
 }
