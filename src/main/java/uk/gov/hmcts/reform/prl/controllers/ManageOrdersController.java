@@ -127,7 +127,7 @@ public class ManageOrdersController {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
             // Custom order flow - render the document for preview
-            if (caseData.getManageOrdersOptions().equals(createCustomOrder)) {
+            if (caseData.getManageOrdersOptions() != null && caseData.getManageOrdersOptions().equals(createCustomOrder)) {
                 try {
                     caseDataUpdated = customOrderService.renderUploadedCustomOrderAndStoreOnManageOrders(
                         authorisation,
