@@ -384,6 +384,8 @@ dependencies {
   implementation group: 'com.opencsv', name: 'opencsv', version: '5.12.0', {
     exclude group: 'commons-collections', module: 'commons-collections'
   }
+  implementation 'com.deepoove:poi-tl:1.12.2'
+
 
   runtimeOnly('org.springframework.boot:spring-boot-devtools')
     testImplementation group: 'org.awaitility', name: 'awaitility', version: versions.awaitility
@@ -592,7 +594,8 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/mapper/citizen/awp/CitizenAwpMapper.java',
   '**uk/gov/hmcts/reform/prl/mapper/citizen/CitizenPartyDetailsMapper.java',
   '**uk/gov/hmcts/reform/prl/services/DraftAnOrderService.java',
-  '**uk/gov/hmcts/reform/prl/services/ManageOrderService.java'
+  '**uk/gov/hmcts/reform/prl/services/ManageOrderService.java',
+  '**uk/gov/hmcts/reform/prl/services/CustomOrderService.java'
 ]
 
 sonarqube {
