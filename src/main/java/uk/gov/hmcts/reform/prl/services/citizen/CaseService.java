@@ -1656,7 +1656,6 @@ public class CaseService {
             return servedDetails.getEmailNotificationDetails().stream()
                 .map(Element::getValue)
                 .filter(emailNotification -> {
-
                     String partyId = nonNull(partyIdAndType) ? partyIdAndType.get(PARTY_ID) : null;
                     return nonNull(partyId) && partyId.equals(emailNotification.getPartyIds());
                 })
@@ -1685,7 +1684,6 @@ public class CaseService {
             return servedDetails.getBulkPrintDetails().stream()
                 .map(Element::getValue)
                 .filter(postNotification -> {
-
                     String partyId = nonNull(partyIdAndType) ? partyIdAndType.get(PARTY_ID) : null;
                     return nonNull(partyId) && partyId.equals(postNotification.getPartyIds());
                 })
