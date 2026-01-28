@@ -63,6 +63,7 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.AmendOrderService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.CustomOrderService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
@@ -76,7 +77,6 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.TaskUtils;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -86,7 +86,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Predicate;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -177,6 +176,9 @@ public class ManageOrdersControllerTest {
 
     @Mock
     private ManageOrderService manageOrderService;
+
+    @Mock
+    private CustomOrderService customOrderService;
 
     @Mock
     private UserService userService;
@@ -322,6 +324,10 @@ public class ManageOrdersControllerTest {
 
     @Test
     public void testPopulatePreviewOrderWhenOrderUploaded() throws Exception {
+        // Ensure customOrderService.renderUploadedCustomOrderAndStoreOnManageOrders is called for custom order
+        when(customOrderService.renderUploadedCustomOrderAndStoreOnManageOrders(any(), any(), any(), any(), any(), any()))
+            .thenReturn(new HashMap<>());
+
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
             .manageOrders(ManageOrders.builder().build())

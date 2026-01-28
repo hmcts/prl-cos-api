@@ -293,29 +293,7 @@ public class ManageOrdersController {
             //updating state in caseData so that caseSummaryTab is updated with latest state
             CaseData caseData = startAllTabsUpdateDataContent.caseData();
 
-            // Handle custom order transformation - only if not already rendered in mid-event
-            Object customOrderDoc = caseDataUpdated.remove("customOrderDoc");
-            Object customOrderTransformedDoc = caseDataUpdated.get("customOrderTransformedDoc");
-            Long caseId = callbackRequest.getCaseDetails().getId();
-            log.info(">>> customOrderDoc present = {}, customOrderTransformedDoc present = {}, caseId = {}",
-                customOrderDoc != null, customOrderTransformedDoc != null, caseId);
-            if (customOrderDoc != null && customOrderTransformedDoc == null) {
-                try {
-                    log.info("Processing custom order transformation for case: {}", caseId);
-                    caseDataUpdated = customOrderService.renderUploadedCustomOrderAndStoreOnManageOrders(
-                        authorisation,
-                        caseId,
-                        caseData,
-                        caseDataUpdated,
-                        manageOrderService::populateJudgeNames,
-                        manageOrderService::populatePartyDetailsOfNewParterForDocmosis
-                    );
-                    // Remove the original uploaded doc after transformation
-                    caseDataUpdated.remove("customOrderDoc");
-                } catch (IOException e) {
-                    log.error("Error rendering custom order template", e);
-                }
-            }
+            // Custom order document should already be rendered in preview step; skip redundant transformation here
 
             try {
                 log.info("Initiating court seal for the orders");
