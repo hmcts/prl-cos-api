@@ -1,9 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.mapper.ESQueryObjectMapper;
 import uk.gov.hmcts.reform.prl.models.SearchResultResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Bool;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Match;
@@ -27,7 +26,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.request.StateFilter;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -46,7 +44,7 @@ public class PrepareHearingBundleService {
     private final CoreCaseDataApi coreCaseDataApi;
     private final AllTabServiceImpl allTabService;
 
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = ESQueryObjectMapper.getObjectMapper();
 
     public void searchForHearingsIn5DaysAndCreateTasks() {
 
@@ -85,30 +83,22 @@ public class PrepareHearingBundleService {
     }
 
     public List<CaseDetails> retrieveCasesWithHearingsIn5Days() {
-        SearchResultResponse response = SearchResultResponse.builder().cases(new ArrayList<>()).build();
-
-        QueryParam ccdQueryParam = buildCcdQueryParam();
-
         try {
-            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-            objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+            QueryParam ccdQueryParam = buildCcdQueryParam();
+
             String searchString = objectMapper.writeValueAsString(ccdQueryParam);
             String userToken = systemUserService.getSysUserToken();
             final String s2sToken = authTokenGenerator.generate();
             SearchResult searchResult = coreCaseDataApi.searchCases(userToken, s2sToken, CASE_TYPE, searchString);
-            response = objectMapper.convertValue(searchResult, SearchResultResponse.class);
-        } catch (JsonProcessingException e) {
-            log.error("Exception happened in parsing query param ", e);
-        }
+            SearchResultResponse response = objectMapper.convertValue(searchResult, SearchResultResponse.class);
 
-        if (null != response) {
             log.info("Total no. of cases retrieved {}", response.getTotal());
             return response.getCases();
+        } catch (JsonProcessingException e) {
+            log.error("Exception happened in parsing query param ", e);
+            return Collections.emptyList();
         }
-        return Collections.emptyList();
     }
-
 
     private QueryParam buildCcdQueryParam() {
         // All cases with nextHearingDate in 5 days
@@ -119,11 +109,11 @@ public class PrepareHearingBundleService {
         );
 
         // Hearing state(s)
-        StateFilter stateFilter = StateFilter.builder().should(List.of(
-            Should.builder().match(Match.builder().state(State.JUDICIAL_REVIEW.getValue()).build()).build(),
-            Should.builder().match(Match.builder().state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue()).build()).build(),
-            Should.builder().match(Match.builder().state(State.DECISION_OUTCOME.getValue()).build()).build()
-        )).build();
+        StateFilter stateFilter = ESQueryUtils.getFilterForStates(
+            List.of(State.JUDICIAL_REVIEW,
+                    State.PREPARE_FOR_HEARING_CONDUCT_HEARING,
+                    State.DECISION_OUTCOME));
+
         Must mustFilter = Must.builder().stateFilter(stateFilter).build();
 
         Bool finalFilter = Bool.builder().should(shoulds).minimumShouldMatch(2).must(mustFilter).build();

@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
-import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
+import uk.gov.hmcts.reform.prl.mapper.ESQueryObjectMapper;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.List;
@@ -36,7 +36,7 @@ class PrepareHearingBundleServiceTest {
     private static final String S2S_TOKEN = "s2sToken";
 
     @Spy
-    private ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
+    private ObjectMapper objectMapper = ESQueryObjectMapper.getObjectMapper();
 
     @Mock
     private SystemUserService systemUserService;
