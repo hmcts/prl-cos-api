@@ -7,6 +7,7 @@ import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -38,9 +39,13 @@ import java.util.stream.Collectors;
 import javax.json.JsonObject;
 
 import static org.bouncycastle.cert.ocsp.OCSPResp.SUCCESSFUL;
+import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -537,18 +542,6 @@ public class SendgridServiceTest {
         combinedMap.put("disposition", "attachment");
         combinedMap.put("specialNote", "Yes");
 
-        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-        String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
-
-        EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder()
-            .emailAddress("test@email.com")
-            .servedParty(SERVED_PARTY_APPLICANT_SOLICITOR)
-            .docs(documentList.stream().map(s -> element(s)).collect(Collectors.toList()))
-            .attachedDocs(String.join(
-                ",", documentList.stream().map(a -> a.getDocumentFileName()).collect(
-                    Collectors.toList())
-            ))
-            .timeStamp(currentDate).build();
         when(launchDarklyClient.isFeatureEnabled("transfer-case-sendgrid")).thenReturn(true);
 
         Request request = new Request();
@@ -571,7 +564,6 @@ public class SendgridServiceTest {
         Response response = new Response();
         response.setBody("test response");
         response.setHeaders(headers);
-        response.setStatusCode(500);
         when(sendGrid.api(any(Request.class))).thenReturn(new Response(
             500,
             "response body",
@@ -580,7 +572,22 @@ public class SendgridServiceTest {
         sendgridService
             .sendTransferCourtEmailWithAttachments(TEST_AUTH, combinedMap, applicant.getSolicitorEmail(),
                                                    documentList);
-        assertEquals(500, response.getStatusCode());
+
+
+        assertDoesNotThrow(() ->
+                               sendgridService.sendTransferCourtEmailWithAttachments(
+                                   TEST_AUTH, combinedMap, applicant.getSolicitorEmail(), documentList
+                               )
+        );
+
+        ArgumentCaptor<Request> captor = ArgumentCaptor.forClass(Request.class);
+        verify(sendGrid, atLeastOnce()).api(captor.capture());
+
+        Request last = captor.getAllValues().getLast();
+        assertEquals(Method.POST, last.getMethod());
+        assertEquals("mail/send", last.getEndpoint());
+        assertNotNull(last.getBody());
+        assertFalse(last.getBody().isEmpty());
     }
 
     @Test
