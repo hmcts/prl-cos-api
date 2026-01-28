@@ -7,7 +7,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.request.StateFilter;
 
 import java.util.List;
 
-public class ESQueryUtils {
+public class EsQueryUtils {
 
     public static StateFilter getFilterForStates(List<State> states) {
         return StateFilter.builder()

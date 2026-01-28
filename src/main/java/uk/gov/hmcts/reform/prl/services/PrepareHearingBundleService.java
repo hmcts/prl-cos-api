@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.mapper.ESQueryObjectMapper;
+import uk.gov.hmcts.reform.prl.mapper.EsQueryObjectMapper;
 import uk.gov.hmcts.reform.prl.models.SearchResultResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Bool;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Match;
@@ -44,7 +44,7 @@ public class PrepareHearingBundleService {
     private final CoreCaseDataApi coreCaseDataApi;
     private final AllTabServiceImpl allTabService;
 
-    private final ObjectMapper objectMapper = ESQueryObjectMapper.getObjectMapper();
+    private final ObjectMapper objectMapper = EsQueryObjectMapper.getObjectMapper();
 
     public void searchForHearingsIn5DaysAndCreateTasks() {
 
@@ -109,7 +109,7 @@ public class PrepareHearingBundleService {
         );
 
         // Hearing state(s)
-        StateFilter stateFilter = ESQueryUtils.getFilterForStates(
+        StateFilter stateFilter = EsQueryUtils.getFilterForStates(
             List.of(State.JUDICIAL_REVIEW,
                     State.PREPARE_FOR_HEARING_CONDUCT_HEARING,
                     State.DECISION_OUTCOME));

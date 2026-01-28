@@ -7,9 +7,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-public class ESQueryObjectMapper {
+public class EsQueryObjectMapper {
 
-    private ESQueryObjectMapper() {
+    private EsQueryObjectMapper() {
         throw new IllegalStateException("Utility class");
     }
 
