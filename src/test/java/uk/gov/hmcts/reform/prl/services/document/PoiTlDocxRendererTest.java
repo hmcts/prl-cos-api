@@ -122,6 +122,16 @@ class PoiTlDocxRendererTest {
             assertThat(allTextStr).contains("CD34E56789");
         }
     }
+
+    @Test
+    void shouldThrowRuntimeExceptionOnInvalidTemplate() {
+        PoiTlDocxRenderer renderer = new PoiTlDocxRenderer();
+        byte[] invalidBytes = new byte[] {0, 1, 2, 3, 4};
+        Map<String, Object> data = new HashMap<>();
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> renderer.render(invalidBytes, data))
+            .isInstanceOf(RuntimeException.class)
+            .hasMessageContaining("poi-tl rendering failed");
+    }
 }
 
 
