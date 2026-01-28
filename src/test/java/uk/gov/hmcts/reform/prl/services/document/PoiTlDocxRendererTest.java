@@ -2,8 +2,8 @@ package uk.gov.hmcts.reform.prl.services.document;
 
 import com.deepoove.poi.XWPFTemplate;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
-
 import org.junit.jupiter.api.Test;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
