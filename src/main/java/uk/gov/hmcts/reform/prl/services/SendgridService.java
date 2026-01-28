@@ -176,7 +176,6 @@ public class SendgridService {
                 }
                 if (HttpStatus.valueOf(response.getStatusCode()).isError()) {
                     log.error("Notification to parties failed for CASE ID: {}", emailProps.get(CASE_NUMBER));
-                    throw new IOException("Failed to send transfer case email");
                 }
             } catch (IOException ex) {
                 log.error("Notification to parties failed");
