@@ -368,29 +368,28 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testPopulatePreviewOrderWithError() throws Exception {
+    public void testPopulatePreviewOrder_CustomOrderTryCatch() throws Exception {
+        // Simulate normal custom order flow
+        when(customOrderService.renderUploadedCustomOrderAndStoreOnManageOrders(any(), any(), any(), any(), any(), any()))
+            .thenReturn(new HashMap<>());
         CaseData expectedCaseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().c21OrderOptions(C21OrderOptionsEnum.c21other).build())
             .id(12345L)
-            .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.justicesLegalAdviser).build())
-            .uploadOrderDoc(Document.builder().build())
-            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .fl401FamilymanCaseNumber("familyman12345")
+            .courtName("testCourt")
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.noticeOfProceedings)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
+            .isSdoSelected(No)
             .dateOrderMade(LocalDate.now())
+            .uploadOrderDoc(Document.builder().build())
             .build();
 
         ObjectMapper objectMapper1 = new ObjectMapper();
         objectMapper1.findAndRegisterModules();
-
         Map<String, Object> stringObjectMap = expectedCaseData.toMap(objectMapper1);
-
-        CaseData caseData = CaseData.builder()
-            .manageOrders(ManageOrders.builder().build())
-            .previewOrderDoc(Document.builder()
-                                 .documentUrl(generatedDocumentInfo.getUrl())
-                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                 .documentHash(generatedDocumentInfo.getHashToken())
-                                 .documentFileName("c21DraftFilename")
-                                 .build())
-            .build();
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -400,10 +399,19 @@ public class ManageOrdersControllerTest {
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(expectedCaseData);
-        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
             .populatePreviewOrderWhenOrderUploaded(authToken,s2sToken, PrlAppsConstants.ENGLISH, callbackRequest);
         assertNotNull(callbackResponse);
+        verify(customOrderService, times(1)).renderUploadedCustomOrderAndStoreOnManageOrders(any(), any(), any(), any(), any(), any());
+
+        // Simulate exception in customOrderService
+        when(customOrderService.renderUploadedCustomOrderAndStoreOnManageOrders(any(), any(), any(), any(), any(), any()))
+            .thenThrow(new RuntimeException("Simulated error"));
+        callbackResponse = manageOrdersController
+            .populatePreviewOrderWhenOrderUploaded(authToken,s2sToken, PrlAppsConstants.ENGLISH, callbackRequest);
+        assertNotNull(callbackResponse);
+        assertThat(callbackResponse.getErrors()).isNotEmpty();
+        assertThat(callbackResponse.getErrors().get(0)).contains("Simulated error");
     }
 
     @Test
