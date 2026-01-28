@@ -84,6 +84,44 @@ class PoiTlDocxRendererTest {
             assertThat(allTextStr).contains("AB12C34567");
         }
     }
+
+    @Test
+    void shouldRenderUsingPoiTlDocxRenderer() throws Exception {
+        byte[] templateBytes;
+        try (InputStream in = getClass().getResourceAsStream("/templates/Order7.6_poitl_POC.docx")) {
+            assertThat(in).isNotNull();
+            templateBytes = in.readAllBytes();
+        }
+        Map<String, Object> data = new HashMap<>();
+        data.put("caseNumber", "CD34E56789");
+        data.put("courtName", "Test Family Court");
+        PoiTlDocxRenderer renderer = new PoiTlDocxRenderer();
+        byte[] outBytes = renderer.render(templateBytes, data);
+        try (XWPFDocument doc = new XWPFDocument(new ByteArrayInputStream(outBytes))) {
+            StringBuilder allText = new StringBuilder();
+            doc.getParagraphs().forEach(p -> allText.append(p.getText()).append("\n"));
+            doc.getTables().forEach(table ->
+                table.getRows().forEach(row ->
+                    row.getTableCells().forEach(cell ->
+                        allText.append(cell.getText()).append("\n")
+                    )
+                )
+            );
+            if (doc.getHeaderList() != null) {
+                doc.getHeaderList().forEach(header ->
+                    header.getParagraphs().forEach(p -> allText.append(p.getText()).append("\n"))
+                );
+            }
+            if (doc.getFooterList() != null) {
+                doc.getFooterList().forEach(footer ->
+                    footer.getParagraphs().forEach(p -> allText.append(p.getText()).append("\n"))
+                );
+            }
+            String allTextStr = allText.toString();
+            assertThat(allTextStr).contains("Test Family Court");
+            assertThat(allTextStr).contains("CD34E56789");
+        }
+    }
 }
 
 
