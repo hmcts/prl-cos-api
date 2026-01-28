@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.prl.exception.InvalidResourceException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.document.PoiTlDocxRenderer;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
