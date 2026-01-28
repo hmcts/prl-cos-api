@@ -10,10 +10,8 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.document.PoiTlDocxRenderer;
-
 import java.util.HashMap;
 import java.util.Map;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -21,7 +19,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -69,16 +66,17 @@ public class CustomOrderServiceTest {
         doNothing().when(hearingDataService).populatePartiesAndSolicitorsNames(any(), any());
         when(poiTlDocxRenderer.render(eq(templateBytes), any())).thenReturn(filledBytes);
         // Mock Document.Links and Document.Link
-        uk.gov.hmcts.reform.ccd.document.am.model.Document.Links links = mock(uk.gov.hmcts.reform.ccd.document.am.model.Document.Links.class);
-        uk.gov.hmcts.reform.ccd.document.am.model.Document.Link selfLink = mock(uk.gov.hmcts.reform.ccd.document.am.model.Document.Link.class);
-        uk.gov.hmcts.reform.ccd.document.am.model.Document.Link binaryLink = mock(uk.gov.hmcts.reform.ccd.document.am.model.Document.Link.class);
-        when(links.self).thenReturn(selfLink);
-        when(links.binary).thenReturn(binaryLink);
-        when(selfLink.href).thenReturn("http://self");
-        when(binaryLink.href).thenReturn("http://binary");
-        uk.gov.hmcts.reform.ccd.document.am.model.Document uploadedDoc = mock(uk.gov.hmcts.reform.ccd.document.am.model.Document.class);
-        when(uploadedDoc.links).thenReturn(links);
-        when(uploadedDoc.originalDocumentName).thenReturn("filled.docx");
+        uk.gov.hmcts.reform.ccd.document.am.model.Document.Links links = new uk.gov.hmcts.reform.ccd.document.am.model.Document.Links();
+        uk.gov.hmcts.reform.ccd.document.am.model.Document.Link selfLink = new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
+        uk.gov.hmcts.reform.ccd.document.am.model.Document.Link binaryLink = new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
+        selfLink.href = "http://self";
+
+        binaryLink.href = "http://binary";
+        links.self = selfLink;
+        links.binary = binaryLink;
+        uk.gov.hmcts.reform.ccd.document.am.model.Document uploadedDoc = uk.gov.hmcts.reform.ccd.document.am.model.Document.builder().build();
+        uploadedDoc.links = links;
+        uploadedDoc.originalDocumentName = "filled.docx";
         String authorisation = "auth";
         when(uploadService.uploadDocument(eq(filledBytes), any(), any(), eq(authorisation))).thenReturn(uploadedDoc);
         doReturn(templateBytes).when(spyCustomOrderService).downloadFromBinaryUrl(any(), any(), any());
