@@ -81,6 +81,7 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -122,6 +123,8 @@ import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.ADDRE
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.ADDRESS_MISSED_FOR_RESPONDENT_AND_OTHER_PARTIES;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.APPLICANTS;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CA_ADDRESS_MISSED_FOR_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIDENTIAL_CHECK_FAILED;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIDENTIALITY_CONFIRMATION_HEADER_PERSONAL;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIRMATION_HEADER_NON_PERSONAL;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.COURT;
@@ -457,6 +460,108 @@ public class ServiceOfApplicationServiceTest {
         assertEquals(RETURNED_TO_ADMIN_HEADER, confirmationHeader);
 
 
+    }
+
+    @Test
+    public void testRejectPacksWithConfidentialDetailsAddsRejectionReasonsToCaseDataMap() throws Exception {
+        // Given
+        final List<Element<ConfidentialCheckFailed>> confidentialCheckFailed = wrapElements(
+            ConfidentialCheckFailed.builder()
+                .confidentialityCheckRejectReason("pack contain confidential info")
+                .build()
+        );
+
+        final CaseData caseData = CaseData.builder()
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .confidentialCheckFailed(confidentialCheckFailed)
+                                      .build())
+            .build();
+
+        final Map<String, Object> caseDataMap = new HashMap<>();
+
+        // When
+        final Method rejectMethod = ServiceOfApplicationService.class.getDeclaredMethod(
+            "rejectPacksWithConfidentialDetails",
+            CaseData.class,
+            Map.class
+        );
+        rejectMethod.setAccessible(true);
+
+        @SuppressWarnings("unchecked")
+        final ResponseEntity<SubmittedCallbackResponse> response =
+            (ResponseEntity<SubmittedCallbackResponse>) rejectMethod.invoke(serviceOfApplicationService, caseData, caseDataMap);
+
+        // Then
+        assertNotNull(response);
+        assertEquals(RETURNED_TO_ADMIN_HEADER, Objects.requireNonNull(response.getBody()).getConfirmationHeader());
+        assertEquals(CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX, response.getBody().getConfirmationBody());
+
+        assertNotNull(caseDataMap.get(CONFIDENTIAL_CHECK_FAILED));
+        assertEquals(confidentialCheckFailed, caseDataMap.get(CONFIDENTIAL_CHECK_FAILED));
+        // method copies into a new ArrayList, so it should not be the same instance
+        assertFalse(confidentialCheckFailed == caseDataMap.get(CONFIDENTIAL_CHECK_FAILED));
+    }
+
+    @Test
+    public void testRejectPacksWithConfidentialDetailsDoesNotAddRejectionReasonsWhenListIsEmpty() throws Exception {
+        // Given
+        final CaseData caseData = CaseData.builder()
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .confidentialCheckFailed(Collections.emptyList())
+                                      .build())
+            .build();
+
+        final Map<String, Object> caseDataMap = new HashMap<>();
+
+        // When
+        final Method rejectMethod = ServiceOfApplicationService.class.getDeclaredMethod(
+            "rejectPacksWithConfidentialDetails",
+            CaseData.class,
+            Map.class
+        );
+        rejectMethod.setAccessible(true);
+
+        @SuppressWarnings("unchecked")
+        final ResponseEntity<SubmittedCallbackResponse> response =
+            (ResponseEntity<SubmittedCallbackResponse>) rejectMethod.invoke(serviceOfApplicationService, caseData, caseDataMap);
+
+        // Then
+        assertNotNull(response);
+        assertEquals(RETURNED_TO_ADMIN_HEADER, Objects.requireNonNull(response.getBody()).getConfirmationHeader());
+        assertEquals(CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX, response.getBody().getConfirmationBody());
+
+        assertFalse(caseDataMap.containsKey(CONFIDENTIAL_CHECK_FAILED));
+    }
+
+    @Test
+    public void testRejectPacksWithConfidentialDetailsDoesNotAddRejectionReasonsWhenListIsNull() throws Exception {
+        // Given
+        final CaseData caseData = CaseData.builder()
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .confidentialCheckFailed(null)
+                                      .build())
+            .build();
+
+        final Map<String, Object> caseDataMap = new HashMap<>();
+
+        // When
+        final Method rejectMethod = ServiceOfApplicationService.class.getDeclaredMethod(
+            "rejectPacksWithConfidentialDetails",
+            CaseData.class,
+            Map.class
+        );
+        rejectMethod.setAccessible(true);
+
+        @SuppressWarnings("unchecked")
+        final ResponseEntity<SubmittedCallbackResponse> response =
+            (ResponseEntity<SubmittedCallbackResponse>) rejectMethod.invoke(serviceOfApplicationService, caseData, caseDataMap);
+
+        // Then
+        assertNotNull(response);
+        assertEquals(RETURNED_TO_ADMIN_HEADER, Objects.requireNonNull(response.getBody()).getConfirmationHeader());
+        assertEquals(CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX, response.getBody().getConfirmationBody());
+
+        assertFalse(caseDataMap.containsKey(CONFIDENTIAL_CHECK_FAILED));
     }
 
     @Test
