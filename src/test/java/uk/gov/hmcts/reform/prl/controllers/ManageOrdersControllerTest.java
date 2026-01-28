@@ -4140,4 +4140,39 @@ public class ManageOrdersControllerTest {
 
     }
 
+    @Test
+    public void testPrepopulateCaseDetails_withProhibitedOrderErrors() {
+        // Arrange
+        Map<String, Object> caseDataMap = new HashMap<>();
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails =
+            uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().data(caseDataMap).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        CaseData caseData = CaseData.builder().build();
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
+
+        // Mock static method
+        List<String> errorList = new ArrayList<>();
+        errorList.add("Prohibited order error");
+        Mockito.mockStatic(uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.class)
+            .when(() -> uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getErrorsForOrdersProhibitedForC100FL401(
+                any(), any(), any(), any()))
+            .thenAnswer(invocation -> {
+                List<String> errors = invocation.getArgument(2);
+                errors.add("Prohibited order error");
+                return true;
+            });
+
+        // Act
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.prepopulateCaseDetails(
+            "auth", "s2s", null, callbackRequest);
+
+        // Assert
+        assertNotNull(response);
+        assertNotNull(response.getErrors());
+        assertEquals("Prohibited order error", response.getErrors().get(0));
+    }
+
+
 }
