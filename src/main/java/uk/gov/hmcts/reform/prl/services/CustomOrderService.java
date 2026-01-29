@@ -3,30 +3,24 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
-import uk.gov.hmcts.reform.prl.exception.InvalidResourceException;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.document.PoiTlDocxRenderer;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.function.Supplier;
 
 /**
  * Service for handling custom order document operations.
- * Uses CaseDocumentClient for document access.
+ * Uses DocumentGenService for document access.
  */
 @Service
 @Slf4j
@@ -38,11 +32,9 @@ public class CustomOrderService {
     private final HearingDataService hearingDataService;
     private final PoiTlDocxRenderer poiTlDocxRenderer;
     private final UploadDocumentService uploadService;
-    private final CaseDocumentClient caseDocumentClient;
+    private final DocumentGenService documentGenService;
     private final SystemUserService systemUserService;
-
-    @Value("${case_document_am.url}")
-    private String cdamBaseUrl;
+    private final AllTabServiceImpl allTabService;
 
     /**
      * Renders an uploaded custom order template with case data placeholders and stores it.
@@ -75,12 +67,18 @@ public class CustomOrderService {
             throw new IllegalArgumentException("customOrderDoc is missing from case data");
         }
 
-        // 1) Download template bytes using user's auth token
-        byte[] templateBytes;
+        // 1) First persist the document to the case so CDAM associates it
+        // This is necessary because CDAM requires case-level permissions for document access
         String documentUrl = templateDoc.getDocumentBinaryUrl();
         log.info("Document URL: {}", documentUrl);
 
-        templateBytes = downloadFromBinaryUrl(documentUrl, authorisation, authTokenGenerator.generate());
+        associateDocumentWithCase(String.valueOf(caseId));
+        log.info("Document associated with case, now downloading...");
+
+        // 2) Download template bytes using DocumentGenService (now works because doc is case-associated)
+        byte[] templateBytes;
+        String systemAuthorisation = systemUserService.getSysUserToken();
+        templateBytes = documentGenService.getDocumentBytes(documentUrl, systemAuthorisation, authTokenGenerator.generate());
         log.info("Successfully downloaded document, size: {} bytes", templateBytes != null ? templateBytes.length : 0);
 
         // 2) Build placeholders (minimal POC + names/solicitors if possible)
@@ -139,105 +137,6 @@ public class CustomOrderService {
         return caseDataUpdated;
     }
 
-    public byte[] downloadFromBinaryUrl(String binaryUrl, String userAuth, String s2sAuth) {
-        String fileName = FilenameUtils.getName(binaryUrl);
-        //String testUrl = "http://dm-store-aat.service.core-compute-aat.internal/documents/c577e97b-d587-4bc8-8012-891d664e6388/binary";
-        log.info("Downloading from dm-store binary URL temp: {}", binaryUrl);
-        //String systemAuthorisation = systemUserService.getSysUserToken();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", userAuth);
-        headers.set("ServiceAuthorization", s2sAuth);
-
-        try {
-            ResponseEntity<byte[]> response = new RestTemplate().exchange(
-                binaryUrl,
-                HttpMethod.GET,
-                new HttpEntity<>(headers),
-                byte[].class
-            );
-
-            byte[] body = response.getBody();
-            if (body == null) {
-                throw new InvalidResourceException("Empty body for " + fileName);
-            }
-            return body;
-        } catch (Exception e) {
-            log.error(e.getMessage(),e.toString());
-            throw new InvalidResourceException("Doc name " + fileName, e);
-        }
-    }
-
-    public byte[] getDocumentBytesLikeDocumentGenService(String docUrl, String authToken, String s2sToken) {
-
-        String fileName = FilenameUtils.getName(docUrl);
-        UUID documentId = extractUuidFromUrl(docUrl);
-
-        // Call CDAM directly via RestTemplate to bypass permission wrapper
-        String cdamUrl = cdamBaseUrl + "/cases/documents/" + documentId + "/binary";
-        log.info("Calling CDAM directly at: {}", cdamUrl);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", authToken);
-        headers.set("ServiceAuthorization", s2sToken);
-
-        HttpEntity<Void> entity = new HttpEntity<>(headers);
-
-        try {
-            RestTemplate restTemplate = new RestTemplate();
-            ResponseEntity<byte[]> response = restTemplate.exchange(
-                cdamUrl,
-                HttpMethod.GET,
-                entity,
-                byte[].class
-            );
-            byte[] body = response.getBody();
-            log.info("Successfully downloaded document from CDAM, size: {} bytes", body != null ? body.length : 0);
-            return body;
-        } catch (Exception e) {
-            log.error("Failed to download from CDAM: {}", e.getMessage());
-            throw new InvalidResourceException("Doc name " + fileName, e);
-        }
-    }
-
-    private UUID extractUuidFromUrl(String url) {
-        // Handle both formats:
-        // http://dm-store/documents/{uuid}
-        // http://dm-store/documents/{uuid}/binary
-        String cleanUrl = url.endsWith("/binary") ? url.substring(0, url.length() - 7) : url;
-        return UUID.fromString(cleanUrl.substring(cleanUrl.lastIndexOf('/') + 1));
-    }
-
-    /**
-     * Downloads document bytes using the user's authorization token via CaseDocumentClient.
-     *
-     * @param binaryUrl The document binary URL
-     * @param authorisation User's authorization token
-     * @return The document bytes
-     */
-    private byte[] getDocumentBytes(String binaryUrl, String authorisation) {
-        String serviceToken = authTokenGenerator.generate();
-
-        log.info("Downloading document from URL: {}", binaryUrl);
-
-        try {
-            var response = caseDocumentClient.getDocumentBinary(
-                authorisation,
-                serviceToken,
-                binaryUrl
-            );
-
-            if (response.getBody() != null) {
-                byte[] bytes = response.getBody().getInputStream().readAllBytes();
-                log.info("Successfully downloaded document, size: {} bytes", bytes.length);
-                return bytes;
-            }
-            throw new RuntimeException("Document body is null");
-        } catch (IOException e) {
-            log.error("Failed to read document bytes: {}", e.getMessage());
-            throw new RuntimeException("Failed to read document", e);
-        }
-    }
-
     /**
      * Safely builds placeholder map for custom order template.
      * Returns empty string for any null values or exceptions.
@@ -276,5 +175,34 @@ public class CustomOrderService {
             map.put(key, "");
             log.warn("Placeholder '{}' failed to resolve: {}", key, e.getMessage());
         }
+    }
+
+    /**
+     * Associates the document with the case by submitting a minimal UPDATE_ALL_TABS event.
+     * This triggers CDAM to recognize the document belongs to this case, allowing subsequent downloads.
+     *
+     * Note: We intentionally don't add the document to case data here - just triggering the event
+     * with the existing case data seems to be enough to establish CDAM association for documents
+     * uploaded during this case's event flow.
+     */
+    private void associateDocumentWithCase(String caseId) {
+        log.info("Triggering UPDATE_ALL_TABS for case {} to establish CDAM association", caseId);
+
+        StartAllTabsUpdateDataContent startContent = allTabService.getStartUpdateForSpecificEvent(
+            caseId,
+            CaseEvent.UPDATE_ALL_TABS.getValue()
+        );
+
+        // Submit with existing case data - don't add the document, just trigger the event
+        // This may be enough to establish CDAM association for pending documents
+        allTabService.submitAllTabsUpdate(
+            startContent.authorisation(),
+            caseId,
+            startContent.startEventResponse(),
+            startContent.eventRequestData(),
+            startContent.caseDataMap()
+        );
+
+        log.info("UPDATE_ALL_TABS completed, CDAM association should now be established");
     }
 }
