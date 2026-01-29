@@ -7,6 +7,7 @@ import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -38,9 +39,13 @@ import java.util.stream.Collectors;
 import javax.json.JsonObject;
 
 import static org.bouncycastle.cert.ocsp.OCSPResp.SUCCESSFUL;
+import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -537,24 +542,8 @@ public class SendgridServiceTest {
         combinedMap.put("disposition", "attachment");
         combinedMap.put("specialNote", "Yes");
 
-        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-        String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
-
-        EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder()
-            .emailAddress("test@email.com")
-            .servedParty(SERVED_PARTY_APPLICANT_SOLICITOR)
-            .docs(documentList.stream().map(s -> element(s)).collect(Collectors.toList()))
-            .attachedDocs(String.join(
-                ",", documentList.stream().map(a -> a.getDocumentFileName()).collect(
-                    Collectors.toList())
-            ))
-            .timeStamp(currentDate).build();
         when(launchDarklyClient.isFeatureEnabled("transfer-case-sendgrid")).thenReturn(true);
-
-        Request request = new Request();
-        request.setMethod(Method.POST);
-        request.setEndpoint("mail/send");
-        request.setBody("test body");
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
 
         byte[] biteData = "test bytes".getBytes();
         for (Document d : documentList) {
@@ -564,23 +553,24 @@ public class SendgridServiceTest {
                 s2sToken
             )).thenReturn(biteData);
         }
-        final Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "test auth");
-        headers.put("Content-Type", "mail/send");
-        when(authTokenGenerator.generate()).thenReturn(s2sToken);
-        Response response = new Response();
-        response.setBody("test response");
-        response.setHeaders(headers);
-        response.setStatusCode(500);
-        when(sendGrid.api(any(Request.class))).thenReturn(new Response(
-            500,
-            "response body",
-            Map.of()
-        ));
+
+        Response mockResponse = new Response();
+        mockResponse.setStatusCode(500);
+        mockResponse.setBody("Internal Server Error");
+        mockResponse.setHeaders(new HashMap<>());
+        when(sendGrid.api(any(Request.class))).thenReturn(mockResponse);
+
         sendgridService
             .sendTransferCourtEmailWithAttachments(TEST_AUTH, combinedMap, applicant.getSolicitorEmail(),
                                                    documentList);
-        assertEquals(500, response.getStatusCode());
+
+        ArgumentCaptor<Request> captor = ArgumentCaptor.forClass(Request.class);
+        verify(sendGrid, times(1)).api(captor.capture());
+
+        Request sentRequest = captor.getValue();
+        assertEquals(Method.POST, sentRequest.getMethod());
+        assertEquals("mail/send", sentRequest.getEndpoint());
+        assertNotNull(sentRequest.getBody());
     }
 
     @Test
@@ -631,49 +621,16 @@ public class SendgridServiceTest {
         combinedMap.put("disposition", "attachment");
         combinedMap.put("specialNote", "Yes");
 
-        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-        String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
-
-        EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder()
-            .emailAddress("test@email.com")
-            .servedParty(SERVED_PARTY_APPLICANT_SOLICITOR)
-            .docs(documentList.stream().map(s -> element(s)).collect(Collectors.toList()))
-            .attachedDocs(String.join(
-                ",", documentList.stream().map(a -> a.getDocumentFileName()).collect(
-                    Collectors.toList())
-            ))
-            .timeStamp(currentDate).build();
         when(launchDarklyClient.isFeatureEnabled("transfer-case-sendgrid")).thenReturn(true);
-
-        Request request = new Request();
-        request.setMethod(Method.POST);
-        request.setEndpoint("mail/send");
-        request.setBody("test body");
-
-        byte[] biteData = "test bytes".getBytes();
-        for (Document d : documentList) {
-            when(documentGenService.getDocumentBytes(
-                d.getDocumentUrl(),
-                TEST_AUTH,
-                s2sToken
-            )).thenReturn(biteData);
-        }
-        final Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "test auth");
-        headers.put("Content-Type", "mail/send");
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
-        Response response = new Response();
-        response.setBody("test response");
-        response.setHeaders(headers);
-        response.setStatusCode(SUCCESSFUL);
-        when(sendGrid.api(any(Request.class))).thenReturn(new Response(
-            200,
-            "response body",
-            Map.of()
-        ));
-        sendgridService
-            .sendTransferCourtEmailWithAttachments(TEST_AUTH, combinedMap, applicant.getSolicitorEmail(),
-                                                   documentList);
-        assertEquals(0,  response.getStatusCode());
+        when(documentGenService.getDocumentBytes(any(), any(), any())).thenReturn("bytes".getBytes());
+
+        Response mockSendGridResponse = new Response();
+        mockSendGridResponse.setStatusCode(200);
+        when(sendGrid.api(any(Request.class))).thenReturn(mockSendGridResponse);
+
+        sendgridService.sendTransferCourtEmailWithAttachments(TEST_AUTH, combinedMap, applicant.getSolicitorEmail(), documentList);
+
+        verify(sendGrid, times(1)).api(any(Request.class));
     }
 }
