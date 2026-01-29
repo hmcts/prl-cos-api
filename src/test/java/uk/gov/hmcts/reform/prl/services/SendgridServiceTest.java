@@ -582,8 +582,8 @@ public class SendgridServiceTest {
         assertNotNull(sentRequest.getBody());
 
         assertTrue(appender.getEvents().stream().anyMatch(
-            e -> e.getFormattedMessage().contains("Notification to parties failed for CASE ID: " +
-                                                  combinedMap.get("caseNumber"))
+            e -> e.getFormattedMessage().contains("Notification to parties failed for CASE ID: "
+                                                      + combinedMap.get("caseNumber"))
             )
         );
 
