@@ -77,6 +77,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.TaskUtils;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -86,6 +87,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Predicate;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -4068,12 +4070,15 @@ public class ManageOrdersControllerTest {
                              .build())
             .build();
 
-        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
 
-        assertExpectedException(() -> {
-                                    manageOrdersController
-                                        .validateRespondentAndOtherPersonAddress(authToken, s2sToken, callbackRequest); },
-                                RuntimeException.class, "Invalid Client");
+        assertExpectedException(
+            () -> {
+                manageOrdersController
+                    .validateRespondentAndOtherPersonAddress(authToken, s2sToken, callbackRequest);
+            },
+            RuntimeException.class, "Invalid Client"
+        );
 
     }
 
