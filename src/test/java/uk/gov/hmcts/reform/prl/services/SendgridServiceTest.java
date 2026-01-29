@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import ch.qos.logback.classic.Logger;
 import com.google.common.collect.ImmutableMap;
 import com.sendgrid.Method;
 import com.sendgrid.Request;
@@ -11,10 +12,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.config.SendgridEmailTemplatesConfig;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.controllers.testingsupport.TestLogAppender;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -42,6 +45,7 @@ import static org.bouncycastle.cert.ocsp.OCSPResp.SUCCESSFUL;
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
@@ -496,6 +500,11 @@ public class SendgridServiceTest {
 
     @Test
     public void testTransferCourtEmailWithAttachmentsReturnError() throws Exception {
+        ch.qos.logback.classic.Logger logger = (Logger) LoggerFactory.getLogger(SendgridService.class);
+        TestLogAppender appender = new TestLogAppender();
+        appender.start();
+        logger.addAppender(appender);
+
         PartyDetails applicant = PartyDetails.builder()
             .solicitorEmail("test@gmail.com")
             .representativeLastName("LastName")
@@ -571,10 +580,23 @@ public class SendgridServiceTest {
         assertEquals(Method.POST, sentRequest.getMethod());
         assertEquals("mail/send", sentRequest.getEndpoint());
         assertNotNull(sentRequest.getBody());
+
+        assertTrue(appender.getEvents().stream().anyMatch(
+            e -> e.getFormattedMessage().contains("Notification to parties failed for CASE ID: " +
+                                                  combinedMap.get("caseNumber"))
+            )
+        );
+
+        logger.detachAppender(appender);
     }
 
     @Test
     public void testTransferCourtEmailWithAttachmentsReturnSuccess() throws Exception {
+        ch.qos.logback.classic.Logger logger = (Logger) LoggerFactory.getLogger(SendgridService.class);
+        TestLogAppender appender = new TestLogAppender();
+        appender.start();
+        logger.addAppender(appender);
+
         PartyDetails applicant = PartyDetails.builder()
             .solicitorEmail("test@gmail.com")
             .representativeLastName("LastName")
@@ -632,5 +654,11 @@ public class SendgridServiceTest {
         sendgridService.sendTransferCourtEmailWithAttachments(TEST_AUTH, combinedMap, applicant.getSolicitorEmail(), documentList);
 
         verify(sendGrid, times(1)).api(any(Request.class));
+        assertTrue(appender.getEvents().stream().anyMatch(
+                       e -> e.getFormattedMessage().contains("Notification to party sent successfully")
+                   )
+        );
+
+        logger.detachAppender(appender);
     }
 }
