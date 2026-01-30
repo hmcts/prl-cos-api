@@ -151,7 +151,6 @@ public class CaseUtils {
     }
 
     public static String getCaseTypeOfApplication(CaseData caseData) {
-        log.info("Case ID: {} CaseTypeOfApplication = {}", caseData.getId(), caseData.getCaseTypeOfApplication());
         return caseData.getCaseTypeOfApplication() != null
             ? caseData.getCaseTypeOfApplication() : caseData.getSelectedCaseTypeID();
     }
