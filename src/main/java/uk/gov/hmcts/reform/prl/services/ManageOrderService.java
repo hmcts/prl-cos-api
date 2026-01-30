@@ -24,7 +24,6 @@ import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.ManageOrderFieldsEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
-import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.ServeOrderFieldsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -176,6 +175,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.MANAGE_ORDERS;
 import static uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab;
+import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum.noCheck;
@@ -2436,7 +2436,7 @@ public class ManageOrderService {
     private String getChildArrangementOrder(CaseData caseData) {
         return caseData.getManageOrders().getChildArrangementsOrdersToIssue()
             .stream()
-            .flatMap(element -> OrderTypeEnum.childArrangementsOrder.equals(element)
+            .flatMap(element -> childArrangementsOrder.equals(element)
                 ? Stream.of(element.getDisplayedValue() + "(" + caseData.getManageOrders()
                 .getSelectChildArrangementsOrder().getDisplayedValue() + ")")
                 : Stream.of(element.getDisplayedValue()))
