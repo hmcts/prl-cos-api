@@ -40,43 +40,44 @@ import static org.mockito.Mockito.when;
 public class CaseSummaryTabServiceTest {
 
     @InjectMocks
-    CaseSummaryTabService caseSummaryTabService;
+    private CaseSummaryTabService caseSummaryTabService;
 
     @Mock
-    AllocatedJudgeDetailsGenerator allocatedJudgeDetailsGenerator;
+    private AllocatedJudgeDetailsGenerator allocatedJudgeDetailsGenerator;
 
     @Mock
-    RefugeCaseGenerator refugeCaseGenerator;
+    private RefugeCaseGenerator refugeCaseGenerator;
 
     @Mock
-    CaseStatusGenerator caseStatusGenerator;
+    private CaseStatusGenerator caseStatusGenerator;
 
     @Mock
-    ConfidentialDetailsGenerator confidentialDetailsGenerator;
+    private ConfidentialDetailsGenerator confidentialDetailsGenerator;
 
     @Mock
-    OrderAppliedForGenerator orderAppliedForGenerator;
+    private OrderAppliedForGenerator orderAppliedForGenerator;
 
     @Mock
-    OtherProceedingsGenerator otherProceedingsGenerator;
+    private OtherProceedingsGenerator otherProceedingsGenerator;
 
     @Mock
-    SpecialArrangementsGenerator specialArrangementsGenerator;
+    private SpecialArrangementsGenerator specialArrangementsGenerator;
 
     @Mock
-    UrgencyGenerator urgencyGenerator;
+    private UrgencyGenerator urgencyGenerator;
 
     @Mock
-    AllegationOfHarmGenerator allegationOfHarmGenerator;
+    private AllegationOfHarmGenerator allegationOfHarmGenerator;
 
     @Mock
-    DateOfSubmissionGenerator dateOfSubmissionGenerator;
+    private DateOfSubmissionGenerator dateOfSubmissionGenerator;
 
     @Mock
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
     @Mock
-    CaseClosedDateGenerator caseClosedDateGenerator;
+    private CaseClosedDateGenerator caseClosedDateGenerator;
+
 
     private static final CaseData CASE_DATA = mock(CaseData.class);
     private static final CaseSummary CASE_SUMMARY0 = mock(CaseSummary.class);
@@ -90,8 +91,6 @@ public class CaseSummaryTabServiceTest {
     private static final CaseSummary CASE_SUMMARY8 = mock(CaseSummary.class);
 
     private static final CaseSummary CASE_SUMMARY9 = mock(CaseSummary.class);
-
-    private static final String[] EMPTY_ARRAY = {};
 
     @Before
     public void setUp() {
@@ -136,7 +135,7 @@ public class CaseSummaryTabServiceTest {
 
         final Map<String, Object> actual = caseSummaryTabService.updateTab(CASE_DATA);
 
-        Map<String, Object> fields = new HashMap<String, Object>();
+        Map<String, Object> fields = new HashMap<>();
         fields.put("field0", "value0");
         fields.put("fieldR", "valueR");
         fields.put("field1", "value1");

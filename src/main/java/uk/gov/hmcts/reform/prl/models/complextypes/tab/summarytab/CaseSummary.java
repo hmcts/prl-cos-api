@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.Applic
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseClosedDate;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.ConfidentialDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CourtIdentifier;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.DateOfSubmission;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.OrderAppliedFor;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.OtherProceedingEmptyTable;
@@ -30,6 +31,7 @@ public class CaseSummary implements MappableObject {
     private final CaseClosedDate caseClosedDate;
     private final ConfidentialDetails confidentialDetails;
     private final Urgency urgencyDetails;
+    private final CourtIdentifier courtIdentifier;
     private final AllegationOfHarm allegationOfHarm;
     private final AllegationOfHarmRevised allegationOfHarmRevised;
     //private final Hearings hearings;
