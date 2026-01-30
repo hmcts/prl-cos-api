@@ -5,6 +5,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.exception.MissingCaseDataFieldException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
@@ -215,12 +217,31 @@ public class AllegationOfHarmRevisedService {
 
     public Map<String, Object> getPrePopulatedChildData(CaseData caseData) {
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
-        caseData.getNewChildDetails().forEach(eachChild ->
-                                                  listItems.add(DynamicMultiselectListElement.builder()
-                                                                    .code(eachChild.getId().toString())
-                                                                    .label(eachChild.getValue().getFirstName() + " "
-                                                                               + eachChild.getValue().getLastName()).build())
-        );
+
+        if (caseData.getNewChildDetails() != null && !caseData.getNewChildDetails().isEmpty()) {
+            caseData.getNewChildDetails().forEach(child ->
+                                                      listItems.add(createListElement(
+                                                          child.getId(),
+                                                          child.getValue().getFirstName(),
+                                                          child.getValue().getLastName()
+                                                      ))
+            );
+
+        } else if (caseData.getChildren() != null && !caseData.getChildren().isEmpty()) {
+            log.info("newChildDetails does not exist for case: {}", caseData.getId());
+
+            caseData.getChildren().forEach(child ->
+                                               listItems.add(createListElement(
+                                                   child.getId(),
+                                                   child.getValue().getFirstName(),
+                                                   child.getValue().getLastName()
+                                               ))
+            );
+
+        } else {
+            throw new MissingCaseDataFieldException("newChildrenDetails & children cannot both be null or empty");
+        }
+
         Map<String, Object> caseDataMap = new HashMap<>();
 
         //Retrieve child list for Physical Abuse
@@ -332,5 +353,12 @@ public class AllegationOfHarmRevisedService {
             }
 
         }
+    }
+
+    private DynamicMultiselectListElement createListElement(UUID id, String firstName, String lastName) {
+        return DynamicMultiselectListElement.builder()
+            .code(id.toString())
+            .label(firstName + " " + lastName)
+            .build();
     }
 }
