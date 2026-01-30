@@ -40,7 +40,8 @@ public enum ManageOrderFieldsEnum {
     judgeDirectionsToAdmin("judgeDirectionsToAdmin"),
     instructionsFromJudge("instructionsFromJudge"),
     courtAdminNotes("courtAdminNotes"),
-    nameOfOrder("nameOfOrder"),
+    // nameOfOrder - removed from cleanup, needed for custom order submitted callback
+    // nameOfOrder("nameOfOrder"),
     appointedGuardianName("appointedGuardianName"),
     orderName("orderName"),
     orderType("orderType"),
