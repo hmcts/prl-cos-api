@@ -154,6 +154,9 @@ public class BaseCaseData {
 
     private String dfjArea;
 
+    @JsonProperty("isHighCourtCase")
+    private YesOrNo isHighCourtCase;
+
     @JsonProperty("TTL")
     private TTL retainAndDisposeTimeToLive;
 
