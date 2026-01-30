@@ -120,6 +120,50 @@ public class AllegationsOfHarmRevisedMapperTest {
                                                          .builder().code("test").build())).build());
         assertNotNull(allegationsOfHarmRevisedMapper.map(caseData));
     }
+
+    @Test
+    public void testWhenTypeOfAbuseIsNull() {
+
+
+        DomesticAbuseBehaviours domesticAbuseBehaviours = DomesticAbuseBehaviours.builder().typeOfAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
+            .newAbuseNatureDescription("des").newBehavioursApplicantHelpSoughtWho("sought").newBehavioursApplicantSoughtHelp(
+                YesOrNo.Yes).typeOfAbuse(null).build();
+
+        Element<DomesticAbuseBehaviours> domesticAbuseBehavioursElement = Element
+            .<DomesticAbuseBehaviours>builder().value(domesticAbuseBehaviours).build();
+
+
+        ChildAbuse childAbuse = ChildAbuse.builder().abuseNatureDescription("test").typeOfAbuse(null)
+            .build();
+
+        ChildPassportDetails childPassportDetails = ChildPassportDetails.builder().newChildHasMultiplePassports(YesOrNo.Yes)
+            .newChildPassportPossession(List
+                                            .of(NewPassportPossessionEnum.father)).newChildPassportPossessionOtherDetails(
+                "de").build();
+        CaseData caseData = CaseData.builder()
+            .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
+                                         .childPassportDetails(childPassportDetails)
+                                         .domesticBehaviours(Collections.singletonList(domesticAbuseBehavioursElement))
+                                         .newAllegationsOfHarmChildAbuseYesNo(YesOrNo.Yes)
+                                         .allChildrenAreRiskPhysicalAbuse(YesOrNo.Yes)
+                                         .allChildrenAreRiskPsychologicalAbuse(YesOrNo.Yes)
+                                         .allChildrenAreRiskEmotionalAbuse(YesOrNo.Yes)
+                                         .allChildrenAreRiskFinancialAbuse(YesOrNo.Yes)
+                                         .allChildrenAreRiskSexualAbuse(YesOrNo.Yes)
+                                         .childPhysicalAbuse(childAbuse)
+                                         .childPsychologicalAbuse(childAbuse)
+                                         .childEmotionalAbuse(childAbuse)
+                                         .childFinancialAbuse(childAbuse)
+                                         .childSexualAbuse(childAbuse)
+                                         .build()).build();
+        Mockito.lenient().when(allegationOfHarmRevisedService.getIfAllChildrenAreRisk(any(ChildAbuseEnum.class), any(AllegationOfHarmRevised.class)))
+            .thenReturn(YesOrNo.Yes);
+        Mockito.lenient().when(allegationOfHarmRevisedService.getWhichChildrenAreInRisk(any(ChildAbuseEnum.class),any(AllegationOfHarmRevised.class)))
+            .thenReturn(DynamicMultiSelectList
+                            .builder().value(List.of(DynamicMultiselectListElement
+                                                         .builder().code("test").build())).build());
+        assertNotNull(allegationsOfHarmRevisedMapper.map(caseData));
+    }
 }
 
 
