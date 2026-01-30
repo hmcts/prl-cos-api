@@ -309,7 +309,7 @@ configurations.configureEach {
 }
 
 dependencies {
-  implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.6.0'
+  implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.8.15'
   implementation group: 'org.springframework', name: 'spring-context-support', version: versions.springFramework
   annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
   implementation("org.projectlombok:lombok:${versions.lombok}")
