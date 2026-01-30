@@ -16,12 +16,14 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.exception.cafcass.exceptionhandlers.ApiError;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassCdamService;
 
 import java.net.URLConnection;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -52,10 +54,11 @@ public class CafcassDocumentManagementController {
     public <T> ResponseEntity<T> downloadDocument(@RequestHeader(AUTHORIZATION) String authorisation,
                                                   @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorisation,
                                                   @PathVariable UUID documentId) {
+        Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
         try {
-            if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
+            if (userInfo.isPresent() && Boolean.TRUE.equals(
                 authorisationService.authoriseService(serviceAuthorisation))
-                && authorisationService.getUserInfo().getRoles().contains(CAFCASS_USER_ROLE)) {
+                && userInfo.get().getRoles().contains(CAFCASS_USER_ROLE)) {
                 log.info("processing cafcass request after authorization");
                 // Fetch downstream response
                 ResponseEntity<T> downstream =

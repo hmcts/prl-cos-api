@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,11 +22,13 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassCdamService;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -61,6 +64,9 @@ public class CafcassDocumentManagementControllerIntegrationTest {
     @MockBean
     SystemUserService systemUserService;
 
+    @Mock
+    private UserInfo userInfo;
+
     @Before
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
@@ -74,12 +80,11 @@ public class CafcassDocumentManagementControllerIntegrationTest {
 
         Mockito.when(authorisationService.authoriseService(any())).thenReturn(true);
         Mockito.when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_AUTH_TOKEN);
-        Mockito.when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
 
         //create new userInfo object using its constructor with 6 arguments
         UserInfo userInfo = new UserInfo("userId", "email", "forename", "surname",
                                          "roles", List.of("caseworker-privatelaw-cafcass"));
-        Mockito.when(authorisationService.getUserInfo()).thenReturn(userInfo);
         Mockito.when(cafcassCdamService.getDocument(anyString(), anyString(), any())).thenReturn(response);
         Mockito.when(systemUserService.getSysUserToken()).thenReturn("sysUserToken");
 
@@ -100,12 +105,10 @@ public class CafcassDocumentManagementControllerIntegrationTest {
 
         Mockito.when(authorisationService.authoriseService(any())).thenReturn(true);
         Mockito.when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_AUTH_TOKEN);
-        Mockito.when(authorisationService.authoriseUser(any())).thenReturn(true);
-
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         //create new userInfo object using its constructor with 6 arguments
         UserInfo userInfo = new UserInfo("userId", "email", "forename", "surname",
                                          "roles", List.of("caseworker-privatelaw-cafcass"));
-        Mockito.when(authorisationService.getUserInfo()).thenReturn(userInfo);
         Mockito.when(cafcassCdamService.getDocument(anyString(), anyString(), any())).thenReturn(response);
         Mockito.when(systemUserService.getSysUserToken()).thenReturn("sysUserToken");
 
