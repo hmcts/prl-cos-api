@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -58,12 +59,12 @@ public class AuthorisationServiceTest {
     @Test
     public void authoriseUserTheServiceIsCalledWithValidToken() {
         when(idamClient.getUserInfo(any())).thenReturn(UserInfo.builder().uid(UUID.randomUUID().toString()).build());
-        assertTrue(authorisationService.authoriseUser("Bearer abcasda"));
+        assertThat(authorisationService.authoriseUser("Bearer abcasda")).isPresent();
     }
 
     @Test
     public void doNotAuthoriseUserWhenCalledWithInvalidToken() {
-        assertFalse(authorisationService.authoriseUser("Bearer malformed"));
+        assertThat(authorisationService.authoriseUser("Bearer malformed")).isEmpty();
     }
 
     @Test
