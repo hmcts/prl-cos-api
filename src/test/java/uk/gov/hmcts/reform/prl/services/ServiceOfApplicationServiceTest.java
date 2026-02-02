@@ -95,6 +95,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
@@ -123,6 +124,8 @@ import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.ADDRE
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.APPLICANTS;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CA_ADDRESS_MISSED_FOR_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIDENTIALITY_CONFIRMATION_HEADER_PERSONAL;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIDENTIAL_CHECK_FAILED;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIRMATION_HEADER_NON_PERSONAL;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.COURT;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.DA_ADDRESS_MISSED_FOR_RESPONDENT;
@@ -466,7 +469,7 @@ public class ServiceOfApplicationServiceTest {
             .isConfidential(YesOrNo.Yes)
             .applicationServedYesNo(YesOrNo.No)
             .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed.builder()
-                                                      .confidentialityCheckRejectReason("Some reason")
+                                                      .confidentialityCheckRejectReason("pack contain confidential info")
                                                       .build()))
             .build();
 
@@ -496,11 +499,12 @@ public class ServiceOfApplicationServiceTest {
         );
 
         // Assert
-        assertNotNull(response);
-        SubmittedCallbackResponse body = response.getBody();
-        assertNotNull(body);
-        assertEquals(RETURNED_TO_ADMIN_HEADER, body.getConfirmationHeader());
-        // Optionally, assert that the rejection reason is present in the response or case data map
+        assertEquals(RETURNED_TO_ADMIN_HEADER, Objects.requireNonNull(response.getBody()).getConfirmationHeader());
+        assertEquals(CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX, response.getBody().getConfirmationBody());
+        assertNotNull(caseDetails.get(CONFIDENTIAL_CHECK_FAILED));
+        assertEquals(serviceOfApplicationSoa.getConfidentialCheckFailed(), caseDetails.get(CONFIDENTIAL_CHECK_FAILED));
+        // method copies into a new ArrayList, so it should not be the same instance
+        assertFalse(serviceOfApplicationSoa.getConfidentialCheckFailed() == caseDetails.get(CONFIDENTIAL_CHECK_FAILED));
     }
 
     @Test
@@ -536,10 +540,10 @@ public class ServiceOfApplicationServiceTest {
         );
 
         // Assert
-        assertNotNull(response);
-        SubmittedCallbackResponse body = response.getBody();
-        assertNotNull(body);
-        assertEquals(RETURNED_TO_ADMIN_HEADER, body.getConfirmationHeader());
+        assertEquals(RETURNED_TO_ADMIN_HEADER, Objects.requireNonNull(response.getBody()).getConfirmationHeader());
+        assertEquals(CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX, response.getBody().getConfirmationBody());
+        assertTrue(caseDataMap.containsKey(CONFIDENTIAL_CHECK_FAILED));
+        assertTrue(((List<?>) caseDataMap.get(CONFIDENTIAL_CHECK_FAILED)).isEmpty());
     }
 
     @Test
@@ -575,10 +579,10 @@ public class ServiceOfApplicationServiceTest {
         );
 
         // Assert
-        assertNotNull(response);
-        SubmittedCallbackResponse body = response.getBody();
-        assertNotNull(body);
-        assertEquals(RETURNED_TO_ADMIN_HEADER, body.getConfirmationHeader());
+        assertEquals(RETURNED_TO_ADMIN_HEADER, Objects.requireNonNull(response.getBody()).getConfirmationHeader());
+        assertEquals(CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX, response.getBody().getConfirmationBody());
+        assertTrue(caseDataMap.containsKey(CONFIDENTIAL_CHECK_FAILED));
+        assertNull(caseDataMap.get(CONFIDENTIAL_CHECK_FAILED));
     }
 
     @Test
