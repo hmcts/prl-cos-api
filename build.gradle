@@ -46,7 +46,7 @@ def versions = [
   puppyCrawl                   : '8.45.1',
   reformsJavaLogging           : '6.1.9',
   sendLetterClient             : '5.1.1',
-  serenity                     : '4.2.34',
+  serenity                     : '4.3.4',
   serenityCucumber             : '4.3.4',
   serviceTokenGenerator        : '4.1.2',
   sonarPitest                  : '0.5',
