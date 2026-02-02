@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,6 +31,8 @@ public class EsQueryService {
         om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         om.enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING);
         om.disable(JsonGenerator.Feature.AUTO_CLOSE_JSON_CONTENT);
+        om.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        om.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         return om;
     }
 
