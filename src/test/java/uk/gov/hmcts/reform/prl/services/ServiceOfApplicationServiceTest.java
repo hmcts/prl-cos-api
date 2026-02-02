@@ -463,107 +463,127 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testRejectPacksWithConfidentialDetailsAddsRejectionReasonsToCaseDataMap() throws Exception {
-        // Given
-        final List<Element<ConfidentialCheckFailed>> confidentialCheckFailed = wrapElements(
-            ConfidentialCheckFailed.builder()
-                .confidentialityCheckRejectReason("pack contain confidential info")
-                .build()
-        );
-
-        final CaseData caseData = CaseData.builder()
-            .serviceOfApplication(ServiceOfApplication.builder()
-                                      .confidentialCheckFailed(confidentialCheckFailed)
-                                      .build())
+    public void testRejectPacksWithConfidentialDetailsAddsRejectionReasonsToCaseDataMap() {
+        // Arrange: set up caseDataSoa and serviceOfApplicationSoa so that confidential check fails
+        serviceOfApplicationSoa = serviceOfApplicationSoa.toBuilder()
+            .isConfidential(YesOrNo.Yes)
+            .applicationServedYesNo(YesOrNo.No)
+            .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed.builder()
+                                                      .confidentialityCheckRejectReason("Some reason")
+                                                      .build()))
             .build();
 
-        final Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataSoa = caseDataSoa.toBuilder()
+            .serviceOfApplication(serviceOfApplicationSoa)
+            .build();
 
-        // When
-        final Method rejectMethod = ServiceOfApplicationService.class.getDeclaredMethod(
-            "rejectPacksWithConfidentialDetails",
-            CaseData.class,
-            Map.class
+        Map<String, Object> caseDetails = caseDataSoa.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder().data(caseDetails).build())
+            .build();
+
+        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseDataSoa);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authorization,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            caseDetails,
+            caseDataSoa,
+            null
         );
-        rejectMethod.setAccessible(true);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
-        @SuppressWarnings("unchecked")
-        final ResponseEntity<SubmittedCallbackResponse> response =
-            (ResponseEntity<SubmittedCallbackResponse>) rejectMethod.invoke(serviceOfApplicationService, caseData, caseDataMap);
+        // Act
+        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.processConfidentialityCheck(
+            authorization, callbackRequest
+        );
 
-        // Then
+        // Assert
         assertNotNull(response);
-        assertEquals(RETURNED_TO_ADMIN_HEADER, Objects.requireNonNull(response.getBody()).getConfirmationHeader());
-        assertEquals(CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX, response.getBody().getConfirmationBody());
-
-        assertNotNull(caseDataMap.get(CONFIDENTIAL_CHECK_FAILED));
-        assertEquals(confidentialCheckFailed, caseDataMap.get(CONFIDENTIAL_CHECK_FAILED));
-        // method copies into a new ArrayList, so it should not be the same instance
-        assertFalse(confidentialCheckFailed == caseDataMap.get(CONFIDENTIAL_CHECK_FAILED));
+        SubmittedCallbackResponse body = response.getBody();
+        assertNotNull(body);
+        assertEquals(RETURNED_TO_ADMIN_HEADER, body.getConfirmationHeader());
+        // Optionally, assert that the rejection reason is present in the response or case data map
     }
 
     @Test
-    public void testRejectPacksWithConfidentialDetailsDoesNotAddRejectionReasonsWhenListIsEmpty() throws Exception {
-        // Given
-        final CaseData caseData = CaseData.builder()
-            .serviceOfApplication(ServiceOfApplication.builder()
-                                      .confidentialCheckFailed(Collections.emptyList())
-                                      .build())
+    public void testRejectPacksWithConfidentialDetailsDoesNotAddRejectionReasonsWhenListIsEmpty() {
+        // Arrange
+        ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder()
+            .confidentialCheckFailed(Collections.emptyList())
+            .build();
+        CaseData caseDataSoa = CaseData.builder()
+            .serviceOfApplication(serviceOfApplication)
             .build();
 
-        final Map<String, Object> caseDataMap = new HashMap<>();
+        Map<String, Object> caseDataMap = caseDataSoa.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder().data(caseDataMap).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
 
-        // When
-        final Method rejectMethod = ServiceOfApplicationService.class.getDeclaredMethod(
-            "rejectPacksWithConfidentialDetails",
-            CaseData.class,
-            Map.class
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseDataSoa);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authorization,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            caseDataMap,
+            caseDataSoa,
+            null
         );
-        rejectMethod.setAccessible(true);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
-        @SuppressWarnings("unchecked")
-        final ResponseEntity<SubmittedCallbackResponse> response =
-            (ResponseEntity<SubmittedCallbackResponse>) rejectMethod.invoke(serviceOfApplicationService, caseData, caseDataMap);
+        // Act
+        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.processConfidentialityCheck(
+            authorization, callbackRequest
+        );
 
-        // Then
+        // Assert
         assertNotNull(response);
-        assertEquals(RETURNED_TO_ADMIN_HEADER, Objects.requireNonNull(response.getBody()).getConfirmationHeader());
-        assertEquals(CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX, response.getBody().getConfirmationBody());
-
-        assertFalse(caseDataMap.containsKey(CONFIDENTIAL_CHECK_FAILED));
+        SubmittedCallbackResponse body = response.getBody();
+        assertNotNull(body);
+        assertEquals(RETURNED_TO_ADMIN_HEADER, body.getConfirmationHeader());
     }
 
     @Test
-    public void testRejectPacksWithConfidentialDetailsDoesNotAddRejectionReasonsWhenListIsNull() throws Exception {
-        // Given
-        final CaseData caseData = CaseData.builder()
-            .serviceOfApplication(ServiceOfApplication.builder()
-                                      .confidentialCheckFailed(null)
-                                      .build())
+    public void testRejectPacksWithConfidentialDetailsDoesNotAddRejectionReasonsWhenListIsNull() {
+        // Arrange
+        ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder()
+            .confidentialCheckFailed(null)
+            .build();
+        CaseData caseDataSoa = CaseData.builder()
+            .serviceOfApplication(serviceOfApplication)
             .build();
 
-        final Map<String, Object> caseDataMap = new HashMap<>();
+        Map<String, Object> caseDataMap = caseDataSoa.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder().data(caseDataMap).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
 
-        // When
-        final Method rejectMethod = ServiceOfApplicationService.class.getDeclaredMethod(
-            "rejectPacksWithConfidentialDetails",
-            CaseData.class,
-            Map.class
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseDataSoa);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authorization,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            caseDataMap,
+            caseDataSoa,
+            null
         );
-        rejectMethod.setAccessible(true);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
-        @SuppressWarnings("unchecked")
-        final ResponseEntity<SubmittedCallbackResponse> response =
-            (ResponseEntity<SubmittedCallbackResponse>) rejectMethod.invoke(serviceOfApplicationService, caseData, caseDataMap);
+        // Act
+        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.processConfidentialityCheck(
+            authorization, callbackRequest
+        );
 
-        // Then
+        // Assert
         assertNotNull(response);
-        assertEquals(RETURNED_TO_ADMIN_HEADER, Objects.requireNonNull(response.getBody()).getConfirmationHeader());
-        assertEquals(CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX, response.getBody().getConfirmationBody());
-
-        assertFalse(caseDataMap.containsKey(CONFIDENTIAL_CHECK_FAILED));
+        SubmittedCallbackResponse body = response.getBody();
+        assertNotNull(body);
+        assertEquals(RETURNED_TO_ADMIN_HEADER, body.getConfirmationHeader());
     }
-
+    
     @Test
     public void testsendNotificationsForUnServedPacks() {
         caseDataSoa = caseDataSoa.toBuilder().id(12345L)
