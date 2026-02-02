@@ -19,7 +19,7 @@ plugins {
   id 'org.sonarqube' version '5.1.0.4882'
   id 'org.springframework.boot' version '3.3.5'
   id 'au.com.dius.pact' version '4.2.6'
-  id 'com.github.hmcts.rse-cft-lib' version '0.19.2008'
+  id 'com.github.hmcts.rse-cft-lib' version '0.19.2017'
 }
 
 def versions = [
@@ -46,7 +46,7 @@ def versions = [
   puppyCrawl                   : '8.45.1',
   reformsJavaLogging           : '6.1.9',
   sendLetterClient             : '5.1.1',
-  serenity                     : '4.2.34',
+  serenity                     : '4.3.4',
   serenityCucumber             : '4.3.4',
   serviceTokenGenerator        : '4.1.2',
   sonarPitest                  : '0.5',
@@ -179,7 +179,7 @@ allprojects {
       dependency group: 'org.springframework.security', name: 'spring-security-crypto', version: '5.8.16'
 
       //CVE-2023-42795, CVE-2023-45648
-      dependencySet(group: 'org.apache.tomcat.embed', version: '10.1.50') {
+      dependencySet(group: 'org.apache.tomcat.embed', version: '10.1.52') {
         entry 'tomcat-embed-core'
         entry 'tomcat-embed-websocket'
       }
@@ -290,8 +290,8 @@ configurations.configureEach {
     force 'org.bouncycastle:bcpkix-jdk18on:1.83'
     force 'org.springframework.security:spring-security-rsa:1.1.5'
     force 'org.springframework.security:spring-security-crypto:5.8.16'
-    force 'ch.qos.logback:logback-classic:1.5.26'
-    force 'ch.qos.logback:logback-core:1.5.26'
+    force 'ch.qos.logback:logback-classic:1.5.27'
+    force 'ch.qos.logback:logback-core:1.5.27'
   }
 }
 
@@ -332,7 +332,7 @@ dependencies {
   implementation group: 'org.apache.httpcomponents', name: 'fluent-hc', version: versions.httpComponents
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-loadbalancer', version: versions.springCloud
   implementation group: 'org.springframework.retry', name: 'spring-retry', version: '2.0.12'
-  implementation group: 'com.github.hmcts', name: 'ccd-config-generator', version: '6.6.1'
+  implementation group: 'com.github.hmcts', name: 'ccd-config-generator', version: '6.6.2'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: versions.reformsJavaLogging
   implementation group: 'com.github.hmcts.java-logging', name: 'logging-appinsights', version: versions.reformsJavaLogging
@@ -377,8 +377,8 @@ dependencies {
   constraints{
     implementation group: 'com.warrenstrange', name: 'googleauth', version: '1.5.0'
   }
-  implementation(group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.26')
-  implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.26')
+  implementation(group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.27')
+  implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.27')
   implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version:'7.4'
   implementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.5'
   implementation group: 'com.opencsv', name: 'opencsv', version: '5.12.0', {
