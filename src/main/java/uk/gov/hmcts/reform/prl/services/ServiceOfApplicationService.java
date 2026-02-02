@@ -1011,28 +1011,18 @@ public class ServiceOfApplicationService {
                                                           List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                           List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                           List<Document> staticDocs, List<Element<PartyDetails>> respondentFl401) {
+        log.info("inside sendNotificationsDaNonPersonalRespondent");
         if (CollectionUtils.isNotEmpty(respondentFl401)) {
             String emailAddress = respondentFl401.get(0).getValue().getSolicitorEmail();
             String servedParty = respondentFl401.get(0).getValue().getLabelForDynamicList();
             List<Document> docs = new ArrayList<>();
-            boolean sendEmail = true;
-            List<Document> coverLetter = new ArrayList<>();
             Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
             dynamicData.put(SEND_GRID_TEMPLATE, SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB);
+            List<Document> packDocs = getNotificationPack(caseData, PrlAppsConstants.A, staticDocs);
             if (CaseUtils.hasLegalRepresentation(respondentFl401.get(0).getValue())) {
                 log.info("Legal rep present for respondent");
                 servedParty = respondentFl401.get(0).getValue().getRepresentativeFullName();
-            } else {
-                log.info("respondent is unrepresented");
-                coverLetter = getRe1OrRe4BasedOnWithOrWithoutNotice(caseData, authorization, respondentFl401.get(0),
-                                                                    CaseUtils.getCaseInvite(respondentFl401.get(0).getId(),
-                                                                                            caseData.getCaseInvites()));
-                sendEmail = false;
-                docs.addAll(coverLetter);
-            }
-            List<Document> packDocs = getNotificationPack(caseData, PrlAppsConstants.A, staticDocs);
-            docs.addAll(packDocs);
-            if (sendEmail) {
+                docs.addAll(packDocs);
                 sendEmailDaNonPersonalService(
                     caseData,
                     authorization,
@@ -1043,10 +1033,35 @@ public class ServiceOfApplicationService {
                     dynamicData
                 );
             } else {
-                sendPostWithAccessCodeLetterToParty(caseData,
-                                                    authorization, packDocs,
-                                                    bulkPrintDetails, respondentFl401.get(0),
-                                                    coverLetter, servedParty);
+                emailAddress = respondentFl401.get(0).getValue().getEmail();
+
+                log.info("respondent is unrepresented");
+                List<Document> coverLetter = getRe1OrRe4BasedOnWithOrWithoutNotice(caseData, authorization, respondentFl401.get(0),
+                                                                    CaseUtils.getCaseInvite(respondentFl401.get(0).getId(),
+                                                                                          caseData.getCaseInvites()));
+
+                ContactPreferences contactPreference = respondentFl401.get(0).getValue().getContactPreferences();
+
+                if (ContactPreferences.email.equals(contactPreference) && emailAddress != null) {
+                    Map<String, String> fieldsMap = new HashMap<>();
+                    fieldsMap.put(AUTHORIZATION, authorization);
+                    sendEmailToCitizenRespondentNonPersonal(
+                        caseData,
+                        emailNotificationDetails,
+                        respondentFl401.get(0),
+                        packDocs,
+                        SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT,
+                        fieldsMap,
+                        coverLetter
+                    );
+
+                } else {
+                    sendPostWithAccessCodeLetterToParty(caseData,
+                                                        authorization, packDocs,
+                                                        bulkPrintDetails, respondentFl401.get(0),
+                                                        coverLetter, servedParty);
+                }
+
             }
         }
     }

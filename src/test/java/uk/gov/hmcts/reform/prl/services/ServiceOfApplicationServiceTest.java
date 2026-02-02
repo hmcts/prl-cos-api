@@ -6084,4 +6084,268 @@ public class ServiceOfApplicationServiceTest {
 
     }
 
+    @Test
+    public void testSendGridEmailWhenPreferenceSetToEmailForSoaToRespondentFL401() {
+        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
+            .representativeLastName("repLastName")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .partyId(UUID.fromString("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f"))
+            .address(Address.builder().addressLine1("line1").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .contactPreferences(ContactPreferences.email)
+            .firstName("John")
+            .lastName("McGareth")
+            .build();
+
+        List<Element<PartyDetails>> otherParities = new ArrayList<>();
+        Element<PartyDetails> partyDetailsElement = element(partyDetails);
+        otherParities.add(partyDetailsElement);
+        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
+            .code(partyDetailsElement.getId().toString())
+            .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
+            .build();
+        List<Element<PartyDetails>> partyList = new ArrayList<>();
+        partyList.add(element(UUID.fromString("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f"), partyDetails));
+
+        DynamicMultiSelectList soaRecipientsOptions = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.builder()
+                               .code("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f")
+                               .label("recipient1")
+                               .build()))
+            .build();
+
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.builder().code("Blank order or directions (C21) - to withdraw application")
+                               .label("Blank order or directions (C21) - to withdraw application").build())).build();
+        List<Element<CaseInvite>> caseInvites = new ArrayList<>();
+        caseInvites.add(element(CaseInvite.builder().partyId(UUID.fromString(TEST_UUID)).build()));
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicants(partyList)
+            .respondents(partyList)
+            .applicantsFL401(partyDetails)
+            .respondentsFL401(partyDetails)
+            .applicantCaseName("Test Case 45678")
+            .caseInvites(caseInvites)
+            .finalDocument(Document.builder().documentFileName("").build())
+            .finalWelshDocument(Document.builder().documentFileName("").build())
+            .c1AWelshDocument(Document.builder().documentFileName("").build())
+            .orderCollection(List.of(Element.<OrderDetails>builder().value(OrderDetails.builder()
+                                                                               .orderTypeId("Blank order or directions (C21)")
+                                                                               .build())
+                                         .build()))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
+                                      .soaCafcassCymruServedOptions(Yes)
+                                      .soaCafcassEmailId("cymruemail@test.com")
+                                      .soaCafcassCymruEmail("cymruemail@test.com")
+                                      .soaServingRespondentsOptions(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                                      .soaRecipientsOptions(soaRecipientsOptions)
+                                      .soaOtherParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).build()).build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .othersToNotify(otherParities)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .serviceOfApplicationScreen1(dynamicMultiSelectList)
+            .c1ADocument(Document.builder().documentFileName("Blank_C7.pdf").build())
+            .build();
+        Map<String,Object> casedata = new HashMap<>();
+        casedata.put("caseTypeOfApplication","FL401");
+        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
+                                                                       .forename("first")
+                                                                       .surname("test").build());
+
+        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
+            caseData,
+            authorization,
+            casedata
+        );
+
+        assertNotNull(servedApplicationDetails);
+        assertEquals("By email", servedApplicationDetails.getModeOfService());
+        assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
+    }
+
+    @Test
+    public void testPostWhenPreferenceSetToPostForSoaToRespondentFL401() {
+        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
+            .representativeLastName("repLastName")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .partyId(UUID.fromString("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f"))
+            .address(Address.builder().addressLine1("line1").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .contactPreferences(ContactPreferences.post)
+            .firstName("John")
+            .lastName("McGareth")
+            .build();
+
+        List<Element<PartyDetails>> otherParities = new ArrayList<>();
+        Element<PartyDetails> partyDetailsElement = element(partyDetails);
+        otherParities.add(partyDetailsElement);
+        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
+            .code(partyDetailsElement.getId().toString())
+            .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
+            .build();
+        List<Element<PartyDetails>> partyList = new ArrayList<>();
+        partyList.add(element(UUID.fromString("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f"), partyDetails));
+
+        DynamicMultiSelectList soaRecipientsOptions = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.builder()
+                               .code("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f")
+                               .label("recipient1")
+                               .build()))
+            .build();
+
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.builder().code("Blank order or directions (C21) - to withdraw application")
+                               .label("Blank order or directions (C21) - to withdraw application").build())).build();
+        List<Element<CaseInvite>> caseInvites = new ArrayList<>();
+        caseInvites.add(element(CaseInvite.builder().partyId(UUID.fromString(TEST_UUID)).build()));
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicants(partyList)
+            .respondents(partyList)
+            .applicantsFL401(partyDetails)
+            .respondentsFL401(partyDetails)
+            .applicantCaseName("Test Case 45678")
+            .caseInvites(caseInvites)
+            .finalDocument(Document.builder().documentFileName("").build())
+            .finalWelshDocument(Document.builder().documentFileName("").build())
+            .c1AWelshDocument(Document.builder().documentFileName("").build())
+            .orderCollection(List.of(Element.<OrderDetails>builder().value(OrderDetails.builder()
+                                                                               .orderTypeId("Blank order or directions (C21)")
+                                                                               .build())
+                                         .build()))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
+                                      .soaCafcassCymruServedOptions(Yes)
+                                      .soaCafcassEmailId("cymruemail@test.com")
+                                      .soaCafcassCymruEmail("cymruemail@test.com")
+                                      .soaServingRespondentsOptions(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                                      .soaRecipientsOptions(soaRecipientsOptions)
+                                      .soaOtherParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).build()).build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .othersToNotify(otherParities)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .serviceOfApplicationScreen1(dynamicMultiSelectList)
+            .c1ADocument(Document.builder().documentFileName("Blank_C7.pdf").build())
+            .build();
+        Map<String,Object> casedata = new HashMap<>();
+        casedata.put("caseTypeOfApplication","FL401");
+        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
+                                                                       .forename("first")
+                                                                       .surname("test").build());
+
+        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
+            caseData,
+            authorization,
+            casedata
+        );
+
+        assertNotNull(servedApplicationDetails);
+        assertEquals("By post", servedApplicationDetails.getModeOfService());
+        assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
+    }
+
+    @Test
+    public void testEmailWhenThePartyHasLegalRepForFL401() {
+        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
+            .representativeLastName("repLastName")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .partyId(UUID.fromString("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f"))
+            .address(Address.builder().addressLine1("line1").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .contactPreferences(ContactPreferences.post)
+            .firstName("John")
+            .lastName("McGareth")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .solicitorEmail("sol@xyz.com")
+            .build();
+
+        List<Element<PartyDetails>> otherParities = new ArrayList<>();
+        Element<PartyDetails> partyDetailsElement = element(partyDetails);
+        otherParities.add(partyDetailsElement);
+        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
+            .code(partyDetailsElement.getId().toString())
+            .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
+            .build();
+        List<Element<PartyDetails>> partyList = new ArrayList<>();
+        partyList.add(element(UUID.fromString("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f"), partyDetails));
+
+        DynamicMultiSelectList soaRecipientsOptions = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.builder()
+                               .code("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f")
+                               .label("recipient1")
+                               .build()))
+            .build();
+
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.builder().code("Blank order or directions (C21) - to withdraw application")
+                               .label("Blank order or directions (C21) - to withdraw application").build())).build();
+        List<Element<CaseInvite>> caseInvites = new ArrayList<>();
+        caseInvites.add(element(CaseInvite.builder().partyId(UUID.fromString(TEST_UUID)).build()));
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicants(partyList)
+            .respondents(partyList)
+            .applicantsFL401(partyDetails)
+            .respondentsFL401(partyDetails)
+            .applicantCaseName("Test Case 45678")
+            .caseInvites(caseInvites)
+            .finalDocument(Document.builder().documentFileName("").build())
+            .finalWelshDocument(Document.builder().documentFileName("").build())
+            .c1AWelshDocument(Document.builder().documentFileName("").build())
+            .orderCollection(List.of(Element.<OrderDetails>builder().value(OrderDetails.builder()
+                                                                               .orderTypeId("Blank order or directions (C21)")
+                                                                               .build())
+                                         .build()))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
+                                      .soaCafcassCymruServedOptions(Yes)
+                                      .soaCafcassEmailId("cymruemail@test.com")
+                                      .soaCafcassCymruEmail("cymruemail@test.com")
+                                      .soaServingRespondentsOptions(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                                      .soaRecipientsOptions(soaRecipientsOptions)
+                                      .soaOtherParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).build()).build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .othersToNotify(otherParities)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .serviceOfApplicationScreen1(dynamicMultiSelectList)
+            .c1ADocument(Document.builder().documentFileName("Blank_C7.pdf").build())
+            .build();
+        Map<String,Object> casedata = new HashMap<>();
+        casedata.put("caseTypeOfApplication","FL401");
+        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
+                                                                       .forename("first")
+                                                                       .surname("test").build());
+
+        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
+            caseData,
+            authorization,
+            casedata
+        );
+
+        assertNotNull(servedApplicationDetails);
+        assertEquals("By email", servedApplicationDetails.getModeOfService());
+        assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
+    }
+
+
 }
