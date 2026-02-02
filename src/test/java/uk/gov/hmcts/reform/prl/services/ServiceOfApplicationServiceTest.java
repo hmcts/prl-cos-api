@@ -81,7 +81,6 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
-import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -124,8 +123,6 @@ import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.ADDRE
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.APPLICANTS;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CA_ADDRESS_MISSED_FOR_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIDENTIALITY_CONFIRMATION_HEADER_PERSONAL;
-import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIDENTIAL_CHECK_FAILED;
-import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIRMATION_HEADER_NON_PERSONAL;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.COURT;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.DA_ADDRESS_MISSED_FOR_RESPONDENT;
@@ -583,7 +580,7 @@ public class ServiceOfApplicationServiceTest {
         assertNotNull(body);
         assertEquals(RETURNED_TO_ADMIN_HEADER, body.getConfirmationHeader());
     }
-    
+
     @Test
     public void testsendNotificationsForUnServedPacks() {
         caseDataSoa = caseDataSoa.toBuilder().id(12345L)
