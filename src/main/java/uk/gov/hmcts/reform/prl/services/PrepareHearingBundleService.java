@@ -93,6 +93,7 @@ public class PrepareHearingBundleService {
             QueryParam ccdQueryParam = buildCcdQueryParam();
 
             String searchString = esQueryObjectMapper.writeValueAsString(ccdQueryParam);
+            log.info(searchString);
             String userToken = systemUserService.getSysUserToken();
             final String s2sToken = authTokenGenerator.generate();
             SearchResult searchResult = coreCaseDataApi.searchCases(userToken, s2sToken, CASE_TYPE, searchString);

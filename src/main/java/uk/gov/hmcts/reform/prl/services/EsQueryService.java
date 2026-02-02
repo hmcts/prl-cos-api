@@ -33,6 +33,7 @@ public class EsQueryService {
         om.disable(JsonGenerator.Feature.AUTO_CLOSE_JSON_CONTENT);
         om.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         om.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        om.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         return om;
     }
 
