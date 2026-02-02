@@ -1,21 +1,24 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
-import uk.gov.hmcts.reform.prl.mapper.EsQueryObjectMapper;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -35,8 +38,8 @@ class PrepareHearingBundleServiceTest {
     private static final String USER_TOKEN = "userToken";
     private static final String S2S_TOKEN = "s2sToken";
 
-    @Spy
-    private ObjectMapper objectMapper = EsQueryObjectMapper.getObjectMapper();
+    @Mock
+    private EsQueryService esQueryService;
 
     @Mock
     private SystemUserService systemUserService;
@@ -57,6 +60,7 @@ class PrepareHearingBundleServiceTest {
     void setup() {
         when(systemUserService.getSysUserToken()).thenReturn(USER_TOKEN);
         when(authTokenGenerator.generate()).thenReturn(S2S_TOKEN);
+        when(esQueryService.getObjectMapper()).thenReturn(getObjectMapper());
     }
 
     @Test
@@ -71,11 +75,11 @@ class PrepareHearingBundleServiceTest {
         when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
             .thenReturn(searchResult);
 
-        List<CaseDetails> actualCases = prepareHearingBundleService.retrieveCasesWithHearingsIn5Days();
+        List<Long> actualCases = prepareHearingBundleService.retrieveCasesWithHearingsIn5Days();
 
         assertNotNull(actualCases);
         assertEquals(1, actualCases.size());
-        assertEquals(123L, actualCases.getFirst().getId());
+        assertEquals(123L, actualCases.getFirst());
     }
 
     @Test
@@ -113,6 +117,45 @@ class PrepareHearingBundleServiceTest {
         verify(allTabService).getStartUpdateForSpecificEvent(eq("222"), anyString());
         verify(allTabService, times(2))
             .submitAllTabsUpdate(any(), anyString(), any(), any(), eq(Map.of()));
+    }
+
+    @Test
+    void shouldPaginateWhenMoreThan100Cases() {
+        // Arrange: 100 cases on first page, 5 on second
+        CaseDetails caseDetails1 = CaseDetails.builder().id(1L).build();
+        CaseDetails caseDetails2 = CaseDetails.builder().id(2L).build();
+
+        List<CaseDetails> firstPageCases = Collections.nCopies(100, caseDetails1);
+        List<CaseDetails> secondPageCases = Collections.nCopies(5, caseDetails2);
+
+        SearchResult firstPage = SearchResult.builder()
+            .cases(firstPageCases)
+            .total(105)
+            .build();
+        SearchResult secondPage = SearchResult.builder()
+            .cases(secondPageCases)
+            .total(105)
+            .build();
+
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(firstPage, secondPage);
+
+        List<Long> caseIds = prepareHearingBundleService.retrieveCasesWithHearingsIn5Days();
+
+        assertNotNull(caseIds);
+        assertEquals(105, caseIds.size());
+
+        assertEquals(100, caseIds.stream().filter(id -> id.equals(1L)).count());
+        assertEquals(5, caseIds.stream().filter(id -> id.equals(2L)).count());
+    }
+
+    public ObjectMapper getObjectMapper() {
+        ObjectMapper om = new ObjectMapper();
+        om.registerModule(new JavaTimeModule());
+        om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        om.enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING);
+        om.disable(JsonGenerator.Feature.AUTO_CLOSE_JSON_CONTENT);
+        return om;
     }
 
 }
