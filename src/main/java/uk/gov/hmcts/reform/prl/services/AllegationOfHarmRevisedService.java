@@ -216,31 +216,7 @@ public class AllegationOfHarmRevisedService {
     }
 
     public Map<String, Object> getPrePopulatedChildData(CaseData caseData) {
-        List<DynamicMultiselectListElement> listItems = new ArrayList<>();
-
-        if (caseData.getNewChildDetails() != null && !caseData.getNewChildDetails().isEmpty()) {
-            caseData.getNewChildDetails().forEach(child ->
-                                                      listItems.add(createListElement(
-                                                          child.getId(),
-                                                          child.getValue().getFirstName(),
-                                                          child.getValue().getLastName()
-                                                      ))
-            );
-
-        } else if (caseData.getChildren() != null && !caseData.getChildren().isEmpty()) {
-            log.info("newChildDetails does not exist for case: {}", caseData.getId());
-
-            caseData.getChildren().forEach(child ->
-                                               listItems.add(createListElement(
-                                                   child.getId(),
-                                                   child.getValue().getFirstName(),
-                                                   child.getValue().getLastName()
-                                               ))
-            );
-
-        } else {
-            throw new MissingCaseDataFieldException("newChildrenDetails & children cannot both be null or empty");
-        }
+        List<DynamicMultiselectListElement> listItems = getChildList(caseData);
 
         Map<String, Object> caseDataMap = new HashMap<>();
 
@@ -337,6 +313,35 @@ public class AllegationOfHarmRevisedService {
 
 
         return caseDataMap;
+    }
+
+    private List<DynamicMultiselectListElement> getChildList(CaseData caseData) {
+        List<DynamicMultiselectListElement> listItems = new ArrayList<>();
+
+        if (caseData.getNewChildDetails() != null && !caseData.getNewChildDetails().isEmpty()) {
+            caseData.getNewChildDetails().forEach(child ->
+                                                      listItems.add(createListElement(
+                                                          child.getId(),
+                                                          child.getValue().getFirstName(),
+                                                          child.getValue().getLastName()
+                                                      ))
+            );
+
+        } else if (caseData.getChildren() != null && !caseData.getChildren().isEmpty()) {
+            log.info("newChildDetails does not exist for case: {}", caseData.getId());
+
+            caseData.getChildren().forEach(child ->
+                                               listItems.add(createListElement(
+                                                   child.getId(),
+                                                   child.getValue().getFirstName(),
+                                                   child.getValue().getLastName()
+                                               ))
+            );
+
+        } else {
+            throw new MissingCaseDataFieldException("newChildrenDetails & children cannot both be null or empty");
+        }
+        return listItems;
     }
 
     public void resetFields(CaseData caseData, Map<String, Object> caseDataUpdated) {
