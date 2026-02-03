@@ -144,7 +144,7 @@ public class PrepareHearingBundleService {
         List<Should> shoulds = List.of(
             Should.builder().match(Match.builder().caseTypeOfApplication("C100").build()).build(),
             Should.builder().match(Match.builder().caseTypeOfApplication("FL401").build()).build(),
-            Should.builder().match(Match.builder().nextHearingDate(LocalDate.now().plusDays(4)).build()).build()
+            Should.builder().match(Match.builder().nextHearingDate(LocalDate.now().plusDays(5)).build()).build()
         );
 
         // Hearing state(s)
