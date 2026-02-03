@@ -33,7 +33,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 
 @Slf4j
 @Service
-@Component
 @RequiredArgsConstructor
 public class PrepareHearingBundleService {
 
