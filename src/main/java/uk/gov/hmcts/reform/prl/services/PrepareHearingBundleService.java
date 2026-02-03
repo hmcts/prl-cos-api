@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -71,18 +70,23 @@ public class PrepareHearingBundleService {
     }
 
     private void triggerSystemEventForWorkAllocationTask(String caseId, String caseEvent) {
-        log.info("Creating initiation event {} for case id : {}", caseEvent, caseId);
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
-            caseId,
-            caseEvent
-        );
-        allTabService.submitAllTabsUpdate(
-            startAllTabsUpdateDataContent.authorisation(),
-            caseId,
-            startAllTabsUpdateDataContent.startEventResponse(),
-            startAllTabsUpdateDataContent.eventRequestData(),
-            new HashMap<>()
-        );
+        try {
+            log.info("Creating initiation event {} for case id : {}", caseEvent, caseId);
+            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
+                caseId,
+                caseEvent
+            );
+            allTabService.submitAllTabsUpdate(
+                startAllTabsUpdateDataContent.authorisation(),
+                caseId,
+                startAllTabsUpdateDataContent.startEventResponse(),
+                startAllTabsUpdateDataContent.eventRequestData(),
+                new HashMap<>()
+            );
+        } catch (Exception e) {
+            // Catch generic exception to avoid failure of the entire batch
+            log.error("Error while triggering system event {} for case id : {}", caseEvent, caseId, e);
+        }
     }
 
     public List<Long> retrieveCasesWithHearingsIn5Days() {
