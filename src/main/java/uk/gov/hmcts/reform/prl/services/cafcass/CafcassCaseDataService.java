@@ -66,7 +66,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeList;
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class CaseDataService {
+public class CafcassCaseDataService {
     public static final String CONFIDENTIAL = "confidential";
     public static final String ANY_OTHER_DOC = "anyOtherDoc";
     @Value("${cafcaas.search-case-type-id}")

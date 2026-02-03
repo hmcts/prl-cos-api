@@ -84,7 +84,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-public class CaseDataServiceTest {
+public class CafcassCaseDataServiceTest {
     private final String s2sToken = "s2s token";
 
     private final String userToken = "Bearer testToken";
@@ -104,7 +104,7 @@ public class CaseDataServiceTest {
     AuthTokenGenerator authTokenGenerator;
 
     @InjectMocks
-    private CaseDataService caseDataService;
+    private CafcassCaseDataService cafcassCaseDataService;
 
     @Mock
     SystemUserService systemUserService;
@@ -193,11 +193,11 @@ public class CaseDataServiceTest {
 
             List<String> caseStateList = new LinkedList<>();
             caseStateList.add("DECISION_OUTCOME");
-            ReflectionTestUtils.setField(caseDataService, "caseStateList", caseStateList);
+            ReflectionTestUtils.setField(cafcassCaseDataService, "caseStateList", caseStateList);
 
             List<String> caseTypeList = new ArrayList<>();
             caseTypeList.add("C100");
-            ReflectionTestUtils.setField(caseDataService, "caseTypeList", caseTypeList);
+            ReflectionTestUtils.setField(cafcassCaseDataService, "caseTypeList", caseTypeList);
 
         }
 
@@ -212,7 +212,7 @@ public class CaseDataServiceTest {
             when(cafcassCcdDataStoreService.searchCases(anyString(),anyString(),any(),any())).thenReturn(searchResult);
             Mockito.doNothing().when(cafCassFilter).filter(cafCassResponse);
 
-            assertDoesNotThrow(() -> caseDataService.getCaseData("authorisation", "start", "end"));
+            assertDoesNotThrow(() -> cafcassCaseDataService.getCaseData("authorisation", "start", "end"));
         }
 
         @Test
@@ -232,7 +232,7 @@ public class CaseDataServiceTest {
             )).thenReturn(searchResult);
             Mockito.doNothing().when(cafCassFilter).filter(cafCassResponse);
 
-            CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation", "start", "end");
+            CafCassResponse realCafCassResponse = cafcassCaseDataService.getCaseData("authorisation", "start", "end");
             assertEquals(
                 objectMapper.writeValueAsString(cafCassResponse),
                 objectMapper.writeValueAsString(realCafCassResponse)
@@ -258,7 +258,7 @@ public class CaseDataServiceTest {
             )).thenReturn(searchResult);
             Mockito.doNothing().when(cafCassFilter).filter(cafCassResponse);
 
-            CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation", "start", "end");
+            CafCassResponse realCafCassResponse = cafcassCaseDataService.getCaseData("authorisation", "start", "end");
             assertEquals(
                 objectMapper.writeValueAsString(cafCassResponse),
                 objectMapper.writeValueAsString(realCafCassResponse)
@@ -315,11 +315,11 @@ public class CaseDataServiceTest {
                             .build());
         List<String> caseStateList = new LinkedList<>();
         caseStateList.add("DECISION_OUTCOME");
-        ReflectionTestUtils.setField(caseDataService, "caseStateList", caseStateList);
+        ReflectionTestUtils.setField(cafcassCaseDataService, "caseStateList", caseStateList);
 
         List<String> caseTypeList = new ArrayList<>();
         caseTypeList.add("C100");
-        ReflectionTestUtils.setField(caseDataService, "caseTypeList", caseTypeList);
+        ReflectionTestUtils.setField(cafcassCaseDataService, "caseTypeList", caseTypeList);
 
 
         Map<String, String> refDataMap = new HashMap<>();
@@ -327,11 +327,11 @@ public class CaseDataServiceTest {
         when(refDataService.getRefDataCategoryValueMap(anyString(),anyString(),anyString(),anyString())).thenReturn(refDataMap);
         List<String> excludedDocumentCategoryList = new ArrayList<>();
         excludedDocumentCategoryList.add("draftOrders");
-        ReflectionTestUtils.setField(caseDataService, "excludedDocumentCategoryList", excludedDocumentCategoryList);
+        ReflectionTestUtils.setField(cafcassCaseDataService, "excludedDocumentCategoryList", excludedDocumentCategoryList);
         List<String> excludedDocumentList = new ArrayList<>();
         excludedDocumentList.add("Draft_C100_application");
-        ReflectionTestUtils.setField(caseDataService, "excludedDocumentList", excludedDocumentList);
-        ReflectionTestUtils.setField(caseDataService, "objMapper", objectMapper);
+        ReflectionTestUtils.setField(cafcassCaseDataService, "excludedDocumentList", excludedDocumentList);
+        ReflectionTestUtils.setField(cafcassCaseDataService, "objMapper", objectMapper);
         uk.gov.hmcts.reform.ccd.client.model.Document documents =
             new uk.gov.hmcts.reform.ccd.client.model
                 .Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
@@ -347,7 +347,7 @@ public class CaseDataServiceTest {
             Mockito.any()
         )).thenReturn(categoriesAndDocuments);
 
-        CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation",
+        CafCassResponse realCafCassResponse = cafcassCaseDataService.getCaseData("authorisation",
                                                                           "start", "end"
         );
         assertNotNull(objectMapper.writeValueAsString(realCafCassResponse));
@@ -372,9 +372,9 @@ public class CaseDataServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
         List<String> caseStateList = new LinkedList<>();
         caseStateList.add("DECISION_OUTCOME");
-        ReflectionTestUtils.setField(caseDataService, "caseStateList", caseStateList);
+        ReflectionTestUtils.setField(cafcassCaseDataService, "caseStateList", caseStateList);
 
-        CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation",
+        CafCassResponse realCafCassResponse = cafcassCaseDataService.getCaseData("authorisation",
                                                                           "start", "end"
         );
         assertEquals(cafCassResponse, realCafCassResponse);
@@ -412,12 +412,12 @@ public class CaseDataServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
         List<String> caseTypeList = new LinkedList<>();
         caseTypeList.add("C100");
-        ReflectionTestUtils.setField(caseDataService, "caseTypeList", caseTypeList);
+        ReflectionTestUtils.setField(cafcassCaseDataService, "caseTypeList", caseTypeList);
         List<String> caseStateList = new LinkedList<>();
         caseStateList.add("DECISION_OUTCOME");
-        ReflectionTestUtils.setField(caseDataService, "caseStateList", caseStateList);
+        ReflectionTestUtils.setField(cafcassCaseDataService, "caseStateList", caseStateList);
 
-        CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation",
+        CafCassResponse realCafCassResponse = cafcassCaseDataService.getCaseData("authorisation",
                                                                           "start", "end"
         );
         assertTrue(searchResult.getTotal() > realCafCassResponse.getTotal());
@@ -466,12 +466,12 @@ public class CaseDataServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
         List<String> caseTypeList = new ArrayList<>();
         caseTypeList.add("C100");
-        ReflectionTestUtils.setField(caseDataService, "caseTypeList", caseTypeList);
+        ReflectionTestUtils.setField(cafcassCaseDataService, "caseTypeList", caseTypeList);
         List<String> caseStateList = new LinkedList<>();
         caseStateList.add("DECISION_OUTCOME");
-        ReflectionTestUtils.setField(caseDataService, "caseStateList", caseStateList);
+        ReflectionTestUtils.setField(cafcassCaseDataService, "caseStateList", caseStateList);
 
-        assertThrows(RuntimeException.class, () -> caseDataService.getCaseData("authorisation",
+        assertThrows(RuntimeException.class, () -> cafcassCaseDataService.getCaseData("authorisation",
                                                                                "start", "end"
         ));
 
@@ -517,7 +517,7 @@ public class CaseDataServiceTest {
         List<Hearings> listOfHearings = new ArrayList<>();
         listOfHearings.add(hearings);
 
-        caseDataService.filterCancelledHearingsBeforeListing(listOfHearings);
+        cafcassCaseDataService.filterCancelledHearingsBeforeListing(listOfHearings);
 
         assertEquals(2, listOfHearings.get(0).getCaseHearings().size());
 
@@ -532,7 +532,7 @@ public class CaseDataServiceTest {
             "C100FinalDocument"
         );
         String documentFilename = "Draft_C100_application.pdf";
-        assertTrue(caseDataService.checkIfDocumentsNeedToExclude(excludedDocumentList, documentFilename));
+        assertTrue(cafcassCaseDataService.checkIfDocumentsNeedToExclude(excludedDocumentList, documentFilename));
     }
 
     @Test
@@ -544,7 +544,7 @@ public class CaseDataServiceTest {
             "C100FinalDocument"
         );
         String documentFilename = "abc.pdf";
-        assertFalse(caseDataService.checkIfDocumentsNeedToExclude(excludedDocumentList, documentFilename));
+        assertFalse(cafcassCaseDataService.checkIfDocumentsNeedToExclude(excludedDocumentList, documentFilename));
     }
 
     @Test
@@ -602,12 +602,12 @@ public class CaseDataServiceTest {
             .caseData(cafCassCaseData)
             .build();
         CafCassResponse cafCassResponse = CafCassResponse.builder().cases(List.of(cafCassCaseDetail)).build();
-        Method privateMethod = CaseDataService.class.getDeclaredMethod(
+        Method privateMethod = CafcassCaseDataService.class.getDeclaredMethod(
             "addSpecificDocumentsFromCaseFileViewBasedOnCategories",
             CafCassResponse.class
         );
         privateMethod.setAccessible(true);
-        privateMethod.invoke(caseDataService, cafCassResponse);
+        privateMethod.invoke(cafcassCaseDataService, cafCassResponse);
 
         assertEquals("test", cafCassResponse.getCases().get(0).getCaseData().getOtherDocuments().get(0).getValue().getDocumentName());
         assertNull(cafCassResponse.getCases().get(0).getCaseData().getCourtStaffUploadDocListDocTab());
@@ -651,12 +651,12 @@ public class CaseDataServiceTest {
             .caseData(cafCassCaseData)
             .build();
         CafCassResponse cafCassResponse = CafCassResponse.builder().cases(List.of(cafCassCaseDetail)).build();
-        Method privateMethod = CaseDataService.class.getDeclaredMethod(
+        Method privateMethod = CafcassCaseDataService.class.getDeclaredMethod(
             "addSpecificDocumentsFromCaseFileViewBasedOnCategories",
             CafCassResponse.class
         );
         privateMethod.setAccessible(true);
-        privateMethod.invoke(caseDataService, cafCassResponse);
+        privateMethod.invoke(cafcassCaseDataService, cafCassResponse);
 
         assertEquals("test", cafCassResponse.getCases().get(0).getCaseData().getOtherDocuments().get(0).getValue().getDocumentName());
         assertNull(cafCassResponse.getCases().get(0).getCaseData().getCourtStaffUploadDocListDocTab());
@@ -670,12 +670,12 @@ public class CaseDataServiceTest {
         String category = "MIAMCertificate";
         Document document = Document.builder().documentUrl(REDACTED_DOCUMENT_URL).documentFileName("*Redacted*").build();
         List<Element<OtherDocuments>> otherDocsList = new ArrayList<>();
-        Method privateMethod = CaseDataService.class.getDeclaredMethod(
+        Method privateMethod = CafcassCaseDataService.class.getDeclaredMethod(
             "addInOtherDocuments",
             String.class, Document.class, List.class
         );
         privateMethod.setAccessible(true);
-        privateMethod.invoke(caseDataService, category, document, otherDocsList);
+        privateMethod.invoke(cafcassCaseDataService, category, document, otherDocsList);
 
         assertTrue(otherDocsList.isEmpty());
 
@@ -687,12 +687,12 @@ public class CaseDataServiceTest {
         String category = "MIAMCertificate";
         Document document = Document.builder().documentUrl("http://test").documentFileName("test").build();
         List<Element<OtherDocuments>> otherDocsList = new ArrayList<>();
-        Method privateMethod = CaseDataService.class.getDeclaredMethod(
+        Method privateMethod = CafcassCaseDataService.class.getDeclaredMethod(
             "addInOtherDocuments",
             String.class, Document.class, List.class
         );
         privateMethod.setAccessible(true);
-        privateMethod.invoke(caseDataService, category, document, otherDocsList);
+        privateMethod.invoke(cafcassCaseDataService, category, document, otherDocsList);
 
         assertFalse(otherDocsList.isEmpty());
         assertEquals("test", otherDocsList.get(0).getValue().getDocumentName());
@@ -732,12 +732,12 @@ public class CaseDataServiceTest {
             .caseData(cafCassCaseData)
             .build();
         CafCassResponse cafCassResponse = CafCassResponse.builder().cases(List.of(cafCassCaseDetail)).build();
-        Method privateMethod = CaseDataService.class.getDeclaredMethod(
+        Method privateMethod = CafcassCaseDataService.class.getDeclaredMethod(
             "addSpecificDocumentsFromCaseFileViewBasedOnCategories",
             CafCassResponse.class
         );
         privateMethod.setAccessible(true);
-        privateMethod.invoke(caseDataService, cafCassResponse);
+        privateMethod.invoke(cafcassCaseDataService, cafCassResponse);
 
         CafCassCaseData response = cafCassResponse.getCases().get(0).getCaseData();
         assertEquals(2, response.getOtherDocuments().size());
