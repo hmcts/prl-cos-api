@@ -339,7 +339,7 @@ public class AllegationOfHarmRevisedService {
             );
 
         } else {
-            throw new MissingCaseDataFieldException("newChildrenDetails & children cannot both be null or empty");
+            throw new MissingCaseDataFieldException("newChildrenDetails & children cannot both be null or empty for case:" + caseData.getId());
         }
         return listItems;
     }
