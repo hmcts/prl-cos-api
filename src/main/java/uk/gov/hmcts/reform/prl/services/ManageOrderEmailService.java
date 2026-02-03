@@ -766,7 +766,7 @@ public class ManageOrderEmailService {
     private void addBulkPrintIdsInOrderCollection(CaseData caseData,
                                                   List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails) {
         ManageOrders manageOrders = caseData.getManageOrders();
-        DynamicMultiSelectList serveOrderDynamicList = nonNull(manageOrders) ? manageOrders.getServeOrderDynamicList() : null;
+        DynamicMultiSelectList serveOrderDynamicList = manageOrders.getServeOrderDynamicList();
         if (nonNull(serveOrderDynamicList)) {
             serveOrderDynamicList.getValue()
                 .forEach(element -> nullSafeCollection(caseData.getOrderCollection())
