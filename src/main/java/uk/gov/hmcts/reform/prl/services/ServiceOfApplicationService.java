@@ -1043,6 +1043,7 @@ public class ServiceOfApplicationService {
                 ContactPreferences contactPreference = respondentFl401.get(0).getValue().getContactPreferences();
 
                 if (ContactPreferences.email.equals(contactPreference) && emailAddress != null) {
+                    log.info("Sending email from sendNotificationsDaNonPersonalRespondent");
                     Map<String, String> fieldsMap = new HashMap<>();
                     fieldsMap.put(AUTHORIZATION, authorization);
                     sendEmailToCitizenRespondentNonPersonal(
@@ -1056,6 +1057,7 @@ public class ServiceOfApplicationService {
                     );
 
                 } else {
+                    log.info("Sending post from sendNotificationsDaNonPersonalRespondent");
                     sendPostWithAccessCodeLetterToParty(caseData,
                                                         authorization, packDocs,
                                                         bulkPrintDetails, respondentFl401.get(0),
