@@ -318,7 +318,7 @@ public class AllegationOfHarmRevisedService {
     private List<DynamicMultiselectListElement> getChildList(CaseData caseData) {
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
 
-        if (caseData.getNewChildDetails() != null && !caseData.getNewChildDetails().isEmpty()) {
+        if (CollectionUtils.isNotEmpty(caseData.getNewChildDetails())) {
             caseData.getNewChildDetails().forEach(child ->
                                                       listItems.add(createListElement(
                                                           child.getId(),
@@ -327,7 +327,7 @@ public class AllegationOfHarmRevisedService {
                                                       ))
             );
 
-        } else if (caseData.getChildren() != null && !caseData.getChildren().isEmpty()) {
+        } else if (CollectionUtils.isNotEmpty(caseData.getChildren())) {
             log.info("newChildDetails does not exist for case: {}", caseData.getId());
 
             caseData.getChildren().forEach(child ->
@@ -339,7 +339,7 @@ public class AllegationOfHarmRevisedService {
             );
 
         } else {
-            throw new MissingCaseDataFieldException("newChildrenDetails & children cannot both be null or empty for case:" + caseData.getId());
+            throw new MissingCaseDataFieldException("newChildrenDetails & children cannot both be null or empty for case: " + caseData.getId());
         }
         return listItems;
     }

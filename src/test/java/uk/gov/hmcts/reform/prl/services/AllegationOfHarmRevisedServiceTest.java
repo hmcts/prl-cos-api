@@ -282,16 +282,18 @@ public class AllegationOfHarmRevisedServiceTest {
             .whichChildrenAreRiskFinancialAbuse(dynamicMultiSelectList)
             .build();
 
-        MissingCaseDataFieldException exception = assertThrows(MissingCaseDataFieldException.class, () -> {
-            allegationOfHarmService
-                .getPrePopulatedChildData(CaseData.builder()
-                                              .allegationOfHarmRevised(allegationOfHarmRevised)
-                                              .newChildDetails(null)
-                                              .children((null))
-                                              .build());
-        });
+        CaseData caseData = CaseData.builder()
+            .allegationOfHarmRevised(allegationOfHarmRevised)
+            .newChildDetails(null)
+            .children(null)
+            .build();
 
-        assertEquals("newChildrenDetails & children cannot both be null or empty", exception.getMessage());
+        MissingCaseDataFieldException exception =
+            assertThrows(MissingCaseDataFieldException.class,
+                         () -> allegationOfHarmService.getPrePopulatedChildData(caseData)
+            );
+
+        assertEquals("newChildrenDetails & children cannot both be null or empty for case: 0", exception.getMessage());
     }
 
     @Test
