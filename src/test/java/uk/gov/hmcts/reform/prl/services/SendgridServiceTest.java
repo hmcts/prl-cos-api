@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import ch.qos.logback.classic.Logger;
 import com.google.common.collect.ImmutableMap;
 import com.sendgrid.Method;
 import com.sendgrid.Request;
@@ -7,13 +8,16 @@ import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.config.SendgridEmailTemplatesConfig;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.controllers.testingsupport.TestLogAppender;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -38,7 +42,10 @@ import java.util.stream.Collectors;
 import javax.json.JsonObject;
 
 import static org.bouncycastle.cert.ocsp.OCSPResp.SUCCESSFUL;
+import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -399,7 +406,7 @@ public class SendgridServiceTest {
     }
 
     @Test
-    public void testTransferCourtEmailWithAttachments() throws Exception {
+    public void testTransferCourtEmailWithAttachmentsThrowsException() throws Exception {
 
         PartyDetails applicant = PartyDetails.builder()
             .solicitorEmail("test@gmail.com")
@@ -486,5 +493,169 @@ public class SendgridServiceTest {
                                                        documentList));
 
 
+    }
+
+    @Test
+    public void testTransferCourtEmailWithAttachmentsReturnError() throws Exception {
+        ch.qos.logback.classic.Logger logger = (Logger) LoggerFactory.getLogger(SendgridService.class);
+        TestLogAppender appender = new TestLogAppender();
+        appender.start();
+        logger.addAppender(appender);
+
+        PartyDetails applicant = PartyDetails.builder()
+            .solicitorEmail("test@gmail.com")
+            .representativeLastName("LastName")
+            .representativeFirstName("FirstName")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("test@applicant.com")
+            .build();
+
+        Document finalDoc = Document.builder()
+            .documentUrl("finalDoc")
+            .documentBinaryUrl("finalDoc")
+            .documentHash("finalDoc")
+            .build();
+
+        Document coverSheet = Document.builder()
+            .documentUrl("coverSheet")
+            .documentBinaryUrl("coverSheet")
+            .documentHash("coverSheet")
+            .build();
+
+        final List<Document> documentList = List.of(coverSheet, finalDoc);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("test")
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(element(applicant)))
+            .respondents(List.of(element(PartyDetails.builder()
+                                             .solicitorEmail("test@gmail.com")
+                                             .representativeLastName("LastName")
+                                             .representativeFirstName("FirstName")
+                                             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                                             .build())))
+            .build();
+
+        Map<String, String> combinedMap = new HashMap<>();
+        combinedMap.put("caseName", caseData.getApplicantCaseName());
+        combinedMap.put("caseNumber", String.valueOf(caseData.getId()));
+        combinedMap.put("solicitorName", applicant.getRepresentativeFullName());
+        combinedMap.put("subject", "Case documents for : ");
+        combinedMap.put("content", "Case details");
+        combinedMap.put("attachmentType", "pdf");
+        combinedMap.put("disposition", "attachment");
+        combinedMap.put("specialNote", "Yes");
+
+        when(launchDarklyClient.isFeatureEnabled("transfer-case-sendgrid")).thenReturn(true);
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+
+        byte[] biteData = "test bytes".getBytes();
+        for (Document d : documentList) {
+            when(documentGenService.getDocumentBytes(
+                d.getDocumentUrl(),
+                TEST_AUTH,
+                s2sToken
+            )).thenReturn(biteData);
+        }
+
+        Response mockResponse = new Response();
+        mockResponse.setStatusCode(500);
+        mockResponse.setBody("Internal Server Error");
+        mockResponse.setHeaders(new HashMap<>());
+        when(sendGrid.api(any(Request.class))).thenReturn(mockResponse);
+
+        sendgridService
+            .sendTransferCourtEmailWithAttachments(TEST_AUTH, combinedMap, applicant.getSolicitorEmail(),
+                                                   documentList);
+
+        ArgumentCaptor<Request> captor = ArgumentCaptor.forClass(Request.class);
+        verify(sendGrid, times(1)).api(captor.capture());
+
+        Request sentRequest = captor.getValue();
+        assertEquals(Method.POST, sentRequest.getMethod());
+        assertEquals("mail/send", sentRequest.getEndpoint());
+        assertNotNull(sentRequest.getBody());
+
+        assertTrue(appender.getEvents().stream().anyMatch(
+            e -> e.getFormattedMessage().contains("Notification to parties failed for CASE ID: "
+                                                      + combinedMap.get("caseNumber"))
+            )
+        );
+
+        logger.detachAppender(appender);
+    }
+
+    @Test
+    public void testTransferCourtEmailWithAttachmentsReturnSuccess() throws Exception {
+        ch.qos.logback.classic.Logger logger = (Logger) LoggerFactory.getLogger(SendgridService.class);
+        TestLogAppender appender = new TestLogAppender();
+        appender.start();
+        logger.addAppender(appender);
+
+        PartyDetails applicant = PartyDetails.builder()
+            .solicitorEmail("test@gmail.com")
+            .representativeLastName("LastName")
+            .representativeFirstName("FirstName")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("test@applicant.com")
+            .build();
+
+        Document finalDoc = Document.builder()
+            .documentUrl("finalDoc")
+            .documentBinaryUrl("finalDoc")
+            .documentHash("finalDoc")
+            .build();
+
+        Document coverSheet = Document.builder()
+            .documentUrl("coverSheet")
+            .documentBinaryUrl("coverSheet")
+            .documentHash("coverSheet")
+            .build();
+
+        final List<Document> documentList = List.of(coverSheet, finalDoc);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("test")
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(element(applicant)))
+            .respondents(List.of(element(PartyDetails.builder()
+                                             .solicitorEmail("test@gmail.com")
+                                             .representativeLastName("LastName")
+                                             .representativeFirstName("FirstName")
+                                             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                                             .build())))
+            .build();
+
+        Map<String, String> combinedMap = new HashMap<>();
+        combinedMap.put("caseName", caseData.getApplicantCaseName());
+        combinedMap.put("caseNumber", String.valueOf(caseData.getId()));
+        combinedMap.put("solicitorName", applicant.getRepresentativeFullName());
+        combinedMap.put("subject", "Case documents for : ");
+        combinedMap.put("content", "Case details");
+        combinedMap.put("attachmentType", "pdf");
+        combinedMap.put("disposition", "attachment");
+        combinedMap.put("specialNote", "Yes");
+
+        when(launchDarklyClient.isFeatureEnabled("transfer-case-sendgrid")).thenReturn(true);
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        when(documentGenService.getDocumentBytes(any(), any(), any())).thenReturn("bytes".getBytes());
+
+        Response mockSendGridResponse = new Response();
+        mockSendGridResponse.setStatusCode(200);
+        when(sendGrid.api(any(Request.class))).thenReturn(mockSendGridResponse);
+
+        sendgridService.sendTransferCourtEmailWithAttachments(TEST_AUTH, combinedMap, applicant.getSolicitorEmail(), documentList);
+
+        verify(sendGrid, times(1)).api(any(Request.class));
+        assertTrue(appender.getEvents().stream().anyMatch(
+                       e -> e.getFormattedMessage().contains("Notification to party sent successfully")
+                   )
+        );
+
+        logger.detachAppender(appender);
     }
 }
