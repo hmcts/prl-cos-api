@@ -19,12 +19,14 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
+import uk.gov.hmcts.reform.prl.clients.ccd.LACaseAssignmentService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
 import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.localauthority.LocalAuthoritySocialWorker;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
@@ -38,13 +40,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATED_BARRISTER;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -53,6 +49,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
 public class CaseAssignmentController {
 
     private final CaseAssignmentService caseAssignmentService;
+    private final LACaseAssignmentService laCaseAssignmentService;
     private final ObjectMapper objectMapper;
     private final OrganisationService organisationService;
     private final AuthorisationService authorisationService;
@@ -168,5 +165,90 @@ public class CaseAssignmentController {
         caseDetails.getData().putAll(applicationsTabService.updateTab(caseData));
         caseDetails.getData().putAll(partyLevelCaseFlagsService
                                          .generatePartyCaseFlagsForBarristerOnly(caseData));
+    }
+
+    @PostMapping(path = "/localauthority/socialworker/add/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "About to submit to add Local authority social worker")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse submitAddLocalAuthoritySocialWorker(
+        @RequestHeader(javax.ws.rs.core.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) {
+
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            CaseDetails caseDetails = callbackRequest.getCaseDetails();
+            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+
+            List<String> errorList = new ArrayList<>();
+            LocalAuthoritySocialWorker localAuthoritySocialWorker = caseData.getLocalAuthoritySocialWorker();
+
+            Optional<String> userId = organisationService
+                .findUserByEmail(localAuthoritySocialWorker.getLaSocialWorkerEmail());
+            String laSocialWorkerRole  = "[LASOCIALWORKER]";
+            laCaseAssignmentService.validateAddRequest(
+                caseData,
+                Optional.of(laSocialWorkerRole),
+                localAuthoritySocialWorker,
+                errorList);
+
+            if (errorList.isEmpty() && userId.isPresent()) {
+                try {
+                    laCaseAssignmentService.addLocalAuthoritySocialWorker(
+                        caseData,
+                        userId.get(),
+                        laSocialWorkerRole,
+                        localAuthoritySocialWorker
+                    );
+                    localAuthoritySocialWorker.setUserId(userId.get());
+                    caseDetails.getData().put(LOCAL_AUTHORITY_SOCIAL_WORKER, localAuthoritySocialWorker);
+                } catch (GrantCaseAccessException grantCaseAccessException) {
+                    errorList.add(grantCaseAccessException.getMessage());
+                }
+            }
+
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseDetails.getData())
+                .errors(errorList).build();
+        } else {
+            throw new InvalidClientException();
+        }
+    }
+
+    @PostMapping(path = "/localauthority/socialworker/remove/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "About to submit to remove Local authority social worker")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse submitRemoveLocalAuthoritySocialWorker(
+        @RequestHeader(javax.ws.rs.core.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) {
+
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            CaseDetails caseDetails = callbackRequest.getCaseDetails();
+            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+            List<String> errorList = new ArrayList<>();
+            LocalAuthoritySocialWorker localAuthoritySocialWorker = caseData.getLocalAuthoritySocialWorker();
+
+            laCaseAssignmentService.validateRemoveRequest(caseData, localAuthoritySocialWorker, errorList);
+
+            if (errorList.isEmpty()) {
+                laCaseAssignmentService.removeLASocialWorker(caseData, localAuthoritySocialWorker);
+                updateCaseDetails(caseDetails, caseData);
+            }
+
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseDetails.getData())
+                .errors(errorList).build();
+        } else {
+            throw new InvalidClientException();
+        }
+
     }
 }

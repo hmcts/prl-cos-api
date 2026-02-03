@@ -48,6 +48,10 @@ public class FeatureToggleService {
         return isFeatureEnabled(IS_BARRISTER_FEATURE_ENABLED);
     }
 
+    public boolean isLASocialWorkerFeatureEnabled() {
+        return isFeatureEnabled(IS_BARRISTER_FEATURE_ENABLED);
+    }
+
     public boolean isCafcassDateTimeFeatureEnabled() {
         return isFeatureEnabled(IS_CAFCASS_DATE_TIME_FEATURE_ENABLED);
     }
