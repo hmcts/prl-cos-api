@@ -19,7 +19,8 @@ class FeatureToggleServiceTest {
     @SpringBootTest(properties = {
         "feature.toggle.barristerFeatureEnabled=true",
         "feature.toggle.cafcassDateTimeFeatureEnabled=true",
-        "feature.toggle.osCourtLookupEnabled=true"
+        "feature.toggle.osCourtLookupEnabled=true",
+        "feature.toggle.laSocialWorkerFeatureEnabled=true"
     })
     class FeatureFlagSwitchOn {
 

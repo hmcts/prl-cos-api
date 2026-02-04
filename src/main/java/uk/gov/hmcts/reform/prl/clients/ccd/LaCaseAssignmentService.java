@@ -34,7 +34,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY
 @Builder
 @RequiredArgsConstructor
 @Service
-public class LACaseAssignmentService {
+public class LaCaseAssignmentService {
     private final CaseAssignmentApi caseAssignmentApi;
     private final SystemUserService systemUserService;
     private final AuthTokenGenerator tokenGenerator;
@@ -99,7 +99,7 @@ public class LACaseAssignmentService {
 
     }
 
-    public void removeLASocialWorker(final CaseData caseData, LocalAuthoritySocialWorker localAuthoritySocialWorker) {
+    public void removeLaSocialWorker(final CaseData caseData, LocalAuthoritySocialWorker localAuthoritySocialWorker) {
         String userId = localAuthoritySocialWorker.getUserId();
         try {
             log.info(

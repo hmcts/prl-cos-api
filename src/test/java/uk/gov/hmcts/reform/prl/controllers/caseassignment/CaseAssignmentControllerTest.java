@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
-import uk.gov.hmcts.reform.prl.clients.ccd.LACaseAssignmentService;
+import uk.gov.hmcts.reform.prl.clients.ccd.LaCaseAssignmentService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole;
 import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
@@ -68,7 +68,7 @@ class CaseAssignmentControllerTest {
     @Mock
     private CaseAssignmentService caseAssignmentService;
     @Mock
-    private LACaseAssignmentService laCaseAssignmentService;
+    private LaCaseAssignmentService laCaseAssignmentService;
     @Mock
     private OrganisationService organisationService;
     @Mock
@@ -760,7 +760,7 @@ class CaseAssignmentControllerTest {
             isA(LocalAuthoritySocialWorker.class),
             anyList()
         );
-        verify(laCaseAssignmentService).removeLASocialWorker(
+        verify(laCaseAssignmentService).removeLaSocialWorker(
             isA(CaseData.class),
             isA(LocalAuthoritySocialWorker.class)
         );

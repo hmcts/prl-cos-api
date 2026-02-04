@@ -19,7 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
-import uk.gov.hmcts.reform.prl.clients.ccd.LACaseAssignmentService;
+import uk.gov.hmcts.reform.prl.clients.ccd.LaCaseAssignmentService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
 import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
@@ -56,7 +56,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
 public class CaseAssignmentController {
 
     private final CaseAssignmentService caseAssignmentService;
-    private final LACaseAssignmentService laCaseAssignmentService;
+    private final LaCaseAssignmentService laCaseAssignmentService;
     private final ObjectMapper objectMapper;
     private final OrganisationService organisationService;
     private final AuthorisationService authorisationService;
@@ -246,7 +246,7 @@ public class CaseAssignmentController {
             laCaseAssignmentService.validateRemoveRequest(caseData, localAuthoritySocialWorker, errorList);
 
             if (errorList.isEmpty()) {
-                laCaseAssignmentService.removeLASocialWorker(caseData, localAuthoritySocialWorker);
+                laCaseAssignmentService.removeLaSocialWorker(caseData, localAuthoritySocialWorker);
                 updateCaseDetails(caseDetails, caseData);
             }
 
