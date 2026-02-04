@@ -554,8 +554,6 @@ class CaseAssignmentControllerTest {
             .thenReturn(true);
         when(organisationService.findUserByEmail(localAuthoritySocialWorker.getLaSocialWorkerEmail()))
             .thenReturn(userId);
-        Optional<String> socialWorkerRole = Optional.of("[LASOCIALWORKER]");
-
 
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put(PrlAppsConstants.LOCAL_AUTHORITY_SOCIAL_WORKER, localAuthoritySocialWorker);
@@ -582,6 +580,7 @@ class CaseAssignmentControllerTest {
             callbackRequest
         );
 
+        Optional<String> socialWorkerRole = Optional.of("[LASOCIALWORKER]");
         assertThat(response.getData().get(PrlAppsConstants.LOCAL_AUTHORITY_SOCIAL_WORKER))
             .isNotNull();
 
