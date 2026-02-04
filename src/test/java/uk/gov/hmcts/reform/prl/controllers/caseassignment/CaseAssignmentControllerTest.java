@@ -750,12 +750,12 @@ class CaseAssignmentControllerTest {
 
         assertThat(response.getErrors()).isEmpty();
 
-        verify(laCaseAssignmentService).validateSocialWorkerRemoveRequest(
+        verify(caseAssignmentService).validateSocialWorkerRemoveRequest(
             isA(CaseData.class),
             isA(LocalAuthoritySocialWorker.class),
             anyList()
         );
-        verify(laCaseAssignmentService).removeLaSocialWorker(
+        verify(caseAssignmentService).removeLaSocialWorker(
             isA(CaseData.class),
             isA(LocalAuthoritySocialWorker.class)
         );
