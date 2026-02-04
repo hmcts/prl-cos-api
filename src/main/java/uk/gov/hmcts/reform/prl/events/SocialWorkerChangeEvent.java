@@ -8,7 +8,6 @@ import uk.gov.hmcts.reform.prl.enums.barrister.TypeOfBarristerEventEnum;
 import uk.gov.hmcts.reform.prl.enums.localauthority.TypeOfSocialWorkerEventEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
-
 @Getter
 @Setter
 @RequiredArgsConstructor

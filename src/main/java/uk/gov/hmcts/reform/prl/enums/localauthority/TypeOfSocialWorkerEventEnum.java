@@ -14,7 +14,7 @@ public enum TypeOfSocialWorkerEventEnum {
     @JsonProperty("addSocialWorker")
     addSocialWorker("addSocialWorker", "Add Social Worker"),
     @JsonProperty("removeSocialWorker")
-    removeSocialWorker("removeSocialWorker", "Remove Social Worker"),;
+    removeSocialWorker("removeSocialWorker", "Remove Social Worker");
 
     private final String id;
     private final String displayedValue;
