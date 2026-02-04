@@ -28,12 +28,13 @@ import uk.gov.hmcts.reform.prl.utils.MaskEmail;
 import java.util.List;
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOCIAL_WORKER;
+
 @Slf4j
 @Builder
 @RequiredArgsConstructor
 @Service
 public class LACaseAssignmentService {
-    public static final String LOCAL_AUTHORITY_SOCIAL_WORKER = "[LASOCIALWORKER]";
     private final CaseAssignmentApi caseAssignmentApi;
     private final SystemUserService systemUserService;
     private final AuthTokenGenerator tokenGenerator;
@@ -46,10 +47,10 @@ public class LACaseAssignmentService {
     private final BarristerRemoveService barristerRemoveService;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
-    public void addLocalAuthoritySocialWorker(CaseData caseData,
-                                              String userId,
-                                              String socialWorkerRole,
-                                              LocalAuthoritySocialWorker localAuthoritySocialWorker) {
+    public void addSocialWorker(CaseData caseData,
+                                String userId,
+                                String socialWorkerRole,
+                                LocalAuthoritySocialWorker localAuthoritySocialWorker) {
         log.info(
             "On case id {}, about to add {} case access for users {}",
             caseData.getId(),
@@ -131,9 +132,9 @@ public class LACaseAssignmentService {
         }
     }
 
-    public void validateBarristerOrgRelationship(CaseData caseData,
-                                                 LocalAuthoritySocialWorker localAuthoritySocialWorker,
-                                                 List<String> errorList) {
+    public void validateSocialWorkerOrgRelationship(CaseData caseData,
+                                                    LocalAuthoritySocialWorker localAuthoritySocialWorker,
+                                                    List<String> errorList) {
         OrgSolicitors organisationSolicitorDetails = organisationService.getOrganisationSolicitorDetails(
             systemUserService.getSysUserToken(),
             localAuthoritySocialWorker.getLaSocialWorkerOrg().getOrganisationID()
@@ -186,7 +187,7 @@ public class LACaseAssignmentService {
 
         socialWorkerRole.ifPresentOrElse(
             role -> {
-                validateBarristerOrgRelationship(caseData, localAuthoritySocialWorker, errorList);
+                validateSocialWorkerOrgRelationship(caseData, localAuthoritySocialWorker, errorList);
                 validateCaseRoles(caseData, role, errorList);
             },
             () -> {
@@ -208,7 +209,7 @@ public class LACaseAssignmentService {
 
         roleAssignmentServiceResponse.getRoleAssignmentResponse().stream()
             .filter(roleAssignmentResponse ->
-                        roleAssignmentResponse.getRoleName().equals("[LASOCIALWORKER]")
+                        roleAssignmentResponse.getRoleName().equals(LOCAL_AUTHORITY_SOCIAL_WORKER)
                             && roleAssignmentResponse.getActorId().equals(localAuthoritySocialWorker.getUserId()))
             .findAny()
             .ifPresentOrElse(

@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 
 @Data
 @Builder(toBuilder = true)
-@RequiredArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class LocalAuthoritySocialWorker {
     public static final String FULL_NAME_FORMAT = "%s %s";

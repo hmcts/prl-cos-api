@@ -174,7 +174,7 @@ public class CaseAssignmentController {
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse submitAddLocalAuthoritySocialWorker(
+    public AboutToStartOrSubmitCallbackResponse submitAddSocialWorker(
         @RequestHeader(javax.ws.rs.core.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
@@ -197,7 +197,7 @@ public class CaseAssignmentController {
 
             if (errorList.isEmpty() && userId.isPresent()) {
                 try {
-                    laCaseAssignmentService.addLocalAuthoritySocialWorker(
+                    laCaseAssignmentService.addSocialWorker(
                         caseData,
                         userId.get(),
                         laSocialWorkerRole,
@@ -225,7 +225,7 @@ public class CaseAssignmentController {
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse submitRemoveLocalAuthoritySocialWorker(
+    public AboutToStartOrSubmitCallbackResponse submitRemoveSocialWorker(
         @RequestHeader(javax.ws.rs.core.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
