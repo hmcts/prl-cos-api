@@ -40,5 +40,10 @@ class FeatureToggleServiceTest {
         void isOsCourtLookupFeatureEnabledReturnTrue() {
             assertThat(featureToggleService.isOsCourtLookupFeatureEnabled(), is(true));
         }
+
+        @Test
+        void isLaSocialWorkerFeatureEnabledReturnTrue() {
+            assertThat(featureToggleService.isLaSocialWorkerFeatureEnabled(), is(true));
+        }
     }
 }

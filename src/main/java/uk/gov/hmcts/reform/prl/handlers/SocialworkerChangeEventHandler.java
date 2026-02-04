@@ -24,7 +24,8 @@ import java.util.function.Function;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.getPreferenceLanguage;
-import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.*;
+import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.ADD_LA_SOCIAL_WORKER;
+import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.REMOVE_LA_SOCIAL_WORKER;
 
 @Slf4j
 @Component
@@ -40,7 +41,7 @@ public class SocialworkerChangeEventHandler {
     @Async
     @EventListener(condition = "#event.typeOfEvent.displayedValue eq 'Add Social Worker'")
     public void notifyAddSocialWorker(final SocialWorkerChangeEvent event) {
-        if (featureToggleService.isLASocialWorkerFeatureEnabled()) {
+        if (featureToggleService.isLaSocialWorkerFeatureEnabled()) {
             // notify - LA social worker
             sendEmail(event, ADD_LA_SOCIAL_WORKER, LocalAuthoritySocialWorker::getLaSocialWorkerEmail);
         }
@@ -78,7 +79,7 @@ public class SocialworkerChangeEventHandler {
     @Async
     @EventListener(condition = "#event.typeOfEvent.displayedValue eq 'Remove Social Worker'")
     public void notifyWhenSocialWorkerRemoved(final SocialWorkerChangeEvent event) {
-        if (featureToggleService.isLASocialWorkerFeatureEnabled()) {
+        if (featureToggleService.isLaSocialWorkerFeatureEnabled()) {
             // notify - LA social worker
             sendEmail(event, REMOVE_LA_SOCIAL_WORKER, LocalAuthoritySocialWorker::getLaSocialWorkerEmail);
         }
