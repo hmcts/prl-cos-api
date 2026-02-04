@@ -75,7 +75,7 @@ public class CaseAssignmentService {
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     private InvalidPartyException getInvalidPartyException(CaseData caseData,
-                                                           String selectedPartyId) {
+                                                                  String selectedPartyId) {
         log.error(
             "On case id {} no party found for {}",
             caseData.getId(),
@@ -183,7 +183,7 @@ public class CaseAssignmentService {
     }
 
     public void removeAmBarristerCaseRole(final CaseData caseData,
-                                          Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap) {
+                                Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap) {
         if (featureToggleService.isBarristerFeatureEnabled()) {
             selectedPartyDetailsMap.values().stream()
                 .map(Element::getValue)
@@ -250,13 +250,12 @@ public class CaseAssignmentService {
                     );
 
                     errorList.add("Barrister is not registered with the selected organisation");
-                }
-            );
+                });
     }
 
     private void validateUserRole(CaseData caseData,
-                                  String selectedPartyId,
-                                  List<String> errorList) {
+                                 String selectedPartyId,
+                                 List<String> errorList) {
         PartyDetails selectedParty = getSelectedParty(caseData, selectedPartyId);
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentService
             .getRoleAssignmentForCase(String.valueOf(caseData.getId()));
@@ -276,8 +275,7 @@ public class CaseAssignmentService {
                         caseData.getId()
                     );
                     errorList.add("Barrister is not associated with the case");
-                }
-            );
+                });
     }
 
     public PartyDetails getSelectedParty(CaseData caseData, String selectedPartyId) {
@@ -286,11 +284,9 @@ public class CaseAssignmentService {
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             return getC401Party(caseData, selectedPartyId);
         }
-        throw new IllegalArgumentException(String.join(
-            ":",
-            "Invalid case type",
-            String.valueOf(caseData.getId())
-        ));
+        throw new  IllegalArgumentException(String.join(":",
+                                                        "Invalid case type",
+                                                        String.valueOf(caseData.getId())));
     }
 
     private PartyDetails getC401Party(CaseData caseData, String selectedPartyId) {
@@ -374,11 +370,9 @@ public class CaseAssignmentService {
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             return getC401BarristerRole(caseData, selectedPartyId);
         }
-        throw new IllegalArgumentException(String.join(
-            ":",
-            "Invalid case type",
-            String.valueOf(caseData.getId())
-        ));
+        throw new  IllegalArgumentException(String.join(":",
+                                                   "Invalid case type",
+                                                   String.valueOf(caseData.getId())));
     }
 
     private Optional<String> getC401BarristerRole(CaseData caseData,
@@ -396,8 +390,8 @@ public class CaseAssignmentService {
     }
 
     private Optional<String> get401BarristerCaseRole(Supplier<PartyDetails> partyDetails,
-                                                     String selectedPartyId,
-                                                     Representing representing) {
+                                                                  String selectedPartyId,
+                                                                  Representing representing) {
         if (partyDetails.get().getPartyId().equals(UUID.fromString(selectedPartyId))) {
             return Arrays.stream(BarristerRole.values())
                 .filter(barristerRole -> barristerRole.getRepresenting().equals(representing))
@@ -408,12 +402,11 @@ public class CaseAssignmentService {
     }
 
     private Optional<String> getC100BarristerRole(Map<String, Object> data,
-                                                  CaseData caseData,
-                                                  String selectedPartyId) {
+                                                      CaseData caseData,
+                                                      String selectedPartyId) {
         PartyDetails c100Party = getC100Party(caseData, selectedPartyId);
         String nameKey = String.join("-", c100Party.getFirstName(), c100Party.getLastName());
-        record PartyInfo(String firstName, String lastName) {
-        }
+        record PartyInfo(String firstName, String lastName) {}
 
         return Arrays.stream(BarristerRole.RoleMapping.values())
             .filter(roleMapping -> roleMapping.getRepresenting().equals(BarristerRole.Representing.CAAPPLICANT)
@@ -440,9 +433,9 @@ public class CaseAssignmentService {
     }
 
     private void updatedPartyWithBarristerDetails(CaseData caseData,
-                                                  String userId,
-                                                  String barristerRole,
-                                                  AllocatedBarrister allocatedBarrister) {
+                                                 String userId,
+                                                 String barristerRole,
+                                                 AllocatedBarrister allocatedBarrister) {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             updatedPartyWithBarristerDetails(
                 barristerRole,
@@ -461,9 +454,9 @@ public class CaseAssignmentService {
     }
 
     private void updatedPartyWithBarristerDetails(String barristerRole,
-                                                  String userId,
-                                                  AllocatedBarrister allocatedBarrister,
-                                                  Supplier<PartyDetails> partyDetailsSupplier) {
+                                                      String userId,
+                                                      AllocatedBarrister allocatedBarrister,
+                                                      Supplier<PartyDetails> partyDetailsSupplier) {
         PartyDetails partyDetails = partyDetailsSupplier.get();
         updateBarrister(barristerRole, partyDetails, allocatedBarrister, userId);
     }
@@ -472,18 +465,13 @@ public class CaseAssignmentService {
         if (featureToggleService.isBarristerFeatureEnabled()) {
             CaseData caseData = getCaseData(caseDetails, objectMapper);
 
-            removeBarristerIfPresent(
-                caseData,
-                caseData.getChangeOrganisationRequestField(),
-                partyDetailsElement ->
-                    removeAmBarristerCaseRole(
-                        caseData,
-                        partyDetailsElement.getValue()
-                    ),
-                partyDetails -> removeAmBarristerCaseRole(
-                    caseData,
-                    partyDetails
-                )
+            removeBarristerIfPresent(caseData,
+                                     caseData.getChangeOrganisationRequestField(),
+                                     partyDetailsElement ->
+                                         removeAmBarristerCaseRole(caseData,
+                                                                   partyDetailsElement.getValue()),
+                                     partyDetails -> removeAmBarristerCaseRole(caseData,
+                                                                               partyDetails)
             );
         } else {
             log.info("Barrister feature is disabled");
@@ -493,36 +481,32 @@ public class CaseAssignmentService {
     public void removePartyBarristerIfPresent(CaseData caseData,
                                               ChangeOrganisationRequest changeOrganisationRequest) {
         if (featureToggleService.isBarristerFeatureEnabled()) {
-            removeBarristerIfPresent(
-                caseData,
-                changeOrganisationRequest,
-                caPartyDetailsElement -> {
-                    barristerHelper.setAllocatedBarrister(
-                        caPartyDetailsElement.getValue(),
-                        caseData,
-                        caPartyDetailsElement.getId()
-                    );
+            removeBarristerIfPresent(caseData,
+                                     changeOrganisationRequest,
+                                     caPartyDetailsElement -> {
+                                         barristerHelper.setAllocatedBarrister(
+                                             caPartyDetailsElement.getValue(),
+                                             caseData,
+                                             caPartyDetailsElement.getId());
 
-                    barristerRemoveService.notifyBarrister(caseData);
-                    caPartyDetailsElement.getValue().setBarrister(null);
-                    partyLevelCaseFlagsService.updateCaseDataWithGeneratePartyCaseFlags(
-                        caseData,
-                        partyLevelCaseFlagsService::generatePartyCaseFlagsForBarristerOnly
-                    );
-                },
-                daPartyDetails -> {
-                    barristerHelper.setAllocatedBarrister(
-                        daPartyDetails,
-                        caseData,
-                        daPartyDetails.getPartyId()
-                    );
-                    barristerRemoveService.notifyBarrister(caseData);
-                    daPartyDetails.setBarrister(null);
-                    partyLevelCaseFlagsService.updateCaseDataWithGeneratePartyCaseFlags(
-                        caseData,
-                        partyLevelCaseFlagsService::generatePartyCaseFlagsForBarristerOnly
-                    );
-                }
+                                         barristerRemoveService.notifyBarrister(caseData);
+                                         caPartyDetailsElement.getValue().setBarrister(null);
+                                         partyLevelCaseFlagsService.updateCaseDataWithGeneratePartyCaseFlags(
+                                             caseData,
+                                             partyLevelCaseFlagsService::generatePartyCaseFlagsForBarristerOnly
+                                         );
+                                     },
+                                     daPartyDetails -> {
+                                         barristerHelper.setAllocatedBarrister(daPartyDetails,
+                                                                          caseData,
+                                                                          daPartyDetails.getPartyId());
+                                         barristerRemoveService.notifyBarrister(caseData);
+                                         daPartyDetails.setBarrister(null);
+                                         partyLevelCaseFlagsService.updateCaseDataWithGeneratePartyCaseFlags(
+                                             caseData,
+                                             partyLevelCaseFlagsService::generatePartyCaseFlagsForBarristerOnly
+                                         );
+                                     }
 
             );
         } else {
@@ -531,9 +515,9 @@ public class CaseAssignmentService {
     }
 
     private void removeBarristerIfPresent(CaseData caseData,
-                                          ChangeOrganisationRequest changeOrganisationRequest,
-                                          Consumer<Element<PartyDetails>> caPartyDetailsElement,
-                                          Consumer<PartyDetails> daPartyDetails) {
+                                         ChangeOrganisationRequest changeOrganisationRequest,
+                                         Consumer<Element<PartyDetails>> caPartyDetailsElement,
+                                         Consumer<PartyDetails> daPartyDetails) {
         String solicitorRole = changeOrganisationRequest.getCaseRoleId().getValue().getCode();
         String barristerRole = getMatchingBarristerRole(solicitorRole);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
@@ -575,9 +559,8 @@ public class CaseAssignmentService {
             .filter(barristerRole -> barristerRole.getSolicitorCaseRole().equals(solicitorRole))
             .map(BarristerRole::getCaseRoleLabel)
             .findFirst()
-            .orElseThrow(() -> new InvalidSolicitorRoleException(
-                "No barrister matching role found for the given solicitor "
-                    + solicitorRole));
+            .orElseThrow(() -> new InvalidSolicitorRoleException("No barrister matching role found for the given solicitor "
+                                                                + solicitorRole));
     }
 
     public void addSocialWorker(CaseData caseData,
@@ -686,14 +669,12 @@ public class CaseAssignmentService {
                 roleName -> {
                 },
                 () -> {
-                    log.error(
-                        "LA Social worker {} is not associated with the case {}",
+                    log.error("LA Social worker {} is not associated with the case {}",
                         maskEmail.mask(localAuthoritySocialWorker.getLaSocialWorkerEmail()),
                         caseData.getId()
                     );
                     errorList.add("LA Social worker is not associated with the case");
-                }
-            );
+                });
     }
 
     public void validateSocialWorkerOrgRelationship(CaseData caseData,
@@ -720,7 +701,6 @@ public class CaseAssignmentService {
                     );
 
                     errorList.add("Local authority Social worker is not registered with the selected organisation");
-                }
-            );
+                });
     }
 }
