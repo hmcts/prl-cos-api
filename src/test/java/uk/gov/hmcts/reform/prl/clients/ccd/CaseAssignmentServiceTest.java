@@ -961,7 +961,7 @@ class CaseAssignmentServiceTest {
                                                 FL401RESPONDENTBARRISTER.getCaseRoleLabel(),
                                                 errors);
         assertThat(errors)
-            .contains("A barrister is already associated with the case");
+            .contains("Requested user is already associated with the case");
     }
 
     @Test
