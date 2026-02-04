@@ -1,16 +1,12 @@
 package uk.gov.hmcts.reform.prl.clients.ccd;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import feign.FeignException;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CaseAssignmentApi;
-import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRoleWithOrganisation;
-import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRolesRequest;
-import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
 import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.localauthority.LocalAuthoritySocialWorker;
@@ -47,90 +43,7 @@ public class LaCaseAssignmentService {
     private final BarristerRemoveService barristerRemoveService;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
-    public void addSocialWorker(CaseData caseData,
-                                String userId,
-                                String socialWorkerRole,
-                                LocalAuthoritySocialWorker localAuthoritySocialWorker) {
-        log.info(
-            "On case id {}, about to add {} case access for users {}",
-            caseData.getId(),
-            socialWorkerRole,
-            userId
-        );
-        grantUserCaseAccess(caseData, userId, socialWorkerRole, localAuthoritySocialWorker);
-    }
 
-    private void grantUserCaseAccess(final CaseData caseData,
-                                     final String userId,
-                                     final String caseRole,
-                                     LocalAuthoritySocialWorker localAuthoritySocialWorker) {
-        try {
-            String organisationID = localAuthoritySocialWorker.getLaSocialWorkerOrg().getOrganisationID();
-            CaseAssignmentUserRolesRequest addCaseAssignedUserRolesRequest = buildCaseAssignedUserRequest(
-                caseData.getId(),
-                caseRole,
-                organisationID,
-                userId
-            );
-
-            caseAssignmentApi.addCaseUserRoles(
-                systemUserService.getSysUserToken(),
-                tokenGenerator.generate(),
-                addCaseAssignedUserRolesRequest
-            );
-        } catch (FeignException ex) {
-            String message = String.format("User %s not granted %s to case %s", userId, caseRole, caseData.getId());
-            log.error(message, ex);
-            throw new GrantCaseAccessException(message);
-        }
-    }
-
-    private CaseAssignmentUserRolesRequest buildCaseAssignedUserRequest(Long caseId,
-                                                                        String caseRole,
-                                                                        String orgId,
-                                                                        String user) {
-        return CaseAssignmentUserRolesRequest.builder().caseAssignmentUserRolesWithOrganisation(
-            List.of(CaseAssignmentUserRoleWithOrganisation.builder()
-                        .caseDataId(caseId.toString())
-                        .organisationId(orgId)
-                        .userId(user)
-                        .caseRole(caseRole)
-                        .build())).build();
-
-    }
-
-    public void removeLaSocialWorker(final CaseData caseData, LocalAuthoritySocialWorker localAuthoritySocialWorker) {
-        String userId = localAuthoritySocialWorker.getUserId();
-        try {
-            log.info(
-                "On case id {}, about to start remove case access {} for users {}",
-                caseData.getId(),
-                LOCAL_AUTHORITY_SOCIAL_WORKER,
-                userId
-            );
-            CaseAssignmentUserRolesRequest removeCaseAssignedUserRolesRequest = buildCaseAssignedUserRequest(
-                caseData.getId(),
-                LOCAL_AUTHORITY_SOCIAL_WORKER,
-                localAuthoritySocialWorker.getLaSocialWorkerOrg().getOrganisationID(),
-                userId
-            );
-
-            caseAssignmentApi.removeCaseUserRoles(
-                systemUserService.getSysUserToken(),
-                tokenGenerator.generate(),
-                removeCaseAssignedUserRolesRequest
-            );
-        } catch (FeignException ex) {
-            String message = String.format(
-                "Could not remove the user %s role %s from the case %s",
-                userId,
-                LOCAL_AUTHORITY_SOCIAL_WORKER,
-                caseData.getId()
-            );
-            log.error(message, ex);
-            throw new GrantCaseAccessException(message);
-        }
-    }
 
     public void validateSocialWorkerOrgRelationship(CaseData caseData,
                                                     LocalAuthoritySocialWorker localAuthoritySocialWorker,
@@ -180,10 +93,10 @@ public class LaCaseAssignmentService {
             });
     }
 
-    public void validateAddRequest(CaseData caseData,
-                                   Optional<String> socialWorkerRole,
-                                   LocalAuthoritySocialWorker localAuthoritySocialWorker,
-                                   List<String> errorList) {
+    public void validateSocialWorkerAddRequest(CaseData caseData,
+                                               Optional<String> socialWorkerRole,
+                                               LocalAuthoritySocialWorker localAuthoritySocialWorker,
+                                               List<String> errorList) {
 
         socialWorkerRole.ifPresentOrElse(
             role -> {
@@ -201,9 +114,9 @@ public class LaCaseAssignmentService {
         );
     }
 
-    public void validateRemoveRequest(CaseData caseData,
-                                      LocalAuthoritySocialWorker localAuthoritySocialWorker,
-                                      List<String> errorList) {
+    public void validateSocialWorkerRemoveRequest(CaseData caseData,
+                                                  LocalAuthoritySocialWorker localAuthoritySocialWorker,
+                                                  List<String> errorList) {
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentService
             .getRoleAssignmentForCase(String.valueOf(caseData.getId()));
 

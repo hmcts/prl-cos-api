@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
-import uk.gov.hmcts.reform.prl.clients.ccd.LaCaseAssignmentService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole;
 import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
@@ -68,8 +67,6 @@ class CaseAssignmentControllerTest {
     @Mock
     private CaseAssignmentService caseAssignmentService;
     @Mock
-    private LaCaseAssignmentService laCaseAssignmentService;
-    @Mock
     private OrganisationService organisationService;
     @Mock
     private AuthorisationService authorisationService;
@@ -92,7 +89,6 @@ class CaseAssignmentControllerTest {
         objectMapper.findAndRegisterModules();
         caseAssignmentController = new CaseAssignmentController(
             caseAssignmentService,
-            laCaseAssignmentService,
             objectMapper,
             organisationService,
             authorisationService,
@@ -586,13 +582,13 @@ class CaseAssignmentControllerTest {
 
         assertThat(response.getErrors()).isEmpty();
 
-        verify(laCaseAssignmentService).validateAddRequest(
+        verify(caseAssignmentService).validateSocialWorkerAddRequest(
             isA(CaseData.class),
             eq(socialWorkerRole),
             isA(LocalAuthoritySocialWorker.class),
             anyList()
         );
-        verify(laCaseAssignmentService).addSocialWorker(
+        verify(caseAssignmentService).addSocialWorker(
             isA(CaseData.class),
             eq(userId.get()),
             eq(socialWorkerRole.get()),
@@ -633,7 +629,7 @@ class CaseAssignmentControllerTest {
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
 
         doThrow(new GrantCaseAccessException("User(s) not granted [LASOCIALWORKER] to the case "))
-            .when(laCaseAssignmentService).addSocialWorker(
+            .when(caseAssignmentService).addSocialWorker(
                 any(CaseData.class),
                 eq(userId.get()),
                 eq(socialWorkerRole.get()),
@@ -649,13 +645,13 @@ class CaseAssignmentControllerTest {
         assertThat(response.getErrors())
             .contains("User(s) not granted [LASOCIALWORKER] to the case ");
 
-        verify(laCaseAssignmentService).validateAddRequest(
+        verify(caseAssignmentService).validateSocialWorkerAddRequest(
             isA(CaseData.class),
             eq(socialWorkerRole),
             isA(LocalAuthoritySocialWorker.class),
             anyList()
         );
-        verify(laCaseAssignmentService).addSocialWorker(
+        verify(caseAssignmentService).addSocialWorker(
             isA(CaseData.class),
             eq(userId.get()),
             eq(socialWorkerRole.get()),
@@ -676,7 +672,7 @@ class CaseAssignmentControllerTest {
             List<String> errors = invocation.getArgument(4);
             errors.add("errors");
             return null;
-        }).when(laCaseAssignmentService).validateAddRequest(
+        }).when(caseAssignmentService).validateSocialWorkerAddRequest(
             isA(CaseData.class),
             eq(socialWorkerRole),
             isA(LocalAuthoritySocialWorker.class),
@@ -707,13 +703,13 @@ class CaseAssignmentControllerTest {
 
         assertThat(response.getErrors()).contains("errors");
 
-        verify(laCaseAssignmentService).validateAddRequest(
+        verify(caseAssignmentService).validateSocialWorkerAddRequest(
             isA(CaseData.class),
             eq(socialWorkerRole),
             isA(LocalAuthoritySocialWorker.class),
             anyList()
         );
-        verify(laCaseAssignmentService, never()).addSocialWorker(
+        verify(caseAssignmentService, never()).addSocialWorker(
             isA(CaseData.class),
             eq(userId.get()),
             eq(socialWorkerRole.get()),
@@ -754,7 +750,7 @@ class CaseAssignmentControllerTest {
 
         assertThat(response.getErrors()).isEmpty();
 
-        verify(laCaseAssignmentService).validateRemoveRequest(
+        verify(laCaseAssignmentService).validateSocialWorkerRemoveRequest(
             isA(CaseData.class),
             isA(LocalAuthoritySocialWorker.class),
             anyList()

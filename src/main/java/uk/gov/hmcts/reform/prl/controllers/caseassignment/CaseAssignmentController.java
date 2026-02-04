@@ -10,16 +10,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
-import uk.gov.hmcts.reform.prl.clients.ccd.LaCaseAssignmentService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
 import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
@@ -56,7 +51,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
 public class CaseAssignmentController {
 
     private final CaseAssignmentService caseAssignmentService;
-    private final LaCaseAssignmentService laCaseAssignmentService;
     private final ObjectMapper objectMapper;
     private final OrganisationService organisationService;
     private final AuthorisationService authorisationService;
@@ -85,15 +79,18 @@ public class CaseAssignmentController {
 
             Optional<String> userId = organisationService
                 .findUserByEmail(allocatedBarrister.getBarristerEmail());
-            Optional<String> barristerRole  = caseAssignmentService.deriveBarristerRole(caseDetails.getData(),
-                                                                                        caseData,
-                                                                                        allocatedBarrister);
+            Optional<String> barristerRole = caseAssignmentService.deriveBarristerRole(
+                caseDetails.getData(),
+                caseData,
+                allocatedBarrister
+            );
             caseAssignmentService.validateAddRequest(
-                    userId,
-                    caseData,
-                    barristerRole,
-                    allocatedBarrister,
-                    errorList);
+                userId,
+                caseData,
+                barristerRole,
+                allocatedBarrister,
+                errorList
+            );
 
             if (errorList.isEmpty() && userId.isPresent() && barristerRole.isPresent()) {
                 try {
@@ -103,8 +100,10 @@ public class CaseAssignmentController {
                         barristerRole.get(),
                         allocatedBarrister
                     );
-                    updateCaseDetails(caseDetails,
-                                      caseData);
+                    updateCaseDetails(
+                        caseDetails,
+                        caseData
+                    );
                 } catch (GrantCaseAccessException grantCaseAccessException) {
                     errorList.add(grantCaseAccessException.getMessage());
                 }
@@ -136,16 +135,20 @@ public class CaseAssignmentController {
             List<String> errorList = new ArrayList<>();
             AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
 
-            caseAssignmentService.validateRemoveRequest(caseData,
-                                                        allocatedBarrister.getPartyList().getValueCode(),
-                                                        errorList);
+            caseAssignmentService.validateRemoveRequest(
+                caseData,
+                allocatedBarrister.getPartyList().getValueCode(),
+                errorList
+            );
 
             if (errorList.isEmpty()) {
                 PartyDetails partyDetails = caseAssignmentService
                     .getSelectedParty(caseData, allocatedBarrister.getPartyList().getValueCode());
-                barristerHelper.setAllocatedBarrister(partyDetails,
-                                                 caseData,
-                                                 UUID.fromString(allocatedBarrister.getPartyList().getValueCode()));
+                barristerHelper.setAllocatedBarrister(
+                    partyDetails,
+                    caseData,
+                    UUID.fromString(allocatedBarrister.getPartyList().getValueCode())
+                );
                 caseAssignmentService.removeBarrister(caseData, partyDetails);
                 updateCaseDetails(caseDetails, caseData);
             }
@@ -195,16 +198,17 @@ public class CaseAssignmentController {
 
             Optional<String> userId = organisationService
                 .findUserByEmail(localAuthoritySocialWorker.getLaSocialWorkerEmail());
-            String laSocialWorkerRole  = "[LASOCIALWORKER]";
-            laCaseAssignmentService.validateAddRequest(
+            String laSocialWorkerRole = "[LASOCIALWORKER]";
+            caseAssignmentService.validateSocialWorkerAddRequest(
                 caseData,
                 Optional.of(laSocialWorkerRole),
                 localAuthoritySocialWorker,
-                errorList);
+                errorList
+            );
 
             if (errorList.isEmpty() && userId.isPresent()) {
                 try {
-                    laCaseAssignmentService.addSocialWorker(
+                    caseAssignmentService.addSocialWorker(
                         caseData,
                         userId.get(),
                         laSocialWorkerRole,
@@ -243,10 +247,10 @@ public class CaseAssignmentController {
             List<String> errorList = new ArrayList<>();
             LocalAuthoritySocialWorker localAuthoritySocialWorker = caseData.getLocalAuthoritySocialWorker();
 
-            laCaseAssignmentService.validateRemoveRequest(caseData, localAuthoritySocialWorker, errorList);
+            caseAssignmentService.validateSocialWorkerRemoveRequest(caseData, localAuthoritySocialWorker, errorList);
 
             if (errorList.isEmpty()) {
-                laCaseAssignmentService.removeLaSocialWorker(caseData, localAuthoritySocialWorker);
+                caseAssignmentService.removeLaSocialWorker(caseData, localAuthoritySocialWorker);
                 updateCaseDetails(caseDetails, caseData);
             }
 
