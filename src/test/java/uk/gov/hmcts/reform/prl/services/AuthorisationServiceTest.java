@@ -84,7 +84,7 @@ public class AuthorisationServiceTest {
     }
 
     @Test
-    public void shouldNotAuthoriseServiceWhenCallingServiceIsNull(){
+    public void shouldNotAuthoriseServiceWhenCallingServiceIsNull() {
         when(serviceAuthorisationApi.getServiceName(any())).thenReturn(null);
 
         Boolean authService = authorisationService.authoriseService("bearer abc");
@@ -93,8 +93,8 @@ public class AuthorisationServiceTest {
     }
 
     @Test
-    public void shouldReturnFalseWhenS2sAuthorisedServicesNotSplit(){
-        ReflectionTestUtils.setField(authorisationService, "s2sAuthorisedServices", " " );
+    public void shouldReturnFalseWhenS2sAuthorisedServicesNotSplit() {
+        ReflectionTestUtils.setField(authorisationService, "s2sAuthorisedServices", " ");
         when(serviceAuthorisationApi.getServiceName(any())).thenReturn("serviceName");
 
         Boolean authService = authorisationService.authoriseService("Bearer abc");
@@ -113,7 +113,7 @@ public class AuthorisationServiceTest {
     }
 
     @Test
-    public void shouldReturnUserInfoWhenUserIsAuthorised(){
+    public void shouldReturnUserInfoWhenUserIsAuthorised() {
         when(idamClient.getUserInfo(anyString())).thenReturn(UserInfo.builder().build());
         Optional<UserInfo> userInfo = authorisationService.authoriseUser("authorisation");
         assertThat(userInfo).isPresent();
