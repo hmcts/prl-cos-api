@@ -11,12 +11,14 @@ import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -79,5 +81,41 @@ public class AuthorisationServiceTest {
         when(idamClient.getUserInfo(any())).thenReturn(UserInfo.builder().uid(UUID.randomUUID().toString()).build());
         when(serviceAuthorisationApi.getServiceName(any())).thenReturn("unknown_api");
         assertFalse(authorisationService.isAuthorized("Bearer abcasda", "s2s token"));
+    }
+
+    @Test
+    public void shouldNotAuthoriseServiceWhenCallingServiceIsNull(){
+        when(serviceAuthorisationApi.getServiceName(any())).thenReturn(null);
+
+        Boolean authService = authorisationService.authoriseService("bearer abc");
+
+        assertFalse(authService);
+    }
+
+    @Test
+    public void shouldReturnFalseWhenS2sAuthorisedServicesNotSplit(){
+        ReflectionTestUtils.setField(authorisationService, "s2sAuthorisedServices", " " );
+        when(serviceAuthorisationApi.getServiceName(any())).thenReturn("serviceName");
+
+        Boolean authService = authorisationService.authoriseService("Bearer abc");
+
+        assertFalse(authService);
+    }
+
+
+    @Test
+    public void shouldCatchAnExceptionWhenUserTokenIsInvalid() {
+        when(idamClient.getUserInfo(any())).thenThrow(new RuntimeException("Not found"));
+        Optional<UserInfo> userInfo = authorisationService.authoriseUser("authorisation");
+
+        assertThat(userInfo).isEmpty();
+
+    }
+
+    @Test
+    public void shouldReturnUserInfoWhenUserIsAuthorised(){
+        when(idamClient.getUserInfo(anyString())).thenReturn(UserInfo.builder().build());
+        Optional<UserInfo> userInfo = authorisationService.authoriseUser("authorisation");
+        assertThat(userInfo).isPresent();
     }
 }
