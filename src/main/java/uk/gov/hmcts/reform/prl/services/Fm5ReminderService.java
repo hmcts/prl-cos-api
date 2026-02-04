@@ -146,14 +146,19 @@ public class Fm5ReminderService {
             filteredCaseAndParties.putAll(validateNonHearingSystemRules(caseData));
 
             if (!Fm5PendingParty.NOTIFICATION_NOT_REQUIRED.equals(filteredCaseAndParties.get(String.valueOf(caseData.getId())))) {
+                log.info("Adding caseId {} for hearing check", caseData.getId());
                 caseIdsForHearing.add(String.valueOf(caseData.getId()));
             } else {
+                log.info("Not adding caseId {} for hearing check", caseData.getId());
                 qualifiedCasesAndPartiesBeforeHearing.put(
                     String.valueOf(caseData.getId()),
                     Fm5PendingParty.NOTIFICATION_NOT_REQUIRED
                 );
             }
         }
+        
+        log.info("TEST LOGGING qualifiedCasesAndPartiesBeforeHearing: {}", qualifiedCasesAndPartiesBeforeHearing);
+        log.info("TEST LOGGING filteredCaseAndParties: {}", filteredCaseAndParties);
 
         if (isNotEmpty(caseIdsForHearing)) {
             log.info("Fetching hearings for cases {}", caseIdsForHearing);
