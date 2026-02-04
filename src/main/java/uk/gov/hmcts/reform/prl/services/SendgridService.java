@@ -184,8 +184,8 @@ public class SendgridService {
         }
     }
 
-    private void attachFiles(String authorization, Mail mail, Map<String,
-        String> emailProps, List<Document> documents) {
+    private void attachFiles(String authorization, Mail mail, Map<String, String> emailProps, List<Document> documents) {
+        log.info("Case ID: {} - Attaching {} documents to email", emailProps.get(CASE_NUMBER), documents.size());
         String s2sToken = authTokenGenerator.generate();
         documents.parallelStream().forEach(document -> {
             Attachments attachments = new Attachments();
