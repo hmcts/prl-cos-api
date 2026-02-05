@@ -2671,21 +2671,21 @@ public class UpdatePartyDetailsServiceTest {
 
     @Test
     void shouldReturnValidationErrorWhenRespondantsChangeAndBarristerPresentForC100() {
-        Element<PartyDetails> applicant1 = getPartyDetails("App1", true);
-        Element<PartyDetails> applicant2 = getPartyDetails("App2", true);
+        Element<PartyDetails> respondent1 = getPartyDetails("Resp1", true);
+        Element<PartyDetails> respondent2 = getPartyDetails("Resp2", true);
 
         CaseData caseDataBefore = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
-            .applicants(List.of(applicant1, applicant2))
-            .respondents(Collections.emptyList())
+            .applicants(Collections.emptyList())
+            .respondents(List.of(respondent1, respondent2))
             .build();
 
-        Element<PartyDetails> newApplicant = getPartyDetails(null, "App3", true);
+        Element<PartyDetails> newRespondent = getPartyDetails(null, "Resp3", true);
 
         CaseData caseDataCurrent = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
-            .applicants(List.of(applicant2, newApplicant))
-            .respondents(Collections.emptyList())
+            .applicants(Collections.emptyList())
+            .respondents(List.of(newRespondent))
             .build();
 
         Map<String,Object> caseDataMapBefore = Map.of("before", true);
