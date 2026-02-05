@@ -470,7 +470,7 @@ public class ServiceOfDocumentsService {
                 documents,
                 (EmailTemplateNames) inputParams.get(GOV_NOTIFY_TEMPLATE),
                 (SendgridEmailTemplateNames) inputParams.get(SEND_GRID_TEMPLATE),
-                                emailNotificationDetails,
+                emailNotificationDetails,
                 params
             );
         } else {
