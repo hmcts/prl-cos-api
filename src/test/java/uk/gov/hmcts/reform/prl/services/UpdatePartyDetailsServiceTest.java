@@ -2802,6 +2802,7 @@ public class UpdatePartyDetailsServiceTest {
     private Element<PartyDetails> getPartyDetails(String partyName, boolean hasBarrister) {
         return getPartyDetails(UUID.randomUUID(), partyName, hasBarrister);
     }
+
     private Element<PartyDetails> getPartyDetails(UUID id, String partyName, boolean hasBarrister) {
         return Element.<PartyDetails>builder().id(id)
             .value(PartyDetails.builder()
