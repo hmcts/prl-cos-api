@@ -27,6 +27,7 @@ import java.util.Map;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_EMAIL;
 
 @RestController
 @RequestMapping("/service-of-documents")
@@ -63,12 +64,12 @@ public class ServiceOfDocumentsController {
     @PostMapping(path = "/validate", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Mid event callback to validate documents")
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse validateSodRequest(
+    public AboutToStartOrSubmitCallbackResponse validateDocuments(
         @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            List<String> errorList = serviceOfDocumentsService.validateSodRequest(callbackRequest);
+            List<String> errorList = serviceOfDocumentsService.validateDocuments(callbackRequest);
             if (isNotEmpty(errorList)) {
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
             }
@@ -77,6 +78,26 @@ public class ServiceOfDocumentsController {
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(path = "/validate-additional-recipients", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Mid event callback to validate additional recipients email addresses")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse validateAdditionalRecipients(
+        @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            List<String> errorList = serviceOfDocumentsService.validateAdditionalRecipients(callbackRequest);
+            if (isNotEmpty(errorList)) {
+                return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
+            }
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(callbackRequest.getCaseDetails().getData())
+                .build();
+        } else {
+            throw (new RuntimeException(INVALID_EMAIL));
         }
     }
 

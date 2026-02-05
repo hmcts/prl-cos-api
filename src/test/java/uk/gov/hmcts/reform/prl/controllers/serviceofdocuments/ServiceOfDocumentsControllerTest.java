@@ -111,10 +111,10 @@ public class ServiceOfDocumentsControllerTest {
 
     @Test
     public void testValidateDocumentsWhenEitherPresent() {
-        when(serviceOfDocumentsService.validateSodRequest(Mockito.any(CallbackRequest.class))).thenReturn(Collections.emptyList());
+        when(serviceOfDocumentsService.validateDocuments(Mockito.any(CallbackRequest.class))).thenReturn(Collections.emptyList());
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfDocumentsController
-            .validateSodRequest(any(),any(),callbackRequest);
+            .validateDocuments(any(),any(),callbackRequest);
 
         assertNotNull(aboutToStartOrSubmitCallbackResponse);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
@@ -123,10 +123,10 @@ public class ServiceOfDocumentsControllerTest {
     @Test
     public void testValidateDocumentsWhenBothDocsAreEmpty() {
         List<String> errors = List.of(NO_DOCUMENTS_SELECTED_ERROR);
-        when(serviceOfDocumentsService.validateSodRequest(Mockito.any(CallbackRequest.class))).thenReturn(errors);
+        when(serviceOfDocumentsService.validateDocuments(Mockito.any(CallbackRequest.class))).thenReturn(errors);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfDocumentsController
-            .validateSodRequest(any(),any(),callbackRequest);
+            .validateDocuments(any(),any(),callbackRequest);
 
         assertNotNull(aboutToStartOrSubmitCallbackResponse);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getErrors());
@@ -136,7 +136,7 @@ public class ServiceOfDocumentsControllerTest {
     @Test
     public void testValidateSodRequestWhenEmailIsInvalid() {
         List<String> errors = List.of(INVALID_EMAIL);
-        when(serviceOfDocumentsService.validateSodRequest(Mockito.any(CallbackRequest.class))).thenReturn(errors);
+        when(serviceOfDocumentsService.validateAdditionalRecipients(Mockito.any(CallbackRequest.class))).thenReturn(errors);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfDocumentsController
             .validateSodRequest(any(),any(),callbackRequest);

@@ -917,7 +917,7 @@ public class ServiceOfDocumentsServiceTest {
             .eventId("eventID")
             .build();
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData1);
-        List<String> response = serviceOfDocumentsService.validateSodRequest(callbackRequest1);
+        List<String> response = serviceOfDocumentsService.validateAdditionalRecipients(callbackRequest1);
         assertNotNull(response);
         assertEquals(0, response.size());
     }
@@ -944,7 +944,7 @@ public class ServiceOfDocumentsServiceTest {
             .eventId("eventID")
             .build();
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData1);
-        List<String> response = serviceOfDocumentsService.validateSodRequest(callbackRequest1);
+        List<String> response = serviceOfDocumentsService.validateAdditionalRecipients(callbackRequest1);
         assertNotNull(response);
         assertEquals(0,response.size());
     }
@@ -970,13 +970,13 @@ public class ServiceOfDocumentsServiceTest {
             .eventId("eventID")
             .build();
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData1);
-        List<String> response = serviceOfDocumentsService.validateSodRequest(callbackRequest1);
+        List<String> response = serviceOfDocumentsService.validateAdditionalRecipients(callbackRequest1);
         assertNotNull(response);
         assertEquals(1,response.size());
     }
 
     @Test
-    public void validateSodRequestShouldReturnErrorsForInvalidEmails() {
+    public void validateAdditionalRecipientsShouldReturnErrorsForInvalidEmails() {
         Document document = Document.builder()
             .documentUrl("testUrl")
             .documentBinaryUrl("testUrl")
@@ -1003,7 +1003,7 @@ public class ServiceOfDocumentsServiceTest {
 
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(testData);
 
-        List<String> errors = serviceOfDocumentsService.validateSodRequest(testCallback);
+        List<String> errors = serviceOfDocumentsService.validateAdditionalRecipients(testCallback);
 
         assertNotNull(errors);
         assertEquals(1, errors.size());
@@ -1011,7 +1011,7 @@ public class ServiceOfDocumentsServiceTest {
     }
 
     @Test
-    public void validateSodRequestShouldReturnNoErrorsForValidEmails() {
+    public void validateAdditionalRecipientsShouldReturnNoErrorsForValidEmails() {
         Document document = Document.builder()
             .documentUrl("testUrl")
             .documentBinaryUrl("testUrl")
@@ -1038,7 +1038,7 @@ public class ServiceOfDocumentsServiceTest {
 
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(testData);
 
-        List<String> errors = serviceOfDocumentsService.validateSodRequest(testCallback);
+        List<String> errors = serviceOfDocumentsService.validateAdditionalRecipients(testCallback);
 
         assertNotNull(errors);
         assertEquals(0, errors.size());

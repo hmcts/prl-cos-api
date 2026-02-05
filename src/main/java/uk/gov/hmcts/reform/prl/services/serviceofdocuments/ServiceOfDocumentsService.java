@@ -970,7 +970,7 @@ public class ServiceOfDocumentsService {
         }
     }
 
-    public List<String> validateSodRequest(CallbackRequest callbackRequest) {
+    public List<String> validateAdditionalRecipients(CallbackRequest callbackRequest) {
         List<String> errors = new ArrayList<>();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
@@ -987,12 +987,10 @@ public class ServiceOfDocumentsService {
                 });
         }
 
-        // Validate documents
-        errors.addAll(validateDocuments(callbackRequest));
         return errors;
     }
 
-    private List<String> validateDocuments(CallbackRequest callbackRequest) {
+    public List<String> validateDocuments(CallbackRequest callbackRequest) {
         List<String> errors = new ArrayList<>();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         if (CollectionUtils.isEmpty(caseData.getServiceOfDocuments().getSodAdditionalDocumentsList())
