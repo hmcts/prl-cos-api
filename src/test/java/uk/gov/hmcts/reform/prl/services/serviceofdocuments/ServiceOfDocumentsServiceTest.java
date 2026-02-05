@@ -917,7 +917,7 @@ public class ServiceOfDocumentsServiceTest {
             .eventId("eventID")
             .build();
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData1);
-        List<String> response = serviceOfDocumentsService.validateAdditionalRecipients(callbackRequest1);
+        List<String> response = serviceOfDocumentsService.validateDocuments(callbackRequest1);
         assertNotNull(response);
         assertEquals(0, response.size());
     }
@@ -944,7 +944,7 @@ public class ServiceOfDocumentsServiceTest {
             .eventId("eventID")
             .build();
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData1);
-        List<String> response = serviceOfDocumentsService.validateAdditionalRecipients(callbackRequest1);
+        List<String> response = serviceOfDocumentsService.validateDocuments(callbackRequest1);
         assertNotNull(response);
         assertEquals(0,response.size());
     }
@@ -970,7 +970,7 @@ public class ServiceOfDocumentsServiceTest {
             .eventId("eventID")
             .build();
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData1);
-        List<String> response = serviceOfDocumentsService.validateAdditionalRecipients(callbackRequest1);
+        List<String> response = serviceOfDocumentsService.validateDocuments(callbackRequest1);
         assertNotNull(response);
         assertEquals(1,response.size());
     }

@@ -33,6 +33,7 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @Slf4j
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -139,7 +140,7 @@ public class ServiceOfDocumentsControllerTest {
         when(serviceOfDocumentsService.validateAdditionalRecipients(Mockito.any(CallbackRequest.class))).thenReturn(errors);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfDocumentsController
-            .validateSodRequest(any(),any(),callbackRequest);
+            .validateAdditionalRecipients(any(),any(),callbackRequest);
 
         assertNotNull(aboutToStartOrSubmitCallbackResponse);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getErrors());
@@ -185,7 +186,7 @@ public class ServiceOfDocumentsControllerTest {
     public void testExceptionValidateSodRequest() {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
         assertExpectedException(() -> {
-            serviceOfDocumentsController.validateSodRequest(any(), any(), callbackRequest);
+            serviceOfDocumentsController.validateAdditionalRecipients(any(), any(), callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 

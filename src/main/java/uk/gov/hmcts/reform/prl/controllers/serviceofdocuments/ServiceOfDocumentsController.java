@@ -97,7 +97,7 @@ public class ServiceOfDocumentsController {
                 .data(callbackRequest.getCaseDetails().getData())
                 .build();
         } else {
-            throw (new RuntimeException(INVALID_EMAIL));
+            throw (new RuntimeException(INVALID_CLIENT));
         }
     }
 
