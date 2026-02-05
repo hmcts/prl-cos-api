@@ -27,7 +27,6 @@ import java.util.Map;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_EMAIL;
 
 @RestController
 @RequestMapping("/service-of-documents")
