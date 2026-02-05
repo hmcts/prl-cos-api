@@ -63,12 +63,12 @@ public class ServiceOfDocumentsController {
     @PostMapping(path = "/validate", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Mid event callback to validate documents")
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse validateDocuments(
+    public AboutToStartOrSubmitCallbackResponse validateSodRequest(
         @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            List<String> errorList = serviceOfDocumentsService.validateDocuments(callbackRequest);
+            List<String> errorList = serviceOfDocumentsService.validateSodRequest(callbackRequest);
             if (isNotEmpty(errorList)) {
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
             }

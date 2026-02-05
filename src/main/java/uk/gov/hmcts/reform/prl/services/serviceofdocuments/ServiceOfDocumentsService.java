@@ -103,6 +103,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
+import static uk.gov.hmcts.reform.prl.utils.EmailUtils.isValidEmailAddress;
 
 @Service
 @Slf4j
@@ -469,7 +470,7 @@ public class ServiceOfDocumentsService {
                 documents,
                 (EmailTemplateNames) inputParams.get(GOV_NOTIFY_TEMPLATE),
                 (SendgridEmailTemplateNames) inputParams.get(SEND_GRID_TEMPLATE),
-                emailNotificationDetails,
+                                emailNotificationDetails,
                 params
             );
         } else {
@@ -969,7 +970,29 @@ public class ServiceOfDocumentsService {
         }
     }
 
-    public List<String> validateDocuments(CallbackRequest callbackRequest) {
+    public List<String> validateSodRequest(CallbackRequest callbackRequest) {
+        List<String> errors = new ArrayList<>();
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        // Validate additional recipients email addresses
+        if (CollectionUtils.isNotEmpty(caseData.getServiceOfDocuments().getSodAdditionalRecipientsList())) {
+            caseData.getServiceOfDocuments().getSodAdditionalRecipientsList().stream()
+                .map(Element::getValue)
+                .filter(addRecipient -> DeliveryByEnum.email.equals(addRecipient.getServeByPostOrEmail()))
+                .forEach(addRecipient -> {
+                    String emailAddress = addRecipient.getEmailInformation().getEmailAddress();
+                    if (!isValidEmailAddress(emailAddress)) {
+                        errors.add("Please provide valid email address for additional recipient");
+                    }
+                });
+        }
+
+        // Validate documents
+        errors.addAll(validateDocuments(callbackRequest));
+        return errors;
+    }
+
+    private List<String> validateDocuments(CallbackRequest callbackRequest) {
         List<String> errors = new ArrayList<>();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         if (CollectionUtils.isEmpty(caseData.getServiceOfDocuments().getSodAdditionalDocumentsList())

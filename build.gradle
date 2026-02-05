@@ -30,6 +30,7 @@ def versions = [
   commonsIo                    : '2.21.0',
   commonsLang3                 : '3.20.0',
   commonsMath3                 : '3.6.1',
+  commonsValidator             : '1.10.1',
   dumbster                     : '1.7.1',
   googleAuth                   : '1.5.0',
   gradlePitest                 : '1.15.0',
@@ -324,6 +325,7 @@ dependencies {
   implementation group: 'jakarta.activation', name: 'jakarta.activation-api', version: '2.1.4'
   implementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
   implementation group: 'org.apache.commons', name: 'commons-math3', version: versions.commonsMath3
+  implementation group: 'commons-validator', name: 'commons-validator', version: versions.commonsValidator
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version: versions.springBoot
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: versions.springBoot

@@ -41,6 +41,7 @@ public class ServiceOfDocumentsControllerTest {
     public static final String NO_DOCUMENTS_SELECTED_ERROR = "Please select a document or upload a document to serve";
     public static final String UN_SERVED_DOCUMENTS_PRESENT_ERROR =
         "Can not execute service of documents, there are unserved document(s) pending review";
+    public static final String INVALID_EMAIL = "Please provide valid email address for additional recipient";
 
     @InjectMocks
     private ServiceOfDocumentsController serviceOfDocumentsController;
@@ -110,10 +111,10 @@ public class ServiceOfDocumentsControllerTest {
 
     @Test
     public void testValidateDocumentsWhenEitherPresent() {
-        when(serviceOfDocumentsService.validateDocuments(Mockito.any(CallbackRequest.class))).thenReturn(Collections.emptyList());
+        when(serviceOfDocumentsService.validateSodRequest(Mockito.any(CallbackRequest.class))).thenReturn(Collections.emptyList());
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfDocumentsController
-            .validateDocuments(any(),any(),callbackRequest);
+            .validateSodRequest(any(),any(),callbackRequest);
 
         assertNotNull(aboutToStartOrSubmitCallbackResponse);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
@@ -122,14 +123,27 @@ public class ServiceOfDocumentsControllerTest {
     @Test
     public void testValidateDocumentsWhenBothDocsAreEmpty() {
         List<String> errors = List.of(NO_DOCUMENTS_SELECTED_ERROR);
-        when(serviceOfDocumentsService.validateDocuments(Mockito.any(CallbackRequest.class))).thenReturn(errors);
+        when(serviceOfDocumentsService.validateSodRequest(Mockito.any(CallbackRequest.class))).thenReturn(errors);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfDocumentsController
-            .validateDocuments(any(),any(),callbackRequest);
+            .validateSodRequest(any(),any(),callbackRequest);
 
         assertNotNull(aboutToStartOrSubmitCallbackResponse);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getErrors());
         assertEquals(NO_DOCUMENTS_SELECTED_ERROR, aboutToStartOrSubmitCallbackResponse.getErrors().get(0));
+    }
+
+    @Test
+    public void testValidateSodRequestWhenEmailIsInvalid() {
+        List<String> errors = List.of(INVALID_EMAIL);
+        when(serviceOfDocumentsService.validateSodRequest(Mockito.any(CallbackRequest.class))).thenReturn(errors);
+
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfDocumentsController
+            .validateSodRequest(any(),any(),callbackRequest);
+
+        assertNotNull(aboutToStartOrSubmitCallbackResponse);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getErrors());
+        assertEquals(INVALID_EMAIL, aboutToStartOrSubmitCallbackResponse.getErrors().getFirst());
     }
 
     @Test
@@ -168,10 +182,10 @@ public class ServiceOfDocumentsControllerTest {
     }
 
     @Test
-    public void testExceptionValidateDocuments() {
+    public void testExceptionValidateSodRequest() {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
         assertExpectedException(() -> {
-            serviceOfDocumentsController.validateDocuments(any(), any(), callbackRequest);
+            serviceOfDocumentsController.validateSodRequest(any(), any(), callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 

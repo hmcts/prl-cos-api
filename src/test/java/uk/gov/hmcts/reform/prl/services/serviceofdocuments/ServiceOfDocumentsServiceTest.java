@@ -917,7 +917,7 @@ public class ServiceOfDocumentsServiceTest {
             .eventId("eventID")
             .build();
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData1);
-        List<String> response = serviceOfDocumentsService.validateDocuments(callbackRequest1);
+        List<String> response = serviceOfDocumentsService.validateSodRequest(callbackRequest1);
         assertNotNull(response);
         assertEquals(0, response.size());
     }
@@ -944,7 +944,7 @@ public class ServiceOfDocumentsServiceTest {
             .eventId("eventID")
             .build();
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData1);
-        List<String> response = serviceOfDocumentsService.validateDocuments(callbackRequest1);
+        List<String> response = serviceOfDocumentsService.validateSodRequest(callbackRequest1);
         assertNotNull(response);
         assertEquals(0,response.size());
     }
@@ -970,10 +970,78 @@ public class ServiceOfDocumentsServiceTest {
             .eventId("eventID")
             .build();
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData1);
-        List<String> response = serviceOfDocumentsService.validateDocuments(callbackRequest1);
+        List<String> response = serviceOfDocumentsService.validateSodRequest(callbackRequest1);
         assertNotNull(response);
         assertEquals(1,response.size());
     }
 
+    @Test
+    public void validateSodRequestShouldReturnErrorsForInvalidEmails() {
+        Document document = Document.builder()
+            .documentUrl("testUrl")
+            .documentBinaryUrl("testUrl")
+            .documentFileName("testFile.pdf")
+            .build();
+        CaseData testData = CaseData.builder()
+            .serviceOfDocuments(ServiceOfDocuments.builder()
+                                    .sodAdditionalDocumentsList(List.of(element(document)))
+                                    .sodAdditionalRecipientsList(List.of(
+                                        element(ServeOrgDetails.builder()
+                                                    .serveByPostOrEmail(DeliveryByEnum.email)
+                                                    .emailInformation(EmailInformation.builder()
+                                                                          .emailAddress("invalid-email")
+                                                                          .build())
+                                                    .build())))
+                                    .build())
+            .build();
+
+        CallbackRequest testCallback = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder().id(Long.valueOf(TEST_CASE_ID))
+                             .data(caseData.toMap(new ObjectMapper()))
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(testData);
+
+        List<String> errors = serviceOfDocumentsService.validateSodRequest(testCallback);
+
+        assertNotNull(errors);
+        assertEquals(1, errors.size());
+        assertEquals("Please provide valid email address for additional recipient", errors.getFirst());
+    }
+
+    @Test
+    public void validateSodRequestShouldReturnNoErrorsForValidEmails() {
+        Document document = Document.builder()
+            .documentUrl("testUrl")
+            .documentBinaryUrl("testUrl")
+            .documentFileName("testFile.pdf")
+            .build();
+        CaseData testData = CaseData.builder()
+            .serviceOfDocuments(ServiceOfDocuments.builder()
+                                    .sodAdditionalDocumentsList(List.of(element(document)))
+                                    .sodAdditionalRecipientsList(List.of(
+                                        element(ServeOrgDetails.builder()
+                                                    .serveByPostOrEmail(DeliveryByEnum.email)
+                                                    .emailInformation(EmailInformation.builder()
+                                                                          .emailAddress("test@test.com")
+                                                                          .build())
+                                                    .build())))
+                                    .build())
+            .build();
+
+        CallbackRequest testCallback = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder().id(Long.valueOf(TEST_CASE_ID))
+                             .data(caseData.toMap(new ObjectMapper()))
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(testData);
+
+        List<String> errors = serviceOfDocumentsService.validateSodRequest(testCallback);
+
+        assertNotNull(errors);
+        assertEquals(0, errors.size());
+    }
 
 }
