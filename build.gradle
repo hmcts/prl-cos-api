@@ -50,7 +50,7 @@ def versions = [
   serenityCucumber             : '4.3.4',
   serviceTokenGenerator        : '4.1.2',
   sonarPitest                  : '0.5',
-  springSecurityCrypto         : '6.5.0',
+  springSecurityCrypto         : '6.5.7',
   springSecurityRsa            : '1.1.5',
   springBoot                   : '3.5.10',
   springCloud                  : '4.3.0',
@@ -289,7 +289,7 @@ configurations.configureEach {
   resolutionStrategy {
     force 'org.bouncycastle:bcpkix-jdk18on:1.83'
     force 'org.springframework.security:spring-security-rsa:1.1.5'
-    force 'org.springframework.security:spring-security-crypto:6.5.0'
+    force 'org.springframework.security:spring-security-crypto:6.5.7'
     force 'ch.qos.logback:logback-classic:1.5.27'
     force 'ch.qos.logback:logback-core:1.5.27'
   }
@@ -355,9 +355,9 @@ dependencies {
   implementation group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
   implementation group: 'com.sendgrid', name: 'sendgrid-java', version: '4.10.3'
   implementation group: 'commons-net', name: 'commons-net', version: '3.12.0'
-  implementation group: 'org.springframework.security', name: 'spring-security-web', version: '6.5.0'
+  implementation group: 'org.springframework.security', name: 'spring-security-web', version: '6.5.7'
 //  // CVE-2021-22112 - Privilege Escalation
-  implementation group: 'org.springframework.security', name: 'spring-security-core', version: '6.5.0'
+  implementation group: 'org.springframework.security', name: 'spring-security-core', version: '6.5.7'
   implementation(group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.3.0')
     {
       exclude group: 'io.reactivex', module: 'io.reactivex'
