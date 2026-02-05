@@ -2622,31 +2622,27 @@ public class UpdatePartyDetailsServiceTest {
 
     }
 
-
     @Test
-    void shouldReturnValidateUpdatePartyDetailsIfBarristerPresentAndRespondentIsRemovedForC100() {
+    void shouldReturnValidationErrorWhenApplicantsChangeAndBarristerPresentForC100() {
         Element<PartyDetails> applicant1 = getPartyDetails("App1", true);
         Element<PartyDetails> applicant2 = getPartyDetails("App2", true);
-
-        Element<PartyDetails> respondent1 = getPartyDetails("Resp1", true);
-        Element<PartyDetails> respondent2 = getPartyDetails("Resp2", true);
 
         CaseData caseDataBefore = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(List.of(applicant1, applicant2))
-            .respondents(List.of(respondent1, respondent2))
+            .respondents(Collections.emptyList())
             .build();
 
-        CaseData caseData = CaseData.builder()
+        Element<PartyDetails> newApplicant = getPartyDetails(null, "App2", true);
+
+        CaseData caseDataCurrent = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
-            .applicants(List.of(applicant1, respondent2))
-            .respondents(List.of(respondent1))
+            .applicants(List.of(newApplicant))
+            .respondents(Collections.emptyList())
             .build();
 
-        Map<String,Object> caseDataMapBefore = new HashMap<>();
-        Map<String,Object> caseDataMap = new HashMap<>();
-        caseDataMapBefore.put("before", true);
-        caseDataMap.put("before", false);
+        Map<String,Object> caseDataMapBefore = Map.of("before", true);
+        Map<String,Object> caseDataMap = Map.of("before", false);
 
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetailsBefore(CaseDetails.builder()
@@ -2662,12 +2658,105 @@ public class UpdatePartyDetailsServiceTest {
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class)))
             .thenAnswer(invocation -> {
                 Map<String, Object> map = invocation.getArgument(0);
-                if (map.get("before").equals(true)) {
-                    return caseDataBefore;
-                } else if (map.get("before").equals(false)) {
-                    return caseData;
-                }
-                return null;
+                Boolean before = (Boolean) map.get("before");
+                return Boolean.TRUE.equals(before) ? caseDataBefore : caseDataCurrent;
+            });
+
+        List<String> validationErrorList = updatePartyDetailsService.validateUpdatePartyDetails(callbackRequest);
+
+        assertTrue(!validationErrorList.isEmpty());
+        assertTrue(validationErrorList.getFirst().contains("Barrister is associated with the party"));
+
+    }
+
+    @Test
+    void shouldReturnValidationErrorWhenRespondantsChangeAndBarristerPresentForC100() {
+        Element<PartyDetails> applicant1 = getPartyDetails("App1", true);
+        Element<PartyDetails> applicant2 = getPartyDetails("App2", true);
+
+        CaseData caseDataBefore = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(applicant1, applicant2))
+            .respondents(Collections.emptyList())
+            .build();
+
+        Element<PartyDetails> newApplicant = getPartyDetails(null, "App3", true);
+
+        CaseData caseDataCurrent = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(newApplicant))
+            .respondents(Collections.emptyList())
+            .build();
+
+        Map<String,Object> caseDataMapBefore = Map.of("before", true);
+        Map<String,Object> caseDataMap = Map.of("before", false);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetailsBefore(CaseDetails.builder()
+                                   .id(12345L)
+                                   .data(caseDataMapBefore)
+                                   .build())
+            .caseDetails(CaseDetails.builder()
+                             .id(12345L)
+                             .data(caseDataMap)
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class)))
+            .thenAnswer(invocation -> {
+                Map<String, Object> map = invocation.getArgument(0);
+                Boolean before = (Boolean) map.get("before");
+                return Boolean.TRUE.equals(before) ? caseDataBefore : caseDataCurrent;
+            });
+
+        List<String> validationErrorList = updatePartyDetailsService.validateUpdatePartyDetails(callbackRequest);
+
+        assertTrue(!validationErrorList.isEmpty());
+        assertTrue(validationErrorList.getFirst().contains("Barrister is associated with the party"));
+
+    }
+
+    @Test
+    void shouldReturnValidateUpdatePartyDetailsIfBarristerPresentAndRespondentIsRemovedForC100() {
+        Element<PartyDetails> applicant1 = getPartyDetails("App1", true);
+        Element<PartyDetails> applicant2 = getPartyDetails("App2", true);
+
+        Element<PartyDetails> respondent1 = getPartyDetails("Resp1", true);
+        Element<PartyDetails> respondent2 = getPartyDetails("Resp2", true);
+
+        Element<PartyDetails> newRespondent = getPartyDetails(null, "Resp3", true);
+
+        CaseData caseDataBefore = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(applicant1, applicant2))
+            .respondents(List.of(respondent1, respondent2))
+            .build();
+
+        CaseData caseDataCurrent = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(applicant1, respondent2))
+            .respondents(List.of(newRespondent))
+            .build();
+
+        Map<String,Object> caseDataMapBefore = Map.of("before", true);
+        Map<String,Object> caseDataMap = Map.of("before", false);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetailsBefore(CaseDetails.builder()
+                                   .id(12345L)
+                                   .data(caseDataMapBefore)
+                                   .build())
+            .caseDetails(CaseDetails.builder()
+                             .id(12345L)
+                             .data(caseDataMap)
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class)))
+            .thenAnswer(invocation -> {
+                Map<String, Object> map = invocation.getArgument(0);
+                Boolean before = (Boolean) map.get("before");
+                return Boolean.TRUE.equals(before) ? caseDataBefore : caseDataCurrent;
             });
 
 
@@ -2711,7 +2800,10 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     private Element<PartyDetails> getPartyDetails(String partyName, boolean hasBarrister) {
-        return Element.<PartyDetails>builder().id(UUID.randomUUID())
+        return getPartyDetails(UUID.randomUUID(), partyName, hasBarrister);
+    }
+    private Element<PartyDetails> getPartyDetails(UUID id, String partyName, boolean hasBarrister) {
+        return Element.<PartyDetails>builder().id(id)
             .value(PartyDetails.builder()
                        .barrister(hasBarrister ? Barrister.builder()
                                       .barristerEmail("test1@test.com")
