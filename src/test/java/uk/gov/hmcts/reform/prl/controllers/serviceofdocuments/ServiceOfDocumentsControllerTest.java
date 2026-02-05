@@ -41,7 +41,7 @@ public class ServiceOfDocumentsControllerTest {
     public static final String NO_DOCUMENTS_SELECTED_ERROR = "Please select a document or upload a document to serve";
     public static final String UN_SERVED_DOCUMENTS_PRESENT_ERROR =
         "Can not execute service of documents, there are unserved document(s) pending review";
-    public static final String INVALID_EMAIL = "Please provide valid email address for additional recipient";
+    public static final String INVALID_ADDITIONAL_RECIPIENTS_EMAIL = "Please provide valid email address for additional recipient";
 
     @InjectMocks
     private ServiceOfDocumentsController serviceOfDocumentsController;
@@ -135,7 +135,7 @@ public class ServiceOfDocumentsControllerTest {
 
     @Test
     public void testValidateSodRequestWhenEmailIsInvalid() {
-        List<String> errors = List.of(INVALID_EMAIL);
+        List<String> errors = List.of(INVALID_ADDITIONAL_RECIPIENTS_EMAIL);
         when(serviceOfDocumentsService.validateAdditionalRecipients(Mockito.any(CallbackRequest.class))).thenReturn(errors);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfDocumentsController
@@ -143,7 +143,7 @@ public class ServiceOfDocumentsControllerTest {
 
         assertNotNull(aboutToStartOrSubmitCallbackResponse);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getErrors());
-        assertEquals(INVALID_EMAIL, aboutToStartOrSubmitCallbackResponse.getErrors().getFirst());
+        assertEquals(INVALID_ADDITIONAL_RECIPIENTS_EMAIL, aboutToStartOrSubmitCallbackResponse.getErrors().getFirst());
     }
 
     @Test

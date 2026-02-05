@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.DocumentsDynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.PostalInformation;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.ServeOrgDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofdocuments.SodPack;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
@@ -971,23 +972,19 @@ public class ServiceOfDocumentsService {
     }
 
     public List<String> validateAdditionalRecipients(CallbackRequest callbackRequest) {
-        List<String> errors = new ArrayList<>();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
-        // Validate additional recipients email addresses
+        // Validate additional recipients email addresses - return error on first invalid email
         if (CollectionUtils.isNotEmpty(caseData.getServiceOfDocuments().getSodAdditionalRecipientsList())) {
-            caseData.getServiceOfDocuments().getSodAdditionalRecipientsList().stream()
-                .map(Element::getValue)
-                .filter(addRecipient -> DeliveryByEnum.email.equals(addRecipient.getServeByPostOrEmail()))
-                .forEach(addRecipient -> {
-                    String emailAddress = addRecipient.getEmailInformation().getEmailAddress();
-                    if (!isValidEmailAddress(emailAddress)) {
-                        errors.add("Please provide valid email address for additional recipient");
-                    }
-                });
+            for (Element<ServeOrgDetails> recipient : caseData.getServiceOfDocuments()
+                .getSodAdditionalRecipientsList()) {
+                if (recipient.getValue().getServeByPostOrEmail().equals(DeliveryByEnum.email)
+                    && !isValidEmailAddress(recipient.getValue().getEmailInformation().getEmailAddress())) {
+                    return List.of("Please provide valid email address for additional recipient");
+                }
+            }
         }
-
-        return errors;
+        return emptyList();
     }
 
     public List<String> validateDocuments(CallbackRequest callbackRequest) {

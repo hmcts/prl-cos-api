@@ -631,8 +631,6 @@ public class PrlAppsConstants {
 
     public static final String INVALID_CLIENT = "Invalid Client";
 
-    public static final String INVALID_EMAIL = "Please provide valid email address for additional recipient";
-
     public static final String WAITING_TO_BE_LISTED = "WAITING_TO_BE_LISTED";
     public static final String LISTED = "LISTED";
     public static final String AWAITING_HEARING_DETAILS = "AWAITING_ACTUALS";
