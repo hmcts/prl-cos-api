@@ -2684,7 +2684,7 @@ public class UpdatePartyDetailsServiceTest {
 
         CaseData caseDataCurrent = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
-            .applicants(List.of(newApplicant))
+            .applicants(List.of(applicant2, newApplicant))
             .respondents(Collections.emptyList())
             .build();
 
@@ -2724,22 +2724,22 @@ public class UpdatePartyDetailsServiceTest {
         Element<PartyDetails> respondent1 = getPartyDetails("Resp1", true);
         Element<PartyDetails> respondent2 = getPartyDetails("Resp2", true);
 
-        Element<PartyDetails> newRespondent = getPartyDetails(null, "Resp3", true);
-
         CaseData caseDataBefore = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(List.of(applicant1, applicant2))
             .respondents(List.of(respondent1, respondent2))
             .build();
 
-        CaseData caseDataCurrent = CaseData.builder()
+        CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(List.of(applicant1, respondent2))
-            .respondents(List.of(newRespondent))
+            .respondents(List.of(respondent1))
             .build();
 
-        Map<String,Object> caseDataMapBefore = Map.of("before", true);
-        Map<String,Object> caseDataMap = Map.of("before", false);
+        Map<String,Object> caseDataMapBefore = new HashMap<>();
+        Map<String,Object> caseDataMap = new HashMap<>();
+        caseDataMapBefore.put("before", true);
+        caseDataMap.put("before", false);
 
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetailsBefore(CaseDetails.builder()
@@ -2755,8 +2755,12 @@ public class UpdatePartyDetailsServiceTest {
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class)))
             .thenAnswer(invocation -> {
                 Map<String, Object> map = invocation.getArgument(0);
-                Boolean before = (Boolean) map.get("before");
-                return Boolean.TRUE.equals(before) ? caseDataBefore : caseDataCurrent;
+                if (map.get("before").equals(true)) {
+                    return caseDataBefore;
+                } else if (map.get("before").equals(false)) {
+                    return caseData;
+                }
+                return null;
             });
 
 
