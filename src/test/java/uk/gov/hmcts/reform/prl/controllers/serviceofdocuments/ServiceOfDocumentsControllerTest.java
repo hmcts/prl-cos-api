@@ -155,7 +155,6 @@ public class ServiceOfDocumentsControllerTest {
             .validateAdditionalRecipients(any(),any(),callbackRequest);
 
         assertNotNull(aboutToStartOrSubmitCallbackResponse);
-        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
     }
 
     @Test

@@ -89,12 +89,7 @@ public class ServiceOfDocumentsController {
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             List<String> errorList = serviceOfDocumentsService.validateAdditionalRecipients(callbackRequest);
-            if (isNotEmpty(errorList)) {
-                return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
-            }
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(callbackRequest.getCaseDetails().getData())
-                .build();
+            return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
