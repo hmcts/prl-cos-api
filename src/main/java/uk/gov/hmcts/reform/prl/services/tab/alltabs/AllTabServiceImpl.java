@@ -304,8 +304,9 @@ public class AllTabServiceImpl implements AllTabsService {
                 !userDetails.getRoles().contains(CITIZEN_ROLE)
             );
 
-        log.info("Case ID: {} - Event ID {} started at version {}", caseId, eventId,
-                 allTabsUpdateStartEventResponse.getCaseDetails().getVersion());
+        log.info("Case ID: {} - Event ID {} started at version {} state {}", caseId, eventId,
+                 allTabsUpdateStartEventResponse.getCaseDetails().getVersion(),
+                 allTabsUpdateStartEventResponse.getCaseDetails().getState());
 
         CaseData allTabsUpdateCaseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(
             allTabsUpdateStartEventResponse,
@@ -339,8 +340,8 @@ public class AllTabServiceImpl implements AllTabsService {
             !userDetails.getRoles().contains(CITIZEN_ROLE)
         );
 
-        log.info("Case ID: {} - Event ID {} completed at version {}", caseId, eventRequestData.getEventId(),
-                 caseDetails.getVersion());
+        log.info("Case ID: {} - Event ID {} completed at version {} state {}", caseId, eventRequestData.getEventId(),
+                 caseDetails.getVersion(), caseDetails.getState());
         return caseDetails;
     }
 }
