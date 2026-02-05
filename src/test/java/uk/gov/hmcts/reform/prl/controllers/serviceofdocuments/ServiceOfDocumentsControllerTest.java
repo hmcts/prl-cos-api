@@ -147,6 +147,18 @@ public class ServiceOfDocumentsControllerTest {
     }
 
     @Test
+    public void testValidateSodRequestWhenEmailIsValid() {
+        when(serviceOfDocumentsService.validateAdditionalRecipients(Mockito.any(CallbackRequest.class)))
+            .thenReturn(Collections.emptyList());
+
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfDocumentsController
+            .validateAdditionalRecipients(any(),any(),callbackRequest);
+
+        assertNotNull(aboutToStartOrSubmitCallbackResponse);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
+    }
+
+    @Test
     public void testHandleSubmitted() {
         ResponseEntity<SubmittedCallbackResponse> submittedCallbackResponse = ResponseEntity.ok().build();
         when(serviceOfDocumentsService.handleSubmitted(anyString(), Mockito.any(CallbackRequest.class))).thenReturn(submittedCallbackResponse);
@@ -182,7 +194,7 @@ public class ServiceOfDocumentsControllerTest {
     }
 
     @Test
-    public void testExceptionValidateSodRequest() {
+    public void testExceptionValidateAdditionalRecipients() {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
         assertExpectedException(() -> {
             serviceOfDocumentsController.validateAdditionalRecipients(any(), any(), callbackRequest);
