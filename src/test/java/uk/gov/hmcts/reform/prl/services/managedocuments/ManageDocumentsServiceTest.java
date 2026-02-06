@@ -48,6 +48,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
+import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.notifications.NotificationService;
@@ -149,6 +150,9 @@ public class ManageDocumentsServiceTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private RoleAssignmentService roleAssignmentService;
 
     @Mock
     private StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
@@ -353,12 +357,13 @@ public class ManageDocumentsServiceTest {
     @Test
     public void testPopulateDocumentCategories() {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
-
+        when(roleAssignmentService.isUserAllocatedRoleForCase(anyString(), anyString(), anyString())).thenReturn(true);
         when(coreCaseDataApi.getCategoriesAndDocuments(
             any(),
             any(),
             any()
         )).thenReturn(categoriesAndDocuments);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
 
         CaseData caseData = CaseData.builder().build();
 
@@ -387,6 +392,8 @@ public class ManageDocumentsServiceTest {
             Mockito.any(),
             Mockito.any()
         )).thenReturn(categoriesAndDocuments);
+        when(roleAssignmentService.isUserAllocatedRoleForCase(anyString(), anyString(), anyString())).thenReturn(true);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
 
         CaseData caseData = CaseData.builder().build();
 
@@ -399,7 +406,10 @@ public class ManageDocumentsServiceTest {
     @Test
     @DisplayName("test case for populateDocumentCategories Exception.")
     public void testPopulateDocumentCategoriesException() {
+        when(roleAssignmentService.isUserAllocatedRoleForCase(anyString(), anyString(), anyString())).thenReturn(true);
         when(authTokenGenerator.generate()).thenThrow(new RuntimeException());
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+
         CaseData caseData = CaseData.builder().build();
         CaseData updatedCaseData = manageDocumentsService.populateDocumentCategories(auth, caseData);
         List<DynamicListElement> listItems = updatedCaseData.getDocumentManagementDetails().getManageDocuments()
