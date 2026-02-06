@@ -1677,19 +1677,19 @@ public class ServiceOfApplicationService {
 
         log.info("inside sendEmailViaSendGridWithAttachedDocsToPartyRespondent {}", party.getId());
         List<Document> modifiedList = new ArrayList<>();
-        if(coverLetters != null && !coverLetters.isEmpty()) {
-            modifiedList = IntStream.range(0, coverLetters.size()).mapToObj(i-> {
-                    Document each = coverLetters.get(i);
-                    return new Document(
-                        each.getDocumentUrl(),
-                        each.getDocumentBinaryUrl(),
-                        (i + 1) + each.getDocumentFileName(),
-                        each.getDocumentHash(),
-                        each.getCategoryId(),
-                        each.getDocumentCreatedOn(),
-                        each.getUploadTimeStamp()
-                    );
-                }).toList();
+        if (coverLetters != null && !coverLetters.isEmpty()) {
+            modifiedList = IntStream.range(0, coverLetters.size()).mapToObj(i -> {
+                Document each = coverLetters.get(i);
+                return new Document(
+                    each.getDocumentUrl(),
+                    each.getDocumentBinaryUrl(),
+                    (i + 1) + each.getDocumentFileName(),
+                    each.getDocumentHash(),
+                    each.getCategoryId(),
+                    each.getDocumentCreatedOn(),
+                    each.getUploadTimeStamp()
+                );
+            }).toList();
         }
 
         List<Document> packsWithCoverLetter = new ArrayList<>(modifiedList);
