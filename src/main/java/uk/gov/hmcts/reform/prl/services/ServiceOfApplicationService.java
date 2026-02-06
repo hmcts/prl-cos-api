@@ -85,6 +85,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.Optional.ofNullable;
@@ -1675,8 +1676,23 @@ public class ServiceOfApplicationService {
                                                                                  List<Document> coverLetters) {
 
         log.info("inside sendEmailViaSendGridWithAttachedDocsToPartyRespondent {}", party.getId());
+        List<Document> modifiedList = new ArrayList<>();
+        if(coverLetters != null && !coverLetters.isEmpty()) {
+            modifiedList = IntStream.range(0, coverLetters.size()).mapToObj(i-> {
+                    Document each = coverLetters.get(i);
+                    return new Document(
+                        each.getDocumentUrl(),
+                        each.getDocumentBinaryUrl(),
+                        (i + 1) + each.getDocumentFileName(),
+                        each.getDocumentHash(),
+                        each.getCategoryId(),
+                        each.getDocumentCreatedOn(),
+                        each.getUploadTimeStamp()
+                    );
+                }).toList();
+        }
 
-        List<Document> packsWithCoverLetter = new ArrayList<>(coverLetters);
+        List<Document> packsWithCoverLetter = new ArrayList<>(modifiedList);
         packsWithCoverLetter.addAll(packDocs);
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         dynamicData.put("name", party.getValue().getLabelForDynamicList());
