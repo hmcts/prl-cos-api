@@ -1675,7 +1675,7 @@ public class ServiceOfApplicationService {
                                                                                  SendgridEmailTemplateNames emailTemplate,
                                                                                  List<Document> coverLetters) {
 
-        log.info("inside sendEmailViaSendGridWithAttachedDocsToPartyRespondent {}", party.getId());
+        log.info("inside sendEmailViaSendGridWithAttachedDocsToPartyRespondent method {}", party.getId());
         List<Document> modifiedList = new ArrayList<>();
         if (coverLetters != null && !coverLetters.isEmpty()) {
             modifiedList = IntStream.range(0, coverLetters.size()).mapToObj(i -> {
@@ -1683,7 +1683,7 @@ public class ServiceOfApplicationService {
                 return new Document(
                     each.getDocumentUrl(),
                     each.getDocumentBinaryUrl(),
-                    (i + 1) + each.getDocumentFileName(),
+                    (i + 1)+"_"+ each.getDocumentFileName(),
                     each.getDocumentHash(),
                     each.getCategoryId(),
                     each.getDocumentCreatedOn(),
