@@ -143,11 +143,11 @@ public class PrepareHearingBundleService {
     }
 
     private QueryParam buildCcdQueryParam(int from) {
-        // All cases with nextHearingDate in 5 days
+        // All cases with nextHearingDate in 5 working days (7 calendar)
         List<Should> shoulds = List.of(
             Should.builder().match(Match.builder().caseTypeOfApplication("C100").build()).build(),
             Should.builder().match(Match.builder().caseTypeOfApplication("FL401").build()).build(),
-            Should.builder().match(Match.builder().nextHearingDate(LocalDate.now().plusDays(5)).build()).build()
+            Should.builder().match(Match.builder().nextHearingDate(LocalDate.now().plusDays(7)).build()).build()
         );
 
         // Hearing state(s)
