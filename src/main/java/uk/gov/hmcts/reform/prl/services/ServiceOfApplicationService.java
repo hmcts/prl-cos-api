@@ -1683,7 +1683,7 @@ public class ServiceOfApplicationService {
                 return new Document(
                     each.getDocumentUrl(),
                     each.getDocumentBinaryUrl(),
-                    (i + 1)+"_"+ each.getDocumentFileName(),
+                    (i + 1) + "_" + each.getDocumentFileName(),
                     each.getDocumentHash(),
                     each.getCategoryId(),
                     each.getDocumentCreatedOn(),
