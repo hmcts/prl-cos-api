@@ -214,6 +214,110 @@ class PoiTlDocxRendererTest {
             .hasMessageContaining("poi-tl rendering failed");
     }
 
+
+    @Test
+    void memoryUsageSanityCheck() throws Exception {
+        // Load template - use sample_order3 as it's a realistic template
+        byte[] templateBytes;
+        try (InputStream in = getClass().getResourceAsStream("/templates/CustomOrderHeader.docx")) {
+            assertThat(in).isNotNull();
+            templateBytes = in.readAllBytes();
+        }
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("caseNumber", "AB12C34567");
+        data.put("courtName", "Example Family Court");
+        data.put("judgeName", "HHJ Example");
+        data.put("applicantName", "Alex Applicant");
+        data.put("respondent1Name", "Rory Respondent");
+
+        PoiTlDocxRenderer renderer = new PoiTlDocxRenderer();
+        Runtime runtime = Runtime.getRuntime();
+        int totalRenders = 100;
+        int concurrentThreads = 100;
+
+        // Warm up - run a few times to let JIT compile
+        for (int i = 0; i < 5; i++) {
+            renderer.render(templateBytes, data);
+        }
+
+        // Force GC and measure baseline
+        System.gc();
+        Thread.sleep(100);
+        long baselineMemory = runtime.totalMemory() - runtime.freeMemory();
+
+        // Track peak memory during execution
+        java.util.concurrent.atomic.AtomicLong peakMemory = new java.util.concurrent.atomic.AtomicLong(baselineMemory);
+        java.util.concurrent.atomic.AtomicInteger failureCount = new java.util.concurrent.atomic.AtomicInteger(0);
+
+        // Run renders in parallel using ExecutorService
+        java.util.concurrent.ExecutorService executor = java.util.concurrent.Executors.newFixedThreadPool(concurrentThreads);
+        java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(totalRenders);
+
+        long startTime = System.currentTimeMillis();
+
+        for (int i = 0; i < totalRenders; i++) {
+            executor.submit(() -> {
+                try {
+                    byte[] result = renderer.render(templateBytes, data);
+                    if (result == null || result.length == 0) {
+                        failureCount.incrementAndGet();
+                    }
+                    // Sample memory periodically
+                    long currentMemory = runtime.totalMemory() - runtime.freeMemory();
+                    peakMemory.updateAndGet(prev -> Math.max(prev, currentMemory));
+                } catch (Exception e) {
+                    failureCount.incrementAndGet();
+                    e.printStackTrace();
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        // Wait for all tasks to complete
+        latch.await(60, java.util.concurrent.TimeUnit.SECONDS);
+        executor.shutdown();
+        executor.awaitTermination(10, java.util.concurrent.TimeUnit.SECONDS);
+
+        long endTime = System.currentTimeMillis();
+
+        // Force GC and measure final memory
+        System.gc();
+        Thread.sleep(100);
+        long finalMemory = runtime.totalMemory() - runtime.freeMemory();
+
+        long peakMemoryMb = peakMemory.get() / 1024 / 1024;
+        long memoryDeltaKb = (finalMemory - baselineMemory) / 1024;
+        long totalTimeMs = endTime - startTime;
+
+        System.out.println("=== POI-TL PARALLEL MEMORY CHECK ===");
+        System.out.println("Total renders: " + totalRenders);
+        System.out.println("Concurrent threads: " + concurrentThreads);
+        System.out.println("Template size: " + templateBytes.length / 1024 + " KB");
+        System.out.println("Baseline memory: " + baselineMemory / 1024 / 1024 + " MB");
+        System.out.println("Peak memory during execution: " + peakMemoryMb + " MB");
+        System.out.println("Final memory (after GC): " + finalMemory / 1024 / 1024 + " MB");
+        System.out.println("Memory delta (final - baseline): " + memoryDeltaKb + " KB");
+        System.out.println("Total time: " + totalTimeMs + " ms");
+        System.out.println("Throughput: " + (totalRenders * 1000 / totalTimeMs) + " renders/sec");
+        System.out.println("Failures: " + failureCount.get());
+        System.out.println("=====================================");
+
+        // Sanity assertions
+        assertThat(failureCount.get())
+            .as("All renders should succeed")
+            .isZero();
+
+        assertThat(peakMemoryMb)
+            .as("Peak memory should stay reasonable under concurrent load")
+            .isLessThan(750); // 750 MB max peak for 100 concurrent threads
+
+        assertThat(memoryDeltaKb)
+            .as("Memory should not leak after concurrent execution")
+            .isLessThan(50 * 1024); // 50 MB max retained growth
+    }
+
     @Test
     void shouldRenderSquareBracketPlaceholders() throws Exception {
         // Test that the renderer correctly handles [placeholder] format

@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.CustomOrderNameOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation;
@@ -232,7 +233,7 @@ public class CustomOrderServiceTest {
 
         // Act
         uk.gov.hmcts.reform.prl.models.documents.Document result =
-            customOrderService.renderAndUploadHeaderPreview(authorisation, caseId, caseData);
+            customOrderService.renderAndUploadHeaderPreview(authorisation, caseId, caseData, null);
 
         // Assert
         assertNotNull(result);
@@ -301,7 +302,8 @@ public class CustomOrderServiceTest {
         // The method calls combineHeaderAndContent which uses Apache POI and needs valid DOCX
         // For now, we verify the setup is correct and the exception is expected
         try {
-            customOrderService.processCustomOrderOnSubmitted(authorisation, caseId, caseData, userDocUrl, headerDocUrl);
+            customOrderService.processCustomOrderOnSubmitted(
+                authorisation, caseId, caseData, userDocUrl, headerDocUrl, null);
         } catch (RuntimeException e) {
             // Expected - combineHeaderAndContent needs real DOCX bytes
             // Verify that we got to the point of downloading both documents
@@ -345,7 +347,7 @@ public class CustomOrderServiceTest {
         });
 
         // Act - renderHeaderPreview calls buildHeaderPlaceholders internally
-        byte[] result = customOrderService.renderHeaderPreview(caseId, caseData);
+        byte[] result = customOrderService.renderHeaderPreview(caseId, caseData, null);
 
         // Assert
         assertNotNull(result);
@@ -362,7 +364,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData);
+        customOrderService.renderHeaderPreview(caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertEquals("1234-5678-9012-3456", placeholders.get("caseNumber"));
@@ -378,7 +380,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData);
+        customOrderService.renderHeaderPreview(caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertEquals("Central Family Court", placeholders.get("courtName"));
@@ -394,7 +396,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData);
+        customOrderService.renderHeaderPreview(caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertEquals("HHJ Richardson", placeholders.get("judgeName"));
@@ -415,7 +417,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData);
+        customOrderService.renderHeaderPreview(caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertEquals("Sarah Johnson", placeholders.get("applicantName"));
@@ -438,7 +440,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData);
+        customOrderService.renderHeaderPreview(caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertEquals("Michael Solicitor", placeholders.get("applicantRepresentativeName"));
@@ -459,7 +461,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData);
+        customOrderService.renderHeaderPreview(caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertEquals("David Williams", placeholders.get("respondent1Name"));
@@ -481,7 +483,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData);
+        customOrderService.renderHeaderPreview(caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertEquals("Father", placeholders.get("respondent1RelationshipToChild"));
@@ -504,7 +506,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData);
+        customOrderService.renderHeaderPreview(caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertEquals("Emma Barrister", placeholders.get("respondent1RepresentativeName"));
@@ -547,7 +549,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData);
+        customOrderService.renderHeaderPreview(caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
 
@@ -586,7 +588,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData);
+        customOrderService.renderHeaderPreview(caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertEquals("", placeholders.get("respondent1RepresentativeName"));
@@ -617,7 +619,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData);
+        customOrderService.renderHeaderPreview(caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertEquals("David Williams", placeholders.get("respondent1Name"));
@@ -659,7 +661,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData);
+        customOrderService.renderHeaderPreview(caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertEquals("Mother", placeholders.get("respondent1RelationshipToChild"));
@@ -704,7 +706,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData);
+        customOrderService.renderHeaderPreview(caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         // Should deduplicate to just "Mother"
@@ -750,7 +752,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData);
+        customOrderService.renderHeaderPreview(caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         // Should show both unique relationships
@@ -803,7 +805,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData);
+        customOrderService.renderHeaderPreview(caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertEquals("Mother", placeholders.get("respondent1RelationshipToChild"));
@@ -826,7 +828,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData);
+        customOrderService.renderHeaderPreview(caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertEquals("", placeholders.get("respondent1RepresentativeClause"));
@@ -850,9 +852,318 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData);
+        customOrderService.renderHeaderPreview(caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertEquals("represented by Emma Solicitor", placeholders.get("respondent1RepresentativeClause"));
+    }
+
+    // ========== Tests for judge name and order date from map (mid-event callback population) ==========
+
+    @Test
+    public void testBuildHeaderPlaceholders_judgeNameFromMap_whenSetDuringCallback() throws IOException {
+        // Arrange - simulates controller setting judge name in map during mid-event callback
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder()
+            .judgeOrMagistratesLastName("Old Judge Name") // This should be overridden by map value
+            .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("judgeOrMagistratesLastName", "HHJ Smith"); // Set by controller when logged-in user is judge
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        // Act
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        // Assert - should use value from map, not from caseData
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("HHJ Smith", placeholders.get("judgeName"));
+    }
+
+    @Test
+    public void testBuildHeaderPlaceholders_orderDateFromMap_whenSetDuringCallback() throws IOException {
+        // Arrange - simulates controller setting dateOrderMade to current date during mid-event callback
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("dateOrderMade", java.time.LocalDate.of(2025, 2, 2)); // Set by controller to current date
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        // Act
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        // Assert - should use formatted date from map
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("02/02/2025", placeholders.get("orderDate"));
+    }
+
+    @Test
+    public void testBuildHeaderPlaceholders_orderDateFromMap_asString() throws IOException {
+        // Arrange - dateOrderMade might be a string in some contexts
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("dateOrderMade", "2025-01-15"); // String format
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        // Act
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        // Assert - should use string value directly
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("2025-01-15", placeholders.get("orderDate"));
+    }
+
+    @Test
+    public void testBuildHeaderPlaceholders_judgeNameFallsBackToCaseData_whenNotInMap() throws IOException {
+        // Arrange - map doesn't have judge name, should fall back to caseData
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder()
+            .judgeOrMagistratesLastName("HHJ Richardson")
+            .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        // No judgeOrMagistratesLastName in map
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        // Act
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        // Assert - should fall back to caseData value
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("HHJ Richardson", placeholders.get("judgeName"));
+    }
+
+    @Test
+    public void testBuildHeaderPlaceholders_orderDateFallsBackToCaseData_whenNotInMap() throws IOException {
+        // Arrange - map doesn't have dateOrderMade, should fall back to caseData
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder()
+            .dateOrderMade(java.time.LocalDate.of(2024, 12, 25))
+            .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        // No dateOrderMade in map
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        // Act
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        // Assert - should fall back to caseData value with correct format
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("25/12/2024", placeholders.get("orderDate"));
+    }
+
+    @Test
+    public void testBuildHeaderPlaceholders_bothJudgeAndDateFromMap() throws IOException {
+        // Arrange - full scenario: both judge name and date set by controller in map
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder()
+            .courtName("Central Family Court")
+            .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("judgeOrMagistratesLastName", "District Judge Taylor");
+        caseDataMap.put("dateOrderMade", java.time.LocalDate.of(2025, 2, 2));
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        // Act
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        // Assert - both values should come from map
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("District Judge Taylor", placeholders.get("judgeName"));
+        assertEquals("02/02/2025", placeholders.get("orderDate"));
+        assertEquals("Central Family Court", placeholders.get("courtName"));
+    }
+
+    // ========== Tests for getEffectiveOrderName (custom order dropdown feature) ==========
+
+    @Test
+    public void testGetEffectiveOrderName_returnsDropdownValue_whenStandardOptionSelected() {
+        // Arrange - user selects a standard order name from dropdown
+        CaseData caseData = CaseData.builder()
+            .nameOfOrder("This should be ignored")
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "standardDirectionsOrder");
+
+        // Act
+        String result = customOrderService.getEffectiveOrderName(caseData, caseDataMap);
+
+        // Assert - should use dropdown display value, not the text field
+        assertEquals("Standard directions order", result);
+    }
+
+    @Test
+    public void testGetEffectiveOrderName_returnsDropdownValue_whenBlankOrderSelected() {
+        // Arrange - user selects "Blank order or directions (C21)" from dropdown
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "blankOrderOrDirections");
+
+        // Act
+        String result = customOrderService.getEffectiveOrderName(caseData, caseDataMap);
+
+        // Assert
+        assertEquals("Blank order or directions (C21)", result);
+    }
+
+    @Test
+    public void testGetEffectiveOrderName_returnsDropdownValue_whenNonMolestationSelected() {
+        // Arrange - user selects "Non-molestation order (FL404A)" from dropdown
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "nonMolestation");
+
+        // Act
+        String result = customOrderService.getEffectiveOrderName(caseData, caseDataMap);
+
+        // Assert
+        assertEquals("Non-molestation order (FL404A)", result);
+    }
+
+    @Test
+    public void testGetEffectiveOrderName_returnsTextField_whenOtherSelected() {
+        // Arrange - user selects "Other" and types custom name
+        CaseData caseData = CaseData.builder()
+            .nameOfOrder("My Custom Order Name")
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "other");
+
+        // Act
+        String result = customOrderService.getEffectiveOrderName(caseData, caseDataMap);
+
+        // Assert - should use the text field value when "Other" is selected
+        assertEquals("My Custom Order Name", result);
+    }
+
+    @Test
+    public void testGetEffectiveOrderName_returnsTextField_whenDropdownIsNull() {
+        // Arrange - backwards compatibility: no dropdown selection, only text field
+        CaseData caseData = CaseData.builder()
+            .nameOfOrder("Legacy Order Name")
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        // No customOrderNameOption in map
+
+        // Act
+        String result = customOrderService.getEffectiveOrderName(caseData, caseDataMap);
+
+        // Assert - should fall back to text field
+        assertEquals("Legacy Order Name", result);
+    }
+
+    @Test
+    public void testGetEffectiveOrderName_returnsDefault_whenBothAreNull() {
+        // Arrange - neither dropdown nor text field set
+        CaseData caseData = CaseData.builder()
+            .nameOfOrder(null)
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+
+        // Act
+        String result = customOrderService.getEffectiveOrderName(caseData, caseDataMap);
+
+        // Assert - should return default value
+        assertEquals("custom_order", result);
+    }
+
+    @Test
+    public void testGetEffectiveOrderName_returnsDefault_whenOtherSelectedButTextFieldBlank() {
+        // Arrange - "Other" selected but user didn't type anything
+        CaseData caseData = CaseData.builder()
+            .nameOfOrder("   ")  // blank/whitespace only
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "other");
+
+        // Act
+        String result = customOrderService.getEffectiveOrderName(caseData, caseDataMap);
+
+        // Assert - should return default value
+        assertEquals("custom_order", result);
+    }
+
+    @Test
+    public void testGetEffectiveOrderName_returnsDefault_whenOtherSelectedAndTextFieldEmpty() {
+        // Arrange - "Other" selected but nameOfOrder is empty string
+        CaseData caseData = CaseData.builder()
+            .nameOfOrder("")
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "other");
+
+        // Act
+        String result = customOrderService.getEffectiveOrderName(caseData, caseDataMap);
+
+        // Assert - should return default value
+        assertEquals("custom_order", result);
+    }
+
+    @Test
+    public void testGetEffectiveOrderName_returnsTextField_whenMapIsNull() {
+        // Arrange - map is null (backwards compatibility)
+        CaseData caseData = CaseData.builder()
+            .nameOfOrder("Fallback Order Name")
+            .build();
+
+        // Act
+        String result = customOrderService.getEffectiveOrderName(caseData, null);
+
+        // Assert - should fall back to text field
+        assertEquals("Fallback Order Name", result);
+    }
+
+    @Test
+    public void testGetEffectiveOrderName_handlesEnumObjectInMap() {
+        // Arrange - map contains enum object instead of string (happens in some contexts)
+        CaseData caseData = CaseData.builder()
+            .nameOfOrder("This should be ignored")
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", CustomOrderNameOptionsEnum.parentalResponsibility);
+
+        // Act
+        String result = customOrderService.getEffectiveOrderName(caseData, caseDataMap);
+
+        // Assert
+        assertEquals("Parental responsibility order (C45A)", result);
+    }
+
+    @Test
+    public void testGetEffectiveOrderName_allDropdownOptionsHaveDisplayValues() {
+        // Verify all enum values have proper display values
+        for (CustomOrderNameOptionsEnum option : CustomOrderNameOptionsEnum.values()) {
+            assertNotNull(option.getDisplayedValue(), "Display value should not be null for " + option.name());
+            assertFalse(option.getDisplayedValue().isEmpty(), "Display value should not be empty for " + option.name());
+        }
+    }
+
+    @Test
+    public void testGetEffectiveOrderName_onlyOtherOptionIsOther() {
+        // Verify only the "other" option returns true for isOther()
+        for (CustomOrderNameOptionsEnum option : CustomOrderNameOptionsEnum.values()) {
+            if (option == CustomOrderNameOptionsEnum.other) {
+                assertTrue(option.isOther(), "other option should return true for isOther()");
+            } else {
+                assertFalse(option.isOther(), option.name() + " should return false for isOther()");
+            }
+        }
     }
 }

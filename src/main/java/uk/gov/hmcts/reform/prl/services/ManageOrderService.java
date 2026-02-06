@@ -1039,7 +1039,9 @@ public class ManageOrderService {
         List<Element<OrderDetails>> newOrderDetails = new ArrayList<>();
         newOrderDetails.add(element(OrderDetails.builder().orderType(flagSelectedOrderId)
                                    .orderTypeId(flagSelectedOrder)
-                                   .orderDocument(caseData.getUploadOrderDoc())
+                                   .orderDocument(createCustomOrder.equals(caseData.getManageOrdersOptions())
+                                       ? caseData.getManageOrders().getCustomOrderDoc()
+                                       : caseData.getUploadOrderDoc())
                                    .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
                                    .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
                                    .childrenList(getSelectedChildInfoFromMangeOrder(caseData))
@@ -1420,7 +1422,9 @@ public class ManageOrderService {
             .typeOfOrder(typeOfOrder != null ? typeOfOrder.getDisplayedValue() : null)
             .orderType(CreateSelectOrderOptionsEnum.getIdFromValue(flagSelectedOrder))
             .orderTypeId(flagSelectedOrder)
-            .orderDocument(caseData.getUploadOrderDoc())
+            .orderDocument(createCustomOrder.equals(caseData.getManageOrdersOptions())
+                ? caseData.getManageOrders().getCustomOrderDoc()
+                : caseData.getUploadOrderDoc())
             .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
             .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
             .childOption(getChildOption(caseData))
@@ -3356,7 +3360,23 @@ public class ManageOrderService {
     }
 
     public void addSealToOrders(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
-        List<Element<OrderDetails>> orders = caseData.getOrderCollection();
+        // Use orderCollection from caseDataUpdated if available (e.g., after custom order combining updated it),
+        // otherwise fall back to caseData.getOrderCollection()
+        List<Element<OrderDetails>> orders;
+        if (caseDataUpdated.containsKey(ORDER_COLLECTION) && caseDataUpdated.get(ORDER_COLLECTION) != null) {
+            Object rawOrders = caseDataUpdated.get(ORDER_COLLECTION);
+            if (rawOrders instanceof List) {
+                // Convert to ensure proper typing (handles both typed lists and raw map lists)
+                orders = objectMapper.convertValue(rawOrders, new TypeReference<List<Element<OrderDetails>>>() {});
+                log.info("addSealToOrders: using orderCollection from caseDataUpdated");
+            } else {
+                orders = caseData.getOrderCollection();
+                log.info("addSealToOrders: caseDataUpdated has non-list orderCollection, falling back to caseData");
+            }
+        } else {
+            orders = caseData.getOrderCollection();
+            log.info("addSealToOrders: using orderCollection from caseData");
+        }
         log.info("addSealToOrders: orderCollection size = {}", orders != null ? orders.size() : 0);
         if (orders != null) {
             long ordersNeedingSeal = orders.stream()
