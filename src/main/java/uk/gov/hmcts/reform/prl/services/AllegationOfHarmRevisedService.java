@@ -317,7 +317,10 @@ public class AllegationOfHarmRevisedService {
 
     private List<DynamicMultiselectListElement> getChildList(CaseData caseData) {
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
-
+        log.info("case {} has the following newChildDetails: {} and children: {}",
+                 caseData.getId(), caseData.getNewChildDetails(), caseData.getChildren());
+        log.info("CollectionUtils.isNotEmpty(caseData.getNewChildDetails()) : {}", CollectionUtils.isNotEmpty(caseData.getNewChildDetails()));
+        log.info("CollectionUtils.isNotEmpty(caseData.getChildren()) : {}", CollectionUtils.isNotEmpty(caseData.getChildren()));
         if (CollectionUtils.isNotEmpty(caseData.getNewChildDetails())) {
             caseData.getNewChildDetails().forEach(child ->
                                                       listItems.add(createListElement(
