@@ -422,17 +422,30 @@ public class ConfidentialityTabServiceTest {
 
     @Test
     public void testFl401ChildConfidentialDetails() {
-        ChildrenLiveAtAddress child = ChildrenLiveAtAddress.builder()
-            .childFullName("Test")
+        ChildrenLiveAtAddress childA = ChildrenLiveAtAddress.builder()
+            .childFullName("Child A")
             .keepChildrenInfoConfidential(YesOrNo.Yes)
             .build();
+        ChildrenLiveAtAddress childB = ChildrenLiveAtAddress.builder()
+            .childFullName("Child B")
+            .keepChildrenInfoConfidential(YesOrNo.No)
+            .build();
+        ChildrenLiveAtAddress childC = ChildrenLiveAtAddress.builder()
+            .childFullName("Child C")
+            .keepChildrenInfoConfidential(null)
+            .build();
 
-        List<Element<ChildrenLiveAtAddress>> listOfChildren = Collections.singletonList(element(child));
+        List<Element<ChildrenLiveAtAddress>> listOfChildren = List.of(
+            element(childA),
+            element(childB),
+            element(childC)
+        );
+
         List<Element<Fl401ChildConfidentialityDetails>> expectedOutput = List.of(
             Element.<Fl401ChildConfidentialityDetails>builder()
                 .value(Fl401ChildConfidentialityDetails
                            .builder()
-                           .fullName("Test")
+                           .fullName("Child A")
                            .build()).build()
         );
 
