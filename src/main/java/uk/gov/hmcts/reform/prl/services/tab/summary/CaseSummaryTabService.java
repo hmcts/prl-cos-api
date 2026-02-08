@@ -55,7 +55,6 @@ public class CaseSummaryTabService implements TabService {
     private final ObjectMapper objectMapper;
     private final TypeOfApplicationGenerator typeOfApplicationGenerator;
     private final RefugeCaseGenerator refugeCaseGenerator;
-
     private final CaseClosedDateGenerator caseClosedDateGenerator;
 
     @Override
@@ -76,7 +75,7 @@ public class CaseSummaryTabService implements TabService {
                 }
             }, HashMap::putAll);
 
-        // For Collection Fields, We should do manually since it should have element structure..
+        // For Collection Fields, We should do manually since it should have element structure.
         CaseSummary caseSummary = otherProceedingsGenerator.generate(caseData);
         List<Element<OtherProceedings>> otherProceedingsForSummaryTab = otherProceedingsGenerator.getOtherProceedingsDetails(caseData);
         if (CollectionUtils.isNotEmpty(otherProceedingsForSummaryTab)) {
