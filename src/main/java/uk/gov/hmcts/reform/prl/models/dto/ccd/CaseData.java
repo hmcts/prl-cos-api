@@ -757,6 +757,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
 
     private List<Element<RespondentDocs>> respondentDocsList;
 
+
     @JsonUnwrapped
     private CitizenResponseDocuments citizenResponseDocuments;
 
