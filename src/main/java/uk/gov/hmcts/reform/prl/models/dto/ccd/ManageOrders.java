@@ -242,6 +242,8 @@ public class ManageOrders implements MappableObject {
     private YesOrNo makeChangesToUploadedOrder;
     @JsonProperty("editedUploadOrderDoc")
     private Document editedUploadOrderDoc;
+    @JsonProperty("customOrderDoc")
+    private Document customOrderDoc;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     private final LocalDateTime currentOrderCreatedDateTime;
