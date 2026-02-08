@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -36,6 +37,7 @@ import uk.gov.hmcts.reform.prl.services.hearingmanagement.HearingManagementServi
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEXT_HEARING_DATE;
@@ -90,8 +92,8 @@ public class HearingsManagementController extends AbstractCallbackController {
     public void nextHearingDateUpdateByHearingManagement(@RequestHeader("authorization") String authorization,
                                                          @RequestHeader("serviceAuthorization") String s2sToken,
                                                          @RequestBody NextHearingDateRequest nextHearingDateRequest) throws Exception {
-        if (Boolean.FALSE.equals(authorisationService.authoriseUser(authorization))
-            && Boolean.FALSE.equals(authorisationService.authoriseService(s2sToken))) {
+        Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorization);
+        if (userInfo.isEmpty() && Boolean.FALSE.equals(authorisationService.authoriseService(s2sToken))) {
             throw new HearingManagementValidationException("Provide a valid s2s token");
         } else {
             hearingManagementService.caseNextHearingDateChangeForHearingManagement(nextHearingDateRequest);

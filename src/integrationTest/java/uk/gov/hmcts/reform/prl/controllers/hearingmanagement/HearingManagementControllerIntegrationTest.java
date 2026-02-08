@@ -15,6 +15,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -50,6 +52,9 @@ public class HearingManagementControllerIntegrationTest {
 
     @MockBean
     HearingManagementService hearingManagementService;
+
+    @MockBean
+    private UserInfo userInfo;
 
     @MockBean
     AllTabServiceImpl allTabService;
@@ -85,7 +90,7 @@ public class HearingManagementControllerIntegrationTest {
         String url = "/hearing-management-next-hearing-date-update";
         String jsonRequest = ResourceLoader.loadJson("requests/hearing-mgmnt-controller-next-hearing-details.json");
 
-        Mockito.when(authorisationService.authoriseUser(any())).thenReturn(true);
+        Mockito.when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         Mockito.when(authorisationService.authoriseService(any())).thenReturn(true);
         Mockito.doNothing().when(hearingManagementService).caseNextHearingDateChangeForHearingManagement(any());
 

@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -26,7 +27,6 @@ public class AuthorisationService {
 
     private final IdamClient idamClient;
 
-    private UserInfo userInfo;
 
     public Boolean authoriseService(String serviceAuthHeader) {
         String callingService;
@@ -42,24 +42,18 @@ public class AuthorisationService {
         return false;
     }
 
-    public Boolean authoriseUser(String authorisation) {
+    public Optional<UserInfo> authoriseUser(String authorisation) {
         try {
-            userInfo = idamClient.getUserInfo(authorisation);
-            if (null != userInfo) {
-                return true;
-            }
+            UserInfo userInfo = idamClient.getUserInfo(authorisation);
+            return Optional.ofNullable(userInfo);
         } catch (Exception ex) {
-            log.error("User token is invalid");
+            log.error("User token is invalid", ex);
         }
-        return false;
-    }
-
-    public UserInfo getUserInfo() {
-        return this.userInfo;
+        return Optional.empty();
     }
 
     public boolean isAuthorized(String authorisation, String s2sToken) {
-        return Boolean.TRUE.equals(authoriseUser(authorisation))
+        return authoriseUser(authorisation).isPresent()
             && Boolean.TRUE.equals(authoriseService(s2sToken));
     }
 }

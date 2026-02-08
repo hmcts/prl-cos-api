@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.mapper.courtnav.FL401ApplicationMapper;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseCreationResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -30,6 +31,8 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService;
 import uk.gov.hmcts.reform.prl.services.courtnav.CourtLocationService;
 import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
+
+import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -66,8 +69,8 @@ public class CourtNavCaseController {
         @Valid @RequestBody CourtNavFl401 inputData
     ) throws Exception {
 
-        if (!authorisationService.authoriseUser(authorisation)
-            || !authorisationService.authoriseService(serviceAuthorization)) {
+        Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
+        if (userInfo.isEmpty() || !authorisationService.authoriseService(serviceAuthorization)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
 
@@ -98,10 +101,11 @@ public class CourtNavCaseController {
         @RequestParam MultipartFile file,
         @RequestParam String typeOfDocument
     ) {
-        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
+        Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
+        if ((authorisationService.authoriseUser(authorisation).isPresent()) && Boolean.TRUE.equals(
             authorisationService.authoriseService(serviceAuthorization))) {
 
-            if (authorisationService.getUserInfo().getRoles().contains(CAFCASS_USER_ROLE)) {
+            if (userInfo.get().getRoles().contains(CAFCASS_USER_ROLE)) {
                 log.info("uploading cafcass document");
                 cafcassUploadDocService.uploadDocument(systemUserService.getSysUserToken(), file, typeOfDocument, caseId);
             } else {
