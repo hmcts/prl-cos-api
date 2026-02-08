@@ -1,15 +1,20 @@
 package uk.gov.hmcts.reform.prl.services.courtnav;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
+import feign.Request;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -45,15 +50,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
+@RunWith(SpringRunner.class)
+@EnableRetry
+@SpringBootTest(classes = {CourtNavCaseService.class})
 public class CourtNavCaseServiceTest {
 
     private final String authToken = "Bearer abc";
@@ -67,43 +76,43 @@ public class CourtNavCaseServiceTest {
     private final String randomUserId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
     private static final String randomAlphaNumeric = "A1b2c3EFGH";
 
-    @Mock
+    @MockBean
     private CoreCaseDataApi coreCaseDataApi;
 
-    @Mock
+    @MockBean
     private IdamClient idamClient;
 
     @Mock
     private CaseUtils caseUtils;
 
-    @Mock
+    @MockBean
     private AuthTokenGenerator authTokenGenerator;
 
-    @Mock
+    @MockBean
     private CaseDocumentClient caseDocumentClient;
 
-    @Mock
+    @MockBean
     private DocumentGenService documentGenService;
 
-    @Mock
+    @MockBean
     private ObjectMapper objectMapper;
 
-    @InjectMocks
+    @Autowired
     CourtNavCaseService courtNavCaseService;
 
-    @Mock
+    @MockBean
     CcdCoreCaseDataService ccdCoreCaseDataService;
 
-    @Mock
+    @MockBean
     private AllTabServiceImpl allTabService;
 
-    @Mock
+    @MockBean
     private ManageDocumentsService manageDocumentsService;
 
-    @Mock
+    @MockBean
     private PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
-    @Mock
+    @MockBean
     private NoticeOfChangePartiesService noticeOfChangePartiesService;
 
     private Map<String, Object> caseDataMap = new HashMap<>();
@@ -227,6 +236,73 @@ public class CourtNavCaseServiceTest {
                                            "1234567891234567"
         );
     }
+
+    @Test
+    public void shouldRetry3TimesOnCcdConflictException() {
+        QuarantineLegalDoc courtNavDocument = QuarantineLegalDoc.builder().build();
+        List<Element<QuarantineLegalDoc>> courtNavUploadedDocListDocs =  new ArrayList<>();
+        courtNavUploadedDocListDocs.add(element(courtNavDocument));
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder()
+            .courtNavUploadedDocListDocTab(courtNavUploadedDocListDocs)
+            .build();
+
+        caseData = caseData.toBuilder().reviewDocuments(reviewDocuments).build();
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        Document document = testDocument();
+        UploadResponse uploadResponse = new UploadResponse(List.of(document));
+        when(coreCaseDataApi.getCase(authToken, s2sToken, "1234567891234567")).thenReturn(caseDetails);
+        when(coreCaseDataApi.startEventForCaseWorker(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+                                                     Mockito.any(), Mockito.any(), Mockito.any())
+        ).thenReturn(StartEventResponse.builder().eventId("courtnav-document-upload").token(eventToken).build());
+
+        when(caseDocumentClient.uploadDocuments(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+                                                Mockito.any())).thenReturn(uploadResponse);
+
+        when(ccdCoreCaseDataService.submitUpdate(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
+            .thenThrow(new FeignException.Conflict("conflict", mock(Request.class), null, null));
+
+        try {
+            courtNavCaseService.uploadDocument("Bearer abc", file, "WITNESS_STATEMENT", "1234567891234567");
+        } catch (FeignException.Conflict ex) {
+            // expected behaviour after 3 retries, it'll still conflict
+        }
+        // Verify we start & submit an event 3 times - as we have to restart the whole transaction again on conflict
+        verify(ccdCoreCaseDataService, times(3))
+            .startUpdate(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean());
+        verify(ccdCoreCaseDataService, times(3))
+            .submitUpdate(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean());
+    }
+
+    @Test
+    public void shouldNotRetryOnAGatewayTimeout() {
+        QuarantineLegalDoc courtNavDocument = QuarantineLegalDoc.builder().build();
+        List<Element<QuarantineLegalDoc>> courtNavUploadedDocListDocs =  new ArrayList<>();
+        courtNavUploadedDocListDocs.add(element(courtNavDocument));
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder()
+            .courtNavUploadedDocListDocTab(courtNavUploadedDocListDocs)
+            .build();
+
+        caseData = caseData.toBuilder().reviewDocuments(reviewDocuments).build();
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        Document document = testDocument();
+        UploadResponse uploadResponse = new UploadResponse(List.of(document));
+        when(coreCaseDataApi.getCase(authToken, s2sToken, "1234567891234567")).thenReturn(caseDetails);
+        when(coreCaseDataApi.startEventForCaseWorker(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+                                                     Mockito.any(), Mockito.any(), Mockito.any())
+        ).thenReturn(StartEventResponse.builder().eventId("courtnav-document-upload").token(eventToken).build());
+
+        when(caseDocumentClient.uploadDocuments(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+                                                Mockito.any())).thenReturn(uploadResponse);
+
+        when(ccdCoreCaseDataService.submitUpdate(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
+            .thenThrow(new FeignException.GatewayTimeout("conflict", mock(Request.class), null, null));
+
+        assertThrows(FeignException.GatewayTimeout.class,
+                     () -> courtNavCaseService.uploadDocument("Bearer abc", file, "WITNESS_STATEMENT", "1234567891234567"));
+    }
+
 
     @Test(expected = ResponseStatusException.class)
     public void shouldThrowExceptionForNumberOfAttchmentsSize() {
