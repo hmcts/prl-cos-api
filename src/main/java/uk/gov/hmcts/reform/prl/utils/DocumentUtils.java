@@ -79,6 +79,10 @@ public class DocumentUtils {
         String wierdAttributeName = returnAttributeNameForWierdCategories(categoryId);
         if (wierdAttributeName == null) {
             String[] splittedCategory = StringUtils.splitByCharacterTypeCamelCase(categoryId);
+
+            if (splittedCategory == null || splittedCategory.length == 0) {
+                return null;
+            }
             String finalCategory = "";
 
             for (int i = 0; i < splittedCategory.length; i++) {
