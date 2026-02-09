@@ -58,6 +58,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 import uk.gov.hmcts.reform.prl.utils.TaskUtils;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -66,6 +67,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 import javax.ws.rs.core.HttpHeaders;
+
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -76,7 +78,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_ORDER_COL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM_TASK;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOGGED_IN_USER_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
@@ -127,44 +128,68 @@ public class ManageOrdersController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
-        if (!authorisationService.isAuthorized(authorisation, s2sToken)) {
-            throw new InvalidClientException(INVALID_CLIENT);
-        }
-
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
             // Custom order flow - render header preview if document uploaded
             if (caseData.getManageOrdersOptions() != null && caseData.getManageOrdersOptions().equals(createCustomOrder)) {
-            return handleCustomOrderPreview(authorisation, callbackRequest, caseData, caseDataUpdated);
-        }
-
-        return handleStandardOrderPreview(authorisation, callbackRequest, caseData, caseDataUpdated, clientContext);
-    }
-
-    private AboutToStartOrSubmitCallbackResponse handleCustomOrderPreview(
-            String authorisation, CallbackRequest callbackRequest,
-            CaseData caseData, Map<String, Object> caseDataUpdated) {
+                // Set loggedInUserType for field show conditions
                 String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
-        caseDataUpdated.put(LOGGED_IN_USER_TYPE, loggedInUserType);
+                caseDataUpdated.put("loggedInUserType", loggedInUserType);
 
-        java.util.Optional<String> error = customOrderService.populateCustomOrderHeaderPreview(
-            authorisation, callbackRequest.getCaseDetails().getId(), caseData, caseDataUpdated);
+                // Only render header preview if custom order document has been uploaded
+                Object customOrderDocObj = caseDataUpdated.get("customOrderDoc");
+                if (customOrderDocObj != null) {
+                    try {
+                        // Try to get court name from various possible fields
+                        String courtNameValue = null;
+                        Object rawCourtName = caseDataUpdated.get("courtName");
+                        Object allocatedJudgeObj = caseDataUpdated.get("allocatedJudgeDetails");
 
-        if (error.isPresent()) {
+                        if (caseData.getCourtName() != null && !caseData.getCourtName().isEmpty()) {
+                            courtNameValue = caseData.getCourtName();
+                        } else if (rawCourtName != null && !"null".equals(rawCourtName.toString())
+                            && !rawCourtName.toString().isEmpty()) {
+                            courtNameValue = rawCourtName.toString();
+                        } else if (allocatedJudgeObj != null) {
+                            courtNameValue = extractCourtNameFromAllocatedJudge(allocatedJudgeObj);
+                        } else if (caseDataUpdated.get("courtList") != null) {
+                            courtNameValue = extractCourtNameFromDynamicList(caseDataUpdated.get("courtList"));
+                        }
+
+                        if (courtNameValue != null && !courtNameValue.isEmpty()) {
+                            caseData.setCourtName(courtNameValue);
+                        } else {
+                            log.warn("Could not find court name for custom order");
+                        }
+
+                        // Render the header preview with the populated values
+                        uk.gov.hmcts.reform.prl.models.documents.Document previewDoc =
+                            customOrderService.renderAndUploadHeaderPreview(
+                                authorisation,
+                                callbackRequest.getCaseDetails().getId(),
+                                caseData,
+                                caseDataUpdated
+                            );
+                        caseDataUpdated.put("previewOrderDoc", previewDoc);
+
+                        log.info("Custom order header preview uploaded: {}", previewDoc.getDocumentFileName());
+                    } catch (Exception e) {
+                        log.error("Failed to render custom order header preview", e);
                         return AboutToStartOrSubmitCallbackResponse.builder()
-                .errors(List.of(error.get()))
+                            .errors(List.of("Failed to render custom order header: " + e.getMessage()))
                             .build();
                     }
+                } else {
+                    log.info("Custom order document not yet uploaded, skipping header preview render");
+                }
 
                 return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
             }
 
-    private AboutToStartOrSubmitCallbackResponse handleStandardOrderPreview(
-            String authorisation, CallbackRequest callbackRequest,
-            CaseData caseData, Map<String, Object> caseDataUpdated, String clientContext) {
             String language = CaseUtils.getLanguage(clientContext);
-        List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData, language);
+            List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData, CaseUtils.getLanguage(clientContext));
             errorList.addAll(getErrorForOccupationScreen(caseData, caseData.getCreateSelectOrderOptions(), language));
             if (isNotEmpty(errorList)) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
@@ -176,6 +201,9 @@ public class ManageOrdersController {
                 authorisation,
                 language
             )).build();
+        } else {
+            throw (new InvalidClientException(INVALID_CLIENT));
+        }
     }
 
     @PostMapping(path = "/fetch-order-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -277,7 +305,7 @@ public class ManageOrdersController {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Map<String, Object> caseDataUpdated = new HashMap<>();
             caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
-            caseDataUpdated.put(LOGGED_IN_USER_TYPE, manageOrderService.getLoggedInUserType(authorisation));
+            caseDataUpdated.put("loggedInUserType", manageOrderService.getLoggedInUserType(authorisation));
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 caseDataUpdated.put(
                     "isInHearingState",
@@ -310,61 +338,38 @@ public class ManageOrdersController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
-        if (!authorisationService.isAuthorized(authorisation, s2sToken)) {
-            throw new RuntimeException(INVALID_CLIENT);
-        }
-
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
-            allTabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
+        log.info(">>> Submitted callback (case-order-email-notification) called");
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+                    = allTabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
             Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
+            //SNI-4330 fix - this will set state in caseData
+            //updating state in caseData so that caseSummaryTab is updated with latest state
             CaseData caseData = startAllTabsUpdateDataContent.caseData();
 
-        boolean isCustomOrder = isCustomOrder(caseDataUpdated);
-        sealOrderDocuments(authorisation, caseDataUpdated, caseData, isCustomOrder);
-        sendNotificationsIfRequired(authorisation, caseData, caseDataUpdated);
-        handleAutomatedHearingIfRequired(authorisation, caseData, caseDataUpdated);
-
-        ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
-        allTabService.submitAllTabsUpdate(
-            startAllTabsUpdateDataContent.authorisation(),
-            String.valueOf(callbackRequest.getCaseDetails().getId()),
-            startAllTabsUpdateDataContent.startEventResponse(),
-            startAllTabsUpdateDataContent.eventRequestData(),
-            caseDataUpdated);
-
-        cleanUpCustomOrderFieldsIfRequired(caseDataUpdated, isCustomOrder);
-
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-    }
-
-    private boolean isCustomOrder(Map<String, Object> caseDataUpdated) {
-        return caseDataUpdated.containsKey(CUSTOM_ORDER_DOC) && caseDataUpdated.get(CUSTOM_ORDER_DOC) != null;
-    }
-
-    private void sealOrderDocuments(String authorisation, Map<String, Object> caseDataUpdated,
-                                    CaseData caseData, boolean isCustomOrder) {
+            // Custom order flow: combine header preview + user content, update the order
+            // Note: manageOrdersOptions is cleaned up in aboutToSubmit, so we check for customOrderDoc instead
+            boolean isCustomOrder = caseDataUpdated.containsKey("customOrderDoc") && caseDataUpdated.get("customOrderDoc") != null;
             if (isCustomOrder) {
                 combineOrderAndSealNonDraft(authorisation, caseDataUpdated, caseData);
-        } else {
+            }
+
+            // Skip addSealToOrders for custom orders - the combined document isn't CDAM-associated yet
+            // (association happens during submitAllTabsUpdate below). sealCustomOrderSynchronously handles sealing after.
+            if (!isCustomOrder) {
                 try {
                     manageOrderService.addSealToOrders(authorisation, caseData, caseDataUpdated);
                 } catch (Exception e) {
                     log.error("Sealing failed for case {}: {}", caseData.getId(), e.getMessage(), e);
                 }
             }
-    }
-
-    private void sendNotificationsIfRequired(String authorisation, CaseData caseData,
-                                             Map<String, Object> caseDataUpdated) {
             log.info("Notifications to be sent? - {}", caseData.getManageOrders().getMarkedToServeEmailNotification());
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
                 log.info("Preparing to send notifications to parties for case id {}", caseData.getId());
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
-    }
 
-    private void handleAutomatedHearingIfRequired(String authorisation, CaseData caseData,
-                                                  Map<String, Object> caseDataUpdated) {
+            // Check for Automated Hearing Management
             if (Yes.equals(caseData.getManageOrders().getCheckForAutomatedHearing())) {
                 AutomatedHearingUtils.automatedHearingManagementRequest(
                     authorisation,
@@ -373,15 +378,25 @@ public class ManageOrdersController {
                     manageOrderService
                 );
             }
-    }
 
-    private void cleanUpCustomOrderFieldsIfRequired(Map<String, Object> caseDataUpdated, boolean isCustomOrder) {
-        if (!isCustomOrder) {
-            return;
-        }
-        caseDataUpdated.remove(CUSTOM_ORDER_DOC);
+            //SNI-4330 fix
+            //update caseSummaryTab with latest state
+            ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
+            allTabService.submitAllTabsUpdate(
+                    startAllTabsUpdateDataContent.authorisation(),
+                    String.valueOf(callbackRequest.getCaseDetails().getId()),
+                    startAllTabsUpdateDataContent.startEventResponse(),
+                    startAllTabsUpdateDataContent.eventRequestData(),
+                    caseDataUpdated);
+
+            // Note: Custom orders are now sealed directly during combining (above), not here
+            // This avoids issues with CDAM association timing
+
+            // Clean up custom order fields to prevent them affecting subsequent order creations
+            if (isCustomOrder) {
+                caseDataUpdated.remove("customOrderDoc");
                 caseDataUpdated.remove("customOrderNameOption");
-        caseDataUpdated.remove(PREVIEW_ORDER_DOC);
+                caseDataUpdated.remove("previewOrderDoc");
                 caseDataUpdated.remove("nameOfOrder");
                 caseDataUpdated.remove("amendOrderSelectCheckOptions");
                 caseDataUpdated.remove("whatDoWithOrder");
@@ -389,60 +404,35 @@ public class ManageOrdersController {
                 log.info("Cleaned up custom order fields after processing");
             }
 
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
     private void combineOrderAndSealNonDraft(String authorisation, Map<String, Object> caseDataUpdated, CaseData caseData) {
         try {
-            uk.gov.hmcts.reform.prl.models.documents.Document customOrderDoc = extractCustomOrderDoc(caseDataUpdated);
-            uk.gov.hmcts.reform.prl.models.documents.Document headerPreview = caseData.getPreviewOrderDoc();
-
-            logCustomOrderDocuments(customOrderDoc, headerPreview);
-
-            if (!areDocumentsAvailable(customOrderDoc, headerPreview)) {
-                log.warn("Skipping custom order combine - customOrderDoc or headerPreview not available");
-                return;
+            // Get the user's uploaded document
+            Object customOrderDocObj = caseDataUpdated.get("customOrderDoc");
+            uk.gov.hmcts.reform.prl.models.documents.Document customOrderDoc = null;
+            if (customOrderDocObj != null) {
+                customOrderDoc = objectMapper.convertValue(customOrderDocObj,
+                    uk.gov.hmcts.reform.prl.models.documents.Document.class);
             }
 
-            uk.gov.hmcts.reform.prl.models.documents.Document combinedDoc = combineCustomOrderDocuments(
-                authorisation, caseData, customOrderDoc, headerPreview, caseDataUpdated);
+            // Get the header preview directly from the field (not cleaned up until after combining)
+            uk.gov.hmcts.reform.prl.models.documents.Document headerPreview = caseData.getPreviewOrderDoc();
 
-            boolean isDraftOrder = isDraftOrder(authorisation, caseData);
-            uk.gov.hmcts.reform.prl.models.documents.Document docToStore = sealDocumentIfNotDraft(
-                combinedDoc, isDraftOrder, caseData, authorisation);
-
-            updateOrderCollection(caseDataUpdated, docToStore, isDraftOrder);
-            caseDataUpdated.put(PREVIEW_ORDER_DOC, null);
-
-        } catch (Exception e) {
-            log.error("Failed to process custom order in submitted callback", e);
-        }
-    }
-
-    private uk.gov.hmcts.reform.prl.models.documents.Document extractCustomOrderDoc(Map<String, Object> caseDataUpdated) {
-        Object customOrderDocObj = caseDataUpdated.get(CUSTOM_ORDER_DOC);
-        if (customOrderDocObj == null) {
-            return null;
-        }
-        return objectMapper.convertValue(customOrderDocObj, uk.gov.hmcts.reform.prl.models.documents.Document.class);
-    }
-
-    private void logCustomOrderDocuments(uk.gov.hmcts.reform.prl.models.documents.Document customOrderDoc,
-                                         uk.gov.hmcts.reform.prl.models.documents.Document headerPreview) {
             log.info("Custom order combining: customOrderDoc={}, headerPreview={}",
                 customOrderDoc != null ? customOrderDoc.getDocumentFileName() : "null",
                 headerPreview != null ? headerPreview.getDocumentFileName() : "null");
-    }
 
-    private boolean areDocumentsAvailable(uk.gov.hmcts.reform.prl.models.documents.Document customOrderDoc,
-                                          uk.gov.hmcts.reform.prl.models.documents.Document headerPreview) {
-        return customOrderDoc != null && customOrderDoc.getDocumentBinaryUrl() != null
-            && headerPreview != null && headerPreview.getDocumentBinaryUrl() != null;
-    }
+            if (customOrderDoc != null && customOrderDoc.getDocumentBinaryUrl() != null
+                && headerPreview != null && headerPreview.getDocumentBinaryUrl() != null) {
 
-    private uk.gov.hmcts.reform.prl.models.documents.Document combineCustomOrderDocuments(
-            String authorisation, CaseData caseData,
-            uk.gov.hmcts.reform.prl.models.documents.Document customOrderDoc,
-            uk.gov.hmcts.reform.prl.models.documents.Document headerPreview,
-            Map<String, Object> caseDataUpdated) throws IOException {
-        uk.gov.hmcts.reform.prl.models.documents.Document combinedDoc = customOrderService.processCustomOrderOnSubmitted(
+                // Combine header preview + user content
+                uk.gov.hmcts.reform.prl.models.documents.Document combinedDoc =
+                    customOrderService.processCustomOrderOnSubmitted(
                         authorisation,
                         caseData.getId(),
                         caseData,
@@ -452,57 +442,40 @@ public class ManageOrdersController {
                     );
 
                 log.info("Custom order combined doc created: {}", combinedDoc.getDocumentFileName());
-        return combinedDoc;
-    }
 
-    private boolean isDraftOrder(String authorisation, CaseData caseData) {
+                // Determine which collection the order went to (same logic as addOrderDetailsAndReturnReverseSortedList)
                 String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
-        boolean isDraft = UserRoles.JUDGE.name().equals(loggedInUserType)
+                boolean isDraftOrder = UserRoles.JUDGE.name().equals(loggedInUserType)
                     || (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
                         && (!AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                             || manageOrderService.isSaveAsDraft(caseData)));
-        log.info("Updating custom order: userType={}, isDraftOrder={}", loggedInUserType, isDraft);
-        return isDraft;
-    }
-
-    private uk.gov.hmcts.reform.prl.models.documents.Document sealDocumentIfNotDraft(
-            uk.gov.hmcts.reform.prl.models.documents.Document combinedDoc,
-            boolean isDraftOrder, CaseData caseData, String authorisation) {
-        if (isDraftOrder) {
-            return combinedDoc;
-        }
+                log.info("Updating custom order: userType={}, isDraftOrder={}", loggedInUserType, isDraftOrder);
+                log.info("caseData.getServeOrderData().getWhatDoWithOrder() is {}", caseData.getServeOrderData().getWhatDoWithOrder());
+                log.info("caseData.getServeOrderData().getDoYouWantToServeOrder() is {}", caseData.getServeOrderData().getDoYouWantToServeOrder());
+                log.info("isSaveAsDraft is {} and noCheck is {}", manageOrderService.isSaveAsDraft(caseData), caseData.getManageOrders().getAmendOrderSelectCheckOptions());
+                // For final orders (not draft), seal the combined document directly
+                // Draft orders don't need sealing
+                uk.gov.hmcts.reform.prl.models.documents.Document docToStore = combinedDoc;
+                if (!isDraftOrder) {
                     try {
-            uk.gov.hmcts.reform.prl.models.documents.Document sealed = documentSealingService.sealDocument(
-                combinedDoc, caseData, authorisation);
-            log.info("Sealed custom order document: {}", sealed.getDocumentFileName());
-            return sealed;
+                        log.info("Sealing combined custom order document: {}", combinedDoc.getDocumentFileName());
+                        docToStore = documentSealingService.sealDocument(combinedDoc, caseData, authorisation);
+                    log.info("Sealed custom order document: {}", docToStore.getDocumentFileName());
                     } catch (Exception e) {
                         log.error("Failed to seal custom order document, will use unsealed: {}", e.getMessage());
-            return combinedDoc;
+                        // Continue with unsealed doc - can be sealed later
                     }
                 }
 
-    private void updateOrderCollection(Map<String, Object> caseDataUpdated,
-                                       uk.gov.hmcts.reform.prl.models.documents.Document docToStore,
-                                       boolean isDraftOrder) {
                 if (isDraftOrder) {
-            updateDraftOrderCollection(caseDataUpdated, docToStore);
-        } else {
-            updateFinalOrderCollection(caseDataUpdated, docToStore);
-        }
-    }
-
-    private void updateDraftOrderCollection(Map<String, Object> caseDataUpdated,
-                                            uk.gov.hmcts.reform.prl.models.documents.Document docToStore) {
-        Object rawDrafts = caseDataUpdated.get(DRAFT_ORDER_COLLECTION);
-        if (rawDrafts == null) {
-            return;
-        }
-        List<Element<DraftOrder>> drafts = objectMapper.convertValue(rawDrafts,
-            new TypeReference<List<Element<DraftOrder>>>() {});
-        if (drafts.isEmpty()) {
-            return;
-        }
+                    // Update draftOrderCollection[0] - convert from raw map data
+                    Object rawDrafts = caseDataUpdated.get("draftOrderCollection");
+                    if (rawDrafts != null) {
+                        List<Element<DraftOrder>> drafts = objectMapper.convertValue(
+                            rawDrafts,
+                            new TypeReference<List<Element<DraftOrder>>>() {}
+                        );
+                        if (!drafts.isEmpty()) {
                             Element<DraftOrder> draftElement = drafts.get(0);
                             DraftOrder updatedDraft = draftElement.getValue().toBuilder()
                                 .orderDocument(docToStore)
@@ -511,33 +484,43 @@ public class ManageOrdersController {
                                 .id(draftElement.getId())
                                 .value(updatedDraft)
                                 .build());
-        caseDataUpdated.put(DRAFT_ORDER_COLLECTION, drafts);
+                            caseDataUpdated.put("draftOrderCollection", drafts);
                             log.info("Updated draftOrderCollection[0] with doc: {}", docToStore.getDocumentFileName());
                         }
-
-    private void updateFinalOrderCollection(Map<String, Object> caseDataUpdated,
-                                            uk.gov.hmcts.reform.prl.models.documents.Document docToStore) {
-        Object rawOrders = caseDataUpdated.get(ORDER_COLLECTION);
-        if (rawOrders == null) {
-            return;
                     }
-        List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>> orders = objectMapper.convertValue(rawOrders,
-            new TypeReference<List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>>>() {});
-        if (orders.isEmpty()) {
-            return;
-        }
+                } else {
+                    // Update orderCollection[0] - convert from raw map data
+                    Object rawOrders = caseDataUpdated.get("orderCollection");
+                    if (rawOrders != null) {
+                        List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>> orders = objectMapper.convertValue(
+                            rawOrders,
+                            new TypeReference<List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>>>() {}
+                        );
+                        if (!orders.isEmpty()) {
                             Element<uk.gov.hmcts.reform.prl.models.OrderDetails> orderElement = orders.get(0);
                             uk.gov.hmcts.reform.prl.models.OrderDetails updatedOrder = orderElement.getValue().toBuilder()
                                 .orderDocument(docToStore)
-            .doesOrderDocumentNeedSeal(YesOrNo.No)
+                                .doesOrderDocumentNeedSeal(YesOrNo.No)  // Already sealed
                                 .build();
                             orders.set(0, Element.<uk.gov.hmcts.reform.prl.models.OrderDetails>builder()
                                 .id(orderElement.getId())
                                 .value(updatedOrder)
                                 .build());
-        caseDataUpdated.put(ORDER_COLLECTION, orders);
+                            caseDataUpdated.put("orderCollection", orders);
                             log.info("Updated orderCollection[0] with sealed doc: {}", docToStore.getDocumentFileName());
                         }
+                    }
+                }
+
+                // Clean up previewOrderDoc now that we've used it
+                caseDataUpdated.put("previewOrderDoc", null);
+            } else {
+                log.warn("Skipping custom order combine - customOrderDoc or headerPreview not available");
+            }
+        } catch (Exception e) {
+            log.error("Failed to process custom order in submitted callback", e);
+        }
+    }
 
     @PostMapping(path = "/manage-orders/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiResponses(value = {
@@ -628,7 +611,19 @@ public class ManageOrdersController {
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
         } else if (caseData.getManageOrdersOptions().equals(createCustomOrder)) {
-            addCustomOrderToCollection(caseData, caseDataUpdated, authorisation, orderAlreadyAddedInMidEvent);
+            // Custom order flow: add order to collection using customOrderDoc
+            // The submitted callback will later replace it with the combined header + content (sealed for non-draft)
+            // Only add if order wasn't already added in mid-event (when serving immediately)
+            if (!orderAlreadyAddedInMidEvent) {
+                log.info("Custom order flow: adding order to collection with customOrderDoc");
+                caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
+                    authorisation,
+                    caseData,
+                    PrlAppsConstants.ENGLISH
+                ));
+            } else {
+                log.info("Custom order flow: order already added in mid-event (serve flow), skipping duplicate add");
+            }
         } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
             || caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
             Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
@@ -662,23 +657,6 @@ public class ManageOrdersController {
                 ORDER_COLLECTION,
                 manageOrderService.serveOrder(caseData, caseData.getOrderCollection())
             );
-        }
-    }
-
-    private void addCustomOrderToCollection(CaseData caseData, Map<String, Object> caseDataUpdated, String authorisation,
-                                            boolean orderAlreadyAddedInMidEvent) {
-        // Custom order flow: add order to collection using customOrderDoc
-        // The submitted callback will later replace it with the combined header + content (sealed for non-draft)
-        // Only add if order wasn't already added in mid-event (when serving immediately)
-        if (!orderAlreadyAddedInMidEvent) {
-            log.info("Custom order flow: adding order to collection with customOrderDoc");
-            caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
-                authorisation,
-                caseData,
-                PrlAppsConstants.ENGLISH
-            ));
-        } else {
-            log.info("Custom order flow: order already added in mid-event (serve flow), skipping duplicate add");
         }
     }
 
@@ -770,7 +748,7 @@ public class ManageOrdersController {
                 caseDataUpdated.putAll(manageOrderService.getOrderToAmendDownloadLink(caseData));
             }
 
-            caseDataUpdated.put(LOGGED_IN_USER_TYPE, manageOrderService.getLoggedInUserType(authorisation));
+            caseDataUpdated.put("loggedInUserType", manageOrderService.getLoggedInUserType(authorisation));
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new InvalidClientException(INVALID_CLIENT));
@@ -997,4 +975,56 @@ public class ManageOrdersController {
         }
     }
 
+    /**
+     * Extracts the court name from allocatedJudgeDetails object.
+     * The allocatedJudgeDetails is stored in the summary tab and contains courtName.
+     */
+    private String extractCourtNameFromAllocatedJudge(Object allocatedJudgeObj) {
+        if (allocatedJudgeObj == null) {
+            log.info("extractCourtNameFromAllocatedJudge: object is null");
+            return null;
+        }
+        try {
+            log.info("extractCourtNameFromAllocatedJudge: type={}, value={}",
+                allocatedJudgeObj.getClass().getSimpleName(), allocatedJudgeObj);
+            if (allocatedJudgeObj instanceof Map<?, ?> judgeMap) {
+                log.info("extractCourtNameFromAllocatedJudge: map keys={}", judgeMap.keySet());
+                Object courtName = judgeMap.get("courtName");
+                log.info("extractCourtNameFromAllocatedJudge: courtName='{}' (type={})",
+                    courtName, courtName != null ? courtName.getClass().getSimpleName() : "null");
+                if (courtName != null
+                    && !"null".equals(courtName.toString())
+                    && !courtName.toString().trim().isEmpty()) {
+                    return courtName.toString().trim();
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to extract court name from allocatedJudgeDetails: {}", e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * Extracts the court name label from a DynamicList object.
+     * The courtList field is stored as a Map with structure: {value={code=..., label=...}, list_items=...}
+     */
+    private String extractCourtNameFromDynamicList(Object courtListObj) {
+        if (courtListObj == null) {
+            return null;
+        }
+        try {
+            if (courtListObj instanceof Map<?, ?> courtListMap) {
+                Object valueObj = courtListMap.get("value");
+                if (valueObj instanceof Map<?, ?> valueMap) {
+                    Object label = valueMap.get("label");
+                    if (label != null) {
+                        return label.toString();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to extract court name from courtList: {}", e.getMessage());
+        }
+        return null;
+    }
 }
