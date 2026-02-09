@@ -26,10 +26,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.document.PoiTlDocxRenderer;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
-
-import uk.gov.hmcts.reform.prl.models.DraftOrder;
-import uk.gov.hmcts.reform.prl.models.OrderDetails;
-
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -37,19 +33,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -916,6 +910,148 @@ public class CustomOrderServiceTest {
         assertEquals("represented by Emma Solicitor", placeholders.get("respondent1RepresentativeClause"));
     }
 
+    @Test
+    public void testBuildHeaderPlaceholders_fullCase_applicantAndMultipleRespondentsAllRepresented() throws IOException {
+        // Comprehensive test: applicant with representative, 3 respondents all with representatives and relationships
+        Long caseId = 1234567890123456L;
+
+        // Applicant with solicitor
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("Alice")
+            .lastName("Thompson")
+            .representativeFirstName("Robert")
+            .representativeLastName("Counsel QC")
+            .build();
+
+        // Respondent 1 - Mother with solicitor
+        PartyDetails respondent1 = PartyDetails.builder()
+            .firstName("Barbara")
+            .lastName("Jones")
+            .representativeFirstName("Sarah")
+            .representativeLastName("Solicitor")
+            .build();
+
+        // Respondent 2 - Father with solicitor
+        PartyDetails respondent2 = PartyDetails.builder()
+            .firstName("Charles")
+            .lastName("Jones")
+            .representativeFirstName("Michael")
+            .representativeLastName("Barrister")
+            .build();
+
+        // Respondent 3 - Grandmother with solicitor
+        PartyDetails respondent3 = PartyDetails.builder()
+            .firstName("Dorothy")
+            .lastName("Smith")
+            .representativeFirstName("Emma")
+            .representativeLastName("Legal Rep")
+            .build();
+
+        // Relations data for all respondents
+        ChildrenAndRespondentRelation relation1 = ChildrenAndRespondentRelation.builder()
+            .respondentFullName("Barbara Jones")
+            .childAndRespondentRelation(RelationshipsEnum.mother)
+            .build();
+
+        ChildrenAndRespondentRelation relation2 = ChildrenAndRespondentRelation.builder()
+            .respondentFullName("Charles Jones")
+            .childAndRespondentRelation(RelationshipsEnum.father)
+            .build();
+
+        ChildrenAndRespondentRelation relation3 = ChildrenAndRespondentRelation.builder()
+            .respondentFullName("Dorothy Smith")
+            .childAndRespondentRelation(RelationshipsEnum.grandParent)
+            .build();
+
+        Relations relations = Relations.builder()
+            .childAndRespondentRelations(List.of(
+                Element.<ChildrenAndRespondentRelation>builder().value(relation1).build(),
+                Element.<ChildrenAndRespondentRelation>builder().value(relation2).build(),
+                Element.<ChildrenAndRespondentRelation>builder().value(relation3).build()
+            ))
+            .build();
+
+        // Children on the case
+        ChildDetailsRevised child1 = ChildDetailsRevised.builder()
+            .firstName("Emily")
+            .lastName("Jones")
+            .gender(Gender.female)
+            .dateOfBirth(java.time.LocalDate.of(2018, 5, 15))
+            .build();
+
+        ChildDetailsRevised child2 = ChildDetailsRevised.builder()
+            .firstName("James")
+            .lastName("Jones")
+            .gender(Gender.male)
+            .dateOfBirth(java.time.LocalDate.of(2020, 8, 22))
+            .build();
+
+        // ManageOrders with isTheOrderAboutAllChildren = Yes to include all children
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isTheOrderAboutAllChildren(YesOrNo.Yes)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(caseId)
+            .courtName("Central Family Court")
+            .manageOrders(manageOrders)
+            .applicants(List.of(Element.<PartyDetails>builder().value(applicant).build()))
+            .respondents(List.of(
+                Element.<PartyDetails>builder().value(respondent1).build(),
+                Element.<PartyDetails>builder().value(respondent2).build(),
+                Element.<PartyDetails>builder().value(respondent3).build()
+            ))
+            .relations(relations)
+            .newChildDetails(List.of(
+                Element.<ChildDetailsRevised>builder().value(child1).build(),
+                Element.<ChildDetailsRevised>builder().value(child2).build()
+            ))
+            .build();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, null);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+
+        // Verify case details
+        assertEquals("1234-5678-9012-3456", placeholders.get("caseNumber"));
+        assertEquals("Central Family Court", placeholders.get("courtName"));
+
+        // Verify applicant
+        assertEquals("Alice Thompson", placeholders.get("applicantName"));
+        assertEquals("Robert Counsel QC", placeholders.get("applicantRepresentativeName"));
+        assertEquals("represented by Robert Counsel QC", placeholders.get("applicantRepresentativeClause"));
+
+        // Verify respondent 1 - Mother
+        assertEquals("Barbara Jones", placeholders.get("respondent1Name"));
+        assertEquals("Mother", placeholders.get("respondent1RelationshipToChild"));
+        assertEquals("Sarah Solicitor", placeholders.get("respondent1RepresentativeName"));
+        assertEquals("represented by Sarah Solicitor", placeholders.get("respondent1RepresentativeClause"));
+
+        // Verify respondent 2 - Father
+        assertEquals("Charles Jones", placeholders.get("respondent2Name"));
+        assertEquals("Father", placeholders.get("respondent2RelationshipToChild"));
+        assertEquals("Michael Barrister", placeholders.get("respondent2RepresentativeName"));
+        assertEquals("represented by Michael Barrister", placeholders.get("respondent2RepresentativeClause"));
+
+        // Verify respondent 3 - Grandmother
+        assertEquals("Dorothy Smith", placeholders.get("respondent3Name"));
+        assertEquals("Grandparent", placeholders.get("respondent3RelationshipToChild"));
+        assertEquals("Emma Legal Rep", placeholders.get("respondent3RepresentativeName"));
+        assertEquals("represented by Emma Legal Rep", placeholders.get("respondent3RepresentativeClause"));
+
+        // Verify children
+        List<Map<String, String>> children = (List<Map<String, String>>) placeholders.get("children");
+        assertNotNull(children);
+        assertEquals(2, children.size());
+        assertEquals("Emily Jones", children.get(0).get("fullName"));
+        assertEquals("Female", children.get(0).get("gender"));
+        assertEquals("James Jones", children.get(1).get("fullName"));
+        assertEquals("Male", children.get(1).get("gender"));
+    }
+
     // ========== Tests for judge name and order date from map (mid-event callback population) ==========
 
     @Test
@@ -1476,9 +1612,9 @@ public class CustomOrderServiceTest {
         caseDataUpdated.put("previewOrderDoc", previewDoc);
 
         // Mock objectMapper to return the documents
-        when(objectMapper.convertValue(eq(customDoc), eq(uk.gov.hmcts.reform.prl.models.documents.Document.class)))
+        when(objectMapper.convertValue(customDoc, uk.gov.hmcts.reform.prl.models.documents.Document.class))
             .thenReturn(customDoc);
-        when(objectMapper.convertValue(eq(previewDoc), eq(uk.gov.hmcts.reform.prl.models.documents.Document.class)))
+        when(objectMapper.convertValue(previewDoc, uk.gov.hmcts.reform.prl.models.documents.Document.class))
             .thenReturn(previewDoc);
 
         CaseData caseData = CaseData.builder()
@@ -1489,8 +1625,8 @@ public class CustomOrderServiceTest {
         customOrderService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, true);
 
         // Assert - verify objectMapper was called to convert both documents
-        verify(objectMapper).convertValue(eq(customDoc), eq(uk.gov.hmcts.reform.prl.models.documents.Document.class));
-        verify(objectMapper).convertValue(eq(previewDoc), eq(uk.gov.hmcts.reform.prl.models.documents.Document.class));
+        verify(objectMapper).convertValue(customDoc, uk.gov.hmcts.reform.prl.models.documents.Document.class);
+        verify(objectMapper).convertValue(previewDoc, uk.gov.hmcts.reform.prl.models.documents.Document.class);
     }
 
     @Test
@@ -1514,10 +1650,10 @@ public class CustomOrderServiceTest {
         caseDataUpdated.put("customOrderDoc", customDoc);
         // NO previewOrderDoc in map - should fall back to caseData.getPreviewOrderDoc()
 
-        when(objectMapper.convertValue(eq(customDoc), eq(uk.gov.hmcts.reform.prl.models.documents.Document.class)))
+        when(objectMapper.convertValue(customDoc, uk.gov.hmcts.reform.prl.models.documents.Document.class))
             .thenReturn(customDoc);
         // Return null for previewOrderDoc from map (simulating it's not there)
-        when(objectMapper.convertValue(eq(null), eq(uk.gov.hmcts.reform.prl.models.documents.Document.class)))
+        when(objectMapper.convertValue(isNull(), eq(uk.gov.hmcts.reform.prl.models.documents.Document.class)))
             .thenReturn(null);
 
         CaseData caseData = CaseData.builder()
@@ -1530,7 +1666,7 @@ public class CustomOrderServiceTest {
 
         // Assert - the method should have used caseData.getPreviewOrderDoc() as fallback
         // Since previewDoc has a valid binaryUrl, processing would have continued
-        verify(objectMapper).convertValue(eq(customDoc), eq(uk.gov.hmcts.reform.prl.models.documents.Document.class));
+        verify(objectMapper).convertValue(customDoc, uk.gov.hmcts.reform.prl.models.documents.Document.class);
     }
 
     @Test
