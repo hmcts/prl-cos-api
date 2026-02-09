@@ -12,7 +12,10 @@ import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -87,5 +90,16 @@ public class AmendCourtService {
             return true;
         }
         return false;
+    }
+
+    public List<String> validateCourtEmailAddress(CallbackRequest callbackRequest) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        List<String> errorList = new ArrayList<>();
+        if (!caseData.getCourtEmailAddress().isEmpty()
+            && !EmailUtils.isValidEmailAddress(caseData.getCourtEmailAddress())) {
+            errorList.add("Please enter valid court email address.");
+            return errorList;
+        }
+        return Collections.emptyList();
     }
 }
