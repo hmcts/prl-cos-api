@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,6 +38,7 @@ import static uk.gov.hmcts.reform.prl.enums.State.AWAITING_INFORMATION;
 @Slf4j
 @RestController
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@ConditionalOnProperty(prefix = "feature.toggle", name = "awaitingInformationEnabled", havingValue = "true")
 public class AwaitingInformationController {
     private final AwaitingInformationService awaitingInformationService;
     private final ObjectMapper objectMapper;
@@ -50,15 +52,17 @@ public class AwaitingInformationController {
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse submitAwaitingInformation(
-            @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-            @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-            @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            caseDataUpdated.put(CASE_STATUS, CaseStatus.builder()
-                .state(AWAITING_INFORMATION.getLabel())
-                .build());
+            caseDataUpdated.put(
+                CASE_STATUS, CaseStatus.builder()
+                    .state(AWAITING_INFORMATION.getLabel())
+                    .build()
+            );
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
@@ -77,7 +81,7 @@ public class AwaitingInformationController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .build();
         } else {
@@ -100,7 +104,7 @@ public class AwaitingInformationController {
         List<String> errorList = awaitingInformationService.validateAwaitingInformation(awaitingInformation);
 
         return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder()
-                .errors(errorList)
-                .build();
+            .errors(errorList)
+            .build();
     }
 }

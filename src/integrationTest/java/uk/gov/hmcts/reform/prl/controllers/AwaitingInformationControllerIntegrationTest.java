@@ -30,7 +30,9 @@ import static uk.gov.hmcts.reform.prl.util.TestConstants.TEST_SERVICE_AUTH_TOKEN
 
 
 @Slf4j
-@SpringBootTest
+@SpringBootTest(properties = {
+    "feature.toggle.awaitingInformationEnabled=true"
+})
 @RunWith(SpringRunner.class)
 @ContextConfiguration
 public class AwaitingInformationControllerIntegrationTest {
