@@ -83,7 +83,7 @@ public class CustomOrderServiceTest {
     // ========== Tests for EXISTING FLOW (renderUploadedCustomOrderAndStoreOnManageOrders) ==========
 
     @Test
-    public void testCustomOrderDocRemovedAndTransformedDocPersisted() throws Exception {
+    public void testCustomOrderDocKeptAndTransformedDocPersisted() throws Exception {
         // Arrange
         Map<String, Object> caseDataUpdated = new HashMap<>();
         uk.gov.hmcts.reform.prl.models.documents.Document customOrderDoc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
@@ -145,7 +145,8 @@ public class CustomOrderServiceTest {
         );
 
         // Assert
-        assertFalse(result.containsKey("customOrderDoc"));
+        // customOrderDoc is kept because it's needed in the submitted callback to combine with header
+        assertTrue(result.containsKey("customOrderDoc"));
         assertNotNull(result.get("customOrderTransformedDoc"));
         uk.gov.hmcts.reform.prl.models.documents.Document transformed =
             (uk.gov.hmcts.reform.prl.models.documents.Document) result.get("customOrderTransformedDoc");
