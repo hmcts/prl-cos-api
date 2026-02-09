@@ -25,3 +25,5 @@ src/main/resources/application.yaml
 /bin/ccd-config-PRL-local.xlsx
 /.mirrord/mirrord.json
 /.devcontainer/
+
+.aat-env*
