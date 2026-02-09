@@ -27,3 +27,6 @@ src/main/resources/application.yaml
 /.devcontainer/
 
 .aat-env*
+
+.aat-env*
+.aat.env*
