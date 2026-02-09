@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -22,14 +23,17 @@ import uk.gov.hmcts.reform.prl.services.EventService;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY;
 
 @Slf4j
 @RestController
+@SecurityRequirement(name = "Bearer Authentication")
 @RequestMapping("/localauthority")
 public class LocalAuthorityController extends AbstractCallbackController {
     private final AuthorisationService authorisationService;
 
+    @Autowired
     public LocalAuthorityController(ObjectMapper objectMapper, EventService eventPublisher,
                                     AuthorisationService authorisationService) {
         super(objectMapper, eventPublisher);
@@ -56,10 +60,6 @@ public class LocalAuthorityController extends AbstractCallbackController {
             caseDataUpdated.put(
                 LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY,
                 localAuthorityOrganisationPolicy.toBuilder().orgPolicyCaseAssignedRole("[LASOLICITOR]").build()
-            );
-            caseDataUpdated.put(
-                LOCAL_AUTHORITY_SOCIAL_WORKER_ORGANISATION_POLICY,
-                localAuthorityOrganisationPolicy.toBuilder().orgPolicyCaseAssignedRole("[LASOCIALWORKER]").build()
             );
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
