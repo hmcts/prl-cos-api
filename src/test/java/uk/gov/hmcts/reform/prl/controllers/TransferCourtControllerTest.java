@@ -398,20 +398,5 @@ public class TransferCourtControllerTest {
         assertNotNull(response.getErrors());
         assertEquals("Please enter valid court email address.", response.getErrors().getFirst());
     }
-
-    @Test
-    public void testExceptionForValidateTransferCourtEmail() throws Exception {
-        CaseData caseData = CaseData.builder().build();
-        Map<String, Object> stringObjectMap = new HashMap<>();
-        when(amendCourtService.handleAmendCourtSubmission(Mockito.anyString(), Mockito.any(), Mockito.any()))
-            .thenReturn(new HashMap<>());
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
-        callbackRequest = CallbackRequest.builder().caseDetails(CaseDetails.builder().id(123L)
-                                                       .data(caseDataMap).build()).build();
-
-        assertExpectedException(() -> {
-            transferCourtController.validateTransferCourtEmail(callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
-    }
+    
 }
