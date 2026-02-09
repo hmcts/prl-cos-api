@@ -1007,7 +1007,7 @@ public class ServiceOfDocumentsServiceTest {
 
         assertNotNull(errors);
         assertEquals(1, errors.size());
-        assertEquals("Please provide valid email address for additional recipient", errors.getFirst());
+        assertEquals("Please provide valid email address for all additional recipients", errors.getFirst());
     }
 
     @Test
