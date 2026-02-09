@@ -11,7 +11,10 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.AwaitingInformation;
 import java.time.LocalDate;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class AwaitingInformationServiceTest {
