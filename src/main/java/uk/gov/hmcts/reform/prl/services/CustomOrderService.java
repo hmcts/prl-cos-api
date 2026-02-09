@@ -24,6 +24,8 @@ import uk.gov.hmcts.reform.prl.services.document.PoiTlDocxRenderer;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -47,6 +49,15 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 public class CustomOrderService {
 
     private static final String HEADER_TEMPLATE_PATH = "templates/CustomOrderHeader.docx";
+    private static final String DATE_FORMAT_PATTERN = "dd/MM/yyyy";
+    private static final String JUDGE_OR_MAGISTRATES_LAST_NAME = "judgeOrMagistratesLastName";
+    private static final String DATE_ORDER_MADE = "dateOrderMade";
+    private static final String RESPONDENT_PREFIX = "respondent";
+    private static final String CHILD_PREFIX = "child";
+    private static final String DEFAULT_ORDER_NAME = "custom_order";
+    private static final String HEADER_PREVIEW_FILENAME_PATTERN = "custom_order_header_preview";
+    private static final java.time.format.DateTimeFormatter DATE_FORMATTER =
+        java.time.format.DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
 
     /**
      * Gets the effective order name for a custom order.
@@ -86,8 +97,8 @@ public class CustomOrderService {
             return textFieldName;
         }
 
-        log.info("No order name found, using default: custom_order");
-        return "custom_order";
+        log.info("No order name found, using default: {}", DEFAULT_ORDER_NAME);
+        return DEFAULT_ORDER_NAME;
     }
 
     /**
@@ -359,7 +370,7 @@ public class CustomOrderService {
         byte[] headerBytes = renderHeaderPreview(caseId, caseData, caseDataMap);
 
         // Upload for preview
-        String previewName = "custom_order_header_preview_" + caseId + ".docx";
+        String previewName = HEADER_PREVIEW_FILENAME_PATTERN + "_" + caseId + ".docx";
         uk.gov.hmcts.reform.ccd.document.am.model.Document uploaded = uploadService.uploadDocument(
             headerBytes,
             previewName,
@@ -409,99 +420,111 @@ public class CustomOrderService {
     }
 
     /**
+     * Extracts judge name from case data map or CaseData object.
+     */
+    private String extractJudgeName(CaseData caseData, Map<String, Object> caseDataMap) {
+        if (caseDataMap != null && caseDataMap.get(JUDGE_OR_MAGISTRATES_LAST_NAME) != null) {
+            return caseDataMap.get(JUDGE_OR_MAGISTRATES_LAST_NAME).toString();
+        }
+        return caseData.getJudgeOrMagistratesLastName();
+    }
+
+    /**
+     * Extracts and formats order date from case data map or CaseData object.
+     */
+    private String extractOrderDate(CaseData caseData, Map<String, Object> caseDataMap) {
+        if (caseDataMap != null && caseDataMap.get(DATE_ORDER_MADE) != null) {
+            Object dateValue = caseDataMap.get(DATE_ORDER_MADE);
+            if (dateValue instanceof java.time.LocalDate) {
+                return ((java.time.LocalDate) dateValue).format(DATE_FORMATTER);
+            }
+            return dateValue.toString();
+        }
+        if (caseData.getDateOrderMade() != null) {
+            return caseData.getDateOrderMade().format(DATE_FORMATTER);
+        }
+        return null;
+    }
+
+    /**
+     * Extracts hearing date from manage orders or falls back to order date.
+     */
+    private String extractHearingDate(CaseData caseData, Map<String, Object> caseDataMap) {
+        if (caseData.getManageOrders() != null
+            && caseData.getManageOrders().getOrdersHearingDetails() != null
+            && !caseData.getManageOrders().getOrdersHearingDetails().isEmpty()) {
+            var hearingDate = caseData.getManageOrders().getOrdersHearingDetails().get(0)
+                .getValue().getHearingDateConfirmOptionEnum();
+            if (hearingDate != null) {
+                return hearingDate.toString();
+            }
+        }
+        return extractOrderDate(caseData, caseDataMap);
+    }
+
+    /**
+     * Populates applicant placeholders for the header template.
+     */
+    private void populateApplicantPlaceholders(Map<String, Object> data, CaseData caseData, boolean isFL401) {
+        if (isFL401 && caseData.getApplicantsFL401() != null) {
+            PartyDetails applicant = caseData.getApplicantsFL401();
+            populateApplicantData(data, applicant);
+        } else if (caseData.getApplicants() != null && !caseData.getApplicants().isEmpty()) {
+            var applicant = caseData.getApplicants().get(0).getValue();
+            populateApplicantData(data, applicant);
+        } else {
+            setEmptyApplicantPlaceholders(data);
+        }
+    }
+
+    private void populateApplicantData(Map<String, Object> data, PartyDetails applicant) {
+        data.put("applicantName", getFullName(applicant.getFirstName(), applicant.getLastName()));
+        String appRep = getRepresentativeName(applicant);
+        data.put("applicantRepresentativeName", appRep);
+        data.put("applicantRepresentativeClause", formatRepresentativeClause(appRep));
+    }
+
+    private void setEmptyApplicantPlaceholders(Map<String, Object> data) {
+        data.put("applicantName", "");
+        data.put("applicantRepresentativeName", "");
+        data.put("applicantRepresentativeClause", "");
+    }
+
+    /**
      * Builds placeholder map for the header template from case data.
      */
     private Map<String, Object> buildHeaderPlaceholders(Long caseId, CaseData caseData, Map<String, Object> caseDataMap) {
         Map<String, Object> data = new HashMap<>();
 
-        // Case details - format as xxxx-xxxx-xxxx-xxxx
+        // Case details
         data.put("caseNumber", formatCaseNumber(String.valueOf(caseId)));
         safePut(data, "courtName", caseData::getCourtName);
         safePut(data, "orderName", () -> getEffectiveOrderName(caseData, caseDataMap));
 
-        // Judge details - read from map first (set during aboutToStart callback), then fall back to caseData
-        String judgeName = null;
-        if (caseDataMap != null && caseDataMap.get("judgeOrMagistratesLastName") != null) {
-            judgeName = caseDataMap.get("judgeOrMagistratesLastName").toString();
-        } else if (caseData.getJudgeOrMagistratesLastName() != null) {
-            judgeName = caseData.getJudgeOrMagistratesLastName();
-        }
+        // Judge details
+        String judgeName = extractJudgeName(caseData, caseDataMap);
         if (judgeName != null && !judgeName.isEmpty()) {
             data.put("judgeName", judgeName);
         }
 
-        // Order date - read from map first (set during aboutToStart callback), then fall back to caseData
-        String orderDate = null;
-        if (caseDataMap != null && caseDataMap.get("dateOrderMade") != null) {
-            Object dateValue = caseDataMap.get("dateOrderMade");
-            if (dateValue instanceof java.time.LocalDate) {
-                orderDate = ((java.time.LocalDate) dateValue).format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-            } else {
-                orderDate = dateValue.toString();
-            }
-        } else if (caseData.getDateOrderMade() != null) {
-            orderDate = caseData.getDateOrderMade().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-        }
+        // Order date
+        String orderDate = extractOrderDate(caseData, caseDataMap);
         if (orderDate != null && !orderDate.isEmpty()) {
             data.put("orderDate", orderDate);
         }
 
-        // Hearing/Order date details - prefer hearing date, fall back to order date
+        // Hearing date with fallback to order date
         safePut(data, "hearingDate", () -> {
-            // First try hearing details
-            if (caseData.getManageOrders() != null
-                && caseData.getManageOrders().getOrdersHearingDetails() != null
-                && !caseData.getManageOrders().getOrdersHearingDetails().isEmpty()) {
-                var hearingDate = caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getHearingDateConfirmOptionEnum();
-                if (hearingDate != null) {
-                    return hearingDate;
-                }
-            }
-            // Fall back to dateOrderMade from map or caseData
-            if (caseDataMap != null && caseDataMap.get("dateOrderMade") != null) {
-                Object dateValue = caseDataMap.get("dateOrderMade");
-                if (dateValue instanceof java.time.LocalDate) {
-                    return ((java.time.LocalDate) dateValue).format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-                }
-                return dateValue.toString();
-            }
-            if (caseData.getDateOrderMade() != null) {
-                return caseData.getDateOrderMade().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-            }
-            return "";
+            String hearingDate = extractHearingDate(caseData, caseDataMap);
+            return hearingDate != null ? hearingDate : "";
         });
         safePut(data, "hearingType", () -> "hearing");
 
-        // Determine case type
-        String caseType = CaseUtils.getCaseTypeOfApplication(caseData);
-        boolean isFL401 = FL401_CASE_TYPE.equalsIgnoreCase(caseType);
-
-        // Applicant details - handle FL401 vs C100
-        if (isFL401 && caseData.getApplicantsFL401() != null) {
-            PartyDetails applicant = caseData.getApplicantsFL401();
-            data.put("applicantName", getFullName(applicant.getFirstName(), applicant.getLastName()));
-            String appRep = getRepresentativeName(applicant);
-            data.put("applicantRepresentativeName", appRep);
-            data.put("applicantRepresentativeClause", formatRepresentativeClause(appRep));
-        } else if (caseData.getApplicants() != null && !caseData.getApplicants().isEmpty()) {
-            var applicant = caseData.getApplicants().get(0).getValue();
-            data.put("applicantName", getFullName(applicant.getFirstName(), applicant.getLastName()));
-            String appRep = getRepresentativeName(applicant);
-            data.put("applicantRepresentativeName", appRep);
-            data.put("applicantRepresentativeClause", formatRepresentativeClause(appRep));
-        } else {
-            data.put("applicantName", "");
-            data.put("applicantRepresentativeName", "");
-            data.put("applicantRepresentativeClause", "");
-        }
-
-        // Respondent details - handle FL401 vs C100
+        // Determine case type and populate party details
+        boolean isFL401 = FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData));
+        populateApplicantPlaceholders(data, caseData, isFL401);
         populateRespondents(data, caseData, isFL401);
-
-        // Guardian details - populated from Cafcass officer data
         populateChildrensGuardian(data, caseData);
-
-        // Children details - build table rows for selected children
         populateChildrenPlaceholders(data, caseData);
 
         return data;
@@ -522,7 +545,7 @@ public class CustomOrderService {
             String fullName = getFullName(child.getFirstName(), child.getLastName());
             String gender = child.getGender() != null ? child.getGender().getDisplayedValue() : "";
             String dob = child.getDateOfBirth() != null
-                ? child.getDateOfBirth().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                ? child.getDateOfBirth().format(DATE_FORMATTER)
                 : "";
 
             Map<String, String> childRow = new HashMap<>();
@@ -532,17 +555,17 @@ public class CustomOrderService {
             childrenRows.add(childRow);
 
             // Individual placeholders for each child (child1Name, child1Gender, child1Dob, etc.)
-            data.put("child" + index + "Name", fullName);
-            data.put("child" + index + "Gender", gender);
-            data.put("child" + index + "Dob", dob);
+            data.put(CHILD_PREFIX + index + "Name", fullName);
+            data.put(CHILD_PREFIX + index + "Gender", gender);
+            data.put(CHILD_PREFIX + index + "Dob", dob);
             index++;
         }
 
         // Fill empty slots up to 10 children
         for (int i = index; i <= 10; i++) {
-            data.put("child" + i + "Name", "");
-            data.put("child" + i + "Gender", "");
-            data.put("child" + i + "Dob", "");
+            data.put(CHILD_PREFIX + i + "Name", "");
+            data.put(CHILD_PREFIX + i + "Gender", "");
+            data.put(CHILD_PREFIX + i + "Dob", "");
         }
 
         data.put("children", childrenRows);
@@ -557,83 +580,79 @@ public class CustomOrderService {
         List<Map<String, String>> respondentRows = new ArrayList<>();
 
         if (isFL401 && caseData.getRespondentsFL401() != null) {
-            // FL401 has a single respondent
-            PartyDetails respondent = caseData.getRespondentsFL401();
-            log.debug(" FL401 Respondent: relationshipToChildren='{}', representativeFirstName='{}', representativeLastName='{}'",
-                respondent.getRelationshipToChildren(),
-                respondent.getRepresentativeFirstName(),
-                respondent.getRepresentativeLastName());
-
-            String name = getFullName(respondent.getFirstName(), respondent.getLastName());
-            // Try party details first, then fall back to Relations data
-            String relationship = nullToEmpty(respondent.getRelationshipToChildren());
-            if (relationship.isEmpty()) {
-                relationship = getRespondentRelationshipFromRelations(caseData, 1, null, name);
-            }
-            String representative = getRepresentativeName(respondent);
-
-            Map<String, String> row = new HashMap<>();
-            row.put("name", name);
-            row.put("relationship", relationship);
-            row.put("representative", representative);
-            respondentRows.add(row);
-
-            data.put("respondent1Name", name);
-            data.put("respondent1RelationshipToChild", relationship);
-            data.put("respondent1RepresentativeName", representative);
-            data.put("respondent1RepresentativeClause", formatRepresentativeClause(representative));
-
+            populateFl401Respondent(data, caseData, respondentRows);
         } else if (caseData.getRespondents() != null) {
-            // C100 has a list of respondents
-            int index = 1;
-            for (Element<PartyDetails> respondentElement : caseData.getRespondents()) {
-                PartyDetails respondent = respondentElement.getValue();
-                Map<String, String> row = new HashMap<>();
-
-                // Get respondent ID from Element for matching in Relations
-                String respondentId = respondentElement.getId() != null
-                    ? respondentElement.getId().toString() : null;
-
-                // Debug logging for respondent fields
-                log.debug(" Respondent {}: id='{}', relationshipToChildren='{}', representativeFirstName='{}', representativeLastName='{}'",
-                    index,
-                    respondentId,
-                    respondent.getRelationshipToChildren(),
-                    respondent.getRepresentativeFirstName(),
-                    respondent.getRepresentativeLastName());
-
-                String name = getFullName(respondent.getFirstName(), respondent.getLastName());
-                // Try party details first, then fall back to Relations data
-                String relationship = nullToEmpty(respondent.getRelationshipToChildren());
-                if (relationship.isEmpty()) {
-                    relationship = getRespondentRelationshipFromRelations(caseData, index, respondentId, name);
-                }
-                String representative = getRepresentativeName(respondent);
-
-                row.put("name", name);
-                row.put("relationship", relationship);
-                row.put("representative", representative);
-                respondentRows.add(row);
-
-                // Also populate individual placeholders
-                data.put("respondent" + index + "Name", name);
-                data.put("respondent" + index + "RelationshipToChild", relationship);
-                data.put("respondent" + index + "RepresentativeName", representative);
-                data.put("respondent" + index + "RepresentativeClause", formatRepresentativeClause(representative));
-                index++;
-            }
+            populateC100Respondents(data, caseData, respondentRows);
         }
 
-        // Fill empty slots for respondents 1-5
-        for (int i = 1; i <= 5; i++) {
-            data.putIfAbsent("respondent" + i + "Name", "");
-            data.putIfAbsent("respondent" + i + "RelationshipToChild", "");
-            data.putIfAbsent("respondent" + i + "RepresentativeName", "");
-            data.putIfAbsent("respondent" + i + "RepresentativeClause", "");
-        }
-
+        fillEmptyRespondentSlots(data);
         data.put("respondents", respondentRows);
         log.info("Populated {} respondent rows", respondentRows.size());
+    }
+
+    private void populateFl401Respondent(Map<String, Object> data, CaseData caseData, List<Map<String, String>> respondentRows) {
+        PartyDetails respondent = caseData.getRespondentsFL401();
+        log.debug(" FL401 Respondent: relationshipToChildren='{}', representativeFirstName='{}', representativeLastName='{}'",
+            respondent.getRelationshipToChildren(), respondent.getRepresentativeFirstName(), respondent.getRepresentativeLastName());
+
+        String name = getFullName(respondent.getFirstName(), respondent.getLastName());
+        String relationship = getEffectiveRelationship(caseData, respondent, 1, null, name);
+        String representative = getRepresentativeName(respondent);
+
+        respondentRows.add(buildRespondentRow(name, relationship, representative));
+        putRespondentPlaceholders(data, 1, name, relationship, representative);
+    }
+
+    private void populateC100Respondents(Map<String, Object> data, CaseData caseData, List<Map<String, String>> respondentRows) {
+        int index = 1;
+        for (Element<PartyDetails> respondentElement : caseData.getRespondents()) {
+            PartyDetails respondent = respondentElement.getValue();
+            String respondentId = respondentElement.getId() != null ? respondentElement.getId().toString() : null;
+
+            log.debug(" Respondent {}: id='{}', relationshipToChildren='{}', representativeFirstName='{}', representativeLastName='{}'",
+                index, respondentId, respondent.getRelationshipToChildren(),
+                respondent.getRepresentativeFirstName(), respondent.getRepresentativeLastName());
+
+            String name = getFullName(respondent.getFirstName(), respondent.getLastName());
+            String relationship = getEffectiveRelationship(caseData, respondent, index, respondentId, name);
+            String representative = getRepresentativeName(respondent);
+
+            respondentRows.add(buildRespondentRow(name, relationship, representative));
+            putRespondentPlaceholders(data, index, name, relationship, representative);
+            index++;
+        }
+    }
+
+    private String getEffectiveRelationship(CaseData caseData, PartyDetails respondent, int index, String respondentId, String name) {
+        String relationship = nullToEmpty(respondent.getRelationshipToChildren());
+        if (relationship.isEmpty()) {
+            relationship = getRespondentRelationshipFromRelations(caseData, index, respondentId, name);
+        }
+        return relationship;
+    }
+
+    private Map<String, String> buildRespondentRow(String name, String relationship, String representative) {
+        Map<String, String> row = new HashMap<>();
+        row.put("name", name);
+        row.put("relationship", relationship);
+        row.put("representative", representative);
+        return row;
+    }
+
+    private void putRespondentPlaceholders(Map<String, Object> data, int index, String name, String relationship, String representative) {
+        data.put(RESPONDENT_PREFIX + index + "Name", name);
+        data.put(RESPONDENT_PREFIX + index + "RelationshipToChild", relationship);
+        data.put(RESPONDENT_PREFIX + index + "RepresentativeName", representative);
+        data.put(RESPONDENT_PREFIX + index + "RepresentativeClause", formatRepresentativeClause(representative));
+    }
+
+    private void fillEmptyRespondentSlots(Map<String, Object> data) {
+        for (int i = 1; i <= 5; i++) {
+            data.putIfAbsent(RESPONDENT_PREFIX + i + "Name", "");
+            data.putIfAbsent(RESPONDENT_PREFIX + i + "RelationshipToChild", "");
+            data.putIfAbsent(RESPONDENT_PREFIX + i + "RepresentativeName", "");
+            data.putIfAbsent(RESPONDENT_PREFIX + i + "RepresentativeClause", "");
+        }
     }
 
     /**
@@ -649,99 +668,137 @@ public class CustomOrderService {
      */
     private String getRespondentRelationshipFromRelations(CaseData caseData, int respondentIndex,
                                                           String respondentId, String respondentName) {
-        // Try Relations data first (new model - childAndRespondentRelations)
-        if (caseData.getRelations() != null
-            && caseData.getRelations().getChildAndRespondentRelations() != null
-            && !caseData.getRelations().getChildAndRespondentRelations().isEmpty()) {
-
-            log.debug(" Found {} childAndRespondentRelations entries. Looking for respondent index={}, id='{}', name='{}'",
-                caseData.getRelations().getChildAndRespondentRelations().size(),
-                respondentIndex, respondentId, respondentName);
-
-            // Log all entries for debugging
-            for (Element<uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation> relElement
-                : caseData.getRelations().getChildAndRespondentRelations()) {
-                var relation = relElement.getValue();
-                log.debug(" Relation entry - respondentId='{}', respondentFullName='{}', relation='{}'",
-                    relation.getRespondentId(), relation.getRespondentFullName(),
-                    relation.getChildAndRespondentRelation());
-            }
-
-            // Collect all unique relationships for the target respondent
-            java.util.Set<String> relationshipsForRespondent = new java.util.LinkedHashSet<>();
-
-            // First try to match by respondent name (more reliable than ID which might not match)
-            if (respondentName != null && !respondentName.isEmpty()) {
-                for (Element<uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation> relElement
-                    : caseData.getRelations().getChildAndRespondentRelations()) {
-                    var relation = relElement.getValue();
-                    if (respondentName.equalsIgnoreCase(relation.getRespondentFullName())
-                        && relation.getChildAndRespondentRelation() != null) {
-                        relationshipsForRespondent.add(relation.getChildAndRespondentRelation().getDisplayedValue());
-                    }
-                }
-                if (!relationshipsForRespondent.isEmpty()) {
-                    String result = String.join(", ", relationshipsForRespondent);
-                    log.debug(" Found respondent '{}' relationships by name match: '{}'", respondentName, result);
-                    return result;
-                }
-            }
-
-            // Fall back to ID match
-            if (respondentId != null && !respondentId.isEmpty()) {
-                for (Element<uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation> relElement
-                    : caseData.getRelations().getChildAndRespondentRelations()) {
-                    var relation = relElement.getValue();
-                    if (respondentId.equals(relation.getRespondentId())
-                        && relation.getChildAndRespondentRelation() != null) {
-                        relationshipsForRespondent.add(relation.getChildAndRespondentRelation().getDisplayedValue());
-                    }
-                }
-                if (!relationshipsForRespondent.isEmpty()) {
-                    String result = String.join(", ", relationshipsForRespondent);
-                    log.debug(" Found respondent {} relationships by ID match: '{}'", respondentIndex, result);
-                    return result;
-                }
-            }
-
-            // Last resort: use index-based matching
-            java.util.Map<String, java.util.Set<String>> respondentToRelationships = new java.util.LinkedHashMap<>();
-            for (Element<uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation> relElement
-                : caseData.getRelations().getChildAndRespondentRelations()) {
-                var relation = relElement.getValue();
-                String respName = relation.getRespondentFullName();
-                if (respName != null && relation.getChildAndRespondentRelation() != null) {
-                    respondentToRelationships
-                        .computeIfAbsent(respName, k -> new java.util.LinkedHashSet<>())
-                        .add(relation.getChildAndRespondentRelation().getDisplayedValue());
-                }
-            }
-
-            int count = 0;
-            for (var entry : respondentToRelationships.entrySet()) {
-                count++;
-                if (count == respondentIndex) {
-                    String result = String.join(", ", entry.getValue());
-                    log.debug(" Found respondent {} ('{}') relationships by index: '{}'",
-                        respondentIndex, entry.getKey(), result);
-                    return result;
-                }
-            }
+        String result = findRelationshipFromNewModel(caseData, respondentIndex, respondentId, respondentName);
+        if (!result.isEmpty()) {
+            return result;
         }
 
-        // Fallback to old children model
-        if (caseData.getChildren() != null && !caseData.getChildren().isEmpty()) {
-            for (Element<uk.gov.hmcts.reform.prl.models.complextypes.Child> childElement : caseData.getChildren()) {
-                uk.gov.hmcts.reform.prl.models.complextypes.Child child = childElement.getValue();
-                if (child.getRespondentsRelationshipToChild() != null) {
-                    String displayValue = child.getRespondentsRelationshipToChild().getDisplayedValue();
-                    log.debug(" Found respondent relationship from children model: '{}'", displayValue);
-                    return displayValue;
-                }
-            }
+        result = findRelationshipFromOldModel(caseData);
+        if (!result.isEmpty()) {
+            return result;
         }
 
         log.debug(" No respondent relationship found for respondent {}", respondentIndex);
+        return "";
+    }
+
+    private String findRelationshipFromNewModel(CaseData caseData, int respondentIndex,
+                                                 String respondentId, String respondentName) {
+        if (!hasChildAndRespondentRelations(caseData)) {
+            return "";
+        }
+
+        var relations = caseData.getRelations().getChildAndRespondentRelations();
+        logRelationEntries(relations, respondentIndex, respondentId, respondentName);
+
+        String result = findRelationshipByName(relations, respondentName);
+        if (!result.isEmpty()) {
+            return result;
+        }
+
+        result = findRelationshipById(relations, respondentId, respondentIndex);
+        if (!result.isEmpty()) {
+            return result;
+        }
+
+        return findRelationshipByIndex(relations, respondentIndex);
+    }
+
+    private boolean hasChildAndRespondentRelations(CaseData caseData) {
+        return caseData.getRelations() != null
+            && caseData.getRelations().getChildAndRespondentRelations() != null
+            && !caseData.getRelations().getChildAndRespondentRelations().isEmpty();
+    }
+
+    private void logRelationEntries(List<Element<uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation>> relations,
+                                    int respondentIndex, String respondentId, String respondentName) {
+        log.debug(" Found {} childAndRespondentRelations entries. Looking for respondent index={}, id='{}', name='{}'",
+            relations.size(), respondentIndex, respondentId, respondentName);
+        for (var relElement : relations) {
+            var relation = relElement.getValue();
+            log.debug(" Relation entry - respondentId='{}', respondentFullName='{}', relation='{}'",
+                relation.getRespondentId(), relation.getRespondentFullName(), relation.getChildAndRespondentRelation());
+        }
+    }
+
+    private String findRelationshipByName(List<Element<uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation>> relations,
+                                          String respondentName) {
+        if (respondentName == null || respondentName.isEmpty()) {
+            return "";
+        }
+        java.util.Set<String> relationships = new java.util.LinkedHashSet<>();
+        for (var relElement : relations) {
+            var relation = relElement.getValue();
+            if (respondentName.equalsIgnoreCase(relation.getRespondentFullName())
+                && relation.getChildAndRespondentRelation() != null) {
+                relationships.add(relation.getChildAndRespondentRelation().getDisplayedValue());
+            }
+        }
+        if (!relationships.isEmpty()) {
+            String result = String.join(", ", relationships);
+            log.debug(" Found respondent '{}' relationships by name match: '{}'", respondentName, result);
+            return result;
+        }
+        return "";
+    }
+
+    private String findRelationshipById(List<Element<uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation>> relations,
+                                        String respondentId, int respondentIndex) {
+        if (respondentId == null || respondentId.isEmpty()) {
+            return "";
+        }
+        java.util.Set<String> relationships = new java.util.LinkedHashSet<>();
+        for (var relElement : relations) {
+            var relation = relElement.getValue();
+            if (respondentId.equals(relation.getRespondentId()) && relation.getChildAndRespondentRelation() != null) {
+                relationships.add(relation.getChildAndRespondentRelation().getDisplayedValue());
+            }
+        }
+        if (!relationships.isEmpty()) {
+            String result = String.join(", ", relationships);
+            log.debug(" Found respondent {} relationships by ID match: '{}'", respondentIndex, result);
+            return result;
+        }
+        return "";
+    }
+
+    private String findRelationshipByIndex(List<Element<uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation>> relations,
+                                           int respondentIndex) {
+        java.util.Map<String, java.util.Set<String>> respondentToRelationships = new java.util.LinkedHashMap<>();
+        for (var relElement : relations) {
+            var relation = relElement.getValue();
+            String respName = relation.getRespondentFullName();
+            if (respName != null && relation.getChildAndRespondentRelation() != null) {
+                respondentToRelationships
+                    .computeIfAbsent(respName, k -> new java.util.LinkedHashSet<>())
+                    .add(relation.getChildAndRespondentRelation().getDisplayedValue());
+            }
+        }
+
+        int count = 0;
+        for (var entry : respondentToRelationships.entrySet()) {
+            count++;
+            if (count == respondentIndex) {
+                String result = String.join(", ", entry.getValue());
+                log.debug(" Found respondent {} ('{}') relationships by index: '{}'", respondentIndex, entry.getKey(), result);
+                return result;
+            }
+        }
+        return "";
+    }
+
+    private String findRelationshipFromOldModel(CaseData caseData) {
+        if (caseData.getChildren() == null || caseData.getChildren().isEmpty()) {
+            return "";
+        }
+        for (var childElement : caseData.getChildren()) {
+            var child = childElement.getValue();
+            if (child.getRespondentsRelationshipToChild() != null) {
+                String displayValue = child.getRespondentsRelationshipToChild().getDisplayedValue();
+                log.debug(" Found respondent relationship from children model: '{}'", displayValue);
+                return displayValue;
+            }
+        }
         return "";
     }
 
@@ -849,66 +906,62 @@ public class CustomOrderService {
      * FL401: isTheOrderAboutChildren = Yes → selected from childOption, No → none
      */
     private List<ChildDetailsRevised> getSelectedChildren(CaseData caseData) {
-        List<ChildDetailsRevised> result = new ArrayList<>();
-
-        log.info("getSelectedChildren: newChildDetails={}, manageOrders={}",
-            caseData.getNewChildDetails() != null ? caseData.getNewChildDetails().size() : "null",
-            caseData.getManageOrders() != null ? "present" : "null");
-
-        if (caseData.getNewChildDetails() == null || caseData.getNewChildDetails().isEmpty()) {
-            log.info("No children found in newChildDetails");
-            return result;
+        if (!hasChildrenData(caseData)) {
+            return new ArrayList<>();
         }
 
-        if (caseData.getManageOrders() == null) {
-            log.info("manageOrders is null, returning empty");
-            return result;
-        }
-
-        // Get both field values
         YesOrNo isAboutAllChildren = caseData.getManageOrders().getIsTheOrderAboutAllChildren();
         YesOrNo isAboutChildren = caseData.getManageOrders().getIsTheOrderAboutChildren();
+        log.info("isTheOrderAboutAllChildren={}, isTheOrderAboutChildren={}", isAboutAllChildren, isAboutChildren);
 
-        log.info("isTheOrderAboutAllChildren={}, isTheOrderAboutChildren={}",
-            isAboutAllChildren, isAboutChildren);
-
-        // C100 logic: Yes = all children
         if (YesOrNo.Yes.equals(isAboutAllChildren)) {
-            for (Element<ChildDetailsRevised> childElement : caseData.getNewChildDetails()) {
-                result.add(childElement.getValue());
-            }
-            log.info("isTheOrderAboutAllChildren=Yes, returning all {} children", result.size());
-            return result;
+            return getAllChildren(caseData);
         }
 
-        // FL401 logic: No = no children
         if (YesOrNo.No.equals(isAboutChildren)) {
             log.info("isTheOrderAboutChildren=No, returning no children");
-            return result;
+            return new ArrayList<>();
         }
 
-        // Either C100 with No (select specific) or FL401 with Yes (select specific)
-        // Both use childOption for selection
+        return getChildrenBySelection(caseData);
+    }
+
+    private boolean hasChildrenData(CaseData caseData) {
+        if (caseData.getNewChildDetails() == null || caseData.getNewChildDetails().isEmpty()) {
+            log.info("No children found in newChildDetails");
+            return false;
+        }
+        if (caseData.getManageOrders() == null) {
+            log.info("manageOrders is null, returning empty");
+            return false;
+        }
+        return true;
+    }
+
+    private List<ChildDetailsRevised> getAllChildren(CaseData caseData) {
+        List<ChildDetailsRevised> result = caseData.getNewChildDetails().stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+        log.info("isTheOrderAboutAllChildren=Yes, returning all {} children", result.size());
+        return result;
+    }
+
+    private List<ChildDetailsRevised> getChildrenBySelection(CaseData caseData) {
         DynamicMultiSelectList childOption = caseData.getManageOrders().getChildOption();
-
-        log.info("childOption={}, childOption.getValue()={}",
-            childOption != null ? "present" : "null",
-            childOption != null && childOption.getValue() != null ? childOption.getValue().size() : "null");
-
-        if (childOption != null && childOption.getValue() != null && !childOption.getValue().isEmpty()) {
-            Set<String> selectedIds = childOption.getValue().stream()
-                .map(DynamicMultiselectListElement::getCode)
-                .collect(Collectors.toSet());
-
-            log.info("Selected child IDs: {}", selectedIds);
-
-            for (Element<ChildDetailsRevised> childElement : caseData.getNewChildDetails()) {
-                log.info("Checking child ID: {}", childElement.getId());
-                if (selectedIds.contains(childElement.getId().toString())) {
-                    result.add(childElement.getValue());
-                }
-            }
+        if (childOption == null || childOption.getValue() == null || childOption.getValue().isEmpty()) {
+            log.info("No child selection found, returning empty");
+            return new ArrayList<>();
         }
+
+        Set<String> selectedIds = childOption.getValue().stream()
+            .map(DynamicMultiselectListElement::getCode)
+            .collect(Collectors.toSet());
+        log.info("Selected child IDs: {}", selectedIds);
+
+        List<ChildDetailsRevised> result = caseData.getNewChildDetails().stream()
+            .filter(childElement -> selectedIds.contains(childElement.getId().toString()))
+            .map(Element::getValue)
+            .collect(Collectors.toList());
 
         log.info("Returning {} selected children", result.size());
         return result;
@@ -1030,8 +1083,6 @@ public class CustomOrderService {
             .documentCreatedOn(uploaded.createdOn)
             .build();
     }
-
-    private static final String HEADER_PREVIEW_FILENAME_PATTERN = "custom_order_header_preview";
 
     /**
      * Result of finding a custom order header preview, including which collection it was found in.
@@ -1378,5 +1429,259 @@ public class CustomOrderService {
             log.error("Failed to seal custom order via internal event for case {}: {}",
                 caseId, e.getMessage(), e);
         }
+    }
+
+    // ========== Court Name Resolution Methods (moved from ManageOrdersController) ==========
+
+    /**
+     * Resolves the court name from various possible sources in the case data.
+     * Tries multiple fallback strategies to find the court name.
+     *
+     * @param caseData The case data object
+     * @param caseDataMap The raw case data map
+     * @return The resolved court name, or null if not found
+     */
+    public String resolveCourtName(CaseData caseData, Map<String, Object> caseDataMap) {
+        // Try caseData.courtName first
+        if (caseData.getCourtName() != null && !caseData.getCourtName().isEmpty()) {
+            log.info("Court name found in caseData: {}", caseData.getCourtName());
+            return caseData.getCourtName();
+        }
+
+        // Try raw courtName from map
+        Object rawCourtName = caseDataMap != null ? caseDataMap.get("courtName") : null;
+        if (rawCourtName != null && !"null".equals(rawCourtName.toString())
+            && !rawCourtName.toString().isEmpty()) {
+            log.info("Court name found in caseDataMap: {}", rawCourtName);
+            return rawCourtName.toString();
+        }
+
+        // Try allocatedJudgeDetails
+        Object allocatedJudgeObj = caseDataMap != null ? caseDataMap.get("allocatedJudgeDetails") : null;
+        if (allocatedJudgeObj != null) {
+            String courtName = extractCourtNameFromAllocatedJudge(allocatedJudgeObj);
+            if (courtName != null) {
+                log.info("Court name found in allocatedJudgeDetails: {}", courtName);
+                return courtName;
+            }
+        }
+
+        // Try courtList dynamic list
+        Object courtListObj = caseDataMap != null ? caseDataMap.get("courtList") : null;
+        if (courtListObj != null) {
+            String courtName = extractCourtNameFromDynamicList(courtListObj);
+            if (courtName != null) {
+                log.info("Court name found in courtList: {}", courtName);
+                return courtName;
+            }
+        }
+
+        log.warn("Could not find court name from any source");
+        return null;
+    }
+
+    /**
+     * Extracts the court name from allocatedJudgeDetails object.
+     * The allocatedJudgeDetails is stored in the summary tab and contains courtName.
+     */
+    private String extractCourtNameFromAllocatedJudge(Object allocatedJudgeObj) {
+        if (allocatedJudgeObj == null) {
+            log.debug("extractCourtNameFromAllocatedJudge: object is null");
+            return null;
+        }
+        try {
+            log.debug("extractCourtNameFromAllocatedJudge: type={}, value={}",
+                allocatedJudgeObj.getClass().getSimpleName(), allocatedJudgeObj);
+            if (allocatedJudgeObj instanceof Map<?, ?> judgeMap) {
+                log.debug("extractCourtNameFromAllocatedJudge: map keys={}", judgeMap.keySet());
+                Object courtName = judgeMap.get("courtName");
+                log.debug("extractCourtNameFromAllocatedJudge: courtName='{}' (type={})",
+                    courtName, courtName != null ? courtName.getClass().getSimpleName() : "null");
+                if (courtName != null
+                    && !"null".equals(courtName.toString())
+                    && !courtName.toString().trim().isEmpty()) {
+                    return courtName.toString().trim();
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to extract court name from allocatedJudgeDetails: {}", e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * Extracts the court name label from a DynamicList object.
+     * The courtList field is stored as a Map with structure: {value={code=..., label=...}, list_items=...}
+     */
+    private String extractCourtNameFromDynamicList(Object courtListObj) {
+        if (courtListObj == null) {
+            return null;
+        }
+        try {
+            if (courtListObj instanceof Map<?, ?> courtListMap) {
+                Object valueObj = courtListMap.get("value");
+                if (valueObj instanceof Map<?, ?> valueMap) {
+                    Object label = valueMap.get("label");
+                    if (label != null) {
+                        return label.toString();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to extract court name from courtList: {}", e.getMessage());
+        }
+        return null;
+    }
+
+    // ========== Combine and Finalize Custom Order (moved from ManageOrdersController) ==========
+
+    /**
+     * Combines the header preview document with user content and updates the appropriate order collection.
+     * For non-draft orders, also seals the combined document.
+     *
+     * @param authorisation Auth token
+     * @param caseData The case data
+     * @param caseDataUpdated Map to store updated case data
+     * @param isDraftOrder Whether this is a draft order (determines collection and sealing)
+     */
+    public void combineAndFinalizeCustomOrder(
+        String authorisation,
+        CaseData caseData,
+        Map<String, Object> caseDataUpdated,
+        boolean isDraftOrder
+    ) {
+        try {
+            // Get the user's uploaded document
+            Object customOrderDocObj = caseDataUpdated.get("customOrderDoc");
+            uk.gov.hmcts.reform.prl.models.documents.Document customOrderDoc = null;
+            if (customOrderDocObj != null) {
+                customOrderDoc = objectMapper.convertValue(customOrderDocObj,
+                    uk.gov.hmcts.reform.prl.models.documents.Document.class);
+            }
+
+            // Get the header preview directly from the field
+            uk.gov.hmcts.reform.prl.models.documents.Document headerPreview = caseData.getPreviewOrderDoc();
+
+            log.info("Custom order combining: customOrderDoc={}, headerPreview={}",
+                customOrderDoc != null ? customOrderDoc.getDocumentFileName() : "null",
+                headerPreview != null ? headerPreview.getDocumentFileName() : "null");
+
+            if (customOrderDoc == null || customOrderDoc.getDocumentBinaryUrl() == null
+                || headerPreview == null || headerPreview.getDocumentBinaryUrl() == null) {
+                log.warn("Skipping custom order combine - customOrderDoc or headerPreview not available");
+                return;
+            }
+
+            // Combine header preview + user content
+            uk.gov.hmcts.reform.prl.models.documents.Document combinedDoc =
+                processCustomOrderOnSubmitted(
+                    authorisation,
+                    caseData.getId(),
+                    caseData,
+                    customOrderDoc.getDocumentBinaryUrl(),
+                    headerPreview.getDocumentBinaryUrl(),
+                    caseDataUpdated
+                );
+
+            log.info("Custom order combined doc created: {}", combinedDoc.getDocumentFileName());
+            log.info("Updating custom order: isDraftOrder={}", isDraftOrder);
+
+            // For final orders (not draft), seal the combined document
+            uk.gov.hmcts.reform.prl.models.documents.Document docToStore = combinedDoc;
+            if (!isDraftOrder) {
+                docToStore = sealCombinedDocument(combinedDoc, caseData, authorisation);
+            }
+
+            // Update the appropriate collection
+            if (isDraftOrder) {
+                updateDraftOrderCollection(caseDataUpdated, docToStore);
+            } else {
+                updateFinalOrderCollection(caseDataUpdated, docToStore);
+            }
+
+            // Clean up previewOrderDoc now that we've used it
+            caseDataUpdated.put("previewOrderDoc", null);
+
+        } catch (Exception e) {
+            log.error("Failed to process custom order in submitted callback", e);
+        }
+    }
+
+    private uk.gov.hmcts.reform.prl.models.documents.Document sealCombinedDocument(
+        uk.gov.hmcts.reform.prl.models.documents.Document combinedDoc,
+        CaseData caseData,
+        String authorisation
+    ) {
+        try {
+            log.info("Sealing combined custom order document: {}", combinedDoc.getDocumentFileName());
+            uk.gov.hmcts.reform.prl.models.documents.Document sealedDoc =
+                documentSealingService.sealDocument(combinedDoc, caseData, authorisation);
+            log.info("Sealed custom order document: {}", sealedDoc.getDocumentFileName());
+            return sealedDoc;
+        } catch (Exception e) {
+            log.error("Failed to seal custom order document, will use unsealed: {}", e.getMessage());
+            return combinedDoc;
+        }
+    }
+
+    private void updateDraftOrderCollection(Map<String, Object> caseDataUpdated,
+                                            uk.gov.hmcts.reform.prl.models.documents.Document docToStore) {
+        Object rawDrafts = caseDataUpdated.get("draftOrderCollection");
+        if (rawDrafts == null) {
+            log.warn("draftOrderCollection is null, cannot update");
+            return;
+        }
+
+        List<Element<uk.gov.hmcts.reform.prl.models.DraftOrder>> drafts = objectMapper.convertValue(
+            rawDrafts,
+            new TypeReference<List<Element<uk.gov.hmcts.reform.prl.models.DraftOrder>>>() {}
+        );
+
+        if (drafts.isEmpty()) {
+            log.warn("draftOrderCollection is empty, cannot update");
+            return;
+        }
+
+        Element<uk.gov.hmcts.reform.prl.models.DraftOrder> draftElement = drafts.get(0);
+        uk.gov.hmcts.reform.prl.models.DraftOrder updatedDraft = draftElement.getValue().toBuilder()
+            .orderDocument(docToStore)
+            .build();
+        drafts.set(0, Element.<uk.gov.hmcts.reform.prl.models.DraftOrder>builder()
+            .id(draftElement.getId())
+            .value(updatedDraft)
+            .build());
+        caseDataUpdated.put("draftOrderCollection", drafts);
+        log.info("Updated draftOrderCollection[0] with doc: {}", docToStore.getDocumentFileName());
+    }
+
+    private void updateFinalOrderCollection(Map<String, Object> caseDataUpdated,
+                                            uk.gov.hmcts.reform.prl.models.documents.Document docToStore) {
+        Object rawOrders = caseDataUpdated.get("orderCollection");
+        if (rawOrders == null) {
+            log.warn("orderCollection is null, cannot update");
+            return;
+        }
+
+        List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>> orders = objectMapper.convertValue(
+            rawOrders,
+            new TypeReference<List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>>>() {}
+        );
+
+        if (orders.isEmpty()) {
+            log.warn("orderCollection is empty, cannot update");
+            return;
+        }
+
+        Element<uk.gov.hmcts.reform.prl.models.OrderDetails> orderElement = orders.get(0);
+        uk.gov.hmcts.reform.prl.models.OrderDetails updatedOrder = orderElement.getValue().toBuilder()
+            .orderDocument(docToStore)
+            .doesOrderDocumentNeedSeal(YesOrNo.No)
+            .build();
+        orders.set(0, Element.<uk.gov.hmcts.reform.prl.models.OrderDetails>builder()
+            .id(orderElement.getId())
+            .value(updatedOrder)
+            .build());
+        caseDataUpdated.put("orderCollection", orders);
+        log.info("Updated orderCollection[0] with sealed doc: {}", docToStore.getDocumentFileName());
     }
 }

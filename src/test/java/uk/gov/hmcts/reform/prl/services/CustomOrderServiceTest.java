@@ -37,6 +37,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -1165,5 +1166,232 @@ public class CustomOrderServiceTest {
                 assertFalse(option.isOther(), option.name() + " should return false for isOther()");
             }
         }
+    }
+
+    // ========== Tests for resolveCourtName ==========
+
+    @Test
+    public void testResolveCourtName_fromCaseData() {
+        // Arrange - court name is in caseData
+        CaseData caseData = CaseData.builder()
+            .courtName("Central Family Court")
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+
+        // Act
+        String result = customOrderService.resolveCourtName(caseData, caseDataMap);
+
+        // Assert
+        assertEquals("Central Family Court", result);
+    }
+
+    @Test
+    public void testResolveCourtName_fromCaseDataMap() {
+        // Arrange - court name is in map but not caseData
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("courtName", "Birmingham Family Court");
+
+        // Act
+        String result = customOrderService.resolveCourtName(caseData, caseDataMap);
+
+        // Assert
+        assertEquals("Birmingham Family Court", result);
+    }
+
+    @Test
+    public void testResolveCourtName_fromAllocatedJudgeDetails() {
+        // Arrange - court name is in allocatedJudgeDetails
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        Map<String, Object> allocatedJudge = new HashMap<>();
+        allocatedJudge.put("courtName", "Manchester Family Court");
+        caseDataMap.put("allocatedJudgeDetails", allocatedJudge);
+
+        // Act
+        String result = customOrderService.resolveCourtName(caseData, caseDataMap);
+
+        // Assert
+        assertEquals("Manchester Family Court", result);
+    }
+
+    @Test
+    public void testResolveCourtName_fromCourtList() {
+        // Arrange - court name is in courtList dynamic list
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        Map<String, Object> courtListValue = new HashMap<>();
+        courtListValue.put("code", "123");
+        courtListValue.put("label", "Leeds Family Court");
+        Map<String, Object> courtList = new HashMap<>();
+        courtList.put("value", courtListValue);
+        caseDataMap.put("courtList", courtList);
+
+        // Act
+        String result = customOrderService.resolveCourtName(caseData, caseDataMap);
+
+        // Assert
+        assertEquals("Leeds Family Court", result);
+    }
+
+    @Test
+    public void testResolveCourtName_returnsNull_whenNoSourceAvailable() {
+        // Arrange - no court name anywhere
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+
+        // Act
+        String result = customOrderService.resolveCourtName(caseData, caseDataMap);
+
+        // Assert
+        assertNull(result);
+    }
+
+    @Test
+    public void testResolveCourtName_skipsNullCourtName() {
+        // Arrange - courtName in map is "null" string
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("courtName", "null");
+
+        // Act
+        String result = customOrderService.resolveCourtName(caseData, caseDataMap);
+
+        // Assert
+        assertNull(result);
+    }
+
+    @Test
+    public void testResolveCourtName_prefersDirectCourtName_overAllocatedJudge() {
+        // Arrange - both caseData and allocatedJudge have court name
+        CaseData caseData = CaseData.builder()
+            .courtName("Priority Court")
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        Map<String, Object> allocatedJudge = new HashMap<>();
+        allocatedJudge.put("courtName", "Fallback Court");
+        caseDataMap.put("allocatedJudgeDetails", allocatedJudge);
+
+        // Act
+        String result = customOrderService.resolveCourtName(caseData, caseDataMap);
+
+        // Assert - should use caseData court name (higher priority)
+        assertEquals("Priority Court", result);
+    }
+
+    // ========== Tests for combineAndFinalizeCustomOrder ==========
+
+    @Test
+    public void testCombineAndFinalizeCustomOrder_skipsWhenNoDocuments() {
+        // Arrange - no customOrderDoc
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        // Act - should not throw, just skip
+        customOrderService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, false);
+
+        // Assert - no changes made
+        assertNull(caseDataUpdated.get("orderCollection"));
+    }
+
+    @Test
+    public void testCombineAndFinalizeCustomOrder_skipsWhenNoHeaderPreview() {
+        // Arrange - has customOrderDoc but no headerPreview
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        uk.gov.hmcts.reform.prl.models.documents.Document customDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentBinaryUrl("http://binary-url")
+                .build();
+        caseDataUpdated.put("customOrderDoc", customDoc);
+
+        // Act - should not throw, just skip
+        customOrderService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, false);
+
+        // Assert - previewOrderDoc not cleaned up (since combine was skipped)
+        assertNull(caseDataUpdated.get("previewOrderDoc"));
+    }
+
+    // ========== Tests for extractCourtNameFromAllocatedJudge (via resolveCourtName) ==========
+
+    @Test
+    public void testExtractCourtName_allocatedJudge_nullObject() {
+        // Arrange
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("allocatedJudgeDetails", null);
+
+        // Act
+        String result = customOrderService.resolveCourtName(caseData, caseDataMap);
+
+        // Assert
+        assertNull(result);
+    }
+
+    @Test
+    public void testExtractCourtName_allocatedJudge_emptyMap() {
+        // Arrange
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("allocatedJudgeDetails", new HashMap<>());
+
+        // Act
+        String result = customOrderService.resolveCourtName(caseData, caseDataMap);
+
+        // Assert
+        assertNull(result);
+    }
+
+    @Test
+    public void testExtractCourtName_allocatedJudge_trimWhitespace() {
+        // Arrange
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        Map<String, Object> allocatedJudge = new HashMap<>();
+        allocatedJudge.put("courtName", "  Trimmed Court  ");
+        caseDataMap.put("allocatedJudgeDetails", allocatedJudge);
+
+        // Act
+        String result = customOrderService.resolveCourtName(caseData, caseDataMap);
+
+        // Assert
+        assertEquals("Trimmed Court", result);
+    }
+
+    // ========== Tests for extractCourtNameFromDynamicList (via resolveCourtName) ==========
+
+    @Test
+    public void testExtractCourtName_dynamicList_nullValue() {
+        // Arrange
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        Map<String, Object> courtList = new HashMap<>();
+        courtList.put("value", null);
+        caseDataMap.put("courtList", courtList);
+
+        // Act
+        String result = customOrderService.resolveCourtName(caseData, caseDataMap);
+
+        // Assert
+        assertNull(result);
+    }
+
+    @Test
+    public void testExtractCourtName_dynamicList_missingLabel() {
+        // Arrange
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        Map<String, Object> courtListValue = new HashMap<>();
+        courtListValue.put("code", "123");
+        // no "label" key
+        Map<String, Object> courtList = new HashMap<>();
+        courtList.put("value", courtListValue);
+        caseDataMap.put("courtList", courtList);
+
+        // Act
+        String result = customOrderService.resolveCourtName(caseData, caseDataMap);
+
+        // Assert
+        assertNull(result);
     }
 }
