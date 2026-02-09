@@ -145,9 +145,10 @@ public class TransferCourtController {
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .errors(errorList)
                 .build();
-        } else {
-            throw new RuntimeException(INVALID_CLIENT);
         }
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(callbackRequest.getCaseDetails().getData())
+            .build();
     }
 
     @PostMapping(path = "/transfer-court/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

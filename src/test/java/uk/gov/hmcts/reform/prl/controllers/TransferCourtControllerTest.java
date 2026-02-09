@@ -374,7 +374,7 @@ public class TransferCourtControllerTest {
     }
 
     @Test
-    public void testValidateTransferCourtEmail() throws Exception {
+    public void testValidateTransferCourtEmail() {
         CaseData caseData = CaseData.builder()
             .courtEmailAddress("test@test.com")
             .build();
