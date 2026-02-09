@@ -186,6 +186,8 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private final Document draftConsentOrderFile;
     private final PermissionRequiredEnum applicationPermissionRequired;
     private final String applicationPermissionRequiredReason;
+    @JsonProperty("permissionFromCourtFile")
+    private final Document permissionFromCourtFile;
     private final String applicationDetails;
 
     /**
