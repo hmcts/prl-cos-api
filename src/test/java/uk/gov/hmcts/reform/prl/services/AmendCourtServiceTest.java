@@ -30,6 +30,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -239,4 +241,34 @@ public class AmendCourtServiceTest {
             .validateCourtFields(caseData, errorList);
         Assertions.assertTrue(error);
     }
+
+    @Test
+    public void testValidateCourtEmailAddressWhenEmailIsValid() throws Exception {
+        CaseData testData = CaseData.builder()
+            .courtEmailAddress("test@test.com").build();
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(testData);
+        when(CaseUtils.getCaseData(
+            callbackRequest.getCaseDetails(),
+            objectMapper
+        )).thenReturn(testData);
+
+        List<String> errorList = amendCourtService.validateCourtEmailAddress(callbackRequest);
+        assertTrue(errorList.isEmpty());
+    }
+
+    @Test
+    public void testValidateCourtEmailAddressWhenEmailIsInvalid() throws Exception {
+        CaseData testData = CaseData.builder()
+            .courtEmailAddress("testtest.com").build();
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(testData);
+        when(CaseUtils.getCaseData(
+            callbackRequest.getCaseDetails(),
+            objectMapper
+        )).thenReturn(testData);
+
+        List<String> errorList = amendCourtService.validateCourtEmailAddress(callbackRequest);
+        assertEquals("Please enter valid court email address.", errorList.getFirst());
+    }
+
+    
 }
