@@ -259,7 +259,7 @@ public class TransferCourtControllerTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(CaseDetails.builder().id(1L)
+        callbackRequest = CallbackRequest.builder().caseDetails(CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         transferCourtController.updateApplication(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
@@ -276,7 +276,7 @@ public class TransferCourtControllerTest {
             .thenReturn(new HashMap<>());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(CaseDetails.builder().id(123L)
+        callbackRequest = CallbackRequest.builder().caseDetails(CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
 
         assertExpectedException(() -> {
@@ -289,7 +289,7 @@ public class TransferCourtControllerTest {
         CaseData caseData = CaseData.builder().caseTypeOfApplication(FL401_CASE_TYPE).build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         stringObjectMap.put("caseTypeOfApplication", "FL401");
-        CallbackRequest callbackRequest = CallbackRequest.builder()
+        callbackRequest = CallbackRequest.builder()
             .eventId(Event.TRANSFER_TO_ANOTHER_COURT.getId())
             .caseDetails(CaseDetails.builder().id(123L)
                              .data(stringObjectMap).build()).build();
@@ -310,7 +310,7 @@ public class TransferCourtControllerTest {
             .cantFindCourtCheck(List.of(CantFindCourtEnum.cantFindCourt))
             .anotherCourt("test court").build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(CaseDetails.builder().id(123L)
+        callbackRequest = CallbackRequest.builder().caseDetails(CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(amendCourtService.validateCourtFields(Mockito.any(),Mockito.any())).thenReturn(Boolean.FALSE);
@@ -324,7 +324,7 @@ public class TransferCourtControllerTest {
         CaseData caseData = CaseData.builder()
             .cantFindCourtCheck(List.of(CantFindCourtEnum.cantFindCourt)).build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(CaseDetails.builder().id(123L)
+        callbackRequest = CallbackRequest.builder().caseDetails(CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(amendCourtService.validateCourtFields(Mockito.any(),Mockito.any())).thenReturn(Boolean.TRUE);
@@ -348,7 +348,7 @@ public class TransferCourtControllerTest {
             .courtCodeFromFact("123")
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(CaseDetails.builder().id(123L)
+        callbackRequest = CallbackRequest.builder().caseDetails(CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(allTabsService.updateAllTabsIncludingConfTab(any())).thenReturn(callbackRequest.getCaseDetails());
@@ -397,5 +397,21 @@ public class TransferCourtControllerTest {
             callbackRequest);
         assertNotNull(response.getErrors());
         assertEquals("Please enter valid court email address.", response.getErrors().getFirst());
+    }
+
+    @Test
+    public void testExceptionForValidateTransferCourtEmail() throws Exception {
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        when(amendCourtService.handleAmendCourtSubmission(Mockito.anyString(), Mockito.any(), Mockito.any()))
+            .thenReturn(new HashMap<>());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+        callbackRequest = CallbackRequest.builder().caseDetails(CaseDetails.builder().id(123L)
+                                                       .data(caseDataMap).build()).build();
+
+        assertExpectedException(() -> {
+            transferCourtController.validateTransferCourtEmail(callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
     }
 }

@@ -135,6 +135,9 @@ public class TransferCourtController {
 
     @PostMapping(path = "/transfer-court/validate-court-email", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to validate court email")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Court email is validated"),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public AboutToStartOrSubmitCallbackResponse validateTransferCourtEmail(
         @RequestBody CallbackRequest callbackRequest) {
         List<String> errorList = amendCourtService.validateCourtEmailAddress(callbackRequest);
@@ -143,9 +146,9 @@ public class TransferCourtController {
                 .errors(errorList)
                 .build();
         }
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(callbackRequest.getCaseDetails().getData())
-            .build();
+        else {
+            throw new RuntimeException(INVALID_CLIENT);
+        }
     }
 
     @PostMapping(path = "/transfer-court/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

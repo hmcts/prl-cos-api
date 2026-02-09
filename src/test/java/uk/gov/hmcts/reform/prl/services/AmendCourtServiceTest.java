@@ -192,8 +192,8 @@ public class AmendCourtServiceTest {
     }
 
     @Test
-    public void testValidateCourtShouldGiveErrorWhenCantFindCourtIsNotSelected() throws Exception {
-        CaseData caseData = CaseData.builder()
+    public void testValidateCourtShouldGiveErrorWhenCantFindCourtIsNotSelected() {
+        caseData = CaseData.builder()
             .cantFindCourtCheck(List.of(CantFindCourtEnum.cantFindCourt))
             .courtList(DynamicList.builder().build())
             .courtEmailAddress("email@test.com")
@@ -206,8 +206,8 @@ public class AmendCourtServiceTest {
     }
 
     @Test
-    public void testValidateCourtShouldGiveErrorWhenBothOptionSelelcted() throws Exception {
-        CaseData caseData = CaseData.builder()
+    public void testValidateCourtShouldGiveErrorWhenBothOptionSelelcted() {
+        caseData = CaseData.builder()
             .courtEmailAddress("email@test.com")
             .anotherCourt("test court").build();
         List<String> errorList  = new ArrayList<>();
@@ -218,8 +218,8 @@ public class AmendCourtServiceTest {
     }
 
     @Test
-    public void testValidateCourtShouldNotGiveError() throws Exception {
-        CaseData caseData = CaseData.builder()
+    public void testValidateCourtShouldNotGiveError() {
+        caseData = CaseData.builder()
             .courtEmailAddress("email@test.com")
             .cantFindCourtCheck(List.of(CantFindCourtEnum.cantFindCourt))
             .anotherCourt("test court").build();
@@ -231,8 +231,8 @@ public class AmendCourtServiceTest {
     }
 
     @Test
-    public void testValidateCourtShouldGiveError() throws Exception {
-        CaseData caseData = CaseData.builder()
+    public void testValidateCourtShouldGiveError() {
+        caseData = CaseData.builder()
             .cantFindCourtCheck(List.of(CantFindCourtEnum.cantFindCourt)).build();
 
         List<String> errorList  = new ArrayList<>();
@@ -270,5 +270,4 @@ public class AmendCourtServiceTest {
         assertEquals("Please enter valid court email address.", errorList.getFirst());
     }
 
-    
 }
