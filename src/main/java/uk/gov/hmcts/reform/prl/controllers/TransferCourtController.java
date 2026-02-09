@@ -145,8 +145,7 @@ public class TransferCourtController {
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .errors(errorList)
                 .build();
-        }
-        else {
+        } else {
             throw new RuntimeException(INVALID_CLIENT);
         }
     }
