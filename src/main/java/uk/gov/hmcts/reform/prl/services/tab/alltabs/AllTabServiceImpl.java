@@ -290,7 +290,8 @@ public class AllTabServiceImpl implements AllTabsService {
     public StartAllTabsUpdateDataContent getStartUpdateForSpecificUserEvent(String caseId,
                                                                             String eventId,
                                                                             String authorisation) {
-        log.info("Case ID: {} - Event ID {} start update", caseId, eventId);
+        log.info("event Id we got is:: {}", eventId);
+        log.info("event is now:: {}", CaseEvent.fromValue(eventId));
         UserDetails userDetails = idamClient.getUserDetails(authorisation);
         EventRequestData allTabsUpdateEventRequestData = ccdCoreCaseDataService.eventRequest(
             CaseEvent.fromValue(eventId),
@@ -303,11 +304,6 @@ public class AllTabServiceImpl implements AllTabsService {
                 caseId,
                 !userDetails.getRoles().contains(CITIZEN_ROLE)
             );
-
-        log.info("Case ID: {} - Event ID {} started at version {} state {}", caseId, eventId,
-                 allTabsUpdateStartEventResponse.getCaseDetails().getVersion(),
-                 allTabsUpdateStartEventResponse.getCaseDetails().getState());
-
         CaseData allTabsUpdateCaseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(
             allTabsUpdateStartEventResponse,
             objectMapper
@@ -329,7 +325,7 @@ public class AllTabServiceImpl implements AllTabsService {
                                                         EventRequestData eventRequestData,
                                                         Map<String, Object> combinedFieldsMap,
                                                         UserDetails userDetails) {
-        CaseDetails caseDetails = ccdCoreCaseDataService.submitUpdate(
+        return ccdCoreCaseDataService.submitUpdate(
             authorisation,
             eventRequestData,
             ccdCoreCaseDataService.createCaseDataContent(
@@ -339,9 +335,6 @@ public class AllTabServiceImpl implements AllTabsService {
             caseId,
             !userDetails.getRoles().contains(CITIZEN_ROLE)
         );
-
-        log.info("Case ID: {} - Event ID {} completed at version {} state {}", caseId, eventRequestData.getEventId(),
-                 caseDetails.getVersion(), caseDetails.getState());
-        return caseDetails;
     }
+
 }

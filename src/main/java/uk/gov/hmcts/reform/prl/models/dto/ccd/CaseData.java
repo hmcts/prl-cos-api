@@ -549,6 +549,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private DomesticAbuseOrdersEnum domesticAbuseOrders;
     private FcOrdersEnum fcOrders;
     private OtherOrdersOptionEnum otherOrdersOption;
+    // customOrderNameOption - read from raw map due to constructor param limit (see CustomOrderService)
     private String nameOfOrder;
 
     /**

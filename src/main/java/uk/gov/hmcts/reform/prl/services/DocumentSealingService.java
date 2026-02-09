@@ -42,8 +42,8 @@ public class DocumentSealingService {
     private static final long MARGIN_RIGHT = mm2pt(19.0);
     private static final String USER_IMAGE_COURT_SEAL_BILINGUAL = "[userImage:familycourtseal-bilingual.png]";
     private static final String USER_IMAGE_COURT_SEAL = "[userImage:familycourtseal.png]";
-    private static final String COURT_SEAL_BILINGUAL = "/familycourtseal-bilingual.png";
-    private static final String COURT_SEAL = "/familycourtseal.png";
+    private static final String COURT_SEAL_BILINGUAL = "familycourtseal-bilingual.png";
+    private static final String COURT_SEAL = "familycourtseal.png";
 
     private final DgsApiClient dgsApiClient;
     private final DocumentGenService documentGenService;

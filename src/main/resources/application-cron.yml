@@ -1,5 +1,9 @@
 server:
   port: 4144
+hearing:
+  preview:
+    bypass:
+      enabled: true
 
 idam:
   s2s-auth:
