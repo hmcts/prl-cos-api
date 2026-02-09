@@ -11,7 +11,9 @@ public enum Roles {
     SYSTEM_UPDATE("SYSTEM_UPDATE","caseworker-privatelaw-systemupdate"),
     COURTNAV("COURTNAV","courtnav"),
     ALLOCATED_LEGAL_ADVISER("ALLOCATED_LEGAL_ADVISER","allocated-legal-adviser"),
-    LOCAL_AUTHORITY("LOCAL_AUTHORITY","[LOCAL_AUTHORITY]");
+    LOCAL_AUTHORITY_STAFF("LASOCIALWORKER", "[LASOCIALWORKER]"),
+    LOCAL_AUTHORITY_SOLICITOR("LASOLICITOR","[LASOLICITOR]");
+
 
     private final String id;
     private final String value;
