@@ -1,9 +1,12 @@
 package uk.gov.hmcts.reform.prl.services.document;
 
 import com.deepoove.poi.XWPFTemplate;
+import com.deepoove.poi.config.Configure;
+import com.deepoove.poi.plugin.table.LoopRowTableRenderPolicy;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
-import org.junit.Ignore;
+import org.apache.poi.xwpf.usermodel.XWPFTableRow;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -20,16 +23,105 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class PoiTlDocxRendererTest {
 
+    @Test
+    void testLoopRowTableRenderPolicy_simple() throws Exception {
+        // Create a minimal template with a table containing the loop placeholder
+        // With onSameLine=true: {{children}} marker and [fieldName] placeholders are on same row
+        XWPFDocument templateDoc = new XWPFDocument();
+
+        // Create a 2-row, 3-column table
+        // Row 0: Header
+        // Row 1: Template row with {{children}} marker + [fieldName] placeholders
+        XWPFTable table = templateDoc.createTable(2, 3);
+
+        // Header row
+        XWPFTableRow headerRow = table.getRow(0);
+        headerRow.getCell(0).setText("Name");
+        headerRow.getCell(1).setText("Gender");
+        headerRow.getCell(2).setText("DOB");
+
+        // Template row - {{children}} triggers loop, [fieldName] are field placeholders
+        XWPFTableRow templateRow = table.getRow(1);
+        templateRow.getCell(0).setText("{{children}}[fullName]");
+        templateRow.getCell(1).setText("[gender]");
+        templateRow.getCell(2).setText("[dob]");
+
+        // Convert to bytes
+        byte[] templateBytes;
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            templateDoc.write(out);
+            templateBytes = out.toByteArray();
+        }
+        templateDoc.close();
+
+        // Configure poi-tl with LoopRowTableRenderPolicy (onSameLine=true)
+        // Use DEFAULT grammar {{}} for main tags, [fieldName] is built-in for loop row fields
+        LoopRowTableRenderPolicy loopPolicy = new LoopRowTableRenderPolicy(true);
+        Configure config = Configure.builder()
+            .bind("children", loopPolicy)
+            .build();
+
+        // Prepare data
+        Map<String, Object> data = new HashMap<>();
+        List<Map<String, String>> childrenList = new ArrayList<>();
+
+        Map<String, String> child1 = new HashMap<>();
+        child1.put("fullName", "Alice Smith");
+        child1.put("gender", "Female");
+        child1.put("dob", "01/05/2015");
+        childrenList.add(child1);
+
+        Map<String, String> child2 = new HashMap<>();
+        child2.put("fullName", "Bob Smith");
+        child2.put("gender", "Male");
+        child2.put("dob", "15/08/2018");
+        childrenList.add(child2);
+
+        data.put("children", childrenList);
+
+        // Render
+        byte[] outputBytes;
+        try (ByteArrayInputStream in = new ByteArrayInputStream(templateBytes);
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            XWPFTemplate template = XWPFTemplate.compile(in, config).render(data);
+            template.write(out);
+            template.close();
+            outputBytes = out.toByteArray();
+        }
+
+        // Verify output
+        try (XWPFDocument doc = new XWPFDocument(new ByteArrayInputStream(outputBytes))) {
+            StringBuilder allText = new StringBuilder();
+            doc.getTables().forEach(tbl ->
+                tbl.getRows().forEach(row ->
+                    row.getTableCells().forEach(cell ->
+                        allText.append(cell.getText()).append(" | ")
+                    )
+                )
+            );
+            String content = allText.toString();
+            System.out.println("Rendered table content: " + content);
+
+            // Should contain children data
+            assertThat(content).contains("Alice Smith");
+            assertThat(content).contains("Bob Smith");
+
+            // Table should have 3 rows: header + 2 children (template row duplicated)
+            assertThat(doc.getTables()).hasSize(1);
+            assertThat(doc.getTables().get(0).getRows()).hasSize(3);
+            System.out.println("Table rows: " + doc.getTables().get(0).getRows().size());
+        }
+    }
 
     @Test
     void debugLoopRowTableRenderPolicy() throws Exception {
         // Create a minimal template programmatically to test placeholder rendering
-        // PoiTlDocxRenderer is configured to use [placeholder] syntax
+        // PoiTlDocxRenderer uses default {{placeholder}} syntax
         XWPFDocument doc = new XWPFDocument();
 
-        // Simple text placeholder using [] syntax
-        doc.createParagraph().createRun().setText("Court: [courtName]");
-        doc.createParagraph().createRun().setText("Judge: [judgeName]");
+        // Simple text placeholder using {{}} syntax
+        doc.createParagraph().createRun().setText("Court: {{courtName}}");
+        doc.createParagraph().createRun().setText("Judge: {{judgeName}}");
 
         // Create table with header row and data row with placeholders
         XWPFTable table = doc.createTable(2, 3);
@@ -39,10 +131,10 @@ class PoiTlDocxRendererTest {
         table.getRow(0).getCell(1).setText("Gender");
         table.getRow(0).getCell(2).setText("DOB");
 
-        // Row 1: Data row with placeholders
-        table.getRow(1).getCell(0).setText("[childName]");
-        table.getRow(1).getCell(1).setText("[childGender]");
-        table.getRow(1).getCell(2).setText("[childDob]");
+        // Row 1: Data row with placeholders (using {{}} for non-loop tables)
+        table.getRow(1).getCell(0).setText("{{childName}}");
+        table.getRow(1).getCell(1).setText("{{childGender}}");
+        table.getRow(1).getCell(2).setText("{{childDob}}");
 
         // Write template to bytes
         ByteArrayOutputStream templateOut = new ByteArrayOutputStream();
@@ -50,7 +142,7 @@ class PoiTlDocxRendererTest {
         doc.close();
         byte[] templateBytes = templateOut.toByteArray();
 
-        // Prepare data
+        // Prepare data - keys must match template placeholders
         Map<String, Object> data = new HashMap<>();
         data.put("courtName", "Test Court");
         data.put("judgeName", "HHJ Smith");
@@ -155,13 +247,13 @@ class PoiTlDocxRendererTest {
 
     @Test
     void shouldRenderUsingPoiTlDocxRenderer() throws Exception {
-        // Create a template programmatically with [placeholder] syntax
+        // Create a template programmatically with {{placeholder}} syntax
         XWPFDocument doc = new XWPFDocument();
-        doc.createParagraph().createRun().setText("In the Family Court sitting at [courtName]");
-        doc.createParagraph().createRun().setText("Case No: [caseNumber]");
-        doc.createParagraph().createRun().setText("Before [judgeName]");
-        doc.createParagraph().createRun().setText("Applicant: [applicantName]");
-        doc.createParagraph().createRun().setText("Respondent: [respondent1Name]");
+        doc.createParagraph().createRun().setText("In the Family Court sitting at {{courtName}}");
+        doc.createParagraph().createRun().setText("Case No: {{caseNumber}}");
+        doc.createParagraph().createRun().setText("Before {{judgeName}}");
+        doc.createParagraph().createRun().setText("Applicant: {{applicantName}}");
+        doc.createParagraph().createRun().setText("Respondent: {{respondent1Name}}");
 
         ByteArrayOutputStream templateOut = new ByteArrayOutputStream();
         doc.write(templateOut);
@@ -207,27 +299,45 @@ class PoiTlDocxRendererTest {
             .hasMessageContaining("poi-tl rendering failed");
     }
 
-    @Ignore
+    @Disabled("Mem usage test is off")
     @Test
     void memoryUsageSanityCheck() throws Exception {
-        // Load template - use sample_order3 as it's a realistic template
+        // Load the actual CustomOrderHeader template
         byte[] templateBytes;
         try (InputStream in = getClass().getResourceAsStream("/templates/CustomOrderHeader.docx")) {
             assertThat(in).isNotNull();
             templateBytes = in.readAllBytes();
         }
 
+        // Use children list for LoopRowTableRenderPolicy
         Map<String, Object> data = new HashMap<>();
         data.put("caseNumber", "AB12C34567");
         data.put("courtName", "Example Family Court");
         data.put("judgeName", "HHJ Example");
         data.put("applicantName", "Alex Applicant");
         data.put("respondent1Name", "Rory Respondent");
+        data.put("orderName", "Child Arrangements Order");
+
+        // Children list for LoopRowTableRenderPolicy
+        List<Map<String, String>> childrenList = new ArrayList<>();
+        Map<String, String> child1 = new HashMap<>();
+        child1.put("fullName", "Alice Example");
+        child1.put("gender", "Female");
+        child1.put("dob", "01/05/2015");
+        childrenList.add(child1);
+
+        Map<String, String> child2 = new HashMap<>();
+        child2.put("fullName", "Bob Example");
+        child2.put("gender", "Male");
+        child2.put("dob", "15/08/2018");
+        childrenList.add(child2);
+
+        data.put("children", childrenList);
 
         PoiTlDocxRenderer renderer = new PoiTlDocxRenderer();
-        Runtime runtime = Runtime.getRuntime();
-        int totalRenders = 100;
-        int concurrentThreads = 100;
+        final Runtime runtime = Runtime.getRuntime();
+        final int totalRenders = 100;
+        final int concurrentThreads = 100;
 
         // Warm up - run a few times to let JIT compile
         for (int i = 0; i < 5; i++) {
@@ -247,7 +357,7 @@ class PoiTlDocxRendererTest {
         java.util.concurrent.ExecutorService executor = java.util.concurrent.Executors.newFixedThreadPool(concurrentThreads);
         java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(totalRenders);
 
-        long startTime = System.currentTimeMillis();
+        final long startTime = System.currentTimeMillis();
 
         for (int i = 0; i < totalRenders; i++) {
             executor.submit(() -> {
@@ -312,8 +422,8 @@ class PoiTlDocxRendererTest {
     }
 
     @Test
-    void shouldRenderSquareBracketPlaceholders() throws Exception {
-        // Test that the renderer correctly handles [placeholder] format
+    void shouldRenderMustachePlaceholders() throws Exception {
+        // Test that the renderer correctly handles {{placeholder}} format
         byte[] templateBytes;
         try (InputStream in = getClass().getResourceAsStream("/templates/CustomOrderHeader.docx")) {
             if (in == null) {
@@ -326,10 +436,24 @@ class PoiTlDocxRendererTest {
 
         Map<String, Object> data = new HashMap<>();
         data.put("caseNumber", "TEST123456");
-        data.put("courtName", "Square Bracket Test Court");
+        data.put("courtName", "Mustache Test Court");
         data.put("judgeName", "Judge Test");
         data.put("applicantName", "Test Applicant");
         data.put("respondent1Name", "Test Respondent");
+        data.put("orderDate", "01/01/2025");
+        data.put("applicantRepresentativeClause", "represented by Test Solicitor");
+        data.put("respondent1RelationshipToChild", "Father");
+        data.put("respondent1RepresentativeName", "");
+        data.put("orderName", "Test Order");
+
+        // Children list for LoopRowTableRenderPolicy
+        List<Map<String, String>> childrenList = new ArrayList<>();
+        Map<String, String> child = new HashMap<>();
+        child.put("fullName", "Test Child");
+        child.put("gender", "Female");
+        child.put("dob", "01/01/2020");
+        childrenList.add(child);
+        data.put("children", childrenList);
 
         PoiTlDocxRenderer renderer = new PoiTlDocxRenderer();
         byte[] outBytes = renderer.render(templateBytes, data);
@@ -346,17 +470,18 @@ class PoiTlDocxRendererTest {
             );
             String allTextStr = allText.toString();
             // Verify placeholders were replaced
-            assertThat(allTextStr).contains("Square Bracket Test Court");
+            assertThat(allTextStr).contains("Mustache Test Court");
             assertThat(allTextStr).contains("TEST123456");
             // Verify no unreplaced placeholders remain
-            assertThat(allTextStr).doesNotContain("[caseNumber]");
-            assertThat(allTextStr).doesNotContain("[courtName]");
+            assertThat(allTextStr).doesNotContain("{{caseNumber}}");
+            assertThat(allTextStr).doesNotContain("{{courtName}}");
         }
     }
 
     @Test
-    void shouldRenderTableRowLoopingWithSquareBrackets() throws Exception {
-        // Test that poi-tl table row looping works with [#list]...[/list] syntax
+    void shouldRenderTableRowLoopingWithChildren() throws Exception {
+        // Test LoopRowTableRenderPolicy for dynamic children table rows
+        // Uses actual template file - regenerate with GenerateCustomOrderHeaderTemplate if this fails
         byte[] templateBytes;
         try (InputStream in = getClass().getResourceAsStream("/templates/CustomOrderHeader.docx")) {
             if (in == null) {
@@ -366,33 +491,33 @@ class PoiTlDocxRendererTest {
             templateBytes = in.readAllBytes();
         }
 
-        // Create children list data
-        List<Map<String, String>> children = new ArrayList<>();
-        Map<String, String> child1 = new HashMap<>();
-        child1.put("fullName", "Alice Smith");
-        child1.put("gender", "Female");
-        child1.put("dob", "01/05/2015");
-        children.add(child1);
-
-        Map<String, String> child2 = new HashMap<>();
-        child2.put("fullName", "Bob Smith");
-        child2.put("gender", "Male");
-        child2.put("dob", "15/08/2018");
-        children.add(child2);
-
         Map<String, Object> data = new HashMap<>();
         data.put("caseNumber", "1234-5678-9012-3456");
         data.put("courtName", "Test Family Court");
         data.put("judgeName", "Judge Test");
         data.put("applicantName", "Test Applicant");
         data.put("respondent1Name", "Test Respondent");
-        // Use individual child placeholders (child1Name, child2Name, etc.) instead of list
-        data.put("child1Name", "Alice Smith");
-        data.put("child1Gender", "Female");
-        data.put("child1Dob", "01/05/2015");
-        data.put("child2Name", "Bob Smith");
-        data.put("child2Gender", "Male");
-        data.put("child2Dob", "15/08/2018");
+        data.put("orderDate", "15/01/2025");
+        data.put("applicantRepresentativeClause", "");
+        data.put("respondent1RelationshipToChild", "Mother");
+        data.put("respondent1RepresentativeName", "Respondent Solicitor");
+        data.put("orderName", "Child Arrangements Order");
+
+        // Children list for LoopRowTableRenderPolicy - supports any number of children
+        List<Map<String, String>> childrenList = new ArrayList<>();
+        Map<String, String> child1 = new HashMap<>();
+        child1.put("fullName", "Alice Smith");
+        child1.put("gender", "Female");
+        child1.put("dob", "01/05/2015");
+        childrenList.add(child1);
+
+        Map<String, String> child2 = new HashMap<>();
+        child2.put("fullName", "Bob Smith");
+        child2.put("gender", "Male");
+        child2.put("dob", "15/08/2018");
+        childrenList.add(child2);
+
+        data.put("children", childrenList);
 
         PoiTlDocxRenderer renderer = new PoiTlDocxRenderer();
         byte[] outBytes = renderer.render(templateBytes, data);
@@ -407,10 +532,10 @@ class PoiTlDocxRendererTest {
         try (XWPFDocument doc = new XWPFDocument(new ByteArrayInputStream(outBytes))) {
             StringBuilder allText = new StringBuilder();
             doc.getParagraphs().forEach(p -> allText.append(p.getText()).append("\n"));
-            doc.getTables().forEach(table ->
-                table.getRows().forEach(row ->
+            doc.getTables().forEach(tbl ->
+                tbl.getRows().forEach(row ->
                     row.getTableCells().forEach(cell ->
-                        allText.append(cell.getText()).append("\n")
+                        allText.append(cell.getText()).append(" ")
                     )
                 )
             );
@@ -421,11 +546,15 @@ class PoiTlDocxRendererTest {
             assertThat(allTextStr).contains("Test Family Court");
             assertThat(allTextStr).contains("1234-5678-9012-3456");
 
-            // Verify children were rendered using individual placeholders
+            // Verify children were rendered
             assertThat(allTextStr).contains("Alice Smith");
             assertThat(allTextStr).contains("Bob Smith");
             assertThat(allTextStr).contains("Female");
             assertThat(allTextStr).contains("Male");
+
+            // Verify table has 3 rows (1 header + 2 children)
+            assertThat(doc.getTables()).isNotEmpty();
+            assertThat(doc.getTables().get(0).getRows()).hasSize(3);
         }
     }
 }

@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services.document;
 
 import com.deepoove.poi.XWPFTemplate;
 import com.deepoove.poi.config.Configure;
+import com.deepoove.poi.plugin.table.LoopRowTableRenderPolicy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +17,15 @@ import java.util.Map;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PoiTlDocxRenderer {
 
-    // Configure poi-tl to use square brackets [placeholder] instead of {{placeholder}}
+    // LoopRowTableRenderPolicy for dynamic table row generation
+    // onSameLine=true means the marker {{children}} is in the same row as the field placeholders
+    private static final LoopRowTableRenderPolicy LOOP_ROW_POLICY = new LoopRowTableRenderPolicy(true);
+
+    // Configure poi-tl with default {{placeholder}} grammar
+    // Bind 'children' to LoopRowTableRenderPolicy for dynamic children table rows
+    // Loop row fields use [fieldName] syntax (built into LoopRowTableRenderPolicy)
     private static final Configure CONFIG = Configure.builder()
-        .buildGramer("[", "]")
+        .bind("children", LOOP_ROW_POLICY)
         .build();
 
     public byte[] render(byte[] templateDocxBytes, Map<String, Object> data) {

@@ -77,7 +77,6 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.TaskUtils;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -87,17 +86,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Predicate;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -4372,6 +4372,233 @@ public class ManageOrdersControllerTest {
         // Verify addOrderDetailsAndReturnReverseSortedList is NOT called when serving (order already added in mid-event)
         verify(manageOrderService, times(0)).addOrderDetailsAndReturnReverseSortedList(any(), any(), any());
         assertNotNull(response);
+    }
+
+    @Test
+    public void sendEmailNotificationOnClosingOrder_customOrder_shouldUseCallbackDataNotDatabase() throws Exception {
+        // Test that custom order fields are retrieved from callback request data, not database
+        // This is critical because the database won't have these fields until after the event completes
+
+        Document customOrderDoc = Document.builder()
+            .documentUrl("http://test.url/custom-order.docx")
+            .documentBinaryUrl("http://test.url/binary/custom-order.docx")
+            .documentFileName("custom-order.docx")
+            .build();
+
+        Document previewOrderDoc = Document.builder()
+            .documentUrl("http://test.url/preview.pdf")
+            .documentBinaryUrl("http://test.url/binary/preview.pdf")
+            .documentFileName("preview.pdf")
+            .build();
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(No)
+            .markedToServeEmailNotification(No)
+            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+            .build();
+
+        // CaseData from database - does NOT have customOrderDoc (simulating database state before persist)
+        CaseData caseDataFromDb = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            .build();
+
+        // Database map - empty of custom order fields
+        Map<String, Object> databaseMap = new HashMap<>();
+        databaseMap.put("id", 12345L);
+
+        // Callback data - HAS the custom order fields (from aboutToSubmit response)
+        Map<String, Object> callbackDataMap = new HashMap<>();
+        callbackDataMap.put("customOrderDoc", customOrderDoc);
+        callbackDataMap.put("previewOrderDoc", previewOrderDoc);
+        callbackDataMap.put("nameOfOrder", "Test Custom Order");
+        callbackDataMap.put("customOrderNameOption", "other");
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            databaseMap,  // Database doesn't have custom order fields
+            caseDataFromDb,
+            null
+        );
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(callbackDataMap)  // Callback data HAS custom order fields
+                .build())
+            .build();
+
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+
+        // Call the method
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.sendEmailNotificationOnClosingOrder(
+            authToken,
+            s2sToken,
+            callbackRequest
+        );
+
+        assertNotNull(response);
+        // Verify customOrderService.combineAndFinalizeCustomOrder was called (proves custom order was detected)
+        verify(customOrderService, times(1)).combineAndFinalizeCustomOrder(
+            eq(authToken), any(CaseData.class), anyMap(), anyBoolean());
+    }
+
+    @Test
+    public void sendEmailNotificationOnClosingOrder_nonCustomOrder_shouldNotCallCombine() throws Exception {
+        // Test that when customOrderDoc is not present, combineAndFinalizeCustomOrder is not called
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(No)
+            .markedToServeEmailNotification(No)
+            .build();
+
+        CaseData caseDataFromDb = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            .build();
+
+        Map<String, Object> databaseMap = new HashMap<>();
+        databaseMap.put("id", 12345L);
+
+        // Callback data - NO custom order fields
+        Map<String, Object> callbackDataMap = new HashMap<>();
+        callbackDataMap.put("id", 12345L);
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            databaseMap,
+            caseDataFromDb,
+            null
+        );
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(callbackDataMap)
+                .build())
+            .build();
+
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.sendEmailNotificationOnClosingOrder(
+            authToken,
+            s2sToken,
+            callbackRequest
+        );
+
+        assertNotNull(response);
+        // Verify combineAndFinalizeCustomOrder was NOT called
+        verify(customOrderService, never()).combineAndFinalizeCustomOrder(any(), any(), any(), anyBoolean());
+    }
+
+    @Test
+    public void sendEmailNotificationOnClosingOrder_customOrder_shouldCopyAllFieldsFromCallbackData() throws Exception {
+        // Test that all custom order fields are copied from callback data to caseDataUpdated
+
+        Document customOrderDoc = Document.builder()
+            .documentUrl("http://test.url/custom-order.docx")
+            .documentBinaryUrl("http://test.url/binary/custom-order.docx")
+            .documentFileName("custom-order.docx")
+            .build();
+
+        Document previewOrderDoc = Document.builder()
+            .documentUrl("http://test.url/preview.pdf")
+            .documentBinaryUrl("http://test.url/binary/preview.pdf")
+            .documentFileName("preview.pdf")
+            .build();
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(No)
+            .markedToServeEmailNotification(No)
+            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+            .build();
+
+        CaseData caseDataFromDb = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            .build();
+
+        Map<String, Object> databaseMap = new HashMap<>();
+
+        // Callback data with all custom order fields
+        Map<String, Object> callbackDataMap = new HashMap<>();
+        callbackDataMap.put("customOrderDoc", customOrderDoc);
+        callbackDataMap.put("previewOrderDoc", previewOrderDoc);
+        callbackDataMap.put("customOrderNameOption", "other");
+        callbackDataMap.put("nameOfOrder", "My Custom Order");
+        callbackDataMap.put("amendOrderSelectCheckOptions", "noCheck");
+        callbackDataMap.put("whatDoWithOrder", "finalize");
+        callbackDataMap.put("doYouWantToServeOrder", "Yes");
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            databaseMap,
+            caseDataFromDb,
+            null
+        );
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(callbackDataMap)
+                .build())
+            .build();
+
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+
+        // Use doAnswer to capture the map contents AT THE TIME combineAndFinalizeCustomOrder is called
+        // (before cleanup removes them)
+        Map<String, Object> capturedValues = new HashMap<>();
+        Mockito.doAnswer(invocation -> {
+            Map<String, Object> mapArg = invocation.getArgument(2);
+            // Copy the values at this point in time
+            capturedValues.put("customOrderDoc", mapArg.get("customOrderDoc"));
+            capturedValues.put("previewOrderDoc", mapArg.get("previewOrderDoc"));
+            capturedValues.put("customOrderNameOption", mapArg.get("customOrderNameOption"));
+            capturedValues.put("nameOfOrder", mapArg.get("nameOfOrder"));
+            capturedValues.put("amendOrderSelectCheckOptions", mapArg.get("amendOrderSelectCheckOptions"));
+            capturedValues.put("whatDoWithOrder", mapArg.get("whatDoWithOrder"));
+            capturedValues.put("doYouWantToServeOrder", mapArg.get("doYouWantToServeOrder"));
+            return null;
+        }).when(customOrderService).combineAndFinalizeCustomOrder(any(), any(), any(), anyBoolean());
+
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.sendEmailNotificationOnClosingOrder(
+            authToken,
+            s2sToken,
+            callbackRequest
+        );
+
+        assertNotNull(response);
+        verify(customOrderService).combineAndFinalizeCustomOrder(eq(authToken), any(), any(), anyBoolean());
+
+        // Verify all custom order fields were copied from callback data (captured before cleanup)
+        assertEquals(customOrderDoc, capturedValues.get("customOrderDoc"));
+        assertEquals(previewOrderDoc, capturedValues.get("previewOrderDoc"));
+        assertEquals("other", capturedValues.get("customOrderNameOption"));
+        assertEquals("My Custom Order", capturedValues.get("nameOfOrder"));
+        assertEquals("noCheck", capturedValues.get("amendOrderSelectCheckOptions"));
+        assertEquals("finalize", capturedValues.get("whatDoWithOrder"));
+        assertEquals("Yes", capturedValues.get("doYouWantToServeOrder"));
     }
 
 }

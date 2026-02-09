@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,8 +25,6 @@ import uk.gov.hmcts.reform.prl.services.document.PoiTlDocxRenderer;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -37,6 +36,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 /**
@@ -53,7 +53,6 @@ public class CustomOrderService {
     private static final String JUDGE_OR_MAGISTRATES_LAST_NAME = "judgeOrMagistratesLastName";
     private static final String DATE_ORDER_MADE = "dateOrderMade";
     private static final String RESPONDENT_PREFIX = "respondent";
-    private static final String CHILD_PREFIX = "child";
     private static final String DEFAULT_ORDER_NAME = "custom_order";
     private static final String HEADER_PREVIEW_FILENAME_PATTERN = "custom_order_header_preview";
     private static final java.time.format.DateTimeFormatter DATE_FORMATTER =
@@ -300,7 +299,7 @@ public class CustomOrderService {
      * This is used to work around the optimistic locking issue that occurs when
      * we submit UPDATE_ALL_TABS mid-event to establish CDAM association.
      *
-     * Because UPDATE_ALL_TABS increments the case version, CCD's final save of
+     * <p>Because UPDATE_ALL_TABS increments the case version, CCD's final save of
      * the original ManageOrders event would fail. This method starts a new
      * ManageOrders event with the current case version and submits the data directly.
      *
@@ -424,9 +423,13 @@ public class CustomOrderService {
      */
     private String extractJudgeName(CaseData caseData, Map<String, Object> caseDataMap) {
         if (caseDataMap != null && caseDataMap.get(JUDGE_OR_MAGISTRATES_LAST_NAME) != null) {
-            return caseDataMap.get(JUDGE_OR_MAGISTRATES_LAST_NAME).toString();
+            String judgeName = caseDataMap.get(JUDGE_OR_MAGISTRATES_LAST_NAME).toString();
+            log.info("Judge name from caseDataMap: {}", judgeName);
+            return judgeName;
         }
-        return caseData.getJudgeOrMagistratesLastName();
+        String judgeName = caseData.getJudgeOrMagistratesLastName();
+        log.info("Judge name from caseData: {}", judgeName);
+        return judgeName;
     }
 
     /**
@@ -435,14 +438,21 @@ public class CustomOrderService {
     private String extractOrderDate(CaseData caseData, Map<String, Object> caseDataMap) {
         if (caseDataMap != null && caseDataMap.get(DATE_ORDER_MADE) != null) {
             Object dateValue = caseDataMap.get(DATE_ORDER_MADE);
+            String result;
             if (dateValue instanceof java.time.LocalDate) {
-                return ((java.time.LocalDate) dateValue).format(DATE_FORMATTER);
+                result = ((java.time.LocalDate) dateValue).format(DATE_FORMATTER);
+            } else {
+                result = dateValue.toString();
             }
-            return dateValue.toString();
+            log.info("Order date from caseDataMap: {}", result);
+            return result;
         }
         if (caseData.getDateOrderMade() != null) {
-            return caseData.getDateOrderMade().format(DATE_FORMATTER);
+            String result = caseData.getDateOrderMade().format(DATE_FORMATTER);
+            log.info("Order date from caseData: {}", result);
+            return result;
         }
+        log.warn("No order date found");
         return null;
     }
 
@@ -466,13 +476,19 @@ public class CustomOrderService {
      * Populates applicant placeholders for the header template.
      */
     private void populateApplicantPlaceholders(Map<String, Object> data, CaseData caseData, boolean isFL401) {
+        log.info("Populating applicant placeholders. isFL401={}, hasApplicantsFL401={}, hasApplicants={}",
+            isFL401, caseData.getApplicantsFL401() != null,
+            caseData.getApplicants() != null && !caseData.getApplicants().isEmpty());
         if (isFL401 && caseData.getApplicantsFL401() != null) {
             PartyDetails applicant = caseData.getApplicantsFL401();
+            log.info("Using FL401 applicant: {} {}", applicant.getFirstName(), applicant.getLastName());
             populateApplicantData(data, applicant);
         } else if (caseData.getApplicants() != null && !caseData.getApplicants().isEmpty()) {
             var applicant = caseData.getApplicants().get(0).getValue();
+            log.info("Using C100 applicant: {} {}", applicant.getFirstName(), applicant.getLastName());
             populateApplicantData(data, applicant);
         } else {
+            log.warn("No applicant data found, using empty placeholders");
             setEmptyApplicantPlaceholders(data);
         }
     }
@@ -527,6 +543,8 @@ public class CustomOrderService {
         populateChildrensGuardian(data, caseData);
         populateChildrenPlaceholders(data, caseData);
 
+        log.info("Final header placeholders - judgeName={}, orderDate={}, applicantName={}, respondent1Name={}",
+            data.get("judgeName"), data.get("orderDate"), data.get("applicantName"), data.get("respondent1Name"));
         return data;
     }
 
@@ -537,9 +555,9 @@ public class CustomOrderService {
     private void populateChildrenPlaceholders(Map<String, Object> data, CaseData caseData) {
         List<ChildDetailsRevised> selectedChildren = getSelectedChildren(caseData);
 
-        // Build children table data for poi-tl table row looping
+        // Build children list for LoopRowTableRenderPolicy
+        // poi-tl will create a table row for each child in the list
         List<Map<String, String>> childrenRows = new ArrayList<>();
-        int index = 1;
 
         for (ChildDetailsRevised child : selectedChildren) {
             String fullName = getFullName(child.getFirstName(), child.getLastName());
@@ -553,23 +571,10 @@ public class CustomOrderService {
             childRow.put("gender", gender);
             childRow.put("dob", dob);
             childrenRows.add(childRow);
-
-            // Individual placeholders for each child (child1Name, child1Gender, child1Dob, etc.)
-            data.put(CHILD_PREFIX + index + "Name", fullName);
-            data.put(CHILD_PREFIX + index + "Gender", gender);
-            data.put(CHILD_PREFIX + index + "Dob", dob);
-            index++;
-        }
-
-        // Fill empty slots up to 10 children
-        for (int i = index; i <= 10; i++) {
-            data.put(CHILD_PREFIX + i + "Name", "");
-            data.put(CHILD_PREFIX + i + "Gender", "");
-            data.put(CHILD_PREFIX + i + "Dob", "");
         }
 
         data.put("children", childrenRows);
-        log.info("Populated {} children rows: {}", childrenRows.size(), childrenRows);
+        log.info("Populated {} children for dynamic table rows", childrenRows.size());
     }
 
     /**
@@ -1218,6 +1223,7 @@ public class CustomOrderService {
     }
 
     /**
+     * Updates the order document in case data.
      * @deprecated Use updateOrderDocumentInCaseData with CustomOrderLocation parameter instead
      */
     @Deprecated
@@ -1248,9 +1254,9 @@ public class CustomOrderService {
                 CaseEvent.INTERNAL_CUSTOM_ORDER_SEAL.getValue()
             );
 
-            String authorisation = startContent.authorisation();
-            CaseData caseData = startContent.caseData();
-            Map<String, Object> caseDataMap = new HashMap<>(startContent.caseDataMap());
+            final String authorisation = startContent.authorisation();
+            final CaseData caseData = startContent.caseData();
+            final Map<String, Object> caseDataMap = new HashMap<>(startContent.caseDataMap());
 
             if (caseData.getOrderCollection() == null || caseData.getOrderCollection().isEmpty()) {
                 log.warn("No orders to seal in case {}", caseId);
@@ -1365,9 +1371,9 @@ public class CustomOrderService {
                 CaseEvent.INTERNAL_CUSTOM_ORDER_SEAL.getValue()
             );
 
-            String authorisation = startContent.authorisation();
-            CaseData caseData = startContent.caseData();
-            Map<String, Object> caseDataMap = new HashMap<>(startContent.caseDataMap());
+            final String authorisation = startContent.authorisation();
+            final CaseData caseData = startContent.caseData();
+            final Map<String, Object> caseDataMap = new HashMap<>(startContent.caseDataMap());
 
             log.info("Fetched case data for sealing - orderCollection size: {}",
                 caseData.getOrderCollection() != null ? caseData.getOrderCollection().size() : 0);
@@ -1559,8 +1565,16 @@ public class CustomOrderService {
                     uk.gov.hmcts.reform.prl.models.documents.Document.class);
             }
 
-            // Get the header preview directly from the field
-            uk.gov.hmcts.reform.prl.models.documents.Document headerPreview = caseData.getPreviewOrderDoc();
+            // Get the header preview from caseDataUpdated (where mid-event stored it) or fall back to caseData
+            uk.gov.hmcts.reform.prl.models.documents.Document headerPreview = null;
+            Object previewDocObj = caseDataUpdated.get("previewOrderDoc");
+            if (previewDocObj != null) {
+                headerPreview = objectMapper.convertValue(previewDocObj,
+                    uk.gov.hmcts.reform.prl.models.documents.Document.class);
+            }
+            if (headerPreview == null) {
+                headerPreview = caseData.getPreviewOrderDoc();
+            }
 
             log.info("Custom order combining: customOrderDoc={}, headerPreview={}",
                 customOrderDoc != null ? customOrderDoc.getDocumentFileName() : "null",

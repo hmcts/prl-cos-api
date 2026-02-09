@@ -142,6 +142,11 @@ public class ManageOrdersController {
                 Object customOrderDocObj = caseDataUpdated.get("customOrderDoc");
                 if (customOrderDocObj != null) {
                     try {
+                        // Debug: log the judge and date values from CCD
+                        log.info("CCD data - judgeOrMagistratesLastName={}, dateOrderMade={}",
+                            caseDataUpdated.get("judgeOrMagistratesLastName"),
+                            caseDataUpdated.get("dateOrderMade"));
+
                         // Resolve court name from various possible sources
                         String courtNameValue = customOrderService.resolveCourtName(caseData, caseDataUpdated);
                         if (courtNameValue != null && !courtNameValue.isEmpty()) {
@@ -242,25 +247,26 @@ public class ManageOrdersController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
-        return getAboutToStartOrSubmitCallbackResponse(callbackRequest,
-                                                       authorisation,
-                                                       s2sToken,
-                                                       updateCaseData -> {
-                                                           updateCaseData.put(IS_INVOKED_FROM_TASK, No);
-                                                           // Pre-populate dateOrderMade with current date
-                                                           updateCaseData.put("dateOrderMade", java.time.LocalDate.now());
-                                                           // Pre-populate judge name if logged-in user is a judge
-                                                           String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
-                                                           if (UserRoles.JUDGE.name().equals(loggedInUserType)) {
-                                                               uk.gov.hmcts.reform.idam.client.models.UserDetails userDetails =
-                                                                   userService.getUserDetails(authorisation);
-                                                               if (userDetails != null && userDetails.getFullName() != null) {
-                                                                   updateCaseData.put("judgeOrMagistratesLastName", userDetails.getFullName());
-                                                                   log.info("Pre-populated judge name for manage orders: {}", userDetails.getFullName());
-                                                               }
-                                                           }
-                                                       }
+        return getAboutToStartOrSubmitCallbackResponse(
+            callbackRequest,
+            authorisation,
+            s2sToken,
+            caseData -> prepopulateHeaderFields(caseData, authorisation)
         );
+    }
+
+    private void prepopulateHeaderFields(Map<String, Object> caseData, String authorisation) {
+        caseData.put(IS_INVOKED_FROM_TASK, No);
+        caseData.put("dateOrderMade", java.time.LocalDate.now());
+
+        String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+        if (UserRoles.JUDGE.name().equals(loggedInUserType)) {
+            uk.gov.hmcts.reform.idam.client.models.UserDetails userDetails = userService.getUserDetails(authorisation);
+            if (userDetails != null && userDetails.getFullName() != null) {
+                caseData.put("judgeOrMagistratesLastName", userDetails.getFullName());
+                log.info("Pre-populated judge name for manage orders: {}", userDetails.getFullName());
+            }
+        }
     }
 
 
@@ -324,22 +330,44 @@ public class ManageOrdersController {
     ) {
         log.info(">>> Submitted callback (case-order-email-notification) called");
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
-                    = allTabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
+            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+                = allTabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
             Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
             //SNI-4330 fix - this will set state in caseData
             //updating state in caseData so that caseSummaryTab is updated with latest state
             CaseData caseData = startAllTabsUpdateDataContent.caseData();
 
             // Custom order flow: combine header preview + user content, update the order
-            // Note: manageOrdersOptions is cleaned up in aboutToSubmit, so we check for customOrderDoc instead
-            boolean isCustomOrder = caseDataUpdated.containsKey("customOrderDoc") && caseDataUpdated.get("customOrderDoc") != null;
+            // Note: caseDataUpdated from allTabService is from the DATABASE (old data before this event).
+            // The callback request data has the CURRENT data from the aboutToSubmit response (not yet persisted).
+            // For custom order fields, we must use callbackRequest data.
+            Map<String, Object> callbackData = callbackRequest.getCaseDetails().getData();
+
+            // Copy all custom order fields from callback data to caseDataUpdated
+            // These fields are set during this event and won't be in the database yet
+            String[] customOrderFields = {
+                "customOrderDoc", "previewOrderDoc", "customOrderNameOption",
+                "nameOfOrder", "amendOrderSelectCheckOptions", "whatDoWithOrder", "doYouWantToServeOrder"
+            };
+            for (String field : customOrderFields) {
+                Object value = callbackData.get(field);
+                if (value != null) {
+                    caseDataUpdated.put(field, value);
+                }
+            }
+
+            boolean isCustomOrder = callbackData.get("customOrderDoc") != null;
             if (isCustomOrder) {
                 // Determine if this is a draft order based on user type and settings
+                // Use callback data for amendOrderSelectCheckOptions since it may have been set during this event
                 String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+                Object amendCheckObj = caseDataUpdated.get("amendOrderSelectCheckOptions");
+                AmendOrderCheckEnum amendCheck = amendCheckObj != null
+                    ? objectMapper.convertValue(amendCheckObj, AmendOrderCheckEnum.class)
+                    : (caseData.getManageOrders() != null ? caseData.getManageOrders().getAmendOrderSelectCheckOptions() : null);
                 boolean isDraftOrder = UserRoles.JUDGE.name().equals(loggedInUserType)
                     || (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
-                        && (!AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+                        && (!AmendOrderCheckEnum.noCheck.equals(amendCheck)
                             || manageOrderService.isSaveAsDraft(caseData)));
                 customOrderService.combineAndFinalizeCustomOrder(authorisation, caseData, caseDataUpdated, isDraftOrder);
             }
