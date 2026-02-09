@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
+import uk.gov.hmcts.reform.prl.services.localauthority.RemoveLocalAuthoritySolicitors;
 
 import java.util.Map;
 
@@ -32,12 +33,15 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY
 @RequestMapping("/localauthority")
 public class LocalAuthorityController extends AbstractCallbackController {
     private final AuthorisationService authorisationService;
+    private final RemoveLocalAuthoritySolicitors removeLocalAuthoritySolver;
 
     @Autowired
     public LocalAuthorityController(ObjectMapper objectMapper, EventService eventPublisher,
-                                    AuthorisationService authorisationService) {
+                                    AuthorisationService authorisationService,
+                                    RemoveLocalAuthoritySolicitors removeLocalAuthoritySolver) {
         super(objectMapper, eventPublisher);
         this.authorisationService = authorisationService;
+        this.removeLocalAuthoritySolver = removeLocalAuthoritySolver;
     }
 
     @PostMapping(path = "/add/aboutToSubmit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -61,6 +65,31 @@ public class LocalAuthorityController extends AbstractCallbackController {
                 LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY,
                 localAuthorityOrganisationPolicy.toBuilder().orgPolicyCaseAssignedRole("[LASOLICITOR]").build()
             );
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(path = "/remove/aboutToSubmit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to remove a local authority on about to submit")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse handleRemoveAboutToSubmit(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) {
+
+        log.info("Inside local authority/remove/about to submit for case {}", callbackRequest.getCaseDetails().getId());
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+
+            CaseData caseData = objectMapper.convertValue(
+                callbackRequest.getCaseDetails().getData(),
+                CaseData.class
+            );
+            removeLocalAuthoritySolver.removeLocalAuthoritySolicitors(caseData);
+
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            caseDataUpdated.remove(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
