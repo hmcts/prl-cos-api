@@ -41,7 +41,7 @@ public class ServiceOfDocumentsControllerTest {
     public static final String NO_DOCUMENTS_SELECTED_ERROR = "Please select a document or upload a document to serve";
     public static final String UN_SERVED_DOCUMENTS_PRESENT_ERROR =
         "Can not execute service of documents, there are unserved document(s) pending review";
-    public static final String INVALID_ADDITIONAL_RECIPIENTS_EMAIL = "Please provide valid email address for additional recipient";
+    public static final String INVALID_ADDITIONAL_RECIPIENTS_EMAIL = "Please provide valid email address for all additional recipients";
 
     @InjectMocks
     private ServiceOfDocumentsController serviceOfDocumentsController;
