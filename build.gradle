@@ -25,7 +25,7 @@ plugins {
 def versions = [
   awaitility                   : '4.3.0',
   bcpkixJdk18on                : '1.83',
-  ccdClient                    : '4.9.2',
+  ccdClient                    : '5.2.0',
   commonsBeanUtils             : '1.11.0',
   commonsIo                    : '2.21.0',
   commonsLang3                 : '3.20.0',
@@ -333,7 +333,7 @@ dependencies {
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-loadbalancer', version: versions.springCloud
   implementation group: 'org.springframework.retry', name: 'spring-retry', version: '2.0.12'
   implementation group: 'com.github.hmcts', name: 'ccd-config-generator', version: '6.6.2'
-  implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
+  implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: versions.ccdClient
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: versions.reformsJavaLogging
   implementation group: 'com.github.hmcts.java-logging', name: 'logging-appinsights', version: versions.reformsJavaLogging
   implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.25.3'
