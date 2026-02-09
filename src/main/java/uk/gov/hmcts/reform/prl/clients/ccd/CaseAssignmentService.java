@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Barrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.localauthority.LocalAuthoritySocialWorker;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
@@ -52,7 +51,6 @@ import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOCIAL_WORKER;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole.Representing.DAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole.Representing.DARESPONDENT;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
@@ -327,7 +325,7 @@ public class CaseAssignmentService {
                     caseRole,
                     caseData.getId()
                 );
-                errorList.add("Requested user is already associated with the case");
+                errorList.add("A barrister is already associated with the case");
             });
     }
 
@@ -561,146 +559,5 @@ public class CaseAssignmentService {
             .findFirst()
             .orElseThrow(() -> new InvalidSolicitorRoleException("No barrister matching role found for the given solicitor "
                                                                 + solicitorRole));
-    }
-
-    public void addSocialWorker(CaseData caseData,
-                                String userId,
-                                String socialWorkerRole,
-                                LocalAuthoritySocialWorker localAuthoritySocialWorker) {
-        log.info(
-            "On case id {}, about to add {} case access for user {}",
-            caseData.getId(),
-            socialWorkerRole,
-            userId
-        );
-        grantUserCaseAccess(caseData, userId, socialWorkerRole, localAuthoritySocialWorker);
-    }
-
-    private void grantUserCaseAccess(final CaseData caseData,
-                                     final String userId,
-                                     final String caseRole,
-                                     LocalAuthoritySocialWorker localAuthoritySocialWorker) {
-        try {
-            String organisationID = localAuthoritySocialWorker.getLaSocialWorkerOrg().getOrganisationID();
-            CaseAssignmentUserRolesRequest addCaseAssignedUserRolesRequest = buildCaseAssignedUserRequest(
-                caseData.getId(),
-                caseRole,
-                organisationID,
-                Set.of(userId)
-            );
-
-            caseAssignmentApi.addCaseUserRoles(
-                systemUserService.getSysUserToken(),
-                tokenGenerator.generate(),
-                addCaseAssignedUserRolesRequest
-            );
-        } catch (FeignException ex) {
-            String message = String.format("User %s not granted %s to case %s", userId, caseRole, caseData.getId());
-            log.error(message, ex);
-            throw new GrantCaseAccessException(message);
-        }
-    }
-
-    public void removeLaSocialWorker(final CaseData caseData, LocalAuthoritySocialWorker localAuthoritySocialWorker) {
-        String userId = localAuthoritySocialWorker.getUserId();
-        try {
-            log.info(
-                "On case id {}, about to start remove case access {} for user {}",
-                caseData.getId(),
-                LOCAL_AUTHORITY_SOCIAL_WORKER,
-                Set.of(userId)
-            );
-            CaseAssignmentUserRolesRequest removeCaseAssignedUserRolesRequest = buildCaseAssignedUserRequest(
-                caseData.getId(),
-                LOCAL_AUTHORITY_SOCIAL_WORKER,
-                localAuthoritySocialWorker.getLaSocialWorkerOrg().getOrganisationID(),
-                Set.of(userId)
-            );
-
-            caseAssignmentApi.removeCaseUserRoles(
-                systemUserService.getSysUserToken(), tokenGenerator.generate(),
-                removeCaseAssignedUserRolesRequest
-            );
-        } catch (FeignException ex) {
-            String message = String.format(
-                "Could not remove the user %s role %s from the case %s",
-                userId,
-                LOCAL_AUTHORITY_SOCIAL_WORKER,
-                caseData.getId()
-            );
-            log.error(message, ex);
-            throw new GrantCaseAccessException(message);
-        }
-    }
-
-    public void validateSocialWorkerAddRequest(CaseData caseData,
-                                               Optional<String> socialWorkerRole,
-                                               LocalAuthoritySocialWorker localAuthoritySocialWorker,
-                                               List<String> errorList) {
-
-        socialWorkerRole.ifPresentOrElse(
-            role -> {
-                validateSocialWorkerOrgRelationship(caseData, localAuthoritySocialWorker, errorList);
-                validateCaseRoles(caseData, role, errorList);
-            },
-            () -> {
-                errorList.add("Could not map to barrister case role");
-                log.error(
-                    "Case id {}, could not map to LA social worker case role for selected party {}",
-                    caseData.getId(),
-                    localAuthoritySocialWorker.getUserId()
-                );
-            }
-        );
-    }
-
-    public void validateSocialWorkerRemoveRequest(CaseData caseData,
-                                                  LocalAuthoritySocialWorker localAuthoritySocialWorker,
-                                                  List<String> errorList) {
-        RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentService
-            .getRoleAssignmentForCase(String.valueOf(caseData.getId()));
-
-        roleAssignmentServiceResponse.getRoleAssignmentResponse().stream()
-            .filter(roleAssignmentResponse ->
-                        roleAssignmentResponse.getRoleName().equals(LOCAL_AUTHORITY_SOCIAL_WORKER)
-                            && roleAssignmentResponse.getActorId().equals(localAuthoritySocialWorker.getUserId()))
-            .findAny()
-            .ifPresentOrElse(
-                roleName -> {
-                },
-                () -> {
-                    log.error("LA Social worker {} is not associated with the case {}",
-                        maskEmail.mask(localAuthoritySocialWorker.getLaSocialWorkerEmail()),
-                        caseData.getId()
-                    );
-                    errorList.add("LA Social worker is not associated with the case");
-                });
-    }
-
-    public void validateSocialWorkerOrgRelationship(CaseData caseData,
-                                                    LocalAuthoritySocialWorker localAuthoritySocialWorker,
-                                                    List<String> errorList) {
-        OrgSolicitors organisationSolicitorDetails = organisationService.getOrganisationSolicitorDetails(
-            systemUserService.getSysUserToken(),
-            localAuthoritySocialWorker.getLaSocialWorkerOrg().getOrganisationID()
-        );
-
-        organisationSolicitorDetails.getUsers().stream()
-            .filter(user -> user.getEmail().equals(localAuthoritySocialWorker.getLaSocialWorkerEmail()))
-            .findAny()
-            .ifPresentOrElse(
-                user -> {
-                },
-                () -> {
-                    log.error(
-                        "Case id {}:"
-                            + " Local authority Social worker {} is not registered with the selected organisation {}",
-                        caseData.getId(),
-                        maskEmail.mask(localAuthoritySocialWorker.getLaSocialWorkerEmail()),
-                        localAuthoritySocialWorker.getLaSocialWorkerOrg().getOrganisationID()
-                    );
-
-                    errorList.add("Local authority Social worker is not registered with the selected organisation");
-                });
     }
 }

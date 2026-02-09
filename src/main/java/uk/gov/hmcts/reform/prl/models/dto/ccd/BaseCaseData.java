@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.closingcases.ClosingCaseOptions;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.restrictedcaseaccessmanagement.CaseAccessStatusAndReason;
-import uk.gov.hmcts.reform.prl.models.dto.localauthority.LocalAuthoritySocialWorker;
 import uk.gov.hmcts.reform.prl.models.serviceofdocuments.ServiceOfDocuments;
 
 import java.time.LocalDate;
@@ -152,7 +151,6 @@ public class BaseCaseData {
     private String documentsToBeRemoved;
 
     private AllocatedBarrister allocatedBarrister;
-    private LocalAuthoritySocialWorker localAuthoritySocialWorker;
 
     private String dfjArea;
 

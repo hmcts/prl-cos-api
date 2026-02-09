@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.localauthority.LocalAuthoritySocialWorker;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
@@ -45,7 +44,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOCIAL_WORKER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
 
 @Slf4j
@@ -83,18 +81,15 @@ public class CaseAssignmentController {
 
             Optional<String> userId = organisationService
                 .findUserByEmail(allocatedBarrister.getBarristerEmail());
-            Optional<String> barristerRole = caseAssignmentService.deriveBarristerRole(
-                caseDetails.getData(),
-                caseData,
-                allocatedBarrister
-            );
+            Optional<String> barristerRole  = caseAssignmentService.deriveBarristerRole(caseDetails.getData(),
+                                                                                        caseData,
+                                                                                        allocatedBarrister);
             caseAssignmentService.validateAddRequest(
-                userId,
-                caseData,
-                barristerRole,
-                allocatedBarrister,
-                errorList
-            );
+                    userId,
+                    caseData,
+                    barristerRole,
+                    allocatedBarrister,
+                    errorList);
 
             if (errorList.isEmpty() && userId.isPresent() && barristerRole.isPresent()) {
                 try {
@@ -104,10 +99,8 @@ public class CaseAssignmentController {
                         barristerRole.get(),
                         allocatedBarrister
                     );
-                    updateCaseDetails(
-                        caseDetails,
-                        caseData
-                    );
+                    updateCaseDetails(caseDetails,
+                                      caseData);
                 } catch (GrantCaseAccessException grantCaseAccessException) {
                     errorList.add(grantCaseAccessException.getMessage());
                 }
@@ -139,20 +132,16 @@ public class CaseAssignmentController {
             List<String> errorList = new ArrayList<>();
             AllocatedBarrister allocatedBarrister = caseData.getAllocatedBarrister();
 
-            caseAssignmentService.validateRemoveRequest(
-                caseData,
-                allocatedBarrister.getPartyList().getValueCode(),
-                errorList
-            );
+            caseAssignmentService.validateRemoveRequest(caseData,
+                                                        allocatedBarrister.getPartyList().getValueCode(),
+                                                        errorList);
 
             if (errorList.isEmpty()) {
                 PartyDetails partyDetails = caseAssignmentService
                     .getSelectedParty(caseData, allocatedBarrister.getPartyList().getValueCode());
-                barristerHelper.setAllocatedBarrister(
-                    partyDetails,
-                    caseData,
-                    UUID.fromString(allocatedBarrister.getPartyList().getValueCode())
-                );
+                barristerHelper.setAllocatedBarrister(partyDetails,
+                                                 caseData,
+                                                 UUID.fromString(allocatedBarrister.getPartyList().getValueCode()));
                 caseAssignmentService.removeBarrister(caseData, partyDetails);
                 updateCaseDetails(caseDetails, caseData);
             }
@@ -179,91 +168,5 @@ public class CaseAssignmentController {
         caseDetails.getData().putAll(applicationsTabService.updateTab(caseData));
         caseDetails.getData().putAll(partyLevelCaseFlagsService
                                          .generatePartyCaseFlagsForBarristerOnly(caseData));
-    }
-
-    @PostMapping(path = "/localauthority/socialworker/add/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "About to submit to add Local authority social worker")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback processed.",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
-        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse submitAddSocialWorker(
-        @RequestHeader(javax.ws.rs.core.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest) {
-
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            CaseDetails caseDetails = callbackRequest.getCaseDetails();
-            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-
-            List<String> errorList = new ArrayList<>();
-            LocalAuthoritySocialWorker localAuthoritySocialWorker = caseData.getLocalAuthoritySocialWorker();
-
-            Optional<String> userId = organisationService
-                .findUserByEmail(localAuthoritySocialWorker.getLaSocialWorkerEmail());
-            String laSocialWorkerRole = "[LASOCIALWORKER]";
-            caseAssignmentService.validateSocialWorkerAddRequest(
-                caseData,
-                Optional.of(laSocialWorkerRole),
-                localAuthoritySocialWorker,
-                errorList
-            );
-
-            if (errorList.isEmpty() && userId.isPresent()) {
-                try {
-                    caseAssignmentService.addSocialWorker(
-                        caseData,
-                        userId.get(),
-                        laSocialWorkerRole,
-                        localAuthoritySocialWorker
-                    );
-                    localAuthoritySocialWorker.setUserId(userId.get());
-                    caseDetails.getData().put(LOCAL_AUTHORITY_SOCIAL_WORKER, localAuthoritySocialWorker);
-                } catch (GrantCaseAccessException grantCaseAccessException) {
-                    errorList.add(grantCaseAccessException.getMessage());
-                }
-            }
-
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseDetails.getData())
-                .errors(errorList).build();
-        } else {
-            throw new InvalidClientException();
-        }
-    }
-
-    @PostMapping(path = "/localauthority/socialworker/remove/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "About to submit to remove Local authority social worker")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback processed.",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
-        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse submitRemoveSocialWorker(
-        @RequestHeader(javax.ws.rs.core.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest) {
-
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            CaseDetails caseDetails = callbackRequest.getCaseDetails();
-            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-            List<String> errorList = new ArrayList<>();
-            LocalAuthoritySocialWorker localAuthoritySocialWorker = caseData.getLocalAuthoritySocialWorker();
-
-            caseAssignmentService.validateSocialWorkerRemoveRequest(caseData, localAuthoritySocialWorker, errorList);
-
-            if (errorList.isEmpty()) {
-                caseAssignmentService.removeLaSocialWorker(caseData, localAuthoritySocialWorker);
-                updateCaseDetails(caseDetails, caseData);
-            }
-
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseDetails.getData())
-                .errors(errorList).build();
-        } else {
-            throw new InvalidClientException();
-        }
-
     }
 }

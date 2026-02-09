@@ -396,6 +396,14 @@ public class CaseData extends BaseCaseData implements MappableObject {
     @JsonProperty("applicantOrganisationPolicy")
     private OrganisationPolicy applicantOrganisationPolicy;
 
+    /* Local authority policies */
+    @JsonProperty("localAuthoritySolicitorOrganisationPolicy")
+    private OrganisationPolicy localAuthoritySolicitorOrganisationPolicy;
+
+    /* Local authority policies */
+    @JsonProperty("localAuthoritySocialWorkerOrganisationPolicy")
+    private OrganisationPolicy localAuthoritySocialWorkerOrganisationPolicy;
+
     /**
      * Without Notice Order.
      */

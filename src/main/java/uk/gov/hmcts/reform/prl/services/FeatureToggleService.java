@@ -13,7 +13,6 @@ import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.models.Features.IS_BARRISTER_FEATURE_ENABLED;
 import static uk.gov.hmcts.reform.prl.models.Features.IS_CAFCASS_DATE_TIME_FEATURE_ENABLED;
-import static uk.gov.hmcts.reform.prl.models.Features.IS_LA_SOCIAL_WORKER_FEATURE_ENABLED;
 import static uk.gov.hmcts.reform.prl.models.Features.IS_OS_COURT_LOOKUP_ENABLED;
 
 
@@ -47,10 +46,6 @@ public class FeatureToggleService {
      */
     public boolean isBarristerFeatureEnabled() {
         return isFeatureEnabled(IS_BARRISTER_FEATURE_ENABLED);
-    }
-
-    public boolean isLaSocialWorkerFeatureEnabled() {
-        return isFeatureEnabled(IS_LA_SOCIAL_WORKER_FEATURE_ENABLED);
     }
 
     public boolean isCafcassDateTimeFeatureEnabled() {
