@@ -25,10 +25,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 import static uk.gov.hmcts.reform.prl.util.TestConstants.*;
 
-/**
- * Integration tests for AwaitingInformationController.
- * Tests the complete flow of the controller endpoints with MockMvc.
- */
 @Slf4j
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -55,10 +51,6 @@ public class AwaitingInformationControllerIntegrationTest {
         objectMapper.registerModule(new ParameterNamesModule());
     }
 
-    /**
-     * Test submit awaiting information endpoint with authorized request
-     * Verifies that the endpoint returns 200 OK when user is authorized
-     */
     @Test
     public void testSubmitAwaitingInformationSuccess() throws Exception {
         String url = "/submit-awaiting-information";
@@ -75,14 +67,8 @@ public class AwaitingInformationControllerIntegrationTest {
                     .content(jsonRequest))
             .andExpect(status().isOk())
             .andReturn();
-
-        log.info("testSubmitAwaitingInformationSuccess - PASSED");
     }
 
-    /**
-     * Test submit awaiting information endpoint with unauthorized request
-     * Verifies that the endpoint returns an appropriate error when user is not authorized
-     */
     @Test
     public void testSubmitAwaitingInformationUnauthorized() throws Exception {
         String url = "/submit-awaiting-information";
@@ -99,14 +85,8 @@ public class AwaitingInformationControllerIntegrationTest {
                     .content(jsonRequest))
             .andExpect(status().isInternalServerError())
             .andReturn();
-
-        log.info("testSubmitAwaitingInformationUnauthorized - PASSED");
     }
 
-    /**
-     * Test populate header endpoint with authorized request
-     * Verifies that the endpoint returns 200 OK when user is authorized
-     */
     @Test
     public void testPopulateHeaderSuccess() throws Exception {
         String url = "/populate-header-awaiting-information";
@@ -123,14 +103,8 @@ public class AwaitingInformationControllerIntegrationTest {
                     .content(jsonRequest))
             .andExpect(status().isOk())
             .andReturn();
-
-        log.info("testPopulateHeaderSuccess - PASSED");
     }
 
-    /**
-     * Test populate header endpoint with unauthorized request
-     * Verifies that the endpoint returns an appropriate error when user is not authorized
-     */
     @Test
     public void testPopulateHeaderUnauthorized() throws Exception {
         String url = "/populate-header-awaiting-information";
@@ -147,14 +121,8 @@ public class AwaitingInformationControllerIntegrationTest {
                     .content(jsonRequest))
             .andExpect(status().isInternalServerError())
             .andReturn();
-
-        log.info("testPopulateHeaderUnauthorized - PASSED");
     }
 
-    /**
-     * Test validate awaiting information endpoint
-     * Verifies that the endpoint returns 200 OK and processes the request
-     */
     @Test
     public void testValidateAwaitingInformationSuccess() throws Exception {
         String url = "/validate-awaiting-information";
@@ -167,14 +135,8 @@ public class AwaitingInformationControllerIntegrationTest {
                     .content(jsonRequest))
             .andExpect(status().isOk())
             .andReturn();
-
-        log.info("testValidateAwaitingInformationSuccess - PASSED");
     }
 
-    /**
-     * Test submit awaiting information endpoint with valid authorization headers
-     * Verifies that the endpoint returns 200 OK with correct headers
-     */
     @Test
     public void testSubmitAwaitingInformationWithCorrectHeaders() throws Exception {
         String url = "/submit-awaiting-information";
@@ -192,14 +154,8 @@ public class AwaitingInformationControllerIntegrationTest {
                     .content(jsonRequest))
             .andExpect(status().isOk())
             .andReturn();
-
-        log.info("testSubmitAwaitingInformationWithCorrectHeaders - PASSED");
     }
 
-    /**
-     * Test populate header endpoint with valid authorization headers
-     * Verifies that the endpoint returns 200 OK with correct headers
-     */
     @Test
     public void testPopulateHeaderWithCorrectHeaders() throws Exception {
         String url = "/populate-header-awaiting-information";
@@ -217,14 +173,8 @@ public class AwaitingInformationControllerIntegrationTest {
                     .content(jsonRequest))
             .andExpect(status().isOk())
             .andReturn();
-
-        log.info("testPopulateHeaderWithCorrectHeaders - PASSED");
     }
 
-    /**
-     * Test validate awaiting information endpoint with valid JSON request
-     * Verifies that the endpoint processes the request correctly
-     */
     @Test
     public void testValidateAwaitingInformationWithValidJson() throws Exception {
         String url = "/validate-awaiting-information";
@@ -237,14 +187,8 @@ public class AwaitingInformationControllerIntegrationTest {
                     .content(jsonRequest))
             .andExpect(status().isOk())
             .andReturn();
-
-        log.info("testValidateAwaitingInformationWithValidJson - PASSED");
     }
 
-    /**
-     * Test submit awaiting information endpoint with different authorization tokens
-     * Verifies that the endpoint handles multiple authorization scenarios
-     */
     @Test
     public void testSubmitAwaitingInformationWithDifferentTokens() throws Exception {
         String url = "/submit-awaiting-information";
@@ -278,14 +222,8 @@ public class AwaitingInformationControllerIntegrationTest {
                     .content(jsonRequest))
             .andExpect(status().isInternalServerError())
             .andReturn();
-
-        log.info("testSubmitAwaitingInformationWithDifferentTokens - PASSED");
     }
 
-    /**
-     * Test all three endpoints in sequence
-     * Verifies that all endpoints can be called in the same test context
-     */
     @Test
     public void testAllEndpointsSequentially() throws Exception {
         String submitUrl = "/submit-awaiting-information";
@@ -325,14 +263,8 @@ public class AwaitingInformationControllerIntegrationTest {
                     .content(jsonRequest))
             .andExpect(status().isOk())
             .andReturn();
-
-        log.info("testAllEndpointsSequentially - PASSED");
     }
 
-    /**
-     * Test submit awaiting information endpoint with missing authorization header
-     * Verifies that the endpoint handles missing headers appropriately
-     */
     @Test
     public void testSubmitAwaitingInformationMissingAuthHeader() throws Exception {
         String url = "/submit-awaiting-information";
@@ -346,14 +278,8 @@ public class AwaitingInformationControllerIntegrationTest {
                     .content(jsonRequest))
             .andExpect(status().isBadRequest())
             .andReturn();
-
-        log.info("testSubmitAwaitingInformationMissingAuthHeader - PASSED");
     }
 
-    /**
-     * Test populate header endpoint with missing service authorization header
-     * Verifies that the endpoint handles missing service auth header appropriately
-     */
     @Test
     public void testPopulateHeaderMissingServiceAuthHeader() throws Exception {
         String url = "/populate-header-awaiting-information";
@@ -367,14 +293,8 @@ public class AwaitingInformationControllerIntegrationTest {
                     .content(jsonRequest))
             .andExpect(status().isBadRequest())
             .andReturn();
-
-        log.info("testPopulateHeaderMissingServiceAuthHeader - PASSED");
     }
 
-    /**
-     * Test submit awaiting information endpoint response content type
-     * Verifies that the endpoint returns JSON content type
-     */
     @Test
     public void testSubmitAwaitingInformationResponseContentType() throws Exception {
         String url = "/submit-awaiting-information";
@@ -391,14 +311,8 @@ public class AwaitingInformationControllerIntegrationTest {
                     .content(jsonRequest))
             .andExpect(status().isOk())
             .andReturn();
-
-        log.info("testSubmitAwaitingInformationResponseContentType - PASSED");
     }
 
-    /**
-     * Test validate awaiting information endpoint response content type
-     * Verifies that the validate endpoint returns JSON content type
-     */
     @Test
     public void testValidateAwaitingInformationResponseContentType() throws Exception {
         String url = "/validate-awaiting-information";
@@ -411,8 +325,6 @@ public class AwaitingInformationControllerIntegrationTest {
                     .content(jsonRequest))
             .andExpect(status().isOk())
             .andReturn();
-
-        log.info("testValidateAwaitingInformationResponseContentType - PASSED");
     }
 }
 
