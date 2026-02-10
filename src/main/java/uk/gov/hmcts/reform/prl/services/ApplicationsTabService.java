@@ -605,14 +605,14 @@ public class ApplicationsTabService implements TabService {
             .ordersApplyingFor(String.join(", ", ordersApplyingFor))
             .typeOfChildArrangementsOrder(typeOfChildArrangementsOrder)
             .applicationPermissionRequired(
-                caseData.getPermissionRequired() != null &&
-                    caseData.getPermissionRequired().getApplicationPermissionRequired() != null
+                caseData.getPermissionRequired() != null
+                    && caseData.getPermissionRequired().getApplicationPermissionRequired() != null
                     ? caseData.getPermissionRequired().getApplicationPermissionRequired().getDisplayedValue()
                     : null
             )
             .applicationPermissionRequiredReason(
-                caseData.getPermissionRequired() != null ?
-                    caseData.getPermissionRequired().getApplicationPermissionRequiredReason() : null
+                caseData.getPermissionRequired() != null
+                    ? caseData.getPermissionRequired().getApplicationPermissionRequiredReason() : null
             )
             .natureOfOrder(natureOfOrder)
             .build();
