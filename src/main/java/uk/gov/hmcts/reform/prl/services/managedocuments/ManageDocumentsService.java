@@ -57,6 +57,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
@@ -222,7 +223,11 @@ public class ManageDocumentsService {
                                           UserDetails userDetails) {
 
         String userRole = CaseUtils.getUserRole(userDetails);
-        List<Element<ManageDocuments>> manageDocuments = caseData.getDocumentManagementDetails().getManageDocuments();
+
+        List<Element<ManageDocuments>> manageDocuments = Optional.ofNullable(caseData.getDocumentManagementDetails())
+            .map(DocumentManagementDetails::getManageDocuments)
+            .orElse(Collections.emptyList());
+
         boolean isWaTaskSetForFirstDocumentIteration = false;
         for (Element<ManageDocuments> element : manageDocuments) {
             CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
