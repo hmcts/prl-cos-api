@@ -658,7 +658,10 @@
         "roleOnCase": null,
         "visibility": null
       },
-      "applicationPermissionRequired": "noNotRequired",
+      "permissionRequired": {
+        "applicationPermissionRequired": "noNotRequired",
+        "applicationPermissionRequiredReason": null
+      },
       "sdoFactFindingFlag": "<div class=\"govuk-inset-text\"> If you need to include directions for a fact-finding hearing, you need to upload the order in manage orders instead.</div>",
       "caRespondentSolicitor3InternalFlags": {
         "details": [
@@ -2326,7 +2329,6 @@
         "roleOnCase": null,
         "visibility": null
       },
-      "applicationPermissionRequiredReason": null,
       "serveOtherPartiesCA": null,
       "cafcassCymruServedOptions": null,
       "dateSubmitted": "2024-02-17",
@@ -2576,8 +2578,10 @@
         "natureOfOrder": "Requesting for spending time with the child twice a week",
         "ordersApplyingFor": "Child Arrangements Order, Prohibited Steps Order, Specific Issue Order",
         "typeOfChildArrangementsOrder": "Spend time with order",
-        "applicationPermissionRequired": "No, permission is not required",
-        "applicationPermissionRequiredReason": null
+        "permissionRequired": {
+          "applicationPermissionRequired": "No, permission is not required",
+          "applicationPermissionRequiredReason": null
+        }
       },
       "c8Document": {
         "category_id": null,

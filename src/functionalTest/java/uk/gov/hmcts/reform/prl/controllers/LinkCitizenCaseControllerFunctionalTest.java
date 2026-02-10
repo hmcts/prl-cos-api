@@ -149,6 +149,7 @@ public class LinkCitizenCaseControllerFunctionalTest {
             .contentType("application/json")
             .post("/citizen/validate-access-code")
             .then()
+            .log().ifValidationFails()
             .extract()
             .asString();
         Assert.assertNotNull(response);

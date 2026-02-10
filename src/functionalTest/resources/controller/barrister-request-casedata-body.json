@@ -2529,8 +2529,10 @@
         "natureOfOrder": "aaaa",
         "ordersApplyingFor": "Child Arrangements Order",
         "typeOfChildArrangementsOrder": "Spend time with order",
-        "applicationPermissionRequired": "Yes",
-        "applicationPermissionRequiredReason": "bbbbb"
+        "permissionRequired": {
+          "applicationPermissionRequired": "Yes",
+          "applicationPermissionRequiredReason": "bbbbb"
+        }
       },
       "allegationOfHarmRevised": {
         "typesOfHarmRevised": "No Allegations of harm"
@@ -3579,7 +3581,10 @@
       },
       "typeOfChildArrangementsOrder": "spendTimeWithOrder",
       "applicantsConfidentialDetails": [],
-      "applicationPermissionRequired": "yes",
+      "permissionRequired": {
+        "applicationPermissionRequired": "yes",
+        "applicationPermissionRequiredReason": "bbbbb"
+      },
       "childDetailsRevisedExtraTable": {
         "childrenKnownToLocalAuthority": "No",
         "childrenSubjectOfChildProtectionPlan": "No"
@@ -3868,7 +3873,6 @@
         "forcedMarriageProtectionOrder": {},
         "newOrdersForcedMarriageProtection": null
       },
-      "applicationPermissionRequiredReason": "bbbbb",
       "caRespondentSolicitor1ExternalFlags": {
         "details": [],
         "groupId": "caRespondentSolicitor1",
