@@ -87,6 +87,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Predicate;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -102,7 +103,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM_TASK;
@@ -4393,12 +4393,6 @@ public class ManageOrdersControllerTest {
             .documentFileName("preview.pdf")
             .build();
 
-        ManageOrders manageOrders = ManageOrders.builder()
-            .isCaseWithdrawn(No)
-            .markedToServeEmailNotification(No)
-            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
-            .build();
-
         // Database map - empty of custom order fields
         Map<String, Object> databaseMap = new HashMap<>();
         databaseMap.put("id", 12345L);
@@ -4410,6 +4404,11 @@ public class ManageOrdersControllerTest {
         callbackDataMap.put("nameOfOrder", "Test Custom Order");
         callbackDataMap.put("customOrderNameOption", "other");
 
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(No)
+            .markedToServeEmailNotification(No)
+            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+            .build();
         // CaseData from database - does NOT have customOrderDoc (simulating database state before persist)
         CaseData caseDataFromDb = CaseData.builder()
             .id(12345L)
