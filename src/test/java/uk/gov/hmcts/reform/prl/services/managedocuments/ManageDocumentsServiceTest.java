@@ -357,7 +357,7 @@ public class ManageDocumentsServiceTest {
     @Test
     public void testPopulateDocumentCategories() {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
-        when(roleAssignmentService.isUserAllocatedRoleForCase(anyString(), anyString(), anyString())).thenReturn(true);
+        when(roleAssignmentService.isUserAllocatedRoleForCase(anyString(), anyString(), anyString())).thenReturn(false);
         when(coreCaseDataApi.getCategoriesAndDocuments(
             any(),
             any(),
@@ -373,6 +373,61 @@ public class ManageDocumentsServiceTest {
             .get(0).getCode();
         assertEquals(subCategory2.getCategoryId(), docCode);
 
+    }
+
+    @Test
+    public void testPopulateDocumentCategoriesForLaParty() {
+
+        Category laCategory = new Category("localAuthorityDocuments", "localAuthorityDocuments", 2, List.of(document), List.of(subCategory1,subCategory2));
+        CategoriesAndDocuments laCategoriesAndDocuments = new CategoriesAndDocuments(1, List.of(laCategory), List.of(document));
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        when(roleAssignmentService.isUserAllocatedRoleForCase(anyString(), anyString(), anyString())).thenReturn(true);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+
+        when(coreCaseDataApi.getCategoriesAndDocuments(
+            any(),
+            any(),
+            any()
+        )).thenReturn(laCategoriesAndDocuments);
+
+
+        CaseData caseData = CaseData.builder().build();
+
+        CaseData updatedCaseData = manageDocumentsService.populateDocumentCategories(auth, caseData);
+        String docCode = updatedCaseData.getDocumentManagementDetails()
+            .getManageDocuments().get(0).getValue().getDocumentCategories().getListItems()
+            .get(0).getCode();
+        DocumentPartyEnum laParty = updatedCaseData.getDocumentManagementDetails()
+            .getManageDocuments().get(0).getValue().getDocumentParty();
+        assertEquals(subCategory2.getCategoryId(), docCode);
+        assertEquals(DocumentPartyEnum.LOCAL_AUTHORITY, laParty);
+    }
+
+    @Test
+    public void testPopulateDocumentCategoriesForNonLaParty() {
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        when(roleAssignmentService.isUserAllocatedRoleForCase(anyString(), anyString(), anyString())).thenReturn(false);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+
+        when(coreCaseDataApi.getCategoriesAndDocuments(
+            any(),
+            any(),
+            any()
+        )).thenReturn(categoriesAndDocuments);
+
+
+        CaseData caseData = CaseData.builder().build();
+
+        CaseData updatedCaseData = manageDocumentsService.populateDocumentCategories(auth, caseData);
+        String docCode = updatedCaseData.getDocumentManagementDetails()
+            .getManageDocuments().get(0).getValue().getDocumentCategories().getListItems()
+            .get(0).getCode();
+        DocumentPartyEnum laParty = updatedCaseData.getDocumentManagementDetails()
+            .getManageDocuments().get(0).getValue().getDocumentParty();
+        assertEquals(subCategory2.getCategoryId(), docCode);
+        assertNull(laParty);
     }
 
     @Test
