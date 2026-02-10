@@ -416,6 +416,7 @@ public class BundleCreateRequestMapper {
         mapApplicationsAndOrders(doc, bundleMap);
         mapWitnessStatements(doc, bundleMap);
         mapCafcassLaReports(doc, bundleMap);
+        mapLocalAuthorityDocs(doc, bundleMap);
         mapOtherDocuments(doc, bundleMap);
 
         return bundleMap.get(doc.getCategoryId());
@@ -607,6 +608,10 @@ public class BundleCreateRequestMapper {
             .documentLink(doc.getOtherDocsDocument())
             .documentFileName(doc.getOtherDocsDocument().getDocumentFileName())
             .documentGroup(BundlingDocGroupEnum.cafcassOtherDocuments).build() : null);
+
+    }
+
+    private static void mapLocalAuthorityDocs(QuarantineLegalDoc doc, HashMap<String, BundlingRequestDocument> bundleMap) {
         bundleMap.put(SEC37_REPORT, Objects.nonNull(doc.getSec37ReportDocument()) ? BundlingRequestDocument.builder()
             .documentLink(doc.getSec37ReportDocument())
             .documentFileName(doc.getSec37ReportDocument().getDocumentFileName())
@@ -630,7 +635,7 @@ public class BundleCreateRequestMapper {
         bundleMap.put(LOCAL_AUTHORITY_INVOLVEMENT_LA, Objects.nonNull(doc.getLocalAuthorityInvolvementLaDocument()) ? BundlingRequestDocument.builder()
             .documentLink(doc.getLocalAuthorityInvolvementLaDocument())
             .documentFileName(doc.getLocalAuthorityInvolvementLaDocument().getDocumentFileName())
-            .documentGroup(BundlingDocGroupEnum.laSectionlocalAuthorityInvolvementReport).build() : null);
+            .documentGroup(BundlingDocGroupEnum.laSectionLocalAuthorityInvolvementReport).build() : null);
         bundleMap.put(SECTION_47_LA, Objects.nonNull(doc.getSection47LaDocument()) ? BundlingRequestDocument.builder()
             .documentLink(doc.getSection47LaDocument())
             .documentFileName(doc.getSection47LaDocument().getDocumentFileName())

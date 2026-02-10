@@ -161,8 +161,8 @@ public enum BundlingDocGroupEnum {
     @JsonProperty("laSectionSection7AddendumReportReport")
     laSectionSection7AddendumReportReport("laSectionSection7AddendumReportReport", "laSectionSection7AddendumReportReport"),
 
-    @JsonProperty("laSectionlocalAuthorityInvolvementReport")
-    laSectionlocalAuthorityInvolvementReport("laSectionlocalAuthorityInvolvementReport", "laSectionlocalAuthorityInvolvementReport"),
+    @JsonProperty("laSectionLocalAuthorityInvolvementReport")
+    laSectionLocalAuthorityInvolvementReport("laSectionLocalAuthorityInvolvementReport", "laSectionLocalAuthorityInvolvementReport"),
 
     @JsonProperty("laSectionSection47EnquiryReport")
     laSectionSection47EnquiryReport("laSectionSection47EnquiryReport", "laSectionSection47EnquiryReport"),

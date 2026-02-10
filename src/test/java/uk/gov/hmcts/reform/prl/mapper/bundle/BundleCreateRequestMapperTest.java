@@ -5,7 +5,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.FurtherEvidenceDocumentType;
@@ -38,36 +37,18 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
-import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT1;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT2;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_1_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_2_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST_LA;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.FM5_STATEMENTS;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.LA_OTHER_DOCS;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.LOCAL_AUTHORITY_INVOLVEMENT_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.OTHER_DOCS;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SEC37_REPORT;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION7_REPORT;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_47_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_7_ADDENDUM_REPORT_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_7_REPORT_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SIXTEEN_A_RISK_ASSESSMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ANY_OTHER_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_C1A_RESPONSE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_OTHER_DOCUMENTS;
@@ -1076,93 +1057,245 @@ public class BundleCreateRequestMapperTest {
     }
 
     @Test
-    public void testMapCafcassLaReports_allDocumentsPresent() throws Exception {
-        QuarantineLegalDoc q = QuarantineLegalDoc.builder()
-            .safeguardingLetterDocument(createDoc("safeguard.pdf"))
-            .childImpactReport1Document(createDoc("impact1.pdf"))
-            .childImpactReport2Document(createDoc("impact2.pdf"))
-            .section7ReportDocument(createDoc("section7.pdf"))
-            .sixteenARiskAssessmentDocument(createDoc("16a.pdf"))
-            .guardianReportDocument(createDoc("guardian.pdf"))
-            .specialGuardianshipReportDocument(createDoc("special.pdf"))
-            .section37ReportDocument(createDoc("sec37cafcass.pdf"))
-            .otherDocsDocument(createDoc("otherCafcass.pdf"))
-            .sec37ReportDocument(createDoc("sec37la.pdf"))
-            .childImpactReport1LaDocument(createDoc("impact1la.pdf"))
-            .childImpactReport2LaDocument(createDoc("impact2la.pdf"))
-            .section7ReportLaDocument(createDoc("section7la.pdf"))
-            .section7AddendumReportLaDocument(createDoc("section7addendumla.pdf"))
-            .localAuthorityInvolvementLaDocument(createDoc("localInvolvement.pdf"))
-            .section47LaDocument(createDoc("section47la.pdf"))
-            .cirExtensionRequestLaDocument(createDoc("cirExtension.pdf"))
-            .cirTransferRequestLaDocument(createDoc("cirTransfer.pdf"))
-            .localAuthorityOtherDocDocument(createDoc("laOther.pdf"))
+    public void testLocalAuthorityChild1ImpactDocumentsUpdatedInMap() {
+        String categoryId = "childImpactReport1La", categoryName = "Child Impact Report 1";
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .childImpactReport1LaDocument(createDoc(categoryId))
+            .documentParty(DocumentPartyEnum.LOCAL_AUTHORITY.getDisplayedValue())
+            .categoryName(categoryName)
+            .categoryId(categoryId)
             .build();
 
-        Map<String, BundlingRequestDocument> bundleMap = new HashMap<>();
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .courtStaffUploadDocListDocTab(Collections.singletonList(element(
+                                     quarantineLegalDoc))).build())
+            .build();
 
-        Method m = BundleCreateRequestMapper.class.getDeclaredMethod("mapCafcassLaReports", QuarantineLegalDoc.class, HashMap.class);
-        m.setAccessible(true);
-        m.invoke(null, q, bundleMap);
+        List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapAllOtherDocuments(caseData);
 
-        // verify a selection of mappings (representative for all)
-        BundlingRequestDocument safeguarding = bundleMap.get(ManageDocumentsCategoryConstants.SAFEGUARDING_LETTER);
-        assertNotNull(safeguarding);
-        assertEquals("safeguard.pdf", safeguarding.getDocumentFileName());
-        assertEquals(q.getSafeguardingLetterDocument(), safeguarding.getDocumentLink());
-        assertEquals(BundlingDocGroupEnum.safeguardingLetter, safeguarding.getDocumentGroup());
+        BundlingRequestDocument expected = result.getFirst().getValue();
 
-        BundlingRequestDocument impact1 = bundleMap.get(CHILD_IMPACT_REPORT1);
-        assertNotNull(impact1);
-        assertEquals("impact1.pdf", impact1.getDocumentFileName());
-        assertEquals(BundlingDocGroupEnum.childImpactReport1, impact1.getDocumentGroup());
-
-        BundlingRequestDocument sec37cafcass = bundleMap.get(ManageDocumentsCategoryConstants.SECTION_37_REPORT);
-        assertNotNull(sec37cafcass);
-        assertEquals("sec37cafcass.pdf", sec37cafcass.getDocumentFileName());
-        assertEquals(BundlingDocGroupEnum.cafcassSection37Report, sec37cafcass.getDocumentGroup());
-
-        BundlingRequestDocument sec37la = bundleMap.get(SEC37_REPORT);
-        assertNotNull(sec37la);
-        assertEquals("sec37la.pdf", sec37la.getDocumentFileName());
-        assertEquals(BundlingDocGroupEnum.laSection37Report, sec37la.getDocumentGroup());
-
-        BundlingRequestDocument laOther = bundleMap.get(LA_OTHER_DOCS);
-        assertNotNull(laOther);
-        assertEquals("laOther.pdf", laOther.getDocumentFileName());
-        assertEquals(BundlingDocGroupEnum.laOtherDocuments, laOther.getDocumentGroup());
+        assertFalse(result.isEmpty());
+        assertEquals(categoryId, expected.getDocumentFileName());
+        assertEquals(BundlingDocGroupEnum.laSectionChildImpactReport1Report, expected.getDocumentGroup());
     }
 
     @Test
-    public void testMapCafcassLaReports_noDocumentsPresent() throws Exception {
-        QuarantineLegalDoc q = QuarantineLegalDoc.builder().build();
+    public void testLocalAuthorityChild2ImpactDocumentsUpdatedInMap() {
+        String categoryId = "childImpactReport2La", categoryName = "Child Impact Report 2";
 
-        Map<String, BundlingRequestDocument> bundleMap = new HashMap<>();
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .childImpactReport2LaDocument(createDoc(categoryId))
+            .documentParty(DocumentPartyEnum.LOCAL_AUTHORITY.getDisplayedValue())
+            .categoryName(categoryName)
+            .categoryId(categoryId)
+            .build();
 
-        Method m = BundleCreateRequestMapper.class.getDeclaredMethod("mapCafcassLaReports", QuarantineLegalDoc.class, HashMap.class);
-        m.setAccessible(true);
-        m.invoke(null, q, bundleMap);
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .courtStaffUploadDocListDocTab(Collections.singletonList(element(
+                                     quarantineLegalDoc))).build())
+            .build();
 
-        // when source documents are null the map entries should be present but null-valued
-        assertNull(bundleMap.get(ManageDocumentsCategoryConstants.SAFEGUARDING_LETTER));
-        assertNull(bundleMap.get(CHILD_IMPACT_REPORT1));
-        assertNull(bundleMap.get(CHILD_IMPACT_REPORT2));
-        assertNull(bundleMap.get(SECTION7_REPORT));
-        assertNull(bundleMap.get(SIXTEEN_A_RISK_ASSESSMENT));
-        assertNull(bundleMap.get(ManageDocumentsCategoryConstants.GUARDIAN_REPORT));
-        assertNull(bundleMap.get(ManageDocumentsCategoryConstants.SPECIAL_GUARDIANSHIP_REPORT));
-        assertNull(bundleMap.get(ManageDocumentsCategoryConstants.SECTION_37_REPORT));
-        assertNull(bundleMap.get(OTHER_DOCS));
-        assertNull(bundleMap.get(SEC37_REPORT));
-        assertNull(bundleMap.get(CHILD_IMPACT_REPORT_1_LA));
-        assertNull(bundleMap.get(CHILD_IMPACT_REPORT_2_LA));
-        assertNull(bundleMap.get(SECTION_7_REPORT_LA));
-        assertNull(bundleMap.get(SECTION_7_ADDENDUM_REPORT_LA));
-        assertNull(bundleMap.get(LOCAL_AUTHORITY_INVOLVEMENT_LA));
-        assertNull(bundleMap.get(SECTION_47_LA));
-        assertNull(bundleMap.get(CIR_EXTENSION_REQUEST_LA));
-        assertNull(bundleMap.get(CIR_TRANSFER_REQUEST_LA));
-        assertNull(bundleMap.get(LA_OTHER_DOCS));
+        List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapAllOtherDocuments(caseData);
+
+        assertFalse(result.isEmpty());
+        assertEquals(categoryId, result.get(0).getValue().getDocumentFileName());
+        assertEquals(BundlingDocGroupEnum.laSectionChildImpactReport2Report, result.get(0).getValue().getDocumentGroup());
+    }
+
+    @Test
+    public void testLocalAuthoritySection37ReportUpdatedInMap() {
+        String categoryId = "sec37Report", categoryName = "Section 37 (S37) report";
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .sec37ReportDocument(createDoc(categoryId))
+            .documentParty(DocumentPartyEnum.LOCAL_AUTHORITY.getDisplayedValue())
+            .categoryName(categoryName)
+            .categoryId(categoryId)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+                                .reviewDocuments(ReviewDocuments.builder()
+                                                .courtStaffUploadDocListDocTab(Collections.singletonList(element(
+                                                    quarantineLegalDoc))).build())
+                                .build();
+
+        List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapAllOtherDocuments(caseData);
+
+        assertFalse(result.isEmpty());
+        assertEquals(categoryId, result.get(0).getValue().getDocumentFileName());
+        assertEquals(BundlingDocGroupEnum.laSection37Report, result.get(0).getValue().getDocumentGroup());
+    }
+
+    @Test
+    public void testLocalAuthoritySection7ReportUpdatedInMap() {
+        String categoryId = "section7ReportLa", categoryName = "Section 7 report";
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .section7ReportLaDocument(createDoc(categoryId))
+            .documentParty(DocumentPartyEnum.LOCAL_AUTHORITY.getDisplayedValue())
+            .categoryName(categoryName)
+            .categoryId(categoryId)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .courtStaffUploadDocListDocTab(Collections.singletonList(element(
+                                     quarantineLegalDoc))).build())
+            .build();
+
+        List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapAllOtherDocuments(caseData);
+
+        assertFalse(result.isEmpty());
+        assertEquals(categoryId, result.get(0).getValue().getDocumentFileName());
+        assertEquals(BundlingDocGroupEnum.laSectionSection7ReportReport, result.get(0).getValue().getDocumentGroup());
+    }
+
+    @Test
+    public void testLocalAuthoritySection7AddendumReportUpdatedInMap() {
+        String categoryId = "section7AddendumReportLa", categoryName = "Section 7 addendum report";
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .section7AddendumReportLaDocument(createDoc(categoryId))
+            .documentParty(DocumentPartyEnum.LOCAL_AUTHORITY.getDisplayedValue())
+            .categoryName(categoryName)
+            .categoryId(categoryId)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .courtStaffUploadDocListDocTab(Collections.singletonList(element(
+                                     quarantineLegalDoc))).build())
+            .build();
+
+        List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapAllOtherDocuments(caseData);
+
+        assertFalse(result.isEmpty());
+        assertEquals(categoryId, result.get(0).getValue().getDocumentFileName());
+        assertEquals(BundlingDocGroupEnum.laSectionSection7AddendumReportReport, result.get(0).getValue().getDocumentGroup());
+    }
+
+    @Test
+    public void testLocalAuthoritySectionInvolvementLetterUpdatedInMap() {
+        String categoryId = "localAuthorityInvolvementLa", categoryName = "Local Authority involvement letter";
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .localAuthorityInvolvementLaDocument(createDoc(categoryId))
+            .documentParty(DocumentPartyEnum.LOCAL_AUTHORITY.getDisplayedValue())
+            .categoryName(categoryName)
+            .categoryId(categoryId)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .courtStaffUploadDocListDocTab(Collections.singletonList(element(
+                                     quarantineLegalDoc))).build())
+            .build();
+
+        List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapAllOtherDocuments(caseData);
+
+        assertFalse(result.isEmpty());
+        assertEquals(categoryId, result.get(0).getValue().getDocumentFileName());
+        assertEquals(BundlingDocGroupEnum.laSectionLocalAuthorityInvolvementReport, result.get(0).getValue().getDocumentGroup());
+    }
+
+    @Test
+    public void testLocalAuthoritySection47EnquiryUpdatedInMap() {
+        String categoryId = "section47La", categoryName = "Section 47 enquiry";
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .section47LaDocument(createDoc(categoryId))
+            .documentParty(DocumentPartyEnum.LOCAL_AUTHORITY.getDisplayedValue())
+            .categoryName(categoryName)
+            .categoryId(categoryId)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .courtStaffUploadDocListDocTab(Collections.singletonList(element(
+                                     quarantineLegalDoc))).build())
+            .build();
+
+        List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapAllOtherDocuments(caseData);
+
+        assertFalse(result.isEmpty());
+        assertEquals(categoryId, result.get(0).getValue().getDocumentFileName());
+        assertEquals(BundlingDocGroupEnum.laSectionSection47EnquiryReport, result.get(0).getValue().getDocumentGroup());
+    }
+
+    @Test
+    public void testLocalAuthorityCIRExtensionRequestUpdatedInMap() {
+        String categoryId = "cirExtensionRequestLa", categoryName = "CIR extension request";
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .cirExtensionRequestLaDocument(createDoc(categoryId))
+            .documentParty(DocumentPartyEnum.LOCAL_AUTHORITY.getDisplayedValue())
+            .categoryName(categoryName)
+            .categoryId(categoryId)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .courtStaffUploadDocListDocTab(Collections.singletonList(element(
+                                     quarantineLegalDoc))).build())
+            .build();
+
+        List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapAllOtherDocuments(caseData);
+
+        assertFalse(result.isEmpty());
+        assertEquals(categoryId, result.get(0).getValue().getDocumentFileName());
+        assertEquals(BundlingDocGroupEnum.laSectionCirExtensionRequestReport, result.get(0).getValue().getDocumentGroup());
+    }
+
+    @Test
+    public void testLocalAuthorityCIRTransferRequestUpdatedInMap() {
+        String categoryId = "cirTransferRequestLa", categoryName = "CIR transfer request";
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .cirTransferRequestLaDocument(createDoc(categoryId))
+            .documentParty(DocumentPartyEnum.LOCAL_AUTHORITY.getDisplayedValue())
+            .categoryName(categoryName)
+            .categoryId(categoryId)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .courtStaffUploadDocListDocTab(Collections.singletonList(element(
+                                     quarantineLegalDoc))).build())
+            .build();
+
+        List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapAllOtherDocuments(caseData);
+
+        assertFalse(result.isEmpty());
+        assertEquals(categoryId, result.get(0).getValue().getDocumentFileName());
+        assertEquals(BundlingDocGroupEnum.laSectionCirTransferRequestReport, result.get(0).getValue().getDocumentGroup());
+    }
+
+    @Test
+    public void testLocalAuthorityOtherDocumentsUpdatedInMap() {
+        String categoryId = "localAuthorityOtherDoc", categoryName = "Other";
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .localAuthorityOtherDocDocument(createDoc(categoryId))
+            .documentParty(DocumentPartyEnum.LOCAL_AUTHORITY.getDisplayedValue())
+            .categoryName(categoryName)
+            .categoryId(categoryId)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .courtStaffUploadDocListDocTab(Collections.singletonList(element(
+                                     quarantineLegalDoc))).build())
+            .build();
+
+        List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapAllOtherDocuments(caseData);
+
+        assertFalse(result.isEmpty());
+        assertEquals(categoryId, result.get(0).getValue().getDocumentFileName());
+        assertEquals(BundlingDocGroupEnum.laOtherDocuments, result.get(0).getValue().getDocumentGroup());
     }
 
 }
