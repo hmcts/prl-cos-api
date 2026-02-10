@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.AwaitingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.AwaitingInformationService;
+import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
@@ -38,11 +39,11 @@ import static uk.gov.hmcts.reform.prl.enums.State.AWAITING_INFORMATION;
 @Slf4j
 @RestController
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@ConditionalOnProperty(prefix = "feature.toggle", name = "awaitingInformationEnabled", havingValue = "true")
 public class AwaitingInformationController {
     private final AwaitingInformationService awaitingInformationService;
     private final ObjectMapper objectMapper;
     private final AuthorisationService authorisationService;
+    private final FeatureToggleService featureToggleService;
 
     @PostMapping(path = "/submit-awaiting-information", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Copy fl401 case name to C100 Case name")
@@ -56,7 +57,7 @@ public class AwaitingInformationController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken) && featureToggleService.isAwaitingInformationEnabled()) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             caseDataUpdated.put(
                 CASE_STATUS, CaseStatus.builder()
@@ -81,7 +82,7 @@ public class AwaitingInformationController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken) && featureToggleService.isAwaitingInformationEnabled()) {
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .build();
         } else {
@@ -97,14 +98,22 @@ public class AwaitingInformationController {
     public CallbackResponse validateUrgentCaseCreation(
         @RequestBody CallbackRequest callbackRequest
     ) {
+        if(featureToggleService.isAwaitingInformationEnabled()) {
+            AwaitingInformation awaitingInformation = objectMapper.convertValue(
+                callbackRequest.getCaseDetails().getData(),
+                AwaitingInformation.class
+            );
+            List<String> errorList = awaitingInformationService.validateAwaitingInformation(awaitingInformation);
+
+            return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder()
+                .errors(errorList)
+                .build();
+        }
         AwaitingInformation awaitingInformation = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             AwaitingInformation.class
         );
-        List<String> errorList = awaitingInformationService.validateAwaitingInformation(awaitingInformation);
+        return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder().build();
 
-        return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder()
-            .errors(errorList)
-            .build();
     }
 }

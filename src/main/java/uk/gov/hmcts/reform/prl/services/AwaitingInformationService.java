@@ -1,22 +1,28 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AwaitingInformation;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
+@Slf4j
+@Builder
 @RequiredArgsConstructor
-@ConditionalOnProperty(prefix = "feature.toggle", name = "awaitingInformationEnabled", havingValue = "true")
+@Service
 public class AwaitingInformationService {
+
+    private final FeatureToggleService featureToggleService;
 
     public List<String> validateAwaitingInformation(AwaitingInformation awaitingInformation) {
         List<String> errorList = new ArrayList<>();
-        if (awaitingInformation.getReviewDate() != null && !awaitingInformation.getReviewDate().isAfter(LocalDate.now())) {
+        if (featureToggleService.isBarristerFeatureEnabled() && awaitingInformation.getReviewDate() != null && !awaitingInformation.getReviewDate().isAfter(LocalDate.now())) {
             errorList.add("The date must be in the future");
         }
         return errorList;
