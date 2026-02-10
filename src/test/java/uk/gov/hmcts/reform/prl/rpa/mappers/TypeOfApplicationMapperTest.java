@@ -34,18 +34,16 @@ public class TypeOfApplicationMapperTest {
             .natureOfOrder("test")
             .consentOrder(Yes)
             .permissionRequired(PermissionRequired.builder()
-                                    .applicationPermissionRequired(PermissionRequiredEnum.yes)
-                                    .applicationPermissionRequiredReason("Need Permission")
-                                    .build())
+                .applicationPermissionRequired(PermissionRequiredEnum.yes)
+                .applicationPermissionRequiredReason("Need Permission")
+                .build())
             .applicationDetails("Done").build();
         assertNotNull(typeOfApplicationMapper.map(caseDataInput));
     }
 
     @Test
     public void testForNoDataTypeOfApplicationMapper() {
-        CaseData caseDataInput = CaseData.builder()
-            .permissionRequired(PermissionRequired.builder().build())
-            .build();
+        CaseData caseDataInput = CaseData.builder().build();
         assertNotNull(typeOfApplicationMapper.map(caseDataInput));
     }
 }
