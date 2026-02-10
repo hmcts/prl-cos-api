@@ -95,6 +95,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_R
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESTRICTED_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
+import static uk.gov.hmcts.reform.prl.enums.Roles.LOCAL_AUTHORITY_SOLICITOR;
+import static uk.gov.hmcts.reform.prl.enums.Roles.LOCAL_AUTHORITY_STAFF;
+import static uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum.LOCAL_AUTHORITY;
 import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_RESTRICTED_FLAG;
 import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_TRIGGERED_BY;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -378,7 +381,7 @@ public class ManageDocumentsServiceTest {
     @Test
     public void testPopulateDocumentCategoriesForLaParty() {
 
-        Category laCategory = new Category("localAuthorityDocuments", "localAuthorityDocuments", 2, List.of(document), List.of(subCategory1,subCategory2));
+        Category laCategory = new Category("localAuthorityDocuments", "localAuthorityDocuments", 2, List.of(document), List.of(subCategory1, subCategory2));
         CategoriesAndDocuments laCategoriesAndDocuments = new CategoriesAndDocuments(1, List.of(laCategory), List.of(document));
 
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
@@ -401,11 +404,70 @@ public class ManageDocumentsServiceTest {
         DocumentPartyEnum laParty = updatedCaseData.getDocumentManagementDetails()
             .getManageDocuments().get(0).getValue().getDocumentParty();
         assertEquals(subCategory2.getCategoryId(), docCode);
-        assertEquals(DocumentPartyEnum.LOCAL_AUTHORITY, laParty);
+        assertEquals(LOCAL_AUTHORITY, laParty);
     }
 
     @Test
-    public void testPopulateDocumentCategoriesForNonLaParty() {
+    public void testLaPartyWithRoleSocialWorker() {
+
+        Category laCategory = new Category("localAuthorityDocuments", "localAuthorityDocuments", 2, List.of(document), List.of(subCategory1, subCategory2));
+        CategoriesAndDocuments laCategoriesAndDocuments = new CategoriesAndDocuments(1, List.of(laCategory), List.of(document));
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        when(roleAssignmentService.isUserAllocatedRoleForCase(anyString(), anyString(), eq(LOCAL_AUTHORITY_STAFF.getValue()))).thenReturn(true);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+
+        when(coreCaseDataApi.getCategoriesAndDocuments(
+            any(),
+            any(),
+            any()
+        )).thenReturn(laCategoriesAndDocuments);
+
+
+        CaseData caseData = CaseData.builder().build();
+
+        CaseData updatedCaseData = manageDocumentsService.populateDocumentCategories(auth, caseData);
+        String docCode = updatedCaseData.getDocumentManagementDetails()
+            .getManageDocuments().get(0).getValue().getDocumentCategories().getListItems()
+            .get(0).getCode();
+        DocumentPartyEnum laParty = updatedCaseData.getDocumentManagementDetails()
+            .getManageDocuments().get(0).getValue().getDocumentParty();
+        assertEquals(subCategory2.getCategoryId(), docCode);
+        assertEquals(LOCAL_AUTHORITY, laParty);
+    }
+
+    @Test
+    public void testLaPartyWithRoleSolicitor() {
+
+        Category laCategory = new Category("localAuthorityDocuments", "localAuthorityDocuments", 2, List.of(document), List.of(subCategory1, subCategory2));
+        CategoriesAndDocuments laCategoriesAndDocuments = new CategoriesAndDocuments(1, List.of(laCategory), List.of(document));
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        when(roleAssignmentService.isUserAllocatedRoleForCase(anyString(), anyString(), eq(LOCAL_AUTHORITY_SOLICITOR.getValue()))).thenReturn(true);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+
+        when(coreCaseDataApi.getCategoriesAndDocuments(
+            any(),
+            any(),
+            any()
+        )).thenReturn(laCategoriesAndDocuments);
+
+
+        CaseData caseData = CaseData.builder().build();
+
+        CaseData updatedCaseData = manageDocumentsService.populateDocumentCategories(auth, caseData);
+        String docCode = updatedCaseData.getDocumentManagementDetails()
+            .getManageDocuments().get(0).getValue().getDocumentCategories().getListItems()
+            .get(0).getCode();
+        DocumentPartyEnum laParty = updatedCaseData.getDocumentManagementDetails()
+            .getManageDocuments().get(0).getValue().getDocumentParty();
+        assertEquals(subCategory2.getCategoryId(), docCode);
+        assertEquals(LOCAL_AUTHORITY, laParty);
+    }
+
+
+    @Test
+    public void testDefaultDocumentPartyForNonLaParty() {
 
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         when(roleAssignmentService.isUserAllocatedRoleForCase(anyString(), anyString(), anyString())).thenReturn(false);
@@ -2784,4 +2846,5 @@ public class ManageDocumentsServiceTest {
 
         verifyNoInteractions(caseDocumentClient);
     }
+
 }
