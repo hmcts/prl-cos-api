@@ -237,6 +237,7 @@ public class CafcassCaseDataService {
             populateConfidentialDoc(caseData, otherDocsList);
             populateBundleDoc(caseData, otherDocsList);
             populateAnyOtherDoc(caseData, otherDocsList);
+            populateServeOrderAdditionalDocuments(caseData, otherDocsList);
 
             List<Element<ApplicantDetails>> respondents = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(caseData.getRespondents())) {
@@ -273,6 +274,7 @@ public class CafcassCaseDataService {
                 .stmtOfServiceForOrder(null)
                 .stmtOfServiceForApplication(null)
                 .finalServedApplicationDetailsList(null)
+                .serveOrderAdditionalDocuments(null)
                 .respondents(respondents)
                 .build();
             cafCassCaseDetail.setCaseData(cafCassCaseData);
@@ -294,8 +296,6 @@ public class CafcassCaseDataService {
         }
         populateServiceOfApplicationUploadDocs(caseData, otherDocsList);
         populateStatementOfServiceDocs(caseData, otherDocsList);
-
-
     }
 
     private void populateStatementOfServiceDocs(CafCassCaseData caseData, List<Element<OtherDocuments>> otherDocsList) {
@@ -323,6 +323,12 @@ public class CafcassCaseDataService {
                     otherDocsList
                 ));
         }
+    }
+
+    private void populateServeOrderAdditionalDocuments(CafCassCaseData caseData, List<Element<OtherDocuments>> otherDocsList) {
+        nullSafeList(caseData.getServeOrderAdditionalDocuments())
+            .parallelStream()
+            .forEach(doc -> addInOtherDocuments(ANY_OTHER_DOC, doc.getValue(), otherDocsList));
     }
 
     private void populateServiceOfApplicationUploadDocs(CafCassCaseData caseData,
@@ -894,7 +900,8 @@ public class CafcassCaseDataService {
             "data.stmtOfServiceAddRecipient",
             "data.stmtOfServiceForOrder",
             "data.stmtOfServiceForApplication",
-            "data.finalServedApplicationDetailsList"
+            "data.finalServedApplicationDetailsList",
+            "data.serveOrderAdditionalDocuments"
         );
     }
 }

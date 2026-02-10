@@ -780,4 +780,5 @@ public class CafCassCaseData {
     private List<uk.gov.hmcts.reform.prl.models.Element<StmtOfServiceAddRecipient>> stmtOfServiceForApplication;
 
     private List<uk.gov.hmcts.reform.prl.models.Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
+    private List<uk.gov.hmcts.reform.prl.models.Element<uk.gov.hmcts.reform.prl.models.documents.Document>> serveOrderAdditionalDocuments;
 }
