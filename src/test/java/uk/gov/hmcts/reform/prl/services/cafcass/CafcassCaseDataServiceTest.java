@@ -4,15 +4,16 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -67,12 +68,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -83,8 +84,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTIO
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
-@RunWith(MockitoJUnitRunner.Silent.class)
-public class CafcassCaseDataServiceTest {
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class CafcassCaseDataServiceTest {
     private final String s2sToken = "s2s token";
 
     private final String userToken = "Bearer testToken";
@@ -125,18 +127,17 @@ public class CafcassCaseDataServiceTest {
     private FeatureToggleService featureToggleService;
 
     @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
+    void setUp() {
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
     }
 
     @Nested
-    public class GetCaseData {
+    class GetCaseData {
 
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
 
         @BeforeEach
-        public void init() {
+        void init() {
             objectMapper.registerModule(new ParameterNamesModule());
             objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
             objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
@@ -202,7 +203,7 @@ public class CafcassCaseDataServiceTest {
         }
 
         @Test
-        public void shouldNotThrowExceptionForFailedBundles() throws IOException {
+        void shouldNotThrowExceptionForFailedBundles() throws IOException {
             String expectedCafCassResponse =
                 TestResourceUtil.readFileFrom("classpath:response/CafcassResponseNullBundles.json");
 
@@ -216,7 +217,7 @@ public class CafcassCaseDataServiceTest {
         }
 
         @Test
-        public void getCaseData() throws IOException {
+        void getCaseData() throws IOException {
             String expectedCafCassResponse = TestResourceUtil.readFileFrom("classpath:response/CafCaasResponse.json");
             SearchResult searchResult = objectMapper.readValue(
                 expectedCafCassResponse,
@@ -240,7 +241,7 @@ public class CafcassCaseDataServiceTest {
         }
 
         @Test
-        public void getCaseDataWhenCafcassDateTimeFeatureFlagIsEnabled() throws IOException {
+        void getCaseDataWhenCafcassDateTimeFeatureFlagIsEnabled() throws IOException {
             String expectedCafCassResponse = TestResourceUtil.readFileFrom("classpath:response/CafCaasResponse.json");
             SearchResult searchResult = objectMapper.readValue(
                 expectedCafCassResponse,
@@ -264,10 +265,38 @@ public class CafcassCaseDataServiceTest {
                 objectMapper.writeValueAsString(realCafCassResponse)
             );
         }
+
+        @Test
+        void shouldMapServeOrderAdditionalDocuments() throws IOException {
+            String expectedCafCassResponse = TestResourceUtil.readFileFrom("classpath:response/CafCaasResponseWithDocument.json");
+            SearchResult searchResult = objectMapper.readValue(
+                expectedCafCassResponse,
+                SearchResult.class
+            );
+            CafCassResponse cafCassResponse = objectMapper.readValue(expectedCafCassResponse, CafCassResponse.class);
+
+            when(featureToggleService.isCafcassDateTimeFeatureEnabled()).thenReturn(true);
+
+            when(cafcassCcdDataStoreService.searchCases(
+                anyString(),
+                anyString(),
+                any(),
+                any()
+            )).thenReturn(searchResult);
+
+            Mockito.doNothing().when(cafCassFilter).filter(cafCassResponse);
+
+            CafCassResponse response = cafcassCaseDataService.getCaseData("auth", "2025-01-01T12:00:00", "2025-01-01T12:15:00");
+
+            // Ensure the (only) test case with a served document is present in the response after processing
+            assertTrue(response.getCases().getFirst()
+                           .getCaseData().getOtherDocuments()
+                           .stream().anyMatch(el -> el.getValue().getDocumentName().equals("testOtherServedDocumentName.pdf")));
+        }
     }
 
     @Test
-    public void testGetCaseDataWithRegion() throws IOException {
+    void testGetCaseDataWithRegion() throws IOException {
 
         final List<CaseHearing> caseHearings = new ArrayList();
 
@@ -359,7 +388,7 @@ public class CafcassCaseDataServiceTest {
     }
 
     @Test
-    public void testGetCaseDataWithZeroRecords() throws IOException {
+    void testGetCaseDataWithZeroRecords() throws IOException {
 
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
         objectMapper.registerModule(new ParameterNamesModule());
@@ -384,7 +413,7 @@ public class CafcassCaseDataServiceTest {
     }
 
     @Test
-    public void testGetCaseDataWithConvertError() throws IOException {
+    void testGetCaseDataWithConvertError() throws IOException {
 
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
         objectMapper.registerModule(new ParameterNamesModule());
@@ -431,7 +460,7 @@ public class CafcassCaseDataServiceTest {
     }
 
     @Test
-    public void testGetCaseDataThrowingException() throws Exception {
+    void testGetCaseDataThrowingException() throws Exception {
 
         final List<CaseHearing> caseHearings = new ArrayList();
 
@@ -449,18 +478,11 @@ public class CafcassCaseDataServiceTest {
         hearings.setCaseRef("1673970714366224");
         hearings.setCaseHearings(caseHearings);
 
-        List<Hearings> listOfHearings = new ArrayList<>();
-        listOfHearings.add(hearings);
-
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
         objectMapper.registerModule(new ParameterNamesModule());
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-        String expectedCafCassResponse = TestResourceUtil.readFileFrom("classpath:response/CafCaasResponseWithRegion.json");
-        SearchResult searchResult = objectMapper.readValue(expectedCafCassResponse,
-                                                           SearchResult.class);
-        CafCassResponse cafCassResponse = objectMapper.readValue(expectedCafCassResponse, CafCassResponse.class);
         Exception exception = new RuntimeException();
         when(cafcassCcdDataStoreService.searchCases(anyString(),anyString(),any(),any())).thenThrow(exception);
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
@@ -478,7 +500,7 @@ public class CafcassCaseDataServiceTest {
     }
 
     @Test
-    public void testFilterCancelledHearingsBeforeListing() {
+    void testFilterCancelledHearingsBeforeListing() {
 
         final List<CaseHearing> caseHearings = new ArrayList();
 
@@ -524,7 +546,7 @@ public class CafcassCaseDataServiceTest {
     }
 
     @Test
-    public void testCheckIfDocumentsNeedToExcludeScenario1() {
+    void testCheckIfDocumentsNeedToExcludeScenario1() {
         List<String> excludedDocumentList = List.of(
             "Draft_C100_application",
             "C8Document",
@@ -536,7 +558,7 @@ public class CafcassCaseDataServiceTest {
     }
 
     @Test
-    public void testCheckIfDocumentsNeedToExcludeScenario2() {
+    void testCheckIfDocumentsNeedToExcludeScenario2() {
         List<String> excludedDocumentList = List.of(
             "Draft_C100_application",
             "C8Document",
@@ -548,7 +570,7 @@ public class CafcassCaseDataServiceTest {
     }
 
     @Test
-    public void testaddSpecificDocumentsFromCaseFileViewBasedOnCategories() throws NoSuchMethodException,
+    void testaddSpecificDocumentsFromCaseFileViewBasedOnCategories() throws NoSuchMethodException,
         InvocationTargetException, IllegalAccessException {
         Document document = Document.builder().documentUrl("test").documentFileName("test").build();
         when(objMapper.convertValue(any(QuarantineLegalDoc.class), eq(Map.class))).thenReturn(new HashMap<>());
@@ -615,7 +637,7 @@ public class CafcassCaseDataServiceTest {
     }
 
     @Test
-    public void testRedactedDocumentsOnAddSpecificDocumentsFromCaseFileViewBasedOnCategories() throws NoSuchMethodException,
+    void testRedactedDocumentsOnAddSpecificDocumentsFromCaseFileViewBasedOnCategories() throws NoSuchMethodException,
         InvocationTargetException, IllegalAccessException {
         Document document = Document.builder().documentUrl(REDACTED_DOCUMENT_URL).documentFileName("*Redacted*").build();
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().categoryId("MIAMCertificate")
@@ -665,7 +687,7 @@ public class CafcassCaseDataServiceTest {
     }
 
     @Test
-    public void testRedactedDocumentsOnAddInOtherDocuments() throws NoSuchMethodException,
+    void testRedactedDocumentsOnAddInOtherDocuments() throws NoSuchMethodException,
         InvocationTargetException, IllegalAccessException {
         String category = "MIAMCertificate";
         Document document = Document.builder().documentUrl(REDACTED_DOCUMENT_URL).documentFileName("*Redacted*").build();
@@ -682,7 +704,7 @@ public class CafcassCaseDataServiceTest {
     }
 
     @Test
-    public void testAddInOtherDocuments() throws NoSuchMethodException,
+    void testAddInOtherDocuments() throws NoSuchMethodException,
         InvocationTargetException, IllegalAccessException {
         String category = "MIAMCertificate";
         Document document = Document.builder().documentUrl("http://test").documentFileName("test").build();
@@ -699,7 +721,7 @@ public class CafcassCaseDataServiceTest {
     }
 
     @Test
-    public void shouldMapFinalisedServiceOfApplicationDocuments() throws NoSuchMethodException,
+    void shouldMapFinalisedServiceOfApplicationDocuments() throws NoSuchMethodException,
         InvocationTargetException, IllegalAccessException {
         Document document = Document.builder().documentUrl("test").documentFileName("test").build();
         when(objMapper.convertValue(any(QuarantineLegalDoc.class), eq(Map.class))).thenReturn(new HashMap<>());
