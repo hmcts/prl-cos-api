@@ -16,6 +16,7 @@ import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.AwaitingInformationService;
+import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -47,6 +48,9 @@ public class AwaitingInformationControllerIntegrationTest {
 
     @MockBean
     private AwaitingInformationService awaitingInformationService;
+
+    @MockBean
+    private FeatureToggleService featureToggleService;
 
     @Autowired
     private ObjectMapper objectMapper;

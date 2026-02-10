@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.AwaitingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.AwaitingInformationService;
+import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -42,6 +43,9 @@ public class AwaitingInformationControllerTest {
 
     @Mock
     private AwaitingInformationService awaitingInformationService;
+
+    @Mock
+    private FeatureToggleService featureToggleService;
 
     @Mock
     private ObjectMapper objectMapper;
@@ -79,6 +83,7 @@ public class AwaitingInformationControllerTest {
             .build();
 
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(featureToggleService.isAwaitingInformationEnabled()).thenReturn(true);
     }
 
     @Test

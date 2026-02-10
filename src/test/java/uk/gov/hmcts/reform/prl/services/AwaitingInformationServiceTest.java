@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.awaitinginformation.AwaitingInformationReasonEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AwaitingInformation;
@@ -15,17 +16,21 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class AwaitingInformationServiceTest {
 
     @InjectMocks
     private AwaitingInformationService awaitingInformationService;
+    @Mock
+    private FeatureToggleService featureToggleService;
 
     private AwaitingInformation awaitingInformation;
 
     @Before
     public void setUp() {
+        when(featureToggleService.isAwaitingInformationEnabled()).thenReturn(true);
         awaitingInformation = AwaitingInformation.builder()
             .reviewDate(LocalDate.now().plusDays(5))
             .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.immediateRisk)

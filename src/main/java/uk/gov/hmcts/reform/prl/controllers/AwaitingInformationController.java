@@ -66,9 +66,9 @@ public class AwaitingInformationController {
             );
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
         }
+        throw (new RuntimeException(INVALID_CLIENT));
+
     }
 
     @PostMapping(path = "/populate-header-awaiting-information", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -85,9 +85,9 @@ public class AwaitingInformationController {
         if (authorisationService.isAuthorized(authorisation, s2sToken) && featureToggleService.isAwaitingInformationEnabled()) {
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .build();
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
         }
+        throw (new RuntimeException(INVALID_CLIENT));
+
     }
 
     @PostMapping(path = "/validate-awaiting-information", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -109,11 +109,6 @@ public class AwaitingInformationController {
                 .errors(errorList)
                 .build();
         }
-        AwaitingInformation awaitingInformation = objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(),
-            AwaitingInformation.class
-        );
-        return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder().build();
-
+        throw new RuntimeException(INVALID_CLIENT);
     }
 }
