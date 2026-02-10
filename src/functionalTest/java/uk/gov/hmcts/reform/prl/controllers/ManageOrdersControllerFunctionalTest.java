@@ -492,7 +492,6 @@ public class ManageOrdersControllerFunctionalTest {
             .contentType("application/json")
             .post("/testing-support/create-ccd-case-data")
             .then()
-            .log().ifValidationFails()
             .assertThat().statusCode(200)
             .extract()
             .as(CaseDetails.class);
@@ -574,7 +573,6 @@ public class ManageOrdersControllerFunctionalTest {
             .contentType("application/json")
             .post("/testing-support/create-ccd-case-data")
             .then()
-            .log().ifValidationFails()
             .assertThat().statusCode(200)
             .extract()
             .as(CaseDetails.class);
@@ -614,7 +612,6 @@ public class ManageOrdersControllerFunctionalTest {
             .contentType("application/json")
             .post("/case-order-email-notification")
             .then()
-            .log().ifValidationFails()
             .body("data.recipientsOptions", equalTo(null))
             .body("data.cafcassCymruEmail", equalTo(null))
             .body("data.serveOrderDynamicList", equalTo(null))
