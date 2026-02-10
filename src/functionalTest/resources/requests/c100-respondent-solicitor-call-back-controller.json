@@ -1246,7 +1246,10 @@
       },
       "draftConsentOrderFile": null,
       "ordersOccupationCurrent": null,
-      "applicationPermissionRequired": "noNotRequired",
+      "permissionRequired": {
+        "applicationPermissionRequired": "noNotRequired",
+        "applicationPermissionRequiredReason": null
+      },
       "familyMediatorMiam": "No",
       "payAgreeStatement": [
         "agree"
@@ -1514,7 +1517,6 @@
       ],
       "respondentTaskListE": "",
       "allegationsOfHarmOtherConcernsDetails": "Very very concerning",
-      "applicationPermissionRequiredReason": null,
       "dateSubmitted": "2023-06-02",
       "allegationsOfHarmDomesticAbuseTable": {
         "sexualAbuseVictim": "",
@@ -1702,8 +1704,10 @@
         "natureOfOrder": "Requesting for spending time with the child twice a week",
         "ordersApplyingFor": "Child Arrangements Order, Prohibited Steps Order, Specific Issue Order",
         "typeOfChildArrangementsOrder": "Spend time with order",
-        "applicationPermissionRequired": "No, permission is not required",
-        "applicationPermissionRequiredReason": null
+        "permissionRequired": {
+          "applicationPermissionRequired": "No, permission is not required",
+          "applicationPermissionRequiredReason": null
+        }
       },
       "c8Document": null,
       "caRespondent4Policy": {

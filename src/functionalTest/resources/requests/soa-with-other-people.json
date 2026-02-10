@@ -737,7 +737,10 @@
           }
         ]
       },
-      "applicationPermissionRequired": "noNotRequired",
+      "permissionRequired": {
+        "applicationPermissionRequired": "noNotRequired",
+        "applicationPermissionRequiredReason": null
+      },
       "newAllegationsOfHarmOtherConcernsDetails": "welfare",
       "familyMediatorMiam": "No",
       "childrenNotPartInTheCaseYesNo": "No",
@@ -3461,7 +3464,6 @@
       "respondentTaskListD": "",
       "transferredCourtFrom": "Swansea Civil And Family Justice Centre",
       "respondentTaskListE": "",
-      "applicationPermissionRequiredReason": null,
       "dateSubmitted": "2024-01-20",
       "otherPeopleInTheCaseRevisedTable": [
         {

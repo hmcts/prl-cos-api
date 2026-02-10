@@ -831,8 +831,10 @@
         "natureOfOrder": "Short Statement Information - Divorce application continued seperately",
         "ordersApplyingFor": "Child Arrangements Order",
         "typeOfChildArrangementsOrder": "Both live with and spend time with order",
-        "applicationPermissionRequired": null,
-        "applicationPermissionRequiredReason": null
+        "permissionRequired": {
+          "applicationPermissionRequired": null,
+          "applicationPermissionRequiredReason": null
+        }
       },
       "c8Document": {
         "category_id": null,

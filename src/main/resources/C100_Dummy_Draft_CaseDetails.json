@@ -3306,8 +3306,10 @@
       "natureOfOrder": "Requesting for spending time with the child twice a week",
       "ordersApplyingFor": "Child Arrangements Order, Prohibited Steps Order, Specific Issue Order",
       "typeOfChildArrangementsOrder": "Spend time with order",
-      "applicationPermissionRequired": "No, permission is not required",
-      "applicationPermissionRequiredReason": null
+      "permissionRequired": {
+        "applicationPermissionRequired": "No, permission is not required",
+        "applicationPermissionRequiredReason": null
+      }
     },
     "allegationOfHarmRevised": {
       "typesOfHarmRevised": "Domestic abuse, child abduction, child abuse, drugs, alcohol or substance abuse, safety or welfare concerns"
@@ -4500,7 +4502,10 @@
         }
       }
     ],
-    "applicationPermissionRequired": "noNotRequired",
+    "permissionRequired": {
+      "applicationPermissionRequired": "noNotRequired",
+      "applicationPermissionRequiredReason": null
+    },
     "childDetailsRevisedExtraTable": {
       "childrenKnownToLocalAuthority": "No",
       "childrenSubjectOfChildProtectionPlan": "No"
@@ -5038,7 +5043,6 @@
       "forcedMarriageProtectionOrder": {},
       "newOrdersForcedMarriageProtection": "No"
     },
-    "applicationPermissionRequiredReason": null,
     "newAllegationsOfHarmChildAbuseYesNo": "Yes",
     "requestToForeignAuthorityGiveReason": "Yes",
     "welshLanguageRequirementApplication": "english",

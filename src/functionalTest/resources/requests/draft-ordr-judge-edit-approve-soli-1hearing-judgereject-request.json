@@ -32,7 +32,10 @@
       },
       "draftConsentOrderFile": null,
       "taskListVersion": "v2",
-      "applicationPermissionRequired": "noNotRequired",
+      "permissionRequired": {
+        "applicationPermissionRequired": "noNotRequired",
+        "applicationPermissionRequiredReason": null
+      },
       "newAllegationsOfHarmOtherConcernsDetails": "welfare",
       "familyMediatorMiam": "No",
       "childrenNotPartInTheCaseYesNo": "No",
@@ -1142,7 +1145,6 @@
       "respondentTaskListC": "",
       "respondentTaskListD": "",
       "respondentTaskListE": "",
-      "applicationPermissionRequiredReason": null,
       "dateSubmitted": "2024-01-12",
       "otherPeopleInTheCaseRevisedTable": [
         {
@@ -1368,8 +1370,10 @@
         "natureOfOrder": "Requesting for spending time with the child twice a week",
         "ordersApplyingFor": "Child Arrangements Order, Prohibited Steps Order, Specific Issue Order",
         "typeOfChildArrangementsOrder": "Spend time with order",
-        "applicationPermissionRequired": "No, permission is not required",
-        "applicationPermissionRequiredReason": null
+        "permissionRequired": {
+          "applicationPermissionRequired": "No, permission is not required",
+          "applicationPermissionRequiredReason": null
+        }
       },
       "c8Document": null,
       "caRespondent4Policy": {
