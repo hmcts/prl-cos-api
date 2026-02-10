@@ -980,7 +980,7 @@ public class ServiceOfDocumentsService {
                 .getSodAdditionalRecipientsList()) {
                 if (recipient.getValue().getServeByPostOrEmail().equals(DeliveryByEnum.email)
                     && !isValidEmailAddress(recipient.getValue().getEmailInformation().getEmailAddress())) {
-                    return List.of("Please provide valid email address for all additional recipients");
+                    return List.of("Please provide valid email address for all recipients");
                 }
             }
         }
