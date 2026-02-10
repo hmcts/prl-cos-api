@@ -113,6 +113,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ChildPassportDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamPolicyUpgradeDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.PermissionRequired;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -253,8 +254,10 @@ public class ApplicationsTabServiceTest {
             .ordersApplyingFor(Collections.singletonList(OrderTypeEnum.childArrangementsOrder))
             .typeOfChildArrangementsOrder(ChildArrangementOrderTypeEnum.spendTimeWithOrder)
             .natureOfOrder("Test nature of order")
-            .applicationPermissionRequired(PermissionRequiredEnum.yes)
-            .applicationPermissionRequiredReason("Some xyz reason")
+            .permissionRequired(PermissionRequired.builder()
+                                    .applicationPermissionRequired(PermissionRequiredEnum.yes)
+                                    .applicationPermissionRequiredReason("Some xyz reason")
+                                    .build())
             // hearing urgency
             .isCaseUrgent(Yes)
             .caseUrgencyTimeAndReason("Test String")

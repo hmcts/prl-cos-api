@@ -5,10 +5,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.SuperBuilder;
-import lombok.extern.jackson.Jacksonized;
 import uk.gov.hmcts.reform.prl.enums.CantFindCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.prl.enums.DocumentCategoryEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.TransferToAnotherCourtReasonDaEnum;
 import uk.gov.hmcts.reform.prl.enums.TransferToAnotherCourtReasonEnum;
@@ -114,9 +113,9 @@ import java.util.List;
 import java.util.Map;
 
 @Data
+@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @SuperBuilder(toBuilder = true)
-@Jacksonized
 public class CaseData extends BaseCaseData implements MappableObject {
 
     @JsonProperty("LanguagePreferenceWelsh")
@@ -184,11 +183,9 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private String natureOfOrder;
     private final YesOrNo consentOrder;
     private final Document draftConsentOrderFile;
-    private final PermissionRequiredEnum applicationPermissionRequired;
-    private final String applicationPermissionRequiredReason;
-    @JsonProperty("sq_uploadDocument")
-    private final Document sqUploadDocument;
     private final String applicationDetails;
+    @JsonUnwrapped
+    private final PermissionRequired permissionRequired;
 
     /**
      * Hearing urgency.

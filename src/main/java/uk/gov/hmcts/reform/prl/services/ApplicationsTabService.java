@@ -604,9 +604,9 @@ public class ApplicationsTabService implements TabService {
         TypeOfApplication typeOfApplication = TypeOfApplication.builder()
             .ordersApplyingFor(String.join(", ", ordersApplyingFor))
             .typeOfChildArrangementsOrder(typeOfChildArrangementsOrder)
-            .applicationPermissionRequired(nonNull(caseData.getApplicationPermissionRequired())
-                    ? caseData.getApplicationPermissionRequired().getDisplayedValue() : null)
-            .applicationPermissionRequiredReason(caseData.getApplicationPermissionRequiredReason())
+            .applicationPermissionRequired(nonNull(caseData.getPermissionRequired().getApplicationPermissionRequired())
+                    ? caseData.getPermissionRequired().getApplicationPermissionRequired().getDisplayedValue() : null)
+            .applicationPermissionRequiredReason(caseData.getPermissionRequired().getApplicationPermissionRequiredReason())
             .natureOfOrder(natureOfOrder)
             .build();
 

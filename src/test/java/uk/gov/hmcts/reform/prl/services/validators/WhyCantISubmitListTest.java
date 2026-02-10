@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AttendHearing;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.PermissionRequired;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.List;
@@ -177,7 +178,7 @@ public class WhyCantISubmitListTest {
 
     @Test
     public void testApplicationTypeCheckerAddsError() {
-
+        caseData = caseData.toBuilder().permissionRequired(PermissionRequired.builder().build()).build();
         applicationTypeChecker.isFinished(caseData);
         verify(taskErrorService).addEventError(TYPE_OF_APPLICATION, TYPE_OF_APPLICATION_ERROR, TYPE_OF_APPLICATION_ERROR.getError());
     }

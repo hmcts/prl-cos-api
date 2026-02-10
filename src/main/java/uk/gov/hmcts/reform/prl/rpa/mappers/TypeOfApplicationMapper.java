@@ -35,10 +35,10 @@ public class TypeOfApplicationMapper {
             .add("consentOrder", CommonUtils.getYesOrNoValue(caseData.getConsentOrder()))
             .add(
                 "applicationPermissionRequired",
-                caseData.getApplicationPermissionRequired() != null
-                    ? caseData.getApplicationPermissionRequired().getDisplayedValue() : null
+                caseData.getPermissionRequired().getApplicationPermissionRequired() != null
+                    ? caseData.getPermissionRequired().getApplicationPermissionRequired().getDisplayedValue() : null
             )
-            .add("applicationPermissionRequiredReason", caseData.getApplicationPermissionRequiredReason())
+            .add("applicationPermissionRequiredReason", caseData.getPermissionRequired().getApplicationPermissionRequiredReason())
             .add("applicationDetails", caseData.getApplicationDetails())
             .build();
     }

@@ -26,8 +26,8 @@ public class ApplicationTypeChecker implements EventChecker {
             caseData.getNatureOfOrder(),
             caseData.getConsentOrder(),
             caseData.getDraftConsentOrderFile(),
-            caseData.getApplicationPermissionRequired(),
-            caseData.getApplicationPermissionRequiredReason(),
+            caseData.getPermissionRequired().getApplicationPermissionRequired(),
+            caseData.getPermissionRequired().getApplicationPermissionRequiredReason(),
             caseData.getApplicationDetails()
         );
     }
@@ -44,7 +44,7 @@ public class ApplicationTypeChecker implements EventChecker {
             caseData.getOrdersApplyingFor(),
             caseData.getNatureOfOrder(),
             caseData.getConsentOrder(),
-            caseData.getApplicationPermissionRequired(),
+            caseData.getPermissionRequired().getApplicationPermissionRequired(),
             caseData.getApplicationDetails()
         );
 

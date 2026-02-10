@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.PermissionRequired;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.Collections;
@@ -32,6 +33,7 @@ public class ApplicationTypeCheckerTest {
 
         CaseData caseData = CaseData.builder()
             .ordersApplyingFor(Collections.singletonList(childArrangementsOrder))
+            .permissionRequired(PermissionRequired.builder().build())
             .applicationDetails("Test details")
             .build();
 
@@ -44,7 +46,9 @@ public class ApplicationTypeCheckerTest {
             .ordersApplyingFor(Collections.singletonList(childArrangementsOrder))
             .natureOfOrder("Test")
             .consentOrder(Yes)
-            .applicationPermissionRequired(noNotRequired)
+            .permissionRequired(PermissionRequired.builder()
+                                    .applicationPermissionRequired(noNotRequired)
+                                    .build())
             .applicationDetails("Test details")
             .build();
 
@@ -57,7 +61,9 @@ public class ApplicationTypeCheckerTest {
             .ordersApplyingFor(Collections.singletonList(childArrangementsOrder))
             .natureOfOrder("Test")
             .consentOrder(Yes)
-            .applicationPermissionRequired(noNowSought)
+            .permissionRequired(PermissionRequired.builder()
+                                    .applicationPermissionRequired(noNowSought)
+                                    .build())
             .applicationDetails("Test details")
             .build();
 
@@ -69,6 +75,7 @@ public class ApplicationTypeCheckerTest {
 
         CaseData caseData = CaseData.builder()
             .natureOfOrder("Test")
+            .permissionRequired(PermissionRequired.builder().build())
             .build();
 
         assertTrue(applicationTypeChecker.isStarted(caseData));
@@ -77,7 +84,9 @@ public class ApplicationTypeCheckerTest {
     @Test
     public void whenNoCaseDataThenIsStartedReturnsFalse() {
 
-        CaseData caseData = CaseData.builder().build();
+        CaseData caseData = CaseData.builder()
+            .permissionRequired(PermissionRequired.builder().build())
+            .build();
 
         assertFalse(applicationTypeChecker.isStarted(caseData));
 
@@ -98,7 +107,9 @@ public class ApplicationTypeCheckerTest {
             .ordersApplyingFor(Collections.singletonList(childArrangementsOrder))
             .natureOfOrder("Test")
             .consentOrder(Yes)
-            .applicationPermissionRequired(noNotRequired)
+            .permissionRequired(PermissionRequired.builder()
+                                    .applicationPermissionRequired(noNotRequired)
+                                    .build())
             .applicationDetails("Test details")
             .build();
 

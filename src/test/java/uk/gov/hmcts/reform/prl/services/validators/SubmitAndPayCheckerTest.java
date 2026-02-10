@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamPolicyUpgradeDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.PermissionRequired;
 import uk.gov.hmcts.reform.prl.services.validators.eventschecker.EventsChecker;
 
 import java.time.LocalDate;
@@ -350,7 +351,9 @@ public class SubmitAndPayCheckerTest {
             .ordersApplyingFor(Collections.singletonList(childArrangementsOrder))
             .natureOfOrder("Test")
             .consentOrder(Yes)
-            .applicationPermissionRequired(noNotRequired)
+            .permissionRequired(PermissionRequired.builder()
+                                    .applicationPermissionRequired(noNotRequired)
+                                    .build())
             .applicationDetails("Test details")
             .isCaseUrgent(Yes)
             .doYouNeedAWithoutNoticeHearing(Yes)
@@ -494,7 +497,9 @@ public class SubmitAndPayCheckerTest {
             .ordersApplyingFor(Collections.singletonList(childArrangementsOrder))
             .natureOfOrder("Test")
             .consentOrder(Yes)
-            .applicationPermissionRequired(noNotRequired)
+            .permissionRequired(PermissionRequired.builder()
+                                    .applicationPermissionRequired(noNotRequired)
+                                    .build())
             .applicationDetails("Test details")
             .isCaseUrgent(Yes)
             .doYouNeedAWithoutNoticeHearing(Yes)
@@ -584,7 +589,9 @@ public class SubmitAndPayCheckerTest {
             .ordersApplyingFor(Collections.singletonList(childArrangementsOrder))
             .natureOfOrder("Test")
             .consentOrder(Yes)
-            .applicationPermissionRequired(noNotRequired)
+            .permissionRequired(PermissionRequired.builder()
+                                    .applicationPermissionRequired(noNotRequired)
+                                    .build())
             .applicationDetails("Test details")
             .isCaseUrgent(Yes)
             .taskListVersion(TASK_LIST_VERSION_V2)
@@ -688,7 +695,9 @@ public class SubmitAndPayCheckerTest {
             .ordersApplyingFor(Collections.singletonList(childArrangementsOrder))
             .natureOfOrder("Test")
             .consentOrder(Yes)
-            .applicationPermissionRequired(noNotRequired)
+            .permissionRequired(PermissionRequired.builder()
+                                    .applicationPermissionRequired(noNotRequired)
+                                    .build())
             .applicationDetails("Test details")
             .isCaseUrgent(Yes)
             .taskListVersion(TASK_LIST_VERSION_V3)
@@ -791,7 +800,9 @@ public class SubmitAndPayCheckerTest {
             .ordersApplyingFor(Collections.singletonList(childArrangementsOrder))
             .natureOfOrder("Test")
             .consentOrder(No)
-            .applicationPermissionRequired(noNotRequired)
+            .permissionRequired(PermissionRequired.builder()
+                                    .applicationPermissionRequired(noNotRequired)
+                                    .build())
             .applicationDetails("Test details")
             .isCaseUrgent(Yes)
             .taskListVersion(TASK_LIST_VERSION_V3)
