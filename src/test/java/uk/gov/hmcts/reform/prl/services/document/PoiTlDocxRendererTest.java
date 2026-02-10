@@ -8,6 +8,7 @@ import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PoiTlDocxRendererTest {
@@ -62,13 +64,12 @@ class PoiTlDocxRendererTest {
             .build();
 
         // Prepare data
-        Map<String, Object> data = new HashMap<>();
-        List<Map<String, String>> childrenList = new ArrayList<>();
 
         Map<String, String> child1 = new HashMap<>();
         child1.put("fullName", "Alice Smith");
         child1.put("gender", "Female");
         child1.put("dob", "01/05/2015");
+        List<Map<String, String>> childrenList = new ArrayList<>();
         childrenList.add(child1);
 
         Map<String, String> child2 = new HashMap<>();
@@ -76,7 +77,7 @@ class PoiTlDocxRendererTest {
         child2.put("gender", "Male");
         child2.put("dob", "15/08/2018");
         childrenList.add(child2);
-
+        Map<String, Object> data = new HashMap<>();
         data.put("children", childrenList);
 
         // Render
@@ -319,17 +320,18 @@ class PoiTlDocxRendererTest {
         data.put("orderName", "Child Arrangements Order");
 
         // Children list for LoopRowTableRenderPolicy
-        List<Map<String, String>> childrenList = new ArrayList<>();
         Map<String, String> child1 = new HashMap<>();
         child1.put("fullName", "Alice Example");
         child1.put("gender", "Female");
         child1.put("dob", "01/05/2015");
-        childrenList.add(child1);
 
         Map<String, String> child2 = new HashMap<>();
         child2.put("fullName", "Bob Example");
         child2.put("gender", "Male");
         child2.put("dob", "15/08/2018");
+
+        List<Map<String, String>> childrenList = new ArrayList<>();
+        childrenList.add(child1);
         childrenList.add(child2);
 
         data.put("children", childrenList);
@@ -447,11 +449,11 @@ class PoiTlDocxRendererTest {
         data.put("orderName", "Test Order");
 
         // Children list for LoopRowTableRenderPolicy
-        List<Map<String, String>> childrenList = new ArrayList<>();
         Map<String, String> child = new HashMap<>();
         child.put("fullName", "Test Child");
         child.put("gender", "Female");
         child.put("dob", "01/01/2020");
+        List<Map<String, String>> childrenList = new ArrayList<>();
         childrenList.add(child);
         data.put("children", childrenList);
 
@@ -504,11 +506,11 @@ class PoiTlDocxRendererTest {
         data.put("orderName", "Child Arrangements Order");
 
         // Children list for LoopRowTableRenderPolicy - supports any number of children
-        List<Map<String, String>> childrenList = new ArrayList<>();
         Map<String, String> child1 = new HashMap<>();
         child1.put("fullName", "Alice Smith");
         child1.put("gender", "Female");
         child1.put("dob", "01/05/2015");
+        List<Map<String, String>> childrenList = new ArrayList<>();
         childrenList.add(child1);
 
         Map<String, String> child2 = new HashMap<>();

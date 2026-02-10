@@ -77,6 +77,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.TaskUtils;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -101,6 +102,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM_TASK;
@@ -4397,14 +4399,6 @@ public class ManageOrdersControllerTest {
             .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
             .build();
 
-        // CaseData from database - does NOT have customOrderDoc (simulating database state before persist)
-        CaseData caseDataFromDb = CaseData.builder()
-            .id(12345L)
-            .applicantCaseName("TestCaseName")
-            .caseTypeOfApplication("C100")
-            .manageOrders(manageOrders)
-            .build();
-
         // Database map - empty of custom order fields
         Map<String, Object> databaseMap = new HashMap<>();
         databaseMap.put("id", 12345L);
@@ -4415,6 +4409,14 @@ public class ManageOrdersControllerTest {
         callbackDataMap.put("previewOrderDoc", previewOrderDoc);
         callbackDataMap.put("nameOfOrder", "Test Custom Order");
         callbackDataMap.put("customOrderNameOption", "other");
+
+        // CaseData from database - does NOT have customOrderDoc (simulating database state before persist)
+        CaseData caseDataFromDb = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            .build();
 
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
             authToken,

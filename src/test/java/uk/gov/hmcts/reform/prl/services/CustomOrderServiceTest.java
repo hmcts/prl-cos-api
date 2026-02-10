@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.document.PoiTlDocxRenderer;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -1639,13 +1641,6 @@ public class CustomOrderServiceTest {
                 .documentFileName("custom.docx")
                 .build();
 
-        uk.gov.hmcts.reform.prl.models.documents.Document previewDoc =
-            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-                .documentBinaryUrl("http://preview-binary")
-                .documentUrl("http://preview-url")
-                .documentFileName("preview.docx")
-                .build();
-
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("customOrderDoc", customDoc);
         // NO previewOrderDoc in map - should fall back to caseData.getPreviewOrderDoc()
@@ -1656,6 +1651,12 @@ public class CustomOrderServiceTest {
         when(objectMapper.convertValue(isNull(), eq(uk.gov.hmcts.reform.prl.models.documents.Document.class)))
             .thenReturn(null);
 
+        uk.gov.hmcts.reform.prl.models.documents.Document previewDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentBinaryUrl("http://preview-binary")
+                .documentUrl("http://preview-url")
+                .documentFileName("preview.docx")
+                .build();
         CaseData caseData = CaseData.builder()
             .id(123L)
             .previewOrderDoc(previewDoc)  // Fallback source
