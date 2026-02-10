@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -57,7 +56,10 @@ public class AwaitingInformationController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken) && featureToggleService.isAwaitingInformationEnabled()) {
+        if (authorisationService.isAuthorized(
+            authorisation,
+            s2sToken
+        ) && featureToggleService.isAwaitingInformationEnabled()) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             caseDataUpdated.put(
                 CASE_STATUS, CaseStatus.builder()
@@ -82,7 +84,10 @@ public class AwaitingInformationController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken) && featureToggleService.isAwaitingInformationEnabled()) {
+        if (authorisationService.isAuthorized(
+            authorisation,
+            s2sToken
+        ) && featureToggleService.isAwaitingInformationEnabled()) {
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .build();
         }
@@ -98,14 +103,13 @@ public class AwaitingInformationController {
     public CallbackResponse validateUrgentCaseCreation(
         @RequestBody CallbackRequest callbackRequest
     ) {
-        if(featureToggleService.isAwaitingInformationEnabled()) {
+
+        if (featureToggleService.isAwaitingInformationEnabled()) {
             AwaitingInformation awaitingInformation = objectMapper.convertValue(
-                callbackRequest.getCaseDetails().getData(),
-                AwaitingInformation.class
-            );
+                callbackRequest.getCaseDetails().getData(), AwaitingInformation.class);
             List<String> errorList = awaitingInformationService.validateAwaitingInformation(awaitingInformation);
 
-            return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder()
+            return CallbackResponse.builder()
                 .errors(errorList)
                 .build();
         }
