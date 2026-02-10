@@ -327,7 +327,7 @@ public class CafcassCaseDataService {
 
     private void populateServeOrderAdditionalDocuments(CafCassCaseData caseData, List<Element<OtherDocuments>> otherDocsList) {
         nullSafeList(caseData.getServeOrderAdditionalDocuments())
-            .parallelStream()
+            .stream()
             .forEach(doc -> addInOtherDocuments(ANY_OTHER_DOC, doc.getValue(), otherDocsList));
     }
 
