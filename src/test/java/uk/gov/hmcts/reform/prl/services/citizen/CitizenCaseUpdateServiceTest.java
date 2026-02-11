@@ -476,8 +476,11 @@ public class CitizenCaseUpdateServiceTest {
             .documentFileName("DraftFilename.pdf")
             .build();
 
+        ObjectMapper testObjectMapper = new ObjectMapper();
+        String jsonString = testObjectMapper.writeValueAsString(permissionRequiredDocument);
+
         C100RebuildData c100RebuildData = getC100RebuildData();
-        c100RebuildData.setC100RebuildScreeningQuestions(permissionRequiredDocument.toString());
+        c100RebuildData.setC100RebuildScreeningQuestions(jsonString);
         partyDetails = PartyDetails.builder().build();
         caseData = caseData.toBuilder()
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
@@ -523,14 +526,15 @@ public class CitizenCaseUpdateServiceTest {
             caseData
         ));
         Assert.assertNotNull(caseData.getC100RebuildData().getC100RebuildScreeningQuestions());
-        Assert.assertEquals(permissionRequiredDocument.toString(), caseData.getC100RebuildData().getC100RebuildScreeningQuestions());
+        ObjectMapper testMapper = new ObjectMapper();
+        String expectedJson = testMapper.writeValueAsString(permissionRequiredDocument);
+        Assert.assertEquals(expectedJson, caseData.getC100RebuildData().getC100RebuildScreeningQuestions());
     }
 
     @Test
     public void testSubmitApplicationWithoutPermissionRequiredDocument() throws IOException, NotFoundException {
         C100RebuildData c100RebuildData = getC100RebuildData();
-        c100RebuildData.setC100RebuildScreeningQuestions("\"applicationPermissionRequired\": \"Yes\","
-                                                             + "\"applicationPermissionRequiredReason\": \"a reason\"");
+        c100RebuildData.setC100RebuildScreeningQuestions("null");
         partyDetails = PartyDetails.builder().build();
         caseData = caseData.toBuilder()
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
@@ -575,7 +579,7 @@ public class CitizenCaseUpdateServiceTest {
             "citizenSaveC100DraftInternal",
             caseData
         ));
-        Assert.assertNotNull(caseData.getC100RebuildData().getC100RebuildScreeningQuestions());
+        Assert.assertEquals("null", caseData.getC100RebuildData().getC100RebuildScreeningQuestions());
     }
 }
 
