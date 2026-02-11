@@ -525,5 +525,57 @@ public class CitizenCaseUpdateServiceTest {
         Assert.assertNotNull(caseData.getC100RebuildData().getC100RebuildScreeningQuestions());
         Assert.assertEquals(permissionRequiredDocument.toString(), caseData.getC100RebuildData().getC100RebuildScreeningQuestions());
     }
+
+    @Test
+    public void testSubmitApplicationWithoutPermissionRequiredDocument() throws IOException, NotFoundException {
+        C100RebuildData c100RebuildData = getC100RebuildData();
+        c100RebuildData.setC100RebuildScreeningQuestions("\"applicationPermissionRequired\": \"Yes\"," +
+                                                             "\"applicationPermissionRequiredReason\": \"a reason\"");
+        partyDetails = PartyDetails.builder().build();
+        caseData = caseData.toBuilder()
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .c100RebuildData(c100RebuildData)
+            .applicants(List.of(element(partyDetails)))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
+                                                                                .builder()
+                                                                                .confidentialityCheckRejectReason(
+                                                                                    "pack contain confidential info")
+                                                                                .build()))
+                                      .unServedApplicantPack(SoaPack.builder().build())
+                                      .unServedRespondentPack(SoaPack.builder().personalServiceBy("courtAdmin").build())
+                                      .applicationServedYesNo(YesOrNo.Yes)
+
+                                      .build()).build();
+        Map<String, Object> caseDetails1 = caseData.toMap(new ObjectMapper());
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent1 = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            caseDetails1,
+            caseData,
+            UserDetails.builder().build()
+        );
+        when(citizenPartyDetailsMapper.buildUpdatedCaseData(
+            any(),
+            any()
+        )).thenReturn(caseData);
+        when(allTabService.getStartUpdateForSpecificUserEvent(anyString(), anyString(), anyString()))
+            .thenReturn(startAllTabsUpdateDataContent1);
+        when(allTabService.submitUpdateForSpecificUserEvent(any(), any(), any(), any(), any(), any()))
+            .thenReturn(CaseDetails.builder().id(12345L).build());
+        when(objectMapper.convertValue(any(CaseData.class), eq(Map.class))).thenReturn(caseDetails1);
+        when(partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(12345L)))
+            .thenReturn(CaseDetails.builder().id(12345L).build());
+        when(courtLocatorService.getNearestFamilyCourt(any(CaseData.class)))
+            .thenReturn(Court.builder().courtName("Test court").build());
+        Assert.assertNotNull(citizenCaseUpdateService.submitCitizenC100Application(
+            authToken,
+            String.valueOf(caseId),
+            "citizenSaveC100DraftInternal",
+            caseData
+        ));
+        Assert.assertNotNull(caseData.getC100RebuildData().getC100RebuildScreeningQuestions());
+    }
 }
 
