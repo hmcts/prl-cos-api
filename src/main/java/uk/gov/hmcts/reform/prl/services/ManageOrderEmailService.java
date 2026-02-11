@@ -691,16 +691,35 @@ public class ManageOrderEmailService {
         }
     }
 
+    // Utility method to extract email addresses from EmailInformation,
+    // handling nulls and blanks, and ensuring only one email address is present
+    List<String> verifySingleEmailAddress(EmailInformation emailInformation) {
+        if (emailInformation == null || StringUtils.isBlank(emailInformation.getEmailAddress())) {
+            return List.of();
+        }
+        List<String> addresses = Arrays.stream(emailInformation.getEmailAddress().split(","))
+            .map(String::trim)
+            .filter(StringUtils::isNotBlank)
+            .toList();
+        if (addresses.size() > 1) {
+            throw new IllegalArgumentException("Only one email address is allowed, but found: " + addresses);
+        }
+        return addresses;
+    }
+
+
     private void sendEmailToOtherOrganisation(List<EmailInformation> emailInformation,
                                               String authorisation, List<Document> orderDocuments, Map<String, Object> dynamicData) {
 
-        emailInformation.forEach(value ->
+        emailInformation.forEach(value -> {
+             verifySingleEmailAddress(value);
              sendEmailViaSendGrid(authorisation,
                                   orderDocuments,
                                   dynamicData,
                                   value.getEmailAddress(),
-                                  SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION)
-        );
+                                  SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION);
+        });
+
     }
 
     private Map<String, Object> getDynamicDataForEmail(CaseData caseData) {
