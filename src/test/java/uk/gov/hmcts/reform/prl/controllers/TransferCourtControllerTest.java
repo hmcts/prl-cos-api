@@ -31,7 +31,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AmendCourtService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -313,8 +312,8 @@ public class TransferCourtControllerTest {
         callbackRequest = CallbackRequest.builder().caseDetails(CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(amendCourtService.validateCourtFields(Mockito.any(),Mockito.any())).thenReturn(Boolean.FALSE);
-        CallbackResponse response =  transferCourtController
+        when(amendCourtService.validateCourtFields(Mockito.any())).thenReturn(Collections.emptyList());
+        AboutToStartOrSubmitCallbackResponse response =  transferCourtController
             .validateCourtFields(callbackRequest);
         assertNull(response.getErrors());
     }
@@ -327,8 +326,9 @@ public class TransferCourtControllerTest {
         callbackRequest = CallbackRequest.builder().caseDetails(CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(amendCourtService.validateCourtFields(Mockito.any(),Mockito.any())).thenReturn(Boolean.TRUE);
-        CallbackResponse response =  transferCourtController
+        when(amendCourtService.validateCourtFields(Mockito.any()))
+                .thenReturn(List.of("Please enter court name.", "Please enter court email address."));
+        AboutToStartOrSubmitCallbackResponse response =  transferCourtController
             .validateCourtFields(callbackRequest);
         assertNotNull(response.getErrors());
     }
@@ -379,8 +379,8 @@ public class TransferCourtControllerTest {
             .courtEmailAddress("test@test.com")
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(amendCourtService.validateCourtEmailAddress(callbackRequest)).thenReturn(Collections.emptyList());
-        AboutToStartOrSubmitCallbackResponse response = transferCourtController.validateTransferCourtEmail(
+        when(amendCourtService.validateCourtFields(callbackRequest)).thenReturn(Collections.emptyList());
+        AboutToStartOrSubmitCallbackResponse response = transferCourtController.validateCourtFields(
             callbackRequest);
         assertNull(response.getErrors());
     }
@@ -392,11 +392,11 @@ public class TransferCourtControllerTest {
             .courtEmailAddress("testtest.com")
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(amendCourtService.validateCourtEmailAddress(callbackRequest)).thenReturn(errors);
-        AboutToStartOrSubmitCallbackResponse response = transferCourtController.validateTransferCourtEmail(
+        when(amendCourtService.validateCourtFields(callbackRequest)).thenReturn(errors);
+        AboutToStartOrSubmitCallbackResponse response = transferCourtController.validateCourtFields(
             callbackRequest);
         assertNotNull(response.getErrors());
         assertEquals("Please enter valid court email address.", response.getErrors().getFirst());
     }
-    
+
 }

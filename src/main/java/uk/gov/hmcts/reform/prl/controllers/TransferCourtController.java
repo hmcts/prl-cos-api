@@ -40,7 +40,6 @@ import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -115,40 +114,17 @@ public class TransferCourtController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Child details are fetched"),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse validateCourtFields(
-        @RequestBody CallbackRequest callbackRequest
-    ) {
-        CaseData caseData = objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(),
-            CaseData.class
-        );
-        List<String> errorList = new ArrayList<>();
-        if (amendCourtService.validateCourtFields(caseData, errorList)) {
-            return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder()
-                .errors(errorList)
-                .build();
-        }
-        return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder()
-            .data(caseData)
-            .build();
-    }
-
-    @PostMapping(path = "/transfer-court/validate-court-email", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to validate court email")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Court email is validated"),
-        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public AboutToStartOrSubmitCallbackResponse validateTransferCourtEmail(
+    public AboutToStartOrSubmitCallbackResponse validateCourtFields(
         @RequestBody CallbackRequest callbackRequest) {
-        List<String> errorList = amendCourtService.validateCourtEmailAddress(callbackRequest);
+        List<String> errorList = amendCourtService.validateCourtFields(callbackRequest);
         if (CollectionUtils.isNotEmpty(errorList)) {
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .errors(errorList)
-                .build();
+                    .errors(errorList)
+                    .build();
         }
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(callbackRequest.getCaseDetails().getData())
-            .build();
+                .data(callbackRequest.getCaseDetails().getData())
+                .build();
     }
 
     @PostMapping(path = "/transfer-court/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
