@@ -529,8 +529,8 @@ public class CitizenCaseUpdateServiceTest {
     @Test
     public void testSubmitApplicationWithoutPermissionRequiredDocument() throws IOException, NotFoundException {
         C100RebuildData c100RebuildData = getC100RebuildData();
-        c100RebuildData.setC100RebuildScreeningQuestions("\"applicationPermissionRequired\": \"Yes\"," +
-                                                             "\"applicationPermissionRequiredReason\": \"a reason\"");
+        c100RebuildData.setC100RebuildScreeningQuestions("\"applicationPermissionRequired\": \"Yes\","
+                                                             + "\"applicationPermissionRequiredReason\": \"a reason\"");
         partyDetails = PartyDetails.builder().build();
         caseData = caseData.toBuilder()
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
