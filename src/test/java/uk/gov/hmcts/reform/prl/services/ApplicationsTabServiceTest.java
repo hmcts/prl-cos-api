@@ -255,6 +255,8 @@ public class ApplicationsTabServiceTest {
             .natureOfOrder("Test nature of order")
             .applicationPermissionRequired(PermissionRequiredEnum.yes)
             .applicationPermissionRequiredReason("Some xyz reason")
+            .orderInPlacePermissionRequired(PermissionRequiredEnum.yes)
+            .orderDetailsForPermissions("ABC")
             // hearing urgency
             .isCaseUrgent(Yes)
             .caseUrgencyTimeAndReason("Test String")
@@ -960,13 +962,17 @@ public class ApplicationsTabServiceTest {
             .natureOfOrder("Test nature of order")
             .applicationPermissionRequired("Yes")
             .applicationPermissionRequiredReason("Some xyz reason")
+            .orderInPlacePermissionRequired("Yes")
+            .orderDetailsForPermissions("ABC")
             .build();
         Map<String, Object> typeOfApplicationMap = Map.of(
             "ordersApplyingFor", "Child Arrangements Order",
             "typeOfChildArrangementsOrder", "Spend time with order",
             "natureOfOrder", "Test nature of order",
             "applicationPermissionRequired", "Yes",
-            "applicationPermissionRequiredReason", "Some xyz reason"
+            "applicationPermissionRequiredReason", "Some xyz reason",
+            "orderInPlacePermissionRequired", "Yes",
+            "orderDetailsForPermissions", "ABC"
         );
 
         when(objectMapper.convertValue(typeOfApplication, Map.class)).thenReturn(typeOfApplicationMap);
