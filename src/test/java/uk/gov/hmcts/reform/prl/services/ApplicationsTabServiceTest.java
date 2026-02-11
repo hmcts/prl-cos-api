@@ -113,7 +113,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ChildPassportDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamPolicyUpgradeDetails;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.PermissionRequired;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -254,10 +253,8 @@ public class ApplicationsTabServiceTest {
             .ordersApplyingFor(Collections.singletonList(OrderTypeEnum.childArrangementsOrder))
             .typeOfChildArrangementsOrder(ChildArrangementOrderTypeEnum.spendTimeWithOrder)
             .natureOfOrder("Test nature of order")
-            .permissionRequired(PermissionRequired.builder()
-                                    .applicationPermissionRequired(PermissionRequiredEnum.yes)
-                                    .applicationPermissionRequiredReason("Some xyz reason")
-                                    .build())
+            .applicationPermissionRequired(PermissionRequiredEnum.yes)
+            .applicationPermissionRequiredReason("Some xyz reason")
             // hearing urgency
             .isCaseUrgent(Yes)
             .caseUrgencyTimeAndReason("Test String")
@@ -759,17 +756,17 @@ public class ApplicationsTabServiceTest {
             .taskListVersion(TASK_LIST_VERSION_V3)
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder().build())
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
-                .builder()
-                .mpuExemptionReasons(miamExemptionsChecklistEnums)
-                .mpuDomesticAbuseEvidences(miamExemptionsDomesticChecklistEnums)
-                .mpuUrgencyReason(uk.gov.hmcts.reform.prl.enums.miampolicyupgrade
-                    .MiamUrgencyReasonChecklistEnum.miamPolicyUpgradeUrgencyReason_Value_1)
-                .mpuPreviousMiamAttendanceReason(uk.gov.hmcts.reform.prl.enums
-                    .miampolicyupgrade.MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_1)
-                .mpuOtherExemptionReasons(uk.gov.hmcts.reform.prl.enums
-                    .miampolicyupgrade.MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_1)
-                .mpuChildProtectionConcernReason(MiamPolicyUpgradeChildProtectionConcernEnum.mpuChildProtectionConcern_value_1)
-                .build())
+                                          .builder()
+                                          .mpuExemptionReasons(miamExemptionsChecklistEnums)
+                                          .mpuDomesticAbuseEvidences(miamExemptionsDomesticChecklistEnums)
+                                          .mpuUrgencyReason(uk.gov.hmcts.reform.prl.enums.miampolicyupgrade
+                                                                .MiamUrgencyReasonChecklistEnum.miamPolicyUpgradeUrgencyReason_Value_1)
+                                          .mpuPreviousMiamAttendanceReason(uk.gov.hmcts.reform.prl.enums
+                                                                               .miampolicyupgrade.MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_1)
+                                          .mpuOtherExemptionReasons(uk.gov.hmcts.reform.prl.enums
+                                                                        .miampolicyupgrade.MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_1)
+                                          .mpuChildProtectionConcernReason(MiamPolicyUpgradeChildProtectionConcernEnum.mpuChildProtectionConcern_value_1)
+                                          .build())
             .othersToNotify(applicantList)
             .applicants(applicantList)
             .respondents(applicantList)
@@ -823,12 +820,12 @@ public class ApplicationsTabServiceTest {
             .build();
 
         Element<Respondent> expectedRespondent = Element.<Respondent>builder().value(
-            respondent
-                .toBuilder()
-                .gender("Male")
-                .isAtAddressLessThan5YearsWithDontKnow("Don't know")
-                .doTheyHaveLegalRepresentation("Don't know")
-                .build())
+                respondent
+                    .toBuilder()
+                    .gender("Male")
+                    .isAtAddressLessThan5YearsWithDontKnow("Don't know")
+                    .doTheyHaveLegalRepresentation("Don't know")
+                    .build())
             .build();
 
         List<Element<Respondent>> expectedRespondentList = Collections.singletonList(expectedRespondent);

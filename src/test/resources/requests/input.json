@@ -197,10 +197,7 @@
         "allegationsOfHarmYesNo": "No",
         "isWelshDocGen": null,
         "courtId": "258",
-        "permissionRequired": {
-          "applicationPermissionRequired": "noNotRequired",
-          "applicationPermissionRequiredReason": null
-        },
+        "applicationPermissionRequired": "noNotRequired",
         "isEngDocGen": "Yes",
         "childDetailsExtraTable": {
           "childrenKnownToLocalAuthority": "No",
@@ -295,6 +292,7 @@
           "allegationsOfHarmChildAbductionYesNo": null,
           "allegationsOfHarmSubstanceAbuseYesNo": null
         },
+        "applicationPermissionRequiredReason": null,
         "consentOrder": "No",
         "documentCategoryChecklist": "documentCategoryChecklistEnumValue3",
         "paymentCallbackServiceRequestUpdate": {
@@ -521,10 +519,8 @@
           "natureOfOrder": "kn,n",
           "ordersApplyingFor": "Child Arrangements Order, Prohibited Steps Order",
           "typeOfChildArrangementsOrder": "Spend time with order",
-          "permissionRequired": {
-            "applicationPermissionRequired": "No, permission is not required",
-            "applicationPermissionRequiredReason": null
-          }
+          "applicationPermissionRequired": "No, permission is not required",
+          "applicationPermissionRequiredReason": null
         },
         "miamDomesticViolenceChecklist": [
           "miamDomesticViolenceChecklistEnum_Value_21"
@@ -823,10 +819,7 @@
         "allegationsOfHarmYesNo": "PUBLIC",
         "isWelshDocGen": "PUBLIC",
         "courtId": "PUBLIC",
-        "permissionRequired": {
-          "applicationPermissionRequired": "PUBLIC",
-          "applicationPermissionRequiredReason": "PUBLIC"
-        },
+        "applicationPermissionRequired": "PUBLIC",
         "isEngDocGen": "PUBLIC",
         "childDetailsExtraTable": {
           "value": {
@@ -946,6 +939,7 @@
           },
           "classification": "PUBLIC"
         },
+        "applicationPermissionRequiredReason": "PUBLIC",
         "consentOrder": "PUBLIC",
         "documentCategoryChecklist": "PUBLIC",
         "paymentCallbackServiceRequestUpdate": {
@@ -1243,10 +1237,8 @@
             "natureOfOrder": "PUBLIC",
             "ordersApplyingFor": "PUBLIC",
             "typeOfChildArrangementsOrder": "PUBLIC",
-            "permissionRequired": {
-              "applicationPermissionRequired": "PUBLIC",
-              "applicationPermissionRequiredReason": "PUBLIC"
-            }
+            "applicationPermissionRequired": "PUBLIC",
+            "applicationPermissionRequiredReason": "PUBLIC"
           },
           "classification": "PUBLIC"
         },

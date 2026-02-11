@@ -2,13 +2,10 @@ package uk.gov.hmcts.reform.prl.rpa.mappers;
 
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.PermissionRequired;
 import uk.gov.hmcts.reform.prl.rpa.mappers.json.NullAwareJsonObjectBuilder;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
-import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.json.JsonObject;
 
@@ -38,17 +35,10 @@ public class TypeOfApplicationMapper {
             .add("consentOrder", CommonUtils.getYesOrNoValue(caseData.getConsentOrder()))
             .add(
                 "applicationPermissionRequired",
-                Optional.ofNullable(caseData.getPermissionRequired())
-                    .map(PermissionRequired::getApplicationPermissionRequired)
-                    .map(PermissionRequiredEnum::getDisplayedValue)
-                    .orElse(null)
+                caseData.getApplicationPermissionRequired() != null
+                    ? caseData.getApplicationPermissionRequired().getDisplayedValue() : null
             )
-            .add(
-                "applicationPermissionRequiredReason",
-                Optional.ofNullable(caseData.getPermissionRequired())
-                    .map(PermissionRequired::getApplicationPermissionRequiredReason)
-                    .orElse(null)
-            )
+            .add("applicationPermissionRequiredReason", caseData.getApplicationPermissionRequiredReason())
             .add("applicationDetails", caseData.getApplicationDetails())
             .build();
     }

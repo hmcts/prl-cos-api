@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.enums.DocumentCategoryEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.TransferToAnotherCourtReasonDaEnum;
 import uk.gov.hmcts.reform.prl.enums.TransferToAnotherCourtReasonEnum;
@@ -184,8 +185,8 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private final YesOrNo consentOrder;
     private final Document draftConsentOrderFile;
     private final String applicationDetails;
-    @JsonUnwrapped
-    private final PermissionRequired permissionRequired;
+    private final PermissionRequiredEnum applicationPermissionRequired;
+    private final String applicationPermissionRequiredReason;
 
     /**
      * Hearing urgency.

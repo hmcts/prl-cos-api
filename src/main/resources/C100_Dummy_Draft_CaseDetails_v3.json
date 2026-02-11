@@ -676,10 +676,7 @@
     },
     "mpuChildProtectionConcernReason": "mpuChildProtectionConcern_value_1",
     "mpuChildInvolvedInMiam": "No",
-    "permissionRequired": {
-      "applicationPermissionRequired": "noNotRequired",
-      "applicationPermissionRequiredReason": null
-    },
+    "applicationPermissionRequired": "noNotRequired",
     "caRespondentSolicitor3InternalFlags": {
       "details": [
 
@@ -1768,6 +1765,7 @@
       "roleOnCase": null,
       "visibility": null
     },
+    "applicationPermissionRequiredReason": null,
     "otherPeopleInTheCaseRevisedTable": [
       {
         "id": "d0a10865-21fa-48a4-b7fc-c473bfbd42f9",
@@ -2004,10 +2002,8 @@
       "natureOfOrder": "Requesting for spending time with the child twice a week",
       "ordersApplyingFor": "Child Arrangements Order, Prohibited Steps Order, Specific Issue Order",
       "typeOfChildArrangementsOrder": "Spend time with order",
-      "permissionRequired": {
-        "applicationPermissionRequired": "No, permission is not required",
-        "applicationPermissionRequiredReason": null
-      }
+      "applicationPermissionRequired": "No, permission is not required",
+      "applicationPermissionRequiredReason": null
     },
     "c8Document": null,
     "caRespondent4Policy": {

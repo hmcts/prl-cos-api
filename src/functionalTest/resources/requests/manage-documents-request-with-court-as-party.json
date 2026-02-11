@@ -176,10 +176,7 @@
         "typeOfChildArrangementsOrder": ""
       },
       "typeOfChildArrangementsOrder": null,
-      "permissionRequired": {
-        "applicationPermissionRequired": "noNotRequired",
-        "applicationPermissionRequiredReason": null
-      },
+      "applicationPermissionRequired": "noNotRequired",
       "childrenKnownToLocalAuthority": "no",
       "isSpecialArrangementsRequired": "No",
       "otherProceedingsForSummaryTab": [
@@ -226,6 +223,7 @@
         "allegationsOfHarmOtherConcernsDetails": null,
         "allegationsOfHarmOtherConcernsCourtActions": null
       },
+      "applicationPermissionRequiredReason": null,
       "requestToForeignAuthorityGiveReason": null,
       "welshLanguageRequirementApplication": "english",
       "allegationsOfHarmChildAbductionTable": {

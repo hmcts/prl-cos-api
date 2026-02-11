@@ -622,10 +622,7 @@
       },
       "draftConsentOrderFile": null,
       "taskListVersion": "v2",
-      "permissionRequired": {
-        "applicationPermissionRequired": "noNotRequired",
-        "applicationPermissionRequiredReason": null
-      },
+      "applicationPermissionRequired": "noNotRequired",
       "newAllegationsOfHarmOtherConcernsDetails": "welfare",
       "familyMediatorMiam": "No",
       "childrenNotPartInTheCaseYesNo": "No",
@@ -1344,6 +1341,7 @@
       "respondentTaskListC": "",
       "respondentTaskListD": "",
       "respondentTaskListE": "",
+      "applicationPermissionRequiredReason": null,
       "docToBeReviewed": "<h3 class='govuk-heading-s'>Submitted by</h3><label class='govuk-label' for='more-detail'><ul class='govuk-list govuk-list--bullet'><li>Legal professional</li></ul></label><h3 class='govuk-heading-s'>Document category</h3><label class='govuk-label' for='more-detail'><ul class='govuk-list govuk-list--bullet'><li>Applicant application</li></ul></label><h3 class='govuk-heading-s'>Confidential information included</h3><label class='govuk-label' for='more-detail'><ul class='govuk-list govuk-list--bullet'><li>Yes</li></ul></label><h3 class='govuk-heading-s'>Request to restrict access</h3><label class='govuk-label' for='more-detail'><ul class='govuk-list govuk-list--bullet'><li>Yes</li></ul></label><h3 class='govuk-heading-s'>Reasons to restrict access</h3><label class='govuk-label' for='more-detail'><ul class='govuk-list govuk-list--bullet'><li>sdsdsd</li></ul></label><br/>",
       "dateSubmitted": "2024-01-04",
       "otherPeopleInTheCaseRevisedTable": [
@@ -1648,10 +1646,8 @@
         "natureOfOrder": "Requesting for spending time with the child twice a week",
         "ordersApplyingFor": "Child Arrangements Order, Prohibited Steps Order, Specific Issue Order",
         "typeOfChildArrangementsOrder": "Spend time with order",
-        "permissionRequired": {
-          "applicationPermissionRequired": "No, permission is not required",
-          "applicationPermissionRequiredReason": null
-        }
+        "applicationPermissionRequired": "No, permission is not required",
+        "applicationPermissionRequiredReason": null
       },
       "c8Document": null,
       "caRespondent4Policy": {

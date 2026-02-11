@@ -743,10 +743,7 @@
         "roleOnCase": null,
         "visibility": null
       },
-      "permissionRequired": {
-        "applicationPermissionRequired": "noNotRequired",
-        "applicationPermissionRequiredReason": null
-      },
+      "applicationPermissionRequired": "noNotRequired",
       "respondentBc8Documents": [
 
       ],
@@ -1688,6 +1685,7 @@
         "roleOnCase": null,
         "visibility": null
       },
+      "applicationPermissionRequiredReason": null,
       "dateSubmitted": "2024-02-22",
       "otherPeopleInTheCaseRevisedTable": [
         {
@@ -1924,10 +1922,8 @@
         "natureOfOrder": "Requesting for spending time with the child twice a week",
         "ordersApplyingFor": "Child Arrangements Order, Prohibited Steps Order, Specific Issue Order",
         "typeOfChildArrangementsOrder": "Spend time with order",
-        "permissionRequired": {
-          "applicationPermissionRequired": "No, permission is not required",
-          "applicationPermissionRequiredReason": null
-        }
+        "applicationPermissionRequired": "No, permission is not required",
+        "applicationPermissionRequiredReason": null
       },
       "c8Document": null,
       "caRespondent4Policy": {

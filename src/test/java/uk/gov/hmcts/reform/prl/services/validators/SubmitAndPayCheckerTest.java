@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamPolicyUpgradeDetails;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.PermissionRequired;
 import uk.gov.hmcts.reform.prl.services.validators.eventschecker.EventsChecker;
 
 import java.time.LocalDate;
@@ -351,9 +350,7 @@ public class SubmitAndPayCheckerTest {
             .ordersApplyingFor(Collections.singletonList(childArrangementsOrder))
             .natureOfOrder("Test")
             .consentOrder(Yes)
-            .permissionRequired(PermissionRequired.builder()
-                                    .applicationPermissionRequired(noNotRequired)
-                                    .build())
+            .applicationPermissionRequired(noNotRequired)
             .applicationDetails("Test details")
             .isCaseUrgent(Yes)
             .doYouNeedAWithoutNoticeHearing(Yes)
@@ -497,9 +494,7 @@ public class SubmitAndPayCheckerTest {
             .ordersApplyingFor(Collections.singletonList(childArrangementsOrder))
             .natureOfOrder("Test")
             .consentOrder(Yes)
-            .permissionRequired(PermissionRequired.builder()
-                                    .applicationPermissionRequired(noNotRequired)
-                                    .build())
+            .applicationPermissionRequired(noNotRequired)
             .applicationDetails("Test details")
             .isCaseUrgent(Yes)
             .doYouNeedAWithoutNoticeHearing(Yes)
@@ -589,9 +584,7 @@ public class SubmitAndPayCheckerTest {
             .ordersApplyingFor(Collections.singletonList(childArrangementsOrder))
             .natureOfOrder("Test")
             .consentOrder(Yes)
-            .permissionRequired(PermissionRequired.builder()
-                                    .applicationPermissionRequired(noNotRequired)
-                                    .build())
+            .applicationPermissionRequired(noNotRequired)
             .applicationDetails("Test details")
             .isCaseUrgent(Yes)
             .taskListVersion(TASK_LIST_VERSION_V2)
@@ -695,9 +688,7 @@ public class SubmitAndPayCheckerTest {
             .ordersApplyingFor(Collections.singletonList(childArrangementsOrder))
             .natureOfOrder("Test")
             .consentOrder(Yes)
-            .permissionRequired(PermissionRequired.builder()
-                                    .applicationPermissionRequired(noNotRequired)
-                                    .build())
+            .applicationPermissionRequired(noNotRequired)
             .applicationDetails("Test details")
             .isCaseUrgent(Yes)
             .taskListVersion(TASK_LIST_VERSION_V3)
@@ -716,14 +707,14 @@ public class SubmitAndPayCheckerTest {
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.dontKnow)
             .respondents(respondentsList)
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder()
-                .mpuApplicantAttendedMiam(Yes)
-                .mediatorRegistrationNumber("123456")
-                .familyMediatorServiceName("Test Name")
-                .soleTraderName("Trade Sole")
-                .miamCertificationDocumentUpload(Document.builder().build())
-                .build())
+                                          .mpuApplicantAttendedMiam(Yes)
+                                          .mediatorRegistrationNumber("123456")
+                                          .familyMediatorServiceName("Test Name")
+                                          .soleTraderName("Trade Sole")
+                                          .miamCertificationDocumentUpload(Document.builder().build())
+                                          .build())
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
-                .newAllegationsOfHarmYesNo(No).build())
+                                         .newAllegationsOfHarmYesNo(No).build())
             .build();
 
         when(caseNameChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
@@ -800,9 +791,7 @@ public class SubmitAndPayCheckerTest {
             .ordersApplyingFor(Collections.singletonList(childArrangementsOrder))
             .natureOfOrder("Test")
             .consentOrder(No)
-            .permissionRequired(PermissionRequired.builder()
-                                    .applicationPermissionRequired(noNotRequired)
-                                    .build())
+            .applicationPermissionRequired(noNotRequired)
             .applicationDetails("Test details")
             .isCaseUrgent(Yes)
             .taskListVersion(TASK_LIST_VERSION_V3)
@@ -820,14 +809,14 @@ public class SubmitAndPayCheckerTest {
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.dontKnow)
             .respondents(respondentsList)
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder()
-                .mpuApplicantAttendedMiam(Yes)
-                .mediatorRegistrationNumber("123456")
-                .familyMediatorServiceName("Test Name")
-                .soleTraderName("Trade Sole")
-                .miamCertificationDocumentUpload(Document.builder().build())
-                .build())
+                                          .mpuApplicantAttendedMiam(Yes)
+                                          .mediatorRegistrationNumber("123456")
+                                          .familyMediatorServiceName("Test Name")
+                                          .soleTraderName("Trade Sole")
+                                          .miamCertificationDocumentUpload(Document.builder().build())
+                                          .build())
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
-                .newAllegationsOfHarmYesNo(No).build())
+                                         .newAllegationsOfHarmYesNo(No).build())
             .build();
 
         when(caseNameChecker.hasMandatoryCompleted(caseData)).thenReturn(true);

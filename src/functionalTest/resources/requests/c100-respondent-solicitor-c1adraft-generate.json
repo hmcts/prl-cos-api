@@ -95,10 +95,7 @@
         "roleOnCase": null,
         "visibility": null
       },
-      "permissionRequired": {
-        "applicationPermissionRequired": "noNotRequired",
-        "applicationPermissionRequiredReason": null
-      },
+      "applicationPermissionRequired": "noNotRequired",
       "respondentBc8Documents": [
 
       ],
@@ -410,6 +407,7 @@
         "roleOnCase": null,
         "visibility": null
       },
+      "applicationPermissionRequiredReason": null,
       "respOrdersUndertakingInPlaceEndDate": null,
       "respAbductionChildHasPassport": null,
       "dateSubmitted": "2024-02-29",
@@ -659,10 +657,8 @@
         "natureOfOrder": "Requesting for spending time with the child twice a week",
         "ordersApplyingFor": "Child Arrangements Order, Prohibited Steps Order, Specific Issue Order",
         "typeOfChildArrangementsOrder": "Spend time with order",
-        "permissionRequired": {
-          "applicationPermissionRequired": "No, permission is not required",
-          "applicationPermissionRequiredReason": null
-        }
+        "applicationPermissionRequired": "No, permission is not required",
+        "applicationPermissionRequiredReason": null
       },
       "c8Document": {
         "category_id": null,

@@ -2642,10 +2642,8 @@
       "natureOfOrder": "sas",
       "ordersApplyingFor": "Child Arrangements Order",
       "typeOfChildArrangementsOrder": "Spend time with order",
-      "permissionRequired": {
-        "applicationPermissionRequired": "No, permission is not required",
-        "applicationPermissionRequiredReason": null
-      }
+      "applicationPermissionRequired": "No, permission is not required",
+      "applicationPermissionRequiredReason": null
     },
     "allegationOfHarmRevised": {
       "typesOfHarmRevised": "Domestic abuse, child abduction, child abuse, drugs, alcohol or substance abuse, safety or welfare concerns"
@@ -4355,10 +4353,7 @@
         }
       }
     ],
-    "permissionRequired": {
-      "applicationPermissionRequired": "noNotRequired",
-      "applicationPermissionRequiredReason": null
-    },
+    "applicationPermissionRequired": "noNotRequired",
     "childDetailsRevisedExtraTable": {
       "childrenKnownToLocalAuthority": "No",
       "childrenSubjectOfChildProtectionPlan": "No"
@@ -4818,6 +4813,7 @@
       },
       "newOrdersForcedMarriageProtection": "Yes"
     },
+    "applicationPermissionRequiredReason": null,
     "newAllegationsOfHarmChildAbuseYesNo": "Yes",
     "newOrdersUndertakingInPlaceDocument": {
       "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/74a40d53-2e60-4b72-9dd0-8d334fb24d6e",
