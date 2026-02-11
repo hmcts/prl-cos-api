@@ -712,14 +712,14 @@ public class ManageOrderEmailService {
                                               String authorisation, List<Document> orderDocuments, Map<String, Object> dynamicData) {
 
         emailInformation.forEach(value -> {
-             verifySingleEmailAddress(value);
-             sendEmailViaSendGrid(authorisation,
-                                  orderDocuments,
-                                  dynamicData,
-                                  value.getEmailAddress(),
-                                  SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION);
-        });
-
+            verifySingleEmailAddress(value);
+            sendEmailViaSendGrid(authorisation,
+                                 orderDocuments,
+                                 dynamicData,
+                                 value.getEmailAddress(),
+                                 SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION);
+            }
+        );
     }
 
     private Map<String, Object> getDynamicDataForEmail(CaseData caseData) {
