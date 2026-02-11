@@ -756,17 +756,17 @@ public class ApplicationsTabServiceTest {
             .taskListVersion(TASK_LIST_VERSION_V3)
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder().build())
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
-                                          .builder()
-                                          .mpuExemptionReasons(miamExemptionsChecklistEnums)
-                                          .mpuDomesticAbuseEvidences(miamExemptionsDomesticChecklistEnums)
-                                          .mpuUrgencyReason(uk.gov.hmcts.reform.prl.enums.miampolicyupgrade
-                                                                .MiamUrgencyReasonChecklistEnum.miamPolicyUpgradeUrgencyReason_Value_1)
-                                          .mpuPreviousMiamAttendanceReason(uk.gov.hmcts.reform.prl.enums
-                                                                               .miampolicyupgrade.MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_1)
-                                          .mpuOtherExemptionReasons(uk.gov.hmcts.reform.prl.enums
-                                                                        .miampolicyupgrade.MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_1)
-                                          .mpuChildProtectionConcernReason(MiamPolicyUpgradeChildProtectionConcernEnum.mpuChildProtectionConcern_value_1)
-                                          .build())
+            .builder()
+            .mpuExemptionReasons(miamExemptionsChecklistEnums)
+            .mpuDomesticAbuseEvidences(miamExemptionsDomesticChecklistEnums)
+            .mpuUrgencyReason(uk.gov.hmcts.reform.prl.enums.miampolicyupgrade
+                .MiamUrgencyReasonChecklistEnum.miamPolicyUpgradeUrgencyReason_Value_1)
+            .mpuPreviousMiamAttendanceReason(uk.gov.hmcts.reform.prl.enums
+                .miampolicyupgrade.MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_1)
+            .mpuOtherExemptionReasons(uk.gov.hmcts.reform.prl.enums
+                .miampolicyupgrade.MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_1)
+            .mpuChildProtectionConcernReason(MiamPolicyUpgradeChildProtectionConcernEnum.mpuChildProtectionConcern_value_1)
+            .build())
             .othersToNotify(applicantList)
             .applicants(applicantList)
             .respondents(applicantList)

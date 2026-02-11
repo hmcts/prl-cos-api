@@ -232,22 +232,22 @@ public class ApplicationsTabService implements TabService {
         List<Element<DomesticAbuseBehaviour>> domesticAbuseBehaviourList = new ArrayList<>();
         if (YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmDomesticAbuseYesNo())) {
             Optional<List<Element<DomesticAbuseBehaviours>>> domesticBehaviours = ofNullable(caseData.getAllegationOfHarmRevised()
-                                                                                                 .getDomesticBehaviours());
+                .getDomesticBehaviours());
 
             if (domesticBehaviours.isPresent()) {
                 domesticBehaviours.get().forEach(each -> {
-                                                     DomesticAbuseBehaviour domesticAbuseBehaviour = DomesticAbuseBehaviour
-                                                         .builder().newAbuseNatureDescription(each.getValue().getNewAbuseNatureDescription())
-                                                         .typeOfAbuse(each.getValue().getTypeOfAbuse() != null
-                                                                          ? each.getValue().getTypeOfAbuse().getDisplayedValue() : null)
-                                                         .newBehavioursApplicantHelpSoughtWho(YesOrNo.Yes.equals(each.getValue()
-                                                                                                                     .getNewBehavioursApplicantSoughtHelp()) ? each.getValue().getNewBehavioursApplicantHelpSoughtWho() : null)
-                                                         .newBehavioursApplicantSoughtHelp(each.getValue().getNewBehavioursApplicantSoughtHelp())
-                                                         .newBehavioursStartDateAndLength(each.getValue().getNewBehavioursStartDateAndLength())
-                                                         .build();
-                                                     Element<DomesticAbuseBehaviour> app = Element.<DomesticAbuseBehaviour>builder().value(domesticAbuseBehaviour).build();
-                                                     domesticAbuseBehaviourList.add(app);
-                                                 }
+                    DomesticAbuseBehaviour domesticAbuseBehaviour = DomesticAbuseBehaviour
+                        .builder().newAbuseNatureDescription(each.getValue().getNewAbuseNatureDescription())
+                        .typeOfAbuse(each.getValue().getTypeOfAbuse() != null
+                            ? each.getValue().getTypeOfAbuse().getDisplayedValue() : null)
+                        .newBehavioursApplicantHelpSoughtWho(YesOrNo.Yes.equals(each.getValue()
+                            .getNewBehavioursApplicantSoughtHelp()) ? each.getValue().getNewBehavioursApplicantHelpSoughtWho() : null)
+                        .newBehavioursApplicantSoughtHelp(each.getValue().getNewBehavioursApplicantSoughtHelp())
+                        .newBehavioursStartDateAndLength(each.getValue().getNewBehavioursStartDateAndLength())
+                        .build();
+                    Element<DomesticAbuseBehaviour> app = Element.<DomesticAbuseBehaviour>builder().value(domesticAbuseBehaviour).build();
+                    domesticAbuseBehaviourList.add(app);
+                    }
                 );
                 return domesticAbuseBehaviourList;
             }
@@ -273,24 +273,24 @@ public class ApplicationsTabService implements TabService {
         List<Element<ChildAbuseBehaviour>> childAbuseBehaviourList = new ArrayList<>();
 
         childPhysicalAbuse.ifPresent(abuse -> {
-                                         if (Objects.nonNull(abuse.getTypeOfAbuse())) {
-                                             childAbuseBehavioursList.add(abuse);
-                                         }
-                                     }
+            if (Objects.nonNull(abuse.getTypeOfAbuse())) {
+                childAbuseBehavioursList.add(abuse);
+            }
+        }
         );
 
         childFinancialAbuse.ifPresent(abuse -> {
-                                          if (Objects.nonNull(abuse.getTypeOfAbuse())) {
-                                              childAbuseBehavioursList.add(abuse);
-                                          }
-                                      }
+            if (Objects.nonNull(abuse.getTypeOfAbuse())) {
+                childAbuseBehavioursList.add(abuse);
+            }
+        }
         );
 
         childPsychologicalAbuse.ifPresent(abuse -> {
-                                              if (Objects.nonNull(abuse.getTypeOfAbuse())) {
-                                                  childAbuseBehavioursList.add(abuse);
-                                              }
-                                          }
+            if (Objects.nonNull(abuse.getTypeOfAbuse())) {
+                childAbuseBehavioursList.add(abuse);
+            }
+        }
         );
 
         Optional<ChildAbuse> childEmotionalAbuse =
@@ -300,17 +300,17 @@ public class ApplicationsTabService implements TabService {
             ofNullable(caseData.getAllegationOfHarmRevised().getChildSexualAbuse());
 
         childEmotionalAbuse.ifPresent(abuse -> {
-                                          if (Objects.nonNull(abuse.getTypeOfAbuse())) {
-                                              childAbuseBehavioursList.add(abuse);
-                                          }
-                                      }
+            if (Objects.nonNull(abuse.getTypeOfAbuse())) {
+                childAbuseBehavioursList.add(abuse);
+            }
+        }
         );
 
         childSexualAbuse.ifPresent(abuse -> {
-                                       if (Objects.nonNull(abuse.getTypeOfAbuse())) {
-                                           childAbuseBehavioursList.add(abuse);
-                                       }
-                                   }
+            if (Objects.nonNull(abuse.getTypeOfAbuse())) {
+                childAbuseBehavioursList.add(abuse);
+            }
+        }
         );
 
 
@@ -325,7 +325,7 @@ public class ApplicationsTabService implements TabService {
                     .builder().newAbuseNatureDescription(each.getAbuseNatureDescription())
                     .typeOfAbuse(each.getTypeOfAbuse().getDisplayedValue())
                     .newBehavioursApplicantHelpSoughtWho(YesOrNo.Yes
-                                                             .equals(each.getBehavioursApplicantSoughtHelp()) ? each.getBehavioursApplicantHelpSoughtWho() : null)
+                        .equals(each.getBehavioursApplicantSoughtHelp()) ? each.getBehavioursApplicantHelpSoughtWho() : null)
                     .newBehavioursApplicantSoughtHelp(each.getBehavioursApplicantSoughtHelp())
                     .newBehavioursStartDateAndLength(each.getBehavioursStartDateAndLength())
                     .allChildrenAreRisk(
@@ -533,14 +533,14 @@ public class ApplicationsTabService implements TabService {
             Respondent respondent = objectMapper.convertValue(currentRespondent.getValue(), Respondent.class);
 
             Element<Respondent> respondentElement = Element.<Respondent>builder().id(currentRespondent.getId()).value(respondent.toBuilder()
-                                                                                                                          .gender(respondent.getGender() != null ? Gender.getDisplayedValueFromEnumString(respondent.getGender()).getDisplayedValue() : null)
-                                                                                                                          .isAtAddressLessThan5YearsWithDontKnow(respondent.getIsAtAddressLessThan5YearsWithDontKnow() != null
-                                                                                                                                                                     ? YesNoDontKnow.getDisplayedValueIgnoreCase(
-                                                                                                                              respondent.getIsAtAddressLessThan5YearsWithDontKnow()).getDisplayedValue() : null)
-                                                                                                                          .doTheyHaveLegalRepresentation(respondent.getDoTheyHaveLegalRepresentation() != null
-                                                                                                                                                             ? YesNoDontKnow.getDisplayedValueIgnoreCase(
-                                                                                                                              respondent.getDoTheyHaveLegalRepresentation()).getDisplayedValue() : null)
-                                                                                                                          .build()).build();
+                .gender(respondent.getGender() != null ? Gender.getDisplayedValueFromEnumString(respondent.getGender()).getDisplayedValue() : null)
+                .isAtAddressLessThan5YearsWithDontKnow(respondent.getIsAtAddressLessThan5YearsWithDontKnow() != null
+                    ? YesNoDontKnow.getDisplayedValueIgnoreCase(
+                        respondent.getIsAtAddressLessThan5YearsWithDontKnow()).getDisplayedValue() : null)
+                .doTheyHaveLegalRepresentation(respondent.getDoTheyHaveLegalRepresentation() != null
+                    ? YesNoDontKnow.getDisplayedValueIgnoreCase(
+                        respondent.getDoTheyHaveLegalRepresentation()).getDisplayedValue() : null)
+                .build()).build();
             respondents.add(respondentElement);
         }
         return respondents;
@@ -1134,7 +1134,7 @@ public class ApplicationsTabService implements TabService {
         if (YesOrNo.Yes.equals(revisedChildAbductionDetails.getNewAbductionChildHasPassport()) && childPassportDetails.isPresent()) {
             revisedChildAbductionDetails.setNewChildHasMultiplePassports(childPassportDetails.get().getNewChildHasMultiplePassports());
             revisedChildAbductionDetails.setNewChildPassportPossession(childPassportDetails.get().getNewChildPassportPossession().stream()
-                                                                           .map(NewPassportPossessionEnum::getDisplayedValue).collect(Collectors.joining(COMMA_SEPARATOR)));
+                .map(NewPassportPossessionEnum::getDisplayedValue).collect(Collectors.joining(COMMA_SEPARATOR)));
         }
         return toMap(revisedChildAbductionDetails);
     }
