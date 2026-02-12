@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIEL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRANSFERRED_COURT_FROM;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.isNotEmpty;
 
 @Service
@@ -78,16 +80,18 @@ public class AmendCourtService {
     public List<String> validateCourtFields(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
-        if (!CollectionUtils.isEmpty(caseData.getCantFindCourtCheck()) && caseData.getCourtList() != null) {
+        if (CollectionUtils.isNotEmpty(caseData.getCantFindCourtCheck()) && caseData.getCourtList() != null) {
             return List.of("Please select one of the option for court name.");
         } else if (CollectionUtils.isNotEmpty(caseData.getCantFindCourtCheck())) {
-            if (!isNotEmpty(caseData.getAnotherCourt())) {
-                return List.of("Please enter court name.");
-            } else if (!isNotEmpty(caseData.getCourtEmailAddress())) {
-                return List.of("Please enter court email address.");
+            List<String> errors = new ArrayList<>();
+            if (isEmpty(caseData.getAnotherCourt())) {
+                errors.add("Please enter court name.");
+            } else if (isEmpty(caseData.getCourtEmailAddress())) {
+                errors.add("Please enter court email address.");
             } else if (!EmailUtils.isValidEmailAddress(caseData.getCourtEmailAddress())) {
-                return List.of("Please enter valid court email address.");
+                errors.add("Please enter valid court email address.");
             }
+            return errors;
         } else if (CollectionUtils.isEmpty(caseData.getCantFindCourtCheck())
             && caseData.getCourtList() == null) {
             return List.of("Please select court name from list.");
