@@ -1700,8 +1700,7 @@ public class ServiceOfApplicationService {
                                                                                  List<Document> packDocs, Element<PartyDetails> party,
                                                                                  SendgridEmailTemplateNames emailTemplate,
                                                                                  List<Document> coverLetters,
-                                                                                 String servedParty)
-        {
+                                                                                 String servedParty) {
         List<Document> packsWithCoverLetter = new ArrayList<>(coverLetters);
         packsWithCoverLetter.addAll(packDocs);
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
