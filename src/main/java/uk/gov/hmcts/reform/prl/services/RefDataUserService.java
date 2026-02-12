@@ -173,7 +173,7 @@ public class RefDataUserService {
         log.info("retrieveCategoryValues {}", categoryId);
         CommonDataResponse commonDataResponse = null;
         try {
-             commonDataResponse = commonDataRefApi.getAllCategoryValuesByCategoryId(
+            commonDataResponse = commonDataRefApi.getAllCategoryValuesByCategoryId(
                 authorization,
                 authTokenGenerator.generate(),
                 categoryId,
