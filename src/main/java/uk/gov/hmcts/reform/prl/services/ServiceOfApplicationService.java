@@ -202,6 +202,7 @@ public class ServiceOfApplicationService {
     public static final String IS_WELSH = "isWelsh";
     public static final String IS_ENGLISH = "isEnglish";
     public static final String AUTHORIZATION = "authorization";
+    public static final String SERVED_PARTY = "servedParty";
     public static final String COVER_LETTER_TEMPLATE = "coverLetterTemplate";
 
     public static final String IS_C8_CHECK_NEEDED = "isC8CheckNeeded";
@@ -1665,7 +1666,8 @@ public class ServiceOfApplicationService {
             packDocs,
             party,
             emailTemplate,
-            packsWithCoverLetters
+            packsWithCoverLetters,
+            SERVED_PARTY_APPLICANT
         );
     }
 
@@ -1697,7 +1699,9 @@ public class ServiceOfApplicationService {
     private EmailNotificationDetails sendEmailViaSendGridWithAttachedDocsToParty(String authorization, CaseData caseData,
                                                                                  List<Document> packDocs, Element<PartyDetails> party,
                                                                                  SendgridEmailTemplateNames emailTemplate,
-                                                                                 List<Document> coverLetters) {
+                                                                                 List<Document> coverLetters,
+                                                                                 String servedParty)
+        {
         List<Document> packsWithCoverLetter = new ArrayList<>(coverLetters);
         packsWithCoverLetter.addAll(packDocs);
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
@@ -1712,7 +1716,7 @@ public class ServiceOfApplicationService {
                 packsWithCoverLetter,
                 emailTemplate,
                 dynamicData,
-                SERVED_PARTY_APPLICANT
+                servedParty
             );
     }
 
@@ -1774,6 +1778,8 @@ public class ServiceOfApplicationService {
                                                           SendgridEmailTemplateNames emailTemplate,
                                                           Map<String, String> fieldMap,
                                                           EmailTemplateNames notifyTemplate) {
+        String servedParty = fieldMap.getOrDefault(SERVED_PARTY, SERVED_PARTY_APPLICANT);
+        log.info("Served Party in sendEmailToCitizenLipByCheckingDashboardAccess {}", party.getId());
         EmailNotificationDetails emailNotification;
         List<Document> packDocs = new ArrayList<>();
         List<Document> coverLetters = new ArrayList<>();
@@ -1793,7 +1799,7 @@ public class ServiceOfApplicationService {
             sendGovNotifyEmail(caseData, party, notifyTemplate);
             emailNotification = EmailNotificationDetails.builder()
                 .emailAddress(party.getValue().getEmail())
-                .servedParty(SERVED_PARTY_APPLICANT)
+                .servedParty(servedParty)
                 .docs(wrapElements(packDocs))
                 .attachedDocs(CITIZEN_CAN_VIEW_ONLINE)
                 .timeStamp(CaseUtils.getCurrentDate())
@@ -1806,7 +1812,8 @@ public class ServiceOfApplicationService {
                 docs,
                 party,
                 emailTemplate,
-                coverLetters
+                coverLetters,
+                servedParty
             );
         }
 
@@ -3948,6 +3955,7 @@ public class ServiceOfApplicationService {
         if (ContactPreferences.email.equals(caseData.getRespondentsFL401().getContactPreferences())) {
             Map<String, String> fieldsMap = new HashMap<>();
             fieldsMap.put(AUTHORIZATION, authorization);
+            fieldsMap.put(SERVED_PARTY, SERVED_PARTY_RESPONDENT);
             sendEmailToCitizenLipByCheckingDashboardAccess(
                 caseData,
                 emailNotificationDetails,
