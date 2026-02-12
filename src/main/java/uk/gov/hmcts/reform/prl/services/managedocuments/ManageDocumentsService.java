@@ -57,7 +57,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
@@ -224,41 +223,41 @@ public class ManageDocumentsService {
 
         String userRole = CaseUtils.getUserRole(userDetails);
 
-        List<Element<ManageDocuments>> manageDocuments = Optional.ofNullable(caseData.getDocumentManagementDetails())
-            .map(DocumentManagementDetails::getManageDocuments)
-            .orElse(Collections.emptyList());
+        List<Element<ManageDocuments>> manageDocuments = caseData.getDocumentManagementDetails().getManageDocuments();
 
         boolean isWaTaskSetForFirstDocumentIteration = false;
-        for (Element<ManageDocuments> element : manageDocuments) {
-            CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
-            ManageDocuments manageDocument = element.getValue();
-            QuarantineLegalDoc quarantineLegalDoc = covertManageDocToQuarantineDoc(manageDocument, userDetails);
+        if (manageDocuments != null) {
+            for (Element<ManageDocuments> element : manageDocuments) {
+                CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
+                ManageDocuments manageDocument = element.getValue();
+                QuarantineLegalDoc quarantineLegalDoc = covertManageDocToQuarantineDoc(manageDocument, userDetails);
 
-            if (!userRole.equals(COURT_ADMIN)
-                && (DocumentPartyEnum.CAFCASS.equals(manageDocument.getDocumentParty())
-                || DocumentPartyEnum.CAFCASS_CYMRU.equals(
-                manageDocument.getDocumentParty())) &&  null != quarantineLegalDoc) {
-                quarantineLegalDoc = updateQuarantineLegalDocForCafcass(
-                    quarantineLegalDoc
-                );
-            }
-
-            if (userRole.equals(COURT_ADMIN) || DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty())
-                || getRestrictedOrConfidentialKey(quarantineLegalDoc) == null
-            ) {
-                moveDocumentsToRespectiveCategoriesNew(
-                    quarantineLegalDoc,
-                    userDetails,
-                    updatedCaseData,
-                    caseDataUpdated,
-                    userRole
-                );
-            } else {
-                if (!isWaTaskSetForFirstDocumentIteration) {
-                    isWaTaskSetForFirstDocumentIteration = true;
-                    setFlagsForWaTask(updatedCaseData, caseDataUpdated, userRole, quarantineLegalDoc);
+                if (!userRole.equals(COURT_ADMIN)
+                    && (DocumentPartyEnum.CAFCASS.equals(manageDocument.getDocumentParty())
+                    || DocumentPartyEnum.CAFCASS_CYMRU.equals(
+                    manageDocument.getDocumentParty())) && null != quarantineLegalDoc) {
+                    quarantineLegalDoc = updateQuarantineLegalDocForCafcass(
+                        quarantineLegalDoc
+                    );
                 }
-                moveDocumentsToQuarantineTab(quarantineLegalDoc, updatedCaseData, caseDataUpdated, userRole);
+
+                if (userRole.equals(COURT_ADMIN) || DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty())
+                    || getRestrictedOrConfidentialKey(quarantineLegalDoc) == null
+                ) {
+                    moveDocumentsToRespectiveCategoriesNew(
+                        quarantineLegalDoc,
+                        userDetails,
+                        updatedCaseData,
+                        caseDataUpdated,
+                        userRole
+                    );
+                } else {
+                    if (!isWaTaskSetForFirstDocumentIteration) {
+                        isWaTaskSetForFirstDocumentIteration = true;
+                        setFlagsForWaTask(updatedCaseData, caseDataUpdated, userRole, quarantineLegalDoc);
+                    }
+                    moveDocumentsToQuarantineTab(quarantineLegalDoc, updatedCaseData, caseDataUpdated, userRole);
+                }
             }
         }
     }
