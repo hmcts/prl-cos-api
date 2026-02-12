@@ -324,7 +324,7 @@ public class ConfidentialityTabService {
             && ofNullable(caseData.getHome()).isPresent() && ofNullable(caseData.getHome().getChildren()).isPresent()) {
             List<ChildrenLiveAtAddress> children = unwrapElements(caseData.getHome().getChildren());
             for (ChildrenLiveAtAddress child : children) {
-                if (child.getKeepChildrenInfoConfidential().equals(YesOrNo.Yes)) {
+                if (child != null && YesOrNo.Yes.equals(child.getKeepChildrenInfoConfidential())) {
                     Element<Fl401ChildConfidentialityDetails> childElement = Element
                         .<Fl401ChildConfidentialityDetails>builder()
                         .value(Fl401ChildConfidentialityDetails.builder()
