@@ -40,6 +40,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
+import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.notifications.NotificationService;
@@ -109,6 +110,7 @@ public class ManageDocumentsService {
     private final LaunchDarklyClient launchDarklyClient;
     private final RoleAssignmentApi roleAssignmentApi;
     private final NotificationService notificationService;
+    private final RoleAssignmentService roleAssignmentService;
 
     public static final String CONFIDENTIAL = "Confidential_";
 
@@ -119,8 +121,12 @@ public class ManageDocumentsService {
         = "Mae’n rhaid i chi roi rheswm pam na ddylai rhai pobl weld y ddogfen";
 
     public CaseData populateDocumentCategories(String authorization, CaseData caseData) {
+        UserDetails userDetails = userService.getUserDetails(authorization);
+        boolean isUserRoleLA = isUserAllocatedRoleForCaseLA(String.valueOf(caseData.getId()), userDetails.getId());
+
         ManageDocuments manageDocuments = ManageDocuments.builder()
-            .documentCategories(getCategoriesSubcategories(authorization, String.valueOf(caseData.getId())))
+            .documentCategories(getCategoriesSubcategories(authorization, String.valueOf(caseData.getId()), isUserRoleLA))
+            .documentParty(setDefaultDocumentParty(isUserRoleLA))
             .build();
 
         return caseData.toBuilder()
@@ -131,7 +137,7 @@ public class ManageDocumentsService {
             .build();
     }
 
-    private DynamicList getCategoriesSubcategories(String authorisation, String caseReference) {
+    private DynamicList getCategoriesSubcategories(String authorisation, String caseReference, boolean isUserRoleLA) {
         try {
             CategoriesAndDocuments categoriesAndDocuments = coreCaseDataApi.getCategoriesAndDocuments(
                 authorisation,
@@ -141,6 +147,14 @@ public class ManageDocumentsService {
             if (null != categoriesAndDocuments) {
                 List<Category> parentCategories = nullSafeCollection(categoriesAndDocuments.getCategories())
                     .stream()
+                    .filter(category-> {
+                        if (isUserRoleLA) {
+                            return category.getCategoryId().equals("localAuthorityDocuments");
+                        }
+                        else {
+                            return !category.getCategoryId().equals("localAuthorityDocuments");
+                        }
+                    })
                     .sorted(Comparator.comparing(Category::getCategoryName))
                     .toList();
 
@@ -900,6 +914,9 @@ public class ManageDocumentsService {
                 } else if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.CAFCASS_CYMRU.getRoles()::contains)) {
                     loggedInUserType.add(UserRoles.CAFCASS.name());
                 }
+                else if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.LOCAL_AUTHORITY.getRoles()::contains)) {
+                    loggedInUserType.add(UserRoles.LOCAL_AUTHORITY.name());
+                }
             } else if (roles.contains(Roles.BULK_SCAN.getValue())) {
                 loggedInUserType.add(BULK_SCAN);
             }
@@ -929,5 +946,14 @@ public class ManageDocumentsService {
         } else {
             loggedInUserType.add(UserRoles.CAFCASS.name());
         }
+    }
+
+    private DocumentPartyEnum setDefaultDocumentParty(boolean isUserRoleLA) {
+        return isUserRoleLA ? DocumentPartyEnum.LOCAL_AUTHORITY :  null;
+    }
+
+    private boolean isUserAllocatedRoleForCaseLA(String caseId, String idamId) {
+        return roleAssignmentService.isUserAllocatedRoleForCase(caseId, idamId, Roles.LOCAL_AUTHORITY_STAFF.getValue())
+            || roleAssignmentService.isUserAllocatedRoleForCase(caseId, idamId, Roles.LOCAL_AUTHORITY_SOLICITOR.getValue());
     }
 }

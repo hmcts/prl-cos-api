@@ -68,6 +68,14 @@ public class QuarantineLegalDoc {
     private final Document drugAndAlcoholTestDocument; // drugAndAlcoholTest(toxicology)
     private final Document policeReportDocument;
     private final Document sec37ReportDocument;
+    private final Document childImpactReport1LaDocument;
+    private final Document childImpactReport2LaDocument;
+    private final Document section7ReportLaDocument;
+    private final Document section7AddendumReportLaDocument;
+    private final Document localAuthorityInvolvementLaDocument;
+    private final Document section47LaDocument;
+    private final Document cirExtensionRequestLaDocument;
+    private final Document cirTransferRequestLaDocument;
     private final Document ordersSubmittedWithApplicationDocument;
     private final Document approvedOrdersDocument;
     private final Document standardDirectionsOrderDocument;
