@@ -16,8 +16,10 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +27,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -40,6 +43,9 @@ class PrepareHearingBundleServiceTest {
 
     @Mock
     private EsQueryService esQueryService;
+
+    @Mock
+    private HearingService hearingService;
 
     @Mock
     private SystemUserService systemUserService;
@@ -58,7 +64,6 @@ class PrepareHearingBundleServiceTest {
 
     @BeforeEach
     void setup() {
-        when(systemUserService.getSysUserToken()).thenReturn(USER_TOKEN);
         when(authTokenGenerator.generate()).thenReturn(S2S_TOKEN);
         when(esQueryService.getObjectMapper()).thenReturn(getObjectMapper());
     }
@@ -75,7 +80,10 @@ class PrepareHearingBundleServiceTest {
         when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
             .thenReturn(searchResult);
 
-        List<Long> actualCases = prepareHearingBundleService.retrieveCasesWithHearingsIn5Days();
+        List<Long> actualCases = prepareHearingBundleService.getCasesWithNextHearingDateByDate(
+            LocalDate.now().plusDays(7),
+            USER_TOKEN
+        );
 
         assertNotNull(actualCases);
         assertEquals(1, actualCases.size());
@@ -84,6 +92,8 @@ class PrepareHearingBundleServiceTest {
 
     @Test
     void shouldNotTriggerAnyEventsIfNoCasesFound() {
+        when(systemUserService.getSysUserToken()).thenReturn(USER_TOKEN);
+
         when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
             .thenReturn(SearchResult.builder().cases(List.of()).total(0).build());
 
@@ -94,6 +104,8 @@ class PrepareHearingBundleServiceTest {
 
     @Test
     void shouldTriggerEventsOnlyOnCasesWithHearingsIn5Days() {
+        when(systemUserService.getSysUserToken()).thenReturn(USER_TOKEN);
+
         CaseDetails case1 = CaseDetails.builder().id(111L).build();
         CaseDetails case2 = CaseDetails.builder().id(222L).build();
 
@@ -104,6 +116,8 @@ class PrepareHearingBundleServiceTest {
 
         when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
             .thenReturn(searchResult);
+        when(hearingService.filterCasesWithHearingsStartingOnDate(anyList(), anyString(), any(LocalDate.class)))
+            .thenReturn(List.of(111L, 222L));
 
         StartAllTabsUpdateDataContent mockContent = org.mockito.Mockito.mock(StartAllTabsUpdateDataContent.class);
         when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(mockContent);
@@ -140,7 +154,10 @@ class PrepareHearingBundleServiceTest {
         when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
             .thenReturn(firstPage, secondPage);
 
-        List<Long> caseIds = prepareHearingBundleService.retrieveCasesWithHearingsIn5Days();
+        List<Long> caseIds = prepareHearingBundleService.getCasesWithNextHearingDateByDate(
+            LocalDate.now().plusDays(7),
+            USER_TOKEN
+        );
 
         assertNotNull(caseIds);
         assertEquals(105, caseIds.size());

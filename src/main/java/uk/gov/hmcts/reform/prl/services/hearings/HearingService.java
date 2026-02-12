@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
@@ -20,13 +21,18 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -232,5 +238,49 @@ public class HearingService {
         }
         return null;
     }
+
+    @Retryable(retryFor = {FeignException.class})
+    public List<Long> filterCasesWithHearingsStartingOnDate(List<Long> caseIds, String userToken, LocalDate dateToCheck) {
+        List<Long> filteredCaseIds = new ArrayList<>();
+        if (caseIds == null || caseIds.isEmpty()) {
+            return filteredCaseIds;
+        }
+        int batchSize = 25;
+
+        for (int i = 0; i < caseIds.size(); i += batchSize) {
+            List<String> batch = caseIds.subList(i, Math.min(i + batchSize, caseIds.size()))
+                .stream().map(String::valueOf).toList();
+            List<Hearings> hearingsList = hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(userToken, authTokenGenerator.generate(), batch);
+            for (Hearings hearing : hearingsList) {
+                String caseId = hearing.getCaseRef();
+                if (isNotEmpty(hearing.getCaseHearings()) && hasHearingStartingOnDate(hearing, dateToCheck)) {
+                    filteredCaseIds.add(Long.parseLong(caseId));
+                }
+            }
+        }
+        return filteredCaseIds;
+    }
+
+    private boolean hasHearingStartingOnDate(Hearings hearing, LocalDate dateToCheck) {
+        if (isEmpty(hearing) || isEmpty(hearing.getCaseHearings())) {
+            return false;
+        }
+        return hearing.getCaseHearings().stream().anyMatch(ch -> {
+            if (isEmpty(ch.getHearingDaySchedule())) {
+                return false;
+            }
+            return ch.getHearingDaySchedule().stream()
+                // Get the earliest day of the hearing
+                .map(HearingDaySchedule::getHearingStartDateTime)
+                .filter(Objects::nonNull)
+                .map(LocalDateTime::toLocalDate)
+                .min(LocalDate::compareTo)
+                // and check if it's 5 working days from now
+                .map(dateToCheck::equals)
+                .orElse(false);
+        });
+    }
+
+
 
 }
