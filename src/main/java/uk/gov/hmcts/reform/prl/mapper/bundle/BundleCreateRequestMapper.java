@@ -42,37 +42,7 @@ import java.util.Optional;
 
 import static java.util.Collections.reverse;
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_C1A_RESPONSE;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_STATEMENTS;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CASE_SUMMARY;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT1;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT2;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.DNA_REPORTS_EXPERT_REPORT;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.DRUG_AND_ALCOHOL_TEST;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.FM5_STATEMENTS;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.GUARDIAN_REPORT;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.LA_OTHER_DOCS;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.MAGISTRATES_FACTS_AND_REASONS;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.MEDICAL_REPORTS;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.MIAM_CERTIFICATE;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ORDERS_FROM_OTHER_PROCEEDINGS;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.OTHER_DOCS;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.OTHER_WITNESS_STATEMENTS;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.POLICE_REPORT;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.POSITION_STATEMENTS;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_APPLICATION;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_APPLICATION;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_RESPONSE;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_STATEMENTS;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESULTS_OF_HAIR_STRAND_BLOOD_TESTS;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SAFEGUARDING_LETTER;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SEC37_REPORT;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION7_REPORT;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_37_REPORT;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SIXTEEN_A_RISK_ASSESSMENT;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SPECIAL_GUARDIANSHIP_REPORT;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.TRANSCRIPTS_OF_JUDGEMENTS;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.*;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
@@ -446,6 +416,7 @@ public class BundleCreateRequestMapper {
         mapApplicationsAndOrders(doc, bundleMap);
         mapWitnessStatements(doc, bundleMap);
         mapCafcassLaReports(doc, bundleMap);
+        mapLocalAuthorityDocs(doc, bundleMap);
         mapOtherDocuments(doc, bundleMap);
 
         return bundleMap.get(doc.getCategoryId());
@@ -637,10 +608,49 @@ public class BundleCreateRequestMapper {
             .documentLink(doc.getOtherDocsDocument())
             .documentFileName(doc.getOtherDocsDocument().getDocumentFileName())
             .documentGroup(BundlingDocGroupEnum.cafcassOtherDocuments).build() : null);
+
+    }
+
+    private static void mapLocalAuthorityDocs(QuarantineLegalDoc doc, HashMap<String, BundlingRequestDocument> bundleMap) {
         bundleMap.put(SEC37_REPORT, Objects.nonNull(doc.getSec37ReportDocument()) ? BundlingRequestDocument.builder()
             .documentLink(doc.getSec37ReportDocument())
             .documentFileName(doc.getSec37ReportDocument().getDocumentFileName())
             .documentGroup(BundlingDocGroupEnum.laSection37Report).build() : null);
+        bundleMap.put(CHILD_IMPACT_REPORT_1_LA, Objects.nonNull(doc.getChildImpactReport1LaDocument()) ? BundlingRequestDocument.builder()
+            .documentLink(doc.getChildImpactReport1LaDocument())
+            .documentFileName(doc.getChildImpactReport1LaDocument().getDocumentFileName())
+            .documentGroup(BundlingDocGroupEnum.laSectionChildImpactReport1Report).build() : null);
+        bundleMap.put(CHILD_IMPACT_REPORT_2_LA, Objects.nonNull(doc.getChildImpactReport2LaDocument()) ? BundlingRequestDocument.builder()
+            .documentLink(doc.getChildImpactReport2LaDocument())
+            .documentFileName(doc.getChildImpactReport2LaDocument().getDocumentFileName())
+            .documentGroup(BundlingDocGroupEnum.laSectionChildImpactReport2Report).build() : null);
+        bundleMap.put(SECTION_7_REPORT_LA, Objects.nonNull(doc.getSection7ReportLaDocument()) ? BundlingRequestDocument.builder()
+            .documentLink(doc.getSection7ReportLaDocument())
+            .documentFileName(doc.getSection7ReportLaDocument().getDocumentFileName())
+            .documentGroup(BundlingDocGroupEnum.laSectionSection7ReportReport).build() : null);
+        bundleMap.put(SECTION_7_ADDENDUM_REPORT_LA, Objects.nonNull(doc.getSection7AddendumReportLaDocument()) ? BundlingRequestDocument.builder()
+            .documentLink(doc.getSection7AddendumReportLaDocument())
+            .documentFileName(doc.getSection7AddendumReportLaDocument().getDocumentFileName())
+            .documentGroup(BundlingDocGroupEnum.laSectionSection7AddendumReportReport).build() : null);
+        bundleMap.put(LOCAL_AUTHORITY_INVOLVEMENT_LA, Objects.nonNull(doc.getLocalAuthorityInvolvementLaDocument()) ? BundlingRequestDocument.builder()
+            .documentLink(doc.getLocalAuthorityInvolvementLaDocument())
+            .documentFileName(doc.getLocalAuthorityInvolvementLaDocument().getDocumentFileName())
+            .documentGroup(BundlingDocGroupEnum.laSectionLocalAuthorityInvolvementReport).build() : null);
+        bundleMap.put(SECTION_47_LA, Objects.nonNull(doc.getSection47LaDocument()) ? BundlingRequestDocument.builder()
+            .documentLink(doc.getSection47LaDocument())
+            .documentFileName(doc.getSection47LaDocument().getDocumentFileName())
+            .documentGroup(BundlingDocGroupEnum.laSectionSection47EnquiryReport).build() : null);
+        bundleMap.put(CIR_EXTENSION_REQUEST_LA, Objects.nonNull(doc.getCirExtensionRequestLaDocument()) ? BundlingRequestDocument.builder()
+            .documentLink(doc.getCirExtensionRequestLaDocument())
+            .documentFileName(doc.getCirExtensionRequestLaDocument().getDocumentFileName())
+            .documentGroup(BundlingDocGroupEnum.laSectionCirExtensionRequestReport).build() : null);
+
+        bundleMap.put(CIR_TRANSFER_REQUEST_LA, Objects.nonNull(doc.getCirTransferRequestLaDocument()) ? BundlingRequestDocument.builder()
+            .documentLink(doc.getCirTransferRequestLaDocument())
+            .documentFileName(doc.getCirTransferRequestLaDocument().getDocumentFileName())
+            .documentGroup(BundlingDocGroupEnum.laSectionCirTransferRequestReport).build() : null);
+
+
         bundleMap.put(
             LA_OTHER_DOCS,
             Objects.nonNull(doc.getLocalAuthorityOtherDocDocument()) ? BundlingRequestDocument.builder()
