@@ -113,7 +113,7 @@ public class ApplicantsCheckerTest {
     public void testIsStartedNullPointerException() {
         caseData = caseData.toBuilder().build();
 
-        applicantsChecker.isStarted(caseData);
+        assertFalse(applicantsChecker.isStarted(caseData));
     }
 
 
