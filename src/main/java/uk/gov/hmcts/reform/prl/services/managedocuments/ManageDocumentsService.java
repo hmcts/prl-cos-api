@@ -914,6 +914,9 @@ public class ManageDocumentsService {
                 } else if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.CAFCASS_CYMRU.getRoles()::contains)) {
                     loggedInUserType.add(UserRoles.CAFCASS.name());
                 }
+                else if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.LOCAL_AUTHORITY.getRoles()::contains)) {
+                    loggedInUserType.add(UserRoles.LOCAL_AUTHORITY.name());
+                }
             } else if (roles.contains(Roles.BULK_SCAN.getValue())) {
                 loggedInUserType.add(BULK_SCAN);
             }
