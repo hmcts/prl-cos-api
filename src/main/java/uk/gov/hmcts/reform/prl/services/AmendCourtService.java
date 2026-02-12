@@ -27,7 +27,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIEL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRANSFERRED_COURT_FROM;
-import static uk.gov.hmcts.reform.prl.utils.CommonUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.isNotEmpty;
 
 @Service
