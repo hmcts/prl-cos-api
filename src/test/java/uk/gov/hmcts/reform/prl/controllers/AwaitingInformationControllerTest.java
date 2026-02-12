@@ -86,8 +86,18 @@ public class AwaitingInformationControllerTest {
         when(featureToggleService.isAwaitingInformationEnabled()).thenReturn(true);
     }
 
+    // Tests for submitAwaitingInformation method
     @Test
     public void testSubmitAwaitingInformationSuccessfully() {
+        // Given
+        Map<String, Object> updatedCaseData = new HashMap<>(caseDataMap);
+        updatedCaseData.put(
+            PrlAppsConstants.CASE_STATUS,
+            CaseStatus.builder().state("Awaiting information").build()
+        );
+        when(awaitingInformationService.addToCase(callbackRequest))
+            .thenReturn(updatedCaseData);
+
         // When
         AboutToStartOrSubmitCallbackResponse response = awaitingInformationController.submitAwaitingInformation(
             AUTH_TOKEN,
@@ -103,22 +113,21 @@ public class AwaitingInformationControllerTest {
     }
 
     @Test
-    public void testSubmitAwaitingInformationSetsCaseStatus() {
+    public void testSubmitAwaitingInformationCallsAddToCaseService() {
+        // Given
+        Map<String, Object> updatedCaseData = new HashMap<>(caseDataMap);
+        when(awaitingInformationService.addToCase(callbackRequest))
+            .thenReturn(updatedCaseData);
+
         // When
-        AboutToStartOrSubmitCallbackResponse response = awaitingInformationController.submitAwaitingInformation(
+        awaitingInformationController.submitAwaitingInformation(
             AUTH_TOKEN,
             S2S_TOKEN,
             callbackRequest
         );
 
         // Then
-        Map<String, Object> data = response.getData();
-        Object caseStatusObj = data.get(PrlAppsConstants.CASE_STATUS);
-        assertNotNull(caseStatusObj);
-        assertTrue(caseStatusObj instanceof CaseStatus);
-
-        CaseStatus caseStatus = (CaseStatus) caseStatusObj;
-        assertEquals("Awaiting information", caseStatus.getState());
+        verify(awaitingInformationService, times(1)).addToCase(callbackRequest);
     }
 
     @Test
@@ -134,6 +143,32 @@ public class AwaitingInformationControllerTest {
         );
     }
 
+    @Test
+    public void testSubmitAwaitingInformationPreservesExistingCaseData() {
+        // Given
+        caseDataMap.put("testKey", "testValue");
+        Map<String, Object> updatedCaseData = new HashMap<>(caseDataMap);
+        updatedCaseData.put(
+            PrlAppsConstants.CASE_STATUS,
+            CaseStatus.builder().state("Awaiting information").build()
+        );
+        when(awaitingInformationService.addToCase(callbackRequest))
+            .thenReturn(updatedCaseData);
+
+        // When
+        AboutToStartOrSubmitCallbackResponse response = awaitingInformationController.submitAwaitingInformation(
+            AUTH_TOKEN,
+            S2S_TOKEN,
+            callbackRequest
+        );
+
+        // Then
+        assertTrue(response.getData().containsKey("testKey"));
+        assertEquals("testValue", response.getData().get("testKey"));
+    }
+
+
+    // Tests for populateHeader method
     @Test
     public void testPopulateHeaderAwaitingInformationSuccessfully() {
         // When
@@ -162,12 +197,27 @@ public class AwaitingInformationControllerTest {
     }
 
     @Test
+    public void testPopulateHeaderReturnsEmptyDataWhenAuthorized() {
+        // When
+        AboutToStartOrSubmitCallbackResponse response = awaitingInformationController.populateHeader(
+            AUTH_TOKEN,
+            S2S_TOKEN,
+            callbackRequest
+        );
+
+        // Then
+        assertNotNull(response);
+        verify(authorisationService, times(1)).isAuthorized(AUTH_TOKEN, S2S_TOKEN);
+    }
+
+    // Tests for validateUrgentCaseCreation (validateAwaitingInformation) method
+    @Test
     public void testValidateAwaitingInformationWithValidDate() {
         // Given
         when(objectMapper.convertValue(caseDetails.getData(), AwaitingInformation.class))
             .thenReturn(awaitingInformation);
         List<String> emptyErrorList = new ArrayList<>();
-        when(awaitingInformationService.validateAwaitingInformation(awaitingInformation))
+        when(awaitingInformationService.validate(awaitingInformation))
             .thenReturn(emptyErrorList);
 
         // When
@@ -177,7 +227,7 @@ public class AwaitingInformationControllerTest {
         assertNotNull(response);
         assertNotNull(response.getErrors());
         assertTrue(response.getErrors().isEmpty());
-        verify(awaitingInformationService, times(1)).validateAwaitingInformation(awaitingInformation);
+        verify(awaitingInformationService, times(1)).validate(awaitingInformation);
     }
 
     @Test
@@ -194,7 +244,7 @@ public class AwaitingInformationControllerTest {
         List<String> errorList = new ArrayList<>();
         errorList.add("The date must be in the future");
 
-        when(awaitingInformationService.validateAwaitingInformation(invalidAwaitingInfo))
+        when(awaitingInformationService.validate(invalidAwaitingInfo))
             .thenReturn(errorList);
 
         // When
@@ -205,7 +255,7 @@ public class AwaitingInformationControllerTest {
         assertNotNull(response.getErrors());
         assertEquals(1, response.getErrors().size());
         assertEquals("The date must be in the future", response.getErrors().getFirst());
-        verify(awaitingInformationService, times(1)).validateAwaitingInformation(invalidAwaitingInfo);
+        verify(awaitingInformationService, times(1)).validate(invalidAwaitingInfo);
     }
 
     @Test
@@ -220,7 +270,7 @@ public class AwaitingInformationControllerTest {
             .thenReturn(nullDateAwaitingInfo);
 
         List<String> emptyErrorList = new ArrayList<>();
-        when(awaitingInformationService.validateAwaitingInformation(nullDateAwaitingInfo))
+        when(awaitingInformationService.validate(nullDateAwaitingInfo))
             .thenReturn(emptyErrorList);
 
         // When
@@ -246,7 +296,7 @@ public class AwaitingInformationControllerTest {
         List<String> errorList = new ArrayList<>();
         errorList.add("The date must be in the future");
 
-        when(awaitingInformationService.validateAwaitingInformation(todayDateAwaitingInfo))
+        when(awaitingInformationService.validate(todayDateAwaitingInfo))
             .thenReturn(errorList);
 
         // When
@@ -257,52 +307,6 @@ public class AwaitingInformationControllerTest {
         assertEquals(1, response.getErrors().size());
     }
 
-    @Test
-    public void testValidateAwaitingInformationConvertsObjectMapperCorrectly() {
-        // Given
-        when(objectMapper.convertValue(caseDetails.getData(), AwaitingInformation.class))
-            .thenReturn(awaitingInformation);
-        when(awaitingInformationService.validateAwaitingInformation(awaitingInformation))
-            .thenReturn(new ArrayList<>());
-
-        // When
-        awaitingInformationController.validateUrgentCaseCreation(callbackRequest);
-
-        // Then
-        verify(objectMapper, times(1)).convertValue(caseDetails.getData(), AwaitingInformation.class);
-    }
-
-    @Test
-    public void testSubmitAwaitingInformationPreservesExistingCaseData() {
-        // Given
-        caseDataMap.put("testKey", "testValue");
-
-        // When
-        AboutToStartOrSubmitCallbackResponse response = awaitingInformationController.submitAwaitingInformation(
-            AUTH_TOKEN,
-            S2S_TOKEN,
-            callbackRequest
-        );
-
-        // Then
-        assertTrue(response.getData().containsKey("testKey"));
-        assertEquals("testValue", response.getData().get("testKey"));
-    }
-
-    @Test
-    public void testPopulateHeaderReturnsEmptyDataWhenAuthorized() {
-        // When
-        AboutToStartOrSubmitCallbackResponse response = awaitingInformationController.populateHeader(
-            AUTH_TOKEN,
-            S2S_TOKEN,
-            callbackRequest
-        );
-
-        // Then
-        assertNotNull(response);
-        // Response may have null or empty data
-        verify(authorisationService, times(1)).isAuthorized(AUTH_TOKEN, S2S_TOKEN);
-    }
 
     @Test
     public void testMultipleValidationErrorsReturned() {
@@ -314,7 +318,7 @@ public class AwaitingInformationControllerTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), AwaitingInformation.class))
             .thenReturn(awaitingInformation);
-        when(awaitingInformationService.validateAwaitingInformation(awaitingInformation))
+        when(awaitingInformationService.validate(awaitingInformation))
             .thenReturn(multipleErrors);
 
         // When
@@ -338,7 +342,7 @@ public class AwaitingInformationControllerTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), AwaitingInformation.class))
             .thenReturn(infoWithOther);
-        when(awaitingInformationService.validateAwaitingInformation(infoWithOther))
+        when(awaitingInformationService.validate(infoWithOther))
             .thenReturn(new ArrayList<>());
 
         // When
@@ -349,6 +353,7 @@ public class AwaitingInformationControllerTest {
         assertTrue(response.getErrors().isEmpty());
     }
 
+    // Helper method for assertion
     protected <T extends Throwable> void assertExpectedException(
         ThrowingRunnable methodExpectedToFail,
         Class<T> expectedThrowableClass,

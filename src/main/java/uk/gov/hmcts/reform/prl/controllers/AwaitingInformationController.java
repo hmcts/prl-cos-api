@@ -19,21 +19,17 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AwaitingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.AwaitingInformationService;
 import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_STATUS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
-import static uk.gov.hmcts.reform.prl.enums.State.AWAITING_INFORMATION;
 
 @Slf4j
 @RestController
@@ -56,21 +52,12 @@ public class AwaitingInformationController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
-        if (authorisationService.isAuthorized(
-            authorisation,
-            s2sToken
-        ) && featureToggleService.isAwaitingInformationEnabled()) {
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            caseDataUpdated.put(
-                CASE_STATUS, CaseStatus.builder()
-                    .state(AWAITING_INFORMATION.getLabel())
-                    .build()
-            );
-            CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
+        if (authorisationService.isAuthorized(authorisation, s2sToken)
+            && featureToggleService.isAwaitingInformationEnabled()) {
+            Map<String, Object> caseDataUpdated = awaitingInformationService.addToCase(callbackRequest);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         }
         throw (new RuntimeException(INVALID_CLIENT));
-
     }
 
     @PostMapping(path = "/populate-header-awaiting-information", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -84,10 +71,8 @@ public class AwaitingInformationController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
-        if (authorisationService.isAuthorized(
-            authorisation,
-            s2sToken
-        ) && featureToggleService.isAwaitingInformationEnabled()) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)
+            && featureToggleService.isAwaitingInformationEnabled()) {
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .build();
         }
@@ -107,7 +92,7 @@ public class AwaitingInformationController {
         if (featureToggleService.isAwaitingInformationEnabled()) {
             AwaitingInformation awaitingInformation = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(), AwaitingInformation.class);
-            List<String> errorList = awaitingInformationService.validateAwaitingInformation(awaitingInformation);
+            List<String> errorList = awaitingInformationService.validate(awaitingInformation);
 
             return CallbackResponse.builder()
                 .errors(errorList)
