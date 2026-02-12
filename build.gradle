@@ -380,7 +380,7 @@ dependencies {
   implementation(group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.28')
   implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.28')
   implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version:'7.4'
-  implementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.5'
+  implementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.6'
   implementation group: 'com.opencsv', name: 'opencsv', version: '5.12.0', {
     exclude group: 'commons-collections', module: 'commons-collections'
   }
@@ -414,7 +414,7 @@ dependencies {
   testImplementation group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: versions.serenity
   testImplementation group: 'net.serenity-bdd', name: 'serenity-spring', version: versions.serenity
   testImplementation group: 'com.github.mifmif', name: 'generex', version: '1.0.2'
-  testImplementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.5'
+  testImplementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.6'
   testImplementation 'org.apiguardian:apiguardian-api:1.1.2'
   testImplementation 'com.github.hmcts:fortify-client:1.4.10:all'
   testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.36'
