@@ -56,7 +56,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFFSORTCOLUMN
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VIDEOPLATFORM;
 
 
-@RunWith(MockitoJUnitRunner.Silent.class)
+@RunWith(MockitoJUnitRunner.class)
 public class RefDataUserServiceTest {
 
     public static final String FLAG_TYPE = "PARTY";
@@ -73,16 +73,7 @@ public class RefDataUserServiceTest {
     StaffResponseDetailsApi staffResponseDetailsApi;
 
     @Mock
-    StaffProfile staffProfile;
-
-    @Mock
-    StaffResponse staffResponse;
-
-    @Mock
     JudicialUserDetailsApi judicialUserDetailsApi;
-
-    @Mock
-    JudicialUsersApiRequest judicialUsersApiRequest;
 
     @Mock
     CommonDataRefApi commonDataRefApi;
@@ -546,15 +537,6 @@ public class RefDataUserServiceTest {
             RD_STAFF_PAGE_SIZE,
             RD_STAFF_FIRST_PAGE
         )).thenReturn(staffResponseFirstPage);
-        when(staffResponseDetailsApi.getAllStaffResponseDetails(
-            idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword),
-            authTokenGenerator.generate(),
-            SERVICENAME,
-            STAFFSORTCOLUMN,
-            STAFFORDERASC,
-            RD_STAFF_PAGE_SIZE,
-            RD_STAFF_SECOND_PAGE
-        )).thenReturn(staffResponseSecondPage);
 
         List<DynamicListElement> legalAdvisorList = refDataUserService.getLegalAdvisorList();
 
