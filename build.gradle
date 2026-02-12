@@ -25,7 +25,7 @@ plugins {
 def versions = [
   awaitility                   : '4.3.0',
   bcpkixJdk18on                : '1.83',
-  ccdClient                    : '5.2.0',
+  ccdClient                    : '4.9.2',
   commonsBeanUtils             : '1.11.0',
   commonsIo                    : '2.21.0',
   commonsLang3                 : '3.20.0',
@@ -50,7 +50,7 @@ def versions = [
   serenityCucumber             : '4.3.4',
   serviceTokenGenerator        : '4.1.2',
   sonarPitest                  : '0.5',
-  springSecurityCrypto         : '6.5.7',
+  springSecurityCrypto         : '6.5.0',
   springSecurityRsa            : '1.1.5',
   springBoot                   : '3.5.10',
   springCloud                  : '4.3.0',
@@ -91,11 +91,11 @@ allprojects {
     }
   }
 
-    java {
-        toolchain {
-            languageVersion = JavaLanguageVersion.of(21)
-        }
+  java {
+    toolchain {
+      languageVersion = JavaLanguageVersion.of(21)
     }
+  }
 
   tasks.withType(JavaExec).configureEach {
     javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
@@ -139,18 +139,18 @@ allprojects {
         entry 'jackson-module-parameter-names'
       }
 
-        // solves CVE-2014-3488, CVE-2015-2156, CVE-2019-16869, CVE-2021-21409,CVE-2025-25193
-        dependencySet(group: 'io.netty', version: '4.2.10.Final') {
-            entry 'netty-buffer'
-            entry 'netty-codec'
-            entry 'netty-codec-http'
-            entry 'netty-common'
-            entry 'netty-handler'
-            entry 'netty-resolver'
-            entry 'netty-transport'
-            entry 'netty-transport-native-unix-common'
-            entry 'netty-transport-classes-epoll'
-        }
+      // solves CVE-2014-3488, CVE-2015-2156, CVE-2019-16869, CVE-2021-21409,CVE-2025-25193
+      dependencySet(group: 'io.netty', version: '4.2.10.Final') {
+        entry 'netty-buffer'
+        entry 'netty-codec'
+        entry 'netty-codec-http'
+        entry 'netty-common'
+        entry 'netty-handler'
+        entry 'netty-resolver'
+        entry 'netty-transport'
+        entry 'netty-transport-native-unix-common'
+        entry 'netty-transport-classes-epoll'
+      }
 
       // CVE-2019-10086
       dependency group: 'commons-beanutils', name: 'commons-beanutils', version: '1.11.0'
@@ -289,7 +289,7 @@ configurations.configureEach {
   resolutionStrategy {
     force 'org.bouncycastle:bcpkix-jdk18on:1.83'
     force 'org.springframework.security:spring-security-rsa:1.1.5'
-    force 'org.springframework.security:spring-security-crypto:6.5.7'
+    force 'org.springframework.security:spring-security-crypto:6.5.0'
     force 'ch.qos.logback:logback-classic:1.5.28'
     force 'ch.qos.logback:logback-core:1.5.28'
   }
@@ -355,9 +355,9 @@ dependencies {
   implementation group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
   implementation group: 'com.sendgrid', name: 'sendgrid-java', version: '4.10.3'
   implementation group: 'commons-net', name: 'commons-net', version: '3.12.0'
-  implementation group: 'org.springframework.security', name: 'spring-security-web', version: '6.5.7'
+  implementation group: 'org.springframework.security', name: 'spring-security-web', version: '6.5.0'
 //  // CVE-2021-22112 - Privilege Escalation
-  implementation group: 'org.springframework.security', name: 'spring-security-core', version: '6.5.7'
+  implementation group: 'org.springframework.security', name: 'spring-security-core', version: '6.5.0'
   implementation(group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.3.0')
     {
       exclude group: 'io.reactivex', module: 'io.reactivex'
@@ -388,9 +388,9 @@ dependencies {
 
 
   runtimeOnly('org.springframework.boot:spring-boot-devtools')
-    testImplementation group: 'org.awaitility', name: 'awaitility', version: versions.awaitility
-    testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: versions.springCloud
-    testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test') {
+  testImplementation group: 'org.awaitility', name: 'awaitility', version: versions.awaitility
+  testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: versions.springCloud
+  testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test') {
     exclude(module: 'commons-logging')
     exclude(module: 'android-json')
     exclude module: 'junit'

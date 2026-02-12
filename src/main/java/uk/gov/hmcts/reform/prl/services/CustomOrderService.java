@@ -647,6 +647,7 @@ public class CustomOrderService {
     private void putRespondentPlaceholders(Map<String, Object> data, int index, String name, String relationship, String representative) {
         data.put(RESPONDENT_PREFIX + index + "Name", name);
         data.put(RESPONDENT_PREFIX + index + "RelationshipToChild", relationship);
+        data.put(RESPONDENT_PREFIX + index + "RelationshipClause", relationship.isEmpty() ? "" : "(" + relationship + ")");
         data.put(RESPONDENT_PREFIX + index + "RepresentativeName", representative);
         data.put(RESPONDENT_PREFIX + index + "RepresentativeClause", formatRepresentativeClause(representative));
     }
@@ -655,6 +656,7 @@ public class CustomOrderService {
         for (int i = 1; i <= 5; i++) {
             data.putIfAbsent(RESPONDENT_PREFIX + i + "Name", "");
             data.putIfAbsent(RESPONDENT_PREFIX + i + "RelationshipToChild", "");
+            data.putIfAbsent(RESPONDENT_PREFIX + i + "RelationshipClause", "");
             data.putIfAbsent(RESPONDENT_PREFIX + i + "RepresentativeName", "");
             data.putIfAbsent(RESPONDENT_PREFIX + i + "RepresentativeClause", "");
         }
