@@ -647,7 +647,9 @@ public class CustomOrderService {
         row.put("ordinal", getOrdinal(index));
         row.put("name", name);
         row.put("relationship", relationship);
+        row.put("relationshipClause", relationship.isEmpty() ? "" : ", the " + relationship);
         row.put("representative", representative);
+        row.put("representativeClause", formatRepresentativeClause(representative));
         return row;
     }
 
@@ -900,13 +902,13 @@ public class CustomOrderService {
     }
 
     /**
-     * Formats the representative clause - returns "represented by [name]" or empty if no representative.
+     * Formats the representative clause - returns ", represented by [name]" or empty if no representative.
      */
     private String formatRepresentativeClause(String representativeName) {
         if (representativeName == null || representativeName.trim().isEmpty()) {
             return "";
         }
-        return "represented by " + representativeName;
+        return ", represented by " + representativeName;
     }
 
     /**

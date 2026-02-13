@@ -909,7 +909,7 @@ public class CustomOrderServiceTest {
         customOrderService.renderHeaderPreview(caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
-        assertEquals("represented by Emma Solicitor", placeholders.get("respondent1RepresentativeClause"));
+        assertEquals(", represented by Emma Solicitor", placeholders.get("respondent1RepresentativeClause"));
     }
 
     @Test
@@ -1024,25 +1024,25 @@ public class CustomOrderServiceTest {
         // Verify applicant
         assertEquals("Alice Thompson", placeholders.get("applicantName"));
         assertEquals("Robert Counsel QC", placeholders.get("applicantRepresentativeName"));
-        assertEquals("represented by Robert Counsel QC", placeholders.get("applicantRepresentativeClause"));
+        assertEquals(", represented by Robert Counsel QC", placeholders.get("applicantRepresentativeClause"));
 
         // Verify respondent 1 - Mother
         assertEquals("Barbara Jones", placeholders.get("respondent1Name"));
         assertEquals("Mother", placeholders.get("respondent1RelationshipToChild"));
         assertEquals("Sarah Solicitor", placeholders.get("respondent1RepresentativeName"));
-        assertEquals("represented by Sarah Solicitor", placeholders.get("respondent1RepresentativeClause"));
+        assertEquals(", represented by Sarah Solicitor", placeholders.get("respondent1RepresentativeClause"));
 
         // Verify respondent 2 - Father
         assertEquals("Charles Jones", placeholders.get("respondent2Name"));
         assertEquals("Father", placeholders.get("respondent2RelationshipToChild"));
         assertEquals("Michael Barrister", placeholders.get("respondent2RepresentativeName"));
-        assertEquals("represented by Michael Barrister", placeholders.get("respondent2RepresentativeClause"));
+        assertEquals(", represented by Michael Barrister", placeholders.get("respondent2RepresentativeClause"));
 
         // Verify respondent 3 - Grandmother
         assertEquals("Dorothy Smith", placeholders.get("respondent3Name"));
         assertEquals("Grandparent", placeholders.get("respondent3RelationshipToChild"));
         assertEquals("Emma Legal Rep", placeholders.get("respondent3RepresentativeName"));
-        assertEquals("represented by Emma Legal Rep", placeholders.get("respondent3RepresentativeClause"));
+        assertEquals(", represented by Emma Legal Rep", placeholders.get("respondent3RepresentativeClause"));
 
         // Verify children
         List<Map<String, String>> children = (List<Map<String, String>>) placeholders.get("children");
