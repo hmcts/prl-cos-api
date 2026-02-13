@@ -79,7 +79,7 @@ public class AwaitingInformationControllerTest {
 
         awaitingInformation = AwaitingInformation.builder()
             .reviewDate(LocalDate.now().plusDays(5))
-            .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.immediateRisk)
+            .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.applicantFurtherInformation)
             .build();
 
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
@@ -235,7 +235,7 @@ public class AwaitingInformationControllerTest {
         // Given
         AwaitingInformation invalidAwaitingInfo = AwaitingInformation.builder()
             .reviewDate(LocalDate.now().minusDays(1))
-            .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.immediateRisk)
+            .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.applicantFurtherInformation)
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), AwaitingInformation.class))
@@ -263,7 +263,7 @@ public class AwaitingInformationControllerTest {
         // Given
         AwaitingInformation nullDateAwaitingInfo = AwaitingInformation.builder()
             .reviewDate(null)
-            .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.immediateRisk)
+            .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.applicantFurtherInformation)
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), AwaitingInformation.class))
@@ -287,7 +287,7 @@ public class AwaitingInformationControllerTest {
         // Given
         AwaitingInformation todayDateAwaitingInfo = AwaitingInformation.builder()
             .reviewDate(LocalDate.now())
-            .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.immediateRisk)
+            .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.applicantFurtherInformation)
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), AwaitingInformation.class))
@@ -337,7 +337,7 @@ public class AwaitingInformationControllerTest {
         // Given
         AwaitingInformation infoWithOther = AwaitingInformation.builder()
             .reviewDate(LocalDate.now().plusDays(10))
-            .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.immediateRisk)
+            .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.applicantFurtherInformation)
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), AwaitingInformation.class))

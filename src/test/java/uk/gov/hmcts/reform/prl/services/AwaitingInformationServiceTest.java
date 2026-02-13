@@ -49,7 +49,7 @@ public class AwaitingInformationServiceTest {
         when(featureToggleService.isAwaitingInformationEnabled()).thenReturn(true);
         awaitingInformation = AwaitingInformation.builder()
             .reviewDate(LocalDate.now().plusDays(5))
-            .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.immediateRisk)
+            .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.applicantFurtherInformation)
             .build();
 
         caseDataMap = new HashMap<>();
@@ -72,7 +72,7 @@ public class AwaitingInformationServiceTest {
         // Given
         awaitingInformation = AwaitingInformation.builder()
             .reviewDate(LocalDate.now().plusDays(1))
-            .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.immediateRisk)
+            .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.applicantFurtherInformation)
             .build();
 
         // When
@@ -88,7 +88,7 @@ public class AwaitingInformationServiceTest {
         // Given
         awaitingInformation = AwaitingInformation.builder()
             .reviewDate(LocalDate.now())
-            .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.immediateRisk)
+            .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.applicantFurtherInformation)
             .build();
 
         // When
@@ -106,7 +106,7 @@ public class AwaitingInformationServiceTest {
         // Given
         awaitingInformation = AwaitingInformation.builder()
             .reviewDate(LocalDate.now().minusDays(1))
-            .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.immediateRisk)
+            .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.applicantFurtherInformation)
             .build();
 
         // When
@@ -124,7 +124,7 @@ public class AwaitingInformationServiceTest {
         // Given
         awaitingInformation = AwaitingInformation.builder()
             .reviewDate(null)
-            .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.immediateRisk)
+            .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.applicantFurtherInformation)
             .build();
 
         // When
@@ -139,8 +139,8 @@ public class AwaitingInformationServiceTest {
     public void testValidateAwaitingInformationWithDifferentReasons() {
         // Test with different reason enums
         AwaitingInformationReasonEnum[] reasons = {
-            AwaitingInformationReasonEnum.immediateRisk,
-            AwaitingInformationReasonEnum.leaveTheJurisdiction,
+            AwaitingInformationReasonEnum.applicantFurtherInformation,
+            AwaitingInformationReasonEnum.applicantClarifyConfidentialDetails,
             AwaitingInformationReasonEnum.other
         };
 
@@ -203,7 +203,7 @@ public class AwaitingInformationServiceTest {
         // Given
         AwaitingInformation nullDateInfo = AwaitingInformation.builder()
             .reviewDate(null)
-            .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.immediateRisk)
+            .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.applicantFurtherInformation)
             .build();
         when(objectMapper.convertValue(eq(caseDataMap), eq(AwaitingInformation.class)))
             .thenReturn(nullDateInfo);
