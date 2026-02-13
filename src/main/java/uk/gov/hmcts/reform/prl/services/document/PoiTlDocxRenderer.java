@@ -22,10 +22,11 @@ public class PoiTlDocxRenderer {
     private static final LoopRowTableRenderPolicy LOOP_ROW_POLICY = new LoopRowTableRenderPolicy(true);
 
     // Configure poi-tl with default {{placeholder}} grammar
-    // Bind 'children' to LoopRowTableRenderPolicy for dynamic children table rows
+    // Bind 'children' and 'respondents' to LoopRowTableRenderPolicy for dynamic table rows
     // Loop row fields use [fieldName] syntax (built into LoopRowTableRenderPolicy)
     private static final Configure CONFIG = Configure.builder()
         .bind("children", LOOP_ROW_POLICY)
+        .bind("respondents", LOOP_ROW_POLICY)
         .build();
 
     public byte[] render(byte[] templateDocxBytes, Map<String, Object> data) {

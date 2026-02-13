@@ -55,6 +55,12 @@ public class CustomOrderService {
     private static final String RESPONDENT_PREFIX = "respondent";
     private static final String DEFAULT_ORDER_NAME = "custom_order";
     private static final String HEADER_PREVIEW_FILENAME_PATTERN = "custom_order_header_preview";
+    private static final String ORDER_COLLECTION = "orderCollection";
+    private static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
+    private static final String CUSTOM_ORDER_DOC = "customOrderDoc";
+    private static final String CUSTOM_ORDER_USED_CDAM_ASSOCIATION = "customOrderUsedCdamAssociation";
+    private static final String DOCX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+    private static final String APPLICANT_NAME = "applicantName";
     private static final java.time.format.DateTimeFormatter DATE_FORMATTER =
         java.time.format.DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
 
@@ -143,7 +149,7 @@ public class CustomOrderService {
 
         // Read customOrderDoc from raw map (not in CaseData model due to constructor param limit)
         uk.gov.hmcts.reform.prl.models.documents.Document templateDoc = objectMapper.convertValue(
-            caseDataUpdated.get("customOrderDoc"),
+            caseDataUpdated.get(CUSTOM_ORDER_DOC),
             uk.gov.hmcts.reform.prl.models.documents.Document.class
         );
         if (templateDoc == null || templateDoc.getDocumentBinaryUrl() == null) {
@@ -166,7 +172,7 @@ public class CustomOrderService {
         log.info("Successfully downloaded document, size: {} bytes", templateBytes != null ? templateBytes.length : 0);
 
         // Mark that we need fresh event submission due to CDAM association (version increment)
-        caseDataUpdated.put("customOrderUsedCdamAssociation", "Yes");
+        caseDataUpdated.put(CUSTOM_ORDER_USED_CDAM_ASSOCIATION, "Yes");
 
         // 2) Build placeholders (minimal POC + names/solicitors if possible)
         Map<String, Object> data = buildCustomOrderPlaceholders(caseId, caseData, caseDataUpdated);
@@ -202,7 +208,7 @@ public class CustomOrderService {
             uploadService.uploadDocument(
                 filledDocxBytes,
                 outName,
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                DOCX_CONTENT_TYPE,
                 authorisation
             );
 
@@ -280,7 +286,7 @@ public class CustomOrderService {
 
         // Include the document in the case data submission so CDAM associates it with the case
         Map<String, Object> caseDataWithDoc = new HashMap<>(startContent.caseDataMap());
-        caseDataWithDoc.put("customOrderDoc", document);
+        caseDataWithDoc.put(CUSTOM_ORDER_DOC, document);
         log.info("Including customOrderDoc in internal-custom-order-submit submission");
 
         allTabService.submitAllTabsUpdate(
@@ -316,8 +322,8 @@ public class CustomOrderService {
         );
 
         // Ensure customOrderDoc is NOT in the final saved state
-        caseDataUpdated.remove("customOrderDoc");
-        caseDataUpdated.remove("customOrderUsedCdamAssociation");
+        caseDataUpdated.remove(CUSTOM_ORDER_DOC);
+        caseDataUpdated.remove(CUSTOM_ORDER_USED_CDAM_ASSOCIATION);
 
         allTabService.submitAllTabsUpdate(
             startContent.authorisation(),
@@ -340,7 +346,7 @@ public class CustomOrderService {
     public boolean requiresFreshEventSubmission(Map<String, Object> caseDataUpdated) {
         // Only need fresh event if we had to use CDAM association (which increments case version)
         // If user's auth token worked for download, no version conflict
-        return "Yes".equals(caseDataUpdated.get("customOrderUsedCdamAssociation"));
+        return "Yes".equals(caseDataUpdated.get(CUSTOM_ORDER_USED_CDAM_ASSOCIATION));
     }
 
     // ========== NEW FLOW: Header from resources + User's uploaded content ==========
@@ -373,7 +379,7 @@ public class CustomOrderService {
         uk.gov.hmcts.reform.ccd.document.am.model.Document uploaded = uploadService.uploadDocument(
             headerBytes,
             previewName,
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            DOCX_CONTENT_TYPE,
             authorisation
         );
 
@@ -494,14 +500,14 @@ public class CustomOrderService {
     }
 
     private void populateApplicantData(Map<String, Object> data, PartyDetails applicant) {
-        data.put("applicantName", getFullName(applicant.getFirstName(), applicant.getLastName()));
+        data.put(APPLICANT_NAME, getFullName(applicant.getFirstName(), applicant.getLastName()));
         String appRep = getRepresentativeName(applicant);
         data.put("applicantRepresentativeName", appRep);
         data.put("applicantRepresentativeClause", formatRepresentativeClause(appRep));
     }
 
     private void setEmptyApplicantPlaceholders(Map<String, Object> data) {
-        data.put("applicantName", "");
+        data.put(APPLICANT_NAME, "");
         data.put("applicantRepresentativeName", "");
         data.put("applicantRepresentativeClause", "");
     }
@@ -544,7 +550,7 @@ public class CustomOrderService {
         populateChildrenPlaceholders(data, caseData);
 
         log.info("Final header placeholders - judgeName={}, orderDate={}, applicantName={}, respondent1Name={}",
-            data.get("judgeName"), data.get("orderDate"), data.get("applicantName"), data.get("respondent1Name"));
+            data.get("judgeName"), data.get("orderDate"), data.get(APPLICANT_NAME), data.get("respondent1Name"));
         return data;
     }
 
@@ -604,7 +610,7 @@ public class CustomOrderService {
         String relationship = getEffectiveRelationship(caseData, respondent, 1, null, name);
         String representative = getRepresentativeName(respondent);
 
-        respondentRows.add(buildRespondentRow(name, relationship, representative));
+        respondentRows.add(buildRespondentRow(1, name, relationship, representative));
         putRespondentPlaceholders(data, 1, name, relationship, representative);
     }
 
@@ -622,7 +628,7 @@ public class CustomOrderService {
             String relationship = getEffectiveRelationship(caseData, respondent, index, respondentId, name);
             String representative = getRepresentativeName(respondent);
 
-            respondentRows.add(buildRespondentRow(name, relationship, representative));
+            respondentRows.add(buildRespondentRow(index, name, relationship, representative));
             putRespondentPlaceholders(data, index, name, relationship, representative);
             index++;
         }
@@ -636,12 +642,22 @@ public class CustomOrderService {
         return relationship;
     }
 
-    private Map<String, String> buildRespondentRow(String name, String relationship, String representative) {
+    private Map<String, String> buildRespondentRow(int index, String name, String relationship, String representative) {
         Map<String, String> row = new HashMap<>();
+        row.put("ordinal", getOrdinal(index));
         row.put("name", name);
         row.put("relationship", relationship);
         row.put("representative", representative);
         return row;
+    }
+
+    private String getOrdinal(int index) {
+        return switch (index) {
+            case 1 -> "1st";
+            case 2 -> "2nd";
+            case 3 -> "3rd";
+            default -> index + "th";
+        };
     }
 
     private void putRespondentPlaceholders(Map<String, Object> data, int index, String name, String relationship, String representative) {
@@ -1079,7 +1095,7 @@ public class CustomOrderService {
         uk.gov.hmcts.reform.ccd.document.am.model.Document uploaded = uploadService.uploadDocument(
             combinedBytes,
             fileName,
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            DOCX_CONTENT_TYPE,
             authorisation
         );
 
@@ -1196,7 +1212,7 @@ public class CustomOrderService {
                     .value(updatedDraft)
                     .build());
 
-            caseDataUpdated.put("draftOrderCollection", updatedDraftCollection);
+            caseDataUpdated.put(DRAFT_ORDER_COLLECTION, updatedDraftCollection);
             log.info("Updated draftOrderCollection[{}] with combined doc: {}",
                 location.index(), combinedDoc.getDocumentFileName());
         } else {
@@ -1218,7 +1234,7 @@ public class CustomOrderService {
                     .value(updatedOrder)
                     .build());
 
-            caseDataUpdated.put("orderCollection", updatedOrderCollection);
+            caseDataUpdated.put(ORDER_COLLECTION, updatedOrderCollection);
             log.info("Updated orderCollection[{}] with combined doc: {}",
                 location.index(), combinedDoc.getDocumentFileName());
         }
@@ -1307,7 +1323,7 @@ public class CustomOrderService {
                 .value(updatedOrder)
                 .build());
 
-            caseDataMap.put("orderCollection", updatedOrderCollection);
+            caseDataMap.put(ORDER_COLLECTION, updatedOrderCollection);
 
             // Submit the update
             allTabService.submitAllTabsUpdate(
@@ -1322,7 +1338,7 @@ public class CustomOrderService {
 
             // Return the updated orderCollection so it can be included in the response
             Map<String, Object> result = new HashMap<>();
-            result.put("orderCollection", updatedOrderCollection);
+            result.put(ORDER_COLLECTION, updatedOrderCollection);
             return result;
 
         } catch (Exception e) {
@@ -1420,7 +1436,7 @@ public class CustomOrderService {
                 .value(updatedOrder)
                 .build());
 
-            caseDataMap.put("orderCollection", updatedOrderCollection);
+            caseDataMap.put(ORDER_COLLECTION, updatedOrderCollection);
 
             // Submit the update
             allTabService.submitAllTabsUpdate(
@@ -1560,7 +1576,7 @@ public class CustomOrderService {
     ) {
         try {
             // Get the user's uploaded document
-            Object customOrderDocObj = caseDataUpdated.get("customOrderDoc");
+            Object customOrderDocObj = caseDataUpdated.get(CUSTOM_ORDER_DOC);
             uk.gov.hmcts.reform.prl.models.documents.Document customOrderDoc = null;
             if (customOrderDocObj != null) {
                 customOrderDoc = objectMapper.convertValue(customOrderDocObj,
@@ -1642,7 +1658,7 @@ public class CustomOrderService {
 
     private void updateDraftOrderCollection(Map<String, Object> caseDataUpdated,
                                             uk.gov.hmcts.reform.prl.models.documents.Document docToStore) {
-        Object rawDrafts = caseDataUpdated.get("draftOrderCollection");
+        Object rawDrafts = caseDataUpdated.get(DRAFT_ORDER_COLLECTION);
         if (rawDrafts == null) {
             log.warn("draftOrderCollection is null, cannot update");
             return;
@@ -1666,13 +1682,13 @@ public class CustomOrderService {
             .id(draftElement.getId())
             .value(updatedDraft)
             .build());
-        caseDataUpdated.put("draftOrderCollection", drafts);
+        caseDataUpdated.put(DRAFT_ORDER_COLLECTION, drafts);
         log.info("Updated draftOrderCollection[0] with doc: {}", docToStore.getDocumentFileName());
     }
 
     private void updateFinalOrderCollection(Map<String, Object> caseDataUpdated,
                                             uk.gov.hmcts.reform.prl.models.documents.Document docToStore) {
-        Object rawOrders = caseDataUpdated.get("orderCollection");
+        Object rawOrders = caseDataUpdated.get(ORDER_COLLECTION);
         if (rawOrders == null) {
             log.warn("orderCollection is null, cannot update");
             return;
@@ -1697,7 +1713,7 @@ public class CustomOrderService {
             .id(orderElement.getId())
             .value(updatedOrder)
             .build());
-        caseDataUpdated.put("orderCollection", orders);
+        caseDataUpdated.put(ORDER_COLLECTION, orders);
         log.info("Updated orderCollection[0] with sealed doc: {}", docToStore.getDocumentFileName());
     }
 }
