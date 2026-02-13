@@ -252,7 +252,7 @@ public class UpdatePartyDetailsService {
                     generateC8.accept(latest);
                 } catch (Exception e) {
                     log.error("Failed to generate C8 document for C100 case {}. Error: {}",
-                              callbackRequest.getCaseDetails().getId(), e.getMessage());
+                              callbackRequest.getCaseDetails().getId(), e.getMessage(), e);
                 }
             } else {
                 log.info("No respondents available for C8 generation for case: {}; skipping.",
