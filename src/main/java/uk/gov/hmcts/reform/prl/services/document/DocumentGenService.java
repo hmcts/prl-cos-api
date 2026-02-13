@@ -369,14 +369,19 @@ public class DocumentGenService {
             updatedCaseData.put("isWelshDocGen", Yes.toString());
             addWelshC8DocumentToUpdatedCaseData(authorisation, caseData, updatedCaseData);
             addWelshC1ADocumentToUpdatedCaseData(authorisation, caseData, updatedCaseData);
-            if (State.CASE_ISSUED.equals(caseData.getState())
-                || State.SUBMITTED_PAID.equals(caseData.getState())
-                || State.JUDICIAL_REVIEW.equals(caseData.getState())) {
-                updatedCaseData.put(
-                    DOCUMENT_FIELD_FINAL_WELSH,
-                    getDocument(authorisation, caseData, FINAL_HINT, true)
-                );
-            }
+            addWelshC100FinalDocumentToUpdatedCaseData(authorisation, caseData, updatedCaseData);
+        }
+    }
+
+    private void addWelshC100FinalDocumentToUpdatedCaseData(String authorisation, CaseData caseData,
+                                                            Map<String, Object> updatedCaseData) throws Exception {
+        if (State.CASE_ISSUED.equals(caseData.getState())
+            || State.SUBMITTED_PAID.equals(caseData.getState())
+            || State.JUDICIAL_REVIEW.equals(caseData.getState())) {
+            updatedCaseData.put(
+                DOCUMENT_FIELD_FINAL_WELSH,
+                getDocument(authorisation, caseData, FINAL_HINT, true)
+            );
         }
     }
 
@@ -448,11 +453,16 @@ public class DocumentGenService {
             updatedCaseData.put(ENGDOCGEN, Yes.toString());
             addEnglishC8DocumentToUpdatedCaseData(authorisation, caseData, updatedCaseData);
             addEnglishC1ADocumentToUpdatedCaseData(authorisation, caseData, updatedCaseData);
-            if (State.CASE_ISSUED.equals(caseData.getState())
-                || State.SUBMITTED_PAID.equals(caseData.getState())
-                || State.JUDICIAL_REVIEW.equals(caseData.getState())) {
-                updatedCaseData.put(DOCUMENT_FIELD_FINAL, getDocument(authorisation, caseData, FINAL_HINT, false));
-            }
+            addEnglishC100FinalDocumentToUpdatedCaseData(authorisation, caseData, updatedCaseData);
+        }
+    }
+
+    private void addEnglishC100FinalDocumentToUpdatedCaseData(String authorisation, CaseData caseData,
+                                                              Map<String, Object> updatedCaseData) throws Exception {
+        if (State.CASE_ISSUED.equals(caseData.getState())
+            || State.SUBMITTED_PAID.equals(caseData.getState())
+            || State.JUDICIAL_REVIEW.equals(caseData.getState())) {
+            updatedCaseData.put(DOCUMENT_FIELD_FINAL, getDocument(authorisation, caseData, FINAL_HINT, false));
         }
     }
 
