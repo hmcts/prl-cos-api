@@ -87,8 +87,8 @@ public class RefDataUserServiceTest {
     @Value("${prl.refdata.password}")
     private String refDataIdamPassword;
 
-    public static final String authToken = "Bearer TestAuthToken";
-    public static final String s2sToken = "Bearer TestAuthToken";
+    public static final String AUTH_TOKEN = "Bearer TestAuthToken";
+    public static final String S2S_TOKEN = "Bearer TestAuthToken";
 
 
     @Test
@@ -172,7 +172,7 @@ public class RefDataUserServiceTest {
         listOfStaffResponse.add(staffResponse1);
         listOfStaffResponse.add(staffResponse2);
         ResponseEntity<List<StaffResponse>> staffResponse = ResponseEntity.ok().body(listOfStaffResponse);
-        when(idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword)).thenReturn(authToken);
+        when(idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword)).thenReturn(AUTH_TOKEN);
         when(authTokenGenerator.generate()).thenReturn("s2sToken");
         when(staffResponseDetailsApi.getAllStaffResponseDetails(
             idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword),
@@ -213,7 +213,7 @@ public class RefDataUserServiceTest {
         listOfStaffResponse.add(staffResponse1);
         listOfStaffResponse.add(staffResponse2);
         ResponseEntity<List<StaffResponse>> staffResponse = ResponseEntity.ok().body(listOfStaffResponse);
-        when(idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword)).thenReturn(authToken);
+        when(idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword)).thenReturn(AUTH_TOKEN);
         when(authTokenGenerator.generate()).thenReturn("s2sToken");
         when(staffResponseDetailsApi.getAllStaffResponseDetails(
             idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword),
@@ -238,8 +238,8 @@ public class RefDataUserServiceTest {
 
     @Test
     public void testGetAllJudicialUsersForV2() {
-        when(idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword)).thenReturn(authToken);
-        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        when(idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword)).thenReturn(AUTH_TOKEN);
+        when(authTokenGenerator.generate()).thenReturn(S2S_TOKEN);
         JudicialUsersApiResponse judge1 = JudicialUsersApiResponse.builder().surname("lastName1").fullName("judge1@test.com").build();
         JudicialUsersApiResponse judge2 = JudicialUsersApiResponse.builder().surname("lastName2").fullName("judge2@test.com").build();
         List<JudicialUsersApiResponse> listOfJudges = new ArrayList<>();
@@ -259,8 +259,8 @@ public class RefDataUserServiceTest {
 
     @Test
     public void testGetAllJudicialUsersForV1() {
-        when(idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword)).thenReturn(authToken);
-        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        when(idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword)).thenReturn(AUTH_TOKEN);
+        when(authTokenGenerator.generate()).thenReturn(S2S_TOKEN);
         JudicialUsersApiResponse judge1 = JudicialUsersApiResponse.builder().surname("lastName1").fullName("judge1@test.com").build();
         JudicialUsersApiResponse judge2 = JudicialUsersApiResponse.builder().surname("lastName2").fullName("judge2@test.com").build();
         List<JudicialUsersApiResponse> listOfJudges = new ArrayList<>();
@@ -280,7 +280,7 @@ public class RefDataUserServiceTest {
 
     @Test
     public void testGetHearingTypeWithData() {
-        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        when(authTokenGenerator.generate()).thenReturn(S2S_TOKEN);
 
         List<CategoryValues> listOfCategoryValues = new ArrayList<>();
         CategoryValues categoryValues1 = CategoryValues.builder().categoryKey("HearingType").valueEn("Celebration hearing").build();
@@ -288,13 +288,14 @@ public class RefDataUserServiceTest {
         listOfCategoryValues.add(categoryValues1);
         listOfCategoryValues.add(categoryValues2);
         CommonDataResponse commonDataResponse = CommonDataResponse.builder().categoryValues(listOfCategoryValues).build();
-        when(commonDataRefApi.getAllCategoryValuesByCategoryId(authToken,
-                                                               authTokenGenerator.generate(),
-                                                               HEARINGTYPE,
-                                                               SERVICE_ID,
-                                                               IS_HEARINGCHILDREQUIRED_N)).thenReturn(commonDataResponse);
+        when(commonDataRefApi.getAllCategoryValuesByCategoryId(
+            AUTH_TOKEN,
+            authTokenGenerator.generate(),
+            HEARINGTYPE,
+            SERVICE_ID,
+            IS_HEARINGCHILDREQUIRED_N)).thenReturn(commonDataResponse);
         CommonDataResponse commonResponse = refDataUserService.retrieveCategoryValues(
-            authToken,
+            AUTH_TOKEN,
             HEARINGTYPE,
             IS_HEARINGCHILDREQUIRED_N
         );
@@ -314,11 +315,12 @@ public class RefDataUserServiceTest {
         List<Flag> flags = new ArrayList<>();
         flags.add(flag1);
         CaseFlag caseFlagResponse = CaseFlag.builder().flags(flags).build();
-        when(authTokenGenerator.generate()).thenReturn(s2sToken);
-        when(commonDataRefApi.retrieveCaseFlagsByServiceId(authToken, authTokenGenerator.generate(), SERVICE_ID,
-                                                           FLAG_TYPE)).thenReturn(caseFlagResponse);
+        when(authTokenGenerator.generate()).thenReturn(S2S_TOKEN);
+        when(commonDataRefApi.retrieveCaseFlagsByServiceId(
+            AUTH_TOKEN, authTokenGenerator.generate(), SERVICE_ID,
+            FLAG_TYPE)).thenReturn(caseFlagResponse);
         CaseFlag caseFlag = refDataUserService.retrieveCaseFlags(
-            authToken,
+            AUTH_TOKEN,
             FLAG_TYPE
         );
         assertEquals("ABCD",caseFlag.getFlags().get(0).getFlagDetails().get(0).getFlagCode());
@@ -328,17 +330,18 @@ public class RefDataUserServiceTest {
 
     @Test
     public void testGetHearingTypeNullData() {
-        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        when(authTokenGenerator.generate()).thenReturn(S2S_TOKEN);
 
         List<CategoryValues> listOfCategoryValues = new ArrayList<>();
         CommonDataResponse commonDataResponse = CommonDataResponse.builder().categoryValues(listOfCategoryValues).build();
-        when(commonDataRefApi.getAllCategoryValuesByCategoryId(authToken,
-                                                               authTokenGenerator.generate(),
-                                                               HEARINGTYPE,
-                                                               SERVICE_ID,
-                                                               IS_HEARINGCHILDREQUIRED_N)).thenReturn(commonDataResponse);
+        when(commonDataRefApi.getAllCategoryValuesByCategoryId(
+            AUTH_TOKEN,
+            authTokenGenerator.generate(),
+            HEARINGTYPE,
+            SERVICE_ID,
+            IS_HEARINGCHILDREQUIRED_N)).thenReturn(commonDataResponse);
         CommonDataResponse commonResponse = refDataUserService.retrieveCategoryValues(
-            authToken,
+            AUTH_TOKEN,
             HEARINGTYPE,
             IS_HEARINGCHILDREQUIRED_N
         );
@@ -348,7 +351,7 @@ public class RefDataUserServiceTest {
     @Test
     public void testGetHearingChannelWithData() {
 
-        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        when(authTokenGenerator.generate()).thenReturn(S2S_TOKEN);
 
         List<CategoryValues> listOfCategoryValues = new ArrayList<>();
         CategoryValues categoryValues1 = CategoryValues.builder().key("ONPPRS").valueEn("On the Papers").build();
@@ -356,13 +359,14 @@ public class RefDataUserServiceTest {
         listOfCategoryValues.add(categoryValues1);
         listOfCategoryValues.add(categoryValues2);
         CommonDataResponse commonDataResponse = CommonDataResponse.builder().categoryValues(listOfCategoryValues).build();
-        when(commonDataRefApi.getAllCategoryValuesByCategoryId(authToken,
-                                                               authTokenGenerator.generate(),
-                                                               HEARINGTYPE,
-                                                               SERVICE_ID,
-                                                               IS_HEARINGCHILDREQUIRED_N)).thenReturn(commonDataResponse);
+        when(commonDataRefApi.getAllCategoryValuesByCategoryId(
+            AUTH_TOKEN,
+            authTokenGenerator.generate(),
+            HEARINGTYPE,
+            SERVICE_ID,
+            IS_HEARINGCHILDREQUIRED_N)).thenReturn(commonDataResponse);
         CommonDataResponse commonResponse = refDataUserService.retrieveCategoryValues(
-            authToken,
+            AUTH_TOKEN,
             HEARINGTYPE,
             IS_HEARINGCHILDREQUIRED_N
         );
@@ -453,7 +457,7 @@ public class RefDataUserServiceTest {
         headers.add(RD_STAFF_TOTAL_RECORDS_HEADER, "45");
         ResponseEntity<List<StaffResponse>> staffResponseFirstPage = ResponseEntity.ok().headers(headers).body(listOfStaffFirstPage);
 
-        when(idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword)).thenReturn(authToken);
+        when(idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword)).thenReturn(AUTH_TOKEN);
         when(authTokenGenerator.generate()).thenReturn("s2sToken");
         when(staffResponseDetailsApi.getAllStaffResponseDetails(
             idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword),
@@ -484,7 +488,7 @@ public class RefDataUserServiceTest {
         headers.add(RD_STAFF_TOTAL_RECORDS_HEADER, "45");
         ResponseEntity<List<StaffResponse>> staffResponseFirstPage = ResponseEntity.ok().headers(headers).body(listOfStaffFirstPage);
 
-        when(idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword)).thenReturn(authToken);
+        when(idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword)).thenReturn(AUTH_TOKEN);
         when(authTokenGenerator.generate()).thenReturn("s2sToken");
         when(staffResponseDetailsApi.getAllStaffResponseDetails(
             idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword),
@@ -512,21 +516,15 @@ public class RefDataUserServiceTest {
 
         StaffProfile staffProfile1 = StaffProfile.builder().userType(LEGALOFFICE)
             .lastName("David").emailId("test2@com").build();
-        StaffProfile staffProfile2 = StaffProfile.builder().userType(LEGALOFFICE)
-            .lastName("John").emailId("test1@com").build();
         StaffResponse staffResponse1 = StaffResponse.builder().ccdServiceName("PRIVATELAW").staffProfile(staffProfile1).build();
-        StaffResponse staffResponse2 = StaffResponse.builder().ccdServiceName("PRIVATELAW").staffProfile(staffProfile2).build();
         List<StaffResponse> listOfStaffFirstPage = new ArrayList<>();
-        List<StaffResponse> listOfStaffSecondPage = new ArrayList<>();
         listOfStaffFirstPage.add(staffResponse1);
-        listOfStaffSecondPage.add(staffResponse2);
         //add a response header for total entries
         HttpHeaders headers = new HttpHeaders();
         headers.add(RD_STAFF_TOTAL_RECORDS_HEADER, "67");
         ResponseEntity<List<StaffResponse>> staffResponseFirstPage = ResponseEntity.ok().headers(headers).body(listOfStaffFirstPage);
-        ResponseEntity<List<StaffResponse>> staffResponseSecondPage = ResponseEntity.ok().headers(headers).body(listOfStaffSecondPage);
 
-        when(idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword)).thenReturn(authToken);
+        when(idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword)).thenReturn(AUTH_TOKEN);
         when(authTokenGenerator.generate()).thenReturn("s2sToken");
         when(staffResponseDetailsApi.getAllStaffResponseDetails(
             idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword),
@@ -563,7 +561,7 @@ public class RefDataUserServiceTest {
         ResponseEntity<List<StaffResponse>> staffResponseFirstPage = ResponseEntity.ok().headers(headers).body(listOfStaffFirstPage);
         ResponseEntity<List<StaffResponse>> staffResponseSecondPage = ResponseEntity.ok().headers(headers).body(listOfStaffSecondPage);
 
-        when(idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword)).thenReturn(authToken);
+        when(idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword)).thenReturn(AUTH_TOKEN);
         when(authTokenGenerator.generate()).thenReturn("s2sToken");
         when(staffResponseDetailsApi.getAllStaffResponseDetails(
             idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword),
@@ -600,14 +598,15 @@ public class RefDataUserServiceTest {
 
     @Test
     public void testRetrieveCategoryValuesFeignException() {
-        when(authTokenGenerator.generate()).thenReturn(s2sToken);
-        when(commonDataRefApi.getAllCategoryValuesByCategoryId(authToken,
-                                                               authTokenGenerator.generate(),
-                                                               HEARINGTYPE,
-                                                               SERVICE_ID,
-                                                               IS_HEARINGCHILDREQUIRED_N)).thenThrow(FeignException.class);
+        when(authTokenGenerator.generate()).thenReturn(S2S_TOKEN);
+        when(commonDataRefApi.getAllCategoryValuesByCategoryId(
+            AUTH_TOKEN,
+            authTokenGenerator.generate(),
+            HEARINGTYPE,
+            SERVICE_ID,
+            IS_HEARINGCHILDREQUIRED_N)).thenThrow(FeignException.class);
         CommonDataResponse commonResponse = refDataUserService.retrieveCategoryValues(
-            authToken,
+            AUTH_TOKEN,
             HEARINGTYPE,
             IS_HEARINGCHILDREQUIRED_N
         );
