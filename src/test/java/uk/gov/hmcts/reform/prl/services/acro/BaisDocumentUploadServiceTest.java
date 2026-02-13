@@ -60,6 +60,7 @@ class BaisDocumentUploadServiceTest {
     @Mock private CsvWriter csvWriter;
     @Mock private PdfExtractorService pdfExtractorService;
     @Mock private LaunchDarklyClient launchDarklyClient;
+    @Mock private SftpService sftpService;
 
     @Captor
     ArgumentCaptor<CsvData> csvDataArgumentCaptor;
