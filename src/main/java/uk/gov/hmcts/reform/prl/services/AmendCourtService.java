@@ -80,7 +80,7 @@ public class AmendCourtService {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         if (CollectionUtils.isNotEmpty(caseData.getCantFindCourtCheck()) && caseData.getCourtList() != null) {
-            return List.of("Please select one of the option for court name.");
+            return List.of("Please select one of the options for court name.");
         } else if (CollectionUtils.isNotEmpty(caseData.getCantFindCourtCheck())) {
             List<String> errors = new ArrayList<>();
             if (isEmpty(caseData.getAnotherCourt())) {

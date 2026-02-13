@@ -162,7 +162,7 @@ public class AmendCourtServiceTest {
 
         List<String> errors =  amendCourtService
             .validateCourtFields(callbackRequest);
-        assertEquals("Please select one of the option for court name.",errors.getFirst());
+        assertEquals("Please select one of the options for court name.",errors.getFirst());
     }
 
     @Test
