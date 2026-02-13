@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
@@ -26,6 +27,7 @@ import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -60,6 +62,9 @@ public class CaseControllerIntegrationTest {
 
     @MockBean
     ConfidentialDetailsMapper confidentialDetailsMapper;
+
+    @MockBean
+    UserInfo userInfo;
 
     @MockBean
     AuthTokenGenerator authTokenGenerator;
@@ -225,7 +230,7 @@ public class CaseControllerIntegrationTest {
         String url = "/fetchIdam-Am-roles/{emailId}";
         String emailId = "test@example.com";
 
-        when(authorisationService.authoriseUser(anyString())).thenReturn(true);
+        when(authorisationService.authoriseUser(anyString())).thenReturn(Optional.of(userInfo));
         when(caseService.fetchIdamAmRoles(anyString(), anyString())).thenReturn(new HashMap<>());
 
         mockMvc.perform(

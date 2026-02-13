@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -64,6 +65,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -132,6 +134,8 @@ public class TestingSupportServiceTest {
     private FL401ApplicationMapper fl401ApplicationMapper;
     @Mock
     private CourtNavCaseService courtNavCaseService;
+    @Mock
+    private UserInfo userInfo;
 
     @Mock
     private TaskListService taskListService;
@@ -299,7 +303,7 @@ public class TestingSupportServiceTest {
             .build();
 
         when(launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)).thenReturn(true);
-        when(authorisationService.authoriseUser(anyString())).thenReturn(Boolean.TRUE);
+        when(authorisationService.authoriseUser(anyString())).thenReturn(Optional.of(userInfo));
         when(authorisationService.authoriseService(anyString())).thenReturn(Boolean.TRUE);
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of("caseworker-privatelaw-solicitor"))
@@ -498,7 +502,7 @@ public class TestingSupportServiceTest {
                 .eventId(TS_ADMIN_APPLICATION_NOC.getId())
                 .build();
         when(launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)).thenReturn(true);
-        when(authorisationService.authoriseUser(anyString())).thenReturn(Boolean.FALSE);
+        when(authorisationService.authoriseUser(anyString())).thenReturn(Optional.empty());
         testingSupportService.initiateCaseCreation(auth, callbackRequest);
     }
 
@@ -551,7 +555,7 @@ public class TestingSupportServiceTest {
                 .eventId(TS_ADMIN_APPLICATION_NOC.getId())
                 .build();
         when(launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)).thenReturn(true);
-        when(authorisationService.authoriseUser(anyString())).thenReturn(Boolean.FALSE);
+        when(authorisationService.authoriseUser(anyString())).thenReturn(Optional.empty());
         testingSupportService.submittedCaseCreation(callbackRequest, auth);
     }
 
@@ -795,7 +799,7 @@ public class TestingSupportServiceTest {
 
     @Test(expected = RuntimeException.class)
     public void testCreateDummyLiPC100Case_InvalidAuthorisation() throws Exception {
-        when(authorisationService.authoriseUser(anyString())).thenReturn(false);
+        when(authorisationService.authoriseUser(anyString())).thenReturn(Optional.empty());
         testingSupportService.createDummyLiPC100Case(auth, s2sAuth);
     }
 
@@ -813,13 +817,13 @@ public class TestingSupportServiceTest {
 
     @Test(expected = RuntimeException.class)
     public void testCreateDummyLiPC100CaseWithBody_InvalidAuthorisation() throws Exception {
-        when(authorisationService.authoriseUser(anyString())).thenReturn(false);
+        when(authorisationService.authoriseUser(anyString())).thenReturn(Optional.empty());
         testingSupportService.createDummyLiPC100CaseWithBody(auth, s2sAuth, "test body");
     }
 
     @Test(expected = RuntimeException.class)
     public void invalidInitiateCaseCreationForCourtNav() throws Exception {
-        when(authorisationService.authoriseUser(anyString())).thenReturn(false);
+        when(authorisationService.authoriseUser(anyString())).thenReturn(Optional.empty());
         testingSupportService.initiateCaseCreationForCourtNav(auth, callbackRequest);
     }
 }

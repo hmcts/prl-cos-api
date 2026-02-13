@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.exception.cafcass.exceptionhandlers.ApiError;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static feign.Request.HttpMethod.GET;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -45,6 +47,9 @@ public class CafCassControllerTest {
     private AuthorisationService authorisationService;
 
     @Mock
+    private UserInfo userInfo;
+
+    @Mock
     private CaseDataService caseDataService;
 
     private static final String RESPONSE_JSON =
@@ -64,7 +69,7 @@ public class CafCassControllerTest {
         );
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         when(caseDataService.getCaseData("authorisation", startDate, endDate))
             .thenReturn(expectedCafCassResponse);
         ResponseEntity responseEntity = cafCassController.searcCasesByDates(
@@ -86,7 +91,7 @@ public class CafCassControllerTest {
     @Test
     public void testInvalidServicAuth_401UnAuthorized() {
         when(authorisationService.authoriseService(any())).thenReturn(false);
-        when(authorisationService.authoriseUser(any())).thenReturn(false);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.empty());
         final ResponseEntity response = cafCassController.searcCasesByDates(
             "authorisation",
             "inValidServiceAuthorisation",
@@ -102,7 +107,7 @@ public class CafCassControllerTest {
     @Test
     public void testFeignExceptionBadRequest() throws IOException {
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         when(caseDataService.getCaseData(TEST_AUTHORIZATION, startDate,
                                          endDate
         )).thenThrow(feignException(HttpStatus.BAD_REQUEST.value(), "Not found"));
@@ -118,7 +123,7 @@ public class CafCassControllerTest {
     @Test
     public void testFeignExceptionUnAuthorised() throws IOException {
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         when(caseDataService.getCaseData(TEST_AUTHORIZATION, startDate,
                                          endDate
         )).thenThrow(feignException(UNAUTHORIZED.value(), "Unauthorised"));
@@ -134,7 +139,7 @@ public class CafCassControllerTest {
     @Test
     public void testExceptionInternalServerError() throws IOException {
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         when(caseDataService.getCaseData(TEST_AUTHORIZATION, "startDate",
                                          "endDate"
         )).thenThrow(new RuntimeException());
@@ -150,7 +155,7 @@ public class CafCassControllerTest {
     @Test
     public void testExceptionInternalServerErrorForDateTimeRange() {
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         final ResponseEntity response = cafCassController.searcCasesByDates(
             TEST_AUTHORIZATION,
             TEST_SERVICE_AUTHORIZATION,
@@ -207,7 +212,7 @@ public class CafCassControllerTest {
         CafCassResponse cafCassResponse = mapper.readValue(json, CafCassResponse.class);
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         when(caseDataService.getCaseData("authorisation", startDate, endDate))
             .thenReturn(cafCassResponse);
 
@@ -281,7 +286,7 @@ public class CafCassControllerTest {
         CafCassResponse cafCassResponse = mapper.readValue(json, CafCassResponse.class);
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         when(caseDataService.getCaseData("authorisation", startDate, endDate))
             .thenReturn(cafCassResponse);
 

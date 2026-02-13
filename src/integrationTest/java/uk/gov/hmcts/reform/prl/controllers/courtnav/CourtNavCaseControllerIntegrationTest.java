@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,9 +33,12 @@ import uk.gov.hmcts.reform.prl.util.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.util.ServiceAuthenticationGenerator;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 import static uk.gov.hmcts.reform.prl.util.TestConstants.AUTHORISATION_HEADER;
@@ -88,6 +92,9 @@ public class CourtNavCaseControllerIntegrationTest {
     @MockBean
     CourtNavCaseService courtNavCaseService;
 
+    @Mock
+    UserInfo userInfo;
+
     @Before
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
@@ -99,13 +106,18 @@ public class CourtNavCaseControllerIntegrationTest {
         String caseId = "12345";
         String typeOfDocument = "testDocument";
         MockMultipartFile file = new MockMultipartFile("file", "test.pdf", MediaType.APPLICATION_PDF_VALUE, "test content".getBytes());
+        UserInfo userInfo = UserInfo.builder()
+            .sub("userId")
+            .uid(UUID.randomUUID().toString())
+            .name("forename")
+            .givenName("surname")
+            .roles(List.of("caseworker-privatelaw-cafcass"))
+            .build();
 
-        Mockito.when(authorisationService.authoriseService(any())).thenReturn(true);
-        Mockito.when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_AUTH_TOKEN);
-        Mockito.when(authorisationService.authoriseUser(any())).thenReturn(true);
-        Mockito.when(authorisationService.getUserInfo()).thenReturn(new UserInfo("userId", "email", "forename", "surname",
-                                                                                 "roles", List.of("caseworker-privatelaw-cafcass")));
-        Mockito.when(systemUserService.getSysUserToken()).thenReturn("sysUserToken");
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_AUTH_TOKEN);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
+        when(systemUserService.getSysUserToken()).thenReturn("sysUserToken");
 
         mockMvc.perform(MockMvcRequestBuilders.multipart("/" + caseId + "/document")
                             .file(file)
@@ -123,11 +135,11 @@ public class CourtNavCaseControllerIntegrationTest {
     public void testCreateCase() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
 
-        Mockito.when(authorisationService.authoriseUser(any())).thenReturn(true);
-        Mockito.when(authorisationService.authoriseService(any())).thenReturn(true);
-        Mockito.when(fl401ApplicationMapper.mapCourtNavData(any())).thenReturn(CaseData.builder().build());
-        Mockito.when(courtLocationService.populateCourtLocation(any(), any())).thenReturn(CaseData.builder().build());
-        Mockito.when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(12345L).build());
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(fl401ApplicationMapper.mapCourtNavData(any())).thenReturn(CaseData.builder().build());
+        when(courtLocationService.populateCourtLocation(any(), any())).thenReturn(CaseData.builder().build());
+        when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(12345L).build());
         Mockito.doNothing().when(courtNavCaseService).refreshTabs(any(), any());
 
         mockMvc.perform(MockMvcRequestBuilders.post("/case")
@@ -141,10 +153,10 @@ public class CourtNavCaseControllerIntegrationTest {
 
     @Test
     public void testCreateCaseReturn400() throws Exception {
-        Mockito.when(authorisationService.authoriseUser(any())).thenReturn(true);
-        Mockito.when(authorisationService.authoriseService(any())).thenReturn(true);
-        Mockito.when(fl401ApplicationMapper.mapCourtNavData(any())).thenReturn(CaseData.builder().build());
-        Mockito.when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(12345L).build());
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(fl401ApplicationMapper.mapCourtNavData(any())).thenReturn(CaseData.builder().build());
+        when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(12345L).build());
         Mockito.doNothing().when(courtNavCaseService).refreshTabs(any(), any());
 
         mockMvc.perform(MockMvcRequestBuilders.post("/case")

@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.services.citizen.CitizenCaseUpdateService;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -80,7 +81,7 @@ public class ReasonableAdjustmentsControllerTest {
         String caseId = "1234567891234567L";
         String partyId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
 
-        Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
+        Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Optional.empty());
         Mockito.when(authorisationService.authoriseService(servAuthToken)).thenReturn(Boolean.TRUE);
 
         reasonableAdjustmentsController.getCaseFlags(caseId, partyId, authToken, servAuthToken);

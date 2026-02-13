@@ -17,6 +17,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
@@ -41,6 +42,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -82,6 +84,9 @@ public class CaseControllerTest {
     @Mock
     private LaunchDarklyClient launchDarklyClient;
 
+    @Mock
+    private UserInfo userInfo;
+
     private CaseData caseData;
     Address address;
     @Rule
@@ -117,7 +122,7 @@ public class CaseControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(caseService.getCase(authToken, caseId)).thenReturn(caseDetails);
         when(authTokenGenerator.generate()).thenReturn("servAuthToken");
-        when(authorisationService.authoriseUser(authToken)).thenReturn(true);
+        when(authorisationService.authoriseUser(authToken)).thenReturn(Optional.of(userInfo));
         when(authorisationService.authoriseService(servAuthToken)).thenReturn(true);
         UiCitizenCaseData caseData1 = caseController.getCase(caseId, authToken, servAuthToken);
         assertEquals(caseData.getApplicantCaseName(), caseData1.getCaseData().getApplicantCaseName());
@@ -384,7 +389,7 @@ public class CaseControllerTest {
         String emailId = "test@email.com";
         Map<String, String> amRoles = new HashMap<>();
         amRoles.put("amRoles","case-worker");
-        Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
+        Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Optional.of(userInfo));
         Mockito.when(caseService.fetchIdamAmRoles(authToken, emailId)).thenReturn(amRoles);
 
         Map<String, String> roles = caseController.fetchIdamAmRoles(
@@ -401,7 +406,7 @@ public class CaseControllerTest {
         String emailId = "test@email.com";
         Map<String, String> amRoles = new HashMap<>();
         amRoles.put("amRoles","case-worker");
-        Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
+        Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Optional.empty());
         Mockito.when(caseService.fetchIdamAmRoles(authToken, emailId)).thenReturn(amRoles);
 
         Map<String, String> roles = caseController.fetchIdamAmRoles(
