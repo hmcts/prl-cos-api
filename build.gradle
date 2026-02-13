@@ -58,7 +58,7 @@ def versions = [
   unirest                      : '1.4.9',
   ccdCaseDocumentAmClient      : '1.59.2',
   pdfbox                       : '2.0.35',
-  springFramework              : '6.2.15',
+  springFramework              : '6.2.16',
 ]
 
 allprojects {
