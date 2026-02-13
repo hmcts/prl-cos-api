@@ -454,6 +454,34 @@ public class ConfidentialityTabServiceTest {
     }
 
     @Test
+    public void shouldAllowFl401KeepChildrenInfoConfidentialToBeNull() {
+        ChildrenLiveAtAddress child = ChildrenLiveAtAddress.builder()
+            .childFullName("Test")
+            .keepChildrenInfoConfidential(null)
+            .build();
+
+        List<Element<ChildrenLiveAtAddress>> listOfChildren = Collections.singletonList(element(child));
+        List<Element<Fl401ChildConfidentialityDetails>> expectedOutput = Collections.emptyList();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .typeOfApplicationOrders(TypeOfApplicationOrders.builder()
+                                         .orderType(List.of(FL401OrderTypeEnum.occupationOrder))
+                                         .build())
+            .home(Home.builder()
+                      .children(listOfChildren)
+                      .build())
+            .build();
+
+        List<Element<Fl401ChildConfidentialityDetails>> actualOutput =
+            confidentialityTabService.getFl401ChildrenConfidentialDetails(caseData);
+
+        // 4. Assert: No crash occurred, and the list is empty
+        assertEquals(expectedOutput, actualOutput);
+        assertTrue(actualOutput.isEmpty());
+    }
+
+    @Test
     public void testChildAndPartyConfidentialDetailsFl401() {
 
         partyDetails1 = PartyDetails.builder()
