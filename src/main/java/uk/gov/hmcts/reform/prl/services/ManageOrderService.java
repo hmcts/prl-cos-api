@@ -24,7 +24,6 @@ import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.ManageOrderFieldsEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
-import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.ServeOrderFieldsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -176,6 +175,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.MANAGE_ORDERS;
 import static uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab;
+import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum.noCheck;
@@ -185,6 +185,7 @@ import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOption
 import static uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum.draftAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createCustomOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.uploadAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
@@ -652,6 +653,12 @@ public class ManageOrderService {
         }
         //PRL-4854 - Set isSdoSelected=No default
         headerMap.put("isSdoSelected", No);
+
+        // Pre-populate childOption with all children for selection
+        headerMap.put(CHILD_OPTION, DynamicMultiSelectList.builder()
+            .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData))
+            .build());
+
         return headerMap;
     }
 
@@ -1032,7 +1039,9 @@ public class ManageOrderService {
         List<Element<OrderDetails>> newOrderDetails = new ArrayList<>();
         newOrderDetails.add(element(OrderDetails.builder().orderType(flagSelectedOrderId)
                                    .orderTypeId(flagSelectedOrder)
-                                   .orderDocument(caseData.getUploadOrderDoc())
+                                   .orderDocument(createCustomOrder.equals(caseData.getManageOrdersOptions())
+                                       ? caseData.getManageOrders().getCustomOrderDoc()
+                                       : caseData.getUploadOrderDoc())
                                    .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
                                    .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
                                    .childrenList(getSelectedChildInfoFromMangeOrder(caseData))
@@ -1253,7 +1262,8 @@ public class ManageOrderService {
     public Map<String, Object> setDraftOrderCollection(CaseData caseData, String loggedInUserType,UserDetails userDetails) {
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
         Element<DraftOrder> draftOrderElement;
-        if (caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
+        if (caseData.getManageOrdersOptions().equals(uploadAnOrder)
+            || caseData.getManageOrdersOptions().equals(createCustomOrder)) {
             draftOrderElement = element(getCurrentUploadDraftOrderDetails(caseData, loggedInUserType, userDetails));
         } else {
             draftOrderElement = element(getCurrentCreateDraftOrderDetails(caseData, loggedInUserType, userDetails));
@@ -1412,7 +1422,9 @@ public class ManageOrderService {
             .typeOfOrder(typeOfOrder != null ? typeOfOrder.getDisplayedValue() : null)
             .orderType(CreateSelectOrderOptionsEnum.getIdFromValue(flagSelectedOrder))
             .orderTypeId(flagSelectedOrder)
-            .orderDocument(caseData.getUploadOrderDoc())
+            .orderDocument(createCustomOrder.equals(caseData.getManageOrdersOptions())
+                ? caseData.getManageOrders().getCustomOrderDoc()
+                : caseData.getUploadOrderDoc())
             .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
             .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
             .childOption(getChildOption(caseData))
@@ -2436,7 +2448,7 @@ public class ManageOrderService {
     private String getChildArrangementOrder(CaseData caseData) {
         return caseData.getManageOrders().getChildArrangementsOrdersToIssue()
             .stream()
-            .flatMap(element -> OrderTypeEnum.childArrangementsOrder.equals(element)
+            .flatMap(element -> childArrangementsOrder.equals(element)
                 ? Stream.of(element.getDisplayedValue() + "(" + caseData.getManageOrders()
                 .getSelectChildArrangementsOrder().getDisplayedValue() + ")")
                 : Stream.of(element.getDisplayedValue()))
@@ -3348,22 +3360,56 @@ public class ManageOrderService {
     }
 
     public void addSealToOrders(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
-        List<Element<OrderDetails>> orders = caseData.getOrderCollection();
+        // Use orderCollection from caseDataUpdated if available (e.g., after custom order combining updated it),
+        // otherwise fall back to caseData.getOrderCollection()
+        List<Element<OrderDetails>> orders;
+        if (caseDataUpdated.containsKey(ORDER_COLLECTION) && caseDataUpdated.get(ORDER_COLLECTION) != null) {
+            Object rawOrders = caseDataUpdated.get(ORDER_COLLECTION);
+            if (rawOrders instanceof List) {
+                // Convert to ensure proper typing (handles both typed lists and raw map lists)
+                orders = objectMapper.convertValue(rawOrders, new TypeReference<List<Element<OrderDetails>>>() {});
+                log.info("addSealToOrders: using orderCollection from caseDataUpdated");
+            } else {
+                orders = caseData.getOrderCollection();
+                log.info("addSealToOrders: caseDataUpdated has non-list orderCollection, falling back to caseData");
+            }
+        } else {
+            orders = caseData.getOrderCollection();
+            log.info("addSealToOrders: using orderCollection from caseData");
+        }
+        log.info("addSealToOrders: orderCollection size = {}", orders != null ? orders.size() : 0);
         if (orders != null) {
+            long ordersNeedingSeal = orders.stream()
+                .filter(order -> order.getValue().getDoesOrderDocumentNeedSeal() != null
+                    && order.getValue().getDoesOrderDocumentNeedSeal().equals(Yes))
+                .count();
+            log.info("addSealToOrders: orders needing seal = {}", ordersNeedingSeal);
+
             orders.stream().filter(order -> order.getValue().getDoesOrderDocumentNeedSeal() != null
                     && order.getValue().getDoesOrderDocumentNeedSeal().equals(Yes))
                 .forEach(order -> {
                     OrderDetails orderDetails = order.getValue();
+                    log.info("addSealToOrders: sealing order with doc = {}",
+                        orderDetails.getOrderDocument() != null ? orderDetails.getOrderDocument().getDocumentFileName() : "null");
 
-                    Element<OrderDetails> sealedOrder = Element.<OrderDetails>builder().id(order.getId()).value(
-                        orderDetails.toBuilder().orderDocument(
-                            documentSealingService.sealDocument(
-                                orderDetails.getOrderDocument(),
-                                caseData,
-                                authorisation
-                            )).doesOrderDocumentNeedSeal(No).build()).build();
+                    try {
+                        log.info("addSealToOrders: caseManagementLocation = {}, region = {}",
+                            caseData.getCaseManagementLocation(),
+                            caseData.getCaseManagementLocation() != null ? caseData.getCaseManagementLocation().getRegion() : "null");
 
-                    orders.set(orders.indexOf(order), sealedOrder);
+                        Element<OrderDetails> sealedOrder = Element.<OrderDetails>builder().id(order.getId()).value(
+                            orderDetails.toBuilder().orderDocument(
+                                documentSealingService.sealDocument(
+                                    orderDetails.getOrderDocument(),
+                                    caseData,
+                                    authorisation
+                                )).doesOrderDocumentNeedSeal(No).build()).build();
+
+                        orders.set(orders.indexOf(order), sealedOrder);
+                        log.info("addSealToOrders: successfully sealed order");
+                    } catch (Exception e) {
+                        log.error("addSealToOrders: failed to seal order", e);
+                    }
                 });
 
             caseDataUpdated.put(ORDER_COLLECTION, orders);
