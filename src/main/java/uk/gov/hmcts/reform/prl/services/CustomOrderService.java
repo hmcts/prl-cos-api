@@ -440,15 +440,24 @@ public class CustomOrderService {
 
     /**
      * Extracts and formats order date from case data map or CaseData object.
+     * If the order was approved at a hearing, extracts the date from the selected hearing.
      */
     private String extractOrderDate(CaseData caseData, Map<String, Object> caseDataMap) {
+        // If order was approved at a hearing, use the hearing date
+        String hearingDate = extractHearingDateIfApproved(caseData);
+        if (hearingDate != null) {
+            log.info("Order date from hearing: {}", hearingDate);
+            return hearingDate;
+        }
+
         if (caseDataMap != null && caseDataMap.get(DATE_ORDER_MADE) != null) {
             Object dateValue = caseDataMap.get(DATE_ORDER_MADE);
             String result;
             if (dateValue instanceof java.time.LocalDate) {
                 result = ((java.time.LocalDate) dateValue).format(DATE_FORMATTER);
             } else {
-                result = dateValue.toString();
+                // Date may come as ISO string (yyyy-MM-dd) from JSON - parse and reformat to UK format
+                result = reformatDateToUkFormat(dateValue.toString());
             }
             log.info("Order date from caseDataMap: {}", result);
             return result;
@@ -459,6 +468,32 @@ public class CustomOrderService {
             return result;
         }
         log.warn("No order date found");
+        return null;
+    }
+
+    /**
+     * Extracts the hearing date if the order was approved at a hearing.
+     * The hearingsType label format is "hearingType - dd/MM/yyyy hh:mm:ss"
+     */
+    private String extractHearingDateIfApproved(CaseData caseData) {
+        if (YesOrNo.Yes.equals(caseData.getWasTheOrderApprovedAtHearing())
+            && caseData.getManageOrders() != null
+            && caseData.getManageOrders().getHearingsType() != null
+            && caseData.getManageOrders().getHearingsType().getValue() != null) {
+
+            String hearingLabel = caseData.getManageOrders().getHearingsType().getValue().getLabel();
+            if (hearingLabel != null && hearingLabel.contains(" - ")) {
+                // Label format: "hearingType - dd/MM/yyyy hh:mm:ss"
+                String[] parts = hearingLabel.split(" - ");
+                if (parts.length >= 2) {
+                    String dateTimePart = parts[1].trim();
+                    // Extract just the date part (dd/MM/yyyy) from "dd/MM/yyyy hh:mm:ss"
+                    if (dateTimePart.length() >= 10) {
+                        return dateTimePart.substring(0, 10);
+                    }
+                }
+            }
+        }
         return null;
     }
 
@@ -542,6 +577,9 @@ public class CustomOrderService {
         });
         safePut(data, "hearingType", () -> "hearing");
 
+        // Future hearing details
+        populateFutureHearingPlaceholders(data, caseData);
+
         // Determine case type and populate party details
         boolean isFL401 = FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData));
         populateApplicantPlaceholders(data, caseData, isFL401);
@@ -552,6 +590,72 @@ public class CustomOrderService {
         log.info("Final header placeholders - judgeName={}, orderDate={}, applicantName={}, respondent1Name={}",
             data.get("judgeName"), data.get("orderDate"), data.get(APPLICANT_NAME), data.get("respondent1Name"));
         return data;
+    }
+
+    /**
+     * Populates future hearing placeholders from ordersHearingDetails.
+     * Provides both individual placeholders and a combined clause that's empty if no hearing scheduled.
+     */
+    private void populateFutureHearingPlaceholders(Map<String, Object> data, CaseData caseData) {
+        if (caseData.getManageOrders() == null
+            || caseData.getManageOrders().getOrdersHearingDetails() == null
+            || caseData.getManageOrders().getOrdersHearingDetails().isEmpty()) {
+            setEmptyFutureHearingPlaceholders(data);
+            return;
+        }
+
+        var hearingDetails = caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue();
+
+        // Check if we have a date - if not, no future hearing is scheduled
+        if (hearingDetails.getFirstDateOfTheHearing() == null) {
+            setEmptyFutureHearingPlaceholders(data);
+            return;
+        }
+
+        String date = hearingDetails.getFirstDateOfTheHearing().format(DATE_FORMATTER);
+        data.put("futureHearingDate", date);
+
+        // Future hearing time
+        String hour = hearingDetails.getHearingMustTakePlaceAtHour();
+        String minute = hearingDetails.getHearingMustTakePlaceAtMinute();
+        String time = "";
+        if (hour != null && !hour.isEmpty()) {
+            time = hour + ":" + (minute != null && !minute.isEmpty() ? minute : "00");
+        }
+        data.put("futureHearingTime", time);
+
+        // Future hearing type
+        String hearingType = "";
+        if (hearingDetails.getHearingTypes() != null && hearingDetails.getHearingTypes().getValue() != null) {
+            hearingType = hearingDetails.getHearingTypes().getValue().getLabel();
+        }
+        data.put("futureHearingType", hearingType);
+
+        // Build the full clause - only populated if there's a future hearing
+        String clause = buildFutureHearingClause(date, time, hearingType);
+        data.put("futureHearingClause", clause);
+
+        log.info("Future hearing placeholders - date={}, time={}, type={}, clause={}",
+            date, time, hearingType, clause);
+    }
+
+    private void setEmptyFutureHearingPlaceholders(Map<String, Object> data) {
+        data.put("futureHearingDate", "");
+        data.put("futureHearingTime", "");
+        data.put("futureHearingType", "");
+        data.put("futureHearingClause", "");
+    }
+
+    private String buildFutureHearingClause(String date, String time, String hearingType) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("The next hearing is scheduled for ").append(date);
+        if (!time.isEmpty()) {
+            sb.append(" at ").append(time);
+        }
+        if (!hearingType.isEmpty()) {
+            sb.append(" (").append(hearingType).append(")");
+        }
+        return sb.toString();
     }
 
     /**
@@ -923,6 +1027,23 @@ public class CustomOrderService {
             + caseNumber.substring(4, 8) + "-"
             + caseNumber.substring(8, 12) + "-"
             + caseNumber.substring(12, 16);
+    }
+
+    /**
+     * Reformats a date string from ISO format (yyyy-MM-dd) to UK format (dd/MM/yyyy).
+     * If parsing fails, returns the original string.
+     */
+    private String reformatDateToUkFormat(String dateStr) {
+        if (dateStr == null || dateStr.isEmpty()) {
+            return dateStr;
+        }
+        try {
+            java.time.LocalDate date = java.time.LocalDate.parse(dateStr);
+            return date.format(DATE_FORMATTER);
+        } catch (Exception e) {
+            log.warn("Could not parse date '{}', returning as-is", dateStr);
+            return dateStr;
+        }
     }
 
     /**

@@ -1105,7 +1105,7 @@ public class CustomOrderServiceTest {
         CaseData caseData = CaseData.builder().build();
 
         Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("dateOrderMade", "2025-01-15"); // String format
+        caseDataMap.put("dateOrderMade", "15-01-2025"); // String format
 
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
@@ -1115,7 +1115,7 @@ public class CustomOrderServiceTest {
 
         // Assert - should use string value directly
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
-        assertEquals("2025-01-15", placeholders.get("orderDate"));
+        assertEquals("15-01-2025", placeholders.get("orderDate"));
     }
 
     @Test
