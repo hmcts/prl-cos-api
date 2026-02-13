@@ -237,7 +237,7 @@ public class ConfidentialityTabService {
         Optional<PartyDetails> partyDetails = ofNullable(objectPartyDetailsMap.get(
             childrenAndOtherPeopleRelation.getOtherPeopleFullName()));
         if (partyDetails.isPresent()) {
-            return Element.<OtherPersonConfidentialityDetails> builder()
+            return Element.<OtherPersonConfidentialityDetails>builder()
                 .value(OtherPersonConfidentialityDetails.builder()
                            .firstName(partyDetails.get().getFirstName())
                            .lastName(partyDetails.get().getLastName())
