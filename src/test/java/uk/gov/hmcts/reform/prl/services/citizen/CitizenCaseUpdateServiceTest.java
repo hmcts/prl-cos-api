@@ -1,11 +1,15 @@
 package uk.gov.hmcts.reform.prl.services.citizen;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -25,6 +29,7 @@ import uk.gov.hmcts.reform.prl.mapper.citizen.awp.CitizenAwpMapper;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.Document;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.LanguageSupportCaseNotesRequest;
 import uk.gov.hmcts.reform.prl.models.citizen.awp.CitizenAwpRequest;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -33,6 +38,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.Confiden
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.court.Court;
+import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CitizenAwpPayment;
@@ -54,7 +60,10 @@ import java.util.Map;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PERMISSION_REQUIRED_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_CREATE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
@@ -97,6 +106,9 @@ public class CitizenCaseUpdateServiceTest {
 
     @Mock
     private CourtFinderService courtLocatorService;
+
+    @Captor
+    private ArgumentCaptor<Map<String, Object>> caseDataUpdatedCaptor;
 
     private CaseData caseData;
     private Map<String, Object> caseDetails;
@@ -457,6 +469,152 @@ public class CitizenCaseUpdateServiceTest {
         List<Element<CitizenAwpPayment>> citizenAwpPayments =
             (List<Element<CitizenAwpPayment>>) updatedCaseDetails.getData().get("citizenAwpPayments");
         Assert.assertTrue(citizenAwpPayments.isEmpty());
+    }
+
+    @Test
+    public void testSubmitApplicationWithPermissionRequiredDocument() throws IOException, NotFoundException {
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .build();
+
+        Document permissionRequiredDocument = Document.builder()
+            .url(generatedDocumentInfo.getUrl())
+            .binaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .filename("test.pdf")
+            .build();
+
+        ObjectMapper realMapper = new ObjectMapper();
+        String jsonString = realMapper.writeValueAsString(permissionRequiredDocument);
+        C100RebuildData c100RebuildData = getC100RebuildData();
+        c100RebuildData.setC100RebuildScreeningQuestions(jsonString);
+
+        partyDetails = PartyDetails.builder().build();
+        caseData = caseData.toBuilder()
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .c100RebuildData(c100RebuildData)
+            .applicants(List.of(element(partyDetails)))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .applicationServedYesNo(YesOrNo.Yes)
+                                      .build())
+            .build();
+
+        Map<String, Object> caseDetailsMap = realMapper.convertValue(caseData, Map.class);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent1 =
+            new StartAllTabsUpdateDataContent(
+                authToken,
+                EventRequestData.builder().build(),
+                StartEventResponse.builder().build(),
+                caseDetailsMap,
+                caseData,
+                UserDetails.builder().build()
+            );
+
+        when(citizenPartyDetailsMapper.buildUpdatedCaseData(any(), any()))
+            .thenReturn(caseData);
+        when(allTabService.getStartUpdateForSpecificUserEvent(anyString(), anyString(), anyString()))
+            .thenReturn(startAllTabsUpdateDataContent1);
+        when(objectMapper.readValue(
+            any(String.class),
+            ArgumentMatchers.<Class<Document>>any()
+        ))
+            .thenReturn(permissionRequiredDocument);
+        when(objectMapper.convertValue(any(CaseData.class), eq(Map.class)))
+            .thenReturn(caseDetailsMap);
+        when(partyLevelCaseFlagsService.generateAndStoreCaseFlags(anyString()))
+            .thenReturn(CaseDetails.builder().id(12345L).build());
+        when(courtLocatorService.getNearestFamilyCourt(any()))
+            .thenReturn(Court.builder().courtName("Test court").build());
+        when(allTabService.submitUpdateForSpecificUserEvent(
+            any(), any(), any(), any(), any(), any()
+        )).thenReturn(CaseDetails.builder().id(12345L).build());
+        citizenCaseUpdateService.submitCitizenC100Application(
+            authToken,
+            String.valueOf(caseId),
+            "citizenSaveC100DraftInternal",
+            caseData
+        );
+        verify(allTabService).submitUpdateForSpecificUserEvent(
+            any(),
+            any(),
+            any(),
+            any(),
+            caseDataUpdatedCaptor.capture(),
+            any()
+        );
+
+        Map<String, Object> updatedMap = caseDataUpdatedCaptor.getValue();
+        Assert.assertNotNull(updatedMap);
+        Assert.assertTrue(updatedMap.containsKey(PERMISSION_REQUIRED_DOCUMENT));
+
+        Document capturedDoc =
+            realMapper.convertValue(updatedMap.get(PERMISSION_REQUIRED_DOCUMENT), Document.class);
+        Assert.assertEquals("test.pdf", capturedDoc.getFilename());
+        Assert.assertEquals("TestUrl", capturedDoc.getUrl());
+        Assert.assertEquals("binaryUrl", capturedDoc.getBinaryUrl());
+    }
+
+    @Test
+    public void testSubmitApplicationWithNullPermissionRequiredDocument() throws IOException, NotFoundException {
+        C100RebuildData c100RebuildData = getC100RebuildData();
+        c100RebuildData.setC100RebuildScreeningQuestions(null);
+
+        partyDetails = PartyDetails.builder().build();
+        caseData = caseData.toBuilder()
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .c100RebuildData(c100RebuildData)
+            .applicants(List.of(element(partyDetails)))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .applicationServedYesNo(YesOrNo.Yes)
+                                      .build())
+            .build();
+
+        Map<String, Object> caseDetailsMap =
+            new ObjectMapper().convertValue(
+                caseData,
+                new TypeReference<Map<String, Object>>() {}
+            );
+
+        StartAllTabsUpdateDataContent content =
+            new StartAllTabsUpdateDataContent(
+                authToken,
+                EventRequestData.builder().build(),
+                StartEventResponse.builder().build(),
+                caseDetailsMap,
+                caseData,
+                UserDetails.builder().build()
+            );
+
+        when(citizenPartyDetailsMapper.buildUpdatedCaseData(any(), any()))
+            .thenReturn(caseData);
+        when(allTabService.getStartUpdateForSpecificUserEvent(anyString(), anyString(), anyString()))
+            .thenReturn(content);
+        when(objectMapper.convertValue(any(CaseData.class), eq(Map.class)))
+            .thenReturn(caseDetailsMap);
+        when(allTabService.submitUpdateForSpecificUserEvent(
+            any(), any(), any(), any(), any(), any()
+        )).thenReturn(CaseDetails.builder().id(12345L).build());
+
+        citizenCaseUpdateService.submitCitizenC100Application(
+            authToken,
+            String.valueOf(caseId),
+            "citizenSaveC100DraftInternal",
+            caseData
+        );
+        verify(objectMapper, never())
+            .readValue(anyString(), ArgumentMatchers.<Class<?>>any());
+
+        verify(allTabService).submitUpdateForSpecificUserEvent(
+            any(),
+            any(),
+            any(),
+            any(),
+            caseDataUpdatedCaptor.capture(),
+            any()
+        );
+
+        Map<String, Object> updatedMap = caseDataUpdatedCaptor.getValue();
+        Assert.assertFalse(updatedMap.containsKey(PERMISSION_REQUIRED_DOCUMENT));
     }
 }
 
