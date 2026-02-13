@@ -85,9 +85,11 @@ public class AmendCourtService {
             List<String> errors = new ArrayList<>();
             if (isEmpty(caseData.getAnotherCourt())) {
                 errors.add("Please enter court name.");
-            } else if (isEmpty(caseData.getCourtEmailAddress())) {
+            }
+            if (isEmpty(caseData.getCourtEmailAddress())) {
                 errors.add("Please enter court email address.");
-            } else if (!EmailUtils.isValidEmailAddress(caseData.getCourtEmailAddress())) {
+            }
+            if (!EmailUtils.isValidEmailAddress(caseData.getCourtEmailAddress())) {
                 errors.add("Please enter valid court email address.");
             }
             return errors;
