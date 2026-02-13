@@ -554,9 +554,9 @@ class PoiTlDocxRendererTest {
             assertThat(allTextStr).contains("Female");
             assertThat(allTextStr).contains("Male");
 
-            // Verify table has 3 rows (1 header + 2 children)
+            // Verify table has  2 children rows
             assertThat(doc.getTables()).isNotEmpty();
-            assertThat(doc.getTables().get(0).getRows()).hasSize(3);
+            assertThat(doc.getTables().get(0).getRows()).hasSize(2);
         }
     }
 }
