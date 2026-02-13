@@ -61,8 +61,9 @@ public class PrepareHearingBundleService {
         List<Long> caseIds = getCasesWithNextHearingDateByDate(dateToCheck, userToken);
         try {
             if (isNotEmpty(caseIds)) {
-                log.info("Cases exist with hearings on {}", dateToCheck);
+                log.info("Found {} cases with nextHearingDate between now and {}", caseIds.size(), dateToCheck);
                 caseIds = hearingService.filterCasesWithHearingsStartingOnDate(caseIds, userToken, dateToCheck);
+                log.info("After filtering against HMC, {} cases have hearings on {}", caseIds.size(), dateToCheck);
                 createPrepareBundleWaTask(caseIds);
             } else {
                 log.info("No cases exist with hearings on {}", dateToCheck);
