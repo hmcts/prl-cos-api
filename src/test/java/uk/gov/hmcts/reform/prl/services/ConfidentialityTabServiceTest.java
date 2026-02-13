@@ -637,17 +637,6 @@ public class ConfidentialityTabServiceTest {
 
     @Test
     public void testGetChildrenConfidentialDetailsV2() {
-        ChildrenLiveAtAddress child = ChildrenLiveAtAddress.builder()
-            .childFullName("Test")
-            .keepChildrenInfoConfidential(YesOrNo.Yes)
-            .build();
-
-        Element<ChildrenLiveAtAddress> child1 = Element.<ChildrenLiveAtAddress>builder().value(
-            child).build();
-
-        List<Element<ChildrenLiveAtAddress>> listOfChild = List.of(
-            child1
-        );
 
         partyDetails1 = PartyDetails.builder()
             .firstName("ABC 1")
@@ -676,7 +665,6 @@ public class ConfidentialityTabServiceTest {
             .childAndOtherPeopleRelation(RelationshipsEnum.other)
             .otherPeopleFullName("ABC 1 XYZ 2")
             .childId("00000000-0000-0000-0000-000000000000").build();
-        PartyDetails partyDetails = mock(PartyDetails.class);
         ChildDetailsRevised childDetailsRevised = ChildDetailsRevised.builder().firstName("ChildFirstName")
             .lastName("ChildLastName").build();
 
@@ -699,17 +687,6 @@ public class ConfidentialityTabServiceTest {
 
     @Test
     public void testGetChildrenConfidentialDetailsV2_scenario2() {
-        ChildrenLiveAtAddress child = ChildrenLiveAtAddress.builder()
-            .childFullName("Test")
-            .keepChildrenInfoConfidential(YesOrNo.Yes)
-            .build();
-
-        Element<ChildrenLiveAtAddress> child1 = Element.<ChildrenLiveAtAddress>builder().value(
-            child).build();
-
-        List<Element<ChildrenLiveAtAddress>> listOfChild = List.of(
-            child1
-        );
 
         partyDetails1 = PartyDetails.builder()
             .firstName("ABC 1")
@@ -738,7 +715,6 @@ public class ConfidentialityTabServiceTest {
             .childAndOtherPeopleRelation(RelationshipsEnum.other)
             .otherPeopleFullName("ABC 1 XYZ 2")
             .childId("00000000-0000-0000-0000-000000000000").build();
-        PartyDetails partyDetails = mock(PartyDetails.class);
         ChildDetailsRevised childDetailsRevised = ChildDetailsRevised.builder().firstName("ChildFirstName")
             .lastName("ChildLastName").build();
 
