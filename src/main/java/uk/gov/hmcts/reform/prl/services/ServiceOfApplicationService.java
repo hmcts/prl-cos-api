@@ -1052,7 +1052,7 @@ public class ServiceOfApplicationService {
                         emailNotificationDetails,
                         respondentFl401.get(0),
                         packDocs,
-                        SendgridEmailTemplateNames.SOA_DA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
+                        SendgridEmailTemplateNames.SOA_DA_NON_PERSONAL_SERVICE_RESPONDENT_LIP,
                         fieldsMap,
                         coverLetter
                     );
@@ -3960,7 +3960,7 @@ public class ServiceOfApplicationService {
                 emailNotificationDetails,
                 respondent,
                 respondentDocs,
-                SendgridEmailTemplateNames.SOA_DA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
+                SendgridEmailTemplateNames.SOA_DA_NON_PERSONAL_SERVICE_RESPONDENT_LIP,
                 fieldsMap,
                 SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITHOUT_C1A
             );
