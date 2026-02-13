@@ -1678,6 +1678,11 @@ public class ServiceOfApplicationService {
 
         log.info("inside sendEmailViaSendGridWithAttachedDocsToPartyRespondent {}", party.getId());
 
+        log.info("inside sendEmailViaSendGridWithAttachedDocsToPartyRespondent template 1 {}", emailTemplate);
+        if (emailTemplate != null) {
+            log.info("inside sendEmailViaSendGridWithAttachedDocsToPartyRespondent template 2 {}", emailTemplate.name());
+        }
+
         List<Document> packsWithCoverLetter = new ArrayList<>(coverLetters);
         packsWithCoverLetter.addAll(packDocs);
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
