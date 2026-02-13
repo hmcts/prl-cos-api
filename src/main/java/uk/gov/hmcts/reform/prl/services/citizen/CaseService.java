@@ -93,6 +93,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ANY_OTHER_DOC;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_APPLICATION;
@@ -1654,7 +1655,10 @@ public class CaseService {
 
             return servedDetails.getEmailNotificationDetails().stream()
                 .map(Element::getValue)
-                .filter(emailNotification -> partyIdAndType.get(PARTY_ID).equals(emailNotification.getPartyIds()))
+                .filter(emailNotification -> {
+                    String partyId = nonNull(partyIdAndType) ? partyIdAndType.get(PARTY_ID) : null;
+                    return nonNull(partyId) && partyId.equals(emailNotification.getPartyIds());
+                })
                 .map(emailNotification ->
                     getSodDocuments(
                         emailNotification.getDocs(),
@@ -1679,7 +1683,10 @@ public class CaseService {
 
             return servedDetails.getBulkPrintDetails().stream()
                 .map(Element::getValue)
-                .filter(postNotification -> partyIdAndType.get(PARTY_ID).equals(postNotification.getPartyIds()))
+                .filter(postNotification -> {
+                    String partyId = nonNull(partyIdAndType) ? partyIdAndType.get(PARTY_ID) : null;
+                    return nonNull(partyId) && partyId.equals(postNotification.getPartyIds());
+                })
                 .map(postNotification ->
                          getSodDocuments(
                              postNotification.getPrintDocs(),
