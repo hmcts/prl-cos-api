@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import uk.gov.hmcts.ccd.sdk.type.TTL;
-import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.reopenclosedcases.ValidReopenClosedCasesStatusEnum;
@@ -160,6 +159,6 @@ public class BaseCaseData {
 
     private List<Element<Document>> miamDocumentsCopy;
 
-    private PermissionRequiredEnum orderInPlacePermissionRequired;
+    private YesOrNo orderInPlacePermissionRequired;
     private String orderDetailsForPermissions;
 }

@@ -255,7 +255,7 @@ public class ApplicationsTabServiceTest {
             .natureOfOrder("Test nature of order")
             .applicationPermissionRequired(PermissionRequiredEnum.yes)
             .applicationPermissionRequiredReason("Some xyz reason")
-            .orderInPlacePermissionRequired(PermissionRequiredEnum.yes)
+            .orderInPlacePermissionRequired(Yes)
             .orderDetailsForPermissions("ABC")
             // hearing urgency
             .isCaseUrgent(Yes)
