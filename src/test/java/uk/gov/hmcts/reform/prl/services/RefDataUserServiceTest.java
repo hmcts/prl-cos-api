@@ -87,8 +87,8 @@ public class RefDataUserServiceTest {
     @Value("${prl.refdata.password}")
     private String refDataIdamPassword;
 
-    public static final String AUTH_TOKEN = "Bearer TestAuthToken";
-    public static final String S2S_TOKEN = "Bearer TestAuthToken";
+    private static final String AUTH_TOKEN = "Bearer TestAuthToken";
+    private static final String S2S_TOKEN = "Bearer TestAuthToken";
 
 
     @Test
