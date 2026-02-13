@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -54,7 +54,7 @@ class CaseDataMapperTest {
 
     private void setValue() throws IOException {
         MockitoAnnotations.openMocks(this);
-        mapper.registerModule(new JSR310Module());
+        mapper.registerModule(new JavaTimeModule());
         caseData = CaseData.builder()
                 .id(1234567891234567L)
                 .caseTypeOfApplication(CASE_TYPE)
