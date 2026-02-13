@@ -1144,5 +1144,6 @@ public class PrlAppsConstants {
 
     public static final String IS_INVOKED_FROM_TASK = "isInvokedFromTask";
     public static final String ALLOCATED_BARRISTER = "allocatedBarrister";
+    public static final String LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY = "localAuthoritySolicitorOrganisationPolicy";
     public static final String CAFCASS_DATE_TIME = "cafcassDateTime";
 }
