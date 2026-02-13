@@ -181,7 +181,7 @@ public class PrepareHearingBundleService {
         Bool finalFilter = Bool.builder()
             .filter(Filter.builder().range(nextHearingDateRange).build())
             .should(shoulds)
-            .minimumShouldMatch(2)
+            .minimumShouldMatch(1)
             .must(mustFilter)
             .build();
 
