@@ -290,8 +290,8 @@ configurations.configureEach {
     force 'org.bouncycastle:bcpkix-jdk18on:1.83'
     force 'org.springframework.security:spring-security-rsa:1.1.5'
     force 'org.springframework.security:spring-security-crypto:6.5.7'
-    force 'ch.qos.logback:logback-classic:1.5.28'
-    force 'ch.qos.logback:logback-core:1.5.28'
+    force 'ch.qos.logback:logback-classic:1.5.31'
+    force 'ch.qos.logback:logback-core:1.5.31'
   }
 }
 
@@ -377,8 +377,8 @@ dependencies {
   constraints{
     implementation group: 'com.warrenstrange', name: 'googleauth', version: '1.5.0'
   }
-  implementation(group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.28')
-  implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.28')
+  implementation(group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.31')
+  implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.31')
   implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version:'7.4'
   implementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.6'
   implementation group: 'com.opencsv', name: 'opencsv', version: '5.12.0', {
