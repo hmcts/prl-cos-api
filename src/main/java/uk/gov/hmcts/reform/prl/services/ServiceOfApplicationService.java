@@ -1690,14 +1690,11 @@ public class ServiceOfApplicationService {
         dynamicData.put("name", party.getValue().getLabelForDynamicList());
 
         if (FL401_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            if (caseData.getApplicantsFL401() != null) {
-                dynamicData.put("applicantName", caseData.getApplicantsFL401().getLabelForDynamicList());
-            }
+            dynamicData.put("applicantName", caseData.getApplicantsFL401().getLabelForDynamicList());
         }
         else if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData)) && !CollectionUtils.isEmpty(caseData.getApplicants())) {
-                dynamicData.put("applicantName", caseData.getApplicants().get(0).getValue().getLabelForDynamicList());
+            dynamicData.put("applicantName", caseData.getApplicants().get(0).getValue().getLabelForDynamicList());
         }
-
 
         dynamicData.put(DASH_BOARD_LINK, citizenUrl);
         populateLanguageMap(caseData, dynamicData);
