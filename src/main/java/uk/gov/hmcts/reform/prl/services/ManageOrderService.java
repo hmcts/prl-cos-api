@@ -66,6 +66,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.PostalInformation;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.ServeOrgDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AdditionalOrderDocument;
@@ -117,6 +118,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.time.temporal.ChronoUnit.DAYS;
+import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -193,6 +195,7 @@ import static uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum.fact
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getDynamicMultiSelectedValueLabels;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getWaMapper;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.EmailUtils.isValidEmailAddress;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.isHearingPageNeeded;
 
 @Service
@@ -3624,6 +3627,23 @@ public class ManageOrderService {
     private boolean checkIfAddressIsPresent(Address address) {
         return null != address
             && null != address.getAddressLine1();
+    }
+
+    public List<String> validateAdditionalPartiesForServingOrder(CallbackRequest callbackRequest) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getServeOrgDetailsList())) {
+            for (Element<ServeOrgDetails> addParty : caseData.getManageOrders()
+                .getServeOrgDetailsList()) {
+                if (addParty.getValue().getServeByPostOrEmail().equals(DeliveryByEnum.email)
+                    && !isValidEmailAddress(addParty.getValue().getEmailInformation().getEmailAddress())) {
+                    return List.of("Invalid email address. Please check the email address entered. " +
+                                       "To send to multiple recipients please use the add new button.");
+                }
+            }
+        }
+
+        return emptyList();
     }
 
     public List<Element<HearingData>> createAutomatedHearingManagement(String authorisation, CaseData caseData,
