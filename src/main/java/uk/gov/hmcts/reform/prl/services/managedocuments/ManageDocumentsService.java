@@ -78,6 +78,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIONAL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESTRICTED_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
@@ -578,6 +579,7 @@ public class ManageDocumentsService {
         return switch (uploadedBy) {
             case LEGAL_PROFESSIONAL -> quarantineLegalDoc.getDocument();
             case CAFCASS -> quarantineLegalDoc.getCafcassQuarantineDocument();
+            case LOCAL_AUTHORITY -> quarantineLegalDoc.getLocalAuthorityQuarantineDocument();
             case COURT_STAFF -> quarantineLegalDoc.getCourtStaffQuarantineDocument();
             case BULK_SCAN -> quarantineLegalDoc.getUrl();
             case CITIZEN -> quarantineLegalDoc.getCitizenQuarantineDocument();
@@ -592,6 +594,8 @@ public class ManageDocumentsService {
             case LEGAL_PROFESSIONAL -> quarantineLegalDoc.toBuilder().document(manageDocument.getDocument()).build();
             case CAFCASS ->
                 quarantineLegalDoc.toBuilder().cafcassQuarantineDocument(manageDocument.getDocument()).build();
+            case LOCAL_AUTHORITY ->
+                quarantineLegalDoc.toBuilder().localAuthorityQuarantineDocument(manageDocument.getDocument()).build();
             case COURT_STAFF ->
                 quarantineLegalDoc.toBuilder().courtStaffQuarantineDocument(manageDocument.getDocument()).build();
             case BULK_SCAN -> quarantineLegalDoc.toBuilder().url(manageDocument.getDocument()).build();
@@ -631,7 +635,9 @@ public class ManageDocumentsService {
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "SOLICITOR");
         } else if (CAFCASS.equals(userRole)) {
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "CAFCASS");
-        } else if (COURT_STAFF.equals(userRole)) {
+        } else if (LOCAL_AUTHORITY.equals(userRole)) {
+            caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "LOCAL_AUTHORITY");
+        }else if (COURT_STAFF.equals(userRole)) {
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "STAFF");
         } else if (CITIZEN.equals(userRole)) {
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "CITIZEN");
@@ -663,6 +669,11 @@ public class ManageDocumentsService {
             case CAFCASS ->
                 caseDataUpdated.put(
                     isDocumentTab ? "cafcassUploadDocListDocTab" : "cafcassQuarantineDocsList",
+                    quarantineDocs
+                );
+            case LOCAL_AUTHORITY ->
+                caseDataUpdated.put(
+                    isDocumentTab ? "localAuthorityUploadDocListDocTab" : "localAuthorityQuarantineDocsList",
                     quarantineDocs
                 );
             case COURT_STAFF ->
@@ -711,6 +722,11 @@ public class ManageDocumentsService {
                     isDocumentTab,
                     caseData.getReviewDocuments().getCafcassUploadDocListDocTab(),
                     caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList()
+            );
+            case LOCAL_AUTHORITY -> getQuarantineOrUploadDocsBasedOnDocumentTab(
+                isDocumentTab,
+                caseData.getReviewDocuments().getLocalAuthorityUploadDocListDocTab(),
+                caseData.getDocumentManagementDetails().getLocalAuthorityQuarantineDocsList()
             );
             case COURT_STAFF -> getQuarantineOrUploadDocsBasedOnDocumentTab(
                     isDocumentTab,
@@ -943,6 +959,8 @@ public class ManageDocumentsService {
             loggedInUserType.add(CITIZEN_ROLE);
         } else if (roles.contains(Roles.BULK_SCAN.getValue())) {
             loggedInUserType.add(BULK_SCAN);
+        }else if (roles.contains(Roles.LOCAL_AUTHORITY_SOLICITOR.getValue())) {
+            loggedInUserType.add(UserRoles.LOCAL_AUTHORITY.name());
         } else {
             loggedInUserType.add(UserRoles.CAFCASS.name());
         }
@@ -953,7 +971,8 @@ public class ManageDocumentsService {
     }
 
     private boolean isUserAllocatedRoleForCaseLA(String caseId, String idamId) {
-        return roleAssignmentService.isUserAllocatedRoleForCase(caseId, idamId, Roles.LOCAL_AUTHORITY_STAFF.getValue())
-            || roleAssignmentService.isUserAllocatedRoleForCase(caseId, idamId, Roles.LOCAL_AUTHORITY_SOLICITOR.getValue());
+        /*return roleAssignmentService.isUserAllocatedRoleForCase(caseId, idamId, Roles.LOCAL_AUTHORITY_STAFF.getValue())
+            || roleAssignmentService.isUserAllocatedRoleForCase(caseId, idamId, Roles.LOCAL_AUTHORITY_SOLICITOR.getValue());*/
+        return true;
     }
 }
