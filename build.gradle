@@ -59,7 +59,7 @@ def versions = [
   unirest                      : '1.4.9',
   ccdCaseDocumentAmClient      : '1.59.2',
   pdfbox                       : '2.0.35',
-  springFramework              : '6.2.15',
+  springFramework              : '6.2.16',
 ]
 
 allprojects {
@@ -291,8 +291,8 @@ configurations.configureEach {
     force 'org.bouncycastle:bcpkix-jdk18on:1.83'
     force 'org.springframework.security:spring-security-rsa:1.1.5'
     force 'org.springframework.security:spring-security-crypto:6.5.7'
-    force 'ch.qos.logback:logback-classic:1.5.28'
-    force 'ch.qos.logback:logback-core:1.5.28'
+    force 'ch.qos.logback:logback-classic:1.5.31'
+    force 'ch.qos.logback:logback-core:1.5.31'
   }
 }
 
@@ -379,10 +379,10 @@ dependencies {
   constraints{
     implementation group: 'com.warrenstrange', name: 'googleauth', version: '1.5.0'
   }
-  implementation(group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.28')
-  implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.28')
+  implementation(group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.31')
+  implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.31')
   implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version:'7.4'
-  implementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.5'
+  implementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.6'
   implementation group: 'com.opencsv', name: 'opencsv', version: '5.12.0', {
     exclude group: 'commons-collections', module: 'commons-collections'
   }
@@ -416,7 +416,7 @@ dependencies {
   testImplementation group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: versions.serenity
   testImplementation group: 'net.serenity-bdd', name: 'serenity-spring', version: versions.serenity
   testImplementation group: 'com.github.mifmif', name: 'generex', version: '1.0.2'
-  testImplementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.5'
+  testImplementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.6'
   testImplementation 'org.apiguardian:apiguardian-api:1.1.2'
   testImplementation 'com.github.hmcts:fortify-client:1.4.10:all'
   testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.36'

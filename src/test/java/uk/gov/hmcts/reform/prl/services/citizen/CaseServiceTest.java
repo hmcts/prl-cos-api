@@ -204,6 +204,7 @@ public class CaseServiceTest {
     private CitizenUpdatedCaseData citizenUpdatedCaseData;
 
     private final UUID testUuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
+    private final UUID testUuid1 = UUID.fromString("06eef861-d2aa-4dbd-acc0-9244a1dfab17");
 
     private ServedApplicationDetails servedApplicationDetails;
 
@@ -1800,6 +1801,149 @@ public class CaseServiceTest {
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
     }
 
+
+    @Test
+    public void testCitizenDocOrdersWhenApplicationServedByWhenPartyIdsDoNotMatch() {
+
+        List<Element<RespondentProceedingDetails>> respondentProceedingDetails = new ArrayList<>();
+        respondentProceedingDetails.add(ElementUtils.element(RespondentProceedingDetails.builder().uploadRelevantOrder(
+            Document.builder().categoryId("ordersFromOtherProceedings").build()).build()));
+        Response response = Response.builder().respondentExistingProceedings(respondentProceedingDetails).build();
+        List<Element<PartyDetails>> partyDetailsList = new ArrayList<>();
+        partyDetailsList.add(Element.<PartyDetails>builder().id(testUuid)
+                                 .value(PartyDetails.builder().partyId(testUuid)
+                                            .user(User.builder().idamId(userDetails.getId()).build())
+                                            .response(response).partyId(testUuid).build()).build());
+        partyDetailsList.add(Element.<PartyDetails>builder()
+                                 .value(PartyDetails.builder().partyId(testUuid)
+                                            .build()).build());
+        List<Element<Document>> docs = new ArrayList<>();
+        List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
+        emailNotificationDetails.add(element(EmailNotificationDetails.builder().partyIds("1234").docs(
+            docs).servedParty(SERVED_PARTY_APPLICANT).timeStamp(LocalDateTime.now().format(DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS)).build()));
+        List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
+        bulkPrintDetails.add(element(BulkPrintDetails.builder().partyIds("5678").printDocs(List.of(
+            element(Document.builder().build()))).timeStamp(LocalDateTime.now().format(DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS)).build()));
+        List<Element<ServedApplicationDetails>> servedApplicationDetails1 = new ArrayList<>();
+        servedApplicationDetails1.add(element(ServedApplicationDetails.builder().emailNotificationDetails(
+                emailNotificationDetails).servedBy("courtAdmin").servedAt(LocalDateTime.now().format(
+                DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS)).whoIsResponsible("courtAdmin")
+                                                  .modeOfService(SOA_BY_EMAIL_AND_POST).build()));
+        servedApplicationDetails1.add(element(ServedApplicationDetails.builder().servedAt(LocalDateTime.now().format(
+                DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS)).modeOfService(SOA_BY_EMAIL).bulkPrintDetails(bulkPrintDetails)
+                                                  .servedBy("courtAdmin").whoIsResponsible("courtAdmin").build()));
+        servedApplicationDetails1.add(element(ServedApplicationDetails.builder().servedAt(LocalDateTime.now().format(
+                DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS)).modeOfService(SOA_BY_POST).bulkPrintDetails(bulkPrintDetails)
+                                                  .servedBy("courtAdmin").whoIsResponsible("courtAdmin").build()));
+        servedApplicationDetails1.add(element(ServedApplicationDetails.builder().servedAt(LocalDateTime.now().format(
+                DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS)).modeOfService("SOA").bulkPrintDetails(bulkPrintDetails)
+                                                  .servedBy("courtAdmin").whoIsResponsible("courtAdmin").build()));
+
+        //Given
+        CaseData caseData1 = caseData.toBuilder()
+            .applicants(partyDetailsList)
+            .respondents(partyDetailsList)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantsFL401(partyDetails)
+            .respondentsFL401(PartyDetails.builder()
+                                  .user(User.builder().idamId("00000000-0000-0000-0000-000000000000").build())
+                                  .partyId(UUID.randomUUID()).build())
+            .state(State.DECISION_OUTCOME)
+            .serviceOfDocuments(ServiceOfDocuments.builder().servedDocumentsDetailsList(servedApplicationDetails1).build())
+            .finalServedApplicationDetailsList(finalServedApplicationDetailsListPostOnly)
+            .statementOfService(StatementOfService.builder()
+                                    .stmtOfServiceForApplication(List.of(element(StmtOfServiceAddRecipient.builder()
+                                                                                     .selectedPartyId(testUuid.toString())
+                                                                                     .build())))
+                                    .build())
+            .build();
+
+        //Action
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
+
+        //Assert
+        assertNotNull(citizenDocumentsManagement);
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenOrders()));
+        //Assert notifications
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
+    }
+
+
+    @Test
+    public void testCitizenDocOrdersWhenApplicationServedByNullPointerExceptionScenario() {
+
+        List<Element<RespondentProceedingDetails>> respondentProceedingDetails = new ArrayList<>();
+        respondentProceedingDetails.add(ElementUtils.element(RespondentProceedingDetails.builder().uploadRelevantOrder(
+            Document.builder().categoryId("ordersFromOtherProceedings").build()).build()));
+        Response response = Response.builder().respondentExistingProceedings(respondentProceedingDetails).build();
+        List<Element<PartyDetails>> applicantPartyDetailsList = new ArrayList<>();
+        applicantPartyDetailsList.add(Element.<PartyDetails>builder().id(null)
+                                 .value(PartyDetails.builder().partyId(testUuid)
+                                            .response(response).partyId(testUuid).build()).build());
+        applicantPartyDetailsList.add(Element.<PartyDetails>builder().id(testUuid1)
+                                 .value(PartyDetails.builder().partyId(testUuid1)
+                                            .build()).build());
+
+        List<Element<PartyDetails>> respondantPartyDetailsList = new ArrayList<>();
+        respondantPartyDetailsList.add(Element.<PartyDetails>builder().id(testUuid)
+                                          .value(PartyDetails.builder().partyId(testUuid)
+                                                     .response(response).partyId(testUuid).build()).build());
+        respondantPartyDetailsList.add(Element.<PartyDetails>builder().id(testUuid1)
+                                          .value(PartyDetails.builder().partyId(testUuid1)
+                                                     .build()).build());
+
+
+
+        List<Element<Document>> docs = new ArrayList<>();
+        List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
+        emailNotificationDetails.add(element(EmailNotificationDetails.builder().partyIds("00000000-0000-0000-0000-000000000000").docs(
+            docs).servedParty(SERVED_PARTY_APPLICANT).timeStamp(LocalDateTime.now().format(DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS)).build()));
+        List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
+        bulkPrintDetails.add(element(BulkPrintDetails.builder().partyIds("00000000-0000-0000-0000-000000000000").printDocs(List.of(
+            element(Document.builder().build()))).timeStamp(LocalDateTime.now().format(DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS)).build()));
+        List<Element<ServedApplicationDetails>> servedApplicationDetails1 = new ArrayList<>();
+        servedApplicationDetails1.add(element(ServedApplicationDetails.builder().emailNotificationDetails(
+                emailNotificationDetails).servedBy("courtAdmin").servedAt(LocalDateTime.now().format(
+                DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS)).whoIsResponsible("courtAdmin")
+                                                  .modeOfService(SOA_BY_EMAIL_AND_POST).build()));
+        servedApplicationDetails1.add(element(ServedApplicationDetails.builder().servedAt(LocalDateTime.now().format(
+                DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS)).modeOfService(SOA_BY_EMAIL).bulkPrintDetails(bulkPrintDetails)
+                                                  .servedBy("courtAdmin").whoIsResponsible("courtAdmin").build()));
+        servedApplicationDetails1.add(element(ServedApplicationDetails.builder().servedAt(LocalDateTime.now().format(
+                DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS)).modeOfService(SOA_BY_POST).bulkPrintDetails(bulkPrintDetails)
+                                                  .servedBy("courtAdmin").whoIsResponsible("courtAdmin").build()));
+        servedApplicationDetails1.add(element(ServedApplicationDetails.builder().servedAt(LocalDateTime.now().format(
+                DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS)).modeOfService("SOA").bulkPrintDetails(bulkPrintDetails)
+                                                  .servedBy("courtAdmin").whoIsResponsible("courtAdmin").build()));
+
+        //Given
+        CaseData caseData1 = caseData.toBuilder()
+            .applicants(applicantPartyDetailsList)
+            .respondents(respondantPartyDetailsList)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantsFL401(partyDetails)
+            .respondentsFL401(PartyDetails.builder()
+                                  .user(User.builder().idamId("00000000-0000-0000-0000-000000000000").build())
+                                  .partyId(UUID.randomUUID()).build())
+            .state(State.DECISION_OUTCOME)
+            .serviceOfDocuments(ServiceOfDocuments.builder().servedDocumentsDetailsList(servedApplicationDetails1).build())
+            .finalServedApplicationDetailsList(finalServedApplicationDetailsListPostOnly)
+            .statementOfService(StatementOfService.builder()
+                                    .stmtOfServiceForApplication(List.of(element(StmtOfServiceAddRecipient.builder()
+                                                                                     .selectedPartyId(testUuid.toString())
+                                                                                     .build())))
+                                    .build())
+            .build();
+
+        //Action
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
+
+        //Assert
+        assertNotNull(citizenDocumentsManagement);
+        assertTrue(CollectionUtils.isEmpty(citizenDocumentsManagement.getCitizenOrders()));
+        //Assert notifications
+        assertTrue(CollectionUtils.isEmpty(citizenDocumentsManagement.getCitizenNotifications()));
+    }
 
 
     @Test
