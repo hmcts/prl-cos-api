@@ -5842,6 +5842,7 @@ public class ServiceOfApplicationServiceTest {
             .caseCreatedBy(CaseCreatedBy.CITIZEN)
             .caseTypeOfApplication("C100")
             .respondents(partyElementList)
+            .applicants(parties)
             .caseInvites(caseInviteList)
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder()
                                                 .specialArrangementsLetter(Document.builder().build())

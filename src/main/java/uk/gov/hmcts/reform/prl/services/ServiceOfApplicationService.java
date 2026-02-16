@@ -1682,10 +1682,23 @@ public class ServiceOfApplicationService {
 
         log.info("inside sendEmailViaSendGridWithAttachedDocsToParty template  {}", emailTemplate);
 
+        log.info("inside sendEmailViaSendGridWithAttachedDocsToParty served party  {}", servedParty);
+
         List<Document> packsWithCoverLetter = new ArrayList<>(coverLetters);
         packsWithCoverLetter.addAll(packDocs);
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         dynamicData.put("name", party.getValue().getLabelForDynamicList());
+
+        if (FL401_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            if (caseData.getApplicantsFL401() != null) {
+                dynamicData.put("applicantName", caseData.getApplicantsFL401().getLabelForDynamicList());
+            }
+        }
+        else if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData)) && !CollectionUtils.isEmpty(caseData.getApplicants())) {
+                dynamicData.put("applicantName", caseData.getApplicants().get(0).getValue().getLabelForDynamicList());
+        }
+
+
         dynamicData.put(DASH_BOARD_LINK, citizenUrl);
         populateLanguageMap(caseData, dynamicData);
 
