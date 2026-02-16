@@ -94,6 +94,7 @@ public class QuarantineLegalDoc {
     private final Document caseSummaryDocument;
     private final Document legalProfQuarantineDocument;
     private final Document cafcassQuarantineDocument;
+    private final Document localAuthorityQuarantineDocument;
     private final Document courtStaffQuarantineDocument;
     private final Document localAuthorityOtherDocDocument;
     private final Document pathfinderDocument;
