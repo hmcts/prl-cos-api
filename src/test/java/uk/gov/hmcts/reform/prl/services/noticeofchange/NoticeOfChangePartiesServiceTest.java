@@ -1166,6 +1166,73 @@ public class NoticeOfChangePartiesServiceTest {
     }
 
     @Test
+    public void testSubmittedPartyUuids() throws Exception {
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName("John")
+            .lastName("Doe")
+            .user(User.builder().build())
+            .build();
+        Element<PartyDetails> partyElement = element(partyDetails);
+
+        List<Element<PartyDetails>> applicants = new ArrayList<>();
+        applicants.add(partyElement);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345678L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(applicants)
+            .changeOrganisationRequestField(ChangeOrganisationRequest.builder()
+                                                .organisationToAdd(Organisation.builder().organisationID("orgId").build())
+                                                .createdBy("solicitor@mail.com")
+                                                .caseRoleId(DynamicList.builder()
+                                                                .value(DynamicListElement.builder().code("[C100APPLICANTSOLICITOR1]").build())
+                                                                .build())
+                                                .build())
+            .build();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .data(caseData.toMap(new ObjectMapper()))
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetails)
+            .build();
+
+        when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
+        when(partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
+            any(),
+            anyInt(),
+            any(),
+            anyBoolean()
+        )).thenAnswer(i -> i.getArguments()[0]); // Return the input CaseData without modification
+        when(systemUserService.getSysUserToken()).thenReturn("sysToken");
+        when(systemUserService.getUserId("sysToken")).thenReturn("sysUserId");
+        when(ccdCoreCaseDataService.eventRequest(any(), any())).thenReturn(EventRequestData.builder().build());
+        when(ccdCoreCaseDataService.startUpdate(any(), any(), any(), anyBoolean()))
+            .thenReturn(StartEventResponse.builder().caseDetails(caseDetails).build());
+        when(organisationService.getOrganisationSolicitorDetails(any(), any()))
+            .thenReturn(OrgSolicitors.builder().users(List.of(SolicitorUser.builder()
+                                                                  .firstName("Jack")
+                                                                  .lastName("Smith")
+                                                                  .email("solicitor@mail.com")
+                                                                  .build())).build());
+        when(organisationService.getOrganisationDetails(any(), any()))
+            .thenReturn(Organisations.builder().organisationIdentifier("orgId").name("Org Name").build());
+        when(ccdCoreCaseDataService.findCaseById(any(), any())).thenReturn(caseDetails);
+
+        noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
+
+        // perform one update, capture the CaseData to verify the UUID is set
+        verify(tabService, times(1)).updatePartyDetailsForNoc(any(), any(), any(), any(), caseDataArgumentCaptor.capture());
+        CaseData updatedCaseData = caseDataArgumentCaptor.getValue();
+        PartyDetails updatedParty = updatedCaseData.getApplicants().getFirst().getValue();
+        assertNotNull("Party UUID should be set", updatedParty.getSolicitorPartyId());
+    }
+
+
+    @Test
     public void testSubmittedStopRepresenting() {
         List<Element<PartyDetails>> applicant = new ArrayList<>();
         partyDetails.setBarrister(Barrister.builder()
