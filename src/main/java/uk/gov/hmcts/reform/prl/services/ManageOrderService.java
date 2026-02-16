@@ -66,6 +66,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.PostalInformation;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.ServeOrgDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AdditionalOrderDocument;
@@ -117,6 +118,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.time.temporal.ChronoUnit.DAYS;
+import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -193,7 +195,9 @@ import static uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum.fact
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getDynamicMultiSelectedValueLabels;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getWaMapper;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.EmailUtils.isValidEmailAddress;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.isHearingPageNeeded;
+
 
 @Service
 @Slf4j
@@ -2616,7 +2620,7 @@ public class ManageOrderService {
                         return concat(concat(hearingType, " - "), hearingDate);
                     }
                     return null;
-                }).filter(Objects::nonNull).toList()).orElse(Collections.emptyList());
+                }).filter(Objects::nonNull).toList()).orElse(emptyList());
             }).map(this::getDynamicListElements)
             .flatMap(Collection::stream)
             .toList();
@@ -3151,7 +3155,7 @@ public class ManageOrderService {
                 caseData
             );
         }
-        return Collections.emptyList();
+        return emptyList();
     }
 
     public Map<String, Object> handleFetchOrderDetails(String authorisation,
@@ -3685,5 +3689,24 @@ public class ManageOrderService {
             .anyMatch(element ->
                           HearingDateConfirmOptionEnum.dateConfirmedByListingTeam.equals(element.getValue().getHearingDateConfirmOptionEnum())
                               || HearingDateConfirmOptionEnum.dateToBeFixed.equals(element.getValue().getHearingDateConfirmOptionEnum()));
+    }
+
+    public List<String> validateAnotherOrgRecipients(CallbackRequest callbackRequest) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        //TODO Implement logic to validate another org recipients email address: make sure only one address is used
+        // and make sure that it is a valid email address
+        //Code from Gareth's FPVTL-2078 below, to be adapted
+        //Validate additional recipients email addresses - return error on first invalid email
+//        if (CollectionUtils.isNotEmpty(caseData.getServiceOfDocuments().getSodAdditionalRecipientsList())) {
+//            for (Element<ServeOrgDetails> recipient : caseData.getServiceOfDocuments()
+//                .getSodAdditionalRecipientsList()) {
+//                if (recipient.getValue().getServeByPostOrEmail().equals(DeliveryByEnum.email)
+//                    && !isValidEmailAddress(recipient.getValue().getEmailInformation().getEmailAddress())) {
+//                    return List.of("Please provide valid email address for all recipients");
+//                }
+//            }
+//        }
+        return emptyList();
     }
 }

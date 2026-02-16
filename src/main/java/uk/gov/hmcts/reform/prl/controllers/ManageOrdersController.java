@@ -303,6 +303,24 @@ public class ManageOrdersController {
         }
     }
 
+    @PostMapping(path = "/manage-orders/validate-another-org-recipients", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Mid event callback to validate another org recipients email addresses")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse validateAnotherOrgRecipients(
+        @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            List<String> errorList = manageOrderService.validateAnotherOrgRecipients(callbackRequest);
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .errors(errorList)
+                .data(callbackRequest.getCaseDetails().getData())
+                .build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
     @PostMapping(path = "/manage-orders/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.", content = @Content(mediaType = "application/json",
