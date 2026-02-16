@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -239,7 +241,12 @@ public class HearingService {
         return null;
     }
 
-    @Retryable(retryFor = {FeignException.class})
+    @Retryable(retryFor = {
+        FeignException.GatewayTimeout.class,
+        FeignException.BadGateway.class,
+        FeignException.InternalServerError.class},
+        backoff = @Backoff (delay = 500, multiplier = 2, maxDelay = 2000),
+        recover = "recoverFromFilterCasesFailure")
     public List<Long> filterCasesWithHearingsStartingOnDate(List<Long> caseIds, String userToken, LocalDate dateToCheck) {
         List<Long> filteredCaseIds = new ArrayList<>();
         if (caseIds == null || caseIds.isEmpty()) {
@@ -259,6 +266,12 @@ public class HearingService {
             }
         }
         return filteredCaseIds;
+    }
+
+    @Recover
+    public List<Long> recoverFromFilterCasesFailure(FeignException ex, List<Long> caseIds, String userToken, LocalDate dateToCheck) {
+        log.error("Failed to filter cases with hearings starting on date {} after retries", dateToCheck, ex);
+        return Collections.emptyList();
     }
 
     private boolean hasHearingStartingOnDate(Hearings hearing, LocalDate dateToCheck) {
