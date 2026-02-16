@@ -6,7 +6,6 @@ import com.google.common.collect.Iterables;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,13 +24,13 @@ import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
 import uk.gov.hmcts.reform.prl.mapper.citizen.awp.CitizenAwpMapper;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.c100rebuild.Document;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.LanguageSupportCaseNotesRequest;
 import uk.gov.hmcts.reform.prl.models.citizen.awp.CitizenAwpRequest;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.court.Court;
+import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
@@ -212,9 +211,14 @@ public class CitizenCaseUpdateService {
         String jsonData = citizenUpdatedCaseData.getC100RebuildData().getC100RebuildScreeningQuestions();
 
         if (jsonData != null) {
-            Document documentDataObject = objectMapper.readValue(jsonData, Document.class);
-            if (ObjectUtils.isNotEmpty(documentDataObject)) {
-                caseDataMapToBeUpdated.put(PERMISSION_REQUIRED_DOCUMENT, documentDataObject);
+            DocumentResponse documentResponse =
+                objectMapper.readValue(jsonData, DocumentResponse.class);
+
+            if (documentResponse != null && documentResponse.getDocument() != null) {
+                caseDataMapToBeUpdated.put(
+                    PERMISSION_REQUIRED_DOCUMENT,
+                    documentResponse.getDocument()
+                );
             }
         }
 

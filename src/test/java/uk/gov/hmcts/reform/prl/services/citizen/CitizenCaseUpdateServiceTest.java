@@ -29,7 +29,6 @@ import uk.gov.hmcts.reform.prl.mapper.citizen.awp.CitizenAwpMapper;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
-import uk.gov.hmcts.reform.prl.models.c100rebuild.Document;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.LanguageSupportCaseNotesRequest;
 import uk.gov.hmcts.reform.prl.models.citizen.awp.CitizenAwpRequest;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -38,6 +37,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.Confiden
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.court.Court;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
@@ -60,6 +61,7 @@ import java.util.Map;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -479,13 +481,18 @@ public class CitizenCaseUpdateServiceTest {
             .build();
 
         Document permissionRequiredDocument = Document.builder()
-            .url(generatedDocumentInfo.getUrl())
-            .binaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .filename("test.pdf")
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentFileName("test.pdf")
             .build();
 
         ObjectMapper realMapper = new ObjectMapper();
-        String jsonString = realMapper.writeValueAsString(permissionRequiredDocument);
+        DocumentResponse documentResponse = new DocumentResponse();
+        documentResponse.setStatus("SUCCESS");
+        documentResponse.setDocument(permissionRequiredDocument);
+
+        String jsonString = realMapper.writeValueAsString(documentResponse);
+
         C100RebuildData c100RebuildData = getC100RebuildData();
         c100RebuildData.setC100RebuildScreeningQuestions(jsonString);
 
@@ -514,11 +521,9 @@ public class CitizenCaseUpdateServiceTest {
             .thenReturn(caseData);
         when(allTabService.getStartUpdateForSpecificUserEvent(anyString(), anyString(), anyString()))
             .thenReturn(startAllTabsUpdateDataContent1);
-        when(objectMapper.readValue(
-            any(String.class),
-            ArgumentMatchers.<Class<Document>>any()
-        ))
-            .thenReturn(permissionRequiredDocument);
+        doReturn(documentResponse)
+            .when(objectMapper)
+            .readValue(any(String.class), eq(DocumentResponse.class));
         when(objectMapper.convertValue(any(CaseData.class), eq(Map.class)))
             .thenReturn(caseDetailsMap);
         when(partyLevelCaseFlagsService.generateAndStoreCaseFlags(anyString()))
@@ -549,9 +554,9 @@ public class CitizenCaseUpdateServiceTest {
 
         Document capturedDoc =
             realMapper.convertValue(updatedMap.get(PERMISSION_REQUIRED_DOCUMENT), Document.class);
-        Assert.assertEquals("test.pdf", capturedDoc.getFilename());
-        Assert.assertEquals("TestUrl", capturedDoc.getUrl());
-        Assert.assertEquals("binaryUrl", capturedDoc.getBinaryUrl());
+        Assert.assertEquals("test.pdf", capturedDoc.getDocumentFileName());
+        Assert.assertEquals("TestUrl", capturedDoc.getDocumentUrl());
+        Assert.assertEquals("binaryUrl", capturedDoc.getDocumentBinaryUrl());
     }
 
     @Test
