@@ -1328,12 +1328,13 @@ public class ServiceOfApplicationService {
         log.info("Respondent does not access to dashboard -> send packs via sendgrid email for {}", party.getId());
 
 
-        emailNotification = sendEmailViaSendGridWithAttachedDocsToPartyRespondent(fieldMap.get(AUTHORIZATION),
+        emailNotification = sendEmailViaSendGridWithAttachedDocsToParty(fieldMap.get(AUTHORIZATION),
                                                                   caseData,
                                                                   docs,
                                                                   party,
                                                                   emailTemplate,
-                                                                  coverLetters);
+                                                                  coverLetters,
+                                                                  SERVED_PARTY_RESPONDENT);
 
         if (emailNotification != null) {
             emailNotificationDetails.add(element(emailNotification.toBuilder()
@@ -1671,41 +1672,16 @@ public class ServiceOfApplicationService {
         );
     }
 
-    private EmailNotificationDetails sendEmailViaSendGridWithAttachedDocsToPartyRespondent(String authorization, CaseData caseData,
-                                                                                 List<Document> packDocs, Element<PartyDetails> party,
-                                                                                 SendgridEmailTemplateNames emailTemplate,
-                                                                                 List<Document> coverLetters) {
-
-        log.info("inside sendEmailViaSendGridWithAttachedDocsToPartyRespondent {}", party.getId());
-
-        log.info("inside sendEmailViaSendGridWithAttachedDocsToPartyRespondent template 1 {}", emailTemplate);
-        if (emailTemplate != null) {
-            log.info("inside sendEmailViaSendGridWithAttachedDocsToPartyRespondent template 2 {}", emailTemplate.name());
-        }
-
-        List<Document> packsWithCoverLetter = new ArrayList<>(coverLetters);
-        packsWithCoverLetter.addAll(packDocs);
-        Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
-        dynamicData.put("name", party.getValue().getLabelForDynamicList());
-        dynamicData.put(DASH_BOARD_LINK, citizenUrl);
-        populateLanguageMap(caseData, dynamicData);
-
-        return serviceOfApplicationEmailService
-            .sendEmailUsingTemplateWithAttachments(
-                authorization,
-                party.getValue().getEmail(),
-                packsWithCoverLetter,
-                emailTemplate,
-                dynamicData,
-                SERVED_PARTY_RESPONDENT
-            );
-    }
-
     private EmailNotificationDetails sendEmailViaSendGridWithAttachedDocsToParty(String authorization, CaseData caseData,
                                                                                  List<Document> packDocs, Element<PartyDetails> party,
                                                                                  SendgridEmailTemplateNames emailTemplate,
                                                                                  List<Document> coverLetters,
                                                                                  String servedParty) {
+
+        log.info("inside sendEmailViaSendGridWithAttachedDocsToParty {}", party.getId());
+
+        log.info("inside sendEmailViaSendGridWithAttachedDocsToParty template  {}", emailTemplate);
+
         List<Document> packsWithCoverLetter = new ArrayList<>(coverLetters);
         packsWithCoverLetter.addAll(packDocs);
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
