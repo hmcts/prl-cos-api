@@ -388,23 +388,6 @@ public class DocumentGenServiceTest {
             "Hello, World!".getBytes()
         );
 
-        ReflectionTestUtils.setField(documentGenService, "organisationService", organisationService);
-        ReflectionTestUtils.setField(documentGenService, "documentLanguageService", documentLanguageService);
-        ReflectionTestUtils.setField(documentGenService, "dgsService", dgsService);
-        ReflectionTestUtils.setField(
-            documentGenService,
-            "c100DocumentTemplateFinderService",
-            c100DocumentTemplateFinderService
-        );
-        ReflectionTestUtils.setField(
-            documentGenService,
-            "allegationOfHarmRevisedService",
-            allegationOfHarmRevisedService
-        );
-        ReflectionTestUtils.setField(documentGenService, "caseDocumentClient", caseDocumentClient);
-        ReflectionTestUtils.setField(documentGenService, "uploadService", uploadService);
-        ReflectionTestUtils.setField(documentGenService, "dgsApiClient", dgsApiClient);
-
         documentRequest = DocumentRequest.builder()
             .caseId("123")
             .categoryId("POSITION_STATEMENTS")
@@ -582,12 +565,12 @@ public class DocumentGenServiceTest {
         assertTrue(stringObjectMap.containsKey(DRAFT_APPLICATION_DOCUMENT_FIELD));
         assertTrue(stringObjectMap.containsKey(DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD));
 
-        verify(dgsService, times(1)).generateDocument(
+        verify(dgsService).generateDocument(
             Mockito.anyString(),
             Mockito.any(CaseDetails.class),
             Mockito.any()
         );
-        verify(dgsService, times(1)).generateWelshDocument(
+        verify(dgsService).generateWelshDocument(
             Mockito.anyString(),
             Mockito.any(CaseDetails.class),
             Mockito.any()
@@ -1036,12 +1019,12 @@ public class DocumentGenServiceTest {
             .thenReturn(caseData);
 
         documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, fl401CaseData);
-        verify(dgsService, times(1)).generateDocument(
+        verify(dgsService).generateDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
             Mockito.any()
         );
-        verify(dgsService, times(1)).generateWelshDocument(
+        verify(dgsService).generateWelshDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
             Mockito.any()
@@ -1100,7 +1083,7 @@ public class DocumentGenServiceTest {
             .thenReturn(caseData);
 
         documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, fl401CaseData);
-        verify(dgsService, times(1)).generateDocument(
+        verify(dgsService).generateDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
             Mockito.any()
@@ -1156,7 +1139,7 @@ public class DocumentGenServiceTest {
             .thenReturn(caseData);
 
         documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, fl401CaseData);
-        verify(dgsService, times(1)).generateWelshDocument(
+        verify(dgsService).generateWelshDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
             Mockito.any()
@@ -1174,7 +1157,7 @@ public class DocumentGenServiceTest {
             false,
             respondentDetails
         );
-        verify(dgsService, times(1)).generateDocument(
+        verify(dgsService).generateDocument(
             Mockito.anyString(),
             Mockito.anyString(),
             Mockito.any(),
@@ -1201,14 +1184,14 @@ public class DocumentGenServiceTest {
     @Test
     public void testSingleDocGeneration() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, DOCUMENT_COVER_SHEET_HINT, false);
-        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
     @Test
     public void testSingleDocGenerationC1A() throws Exception {
         c100CaseData = c100CaseData.toBuilder().taskListVersion(TASK_LIST_VERSION_V2).build();
         documentGenService.generateSingleDocument("auth", c100CaseData, C1A_HINT, false);
-        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
     @Test
@@ -1333,31 +1316,31 @@ public class DocumentGenServiceTest {
     @Test
     public void testSingleDocGenerationForEnglish() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, C7_FINAL_RESPONDENT, false);
-        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
     @Test
     public void testSingleDocGenerationForWelsh() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, C7_FINAL_WELSH, false);
-        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
     @Test
     public void testSingleDocGenerationDefault() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, "", false);
-        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
     @Test
     public void testSingleDocGenerationC8DraftHint() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, C8_DRAFT_HINT, false);
-        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
     @Test
     public void testSingleDocGenerationC1ADraftHint() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, C1A_DRAFT_HINT, false);
-        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
     @Test
@@ -1371,7 +1354,7 @@ public class DocumentGenServiceTest {
             false,
             respondentDetails
         );
-        verify(dgsService, times(1)).generateDocument(
+        verify(dgsService).generateDocument(
             Mockito.anyString(),
             Mockito.anyString(),
             Mockito.any(),
@@ -1449,7 +1432,7 @@ public class DocumentGenServiceTest {
         );
 
         documentGenService.generateCitizenStatementDocument(AUTH_TOKEN, generateAndUploadDocumentRequest, 1);
-        verify(dgsService, times(1)).generateCitizenDocument(
+        verify(dgsService).generateCitizenDocument(
             Mockito.anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
             Mockito.any()
@@ -1486,7 +1469,7 @@ public class DocumentGenServiceTest {
         );
 
         documentGenService.generateCitizenStatementDocument(AUTH_TOKEN, generateAndUploadDocumentRequest, 1);
-        verify(dgsService, times(1)).generateCitizenDocument(
+        verify(dgsService).generateCitizenDocument(
             Mockito.anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
             Mockito.any()
@@ -1523,7 +1506,7 @@ public class DocumentGenServiceTest {
         );
 
         documentGenService.generateCitizenStatementDocument(AUTH_TOKEN, generateAndUploadDocumentRequest, 1);
-        verify(dgsService, times(1)).generateCitizenDocument(
+        verify(dgsService).generateCitizenDocument(
             Mockito.anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
             Mockito.any()
@@ -1560,7 +1543,7 @@ public class DocumentGenServiceTest {
         );
 
         documentGenService.generateCitizenStatementDocument(AUTH_TOKEN, generateAndUploadDocumentRequest, 1);
-        verify(dgsService, times(1)).generateCitizenDocument(
+        verify(dgsService).generateCitizenDocument(
             Mockito.anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
             Mockito.any()
@@ -1597,7 +1580,7 @@ public class DocumentGenServiceTest {
         );
 
         documentGenService.generateCitizenStatementDocument(AUTH_TOKEN, generateAndUploadDocumentRequest, 1);
-        verify(dgsService, times(1)).generateCitizenDocument(
+        verify(dgsService).generateCitizenDocument(
             Mockito.anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
             Mockito.any()
@@ -1634,7 +1617,7 @@ public class DocumentGenServiceTest {
         );
 
         documentGenService.generateCitizenStatementDocument(AUTH_TOKEN, generateAndUploadDocumentRequest, 1);
-        verify(dgsService, times(1)).generateCitizenDocument(
+        verify(dgsService).generateCitizenDocument(
             Mockito.anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
             Mockito.any()
@@ -1671,7 +1654,7 @@ public class DocumentGenServiceTest {
         );
 
         documentGenService.generateCitizenStatementDocument(AUTH_TOKEN, generateAndUploadDocumentRequest, 1);
-        verify(dgsService, times(1)).generateCitizenDocument(
+        verify(dgsService).generateCitizenDocument(
             Mockito.anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
             Mockito.any()
@@ -1708,7 +1691,7 @@ public class DocumentGenServiceTest {
         );
 
         documentGenService.generateCitizenStatementDocument(AUTH_TOKEN, generateAndUploadDocumentRequest, 1);
-        verify(dgsService, times(1)).generateCitizenDocument(
+        verify(dgsService).generateCitizenDocument(
             Mockito.anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
             Mockito.any()
@@ -1745,7 +1728,7 @@ public class DocumentGenServiceTest {
         );
 
         documentGenService.generateCitizenStatementDocument(AUTH_TOKEN, generateAndUploadDocumentRequest, 1);
-        verify(dgsService, times(1)).generateCitizenDocument(
+        verify(dgsService).generateCitizenDocument(
             Mockito.anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
             Mockito.any()
@@ -1782,7 +1765,7 @@ public class DocumentGenServiceTest {
         );
 
         documentGenService.generateCitizenStatementDocument(AUTH_TOKEN, generateAndUploadDocumentRequest, 1);
-        verify(dgsService, times(1)).generateCitizenDocument(
+        verify(dgsService).generateCitizenDocument(
             Mockito.anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
             Mockito.any()
@@ -1819,7 +1802,7 @@ public class DocumentGenServiceTest {
         );
 
         documentGenService.generateCitizenStatementDocument(AUTH_TOKEN, generateAndUploadDocumentRequest, 1);
-        verify(dgsService, times(1)).generateCitizenDocument(
+        verify(dgsService).generateCitizenDocument(
             Mockito.anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
             Mockito.any()
@@ -1856,7 +1839,7 @@ public class DocumentGenServiceTest {
         );
 
         documentGenService.generateCitizenStatementDocument(AUTH_TOKEN, generateAndUploadDocumentRequest, 1);
-        verify(dgsService, times(1)).generateCitizenDocument(
+        verify(dgsService).generateCitizenDocument(
             Mockito.anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
             Mockito.any()
@@ -1893,7 +1876,7 @@ public class DocumentGenServiceTest {
         );
 
         documentGenService.generateCitizenStatementDocument(AUTH_TOKEN, generateAndUploadDocumentRequest, 1);
-        verify(dgsService, times(1)).generateCitizenDocument(
+        verify(dgsService).generateCitizenDocument(
             Mockito.anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
             Mockito.any()
@@ -2638,7 +2621,7 @@ public class DocumentGenServiceTest {
     @Test
     public void testSingleDocGenerationForFl404b() throws Exception {
         documentGenService.generateSingleDocument("auth", fl401CaseData, DA_LIST_ON_NOTICE_FL404B_DOCUMENT, false);
-        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
     @Test
@@ -2657,7 +2640,7 @@ public class DocumentGenServiceTest {
             .thenReturn(expectedResponse);
 
         documentGenService.getDocumentBytes(generatedDocumentInfo.getUrl(), AUTH_TOKEN, "s2s token");
-        verify(caseDocumentClient, times(1)).getDocumentBinary(
+        verify(caseDocumentClient).getDocumentBinary(
             AUTH_TOKEN, "s2s token", generatedDocumentInfo.getUrl()
         );
     }
@@ -2724,7 +2707,7 @@ public class DocumentGenServiceTest {
 
         documentGenService.convertToPdf(AUTH_TOKEN, document);
 
-        verify(caseDocumentClient, times(1)).getDocumentBinary(
+        verify(caseDocumentClient).getDocumentBinary(
             AUTH_TOKEN, "s2s token", generatedDocumentInfo.getUrl()
         );
     }
@@ -2839,7 +2822,7 @@ public class DocumentGenServiceTest {
 
         documentGenService.uploadDocument(AUTH_TOKEN, file);
 
-        verify(uploadService, times(1)).uploadDocument(
+        verify(uploadService).uploadDocument(
             file.getBytes(),
             file.getOriginalFilename(),
             file.getContentType(),
@@ -3011,13 +2994,13 @@ public class DocumentGenServiceTest {
     @Test
     public void testSingleDocGenerationForCitizenDocumentC1aDraftEnglish() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, DOCUMENT_C1A_DRAFT_HINT, false);
-        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
     @Test
     public void testSingleDocGenerationForCitizenDocumentC1aDraftWelsh() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, DOCUMENT_C1A_DRAFT_HINT, true);
-        verify(dgsService, times(1)).generateWelshDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService).generateWelshDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
 
