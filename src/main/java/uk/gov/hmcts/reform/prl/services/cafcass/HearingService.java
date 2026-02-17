@@ -30,7 +30,11 @@ public class HearingService {
     public Hearings getHearings(String userToken, String caseReferenceNumber) {
         Hearings hearingDetails = null;
         try {
-            hearingDetails = hearingApiClient.getHearingDetails(userToken, authTokenGenerator.generate(), caseReferenceNumber);
+            hearingDetails = hearingApiClient.getHearingDetails(
+                userToken,
+                authTokenGenerator.generate(),
+                caseReferenceNumber
+            );
             hearingDetails = filterHearings(hearingDetails);
         } catch (Exception e) {
             log.error("Error in getHearings", e.getMessage());
@@ -38,12 +42,16 @@ public class HearingService {
         return hearingDetails;
     }
 
-    public List<Hearings> getHearingsForAllCases(String userToken, Map<String,String> caseIdWithRegionIdMap) {
+    public List<Hearings> getHearingsForAllCases(String userToken, Map<String, String> caseIdWithRegionIdMap) {
         List<Hearings> listOfHearingDetails = null;
         try {
-            listOfHearingDetails = hearingApiClient.getHearingDetailsForAllCaseIds(userToken, authTokenGenerator.generate(), caseIdWithRegionIdMap);
+            listOfHearingDetails = hearingApiClient.getHearingDetailsForAllCaseIds(
+                userToken,
+                authTokenGenerator.generate(),
+                caseIdWithRegionIdMap
+            );
         } catch (Exception e) {
-            log.error("Error while getHearingsForAllCases {}",e.getMessage());
+            log.error("Error while getHearingsForAllCases {}", e.getMessage());
             return Collections.emptyList();
         }
         return listOfHearingDetails;
@@ -51,17 +59,17 @@ public class HearingService {
 
     private Hearings filterHearings(Hearings hearingDetails) {
 
-        if (hearingDetails != null && hearingDetails.getCaseHearings() != null)  {
+        if (hearingDetails != null && hearingDetails.getCaseHearings() != null) {
 
             final List<CaseHearing> caseHearings = hearingDetails.getCaseHearings();
 
             final List<String> hearingStatuses = hearingStatusList.stream().map(String::trim).toList();
 
             final List<CaseHearing> hearings = caseHearings.stream()
-                    .filter(hearing ->
-                        hearingStatuses.stream().anyMatch(hearingStatus -> hearingStatus.equals(
-                            hearing.getHmcStatus()))
-                    )
+                .filter(hearing ->
+                            hearingStatuses.stream().anyMatch(hearingStatus -> hearingStatus.equals(
+                                hearing.getHmcStatus()))
+                )
                 .toList();
 
 
@@ -73,6 +81,6 @@ public class HearingService {
                 return null;
             }
         }
-       return hearingDetails;
+        return hearingDetails;
     }
 }
