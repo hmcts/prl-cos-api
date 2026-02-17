@@ -1361,15 +1361,7 @@ public class DocumentGenServiceTest {
 
     @Test
     public void testGenerateCitizenDocument() throws Exception {
-        Map<String, String> documentValues = new HashMap<>();
-        documentValues.put("caseId", "1664294549087405");
-        documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType", "Witness statements and evidence");
-        documentValues.put("documentType", "Your position statements");
-        documentValues.put("partyName", "Sonali Citizen");
-        documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
-        documentValues.put("documentRequestedByCourt", "No");
-        documentValues.put("isApplicant", "Yes");
+        Map<String, String> documentValues = createDocumentValues("Your position statements");
 
         GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest = GenerateAndUploadDocumentRequest.builder()
             .values(documentValues)
@@ -1398,15 +1390,7 @@ public class DocumentGenServiceTest {
 
     @Test
     public void testGenerateCitizenDocumentWithYourWitnessStatement() throws Exception {
-        Map<String, String> documentValues = new HashMap<>();
-        documentValues.put("caseId", "1664294549087405");
-        documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType", "Witness statements and evidence");
-        documentValues.put("documentType", YOUR_WITNESS_STATEMENTS);
-        documentValues.put("partyName", "Sonali Citizen");
-        documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
-        documentValues.put("documentRequestedByCourt", "No");
-        documentValues.put("isApplicant", "Yes");
+        Map<String, String> documentValues = createDocumentValues(YOUR_WITNESS_STATEMENTS);
 
         GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest = GenerateAndUploadDocumentRequest.builder()
             .values(documentValues)
@@ -1435,15 +1419,7 @@ public class DocumentGenServiceTest {
 
     @Test
     public void testGenerateCitizenDocumentWithOtherWitnessStatement() throws Exception {
-        Map<String, String> documentValues = new HashMap<>();
-        documentValues.put("caseId", "1664294549087405");
-        documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType", "Witness statements and evidence");
-        documentValues.put("documentType", OTHER_WITNESS_STATEMENTS);
-        documentValues.put("partyName", "Sonali Citizen");
-        documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
-        documentValues.put("documentRequestedByCourt", "No");
-        documentValues.put("isApplicant", "Yes");
+        Map<String, String> documentValues = createDocumentValues(OTHER_WITNESS_STATEMENTS);
 
         GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest = GenerateAndUploadDocumentRequest.builder()
             .values(documentValues)
@@ -1472,15 +1448,7 @@ public class DocumentGenServiceTest {
 
     @Test
     public void testGenerateCitizenDocumentWithMedicalRecords() throws Exception {
-        Map<String, String> documentValues = new HashMap<>();
-        documentValues.put("caseId", "1664294549087405");
-        documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType", "Witness statements and evidence");
-        documentValues.put("documentType", MEDICAL_RECORDS);
-        documentValues.put("partyName", "Sonali Citizen");
-        documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
-        documentValues.put("documentRequestedByCourt", "No");
-        documentValues.put("isApplicant", "Yes");
+        Map<String, String> documentValues = createDocumentValues(MEDICAL_RECORDS);
 
         GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest = GenerateAndUploadDocumentRequest.builder()
             .values(documentValues)
@@ -1509,15 +1477,7 @@ public class DocumentGenServiceTest {
 
     @Test
     public void testGenerateCitizenDocumentWithMail_screenshots() throws Exception {
-        Map<String, String> documentValues = new HashMap<>();
-        documentValues.put("caseId", "1664294549087405");
-        documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType", "Witness statements and evidence");
-        documentValues.put("documentType", MAIL_SCREENSHOTS_MEDIA_FILES);
-        documentValues.put("partyName", "Sonali Citizen");
-        documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
-        documentValues.put("documentRequestedByCourt", "No");
-        documentValues.put("isApplicant", "Yes");
+        Map<String, String> documentValues = createDocumentValues(MAIL_SCREENSHOTS_MEDIA_FILES);
 
         GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest = GenerateAndUploadDocumentRequest.builder()
             .values(documentValues)
@@ -1546,15 +1506,7 @@ public class DocumentGenServiceTest {
 
     @Test
     public void testGenerateCitizenDocumentWithLettersFromSchools() throws Exception {
-        Map<String, String> documentValues = new HashMap<>();
-        documentValues.put("caseId", "1664294549087405");
-        documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType", "Witness statements and evidence");
-        documentValues.put("documentType", LETTERS_FROM_SCHOOL);
-        documentValues.put("partyName", "Sonali Citizen");
-        documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
-        documentValues.put("documentRequestedByCourt", "No");
-        documentValues.put("isApplicant", "Yes");
+        Map<String, String> documentValues = createDocumentValues(LETTERS_FROM_SCHOOL);
 
         GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest = GenerateAndUploadDocumentRequest.builder()
             .values(documentValues)
@@ -1583,15 +1535,7 @@ public class DocumentGenServiceTest {
 
     @Test
     public void testGenerateCitizenDocumentWithTenancyMortgageAgreement() throws Exception {
-        Map<String, String> documentValues = new HashMap<>();
-        documentValues.put("caseId", "1664294549087405");
-        documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType", "Witness statements and evidence");
-        documentValues.put("documentType", TENANCY_MORTGAGE_AGREEMENTS);
-        documentValues.put("partyName", "Sonali Citizen");
-        documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
-        documentValues.put("documentRequestedByCourt", "No");
-        documentValues.put("isApplicant", "Yes");
+        Map<String, String> documentValues = createDocumentValues(TENANCY_MORTGAGE_AGREEMENTS);
 
         GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest = GenerateAndUploadDocumentRequest.builder()
             .values(documentValues)
@@ -1620,15 +1564,7 @@ public class DocumentGenServiceTest {
 
     @Test
     public void testGenerateCitizenDocumentWithPreviousOrderSubmitted() throws Exception {
-        Map<String, String> documentValues = new HashMap<>();
-        documentValues.put("caseId", "1664294549087405");
-        documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType", "Witness statements and evidence");
-        documentValues.put("documentType", PREVIOUS_ORDERS_SUBMITTED);
-        documentValues.put("partyName", "Sonali Citizen");
-        documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
-        documentValues.put("documentRequestedByCourt", "No");
-        documentValues.put("isApplicant", "Yes");
+        Map<String, String> documentValues = createDocumentValues(PREVIOUS_ORDERS_SUBMITTED);
 
         GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest = GenerateAndUploadDocumentRequest.builder()
             .values(documentValues)
@@ -1657,15 +1593,7 @@ public class DocumentGenServiceTest {
 
     @Test
     public void testGenerateCitizenDocumentWithMedicalReports() throws Exception {
-        Map<String, String> documentValues = new HashMap<>();
-        documentValues.put("caseId", "1664294549087405");
-        documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType", "Witness statements and evidence");
-        documentValues.put("documentType", MEDICAL_REPORTS);
-        documentValues.put("partyName", "Sonali Citizen");
-        documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
-        documentValues.put("documentRequestedByCourt", "No");
-        documentValues.put("isApplicant", "Yes");
+        Map<String, String> documentValues = createDocumentValues(MEDICAL_REPORTS);
 
         GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest = GenerateAndUploadDocumentRequest.builder()
             .values(documentValues)
@@ -1694,15 +1622,7 @@ public class DocumentGenServiceTest {
 
     @Test
     public void testGenerateCitizenDocumentWithPaternityTestReports() throws Exception {
-        Map<String, String> documentValues = new HashMap<>();
-        documentValues.put("caseId", "1664294549087405");
-        documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType", "Witness statements and evidence");
-        documentValues.put("documentType", PATERNITY_TEST_REPORTS);
-        documentValues.put("partyName", "Sonali Citizen");
-        documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
-        documentValues.put("documentRequestedByCourt", "No");
-        documentValues.put("isApplicant", "Yes");
+        Map<String, String> documentValues = createDocumentValues(PATERNITY_TEST_REPORTS);
 
         GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest = GenerateAndUploadDocumentRequest.builder()
             .values(documentValues)
@@ -1731,15 +1651,7 @@ public class DocumentGenServiceTest {
 
     @Test
     public void testGenerateCitizenDocumentWithDrugAndAlcoholReports() throws Exception {
-        Map<String, String> documentValues = new HashMap<>();
-        documentValues.put("caseId", "1664294549087405");
-        documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType", "Witness statements and evidence");
-        documentValues.put("documentType", DRUG_AND_ALCOHOL_TESTS);
-        documentValues.put("partyName", "Sonali Citizen");
-        documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
-        documentValues.put("documentRequestedByCourt", "No");
-        documentValues.put("isApplicant", "Yes");
+        Map<String, String> documentValues = createDocumentValues(DRUG_AND_ALCOHOL_TESTS);
 
         GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest = GenerateAndUploadDocumentRequest.builder()
             .values(documentValues)
@@ -1768,15 +1680,7 @@ public class DocumentGenServiceTest {
 
     @Test
     public void testGenerateCitizenDocumentWithPoliceReports() throws Exception {
-        Map<String, String> documentValues = new HashMap<>();
-        documentValues.put("caseId", "1664294549087405");
-        documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType", "Witness statements and evidence");
-        documentValues.put("documentType", POLICE_REPORTS);
-        documentValues.put("partyName", "Sonali Citizen");
-        documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
-        documentValues.put("documentRequestedByCourt", "No");
-        documentValues.put("isApplicant", "Yes");
+        Map<String, String> documentValues = createDocumentValues(POLICE_REPORTS);
 
         GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest = GenerateAndUploadDocumentRequest.builder()
             .values(documentValues)
@@ -1805,15 +1709,7 @@ public class DocumentGenServiceTest {
 
     @Test
     public void testGenerateCitizenDocumentWithOtherDocument() throws Exception {
-        Map<String, String> documentValues = new HashMap<>();
-        documentValues.put("caseId", "1664294549087405");
-        documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType", "Witness statements and evidence");
-        documentValues.put("documentType", OTHER_DOCUMENTS);
-        documentValues.put("partyName", "Sonali Citizen");
-        documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
-        documentValues.put("documentRequestedByCourt", "No");
-        documentValues.put("isApplicant", "Yes");
+        Map<String, String> documentValues = createDocumentValues(OTHER_DOCUMENTS);
 
         GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest = GenerateAndUploadDocumentRequest.builder()
             .values(documentValues)
@@ -3075,6 +2971,21 @@ public class DocumentGenServiceTest {
             ))
             .build();
         assertTrue(documentGenService.isAnyC100ApplicantInfoConfidential(caseData));
+    }
+
+    private Map<String, String> createDocumentValues(String documentType) {
+        Map<String, String> documentValues = new HashMap<>();
+
+        documentValues.put("caseId", "1664294549087405");
+        documentValues.put("freeTextUploadStatements", "testing document gen");
+        documentValues.put("parentDocumentType", "Witness statements and evidence");
+        documentValues.put("documentType", documentType);
+        documentValues.put("partyName", "Sonali Citizen");
+        documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
+        documentValues.put("documentRequestedByCourt", "No");
+        documentValues.put("isApplicant", "Yes");
+
+        return documentValues;
     }
 
     private void verifyDocuments(Map<String, Object> caseData, String... documentFields) {
