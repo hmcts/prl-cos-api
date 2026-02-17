@@ -98,6 +98,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -173,8 +174,6 @@ public class NoticeOfChangePartiesServiceTest {
     private BarristerHelper barristerHelper;
     @Mock
     private BarristerRemoveService barristerRemoveService;
-
-    private StartEventResponse startEventResponse;
 
     @Captor
     private ArgumentCaptor<CaseData> caseDataArgumentCaptor;
@@ -1166,7 +1165,7 @@ public class NoticeOfChangePartiesServiceTest {
     }
 
     @Test
-    public void testSubmittedPartyUuids() throws Exception {
+    public void testSubmittedPartyUuidsC100() {
         PartyDetails partyDetails = PartyDetails.builder()
             .firstName("John")
             .lastName("Doe")
@@ -1230,6 +1229,69 @@ public class NoticeOfChangePartiesServiceTest {
         PartyDetails updatedParty = updatedCaseData.getApplicants().getFirst().getValue();
         assertNotNull("Party UUID should be set", updatedParty.getSolicitorPartyId());
     }
+
+    @Test
+    public void testSubmittedPartyUuidsFL401() {
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName("John")
+            .lastName("Doe")
+            .user(User.builder().build())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345678L)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(partyDetails)
+            .changeOrganisationRequestField(ChangeOrganisationRequest.builder()
+                                                .organisationToAdd(Organisation.builder().organisationID("orgId").build())
+                                                .createdBy("solicitor@mail.com")
+                                                .caseRoleId(DynamicList.builder()
+                                                                .value(DynamicListElement.builder().code("[APPLICANTSOLICITOR]").build())
+                                                                .build())
+                                                .build())
+            .build();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .data(caseData.toMap(new ObjectMapper()))
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetails)
+            .build();
+
+        when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
+        when(partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
+            any(),
+            anyInt(),
+            any(),
+            anyBoolean()
+        )).thenAnswer(i -> i.getArguments()[0]); // Return the input CaseData without modification
+        when(systemUserService.getSysUserToken()).thenReturn("sysToken");
+        when(systemUserService.getUserId("sysToken")).thenReturn("sysUserId");
+        when(ccdCoreCaseDataService.eventRequest(any(), any())).thenReturn(EventRequestData.builder().build());
+        when(ccdCoreCaseDataService.startUpdate(any(), any(), any(), anyBoolean()))
+            .thenReturn(StartEventResponse.builder().caseDetails(caseDetails).build());
+        when(organisationService.getOrganisationSolicitorDetails(any(), any()))
+            .thenReturn(OrgSolicitors.builder().users(List.of(SolicitorUser.builder()
+                                                                  .firstName("Jack")
+                                                                  .lastName("Smith")
+                                                                  .email("solicitor@mail.com")
+                                                                  .build())).build());
+        when(organisationService.getOrganisationDetails(any(), any()))
+            .thenReturn(Organisations.builder().organisationIdentifier("orgId").name("Org Name").build());
+        when(ccdCoreCaseDataService.findCaseById(any(), any())).thenReturn(caseDetails);
+
+        noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
+
+        // perform one update, capture the CaseData to verify the UUID is set
+        verify(tabService, times(1)).updatePartyDetailsForNoc(any(), any(), any(), any(), caseDataArgumentCaptor.capture());
+        CaseData updatedCaseData = caseDataArgumentCaptor.getValue();
+        PartyDetails updatedParty = updatedCaseData.getApplicantsFL401();
+        assertNotNull("Party UUID should be set", updatedParty.getSolicitorPartyId());
+    }
+
 
 
     @Test
