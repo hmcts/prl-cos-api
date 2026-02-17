@@ -2252,4 +2252,35 @@ public class EditAndApproveDraftOrderControllerTest {
                          + "To send to multiple recipients please use the add new button.",
                      aboutToStartOrSubmitCallbackResponse.getErrors().getFirst());
     }
+
+    @Test
+    public void testExceptionForValidateAdditionalPartiesForServingOrder() {
+        PartyDetails partyDetails = PartyDetails.builder().firstName("xyz")
+            .solicitorOrg(Organisation.builder().organisationName("test").build())
+            .build();
+        Element<PartyDetails> applicants = element(partyDetails);
+        DraftOrder draftOrder = DraftOrder.builder()
+            .isOrderUploadedByJudgeOrAdmin(Yes)
+            .build();
+        CaseData caseData = CaseData.builder()
+            .draftOrderCollection(Collections.singletonList(element(draftOrder)))
+            .applicants(List.of(applicants))
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .doYouWantToEditTheOrder(Yes)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
+
+        assertExpectedException(() -> editAndApproveDraftOrderController
+            .validateAdditionalPartiesForServingOrder(authToken, s2sToken, callbackRequest), RuntimeException.class, "Invalid Client");
+    }
 }
