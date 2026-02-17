@@ -2172,4 +2172,84 @@ public class EditAndApproveDraftOrderControllerTest {
         Assert.assertNotNull(updatedCaseDataMap.get("doYouWantToEditTheOrder"));
         Assert.assertEquals("Yes", String.valueOf(updatedCaseDataMap.get("doYouWantToEditTheOrder")));
     }
+
+    @Test
+    public void testValidateAdditionalPartiesForServingOrderWhenEmailIsValid() {
+        PartyDetails partyDetails = PartyDetails.builder().firstName("xyz")
+            .solicitorOrg(Organisation.builder().organisationName("test").build())
+            .build();
+        Element<PartyDetails> applicants = element(partyDetails);
+        DraftOrder draftOrder = DraftOrder.builder()
+            .isOrderUploadedByJudgeOrAdmin(Yes)
+            .build();
+        CaseData caseData = CaseData.builder()
+            .draftOrderCollection(Collections.singletonList(element(draftOrder)))
+            .applicants(List.of(applicants))
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .doYouWantToEditTheOrder(Yes)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.validateAdditionalPartiesForServingOrder(Mockito.any(CallbackRequest.class)))
+            .thenReturn(Collections.emptyList());
+
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = editAndApproveDraftOrderController
+            .validateAdditionalPartiesForServingOrder(authToken, s2sToken, callbackRequest);
+
+        assertNotNull(aboutToStartOrSubmitCallbackResponse);
+    }
+
+    @Test
+    public void testValidateAdditionalPartiesForServingOrderWhenEmailIsInvalid() {
+        PartyDetails partyDetails = PartyDetails.builder().firstName("xyz")
+            .solicitorOrg(Organisation.builder().organisationName("test").build())
+            .build();
+        Element<PartyDetails> applicants = element(partyDetails);
+        DraftOrder draftOrder = DraftOrder.builder()
+            .isOrderUploadedByJudgeOrAdmin(Yes)
+            .build();
+        CaseData caseData = CaseData.builder()
+            .draftOrderCollection(Collections.singletonList(element(draftOrder)))
+            .applicants(List.of(applicants))
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .doYouWantToEditTheOrder(Yes)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        List<String> errors = List.of("Invalid email address. Please check the email address entered. "
+                                          + "To send to multiple recipients please use the add new button.");
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.validateAdditionalPartiesForServingOrder(Mockito.any(CallbackRequest.class)))
+            .thenReturn(errors);
+
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = editAndApproveDraftOrderController
+            .validateAdditionalPartiesForServingOrder(authToken, s2sToken, callbackRequest);
+
+        assertNotNull(aboutToStartOrSubmitCallbackResponse);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getErrors());
+        assertEquals("Invalid email address. Please check the email address entered. "
+                         + "To send to multiple recipients please use the add new button.",
+                     aboutToStartOrSubmitCallbackResponse.getErrors().getFirst());
+    }
 }
