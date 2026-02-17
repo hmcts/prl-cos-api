@@ -30,6 +30,7 @@ def versions = [
   commonsIo                    : '2.21.0',
   commonsLang3                 : '3.20.0',
   commonsMath3                 : '3.6.1',
+  commonsValidator             : '1.10.1',
   dumbster                     : '1.7.1',
   googleAuth                   : '1.5.0',
   gradlePitest                 : '1.15.0',
@@ -39,7 +40,7 @@ def versions = [
   jackson                      : '2.17.2',
   jacksonDatatypeJsr           : '2.20.1',
   jsonAssert                   : '1.5.3',
-  junit                        : '6.0.2',
+  junit                        : '6.0.3',
   lombok                       : '1.18.42',
   pact                         : '4.1.11',
   pitest                       : '1.22.1',
@@ -48,9 +49,9 @@ def versions = [
   sendLetterClient             : '5.1.1',
   serenity                     : '4.3.4',
   serenityCucumber             : '4.3.4',
-  serviceTokenGenerator        : '4.1.2',
+  serviceTokenGenerator        : '5.3.3',
   sonarPitest                  : '0.5',
-  springSecurityCrypto         : '6.5.7',
+  springSecurityCrypto         : '6.5.8',
   springSecurityRsa            : '1.1.5',
   springBoot                   : '3.5.10',
   springCloud                  : '4.3.0',
@@ -58,7 +59,7 @@ def versions = [
   unirest                      : '1.4.9',
   ccdCaseDocumentAmClient      : '1.59.2',
   pdfbox                       : '2.0.35',
-  springFramework              : '6.2.15',
+  springFramework              : '6.2.16',
 ]
 
 allprojects {
@@ -289,9 +290,9 @@ configurations.configureEach {
   resolutionStrategy {
     force 'org.bouncycastle:bcpkix-jdk18on:1.83'
     force 'org.springframework.security:spring-security-rsa:1.1.5'
-    force 'org.springframework.security:spring-security-crypto:6.5.7'
-    force 'ch.qos.logback:logback-classic:1.5.28'
-    force 'ch.qos.logback:logback-core:1.5.28'
+    force 'org.springframework.security:spring-security-crypto:6.5.8'
+    force 'ch.qos.logback:logback-classic:1.5.32'
+    force 'ch.qos.logback:logback-core:1.5.32'
   }
 }
 
@@ -324,6 +325,7 @@ dependencies {
   implementation group: 'jakarta.activation', name: 'jakarta.activation-api', version: '2.1.4'
   implementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
   implementation group: 'org.apache.commons', name: 'commons-math3', version: versions.commonsMath3
+  implementation group: 'commons-validator', name: 'commons-validator', version: versions.commonsValidator
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: versions.springBoot
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version: versions.springBoot
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: versions.springBoot
@@ -349,15 +351,15 @@ dependencies {
   implementation group: 'com.github.hmcts', name:'ccd-case-document-am-client', version: versions.ccdCaseDocumentAmClient
   implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
   implementation group: 'org.apache.commons', name: 'commons-csv', version: '1.14.1'
-  implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '7.11.0'
+  implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '7.12.0'
   implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '8.19.11'
   implementation group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
   implementation group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
   implementation group: 'com.sendgrid', name: 'sendgrid-java', version: '4.10.3'
   implementation group: 'commons-net', name: 'commons-net', version: '3.12.0'
-  implementation group: 'org.springframework.security', name: 'spring-security-web', version: '6.5.7'
+  implementation group: 'org.springframework.security', name: 'spring-security-web', version: '6.5.8'
 //  // CVE-2021-22112 - Privilege Escalation
-  implementation group: 'org.springframework.security', name: 'spring-security-core', version: '6.5.7'
+  implementation group: 'org.springframework.security', name: 'spring-security-core', version: '6.5.8'
   implementation(group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.3.0')
     {
       exclude group: 'io.reactivex', module: 'io.reactivex'
@@ -377,10 +379,10 @@ dependencies {
   constraints{
     implementation group: 'com.warrenstrange', name: 'googleauth', version: '1.5.0'
   }
-  implementation(group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.28')
-  implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.28')
+  implementation(group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.32')
+  implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.32')
   implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version:'7.4'
-  implementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.5'
+  implementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.6'
   implementation group: 'com.opencsv', name: 'opencsv', version: '5.12.0', {
     exclude group: 'commons-collections', module: 'commons-collections'
   }
@@ -414,7 +416,7 @@ dependencies {
   testImplementation group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: versions.serenity
   testImplementation group: 'net.serenity-bdd', name: 'serenity-spring', version: versions.serenity
   testImplementation group: 'com.github.mifmif', name: 'generex', version: '1.0.2'
-  testImplementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.5'
+  testImplementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.6'
   testImplementation 'org.apiguardian:apiguardian-api:1.1.2'
   testImplementation 'com.github.hmcts:fortify-client:1.4.10:all'
   testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.36'
