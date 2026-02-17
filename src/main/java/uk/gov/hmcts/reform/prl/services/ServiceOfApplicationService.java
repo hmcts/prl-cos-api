@@ -4233,16 +4233,16 @@ public class ServiceOfApplicationService {
             log.info("Reject reason list not empty");
             // get existing reject reason
             confidentialCheckFailedList.addAll(caseData.getServiceOfApplication().getConfidentialCheckFailed());
+            //The confidentiality check reason text is mandatory on Manage Case, therefore we only add it to the
+            //case when it has a value to avoid null entries.
+            log.info("Adding reject reason list to the case");
+            caseDataMap.put(CONFIDENTIAL_CHECK_FAILED, confidentialCheckFailedList);
+        } else {
+            //No rejection reasons = not an actual rejection  since the user interface does not allow proceeding with
+            //a rejection without writing at least one reason.
+            log.info("Reject reason list empty, therefore not an actual rejection but"
+                         + " likely timeout on update all tabs");
         }
-        log.info("Reject reason list empty, adding first reject reason");
-        final ConfidentialCheckFailed confidentialCheckFailed = ConfidentialCheckFailed.builder().confidentialityCheckRejectReason(
-                caseData.getServiceOfApplication().getRejectionReason())
-            .dateRejected(CaseUtils.getCurrentDate())
-            .build();
-
-        confidentialCheckFailedList.add(ElementUtils.element(confidentialCheckFailed));
-
-        caseDataMap.put(CONFIDENTIAL_CHECK_FAILED, confidentialCheckFailedList);
 
         response = ok(SubmittedCallbackResponse.builder()
                       .confirmationHeader(RETURNED_TO_ADMIN_HEADER)
