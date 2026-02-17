@@ -396,8 +396,8 @@ public class DocumentGenServiceTest {
             c100CaseData);
         Map<String, Object> stringObjectMap = documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, c100CaseData);
 
-        verifyDocuments(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C8,
-                        DOCUMENT_FIELD_FINAL);
+        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C8,
+                               DOCUMENT_FIELD_FINAL, DOCUMENT_FIELD_C1A, DOCUMENT_FIELD_C1A_WELSH);
 
         verify(dgsService, times(3)).generateDocument(
             Mockito.anyString(),
@@ -433,8 +433,8 @@ public class DocumentGenServiceTest {
 
         Map<String, Object> stringObjectMap = documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, c100CaseDataFinal);
 
-        verifyDocuments(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C1A_WELSH,
-                        DOCUMENT_FIELD_C8, DOCUMENT_FIELD_FINAL, DOCUMENT_FIELD_C1A);
+        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C1A_WELSH,
+                               DOCUMENT_FIELD_C8, DOCUMENT_FIELD_FINAL, DOCUMENT_FIELD_C1A);
 
         verify(dgsService, times(2)).generateDocument(
             Mockito.anyString(),
@@ -470,8 +470,8 @@ public class DocumentGenServiceTest {
 
         Map<String, Object> stringObjectMap = documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, fl401CaseData);
 
-        verifyDocuments(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C8,
-                        DOCUMENT_FIELD_FINAL);
+        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C8,
+                               DOCUMENT_FIELD_FINAL, DOCUMENT_FIELD_C1A, DOCUMENT_FIELD_C1A_WELSH);
 
         verify(dgsService, times(2)).generateDocument(
             Mockito.anyString(),
@@ -494,7 +494,7 @@ public class DocumentGenServiceTest {
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
 
         Map<String, Object> docMap = documentGenService.generateDraftDocuments(AUTH_TOKEN, caseData);
-        verifyDocuments(docMap, DRAFT_APPLICATION_DOCUMENT_FIELD);
+        verifyDocumentsUpdated(docMap, DRAFT_APPLICATION_DOCUMENT_FIELD);
     }
 
     @Test
@@ -505,7 +505,7 @@ public class DocumentGenServiceTest {
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
 
         Map<String, Object> docMap = documentGenService.generateDraftDocuments(AUTH_TOKEN, caseData);
-        verifyDocuments(docMap, DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD);
+        verifyDocumentsUpdated(docMap, DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD);
     }
 
     @Test
@@ -528,7 +528,7 @@ public class DocumentGenServiceTest {
             c100CaseData);
         Map<String, Object> stringObjectMap = documentGenService.generateDraftDocuments(AUTH_TOKEN, c100CaseData);
 
-        verifyDocuments(stringObjectMap, DRAFT_APPLICATION_DOCUMENT_FIELD, DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD);
+        verifyDocumentsUpdated(stringObjectMap, DRAFT_APPLICATION_DOCUMENT_FIELD, DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD);
 
         verify(dgsService).generateDocument(
             Mockito.anyString(),
@@ -565,8 +565,8 @@ public class DocumentGenServiceTest {
             c100CaseDataC1A);
         Map<String, Object> stringObjectMap = documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, c100CaseDataC1A);
 
-        verifyDocuments(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C1A_WELSH,
-                        DOCUMENT_FIELD_C8, DOCUMENT_FIELD_FINAL, DOCUMENT_FIELD_C1A
+        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C1A_WELSH,
+                               DOCUMENT_FIELD_C8, DOCUMENT_FIELD_FINAL, DOCUMENT_FIELD_C1A
         );
 
         verify(dgsService, times(3)).generateDocument(
@@ -603,7 +603,7 @@ public class DocumentGenServiceTest {
 
         Map<String, Object> stringObjectMap = documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, fl401CaseData);
 
-        verifyDocuments(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_C8);
+        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_C8);
 
         verify(dgsService, times(2)).generateDocument(
             Mockito.anyString(),
@@ -639,8 +639,8 @@ public class DocumentGenServiceTest {
 
         Map<String, Object> stringObjectMap = documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, fl401CaseData1);
 
-        verifyDocuments(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C8,
-                        DOCUMENT_FIELD_FINAL);
+        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C8,
+                               DOCUMENT_FIELD_FINAL);
 
         verify(dgsService, times(2)).generateDocument(
             Mockito.anyString(),
@@ -1230,7 +1230,7 @@ public class DocumentGenServiceTest {
             c100CaseData
         );
         assertEquals(updatedCaseData.get(IS_ENG_DOC_GEN), Yes.toString());
-        verifyDocuments(updatedCaseData, DOCUMENT_FIELD_FINAL_WELSH);
+        verifyDocumentsUpdated(updatedCaseData, DOCUMENT_FIELD_FINAL_WELSH);
     }
 
     @Test
@@ -1342,8 +1342,8 @@ public class DocumentGenServiceTest {
 
         Map<String, Object> stringObjectMap = documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, c100CaseDataNotIssued);
 
-        verifyDocuments(stringObjectMap, DOCUMENT_FIELD_C8_DRAFT_WELSH, DOCUMENT_FIELD_C1A_DRAFT_WELSH,
-                        DOCUMENT_FIELD_DRAFT_C8, DOCUMENT_FIELD_DRAFT_C1A);
+        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_DRAFT_WELSH, DOCUMENT_FIELD_C1A_DRAFT_WELSH,
+                               DOCUMENT_FIELD_DRAFT_C8, DOCUMENT_FIELD_DRAFT_C1A);
 
         verify(dgsService, times(2)).generateDocument(
             Mockito.anyString(),
@@ -1788,8 +1788,8 @@ public class DocumentGenServiceTest {
             c100CaseData
         );
 
-        verifyDocuments(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C8,
-                        DOCUMENT_FIELD_FINAL);
+        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C8,
+                               DOCUMENT_FIELD_FINAL);
 
         verify(dgsService, times(6)).generateDocument(
             Mockito.anyString(),
@@ -1826,8 +1826,8 @@ public class DocumentGenServiceTest {
             c100CaseDataFinal
         );
 
-        verifyDocuments(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C1A_WELSH,
-                        DOCUMENT_FIELD_C8, DOCUMENT_FIELD_FINAL, DOCUMENT_FIELD_C1A);
+        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C1A_WELSH,
+                               DOCUMENT_FIELD_C8, DOCUMENT_FIELD_FINAL, DOCUMENT_FIELD_C1A);
 
         verify(dgsService, times(4)).generateDocument(
             Mockito.anyString(),
@@ -1866,8 +1866,8 @@ public class DocumentGenServiceTest {
             fl401CaseData
         );
 
-        verifyDocuments(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C8,
-                        DOCUMENT_FIELD_FINAL);
+        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C8,
+                               DOCUMENT_FIELD_FINAL);
 
         verify(dgsService, times(3)).generateDocument(
             Mockito.anyString(),
@@ -1906,8 +1906,8 @@ public class DocumentGenServiceTest {
             c100CaseDataC1A
         );
 
-        verifyDocuments(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C1A_WELSH,
-                        DOCUMENT_FIELD_C8, DOCUMENT_FIELD_FINAL, DOCUMENT_FIELD_C1A);
+        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C1A_WELSH,
+                               DOCUMENT_FIELD_C8, DOCUMENT_FIELD_FINAL, DOCUMENT_FIELD_C1A);
 
         verify(dgsService, times(6)).generateDocument(
             Mockito.anyString(),
@@ -1946,7 +1946,7 @@ public class DocumentGenServiceTest {
             fl401CaseData
         );
 
-        verifyDocuments(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_C8);
+        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_C8);
 
         verify(dgsService, times(3)).generateDocument(
             Mockito.anyString(),
@@ -1985,8 +1985,8 @@ public class DocumentGenServiceTest {
             fl401CaseData1
         );
 
-        verifyDocuments(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C8,
-                        DOCUMENT_FIELD_FINAL);
+        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C8,
+                               DOCUMENT_FIELD_FINAL);
 
         verify(dgsService, times(3)).generateDocument(
             Mockito.anyString(),
@@ -2763,8 +2763,8 @@ public class DocumentGenServiceTest {
             c100CaseData
         );
 
-        verifyDocuments(stringObjectMap, DOCUMENT_FIELD_DRAFT_C8, DOCUMENT_FIELD_C8_DRAFT_WELSH, DOCUMENT_FIELD_DRAFT_C8,
-                        DOCUMENT_FIELD_C1A_DRAFT_WELSH);
+        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_DRAFT_C8, DOCUMENT_FIELD_C8_DRAFT_WELSH, DOCUMENT_FIELD_DRAFT_C8,
+                               DOCUMENT_FIELD_C1A_DRAFT_WELSH);
     }
 
     @Test
@@ -2797,8 +2797,8 @@ public class DocumentGenServiceTest {
             c100CaseData
         );
 
-        verifyDocuments(stringObjectMap, DOCUMENT_FIELD_DRAFT_C8, DOCUMENT_FIELD_C8_DRAFT_WELSH, DOCUMENT_FIELD_DRAFT_C8,
-                        DOCUMENT_FIELD_C1A_DRAFT_WELSH);
+        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_DRAFT_C8, DOCUMENT_FIELD_C8_DRAFT_WELSH, DOCUMENT_FIELD_DRAFT_C8,
+                               DOCUMENT_FIELD_C1A_DRAFT_WELSH);
     }
 
     @Test
@@ -2987,7 +2987,7 @@ public class DocumentGenServiceTest {
         return documentValues;
     }
 
-    private void verifyDocuments(Map<String, Object> caseData, String... documentFields) {
+    private void verifyDocumentsUpdated(Map<String, Object> caseData, String... documentFields) {
         for (String documentField : documentFields) {
             assertTrue(caseData.containsKey(documentField));
         }
