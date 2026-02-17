@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.AwaitingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.AwaitingInformationService;
-import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -43,9 +42,6 @@ public class AwaitingInformationControllerTest {
 
     @Mock
     private AwaitingInformationService awaitingInformationService;
-
-    @Mock
-    private FeatureToggleService featureToggleService;
 
     @Mock
     private ObjectMapper objectMapper;
@@ -83,7 +79,6 @@ public class AwaitingInformationControllerTest {
             .build();
 
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(featureToggleService.isAwaitingInformationEnabled()).thenReturn(true);
     }
 
     // Tests for submitAwaitingInformation method
@@ -171,6 +166,11 @@ public class AwaitingInformationControllerTest {
     // Tests for populateHeader method
     @Test
     public void testPopulateHeaderAwaitingInformationSuccessfully() {
+        // Given
+        AboutToStartOrSubmitCallbackResponse expectedResponse = AboutToStartOrSubmitCallbackResponse.builder().build();
+        when(awaitingInformationService.populateHeader(callbackRequest))
+            .thenReturn(expectedResponse);
+
         // When
         AboutToStartOrSubmitCallbackResponse response = awaitingInformationController.populateHeader(
             AUTH_TOKEN,
@@ -181,6 +181,7 @@ public class AwaitingInformationControllerTest {
         // Then
         assertNotNull(response);
         verify(authorisationService, times(1)).isAuthorized(AUTH_TOKEN, S2S_TOKEN);
+        verify(awaitingInformationService, times(1)).populateHeader(callbackRequest);
     }
 
     @Test
@@ -197,7 +198,12 @@ public class AwaitingInformationControllerTest {
     }
 
     @Test
-    public void testPopulateHeaderReturnsEmptyDataWhenAuthorized() {
+    public void testPopulateHeaderReturnsResponseWhenAuthorized() {
+        // Given
+        AboutToStartOrSubmitCallbackResponse expectedResponse = AboutToStartOrSubmitCallbackResponse.builder().build();
+        when(awaitingInformationService.populateHeader(callbackRequest))
+            .thenReturn(expectedResponse);
+
         // When
         AboutToStartOrSubmitCallbackResponse response = awaitingInformationController.populateHeader(
             AUTH_TOKEN,
@@ -208,6 +214,7 @@ public class AwaitingInformationControllerTest {
         // Then
         assertNotNull(response);
         verify(authorisationService, times(1)).isAuthorized(AUTH_TOKEN, S2S_TOKEN);
+        verify(awaitingInformationService, times(1)).populateHeader(callbackRequest);
     }
 
     // Tests for validateUrgentCaseCreation (validateAwaitingInformation) method
@@ -351,6 +358,39 @@ public class AwaitingInformationControllerTest {
         // Then
         assertNotNull(response);
         assertTrue(response.getErrors().isEmpty());
+    }
+
+    // Tests for service exceptions
+    @Test(expected = RuntimeException.class)
+    public void testSubmitAwaitingInformationThrowsExceptionWhenServiceThrowsFeatureToggleException() {
+        // Given
+        when(awaitingInformationService.addToCase(callbackRequest))
+            .thenThrow(new RuntimeException("Awaiting information feature is not enabled"));
+
+        // When & Then - exception expected
+        awaitingInformationController.submitAwaitingInformation(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testPopulateHeaderThrowsExceptionWhenServiceThrowsFeatureToggleException() {
+        // Given
+        when(awaitingInformationService.populateHeader(callbackRequest))
+            .thenThrow(new RuntimeException("Awaiting information feature is not enabled"));
+
+        // When & Then - exception expected
+        awaitingInformationController.populateHeader(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testValidateThrowsExceptionWhenServiceThrowsFeatureToggleException() {
+        // Given
+        when(objectMapper.convertValue(caseDetails.getData(), AwaitingInformation.class))
+            .thenReturn(awaitingInformation);
+        when(awaitingInformationService.validate(awaitingInformation))
+            .thenThrow(new RuntimeException("Awaiting information feature is not enabled"));
+
+        // When & Then - exception expected
+        awaitingInformationController.validateUrgentCaseCreation(callbackRequest);
     }
 
     // Helper method for assertion
