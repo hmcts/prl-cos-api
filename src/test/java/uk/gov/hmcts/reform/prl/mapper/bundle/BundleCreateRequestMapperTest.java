@@ -1234,7 +1234,7 @@ public class BundleCreateRequestMapperTest {
     }
 
     @Test
-    public void testLocalAuthorityCIRExtensionRequestUpdatedInMap() {
+    public void testLocalAuthorityCIrExtensionRequestUpdatedInMap() {
         String categoryId = "cirExtensionRequestLa";
         String categoryName = "CIR extension request";
 
@@ -1259,7 +1259,7 @@ public class BundleCreateRequestMapperTest {
     }
 
     @Test
-    public void testLocalAuthorityCIRTransferRequestUpdatedInMap() {
+    public void testLocalAuthorityCIrTransferRequestUpdatedInMap() {
         String categoryId = "cirTransferRequestLa";
         String categoryName = "CIR transfer request";
 
