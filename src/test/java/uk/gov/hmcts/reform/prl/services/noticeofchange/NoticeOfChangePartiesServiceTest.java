@@ -1194,10 +1194,6 @@ public class NoticeOfChangePartiesServiceTest {
             .data(caseData.toMap(new ObjectMapper()))
             .build();
 
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails)
-            .caseDetailsBefore(caseDetails)
-            .build();
 
         when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
         when(partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
@@ -1220,6 +1216,11 @@ public class NoticeOfChangePartiesServiceTest {
         when(organisationService.getOrganisationDetails(any(), any()))
             .thenReturn(Organisations.builder().organisationIdentifier("orgId").name("Org Name").build());
         when(ccdCoreCaseDataService.findCaseById(any(), any())).thenReturn(caseDetails);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetails)
+            .build();
 
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
 
@@ -1256,11 +1257,6 @@ public class NoticeOfChangePartiesServiceTest {
             .data(caseData.toMap(new ObjectMapper()))
             .build();
 
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails)
-            .caseDetailsBefore(caseDetails)
-            .build();
-
         when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
         when(partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
             any(),
@@ -1282,6 +1278,11 @@ public class NoticeOfChangePartiesServiceTest {
         when(organisationService.getOrganisationDetails(any(), any()))
             .thenReturn(Organisations.builder().organisationIdentifier("orgId").name("Org Name").build());
         when(ccdCoreCaseDataService.findCaseById(any(), any())).thenReturn(caseDetails);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetails)
+            .build();
 
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
 
