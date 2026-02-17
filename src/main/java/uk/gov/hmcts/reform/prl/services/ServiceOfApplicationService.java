@@ -100,47 +100,7 @@ import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL4
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE2;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE3;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE4;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_WELSH_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_BLANK_DOCUMENT_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_CAN_VIEW_ONLINE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_CAFCASS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.L;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.M;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MISSING_ADDRESS_WARNING_TEXT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME_WELSH;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT_SOLICITOR;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_APPLICATION_SCREEN_1;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C6A_OTHER_PARTIES_ORDER;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C6A_OTHER_PARTIES_ORDER_WELSH;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CAFCASS_CYMRU_SERVED_OPTIONS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CONFIDENTIAL_DETAILS_PRESENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CYMRU_EMAIL;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_DOCUMENT_PLACE_HOLDER;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_NOTICE_SAFETY;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_ORDER_LIST_EMPTY;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PARTIES;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PEOPLE_PRESENT_IN_CASE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_RECIPIENT_OPTIONS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WARNING_TEXT_DIV;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_APPLICANT_REPRESENTED;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_PRODUCT_HEARING_BUNDLE_ON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT;
@@ -412,6 +372,7 @@ public class ServiceOfApplicationService {
             );
         } else {
             whoIsResponsibleForServing = sendNotificationsSoaFl401(
+
                 caseData,
                 authorization,
                 caseDataMap,
@@ -1015,14 +976,16 @@ public class ServiceOfApplicationService {
         log.info("inside sendNotificationsDaNonPersonalRespondent");
         if (CollectionUtils.isNotEmpty(respondentFl401)) {
             String emailAddress = respondentFl401.get(0).getValue().getSolicitorEmail();
-            String servedParty = respondentFl401.get(0).getValue().getLabelForDynamicList();
+            String servedParty = SERVED_PARTY_RESPONDENT;
             List<Document> docs = new ArrayList<>();
             Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
             dynamicData.put(SEND_GRID_TEMPLATE, SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB);
             List<Document> packDocs = getNotificationPack(caseData, PrlAppsConstants.A, staticDocs);
             if (CaseUtils.hasLegalRepresentation(respondentFl401.get(0).getValue())) {
                 log.info("Legal rep present for respondent");
-                servedParty = respondentFl401.get(0).getValue().getRepresentativeFullName();
+                String partyName = respondentFl401.get(0).getValue().getRepresentativeFullName();
+                servedParty = SERVED_PARTY_RESPONDENT_SOLICITOR;
+                dynamicData.put("name", partyName);
                 docs.addAll(packDocs);
                 sendEmailDaNonPersonalService(
                     caseData,
@@ -1032,6 +995,7 @@ public class ServiceOfApplicationService {
                     servedParty,
                     docs,
                     dynamicData
+
                 );
             } else {
                 emailAddress = respondentFl401.get(0).getValue().getEmail();
@@ -1078,7 +1042,7 @@ public class ServiceOfApplicationService {
                 "Sending the email notification to applicant solicitor for fl401 Application for caseId {}",
                 caseData.getId()
             );
-            dynamicData.put("name", servedParty);
+
             dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
             populateLanguageMap(caseData, dynamicData);
             SendgridEmailTemplateNames sendgridEmailTemplateName = (SendgridEmailTemplateNames) dynamicData.get(
@@ -1133,6 +1097,7 @@ public class ServiceOfApplicationService {
                         caseData.getId()
                     );
                     dynamicData.put("name", partyName);
+
                     populateLanguageMap(caseData, dynamicData);
                     emailNotificationDetails.add(element(serviceOfApplicationEmailService
                                                              .sendEmailUsingTemplateWithAttachments(
@@ -1307,7 +1272,7 @@ public class ServiceOfApplicationService {
                     finalDocs,
                     SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
                     dynamicData,
-                    PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR
+                    SERVED_PARTY_RESPONDENT_SOLICITOR
                 );
                 if (null != emailNotification) {
                     emailNotificationDetails.add(element(emailNotification));
@@ -3911,12 +3876,13 @@ public class ServiceOfApplicationService {
                     log.info("respondent is represented -> serving notification to solicitor");
                     Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                     dynamicData.put(SEND_GRID_TEMPLATE, SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB);
+                    dynamicData.put("name", caseData.getRespondentsFL401().getRepresentativeFullName());
                     sendEmailDaNonPersonalService(
                         caseData,
                         authorization,
                         emailNotificationDetails,
                         caseData.getRespondentsFL401().getSolicitorEmail(),
-                        caseData.getRespondentsFL401().getRepresentativeFullName(),
+                        SERVED_PARTY_RESPONDENT_SOLICITOR,
                         removeCoverLettersFromThePacks(respondentDocs),
                         dynamicData
                     );
