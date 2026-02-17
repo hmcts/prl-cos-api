@@ -293,7 +293,7 @@ public class C100IssueCaseServiceTest {
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-        when(documentGenService.createUpdatedCaseDataWithDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
+        when(documentGenService.createIssueCaseDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
             Map.of("c8Document", "document",
                    "c1ADocument", "document",
                    "c1AWelshDocument", "document",
@@ -407,8 +407,6 @@ public class C100IssueCaseServiceTest {
             .id(123L)
             .build();
 
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
-
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
@@ -419,7 +417,7 @@ public class C100IssueCaseServiceTest {
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(documentGenService.createUpdatedCaseDataWithDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(c100DocsMap);
+        when(documentGenService.createIssueCaseDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(c100DocsMap);
         when(courtFinderService.getCourtDetails(Mockito.anyString())).thenReturn(null);
         Map<String, Object> objectMap = c100IssueCaseService.issueAndSendToLocalCourt(
             authToken,
@@ -428,7 +426,7 @@ public class C100IssueCaseServiceTest {
         Assertions.assertNotNull(objectMap.get("c1ADocument"));
         Assertions.assertNotNull(objectMap.get("c1AWelshDocument"));
         Assertions.assertNotNull(objectMap.get("finalWelshDocument"));
-        verify(documentGenService, times(1)).createUpdatedCaseDataWithDocuments(
+        verify(documentGenService).createIssueCaseDocuments(
             Mockito.anyString(),
             Mockito.any(CaseData.class)
         );
@@ -524,7 +522,7 @@ public class C100IssueCaseServiceTest {
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-        when(documentGenService.createUpdatedCaseDataWithDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
+        when(documentGenService.createIssueCaseDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
             Map.of("c1ADocument", "document",
                    "c1AWelshDocument", "document",
                    "finalWelshDocument", "document")
@@ -631,7 +629,7 @@ public class C100IssueCaseServiceTest {
 
         c100IssueCaseService.issueAndSendToLocalCourt(authToken, callbackRequest);
 
-        Assertions.assertEquals(stringObjectMap.get("isNonWorkAllocationEnabledCourtSelected"), "Yes");
+        Assertions.assertEquals("Yes", stringObjectMap.get("isNonWorkAllocationEnabledCourtSelected"));
     }
 
     @Test
