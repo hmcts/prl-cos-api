@@ -9,7 +9,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.awaitinginformation.AwaitingInformationReasonEnum;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AwaitingInformation;
@@ -197,26 +196,6 @@ public class AwaitingInformationServiceTest {
         assertEquals(12345, result.get("anotherKey"));
     }
 
-
-//    @Test
-//    public void testAddToCaseWithNullReviewDate() {
-//        // Given
-//        AwaitingInformation nullDateInfo = AwaitingInformation.builder()
-//            .reviewDate(null)
-//            .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.applicantFurtherInformation)
-//            .build();
-//        when(objectMapper.convertValue(eq(caseDataMap), eq(AwaitingInformation.class)))
-//            .thenReturn(nullDateInfo);
-//
-//        // When
-//        Map<String, Object> result = awaitingInformationService.addToCase(callbackRequest);
-//
-//        // Then
-//        assertNotNull(result);
-//        assertTrue(result.containsKey(CASE_STATUS));
-//        String awaitingInfoKey = CaseEvent.AWAITING_INFORMATION.getValue();
-//        assertTrue(result.containsKey(awaitingInfoKey));
-//    }
 
     @Test
     public void testAddToCaseWithMultipleCaseDataEntries() {

@@ -46,7 +46,6 @@ public class AwaitingInformationService {
         );
         var awaitingInformation = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(), AwaitingInformation.class);
-       // caseDataUpdated.put(CaseEvent.AWAITING_INFORMATION.getValue(), awaitingInformation);
         CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
         return caseDataUpdated;
     }
