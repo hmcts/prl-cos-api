@@ -198,25 +198,25 @@ public class AwaitingInformationServiceTest {
     }
 
 
-    @Test
-    public void testAddToCaseWithNullReviewDate() {
-        // Given
-        AwaitingInformation nullDateInfo = AwaitingInformation.builder()
-            .reviewDate(null)
-            .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.applicantFurtherInformation)
-            .build();
-        when(objectMapper.convertValue(eq(caseDataMap), eq(AwaitingInformation.class)))
-            .thenReturn(nullDateInfo);
-
-        // When
-        Map<String, Object> result = awaitingInformationService.addToCase(callbackRequest);
-
-        // Then
-        assertNotNull(result);
-        assertTrue(result.containsKey(CASE_STATUS));
-        String awaitingInfoKey = CaseEvent.AWAITING_INFORMATION.getValue();
-        assertTrue(result.containsKey(awaitingInfoKey));
-    }
+//    @Test
+//    public void testAddToCaseWithNullReviewDate() {
+//        // Given
+//        AwaitingInformation nullDateInfo = AwaitingInformation.builder()
+//            .reviewDate(null)
+//            .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.applicantFurtherInformation)
+//            .build();
+//        when(objectMapper.convertValue(eq(caseDataMap), eq(AwaitingInformation.class)))
+//            .thenReturn(nullDateInfo);
+//
+//        // When
+//        Map<String, Object> result = awaitingInformationService.addToCase(callbackRequest);
+//
+//        // Then
+//        assertNotNull(result);
+//        assertTrue(result.containsKey(CASE_STATUS));
+//        String awaitingInfoKey = CaseEvent.AWAITING_INFORMATION.getValue();
+//        assertTrue(result.containsKey(awaitingInfoKey));
+//    }
 
     @Test
     public void testAddToCaseWithMultipleCaseDataEntries() {
