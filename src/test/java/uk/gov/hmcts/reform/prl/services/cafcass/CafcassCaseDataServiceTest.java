@@ -67,6 +67,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -267,7 +268,7 @@ class CafcassCaseDataServiceTest {
         }
 
         @Test
-        void shouldMapServeOrderAdditionalDocuments() throws IOException {
+        void shouldMapAdditionalAdditionalDocuments() throws IOException {
             String expectedCafCassResponse = TestResourceUtil.readFileFrom("classpath:response/CafCaasResponseWithDocument.json");
             SearchResult searchResult = objectMapper.readValue(
                 expectedCafCassResponse,
@@ -288,10 +289,10 @@ class CafcassCaseDataServiceTest {
 
             CafCassResponse response = cafcassCaseDataService.getCaseData("auth", "2025-01-01T12:00:00", "2025-01-01T12:15:00");
 
-            // Ensure the (only) test case with a served document is present in the response after processing
-            assertTrue(response.getCases().getFirst()
-                           .getCaseData().getOtherDocuments()
-                           .stream().anyMatch(el -> el.getValue().getDocumentName().equals("testOtherServedDocumentName.pdf")));
+            // Ensure the (only) test case with two served documents are present in the response after processing
+            List<Element<OtherDocuments>> docs = response.getCases().getFirst().getCaseData().getOtherDocuments();
+            assertTrue(Stream.of("testOtherServedDocumentName.pdf", "testSecondDoc.pdf")
+                .allMatch(str -> docs.stream().anyMatch(doc -> doc.getValue().getDocumentName().equals(str))));
         }
     }
 

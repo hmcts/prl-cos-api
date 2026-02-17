@@ -238,7 +238,7 @@ public class CafcassCaseDataService {
             populateConfidentialDoc(caseData, otherDocsList);
             populateBundleDoc(caseData, otherDocsList);
             populateAnyOtherDoc(caseData, otherDocsList);
-            populateServeOrderAdditionalDocuments(caseData, otherDocsList);
+            populateAdditionalOrderDocuments(caseData, otherDocsList);
 
             List<Element<ApplicantDetails>> respondents = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(caseData.getRespondents())) {
@@ -275,7 +275,7 @@ public class CafcassCaseDataService {
                 .stmtOfServiceForOrder(null)
                 .stmtOfServiceForApplication(null)
                 .finalServedApplicationDetailsList(null)
-                .serveOrderAdditionalDocuments(null)
+                .additionalOrderDocuments(null)
                 .respondents(respondents)
                 .build();
             cafCassCaseDetail.setCaseData(cafCassCaseData);
@@ -326,9 +326,10 @@ public class CafcassCaseDataService {
         }
     }
 
-    private void populateServeOrderAdditionalDocuments(CafCassCaseData caseData, List<Element<OtherDocuments>> otherDocsList) {
-        nullSafeList(caseData.getServeOrderAdditionalDocuments())
+    private void populateAdditionalOrderDocuments(CafCassCaseData caseData, List<Element<OtherDocuments>> otherDocsList) {
+        nullSafeList(caseData.getAdditionalOrderDocuments())
             .stream()
+            .flatMap(el -> el.getValue().getAdditionalDocuments().stream())
             .forEach(doc -> addInOtherDocuments(applicantApplication.getId(), doc.getValue(), otherDocsList));
     }
 

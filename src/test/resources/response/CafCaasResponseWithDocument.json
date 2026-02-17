@@ -9,12 +9,39 @@
     "created_date" : [ 2023, 1, 17, 15, 51, 54, 358000000 ],
     "last_modified" : [ 2023, 1, 23, 15, 46, 4, 556000000 ],
     "case_data" : {
-      "serveOrderAdditionalDocuments": [
+      "additionalOrderDocuments": [
         {
           "id": "aaaaaa9d-6322-4abc-821a-45206b882aaa",
           "value": {
-            "document_url": "http://testDocument.url",
-            "document_filename": "testOtherServedDocumentName.pdf"
+            "uploadedDateTime": "2024-04-02T19:11:46.000Z",
+            "uploadedBy": "John Doe",
+            "servedOrders": "A C2",
+            "additionalDocuments": [
+              {
+                "id": "aaaaaaaa-aaaa-aaaa-aaaa-45206b882aaa",
+                "value": {
+                  "document_url": "http://testDocument.url",
+                  "document_filename": "testOtherServedDocumentName.pdf"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "bbbbbbbb-bbbb-4abc-821a-45206b882aaa",
+          "value": {
+            "uploadedDateTime": "2024-04-02T19:11:46.000Z",
+            "uploadedBy": "John Doe",
+            "servedOrders": "A C2",
+            "additionalDocuments": [
+              {
+                "id": "cccccccc-cccc-cccc-cccc-45206b882aaa",
+                "value": {
+                  "document_url": "http://testDocument2.url",
+                  "document_filename": "testSecondDoc.pdf"
+                }
+              }
+            ]
           }
         }
       ],
