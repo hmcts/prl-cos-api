@@ -6674,6 +6674,37 @@ public class ManageOrderServiceTest {
     }
 
     @Test
+    public void validateAdditionalPartiesShouldReturnNoErrorsForValidEmails() {
+        CaseData testData = CaseData.builder()
+            .manageOrders(ManageOrders.builder()
+                              .serveOrgDetailsList(List.of(
+                                  element(ServeOrgDetails.builder()
+                                              .serveByPostOrEmail(DeliveryByEnum.email)
+                                              .emailInformation(EmailInformation.builder()
+                                                                    .emailAddress("test@test.com")
+                                                                    .build())
+                                              .build())))
+                              .build())
+            .build();
+
+        Map<String, Object> stringObjectMap = testData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(testData, CaseData.class)).thenReturn(testData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(testData);
+
+        List<String> errors = manageOrderService.validateAdditionalPartiesForServingOrder(callbackRequest);
+
+        assertNotNull(errors);
+        assertEquals(0, errors.size());
+    }
+
+    @Test
     public void validateAdditionalPartiesShouldReturnErrorsForInvalidEmails() {
         CaseData testData = CaseData.builder()
             .manageOrders(ManageOrders.builder()
@@ -6681,7 +6712,7 @@ public class ManageOrderServiceTest {
                                   element(ServeOrgDetails.builder()
                                               .serveByPostOrEmail(DeliveryByEnum.email)
                                               .emailInformation(EmailInformation.builder()
-                                                                    .emailAddress("testtest.com,test2@test.com")
+                                                                    .emailAddress("test@test.com,test2@test.com")
                                                                     .build())
                                               .build())))
                               .build())
@@ -6704,36 +6735,5 @@ public class ManageOrderServiceTest {
         assertEquals(1, errors.size());
         assertEquals("Invalid email address. Please check the email address entered. " +
                          "To send to multiple recipients please use the add new button.", errors.getFirst());
-    }
-
-    @Test
-    public void validateAdditionalPartiesShouldReturnNoErrorsForValidEmails() {
-        CaseData testData = CaseData.builder()
-            .manageOrders(ManageOrders.builder()
-                              .serveOrgDetailsList(List.of(
-                                  element(ServeOrgDetails.builder()
-                                              .serveByPostOrEmail(DeliveryByEnum.email)
-                                              .emailInformation(EmailInformation.builder()
-                                                                    .emailAddress("testtest.com")
-                                                                    .build())
-                                              .build())))
-                              .build())
-            .build();
-
-        Map<String, Object> stringObjectMap = testData.toMap(new ObjectMapper());
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-        when(objectMapper.convertValue(testData, CaseData.class)).thenReturn(testData);
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(testData);
-
-        List<String> errors = manageOrderService.validateAdditionalPartiesForServingOrder(callbackRequest);
-
-        assertNotNull(errors);
-        assertEquals(0, errors.size());
     }
 }
