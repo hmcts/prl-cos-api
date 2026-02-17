@@ -61,6 +61,7 @@ import java.util.UUID;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CANCELLED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REDACTED_DOCUMENT_UUID;
+import static uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum.applicantApplication;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeList;
 
 @Slf4j
@@ -328,7 +329,7 @@ public class CafcassCaseDataService {
     private void populateServeOrderAdditionalDocuments(CafCassCaseData caseData, List<Element<OtherDocuments>> otherDocsList) {
         nullSafeList(caseData.getServeOrderAdditionalDocuments())
             .stream()
-            .forEach(doc -> addInOtherDocuments(ANY_OTHER_DOC, doc.getValue(), otherDocsList));
+            .forEach(doc -> addInOtherDocuments(applicantApplication.getId(), doc.getValue(), otherDocsList));
     }
 
     private void populateServiceOfApplicationUploadDocs(CafCassCaseData caseData,
