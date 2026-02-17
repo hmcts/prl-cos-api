@@ -1103,7 +1103,8 @@ public class ServiceOfApplicationService {
                                                          List<Element<PartyDetails>> applicantFl401) {
         if (CollectionUtils.isNotEmpty(applicantFl401)) {
             String emailAddress = applicantFl401.get(0).getValue().getEmail();
-            String servedParty = applicantFl401.get(0).getValue().getLabelForDynamicList();
+            String partyName = applicantFl401.get(0).getValue().getLabelForDynamicList();
+            String servedParty = SERVED_PARTY_APPLICANT;
             List<Document> docs = new ArrayList<>();
             Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
             List<Document> coverLetters = new ArrayList<>();
@@ -1111,7 +1112,8 @@ public class ServiceOfApplicationService {
             SendgridEmailTemplateNames sendgridEmailTemplateName = SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB;
             if (CaseUtils.hasLegalRepresentation(applicantFl401.get(0).getValue())) {
                 emailAddress = applicantFl401.get(0).getValue().getSolicitorEmail();
-                servedParty = applicantFl401.get(0).getValue().getRepresentativeFullName();
+                partyName = applicantFl401.get(0).getValue().getRepresentativeFullName();
+                servedParty = SERVED_PARTY_APPLICANT_SOLICITOR;
             } else {
                 sendgridEmailTemplateName = SendgridEmailTemplateNames.SOA_DA_NON_PERSONAL_SERVICE_APPLICANT_LIP;
                 coverLetters = generateCoverLetterBasedOnCaseAccess(
@@ -1130,7 +1132,7 @@ public class ServiceOfApplicationService {
                         "Sending the email notification to applicant solicitor for fl401 Application for caseId {}",
                         caseData.getId()
                     );
-                    dynamicData.put("name", servedParty);
+                    dynamicData.put("name", partyName);
                     populateLanguageMap(caseData, dynamicData);
                     emailNotificationDetails.add(element(serviceOfApplicationEmailService
                                                              .sendEmailUsingTemplateWithAttachments(
