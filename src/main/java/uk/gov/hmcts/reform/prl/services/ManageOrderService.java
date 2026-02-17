@@ -3637,8 +3637,8 @@ public class ManageOrderService {
                 .getServeOrgDetailsList()) {
                 if (addParty.getValue().getServeByPostOrEmail().equals(DeliveryByEnum.email)
                     && !isValidEmailAddress(addParty.getValue().getEmailInformation().getEmailAddress())) {
-                    return List.of("Invalid email address. Please check the email address entered. " +
-                                       "To send to multiple recipients please use the add new button.");
+                    return List.of("Invalid email address. Please check the email address entered. "
+                                       + "To send to multiple recipients please use the add new button.");
                 }
             }
         }

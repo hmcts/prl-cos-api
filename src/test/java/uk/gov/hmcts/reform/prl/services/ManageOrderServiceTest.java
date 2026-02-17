@@ -6733,7 +6733,7 @@ public class ManageOrderServiceTest {
 
         assertNotNull(errors);
         assertEquals(1, errors.size());
-        assertEquals("Invalid email address. Please check the email address entered. " +
-                         "To send to multiple recipients please use the add new button.", errors.getFirst());
+        assertEquals("Invalid email address. Please check the email address entered. "
+                         + "To send to multiple recipients please use the add new button.", errors.getFirst());
     }
 }

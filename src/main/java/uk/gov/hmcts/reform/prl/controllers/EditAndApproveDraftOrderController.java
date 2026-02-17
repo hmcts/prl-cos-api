@@ -198,8 +198,8 @@ public class EditAndApproveDraftOrderController {
 
     @PostMapping(path = "/judge-or-admin-edit-approve/validate-additional-parties",
         consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Mid event callback to validate additional parties email addresses for " +
-        "the edit and serve an order event")
+    @Operation(description = "Mid event callback to validate additional parties email addresses for "
+        + "the edit and serve an order event")
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse validateAdditionalPartiesForServingOrder(
         @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
