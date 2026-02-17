@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -113,6 +114,16 @@ public class ReviewDocumentsControllerTest {
         verify(reviewDocumentService).processReviewDocument(stringObjectMap,caseData,uuid);
         verifyNoMoreInteractions(reviewDocumentService);
     }
+
+    @Test
+    public void testHandleAboutToSubmitWhenReviewDocsDynamicListIsNull() throws Exception {
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        caseData.getReviewDocuments().setReviewDocsDynamicList(null);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        reviewDocumentsController.handleAboutToSubmit(auth, callbackRequest);
+        verifyNoInteractions(reviewDocumentService);
+    }
+
 
     @Test
     public void testHandleSubmitted() {

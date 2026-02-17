@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.reviewdocument.ReviewDocumentService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -34,6 +35,7 @@ import java.util.Map;
 import java.util.UUID;
 import javax.ws.rs.core.HttpHeaders;
 
+import static java.util.Objects.nonNull;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments.reviewDocTempFields;
 
@@ -102,12 +104,16 @@ public class ReviewDocumentsController {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         log.info("*************************** BEFORE REVIEW ***************************");
         Map<String, Object> caseDataUpdated = caseDetails.getData();
-        UUID uuid = UUID.fromString(caseData.getReviewDocuments().getReviewDocsDynamicList().getValue().getCode());
-        reviewDocumentService.processReviewDocument(caseDataUpdated, caseData, uuid);
-        log.info("*************************** AFTER REVIEW ***************************");
+        ReviewDocuments reviewDocuments = caseData.getReviewDocuments();
+        DynamicList reviewDocsDynamicList = nonNull(reviewDocuments) ? reviewDocuments.getReviewDocsDynamicList() : null;
+        if (nonNull(reviewDocsDynamicList)) {
+            UUID uuid = UUID.fromString(reviewDocsDynamicList.getValue().getCode());
+            reviewDocumentService.processReviewDocument(caseDataUpdated, caseData, uuid);
+            log.info("*************************** AFTER REVIEW ***************************");
 
-        //clear fields
-        CaseUtils.removeTemporaryFields(caseDataUpdated, reviewDocTempFields());
+            //clear fields
+            CaseUtils.removeTemporaryFields(caseDataUpdated, reviewDocTempFields());
+        }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
