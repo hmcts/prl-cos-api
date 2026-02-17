@@ -215,10 +215,15 @@ public class CitizenCaseUpdateService {
                 objectMapper.readValue(jsonData, DocumentResponse.class);
 
             if (documentResponse != null && documentResponse.getDocument() != null) {
-                caseDataMapToBeUpdated.put(
-                    PERMISSION_REQUIRED_DOCUMENT,
-                    documentResponse.getDocument()
-                );
+                Map<String, Object> documentValue = new HashMap<>();
+                documentValue.put("document_url", documentResponse.getDocument().getDocumentUrl());
+                documentValue.put("document_binary_url", documentResponse.getDocument().getDocumentBinaryUrl());
+                documentValue.put("document_filename", documentResponse.getDocument().getDocumentFileName());
+                documentValue.put("document_hash", documentResponse.getDocument().getDocumentHash());
+                documentValue.put("document_date_added", documentResponse.getDocument().getDocumentCreatedOn());
+                documentValue.put("document_category_id", "previousOrdersSubmittedWithApplication");
+
+                caseDataMapToBeUpdated.put(PERMISSION_REQUIRED_DOCUMENT, documentValue);
             }
         }
 
