@@ -29,7 +29,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.testng.AssertJUnit.assertNull;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class HearingServiceTest {
@@ -90,8 +94,6 @@ public class HearingServiceTest {
         authToken = "Authorization";
 
         caseReferenceNumber = "1234567890";
-
-
     }
 
     @Test
@@ -101,7 +103,7 @@ public class HearingServiceTest {
         Hearings response =
             hearingService.getHearings(authToken, caseReferenceNumber);
 
-        Assert.assertEquals(null, response);
+        assertEquals(null, response);
     }
 
     @Test
@@ -116,7 +118,7 @@ public class HearingServiceTest {
         Hearings response =
             hearingService.getHearings(authToken, caseReferenceNumber);
 
-        Assert.assertEquals(null, response);
+        assertEquals(null, response);
     }
 
     @Test
@@ -144,7 +146,7 @@ public class HearingServiceTest {
         Hearings response =
             hearingService.getHearings(authToken, caseReferenceNumber);
 
-        Assert.assertNotNull(response);
+        assertNotNull(response);
     }
 
     @Test
@@ -184,7 +186,7 @@ public class HearingServiceTest {
             .thenReturn(hearingsList);
         List<Hearings> response =
             hearingService.getHearingsForAllCases(authToken, caseIdWithRegionIdMap);
-        Assert.assertNotNull(response);
+        assertNotNull(response);
     }
 
     @Test
@@ -195,8 +197,50 @@ public class HearingServiceTest {
         List<Hearings> response =
             hearingService.getHearingsForAllCases(authToken, caseIdWithRegionIdMap);
 
-        Assert.assertEquals(Collections.emptyList(), response);
+        assertEquals(Collections.emptyList(), response);
 
     }
 
+    @Test
+    public void getHearingsTestPartialMatch() {
+
+        CaseHearing valid = CaseHearing.caseHearingWith().hmcStatus("LISTED").build();
+        CaseHearing invalid = CaseHearing.caseHearingWith().hmcStatus("EXCEPTION").build();
+        Hearings localHearings = new Hearings();
+        localHearings.setCaseRef("123");
+        localHearings.setCaseHearings(new ArrayList<>(List.of(valid, invalid)));
+
+        ReflectionTestUtils.setField(hearingService, "hearingStatusList", List.of("LISTED"));
+
+        when(authTokenGenerator.generate()).thenReturn("s2s");
+        when(hearingApiClient.getHearingDetails(anyString(), anyString(), anyString()))
+            .thenReturn(localHearings);
+
+        Hearings response = hearingService.getHearings("auth", "123");
+
+        assertNotNull("Response should not be null", response);
+        assertEquals(1, response.getCaseHearings().size());
+    }
+
+    @Test
+    public void shouldReturnNullWhenHearingApiIsNull() {
+        when(authTokenGenerator.generate()).thenReturn("s2s");
+        when(hearingApiClient.getHearingDetails(anyString(), anyString(), anyString()))
+            .thenReturn(null);
+
+        Hearings response = hearingService.getHearings("auth", "123");
+
+        assertNull(response);
+    }
+
+    @Test
+    public void shouldReturnNullWhenHearingApiThrowsAnException() {
+        when(authTokenGenerator.generate()).thenReturn("s2s");
+        when(hearingApiClient.getHearingDetails(anyString(), anyString(), anyString()))
+            .thenThrow(new RuntimeException());
+
+        Hearings response = hearingService.getHearings("auth", "123");
+
+        assertNull(response);
+    }
 }
