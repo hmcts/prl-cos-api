@@ -123,7 +123,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_POSITION_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_WITNESS_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.enums.State.CASE_ISSUED;
+import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 import static uk.gov.hmcts.reform.prl.enums.State.JUDICIAL_REVIEW;
+import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -466,8 +468,8 @@ public class DocumentGenService {
         if (isAnyC100ApplicantInfoConfidential(caseData)) {
             if (CASE_ISSUED.equals(caseData.getState())
                 || JUDICIAL_REVIEW.equals(caseData.getState())
-                || State.PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(caseData.getState())
-                || State.DECISION_OUTCOME.equals(caseData.getState())
+                || PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(caseData.getState())
+                || DECISION_OUTCOME.equals(caseData.getState())
                 || SUBMITTED_PAID.equals(caseData.getState())) {
                 updatedCaseData.put(documentDetails.documentFieldName, getDocument(authorisation, caseData, C8_HINT, documentDetails.isWelsh));
             } else {
