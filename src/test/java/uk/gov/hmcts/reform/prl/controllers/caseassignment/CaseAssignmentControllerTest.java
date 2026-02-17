@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.BarristerRole;
 import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
 import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Barrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.localauthority.LocalAuthoritySocialWorker;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
@@ -58,6 +60,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOCIAL_WORKER;
 
 @ExtendWith(MockitoExtension.class)
 class CaseAssignmentControllerTest {
@@ -77,19 +80,22 @@ class CaseAssignmentControllerTest {
     private ObjectMapper objectMapper;
 
     private CaseAssignmentController caseAssignmentController;
+
     private AllocatedBarrister allocatedBarrister;
+    private LocalAuthoritySocialWorker localAuthoritySocialWorker;
 
     @BeforeEach
     void setUp() {
         objectMapper.findAndRegisterModules();
-        caseAssignmentController =  new CaseAssignmentController(
+        caseAssignmentController = new CaseAssignmentController(
             caseAssignmentService,
             objectMapper,
             organisationService,
             authorisationService,
             barristerHelper,
             partyLevelCaseFlagsService,
-            applicationsTabService);
+            applicationsTabService
+        );
 
         Barrister barrister = Barrister.builder()
             .barristerEmail("barristerEmail@gmail.com")
@@ -116,6 +122,18 @@ class CaseAssignmentControllerTest {
             .barristerEmail(barrister.getBarristerEmail())
             .barristerFirstName(barrister.getBarristerFirstName())
             .barristerLastName(barrister.getBarristerLastName())
+            .build();
+
+        localAuthoritySocialWorker = LocalAuthoritySocialWorker.builder()
+            .laSocialWorkerOrg(Organisation.builder()
+                              .organisationID(barrister.getBarristerOrg()
+                                                  .getOrganisationID())
+                              .organisationName(barrister.getBarristerOrg()
+                                                    .getOrganisationName())
+                              .build())
+            .laSocialWorkerEmail("socialWorker@email.com")
+            .laSocialWorkerFirstName("socialWorkerFirstName")
+            .laSocialWorkerLastName("socialWorkerLastName")
             .build();
 
     }
@@ -148,7 +166,8 @@ class CaseAssignmentControllerTest {
             .caseDetails(caseDetails)
             .build();
 
-        CaseData caseData = CaseData.builder().caseTypeOfApplication(C100_CASE_TYPE).allocatedBarrister(allocatedBarrister).build();
+        CaseData caseData = CaseData.builder().caseTypeOfApplication(C100_CASE_TYPE).allocatedBarrister(
+            allocatedBarrister).build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
 
         AboutToStartOrSubmitCallbackResponse response = caseAssignmentController.submitAddBarrister(
@@ -158,19 +177,23 @@ class CaseAssignmentControllerTest {
         );
 
         assertThat(response.getData().get(ALLOCATED_BARRISTER))
-                       .isNotNull();
+            .isNotNull();
 
         assertThat(response.getErrors()).isEmpty();
 
-        verify(caseAssignmentService).validateAddRequest(eq(userId),
-                                                         isA(CaseData.class),
-                                                         eq(barristerRole),
-                                                         isA(AllocatedBarrister.class),
-                                                         anyList());
-        verify(caseAssignmentService).addBarrister(isA(CaseData.class),
-                                                   eq(userId.get()),
-                                                   eq(barristerRole.get()),
-                                                   isA(AllocatedBarrister.class));
+        verify(caseAssignmentService).validateAddRequest(
+            eq(userId),
+            isA(CaseData.class),
+            eq(barristerRole),
+            isA(AllocatedBarrister.class),
+            anyList()
+        );
+        verify(caseAssignmentService).addBarrister(
+            isA(CaseData.class),
+            eq(userId.get()),
+            eq(barristerRole.get()),
+            isA(AllocatedBarrister.class)
+        );
 
         verify(applicationsTabService).updateTab(isA(CaseData.class));
         verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(any());
@@ -190,10 +213,12 @@ class CaseAssignmentControllerTest {
             .thenReturn(barristerRole);
 
         doThrow(new GrantCaseAccessException("User(s) not granted [C100APPLICANTBARRISTER3] to the case "))
-            .when(caseAssignmentService).addBarrister(isA(CaseData.class),
-                                                     eq(userId.get()),
-                                                     eq(barristerRole.get()),
-                                                     isA(AllocatedBarrister.class));
+            .when(caseAssignmentService).addBarrister(
+                isA(CaseData.class),
+                eq(userId.get()),
+                eq(barristerRole.get()),
+                isA(AllocatedBarrister.class)
+            );
 
 
         Map<String, Object> caseDataMap = new HashMap<>();
@@ -221,15 +246,19 @@ class CaseAssignmentControllerTest {
         assertThat(response.getErrors())
             .contains("User(s) not granted [C100APPLICANTBARRISTER3] to the case ");
 
-        verify(caseAssignmentService).validateAddRequest(eq(userId),
-                                                         isA(CaseData.class),
-                                                         eq(barristerRole),
-                                                         isA(AllocatedBarrister.class),
-                                                         anyList());
-        verify(caseAssignmentService).addBarrister(isA(CaseData.class),
-                                                   eq(userId.get()),
-                                                   eq(barristerRole.get()),
-                                                   isA(AllocatedBarrister.class));
+        verify(caseAssignmentService).validateAddRequest(
+            eq(userId),
+            isA(CaseData.class),
+            eq(barristerRole),
+            isA(AllocatedBarrister.class),
+            anyList()
+        );
+        verify(caseAssignmentService).addBarrister(
+            isA(CaseData.class),
+            eq(userId.get()),
+            eq(barristerRole.get()),
+            isA(AllocatedBarrister.class)
+        );
     }
 
 
@@ -249,11 +278,13 @@ class CaseAssignmentControllerTest {
             List<String> errors = invocation.getArgument(4);
             errors.add("errors");
             return null;
-        }).when(caseAssignmentService).validateAddRequest(eq(userId),
-                                                          isA(CaseData.class),
-                                                          eq(barristerRole),
-                                                          isA(AllocatedBarrister.class),
-                                                          anyList());
+        }).when(caseAssignmentService).validateAddRequest(
+            eq(userId),
+            isA(CaseData.class),
+            eq(barristerRole),
+            isA(AllocatedBarrister.class),
+            anyList()
+        );
 
         Map<String, Object> caseDataMap = of(ALLOCATED_BARRISTER, allocatedBarrister);
 
@@ -279,24 +310,32 @@ class CaseAssignmentControllerTest {
 
         assertThat(response.getErrors()).contains("errors");
 
-        verify(caseAssignmentService).validateAddRequest(eq(userId),
-                                                         isA(CaseData.class),
-                                                         eq(barristerRole),
-                                                         isA(AllocatedBarrister.class),
-                                                         anyList());
-        verify(caseAssignmentService, never()).addBarrister(isA(CaseData.class),
-                                                   eq(userId.get()),
-                                                   eq(barristerRole.get()),
-                                                   isA(AllocatedBarrister.class));
+        verify(caseAssignmentService).validateAddRequest(
+            eq(userId),
+            isA(CaseData.class),
+            eq(barristerRole),
+            isA(AllocatedBarrister.class),
+            anyList()
+        );
+        verify(caseAssignmentService, never()).addBarrister(
+            isA(CaseData.class),
+            eq(userId.get()),
+            eq(barristerRole.get()),
+            isA(AllocatedBarrister.class)
+        );
     }
 
     static Stream<Arguments> parameterParameters() {
         return Stream.of(
-                Arguments.of((Supplier<Optional<String>>) () -> Optional.of("userId"),
-                             (Supplier<Optional<String>>) Optional::empty),
-                Arguments.of((Supplier<Optional<String>>) Optional::empty,
-                             (Supplier<Optional<String>>) () -> Optional.of("barristerRole"))
-            );
+            Arguments.of(
+                (Supplier<Optional<String>>) () -> Optional.of("userId"),
+                (Supplier<Optional<String>>) Optional::empty
+            ),
+            Arguments.of(
+                (Supplier<Optional<String>>) Optional::empty,
+                (Supplier<Optional<String>>) () -> Optional.of("barristerRole")
+            )
+        );
     }
 
     @ParameterizedTest
@@ -334,15 +373,19 @@ class CaseAssignmentControllerTest {
 
         assertThat(response.getErrors()).isEmpty();
 
-        verify(caseAssignmentService).validateAddRequest(eq(userId.get()),
-                                                         isA(CaseData.class),
-                                                         eq(barristerRole.get()),
-                                                         isA(AllocatedBarrister.class),
-                                                         anyList());
-        verify(caseAssignmentService, never()).addBarrister(isA(CaseData.class),
-                                                   any(),
-                                                   any(),
-                                                   isA(AllocatedBarrister.class));
+        verify(caseAssignmentService).validateAddRequest(
+            eq(userId.get()),
+            isA(CaseData.class),
+            eq(barristerRole.get()),
+            isA(AllocatedBarrister.class),
+            anyList()
+        );
+        verify(caseAssignmentService, never()).addBarrister(
+            isA(CaseData.class),
+            any(),
+            any(),
+            isA(AllocatedBarrister.class)
+        );
     }
 
 
@@ -389,8 +432,10 @@ class CaseAssignmentControllerTest {
                            .barristerLastName("barrister").build())
             .build();
 
-        when(caseAssignmentService.getSelectedParty(isA(CaseData.class),
-                                                    eq(allocatedBarrister.getPartyList().getValueCode())))
+        when(caseAssignmentService.getSelectedParty(
+            isA(CaseData.class),
+            eq(allocatedBarrister.getPartyList().getValueCode())
+        ))
             .thenReturn(partyDetails);
 
         AboutToStartOrSubmitCallbackResponse response = caseAssignmentController.submitRemoveBarrister(
@@ -406,14 +451,20 @@ class CaseAssignmentControllerTest {
         assertThat(response.getErrors()).isEmpty();
 
         String selectedPartyId = allocatedBarrister.getPartyList().getValueCode();
-        verify(caseAssignmentService).validateRemoveRequest(isA(CaseData.class),
-                                                            eq(selectedPartyId),
-                                                            anyList());
-        verify(caseAssignmentService).removeBarrister(isA(CaseData.class),
-                                                      eq(partyDetails));
-        verify(barristerHelper).setAllocatedBarrister(eq(partyDetails),
-                                                 isA(CaseData.class),
-                                                 eq(UUID.fromString(selectedPartyId)));
+        verify(caseAssignmentService).validateRemoveRequest(
+            isA(CaseData.class),
+            eq(selectedPartyId),
+            anyList()
+        );
+        verify(caseAssignmentService).removeBarrister(
+            isA(CaseData.class),
+            eq(partyDetails)
+        );
+        verify(barristerHelper).setAllocatedBarrister(
+            eq(partyDetails),
+            isA(CaseData.class),
+            eq(UUID.fromString(selectedPartyId))
+        );
         verify(applicationsTabService).updateTab(isA(CaseData.class));
         verify(partyLevelCaseFlagsService).generatePartyCaseFlagsForBarristerOnly(any());
 
@@ -445,9 +496,11 @@ class CaseAssignmentControllerTest {
             List<String> errors = invocation.getArgument(2);
             errors.add("errors");
             return null;
-        }).when(caseAssignmentService).validateRemoveRequest(isA(CaseData.class),
-                                                             eq(selectedPartyId),
-                                                             anyList());
+        }).when(caseAssignmentService).validateRemoveRequest(
+            isA(CaseData.class),
+            eq(selectedPartyId),
+            anyList()
+        );
 
         AboutToStartOrSubmitCallbackResponse response = caseAssignmentController.submitRemoveBarrister(
             "auth",
@@ -457,14 +510,20 @@ class CaseAssignmentControllerTest {
 
         assertThat(response.getErrors()).contains("errors");
 
-        verify(caseAssignmentService).validateRemoveRequest(isA(CaseData.class),
-                                                         eq(selectedPartyId),
-                                                         anyList());
-        verify(caseAssignmentService, never()).removeBarrister(isA(CaseData.class),
-                                                               any(PartyDetails.class));
-        verify(barristerHelper, never()).setAllocatedBarrister(any(PartyDetails.class),
-                                                 any(CaseData.class),
-                                                 any(UUID.class));
+        verify(caseAssignmentService).validateRemoveRequest(
+            isA(CaseData.class),
+            eq(selectedPartyId),
+            anyList()
+        );
+        verify(caseAssignmentService, never()).removeBarrister(
+            isA(CaseData.class),
+            any(PartyDetails.class)
+        );
+        verify(barristerHelper, never()).setAllocatedBarrister(
+            any(PartyDetails.class),
+            any(CaseData.class),
+            any(UUID.class)
+        );
     }
 
     @Test
@@ -482,5 +541,226 @@ class CaseAssignmentControllerTest {
         )).isInstanceOf(InvalidClientException.class)
             .hasMessageContaining(INVALID_CLIENT);
     }
+
+    @Test
+    void testSuccessSubmitAddSocialWorker() {
+
+        Optional<String> userId = Optional.of("userId");
+        when(authorisationService.isAuthorized(any(), any()))
+            .thenReturn(true);
+        when(organisationService.findUserByEmail(localAuthoritySocialWorker.getLaSocialWorkerEmail()))
+            .thenReturn(userId);
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put(PrlAppsConstants.LOCAL_AUTHORITY_SOCIAL_WORKER, localAuthoritySocialWorker);
+        caseDataMap.put(CASE_TYPE_OF_APPLICATION, C100_CASE_TYPE);
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(1234L)
+            .createdDate(LocalDateTime.now())
+            .lastModified(LocalDateTime.now())
+            .data(caseDataMap)
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+
+        CaseData caseData = CaseData.builder().caseTypeOfApplication(C100_CASE_TYPE).localAuthoritySocialWorker(
+            localAuthoritySocialWorker).build();
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+
+        AboutToStartOrSubmitCallbackResponse response = caseAssignmentController.submitAddSocialWorker(
+            "auth",
+            "s2sToken",
+            callbackRequest
+        );
+
+        Optional<String> socialWorkerRole = Optional.of("[LASOCIALWORKER]");
+        assertThat(response.getData().get(PrlAppsConstants.LOCAL_AUTHORITY_SOCIAL_WORKER))
+            .isNotNull();
+
+        assertThat(response.getErrors()).isEmpty();
+
+        verify(caseAssignmentService).validateSocialWorkerAddRequest(
+            isA(CaseData.class),
+            eq(socialWorkerRole),
+            isA(LocalAuthoritySocialWorker.class),
+            anyList()
+        );
+        verify(caseAssignmentService).addSocialWorker(
+            isA(CaseData.class),
+            eq(userId.get()),
+            eq(socialWorkerRole.get()),
+            isA(LocalAuthoritySocialWorker.class)
+        );
+    }
+
+    //@Test
+    void testGrantCaseAccessExceptionOnSubmitAddSocialWorker() {
+
+        Optional<String> userId = Optional.of("userId");
+        when(authorisationService.isAuthorized(any(), any()))
+            .thenReturn(true);
+        when(organisationService.findUserByEmail(localAuthoritySocialWorker.getLaSocialWorkerEmail()))
+            .thenReturn(userId);
+        Optional<String> socialWorkerRole = Optional.of(PrlAppsConstants.LOCAL_AUTHORITY_SOCIAL_WORKER);
+
+
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put(PrlAppsConstants.LOCAL_AUTHORITY_SOCIAL_WORKER, localAuthoritySocialWorker);
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(1234L)
+            .createdDate(LocalDateTime.now())
+            .lastModified(LocalDateTime.now())
+            .data(caseDataMap)
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+        LocalAuthoritySocialWorker localAuthoritySocialWorkerUpdated
+            = localAuthoritySocialWorker.toBuilder().userId(userId.get()).build();
+        CaseData caseData = CaseData.builder()
+            .localAuthoritySocialWorker(localAuthoritySocialWorkerUpdated)
+            .build();
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+
+        doThrow(new GrantCaseAccessException("User(s) not granted [LASOCIALWORKER] to the case "))
+            .when(caseAssignmentService).addSocialWorker(
+                any(CaseData.class),
+                eq(userId.get()),
+                eq(socialWorkerRole.get()),
+                any(LocalAuthoritySocialWorker.class)
+            );
+
+        AboutToStartOrSubmitCallbackResponse response = caseAssignmentController.submitAddSocialWorker(
+            "auth",
+            "s2sToken",
+            callbackRequest
+        );
+
+        assertThat(response.getErrors())
+            .contains("User(s) not granted [LASOCIALWORKER] to the case ");
+
+        verify(caseAssignmentService).validateSocialWorkerAddRequest(
+            isA(CaseData.class),
+            eq(socialWorkerRole),
+            isA(LocalAuthoritySocialWorker.class),
+            anyList()
+        );
+        verify(caseAssignmentService).addSocialWorker(
+            isA(CaseData.class),
+            eq(userId.get()),
+            eq(socialWorkerRole.get()),
+            isA(LocalAuthoritySocialWorker.class)
+        );
+    }
+
+    //@Test
+    void testErrorsSubmitAddSocialWorker() {
+        Optional<String> userId = Optional.of("userId");
+        when(authorisationService.isAuthorized(any(), any()))
+            .thenReturn(true);
+        when(organisationService.findUserByEmail(localAuthoritySocialWorker.getLaSocialWorkerEmail()))
+            .thenReturn(userId);
+        Optional<String> socialWorkerRole = Optional.of(LOCAL_AUTHORITY_SOCIAL_WORKER);
+
+        doAnswer(invocation -> {
+            List<String> errors = invocation.getArgument(4);
+            errors.add("errors");
+            return null;
+        }).when(caseAssignmentService).validateSocialWorkerAddRequest(
+            isA(CaseData.class),
+            eq(socialWorkerRole),
+            isA(LocalAuthoritySocialWorker.class),
+            anyList()
+        );
+
+        Map<String, Object> caseDataMap = of(PrlAppsConstants.LOCAL_AUTHORITY_SOCIAL_WORKER, localAuthoritySocialWorker);
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(1234L)
+            .createdDate(LocalDateTime.now())
+            .lastModified(LocalDateTime.now())
+            .data(caseDataMap)
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+
+        CaseData caseData = CaseData.builder().localAuthoritySocialWorker(localAuthoritySocialWorker).build();
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+
+        AboutToStartOrSubmitCallbackResponse response = caseAssignmentController.submitAddSocialWorker(
+            "auth",
+            "s2sToken",
+            callbackRequest
+        );
+
+        assertThat(response.getErrors()).contains("errors");
+
+        verify(caseAssignmentService).validateSocialWorkerAddRequest(
+            isA(CaseData.class),
+            eq(socialWorkerRole),
+            isA(LocalAuthoritySocialWorker.class),
+            anyList()
+        );
+        verify(caseAssignmentService, never()).addSocialWorker(
+            isA(CaseData.class),
+            eq(userId.get()),
+            eq(socialWorkerRole.get()),
+            isA(LocalAuthoritySocialWorker.class)
+        );
+    }
+
+    @Test
+    void testSuccessSubmitRemoveSocialWorker() {
+        when(authorisationService.isAuthorized(any(), any()))
+            .thenReturn(true);
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put(LOCAL_AUTHORITY_SOCIAL_WORKER, localAuthoritySocialWorker);
+        caseDataMap.put(CASE_TYPE_OF_APPLICATION, FL401_CASE_TYPE);
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(1234L)
+            .createdDate(LocalDateTime.now())
+            .lastModified(LocalDateTime.now())
+            .data(caseDataMap)
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+
+
+        AboutToStartOrSubmitCallbackResponse response = caseAssignmentController.submitRemoveSocialWorker(
+            "auth",
+            "s2sToken",
+            callbackRequest
+        );
+
+        assertThat(response.getData())
+            .contains(entry(LOCAL_AUTHORITY_SOCIAL_WORKER, localAuthoritySocialWorker));
+
+
+        assertThat(response.getErrors()).isEmpty();
+
+        verify(caseAssignmentService).validateSocialWorkerRemoveRequest(
+            isA(CaseData.class),
+            isA(LocalAuthoritySocialWorker.class),
+            anyList()
+        );
+        verify(caseAssignmentService).removeLaSocialWorker(
+            isA(CaseData.class),
+            isA(LocalAuthoritySocialWorker.class)
+        );
+
+    }
+
 }
 
