@@ -141,34 +141,33 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-@SuppressWarnings({"java:S1607"})
 public class DocumentGenServiceTest {
 
     @InjectMocks
-    DocumentGenService documentGenService;
+    private DocumentGenService documentGenService;
     @Mock
-    DgsService dgsService;
+    private DgsService dgsService;
     @Mock
-    DocumentLanguageService documentLanguageService;
+    private DocumentLanguageService documentLanguageService;
     @Mock
-    OrganisationService organisationService;
+    private OrganisationService organisationService;
     @Mock
-    CaseDocumentClient caseDocumentClient;
+    private CaseDocumentClient caseDocumentClient;
     @Mock
-    DgsApiClient dgsApiClient;
+    private DgsApiClient dgsApiClient;
     @Mock
-    AuthTokenGenerator authTokenGenerator;
+    private AuthTokenGenerator authTokenGenerator;
     @Mock
-    UploadDocumentService uploadService;
+    private UploadDocumentService uploadService;
     @Mock
     private Time dateTime;
     @Mock
-    C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
+    private C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
     @Mock
-    AllegationOfHarmRevisedService allegationOfHarmRevisedService;
+    private AllegationOfHarmRevisedService allegationOfHarmRevisedService;
 
-    private GeneratedDocumentInfo generatedDocumentInfo;
     private static final String AUTH_TOKEN = "Bearer TestAuthToken";
+    private GeneratedDocumentInfo generatedDocumentInfo;
     private CaseData c100CaseData;
     private CaseData c100CaseDataFinal;
     private CaseData c100CaseDataC1A;
@@ -178,8 +177,6 @@ public class DocumentGenServiceTest {
     private AllegationOfHarm allegationOfHarmYes;
     private TypeOfApplicationOrders orders;
     private LinkToCA linkToCA;
-    private MockMultipartFile file;
-    private DocumentRequest documentRequest;
 
     @Before
     public void setUp() {
@@ -267,7 +264,6 @@ public class DocumentGenServiceTest {
             .taskListVersion(TASK_LIST_VERSION_V2)
             .applicants(listOfApplicants)
             .state(State.CASE_ISSUED)
-            //.allegationsOfHarmYesNo(No)
             .applicantsConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
             .build();
@@ -294,10 +290,8 @@ public class DocumentGenServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(No).build())
             .taskListVersion(TASK_LIST_VERSION_V2)
-            //.allegationsOfHarmYesNo(Yes)
             .applicants(listOfApplicants)
             .state(State.CASE_ISSUED)
-            //.allegationsOfHarmYesNo(No)
             .applicantsConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
             .build();
@@ -312,7 +306,6 @@ public class DocumentGenServiceTest {
             .state(State.CASE_ISSUED)
             .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(YesOrNo.Yes).build())
             .taskListVersion(TASK_LIST_VERSION_V2)
-            //.allegationsOfHarmYesNo(Yes)
             .applicantsConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
             .build();
@@ -378,24 +371,6 @@ public class DocumentGenServiceTest {
             .isWelshDocGen("Yes")
             .state(State.JUDICIAL_REVIEW)
             .home(homefull)
-            .build();
-
-        file
-            = new MockMultipartFile(
-            "file",
-            "hello.txt",
-            MediaType.TEXT_PLAIN_VALUE,
-            "Hello, World!".getBytes()
-        );
-
-        documentRequest = DocumentRequest.builder()
-            .caseId("123")
-            .categoryId("POSITION_STATEMENTS")
-            .partyId("00000000-0000-0000-0000-000000000000")
-            .partyName("appf appl")
-            .partyType("applicant")
-            .restrictDocumentDetails("test details")
-            .freeTextStatements("free text to generate document")
             .build();
     }
 
@@ -2780,6 +2755,13 @@ public class DocumentGenServiceTest {
         document.links = links;
         document.originalDocumentName = RandomStringUtils.secure().nextAlphanumeric(10);
 
+        MockMultipartFile file = new MockMultipartFile(
+            "file",
+            "hello.txt",
+            MediaType.TEXT_PLAIN_VALUE,
+            "Hello, World!".getBytes()
+        );
+
         when(uploadService.uploadDocument(any(), any(), any(), any())).thenReturn(document);
 
         documentGenService.uploadDocument(AUTH_TOKEN, file);
@@ -2807,6 +2789,16 @@ public class DocumentGenServiceTest {
             .url("TestUrl")
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
+            .build();
+
+        DocumentRequest documentRequest = DocumentRequest.builder()
+            .caseId("123")
+            .categoryId("POSITION_STATEMENTS")
+            .partyId("00000000-0000-0000-0000-000000000000")
+            .partyName("appf appl")
+            .partyType("applicant")
+            .restrictDocumentDetails("test details")
+            .freeTextStatements("free text to generate document")
             .build();
 
         //When
