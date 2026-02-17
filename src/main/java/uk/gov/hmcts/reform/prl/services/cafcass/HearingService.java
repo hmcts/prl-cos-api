@@ -23,18 +23,15 @@ public class HearingService {
     @Value("#{'${cafcaas.hearingStatus}'.split(',')}")
     private List<String> hearingStatusList;
 
-    private Hearings hearingDetails;
-
-    private List<Hearings> listOfHearingDetails;
-
     private final AuthTokenGenerator authTokenGenerator;
 
     private final HearingApiClient hearingApiClient;
 
     public Hearings getHearings(String userToken, String caseReferenceNumber) {
+        Hearings hearingDetails = null;
         try {
             hearingDetails = hearingApiClient.getHearingDetails(userToken, authTokenGenerator.generate(), caseReferenceNumber);
-            filterHearings();
+            hearingDetails = filterHearings(hearingDetails);
         } catch (Exception e) {
             log.error("Error in getHearings", e.getMessage());
         }
@@ -42,6 +39,7 @@ public class HearingService {
     }
 
     public List<Hearings> getHearingsForAllCases(String userToken, Map<String,String> caseIdWithRegionIdMap) {
+        List<Hearings> listOfHearingDetails = null;
         try {
             listOfHearingDetails = hearingApiClient.getHearingDetailsForAllCaseIds(userToken, authTokenGenerator.generate(), caseIdWithRegionIdMap);
         } catch (Exception e) {
@@ -51,7 +49,7 @@ public class HearingService {
         return listOfHearingDetails;
     }
 
-    private void filterHearings() {
+    private Hearings filterHearings(Hearings hearingDetails) {
 
         if (hearingDetails != null && hearingDetails.getCaseHearings() != null)  {
 
@@ -72,8 +70,9 @@ public class HearingService {
                 hearingDetails.setCaseHearings(hearings);
                 log.debug("Hearings filtered based on Listed hearing");
             } else {
-                hearingDetails = null;
+                return null;
             }
         }
+       return hearingDetails;
     }
 }
