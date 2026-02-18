@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.O
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.FeeRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.FeeResponseForCitizen;
+import uk.gov.hmcts.reform.prl.services.payment.FeeService;
 
 import java.math.BigDecimal;
 import java.time.ZoneId;
