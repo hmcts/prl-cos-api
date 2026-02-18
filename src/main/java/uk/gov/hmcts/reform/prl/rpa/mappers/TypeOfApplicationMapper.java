@@ -39,6 +39,11 @@ public class TypeOfApplicationMapper {
                     ? caseData.getApplicationPermissionRequired().getDisplayedValue() : null
             )
             .add("applicationPermissionRequiredReason", caseData.getApplicationPermissionRequiredReason())
+            .add(
+                "uploadOrderDocForPermission",
+                caseData.getUploadOrderDocForPermission() != null
+                    ? caseData.getUploadOrderDocForPermission().getDocumentFileName() : null
+            )
             .add("applicationDetails", caseData.getApplicationDetails())
             .build();
     }
