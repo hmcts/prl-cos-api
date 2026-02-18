@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.exception.cafcass.exceptionhandlers.ApiError;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
@@ -23,6 +24,7 @@ import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CaseDataService;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -62,8 +64,9 @@ public class CafCassController extends AbstractCallbackController {
         try {
             serviceAuthorisation = serviceAuthorisation.startsWith(BEARER)
                 ? serviceAuthorisation : BEARER.concat(serviceAuthorisation);
+            Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
 
-            if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
+            if (userInfo.isPresent() && Boolean.TRUE.equals(
                 authorisationService.authoriseService(serviceAuthorisation))) {
                 if (authorisationService.getUserInfo().getRoles().contains(CAFCASS_USER_ROLE)) {
                     log.info("processing request after authorization");
