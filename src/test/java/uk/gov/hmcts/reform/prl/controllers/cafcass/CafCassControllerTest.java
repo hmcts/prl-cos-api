@@ -53,9 +53,6 @@ public class CafCassControllerTest {
     @Mock
     private CaseDataService caseDataService;
 
-    @Mock
-    private UserInfo userInfo;
-
     private static final String RESPONSE_JSON =
         "classpath:response/CafCaasResponse.json";
 
@@ -76,8 +73,7 @@ public class CafCassControllerTest {
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
-        when(authorisationService.getUserInfo()).thenReturn(userInfo);
-        when(authorisationService.getUserInfo().getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
+        when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
         when(caseDataService.getCaseData("authorisation", startDate, endDate))
             .thenReturn(expectedCafCassResponse);
         ResponseEntity<Object> responseEntity = cafCassController.searchCasesByDates(
@@ -101,7 +97,7 @@ public class CafCassControllerTest {
     public void testInvalidServiceAuth_401UnAuthorized() {
         when(authorisationService.authoriseService(any())).thenReturn(false);
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.empty());
-        final ResponseEntity response = cafCassController.searcCasesByDates(
+        final ResponseEntity response = cafCassController.searchCasesByDates(
             "authorisation",
             "inValidServiceAuthorisation",
             "startDate",
@@ -117,8 +113,7 @@ public class CafCassControllerTest {
     public void testFeignExceptionBadRequest() throws IOException {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
-        when(authorisationService.getUserInfo()).thenReturn(userInfo);
-        when(authorisationService.getUserInfo().getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
+        when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
         when(caseDataService.getCaseData(TEST_AUTHORIZATION, startDate,
                                          endDate
         )).thenThrow(feignException(HttpStatus.BAD_REQUEST.value(), "Not found"));
@@ -135,8 +130,7 @@ public class CafCassControllerTest {
     public void testFeignExceptionUnAuthorised() throws IOException {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
-        when(authorisationService.getUserInfo()).thenReturn(userInfo);
-        when(authorisationService.getUserInfo().getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
+        when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
         when(caseDataService.getCaseData(TEST_AUTHORIZATION, startDate,
                                          endDate
         )).thenThrow(feignException(UNAUTHORIZED.value(), "Unauthorised"));
@@ -153,8 +147,7 @@ public class CafCassControllerTest {
     public void testExceptionInternalServerError() throws IOException {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
-        when(authorisationService.getUserInfo()).thenReturn(userInfo);
-        when(authorisationService.getUserInfo().getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
+        when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
         when(caseDataService.getCaseData(TEST_AUTHORIZATION, "startDate",
                                          "endDate"
         )).thenThrow(new RuntimeException());
@@ -171,8 +164,7 @@ public class CafCassControllerTest {
     public void testExceptionInternalServerErrorForDateTimeRange() {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
-        when(authorisationService.getUserInfo()).thenReturn(userInfo);
-        when(authorisationService.getUserInfo().getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
+        when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
         final ResponseEntity<Object> response = cafCassController.searchCasesByDates(
             TEST_AUTHORIZATION,
             TEST_SERVICE_AUTHORIZATION,
@@ -187,9 +179,8 @@ public class CafCassControllerTest {
     @Test
     public void testExceptionUnAuthorisedForInvalidCaseRole() {
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
-        when(authorisationService.getUserInfo()).thenReturn(userInfo);
-        when(authorisationService.getUserInfo().getRoles()).thenReturn(List.of("invalid-case-role"));
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
+        when(userInfo.getRoles()).thenReturn(List.of("invalid-case-role"));
         final ResponseEntity<Object> response = cafCassController.searchCasesByDates(
             "authorisation",
             "Bearer serviceAuthorisation",
@@ -245,8 +236,7 @@ public class CafCassControllerTest {
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
-        when(authorisationService.getUserInfo()).thenReturn(userInfo);
-        when(authorisationService.getUserInfo().getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
+        when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
         when(caseDataService.getCaseData("authorisation", startDate, endDate))
             .thenReturn(cafCassResponse);
 
@@ -322,8 +312,7 @@ public class CafCassControllerTest {
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
-        when(authorisationService.getUserInfo()).thenReturn(userInfo);
-        when(authorisationService.getUserInfo().getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
+        when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
         when(caseDataService.getCaseData("authorisation", startDate, endDate))
             .thenReturn(cafCassResponse);
 

@@ -68,7 +68,7 @@ public class CafCassController extends AbstractCallbackController {
 
             if (userInfo.isPresent() && Boolean.TRUE.equals(
                 authorisationService.authoriseService(serviceAuthorisation))) {
-                if (authorisationService.getUserInfo().getRoles().contains(CAFCASS_USER_ROLE)) {
+                if (userInfo.get().getRoles().contains(CAFCASS_USER_ROLE)) {
                     log.info("processing request after authorization");
                     LocalDateTime startDateTime = LocalDateTime.parse(startDate);
                     LocalDateTime endDateTime = LocalDateTime.parse(endDate);
