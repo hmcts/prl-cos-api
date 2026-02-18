@@ -33,6 +33,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -185,9 +186,6 @@ public class RemoveLocalAuthoritySolicitorsTest {
         long caseId = 1122334455L;
         when(roleAssignmentService.getRoleAssignmentForCase(String.valueOf(caseId))).thenReturn(raResponse);
 
-        when(systemUserService.getSysUserToken()).thenReturn("sysTok");
-        when(tokenGenerator.generate()).thenReturn("svcTok");
-
         ArgumentCaptor<CaseAssignmentUserRolesRequest> requestCaptor =
             ArgumentCaptor.forClass(CaseAssignmentUserRolesRequest.class);
 
@@ -198,15 +196,7 @@ public class RemoveLocalAuthoritySolicitorsTest {
         service.removeLocalAuthoritySolicitors(caseData);
 
         // Assert
-        verify(caseAssignmentApi, times(1))
+        verify(caseAssignmentApi, never())
             .removeCaseUserRoles(eq("sysTok"), eq("svcTok"), requestCaptor.capture());
-
-        CaseAssignmentUserRolesRequest captured = requestCaptor.getValue();
-        assertNotNull(captured);
-        assertNotNull(captured.getCaseAssignmentUserRolesWithOrganisation(), "Entries list must not be null");
-        assertTrue(
-            captured.getCaseAssignmentUserRolesWithOrganisation().isEmpty(),
-            "When no LASOLICITOR assignments, request list should be empty (per current implementation)"
-        );
     }
 }

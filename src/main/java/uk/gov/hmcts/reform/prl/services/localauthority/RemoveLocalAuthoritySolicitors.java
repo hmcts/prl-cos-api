@@ -41,8 +41,12 @@ public class RemoveLocalAuthoritySolicitors {
             .map(RoleAssignmentResponse::getActorId)
             .collect(Collectors.toSet());
 
-        removeAmBarristerCaseRole(caseData, solicitors);
-
+        if (!solicitors.isEmpty()) {
+            log.info("Removing local authority solicitors {} for case id {}", solicitors, caseData.getId());
+            removeAmBarristerCaseRole(caseData, solicitors);
+        } else {
+            log.info("No roles to remove for local authority solicitors for case id {}", caseData.getId());
+        }
     }
 
     private void removeAmBarristerCaseRole(CaseData caseData, Set<String> userIds) {
