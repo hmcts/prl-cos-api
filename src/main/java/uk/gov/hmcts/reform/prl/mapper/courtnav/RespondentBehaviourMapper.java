@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.BehaviourTowardsApp
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.BehaviourTowardsChildrenEnum;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
@@ -33,7 +34,7 @@ public interface RespondentBehaviourMapper {
         List<BehaviourTowardsApplicantEnum> list = source.getFl401().getRespondentBehaviour().getStopBehaviourTowardsApplicant();
 
         if (list == null) {
-            return null;
+            return Collections.emptyList();
         }
 
         List<ApplicantStopFromRespondentDoingEnum> result = new ArrayList<>();
@@ -47,7 +48,7 @@ public interface RespondentBehaviourMapper {
         List<BehaviourTowardsChildrenEnum> list = source.getFl401().getRespondentBehaviour().getStopBehaviourTowardsChildren();
 
         if (list == null) {
-            return null;
+            return Collections.emptyList();
         }
 
         List<ApplicantStopFromRespondentDoingToChildEnum> result = new ArrayList<>();
