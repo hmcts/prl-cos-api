@@ -100,6 +100,12 @@ public class AllTabServiceImpl implements AllTabsService {
                 caseId,
                 true
             );
+
+        log.info("Case ID: {} - Event ID {} started at version {} state {}", caseId,
+                 CaseEvent.UPDATE_ALL_TABS.getValue(),
+                 allTabsUpdateStartEventResponse.getCaseDetails().getVersion(),
+                 allTabsUpdateStartEventResponse.getCaseDetails().getState());
+
         CaseData allTabsUpdateCaseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(
             allTabsUpdateStartEventResponse,
             objectMapper
@@ -129,6 +135,11 @@ public class AllTabServiceImpl implements AllTabsService {
                 caseId,
                 true
             );
+
+        log.info("Case ID: {} - Event ID {} started at version {} state {}", caseId, eventId,
+                 allTabsUpdateStartEventResponse.getCaseDetails().getVersion(),
+                 allTabsUpdateStartEventResponse.getCaseDetails().getState());
+
         CaseData allTabsUpdateCaseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(
             allTabsUpdateStartEventResponse,
             objectMapper
@@ -162,7 +173,7 @@ public class AllTabServiceImpl implements AllTabsService {
                                            StartEventResponse startEventResponse,
                                            EventRequestData eventRequestData,
                                            Map<String, Object> combinedFieldsMap) {
-        return ccdCoreCaseDataService.submitUpdate(
+        CaseDetails caseDetails = ccdCoreCaseDataService.submitUpdate(
                 systemAuthorisation,
                 eventRequestData,
                 ccdCoreCaseDataService.createCaseDataContent(
@@ -172,6 +183,11 @@ public class AllTabServiceImpl implements AllTabsService {
                 caseId,
                 true
         );
+
+        log.info("Case ID: {} - Event ID {} completed at version {} state {}", caseId, eventRequestData.getEventId(),
+                 caseDetails.getVersion(), caseDetails.getState());
+
+        return caseDetails;
     }
 
     private Map<String, Object> getDocumentsMap(CaseData caseData, Map<String, Object> documentMap) {
