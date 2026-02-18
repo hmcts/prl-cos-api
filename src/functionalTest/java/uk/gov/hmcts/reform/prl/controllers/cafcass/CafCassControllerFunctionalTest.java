@@ -19,6 +19,7 @@ import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
@@ -32,6 +33,7 @@ import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -78,6 +80,9 @@ public class CafCassControllerFunctionalTest {
     private AuthTokenGenerator authTokenGenerator;
 
     @MockBean
+    private UserInfo userInfo;
+
+    @MockBean
     SystemUserService systemUserService;
 
     @MockBean
@@ -102,7 +107,7 @@ public class CafCassControllerFunctionalTest {
         SearchResult expectedSearchResult = objectMapper.readValue(cafcassResponseStr, SearchResult.class);
         Mockito.when(authorisationService.authoriseService(any())).thenReturn(true);
         Mockito.when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_AUTH_TOKEN);
-        Mockito.when(authorisationService.authoriseUser(any())).thenReturn(true);
+        Mockito.when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         when(systemUserService.getSysUserToken()).thenReturn(USER_TOKEN);
         Mockito.when(hearingService.getHearings(
             anyString(),
