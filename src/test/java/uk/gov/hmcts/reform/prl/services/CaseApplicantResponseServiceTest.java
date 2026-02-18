@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -34,6 +35,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.Assert.assertNotNull;
@@ -61,6 +63,9 @@ public class CaseApplicantResponseServiceTest {
     private ObjectMapper objectMapper;
 
     @Mock
+    private UserInfo userInfo;
+
+    @Mock
     DocumentGenService documentGenService;
 
     @Mock
@@ -74,6 +79,9 @@ public class CaseApplicantResponseServiceTest {
 
     @Mock
     DocumentLanguageService documentLanguageService;
+
+
+
 
     private CaseData caseData;
     private CaseDetails caseDetails;
@@ -111,7 +119,7 @@ public class CaseApplicantResponseServiceTest {
         ))
             .thenReturn(Document.builder().build());
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         when(coreCaseDataApi.getCase(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(caseDetails);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(caseService.updateCase(Mockito.any(CaseData.class), Mockito.anyString(), Mockito.anyString(),
