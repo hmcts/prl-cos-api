@@ -37,6 +37,7 @@ import static uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi.SERVICE_AUTHORIZATI
 @RequestMapping("/cases")
 public class CafCassController extends AbstractCallbackController {
     private static final String BEARER = "Bearer ";
+    private static final String CAFCASS_USER_ROLE = "caseworker-privatelaw-cafcass";
     private  final CaseDataService caseDataService;
     private final AuthorisationService authorisationService;
 
@@ -45,7 +46,6 @@ public class CafCassController extends AbstractCallbackController {
         super(objectMapper, eventPublisher);
         this.caseDataService = caseDataService;
         this.authorisationService = authorisationService;
-
     }
 
     @GetMapping(path = "/searchCases", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -54,7 +54,7 @@ public class CafCassController extends AbstractCallbackController {
         @ApiResponse(responseCode = "200", description = "Search cases processed successfully",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = CafCassResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public ResponseEntity<Object> searcCasesByDates(
+    public ResponseEntity<Object> searchCasesByDates(
         @RequestHeader(AUTHORIZATION) String authorisation,
         @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorisation,
         @RequestParam(name = "start_date") String startDate,  @RequestParam(name = "end_date") String endDate
@@ -65,19 +65,22 @@ public class CafCassController extends AbstractCallbackController {
 
             if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
                 authorisationService.authoriseService(serviceAuthorisation))) {
-                log.info("processing request after authorization");
-                LocalDateTime startDateTime = LocalDateTime.parse(startDate);
-                LocalDateTime endDateTime = LocalDateTime.parse(endDate);
-                if (startDateTime.isAfter(endDateTime) || startDateTime.plusMinutes(15).isBefore(endDateTime)) {
-                    return status(BAD_REQUEST).body(new ApiError(
-                        "Difference between end date and start date should not be more than 15 minutes"));
+                if (authorisationService.getUserInfo().getRoles().contains(CAFCASS_USER_ROLE)) {
+                    log.info("processing request after authorization");
+                    LocalDateTime startDateTime = LocalDateTime.parse(startDate);
+                    LocalDateTime endDateTime = LocalDateTime.parse(endDate);
+                    if (startDateTime.isAfter(endDateTime) || startDateTime.plusMinutes(15).isBefore(endDateTime)) {
+                        return status(BAD_REQUEST).body(new ApiError(
+                            "Difference between end date and start date should not be more than 15 minutes"));
+                    }
+                    return ResponseEntity.ok(caseDataService.getCaseData(
+                        authorisation,
+                        startDate,
+                        endDate
+                    ));
+                } else {
+                    throw new ResponseStatusException(UNAUTHORIZED);
                 }
-                return ResponseEntity.ok(caseDataService.getCaseData(
-                    authorisation,
-                    startDate,
-                    endDate
-                ));
-
             } else {
                 throw new ResponseStatusException(UNAUTHORIZED);
             }
