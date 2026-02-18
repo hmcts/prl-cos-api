@@ -903,7 +903,7 @@ public class CafcassCaseDataService {
             "data.stmtOfServiceForOrder",
             "data.stmtOfServiceForApplication",
             "data.finalServedApplicationDetailsList",
-            "data.serveOrderAdditionalDocuments"
+            "data.additionalOrderDocuments"
         );
     }
 }
