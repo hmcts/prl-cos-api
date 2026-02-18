@@ -608,6 +608,10 @@ public class ApplicationsTabService implements TabService {
                     ? caseData.getApplicationPermissionRequired().getDisplayedValue() : null)
             .applicationPermissionRequiredReason(caseData.getApplicationPermissionRequiredReason())
             .natureOfOrder(natureOfOrder)
+            .orderInPlacePermissionRequired(nonNull(caseData.getOrderInPlacePermissionRequired())
+                                                ? caseData.getOrderInPlacePermissionRequired().getDisplayedValue() : null)
+            .orderDetailsForPermissions(nonNull(caseData.getOrderDetailsForPermissions())
+                                            ? caseData.getOrderDetailsForPermissions() : null)
             .build();
 
         return toMap(typeOfApplication);
