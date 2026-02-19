@@ -17,9 +17,12 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -140,9 +143,19 @@ public class BaisDocumentUploadService {
             .courtName(caseData.getCourtName())
             .courtEpimsId(caseData.getCourtEpimsId())
             .courtTypeId(caseData.getCourtTypeId())
-            .dateOrderMade(order.getOtherDetails().getOrderMadeDate())
+            .dateOrderMade(formateOrderMadeDate(order))
             .orderExpiryDate(getOrderExpiryDate(order))
+            .familymanCaseNumber(caseData.getFamilymanCaseNumber())
             .build();
+    }
+
+    private static String formateOrderMadeDate(OrderDetails order) {
+
+        String orderMadeDate = order.getOtherDetails().getOrderMadeDate();
+        DateTimeFormatter inputFormatter =  DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH);
+        DateTimeFormatter outputFormatter =  DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        LocalDate date = LocalDate.parse(orderMadeDate, inputFormatter);
+        return date.format(outputFormatter);
     }
 
     private String getFilePrefix(String caseId, LocalDateTime orderCreatedDate) {
@@ -150,10 +163,11 @@ public class BaisDocumentUploadService {
         return sourceDirectory + "/FL404A-" + caseId + "-" + zdt.toEpochSecond();
     }
 
-    private LocalDateTime getOrderExpiryDate(OrderDetails order) {
+    private String getOrderExpiryDate(OrderDetails order) {
 
         if (order.getFl404CustomFields() != null && order.getFl404CustomFields().getOrderSpecifiedDateTime() != null) {
-            return order.getFl404CustomFields().getOrderSpecifiedDateTime();
+            return order.getFl404CustomFields().getOrderSpecifiedDateTime()
+                .format(DateTimeFormatter.ofPattern("dd/MM/yyyy_HH:mm"));
         }
         return null;
     }

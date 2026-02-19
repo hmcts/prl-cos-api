@@ -192,17 +192,20 @@ class BaisDocumentUploadServiceTest {
                     .id(1L)
                     .caseData(AcroCaseData.builder()
                         .fl404Orders(List.of(createOrderDetails()))
+                        .familymanCaseNumber("familymanCaseNumber")
                         .build())
                     .build(),
                 AcroCaseDetail.builder()
                     .id(2L)
                     .caseData(AcroCaseData.builder()
                         .fl404Orders(null)
+                        .familymanCaseNumber("familymanCaseNumber")
                         .build())
                     .build(),
                 AcroCaseDetail.builder()
                     .id(3L)
                     .caseData(AcroCaseData.builder()
+                        .familymanCaseNumber("familymanCaseNumber")
                         .fl404Orders(Collections.emptyList())
                         .build())
                     .build()
@@ -302,15 +305,14 @@ class BaisDocumentUploadServiceTest {
     @Test
     void testPrepareDataForCsvMapsAllFieldsCorrectly() throws Exception {
         LocalDateTime orderCreatedDate = LocalDateTime.of(2024, 10, 15, 14, 30);
-        LocalDateTime expectedExpiryDate = LocalDateTime.of(2025, 4, 15, 14, 30);
-        String expectedOrderMadeDate = "2025-10-14";
+        LocalDateTime orderExpiryDate = LocalDateTime.of(2025, 4, 15, 14, 30);
 
         FL404 fl404CustomFields = FL404.builder()
-            .orderSpecifiedDateTime(expectedExpiryDate)
+            .orderSpecifiedDateTime(orderExpiryDate)
             .build();
 
         OtherOrderDetails otherOrderDetails = OtherOrderDetails.builder()
-            .orderMadeDate(expectedOrderMadeDate)
+            .orderMadeDate("14 Oct 2025")
             .build();
 
         OrderDetails order = OrderDetails.builder()
@@ -334,6 +336,7 @@ class BaisDocumentUploadServiceTest {
 
         AcroCaseData caseData = AcroCaseData.builder()
             .id(98765L)
+            .familymanCaseNumber("familymanCaseNumber")
             .caseTypeOfApplication("FL402")
             .applicant(applicant)
             .respondent(respondent)
@@ -363,6 +366,8 @@ class BaisDocumentUploadServiceTest {
         CsvData capturedData = csvDataArgumentCaptor.getValue();
 
         Map<String, Object[]> fieldMappings = Map.of(
+            "Family Case number", new Object[]{caseData.getFamilymanCaseNumber(),
+                capturedData.getFamilymanCaseNumber(), "caseData.getId()"},
             "ID", new Object[]{caseData.getId(), capturedData.getId(), "caseData.getId()"},
             "Case Type", new Object[]{caseData.getCaseTypeOfApplication(),
                 capturedData.getCaseTypeOfApplication(), "caseData.getCaseTypeOfApplication()"},
@@ -373,9 +378,9 @@ class BaisDocumentUploadServiceTest {
                 "caseData.getCourtEpimsId()"},
             "Court Type ID", new Object[]{caseData.getCourtTypeId(), capturedData.getCourtTypeId(),
                 "caseData.getCourtTypeId()"},
-            "Date Order Made", new Object[]{expectedOrderMadeDate, capturedData.getDateOrderMade(),
+            "Date Order Made", new Object[]{"14/10/2025", capturedData.getDateOrderMade(),
                 "order.getOtherDetails().getOrderMadeDate()"},
-            "Order Expiry Date", new Object[]{expectedExpiryDate, capturedData.getOrderExpiryDate(),
+            "Order Expiry Date", new Object[]{"15/04/2025_14:30", capturedData.getOrderExpiryDate(),
                 "fl404CustomFields.getOrderSpecifiedDateTime()"}
         );
 
@@ -418,6 +423,7 @@ class BaisDocumentUploadServiceTest {
 
     private AcroCaseData createCaseDataWithHearings(List<CaseHearing> hearings) {
         return AcroCaseData.builder()
+            .familymanCaseNumber("familymanCaseNumber")
             .fl404Orders(List.of(createOrderDetails()))
             .caseHearings(hearings)
             .build();
@@ -440,7 +446,7 @@ class BaisDocumentUploadServiceTest {
             .orderDocument(createDocument())
             .orderDocumentWelsh(createDocument())
             .otherDetails(OtherOrderDetails.builder()
-                .orderMadeDate("2025-10-14")
+                .orderMadeDate("14 Oct 2025")
                 .build())
             .build();
     }
@@ -456,6 +462,7 @@ class BaisDocumentUploadServiceTest {
                 .id(1L)
                 .caseData(AcroCaseData.builder()
                     .fl404Orders(List.of(createOrderDetails()))
+                    .familymanCaseNumber("familymanCaseNumber")
                     .build())
                 .build()))
             .build();

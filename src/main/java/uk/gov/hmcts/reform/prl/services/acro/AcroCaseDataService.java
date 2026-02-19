@@ -173,7 +173,8 @@ public class AcroCaseDataService {
             "data.orderCollection",
             "data.caseManagementLocation",
             "data.stmtOfServiceForOrder",
-            "data.daApplicantContactInstructions"
+            "data.daApplicantContactInstructions",
+            "data.familymanCaseNumber"
         );
     }
 
