@@ -48,7 +48,8 @@ public class TypeOfApplicationMapperTest {
         Document document = Document.builder().documentFileName("file.pdf").build();
         CaseData caseDataInput = CaseData.builder().ordersApplyingFor(orderType).typeOfChildArrangementsOrder(
                 ChildArrangementOrderTypeEnum.liveWithOrder).natureOfOrder("test")
-            .consentOrder(Yes).applicationPermissionRequired(PermissionRequiredEnum.getValue("noNotRequired")).applicationPermissionRequiredReason("Need Permission")
+            .consentOrder(Yes).applicationPermissionRequired(PermissionRequiredEnum.getValue("noNotRequired"))
+            .applicationPermissionRequiredReason("Need Permission")
             .uploadOrderDocForPermission(document).applicationDetails("Done").build();
         assertNotNull(typeOfApplicationMapper.map(caseDataInput));
     }
