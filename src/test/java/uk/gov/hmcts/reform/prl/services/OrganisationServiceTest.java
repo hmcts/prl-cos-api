@@ -60,7 +60,7 @@ import static org.mockito.Mockito.when;
 
     @BeforeEach
     void setUp() {
-       lenient().when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        lenient().when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
     }
 
     @Test
@@ -411,7 +411,7 @@ import static org.mockito.Mockito.when;
         assertEquals(orgData,OrgSolicitors.builder().build());
     }
 
-     static FeignException feignException(int status, String message) {
+    static FeignException feignException(int status, String message) {
         return FeignException.errorStatus(message, Response.builder()
             .status(status)
             .request(Request.create(GET, EMPTY, Map.of(), new byte[]{}, UTF_8, null))
