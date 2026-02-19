@@ -106,6 +106,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofh
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharmrevised.AllegationsOfHarmRevisedOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharmrevised.OrderRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharmrevised.RevisedChildAbductionDetails;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AttendHearing;
@@ -257,6 +258,7 @@ public class ApplicationsTabServiceTest {
             .applicationPermissionRequiredReason("Some xyz reason")
             .orderInPlacePermissionRequired(Yes)
             .orderDetailsForPermissions("ABC")
+            .uploadOrderDocForPermission(Document.builder().documentFileName("test.pdf").build())
             // hearing urgency
             .isCaseUrgent(Yes)
             .caseUrgencyTimeAndReason("Test String")
@@ -964,6 +966,7 @@ public class ApplicationsTabServiceTest {
             .applicationPermissionRequiredReason("Some xyz reason")
             .orderInPlacePermissionRequired("Yes")
             .orderDetailsForPermissions("ABC")
+            .uploadOrderDocForPermission("test.pdf")
             .build();
         Map<String, Object> typeOfApplicationMap = Map.of(
             "ordersApplyingFor", "Child Arrangements Order",
@@ -972,7 +975,8 @@ public class ApplicationsTabServiceTest {
             "applicationPermissionRequired", "Yes",
             "applicationPermissionRequiredReason", "Some xyz reason",
             "orderInPlacePermissionRequired", "Yes",
-            "orderDetailsForPermissions", "ABC"
+            "orderDetailsForPermissions", "ABC",
+            "uploadOrderDocForPermission", "test.pdf"
         );
 
         when(objectMapper.convertValue(typeOfApplication, Map.class)).thenReturn(typeOfApplicationMap);

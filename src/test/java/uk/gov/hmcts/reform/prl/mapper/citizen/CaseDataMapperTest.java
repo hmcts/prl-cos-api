@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.skyscreamer.jsonassert.JSONAssert;
+import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
@@ -477,6 +478,69 @@ class CaseDataMapperTest {
         //Then
         assertNotNull(updatedCaseData);
 
+    }
+
+    @Test
+    public void testCaseDataMapperForScreeningQuestions() throws IOException {
+        CaseData caseData1 = caseData.toBuilder()
+            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+                                 .c100RebuildScreeningQuestions(
+                                     TestUtil.readFileFrom("classpath:c100-rebuild/sq.json"))
+                                 .build())
+            .build();
+
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+
+        assertNotNull(updatedCaseData);
+        assertEquals(
+            PermissionRequiredEnum.yes,
+            updatedCaseData.getApplicationPermissionRequired());
+        assertEquals(
+            "Testing",
+            updatedCaseData.getOrderDetailsForPermissions());
+        assertEquals(
+            "PermissionsDoc.pdf",
+            updatedCaseData.getUploadOrderDocForPermission().getDocumentFileName());
+    }
+
+    @Test
+    public void testScreeningQuestionsWithoutOptionalFields() throws IOException {
+
+        String json = """
+            {
+              "sqCourtPermissionRequired": "Yes"
+            }
+            """;
+
+        CaseData caseData1 = caseData.toBuilder()
+            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+                                 .c100RebuildScreeningQuestions(json)
+                                 .build())
+            .build();
+
+        CaseData updated = caseDataMapper.buildUpdatedCaseData(caseData1);
+
+        assertEquals(PermissionRequiredEnum.yes,
+                     updated.getApplicationPermissionRequired());
+
+        assertNull(updated.getOrderDetailsForPermissions());
+        assertNull(updated.getUploadOrderDocForPermission());
+    }
+
+    @Test
+    public void testScreeningQuestionsWhenNull() throws IOException {
+
+        CaseData caseData1 = caseData.toBuilder()
+            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+                                 .c100RebuildScreeningQuestions(null)
+                                 .build())
+            .build();
+
+        CaseData updated = caseDataMapper.buildUpdatedCaseData(caseData1);
+
+        assertNull(updated.getApplicationPermissionRequired());
+        assertNull(updated.getOrderDetailsForPermissions());
+        assertNull(updated.getUploadOrderDocForPermission());
     }
 
 }
