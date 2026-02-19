@@ -12,6 +12,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
@@ -21,10 +22,11 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.FeeResponseForCitizen;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.FeeService;
-import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
+import uk.gov.hmcts.reform.prl.services.payment.FeeService;
+import uk.gov.hmcts.reform.prl.services.payment.PaymentRequestService;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -53,6 +55,9 @@ public class FeesAndPaymentCitizenControllerIntegrationTest {
     FeeService feeService;
 
     @MockBean
+    UserInfo userInfo;
+
+    @MockBean
     PaymentRequestService paymentRequestService;
 
     @Before
@@ -64,7 +69,7 @@ public class FeesAndPaymentCitizenControllerIntegrationTest {
     public void testGetC100ApplicationFees() throws Exception {
         String url = "/fees-and-payment-apis/getC100ApplicationFees";
 
-        when(authorisationService.authoriseUser(anyString())).thenReturn(true);
+        when(authorisationService.authoriseUser(anyString())).thenReturn(Optional.of(userInfo));
         when(authorisationService.authoriseService(anyString())).thenReturn(true);
         when(feeService.fetchFeeDetails(any())).thenReturn(FeeResponse.builder()
                                                                .amount(BigDecimal.ONE)
@@ -85,7 +90,7 @@ public class FeesAndPaymentCitizenControllerIntegrationTest {
         String url = "/fees-and-payment-apis/create-payment";
         CreatePaymentRequest createPaymentRequest = new CreatePaymentRequest();
 
-        when(authorisationService.authoriseUser(anyString())).thenReturn(true);
+        when(authorisationService.authoriseUser(anyString())).thenReturn(Optional.of(userInfo));
         when(authorisationService.authoriseService(anyString())).thenReturn(true);
         when(paymentRequestService.createPayment(anyString(), any(CreatePaymentRequest.class)))
             .thenReturn(new PaymentResponse());
@@ -105,7 +110,7 @@ public class FeesAndPaymentCitizenControllerIntegrationTest {
     public void testRetrievePaymentStatus() throws Exception {
         String url = "/fees-and-payment-apis/retrievePaymentStatus/testPaymentReference/testCaseId";
 
-        when(authorisationService.authoriseUser(anyString())).thenReturn(true);
+        when(authorisationService.authoriseUser(anyString())).thenReturn(Optional.of(userInfo));
         when(authorisationService.authoriseService(anyString())).thenReturn(true);
         when(paymentRequestService.fetchPaymentStatus(anyString(), anyString()))
             .thenReturn(new PaymentStatusResponse());
@@ -125,7 +130,7 @@ public class FeesAndPaymentCitizenControllerIntegrationTest {
         String url = "/fees-and-payment-apis/getFeeCode";
         FeeRequest feeRequest = new FeeRequest();
 
-        when(authorisationService.authoriseUser(anyString())).thenReturn(true);
+        when(authorisationService.authoriseUser(anyString())).thenReturn(Optional.of(userInfo));
         when(authorisationService.authoriseService(anyString())).thenReturn(true);
         when(feeService.fetchFeeCode(any(FeeRequest.class), anyString()))
             .thenReturn(FeeResponseForCitizen.builder()
