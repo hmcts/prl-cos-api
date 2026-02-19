@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 public enum PermissionRequiredEnum {
 
     yes("Yes"),
+    Yes("Yes"),
     noNowSought("No, permission now sought"),
     noNotRequired("No, permission is not required");
 
@@ -22,13 +23,7 @@ public enum PermissionRequiredEnum {
 
     @JsonCreator
     public static PermissionRequiredEnum getValue(String key) {
-        for (PermissionRequiredEnum permission : PermissionRequiredEnum.values()) {
-            if (permission.displayedValue.equalsIgnoreCase(key)) {
-                return permission;
-            }
-        }
-        throw new IllegalArgumentException("Unknown value: " + key);
+        return PermissionRequiredEnum.valueOf(key);
     }
-
 }
 
