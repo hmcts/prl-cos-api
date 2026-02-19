@@ -8,13 +8,16 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AwaitingInformation;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWAITING_INFORMATION_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_STATUS;
 import static uk.gov.hmcts.reform.prl.enums.State.AWAITING_INFORMATION;
 
@@ -26,6 +29,7 @@ public class AwaitingInformationService {
 
     private final FeatureToggleService featureToggleService;
     private final ObjectMapper objectMapper;
+    private final CaseSummaryTabService caseSummaryTab;
 
     public List<String> validate(AwaitingInformation awaitingInformation) {
         List<String> errorList = new ArrayList<>();
@@ -43,8 +47,11 @@ public class AwaitingInformationService {
                 .state(AWAITING_INFORMATION.getLabel())
                 .build()
         );
-        var awaitingInformation = objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(), AwaitingInformation.class);
+        Map<String, Object> awaitingInformationDetails = new HashMap<>();
+        awaitingInformationDetails.put("reviewByDate", caseDataUpdated.get("reviewByDate"));
+        awaitingInformationDetails.put("awaitingInformationReasonList", caseDataUpdated.get("awaitingInformationReasonList"));
+        caseDataUpdated.put(AWAITING_INFORMATION_DETAILS,awaitingInformationDetails);
+
         CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
         return caseDataUpdated;
     }
