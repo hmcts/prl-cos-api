@@ -6,12 +6,10 @@ import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.BehaviourTowardsApplicantEnum;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.BehaviourTowardsChildrenEnum;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Mapper(componentModel = "spring")
 public interface RespondentBehaviourMapper {
@@ -31,31 +29,19 @@ public interface RespondentBehaviourMapper {
     }
 
     private List<ApplicantStopFromRespondentDoingEnum> mapBehaviourTowardsApplicant(CourtNavFl401 source) {
-        List<BehaviourTowardsApplicantEnum> list = source.getFl401().getRespondentBehaviour().getStopBehaviourTowardsApplicant();
-
-        if (list == null) {
-            return Collections.emptyList();
-        }
-
-        List<ApplicantStopFromRespondentDoingEnum> result = new ArrayList<>();
-        for (BehaviourTowardsApplicantEnum value : list) {
-            result.add(ApplicantStopFromRespondentDoingEnum.getDisplayedValueFromEnumString(value.toString()));
-        }
-        return result;
+        return Optional.ofNullable(source.getFl401().getRespondentBehaviour().getStopBehaviourTowardsApplicant())
+            .orElse(Collections.emptyList())
+            .stream()
+            .map(value -> ApplicantStopFromRespondentDoingEnum.getDisplayedValueFromEnumString(value.toString()))
+            .toList();
     }
 
     private List<ApplicantStopFromRespondentDoingToChildEnum> mapBehaviourTowardsChildren(CourtNavFl401 source) {
-        List<BehaviourTowardsChildrenEnum> list = source.getFl401().getRespondentBehaviour().getStopBehaviourTowardsChildren();
-
-        if (list == null) {
-            return Collections.emptyList();
-        }
-
-        List<ApplicantStopFromRespondentDoingToChildEnum> result = new ArrayList<>();
-        for (BehaviourTowardsChildrenEnum value : list) {
-            result.add(ApplicantStopFromRespondentDoingToChildEnum.getDisplayedValueFromEnumString(value.toString()));
-        }
-        return result;
+        return Optional.ofNullable(source.getFl401().getRespondentBehaviour().getStopBehaviourTowardsChildren())
+            .orElse(Collections.emptyList())
+            .stream()
+            .map(value -> ApplicantStopFromRespondentDoingToChildEnum.getDisplayedValueFromEnumString(value.toString()))
+            .toList();
     }
 }
 
