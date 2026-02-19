@@ -622,9 +622,7 @@ public class UpdatePartyDetailsService {
     public Boolean checkIfConfidentialityDetailsChangedRespondent(CaseData caseDataBefore, Element<PartyDetails> respondent) {
         List<Element<PartyDetails>> respondentList = null;
         if (caseDataBefore.getCaseTypeOfApplication().equals(C100_CASE_TYPE)) {
-            log.info("Yogesh===>1");
             List<Element<PartyDetails>> respondents = caseDataBefore.getRespondents();
-            log.info("Yogesh===>2 {}", respondents);
             respondentList = emptyIfNull(respondents).stream()
                 .filter(resp1 -> resp1.getId().equals(respondent.getId())
                     && (CaseUtils.isEmailAddressChanged(respondent.getValue(), resp1.getValue())
@@ -632,7 +630,6 @@ public class UpdatePartyDetailsService {
                     || CaseUtils.isPhoneNumberChanged(respondent.getValue(), resp1.getValue())
                     || !StringUtils.equals(resp1.getValue().getLabelForDynamicList(), respondent.getValue()
                     .getLabelForDynamicList()))).toList();
-            log.info("Yogesh===>3");
         } else {
             PartyDetails respondentDetailsFL401 = caseDataBefore.getRespondentsFL401();
             if ((CaseUtils.isEmailAddressChanged(respondent.getValue(), respondentDetailsFL401))
