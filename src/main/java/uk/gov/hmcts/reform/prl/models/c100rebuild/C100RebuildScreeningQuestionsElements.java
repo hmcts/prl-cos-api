@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.util.List;
 
@@ -24,7 +24,7 @@ public class C100RebuildScreeningQuestionsElements {
     @JsonProperty("sq_legalRepresentation")
     private String sqLegalRepresentation;
     @JsonProperty("sq_courtPermissionRequired")
-    private PermissionRequiredEnum sqCourtPermissionRequired;
+    private String sqCourtPermissionRequired;
     @JsonProperty("sq_permissionsWhy")
     private List<String> sqPermissionsWhy;
     @JsonProperty("sq_courtOrderPrevent_subfield")

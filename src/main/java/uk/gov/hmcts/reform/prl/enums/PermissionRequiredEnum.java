@@ -22,7 +22,12 @@ public enum PermissionRequiredEnum {
 
     @JsonCreator
     public static PermissionRequiredEnum getValue(String key) {
-        return PermissionRequiredEnum.valueOf(key);
+        for (PermissionRequiredEnum permission : PermissionRequiredEnum.values()) {
+            if (permission.displayedValue.equalsIgnoreCase(key)) {
+                return permission;
+            }
+        }
+        throw new IllegalArgumentException("Unknown value: " + key);
     }
 
 }
