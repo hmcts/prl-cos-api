@@ -497,6 +497,20 @@ class CaseDataMapperTest {
     @ParameterizedTest
     @ValueSource(strings = {"classpath:c100-rebuild/saftycrns.json", "classpath:c100-rebuild/saftycrnsWithoutDomesticAbuse.json",
         "classpath:c100-rebuild/saftycrnsWithoutChildAbuses.json"})
+    void testOrderInPlace_WhenOtherValue_ReturnsNo(String resourcePath) throws IOException {
+        CaseData caseData1 = caseData.toBuilder()
+            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+                                 .c100RebuildScreeningQuestions(TestUtil.readFileFrom("classpath:c100-rebuild/sq2.json"))
+                                 .build()).build();
+
+        CaseData updated = caseDataMapper.buildUpdatedCaseData(caseData1);
+
+        assertEquals(YesOrNo.No, updated.getOrderInPlacePermissionRequired());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"classpath:c100-rebuild/saftycrns.json", "classpath:c100-rebuild/saftycrnsWithoutDomesticAbuse.json",
+        "classpath:c100-rebuild/saftycrnsWithoutChildAbuses.json"})
     void testScreeningQuestionsWhenNull() throws IOException {
 
         CaseData caseData1 = caseData.toBuilder()

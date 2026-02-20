@@ -23,8 +23,11 @@ public class CaseDataScreeningQuestionsElementsMapper {
                                                                    C100RebuildScreeningQuestionsElements c100RebuildScreeningQuestionsElements) {
 
         caseDataBuilder
-            .applicationPermissionRequired(PermissionRequiredEnum.getValue(c100RebuildScreeningQuestionsElements.getSqCourtPermissionRequired()))
-            .orderInPlacePermissionRequired(buildOrderInPlace(c100RebuildScreeningQuestionsElements.getSqPermissionsWhy()))
+            .applicationPermissionRequired(isNotEmpty(c100RebuildScreeningQuestionsElements.getSqCourtPermissionRequired())
+                                               ? PermissionRequiredEnum.getValue(c100RebuildScreeningQuestionsElements.getSqCourtPermissionRequired())
+                                               : null)
+            .orderInPlacePermissionRequired(isNotEmpty(c100RebuildScreeningQuestionsElements.getSqPermissionsWhy())
+                                                ? buildOrderInPlace(c100RebuildScreeningQuestionsElements.getSqPermissionsWhy()) : null)
             .orderDetailsForPermissions(StringUtils.isNotEmpty(c100RebuildScreeningQuestionsElements.getSqCourtOrderPreventSubfield())
                                             ? c100RebuildScreeningQuestionsElements.getSqCourtOrderPreventSubfield() : null)
             .uploadOrderDocForPermission(isNotEmpty(c100RebuildScreeningQuestionsElements.getSqUploadDocumentSubfield())
