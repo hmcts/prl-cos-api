@@ -612,6 +612,8 @@ public class ApplicationsTabService implements TabService {
                                                 ? caseData.getOrderInPlacePermissionRequired().getDisplayedValue() : null)
             .orderDetailsForPermissions(nonNull(caseData.getOrderDetailsForPermissions())
                                             ? caseData.getOrderDetailsForPermissions() : null)
+            .uploadOrderDocForPermission(nonNull(caseData.getUploadOrderDocForPermission())
+                                            ? caseData.getUploadOrderDocForPermission().getDocumentFileName() : null)
             .build();
 
         return toMap(typeOfApplication);

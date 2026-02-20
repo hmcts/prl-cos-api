@@ -161,4 +161,5 @@ public class BaseCaseData {
 
     private YesOrNo orderInPlacePermissionRequired;
     private String orderDetailsForPermissions;
+    private Document uploadOrderDocForPermission;
 }

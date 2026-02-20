@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.skyscreamer.jsonassert.JSONAssert;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
@@ -477,6 +478,53 @@ class CaseDataMapperTest {
         //Then
         assertNotNull(updatedCaseData);
 
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"classpath:c100-rebuild/saftycrns.json", "classpath:c100-rebuild/saftycrnsWithoutDomesticAbuse.json",
+        "classpath:c100-rebuild/saftycrnsWithoutChildAbuses.json"})
+    void testCaseDataMapperForScreeningQuestions(String resourcePath) throws IOException {
+        CaseData caseData1 = caseData.toBuilder()
+            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+                                 .c100RebuildScreeningQuestions(TestUtil.readFileFrom("classpath:c100-rebuild/sq.json"))
+                                 .build()).build();
+
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+        assertNotNull(updatedCaseData);
+        assertEquals(YesOrNo.Yes, updatedCaseData.getOrderInPlacePermissionRequired());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"classpath:c100-rebuild/saftycrns.json", "classpath:c100-rebuild/saftycrnsWithoutDomesticAbuse.json",
+        "classpath:c100-rebuild/saftycrnsWithoutChildAbuses.json"})
+    void testOrderInPlace_WhenOtherValue_ReturnsNo(String resourcePath) throws IOException {
+        CaseData caseData1 = caseData.toBuilder()
+            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+                                 .c100RebuildScreeningQuestions(TestUtil.readFileFrom("classpath:c100-rebuild/sq2.json"))
+                                 .build()).build();
+
+        CaseData updated = caseDataMapper.buildUpdatedCaseData(caseData1);
+
+        assertEquals(YesOrNo.No, updated.getOrderInPlacePermissionRequired());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"classpath:c100-rebuild/saftycrns.json", "classpath:c100-rebuild/saftycrnsWithoutDomesticAbuse.json",
+        "classpath:c100-rebuild/saftycrnsWithoutChildAbuses.json"})
+    void testScreeningQuestionsWhenNull() throws IOException {
+
+        CaseData caseData1 = caseData.toBuilder()
+            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+                                 .c100RebuildScreeningQuestions(null)
+                                 .build())
+            .build();
+
+        CaseData updated = caseDataMapper.buildUpdatedCaseData(caseData1);
+
+        assertNull(updated.getApplicationPermissionRequired());
+        assertNull(updated.getOrderDetailsForPermissions());
+        assertNull(updated.getOrderInPlacePermissionRequired());
+        assertNull(updated.getUploadOrderDocForPermission());
     }
 
 }
