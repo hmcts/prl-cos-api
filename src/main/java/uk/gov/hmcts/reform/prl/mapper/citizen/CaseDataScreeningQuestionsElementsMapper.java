@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
 import org.apache.commons.lang3.StringUtils;
+import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildScreeningQuestionsElements;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -22,6 +23,9 @@ public class CaseDataScreeningQuestionsElementsMapper {
                                                                    C100RebuildScreeningQuestionsElements c100RebuildScreeningQuestionsElements) {
 
         caseDataBuilder
+            .applicationPermissionRequired(isNotEmpty(c100RebuildScreeningQuestionsElements.getSqCourtPermissionRequired())
+                                               ? PermissionRequiredEnum.getValue(c100RebuildScreeningQuestionsElements.getSqCourtPermissionRequired())
+                                               : null)
             .orderInPlacePermissionRequired(isNotEmpty(c100RebuildScreeningQuestionsElements.getSqPermissionsWhy())
                                                 ? buildOrderInPlace(c100RebuildScreeningQuestionsElements.getSqPermissionsWhy()) : null)
             .orderDetailsForPermissions(StringUtils.isNotEmpty(c100RebuildScreeningQuestionsElements.getSqCourtOrderPreventSubfield())
