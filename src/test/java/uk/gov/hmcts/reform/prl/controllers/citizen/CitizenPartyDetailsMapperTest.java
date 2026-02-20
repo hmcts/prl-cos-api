@@ -204,10 +204,8 @@ class CitizenPartyDetailsMapperTest {
     @Test
     void testMapUpdatedPartyDetailsEventConfirmDetails() throws IOException {
         setUpDa();
-        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, updateCaseData,
-                                                                                                                       CaseEvent.CONFIRM_YOUR_DETAILS,
-                                                                                                                       AUTH_TOKEN
-        );
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper
+            .mapUpdatedPartyDetails(caseData, updateCaseData, CaseEvent.CONFIRM_YOUR_DETAILS,AUTH_TOKEN);
         assertNotNull(citizenUpdatePartyDataContent);
     }
 
@@ -253,9 +251,8 @@ class CitizenPartyDetailsMapperTest {
         doNothing().when(c100RespondentSolicitorService).populateConfidentialAndMiscDataMap(any(), any(),
                                                                                             anyString());
         when(updatePartyDetailsService.checkIfConfidentialityDetailsChangedRespondent(any(),any())).thenReturn(true);
-        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, updateCaseData,
-                                                                                                                       CaseEvent.KEEP_DETAILS_PRIVATE,
-                                                                                                                       AUTH_TOKEN);
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper
+            .mapUpdatedPartyDetails(caseData, updateCaseData, CaseEvent.KEEP_DETAILS_PRIVATE, AUTH_TOKEN);
         assertNotNull(citizenUpdatePartyDataContent);
     }
 
@@ -297,9 +294,8 @@ class CitizenPartyDetailsMapperTest {
             .respondentsFL401(applicant1)
             .c100RebuildData(c100RebuildData)
             .build();
-        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, updateCaseData,
-                                                                                                                       CaseEvent.KEEP_DETAILS_PRIVATE,
-                                                                                                                       AUTH_TOKEN);
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper
+            .mapUpdatedPartyDetails(caseData, updateCaseData, CaseEvent.KEEP_DETAILS_PRIVATE, AUTH_TOKEN);
         assertNotNull(citizenUpdatePartyDataContent);
     }
 
