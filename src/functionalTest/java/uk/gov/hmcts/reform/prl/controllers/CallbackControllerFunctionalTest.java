@@ -6,8 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -97,7 +97,7 @@ public class CallbackControllerFunctionalTest {
 
 
     @Test
-    @Ignore
+    @Disabled
     public void givenNoAuthorization_whenPostRequestToDraftDocumentGeneration_then400Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request
@@ -171,7 +171,7 @@ public class CallbackControllerFunctionalTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void givenRequestWithCaseNumberAdded_ResponseContainsIssueDate() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
         RequestSpecification requestA = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
