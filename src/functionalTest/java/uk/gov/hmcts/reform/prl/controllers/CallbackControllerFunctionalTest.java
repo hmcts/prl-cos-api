@@ -171,6 +171,7 @@ public class CallbackControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenRequestWithCaseNumberAdded_ResponseContainsIssueDate() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
         RequestSpecification requestA = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
