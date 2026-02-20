@@ -24,7 +24,8 @@ public class CaseDataScreeningQuestionsElementsMapper {
 
         caseDataBuilder
             .applicationPermissionRequired(PermissionRequiredEnum.getValue(c100RebuildScreeningQuestionsElements.getSqCourtPermissionRequired()))
-            .orderInPlacePermissionRequired(buildOrderInPlace(c100RebuildScreeningQuestionsElements.getSqPermissionsWhy()))
+            .orderInPlacePermissionRequired(isNotEmpty(c100RebuildScreeningQuestionsElements.getSqPermissionsWhy())
+                                                ? buildOrderInPlace(c100RebuildScreeningQuestionsElements.getSqPermissionsWhy()) : null)
             .orderDetailsForPermissions(StringUtils.isNotEmpty(c100RebuildScreeningQuestionsElements.getSqCourtOrderPreventSubfield())
                                             ? c100RebuildScreeningQuestionsElements.getSqCourtOrderPreventSubfield() : null)
             .uploadOrderDocForPermission(isNotEmpty(c100RebuildScreeningQuestionsElements.getSqUploadDocumentSubfield())
