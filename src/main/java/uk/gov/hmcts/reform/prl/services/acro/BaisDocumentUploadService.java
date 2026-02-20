@@ -1,6 +1,13 @@
 package uk.gov.hmcts.reform.prl.services.acro;
 
 
+import com.sendgrid.Method;
+import com.sendgrid.Request;
+import com.sendgrid.SendGrid;
+import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Attachments;
+import com.sendgrid.helpers.mail.objects.Content;
+import com.sendgrid.helpers.mail.objects.Email;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.dto.acro.CsvData;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -22,9 +30,12 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+
+import static uk.gov.hmcts.reform.prl.services.SendgridService.MAIL_SEND;
 
 @Slf4j
 @Service
@@ -38,6 +49,7 @@ public class BaisDocumentUploadService {
     private final CsvWriter csvWriter;
     private final PdfExtractorService pdfExtractorService;
     private final SftpService sftpService;
+    private final SendGrid sendGrid;
 
     @Value("${acro.source-directory}")
     private String sourceDirectory;
@@ -71,9 +83,40 @@ public class BaisDocumentUploadService {
                 "*** Total time taken to run Bais Document upload task - {}s ***",
                 TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime)
             );
+            sendMail(new File(archivePath));
         } catch (Exception e) {
-            throw new BaisDocumentUploadRuntimeException("Document upload to Bais has failed for the run at "
-                                                             + LocalDateTime.now(), e);
+            throw new BaisDocumentUploadRuntimeException(
+                "Document upload to Bais has failed for the run at "
+                    + LocalDateTime.now(), e
+            );
+        }
+    }
+
+    private void sendMail(File file) {
+        try {
+            String subject = "Bais Document Upload";
+            Content content = new Content("text/plain", " ");
+            Attachments attachments = new Attachments();
+            byte[] fileContent = Files.readAllBytes(file.toPath());
+            String encoded = Base64.getEncoder().encodeToString(fileContent);
+            attachments.setContent(encoded);
+            attachments.setFilename(subject + ".zip");
+            attachments.setType("application/zip");
+            attachments.setDisposition("attachment");
+            Mail mail = new Mail(
+                new Email("dharmendra.kumar1@hmcts.net"), subject,
+                new Email("dharmendra.kumar1@hmcts.net"), content
+            );
+            mail.addAttachments(attachments);
+            Request request = new Request();
+            request.setMethod(Method.POST);
+            request.setEndpoint(MAIL_SEND);
+            request.setBody(mail.build());
+            log.info("Initiating email through sendgrid");
+            sendGrid.api(request);
+            log.info("Notification to RPA sent successfully");
+        } catch (IOException ex) {
+            log.error(ex.getMessage());
         }
     }
 
@@ -152,8 +195,8 @@ public class BaisDocumentUploadService {
     private static String formateOrderMadeDate(OrderDetails order) {
 
         String orderMadeDate = order.getOtherDetails().getOrderMadeDate();
-        DateTimeFormatter inputFormatter =  DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH);
-        DateTimeFormatter outputFormatter =  DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH);
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         LocalDate date = LocalDate.parse(orderMadeDate, inputFormatter);
         return date.format(outputFormatter);
     }
