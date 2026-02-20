@@ -58,6 +58,7 @@ class CaseNameServiceTest {
         caseNameService.setFinalCaseName(updatedCaseData, caseData);
 
         assertEquals("AppLN V RespLN", updatedCaseData.get("applicantCaseName"));
+        assertEquals("AppLN V RespLN", updatedCaseData.get("caseNameHmctsInternal"));
     }
 
     @Test
@@ -74,6 +75,7 @@ class CaseNameServiceTest {
         caseNameService.setFinalCaseName(updatedCaseData, caseData);
 
         assertEquals("AppFN AppLN & RespFN RespLN", updatedCaseData.get("applicantCaseName"));
+        assertEquals("AppFN AppLN & RespFN RespLN", updatedCaseData.get("caseNameHmctsInternal"));
     }
 
     @Test
@@ -91,6 +93,7 @@ class CaseNameServiceTest {
         caseNameService.setFinalCaseName(updatedCaseData, caseData);
 
         assertEquals("AppLN V RespLN", updatedCaseData.get("applicantCaseName"));
+        assertEquals("AppLN V RespLN", updatedCaseData.get("caseNameHmctsInternal"));
     }
 
     @Test
@@ -108,6 +111,7 @@ class CaseNameServiceTest {
         caseNameService.setFinalCaseName(updatedCaseData, caseData);
 
         assertEquals("AppFN AppLN & RespFN RespLN", updatedCaseData.get("applicantCaseName"));
+        assertEquals("AppFN AppLN & RespFN RespLN", updatedCaseData.get("caseNameHmctsInternal"));
     }
 
     @Test
@@ -119,6 +123,7 @@ class CaseNameServiceTest {
         caseNameService.setFinalCaseName(updatedCaseData, caseData);
 
         assertNull(updatedCaseData.get("applicantCaseName"));
+        assertNull(updatedCaseData.get("caseNameHmctsInternal"));
     }
 
     @Test
@@ -132,6 +137,7 @@ class CaseNameServiceTest {
         caseNameService.setFinalCaseName(updatedCaseData, caseData);
 
         assertNull(updatedCaseData.get("applicantCaseName"));
+        assertNull(updatedCaseData.get("caseNameHmctsInternal"));
     }
 
     @Test
@@ -141,6 +147,7 @@ class CaseNameServiceTest {
         caseNameService.setFinalCaseName(updatedCaseData, caseData);
 
         assertNull(updatedCaseData.get("applicantCaseName"));
+        assertNull(updatedCaseData.get("caseNameHmctsInternal"));
     }
 
     @Test
@@ -151,6 +158,7 @@ class CaseNameServiceTest {
         caseNameService.setFinalCaseName(updatedCaseData, caseData);
 
         assertNull(updatedCaseData.get("applicantCaseName"));
+        assertNull(updatedCaseData.get("caseNameHmctsInternal"));
     }
 
     @Test

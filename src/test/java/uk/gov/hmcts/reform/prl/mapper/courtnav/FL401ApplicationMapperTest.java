@@ -78,6 +78,20 @@ class FL401ApplicationMapperTest {
     }
 
     @Test
+    void shouldSetCaseName() {
+        courtNavFl401 = courtNavFl401.toBuilder()
+            .fl401(courtNavFl401.getFl401().toBuilder()
+                       .situation(situationWithOnlyOccupationOrder)
+                       .courtNavHome(home)
+                       .build())
+            .build();
+        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        String expectedCaseName = "applicant_first_name applicant_last_name & resp test fl401";
+        assertEquals(expectedCaseName, caseData.getApplicantCaseName());
+        assertEquals(expectedCaseName, caseData.getCaseNameHmctsInternal());
+    }
+
+    @Test
     void shouldMapSituationToOrderTypesAndWithoutNoticeReasonDetails() {
         courtNavFl401 = courtNavFl401.toBuilder()
             .fl401(courtNavFl401.getFl401().toBuilder()
