@@ -1,6 +1,7 @@
 {
   "sq_courtPermissionRequired": "Yes",
   "sq_courtOrderPrevent_subfield": "Testing",
+  "sq_permissionsWhy": ["courtOrderPrevent"],
   "sq_uploadDocument_subfield": {
     "document_url": "http://dm-store/documents/123",
     "document_binary_url": "http://dm-store/documents/123/binary",

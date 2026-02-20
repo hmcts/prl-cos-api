@@ -2,9 +2,12 @@ package uk.gov.hmcts.reform.prl.mapper.citizen;
 
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildScreeningQuestionsElements;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+
+import java.util.List;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
@@ -21,10 +24,24 @@ public class CaseDataScreeningQuestionsElementsMapper {
 
         caseDataBuilder
             .applicationPermissionRequired(PermissionRequiredEnum.getValue(c100RebuildScreeningQuestionsElements.getSqCourtPermissionRequired()))
+            .orderInPlacePermissionRequired(buildOrderInPlace(c100RebuildScreeningQuestionsElements.getSqPermissionsWhy()))
             .orderDetailsForPermissions(StringUtils.isNotEmpty(c100RebuildScreeningQuestionsElements.getSqCourtOrderPreventSubfield())
                                             ? c100RebuildScreeningQuestionsElements.getSqCourtOrderPreventSubfield() : null)
             .uploadOrderDocForPermission(isNotEmpty(c100RebuildScreeningQuestionsElements.getSqUploadDocumentSubfield())
                                 ? buildDocument(c100RebuildScreeningQuestionsElements.getSqUploadDocumentSubfield()) : null);
+    }
+
+    private static YesOrNo buildOrderInPlace(List<String> sqPermissionsWhy) {
+        for (String value : sqPermissionsWhy) {
+            if (StringUtils.isNotEmpty(value)) {
+                if (value.equalsIgnoreCase("courtOrderPrevent")) {
+                    return YesOrNo.Yes;
+                } else {
+                    return YesOrNo.No;
+                }
+            }
+        }
+        return null;
     }
 
     static Document buildDocument(uk.gov.hmcts.reform.prl.models.documents.Document document) {

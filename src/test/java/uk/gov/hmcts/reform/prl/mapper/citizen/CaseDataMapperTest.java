@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.skyscreamer.jsonassert.JSONAssert;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
@@ -490,7 +491,7 @@ class CaseDataMapperTest {
 
         CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
         assertNotNull(updatedCaseData);
-
+        assertEquals(YesOrNo.Yes, updatedCaseData.getOrderInPlacePermissionRequired());
     }
 
     @ParameterizedTest
@@ -508,6 +509,7 @@ class CaseDataMapperTest {
 
         assertNull(updated.getApplicationPermissionRequired());
         assertNull(updated.getOrderDetailsForPermissions());
+        assertNull(updated.getOrderInPlacePermissionRequired());
         assertNull(updated.getUploadOrderDocForPermission());
     }
 
