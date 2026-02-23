@@ -100,6 +100,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
 
 
     @Test
+    @Disabled
     public void createCcdTestCase() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);

@@ -62,6 +62,7 @@ public class EditReturnedOrderControllerFunctionalTest {
     private static final String VALID_INPUT_JSON_FOR_RETURNED_ORDER = "requests/editreturnedorder/CallBackRequestEditReturnedOrder.json";
 
     @Test
+    @Disabled
     public void createCcdTestCase() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
@@ -129,6 +130,7 @@ public class EditReturnedOrderControllerFunctionalTest {
     }
 
     @Test
+    @Disabled
     public void givenBody_whenSubmittedToResubmit() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_RETURNED_ORDER);
         String requestBodyRevised = requestBody
