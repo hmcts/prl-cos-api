@@ -147,11 +147,10 @@ public class ManageDocumentsService {
             if (null != categoriesAndDocuments) {
                 List<Category> parentCategories = nullSafeCollection(categoriesAndDocuments.getCategories())
                     .stream()
-                    .filter(category-> {
+                    .filter(category -> {
                         if (isUserRoleLA) {
                             return category.getCategoryId().equals("localAuthorityDocuments");
-                        }
-                        else {
+                        } else {
                             return !category.getCategoryId().equals("localAuthorityDocuments");
                         }
                     })
@@ -913,8 +912,7 @@ public class ManageDocumentsService {
                     loggedInUserType.add(COURT_ADMIN_ROLE);
                 } else if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.CAFCASS_CYMRU.getRoles()::contains)) {
                     loggedInUserType.add(UserRoles.CAFCASS.name());
-                }
-                else if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.LOCAL_AUTHORITY.getRoles()::contains)) {
+                } else if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.LOCAL_AUTHORITY.getRoles()::contains)) {
                     loggedInUserType.add(UserRoles.LOCAL_AUTHORITY.name());
                 }
             } else if (roles.contains(Roles.BULK_SCAN.getValue())) {

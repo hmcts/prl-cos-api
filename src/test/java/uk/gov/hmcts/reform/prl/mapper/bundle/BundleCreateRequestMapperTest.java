@@ -1058,7 +1058,8 @@ public class BundleCreateRequestMapperTest {
 
     @Test
     public void testLocalAuthorityChild1ImpactDocumentsUpdatedInMap() {
-        String categoryId = "childImpactReport1La", categoryName = "Child Impact Report 1";
+        final String categoryId = "childImpactReport1La";
+        final String categoryName = "Child Impact Report 1";
 
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
             .childImpactReport1LaDocument(createDoc(categoryId))
@@ -1084,7 +1085,8 @@ public class BundleCreateRequestMapperTest {
 
     @Test
     public void testLocalAuthorityChild2ImpactDocumentsUpdatedInMap() {
-        String categoryId = "childImpactReport2La", categoryName = "Child Impact Report 2";
+        final String categoryId = "childImpactReport2La";
+        final String categoryName = "Child Impact Report 2";
 
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
             .childImpactReport2LaDocument(createDoc(categoryId))
@@ -1108,7 +1110,8 @@ public class BundleCreateRequestMapperTest {
 
     @Test
     public void testLocalAuthoritySection37ReportUpdatedInMap() {
-        String categoryId = "sec37Report", categoryName = "Section 37 (S37) report";
+        final String categoryId = "sec37Report";
+        final String categoryName = "Section 37 (S37) report";
 
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
             .sec37ReportDocument(createDoc(categoryId))
@@ -1132,7 +1135,8 @@ public class BundleCreateRequestMapperTest {
 
     @Test
     public void testLocalAuthoritySection7ReportUpdatedInMap() {
-        String categoryId = "section7ReportLa", categoryName = "Section 7 report";
+        final String categoryId = "section7ReportLa";
+        final String categoryName = "Section 7 report";
 
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
             .section7ReportLaDocument(createDoc(categoryId))
@@ -1156,7 +1160,8 @@ public class BundleCreateRequestMapperTest {
 
     @Test
     public void testLocalAuthoritySection7AddendumReportUpdatedInMap() {
-        String categoryId = "section7AddendumReportLa", categoryName = "Section 7 addendum report";
+        final String categoryId = "section7AddendumReportLa";
+        final String categoryName = "Section 7 addendum report";
 
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
             .section7AddendumReportLaDocument(createDoc(categoryId))
@@ -1180,7 +1185,8 @@ public class BundleCreateRequestMapperTest {
 
     @Test
     public void testLocalAuthoritySectionInvolvementLetterUpdatedInMap() {
-        String categoryId = "localAuthorityInvolvementLa", categoryName = "Local Authority involvement letter";
+        final String categoryId = "localAuthorityInvolvementLa";
+        final String categoryName = "Local Authority involvement letter";
 
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
             .localAuthorityInvolvementLaDocument(createDoc(categoryId))
@@ -1204,7 +1210,8 @@ public class BundleCreateRequestMapperTest {
 
     @Test
     public void testLocalAuthoritySection47EnquiryUpdatedInMap() {
-        String categoryId = "section47La", categoryName = "Section 47 enquiry";
+        final String categoryId = "section47La";
+        final String categoryName = "Section 47 enquiry";
 
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
             .section47LaDocument(createDoc(categoryId))
@@ -1227,8 +1234,9 @@ public class BundleCreateRequestMapperTest {
     }
 
     @Test
-    public void testLocalAuthorityCIRExtensionRequestUpdatedInMap() {
-        String categoryId = "cirExtensionRequestLa", categoryName = "CIR extension request";
+    public void testLocalAuthorityCirExtensionRequestUpdatedInMap() {
+        final String categoryId = "cirExtensionRequestLa";
+        final String categoryName = "CIR extension request";
 
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
             .cirExtensionRequestLaDocument(createDoc(categoryId))
@@ -1251,8 +1259,9 @@ public class BundleCreateRequestMapperTest {
     }
 
     @Test
-    public void testLocalAuthorityCIRTransferRequestUpdatedInMap() {
-        String categoryId = "cirTransferRequestLa", categoryName = "CIR transfer request";
+    public void testLocalAuthorityCirTransferRequestUpdatedInMap() {
+        final String categoryId = "cirTransferRequestLa";
+        final String categoryName = "CIR transfer request";
 
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
             .cirTransferRequestLaDocument(createDoc(categoryId))
@@ -1276,7 +1285,8 @@ public class BundleCreateRequestMapperTest {
 
     @Test
     public void testLocalAuthorityOtherDocumentsUpdatedInMap() {
-        String categoryId = "localAuthorityOtherDoc", categoryName = "Other";
+        final String categoryId = "localAuthorityOtherDoc";
+        final String categoryName = "Other";
 
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
             .localAuthorityOtherDocDocument(createDoc(categoryId))
