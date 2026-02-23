@@ -4030,8 +4030,6 @@ public class ManageOrdersControllerTest {
                              .build())
             .build();
 
-        AboutToStartOrSubmitCallbackResponse response  = AboutToStartOrSubmitCallbackResponse.builder()
-            .data(stringObjectMap).build();
         when(manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest)).thenReturn(emptyList());
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
