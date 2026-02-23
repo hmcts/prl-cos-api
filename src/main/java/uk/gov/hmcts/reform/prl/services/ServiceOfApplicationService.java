@@ -1034,7 +1034,6 @@ public class ServiceOfApplicationService {
                     servedParty,
                     docs,
                     dynamicData
-
                 );
             } else {
                 emailAddress = respondentFl401.get(0).getValue().getEmail();
