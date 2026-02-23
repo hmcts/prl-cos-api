@@ -36,15 +36,12 @@ public class CaseDataScreeningQuestionsElementsMapper {
 
     private static YesOrNo buildOrderInPlace(List<String> sqPermissionsWhy) {
         for (String value : sqPermissionsWhy) {
-            if (StringUtils.isNotEmpty(value)) {
-                if (value.equalsIgnoreCase("courtOrderPrevent")) {
-                    return YesOrNo.Yes;
-                } else {
-                    return YesOrNo.No;
-                }
+            if (StringUtils.isNotEmpty(value) && value.equalsIgnoreCase("courtOrderPrevent")) {
+                return YesOrNo.Yes;
             }
+
         }
-        return null;
+        return YesOrNo.No;
     }
 
     static Document buildDocument(uk.gov.hmcts.reform.prl.models.documents.Document document) {
