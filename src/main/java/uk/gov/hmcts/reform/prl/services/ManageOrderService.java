@@ -2472,8 +2472,14 @@ public class ManageOrderService {
             } catch (FeignException e) {
                 log.error("Error fetching role assignments: {}", e.getMessage());
             }
-            List<String> roles = roleAssignmentServiceResponse.getRoleAssignmentResponse().stream().map(role -> role.getRoleName()).collect(
-                Collectors.toList());
+
+            List<String> roles = Optional.ofNullable(roleAssignmentServiceResponse)
+                .map(RoleAssignmentServiceResponse::getRoleAssignmentResponse)
+                .orElse(Collections.emptyList())
+                .stream()
+                .map(role -> role.getRoleName())
+                .collect(Collectors.toList());
+
             if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.JUDGE.getRoles()::contains)
                 || roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.LEGAL_ADVISER.getRoles()::contains)) {
                 loggedInUserType = UserRoles.JUDGE.name();
