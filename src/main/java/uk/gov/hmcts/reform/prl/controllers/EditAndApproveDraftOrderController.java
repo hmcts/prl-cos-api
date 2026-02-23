@@ -54,6 +54,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -198,15 +199,17 @@ public class EditAndApproveDraftOrderController {
 
     @PostMapping(path = "/judge-or-admin-edit-approve/validate-additional-parties",
         consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Mid event callback to validate additional parties email addresses for "
-        + "the edit and serve an order event")
+    @Operation(description = "Mid event callback to validate additional parties "
+        + "email addresses and others addresses for the edit and serve an order event")
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse validateAdditionalPartiesForServingOrder(
         @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            List<String> errorList = manageOrderService.validateAdditionalPartiesForServingOrder(callbackRequest);
+            List<String> errorList = emptyList();
+            errorList.addAll(manageOrderService.validateAdditionalPartiesForServingOrder(callbackRequest));
+            errorList.addAll(manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest));
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .errors(errorList)
                 .data(callbackRequest.getCaseDetails().getData())

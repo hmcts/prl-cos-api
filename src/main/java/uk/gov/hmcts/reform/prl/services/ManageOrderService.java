@@ -231,6 +231,8 @@ public class ManageOrderService {
         + "address is given.";
     public static final String VALIDATION_ADDRESS_ERROR_OTHER_PARTY = "This order cannot be served by post until the other"
         + " people's address is given.";
+    public static final String INVALID_EMAIL_ADDRESS_ERROR = "Invalid email address. Please check the email address entered. "
+        + "To send to multiple recipients please use the add new button.";
 
     public static final String EMAIL = "email";
     public static final String POST = "post";
@@ -3567,7 +3569,7 @@ public class ManageOrderService {
         }
     }
 
-    public AboutToStartOrSubmitCallbackResponse validateRespondentLipAndOtherPersonAddress(CallbackRequest callbackRequest) {
+    public List<String> validateRespondentLipAndOtherPersonAddress(CallbackRequest callbackRequest) {
         List<String> errorList = new ArrayList<>();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         if (null != caseData.getManageOrders().getRecipientsOptions()
@@ -3587,15 +3589,7 @@ public class ManageOrderService {
             checkPartyAddressAndReturnError(otherPeopleInCase, selectedOtherPartyIds, errorList, false);
         }
 
-        if (isNotEmpty(errorList)) {
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .errors(errorList)
-                .build();
-        }
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(callbackRequest.getCaseDetails().getData())
-            .build();
-
+        return isNotEmpty(errorList) ? errorList : emptyList();
     }
 
     private void checkPartyAddressAndReturnError(List<Element<PartyDetails>> partyDetails,
@@ -3637,8 +3631,7 @@ public class ManageOrderService {
                 .getServeOrgDetailsList()) {
                 if (addParty.getValue().getServeByPostOrEmail().equals(DeliveryByEnum.email)
                     && !isValidEmailAddress(addParty.getValue().getEmailInformation().getEmailAddress())) {
-                    return List.of("Invalid email address. Please check the email address entered. "
-                                       + "To send to multiple recipients please use the add new button.");
+                    return List.of(INVALID_EMAIL_ADDRESS_ERROR);
                 }
             }
         }

@@ -706,10 +706,15 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             if (C100_CASE_TYPE.equals(callbackRequest.getCaseDetails().getData().get(CASE_TYPE_OF_APPLICATION))) {
-                return manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+                List<String> errorList = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .errors(errorList)
+                    .data(callbackRequest.getCaseDetails().getData())
+                    .build();
+            } else {
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .data(callbackRequest.getCaseDetails().getData()).build();
             }
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(callbackRequest.getCaseDetails().getData()).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
