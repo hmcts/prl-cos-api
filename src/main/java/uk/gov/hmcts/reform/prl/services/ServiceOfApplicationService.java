@@ -413,7 +413,6 @@ public class ServiceOfApplicationService {
             );
         } else {
             whoIsResponsibleForServing = sendNotificationsSoaFl401(
-
                 caseData,
                 authorization,
                 caseDataMap,
@@ -1686,10 +1685,8 @@ public class ServiceOfApplicationService {
                                                                                  String servedParty) {
 
         log.info("inside sendEmailViaSendGridWithAttachedDocsToParty {}", party.getId());
-
-        log.info("inside sendEmailViaSendGridWithAttachedDocsToParty template  {}", emailTemplate);
-
-        log.info("inside sendEmailViaSendGridWithAttachedDocsToParty served party  {}", servedParty);
+        log.debug("inside sendEmailViaSendGridWithAttachedDocsToParty template  {}", emailTemplate);
+        log.debug("inside sendEmailViaSendGridWithAttachedDocsToParty served party  {}", servedParty);
 
         List<Document> packsWithCoverLetter = new ArrayList<>(coverLetters);
         packsWithCoverLetter.addAll(packDocs);
