@@ -102,17 +102,17 @@ public class ReviewDocumentsController {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        log.info("*************************** BEFORE REVIEW ***************************");
         Map<String, Object> caseDataUpdated = caseDetails.getData();
         ReviewDocuments reviewDocuments = caseData.getReviewDocuments();
         DynamicList reviewDocsDynamicList = nonNull(reviewDocuments) ? reviewDocuments.getReviewDocsDynamicList() : null;
         if (nonNull(reviewDocsDynamicList)) {
             UUID uuid = UUID.fromString(reviewDocsDynamicList.getValue().getCode());
             reviewDocumentService.processReviewDocument(caseDataUpdated, caseData, uuid);
-            log.info("*************************** AFTER REVIEW ***************************");
 
             //clear fields
             CaseUtils.removeTemporaryFields(caseDataUpdated, reviewDocTempFields());
+        } else {
+            log.info("reviewDocsDynamicList is null for caseId {}", caseData.getId());
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
