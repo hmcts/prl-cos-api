@@ -35,13 +35,22 @@ public class CaseDataScreeningQuestionsElementsMapper {
     }
 
     private static YesOrNo buildOrderInPlace(List<String> sqPermissionsWhy) {
-        for (String value : sqPermissionsWhy) {
-            if (StringUtils.isNotEmpty(value) && value.equalsIgnoreCase("courtOrderPrevent")) {
-                return YesOrNo.Yes;
-            }
-
+        if (sqPermissionsWhy == null || sqPermissionsWhy.isEmpty()) {
+            return null;
         }
-        return YesOrNo.No;
+
+        boolean hasNonEmptyValue = false;
+
+        for (String value : sqPermissionsWhy) {
+            if (StringUtils.isNotEmpty(value)) {
+                hasNonEmptyValue = true;
+
+                if (value.equalsIgnoreCase("courtOrderPrevent")) {
+                    return YesOrNo.Yes;
+                }
+            }
+        }
+        return hasNonEmptyValue ? YesOrNo.No : null;
     }
 
     static Document buildDocument(uk.gov.hmcts.reform.prl.models.documents.Document document) {
