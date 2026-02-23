@@ -87,6 +87,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Predicate;
 
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -4004,9 +4005,7 @@ public class ManageOrdersControllerTest {
                              .build())
             .build();
 
-        AboutToStartOrSubmitCallbackResponse response  = AboutToStartOrSubmitCallbackResponse.builder()
-            .errors(errors).build();
-        when(manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest)).thenReturn(response);
+        when(manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest)).thenReturn(errors);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
             .validateRespondentAndOtherPersonAddress(authToken, s2sToken, callbackRequest);
@@ -4033,11 +4032,10 @@ public class ManageOrdersControllerTest {
 
         AboutToStartOrSubmitCallbackResponse response  = AboutToStartOrSubmitCallbackResponse.builder()
             .data(stringObjectMap).build();
-        when(manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest)).thenReturn(response);
+        when(manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest)).thenReturn(emptyList());
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest)).thenReturn(response);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
             .validateRespondentAndOtherPersonAddress(authToken, s2sToken, callbackRequest);
