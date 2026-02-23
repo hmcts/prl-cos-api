@@ -69,8 +69,8 @@ public class CafCassControllerIntegrationTest {
     public void givenValidDatetimeRangeSearchCasesByCafCassControllerReturnOkStatus() throws Exception {
         Mockito.when(authorisationService.authoriseService(any())).thenReturn(true);
         Mockito.when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_AUTH_TOKEN);
-        Mockito.when(cafcassCaseDataService.getCaseData(anyString(), anyString(), anyString()))
         Mockito.when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
+        Mockito.when(cafcassCaseDataService.getCaseData(anyString(), anyString(), anyString()))
             .thenReturn(CafCassResponse.builder().cases(new ArrayList<>()).build());
 
         mockMvc.perform(get(SEARCH_CASE_ENDPOINT)
