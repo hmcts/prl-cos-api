@@ -287,6 +287,32 @@ public class ManageOrdersController {
         );
     }
 
+    @PostMapping(path = "/manage-orders/populate-from-hearing", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to populate order fields from selected hearing")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Fields populated from hearing"),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public AboutToStartOrSubmitCallbackResponse populateFromHearing(
+        @RequestBody CallbackRequest callbackRequest,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
+    ) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+            // Populate fields from selected hearing (date, judge name, judge title)
+            // Silently handles HMC API failures - preserves existing values on error
+            manageOrderService.populateFieldsFromSelectedHearing(authorisation, caseData, caseDataUpdated);
+
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseDataUpdated)
+                .build();
+        } else {
+            throw new InvalidClientException(INVALID_CLIENT);
+        }
+    }
+
     private AboutToStartOrSubmitCallbackResponse getAboutToStartOrSubmitCallbackResponse(CallbackRequest callbackRequest,
                                                                                          String authorisation,
                                                                                          String s2sToken,

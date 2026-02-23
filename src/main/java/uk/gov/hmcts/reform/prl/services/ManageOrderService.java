@@ -35,6 +35,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
@@ -2647,6 +2648,197 @@ public class ManageOrderService {
     private List<DynamicListElement> getDynamicListElements(List<String> dropdowns) {
         return dropdowns.stream().map(dropdown -> DynamicListElement.builder().code(dropdown).label(dropdown).build()).collect(
             Collectors.toList());
+    }
+
+    /**
+     * Populates order fields from the selected hearing.
+     * - If user is NOT a judge: populates judgeOrMagistratesLastName from hearing judge
+     * - If hearing has a date: populates dateOrderMade from hearing date
+     * - Attempts to map judge title from Ref Data API (nice to have, silent failure)
+     * Silently handles HMC API failures - preserves existing values on error.
+     */
+    public void populateFieldsFromSelectedHearing(String authorisation, CaseData caseData,
+                                                   Map<String, Object> caseDataUpdated) {
+        // Check if a hearing was selected
+        DynamicList hearingsType = caseData.getManageOrders() != null
+            ? caseData.getManageOrders().getHearingsType() : null;
+
+        if (hearingsType == null || hearingsType.getValue() == null
+            || StringUtils.isEmpty(hearingsType.getValue().getLabel())) {
+            log.info("No hearing selected, skipping population from hearing");
+            return;
+        }
+
+        String selectedHearingLabel = hearingsType.getValue().getLabel();
+        log.info("Attempting to populate fields from selected hearing: {}", selectedHearingLabel);
+
+        // Check if logged-in user is a judge (preserve their name if so)
+        String loggedInUserType = getLoggedInUserType(authorisation);
+        boolean isJudge = UserRoles.JUDGE.name().equals(loggedInUserType);
+
+        try {
+            // Fetch hearings from HMC API
+            Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
+
+            if (hearings == null || CollectionUtils.isEmpty(hearings.getCaseHearings())) {
+                log.warn("No hearings returned from HMC API");
+                return;
+            }
+
+            // Find the matching hearing based on selected label
+            HearingDaySchedule matchedSchedule = findMatchingHearingSchedule(hearings.getCaseHearings(), selectedHearingLabel);
+
+            if (matchedSchedule == null) {
+                log.warn("Could not find matching hearing for selected label: {}", selectedHearingLabel);
+                return;
+            }
+
+            // Populate dateOrderMade from hearing date (only if hearing has a date)
+            if (matchedSchedule.getHearingStartDateTime() != null) {
+                LocalDate hearingDate = matchedSchedule.getHearingStartDateTime().toLocalDate();
+                caseDataUpdated.put("dateOrderMade", hearingDate);
+                log.info("Populated dateOrderMade from hearing: {}", hearingDate);
+            }
+
+            // Populate judge details (only if NOT a logged-in judge)
+            if (!isJudge && StringUtils.isNotEmpty(matchedSchedule.getHearingJudgeId())) {
+                populateJudgeDetailsFromHearing(matchedSchedule, caseDataUpdated);
+            } else if (isJudge) {
+                log.info("Logged-in user is a judge, preserving their name");
+            }
+
+        } catch (Exception e) {
+            // Silent failure - log warning but don't affect the user journey
+            log.warn("Failed to populate fields from hearing (HMC API may be unavailable): {}", e.getMessage());
+        }
+    }
+
+    /**
+     * Finds the HearingDaySchedule that matches the selected dropdown label.
+     * The label format is: "HearingType - dd/MM/yyyy hh:mm:ss"
+     */
+    private HearingDaySchedule findMatchingHearingSchedule(List<CaseHearing> caseHearings, String selectedLabel) {
+        for (CaseHearing caseHearing : caseHearings) {
+            if (caseHearing.getHearingDaySchedule() == null) {
+                continue;
+            }
+
+            String hearingType = String.valueOf(caseHearing.getHearingTypeValue());
+
+            for (HearingDaySchedule schedule : caseHearing.getHearingDaySchedule()) {
+                if (schedule.getHearingStartDateTime() != null) {
+                    java.time.format.DateTimeFormatter formatter =
+                        java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss");
+                    String hearingDate = schedule.getHearingStartDateTime().format(formatter);
+                    String expectedLabel = hearingType + " - " + hearingDate;
+
+                    if (expectedLabel.equals(selectedLabel)) {
+                        return schedule;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Populates judge name and title from hearing details.
+     * Uses the judge ID from the hearing to fetch full details from Ref Data API.
+     */
+    private void populateJudgeDetailsFromHearing(HearingDaySchedule schedule, Map<String, Object> caseDataUpdated) {
+        String judgeId = schedule.getHearingJudgeId();
+        String judgeName = schedule.getHearingJudgeName();
+
+        // If we have a judge name directly from the hearing, use it
+        if (StringUtils.isNotEmpty(judgeName)) {
+            caseDataUpdated.put("judgeOrMagistratesLastName", judgeName);
+            log.info("Populated judgeOrMagistratesLastName from hearing: {}", judgeName);
+        }
+
+        // Try to get more details from Ref Data API (for title mapping)
+        if (StringUtils.isNotEmpty(judgeId)) {
+            try {
+                JudicialUsersApiRequest request = JudicialUsersApiRequest.builder()
+                    .personalCode(new String[]{judgeId})
+                    .build();
+
+                List<JudicialUsersApiResponse> judicialUsers = refDataUserService.getAllJudicialUserDetails(request);
+
+                if (CollectionUtils.isNotEmpty(judicialUsers)) {
+                    JudicialUsersApiResponse judgeDetails = judicialUsers.get(0);
+
+                    // Use surname if available (more accurate than full name)
+                    if (StringUtils.isNotEmpty(judgeDetails.getSurname())) {
+                        caseDataUpdated.put("judgeOrMagistratesLastName", judgeDetails.getSurname());
+                        log.info("Updated judgeOrMagistratesLastName from Ref Data: {}", judgeDetails.getSurname());
+                    }
+
+                    // Try to map judge title from appointments
+                    JudgeOrMagistrateTitleEnum mappedTitle = mapJudgeTitleFromAppointments(judgeDetails);
+                    if (mappedTitle != null) {
+                        caseDataUpdated.put("judgeOrMagistrateTitle", mappedTitle);
+                        log.info("Populated judgeOrMagistrateTitle: {}", mappedTitle);
+                    }
+                }
+            } catch (Exception e) {
+                // Silent failure for Ref Data API - we already have the judge name from HMC
+                log.warn("Failed to fetch judge details from Ref Data API: {}", e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Maps judge appointment string from Ref Data API to JudgeOrMagistrateTitleEnum.
+     * Returns null if no mapping found (title field remains unchanged).
+     */
+    private JudgeOrMagistrateTitleEnum mapJudgeTitleFromAppointments(JudicialUsersApiResponse judgeDetails) {
+        if (judgeDetails.getAppointments() == null || judgeDetails.getAppointments().isEmpty()) {
+            return null;
+        }
+
+        // Get the first appointment's title
+        String appointment = judgeDetails.getAppointments().get(0).getAppointment();
+        if (StringUtils.isEmpty(appointment)) {
+            return null;
+        }
+
+        String appointmentLower = appointment.toLowerCase();
+
+        // Map common appointment titles to enum values
+        if (appointmentLower.contains("circuit judge")) {
+            if (appointmentLower.contains("deputy")) {
+                return JudgeOrMagistrateTitleEnum.deputyCircuitJudge;
+            }
+            return JudgeOrMagistrateTitleEnum.circuitJudge;
+        }
+        if (appointmentLower.contains("district judge")) {
+            if (appointmentLower.contains("magistrates court")) {
+                return JudgeOrMagistrateTitleEnum.districtJudgeMagistratesCourt;
+            }
+            if (appointmentLower.contains("deputy")) {
+                return JudgeOrMagistrateTitleEnum.deputyDistrictJudge;
+            }
+            return JudgeOrMagistrateTitleEnum.districtJudge;
+        }
+        if (appointmentLower.contains("recorder")) {
+            return JudgeOrMagistrateTitleEnum.recorder;
+        }
+        if (appointmentLower.contains("magistrate")) {
+            return JudgeOrMagistrateTitleEnum.magistrate;
+        }
+        if (appointmentLower.contains("legal adviser") || appointmentLower.contains("justices' legal")) {
+            return JudgeOrMagistrateTitleEnum.justicesLegalAdviser;
+        }
+        if (appointmentLower.contains("justices' clerk") || appointmentLower.contains("clerk")) {
+            return JudgeOrMagistrateTitleEnum.justicesClerk;
+        }
+        if (appointmentLower.contains("high court") || appointmentLower.contains("justice")) {
+            // Can't determine gender from appointment, leave for manual selection
+            return null;
+        }
+
+        log.info("No title mapping found for appointment: {}", appointment);
+        return null;
     }
 
     public void resetChildOptions(CallbackRequest callbackRequest) {
