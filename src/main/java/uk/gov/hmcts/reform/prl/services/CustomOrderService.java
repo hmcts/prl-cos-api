@@ -1006,13 +1006,13 @@ public class CustomOrderService {
     }
 
     /**
-     * Formats the representative clause - returns ", represented by [name]" or empty if no representative.
+     * Formats the representative clause - returns ", legally represented" or empty if no representative.
      */
     private String formatRepresentativeClause(String representativeName) {
         if (representativeName == null || representativeName.trim().isEmpty()) {
             return "";
         }
-        return ", represented by " + representativeName;
+        return ", legally represented";
     }
 
     /**
