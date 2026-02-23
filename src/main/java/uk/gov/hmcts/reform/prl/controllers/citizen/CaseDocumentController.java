@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
@@ -61,6 +63,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -87,7 +90,6 @@ public class CaseDocumentController {
     private final ObjectMapper objectMapper;
     private final IdamClient idamClient;
     private final CaseService caseService;
-    Integer fileIndex;
     private final EmailService emailService;
     private final CitizenDocumentService citizenDocumentService;
 
@@ -103,28 +105,27 @@ public class CaseDocumentController {
     public ResponseEntity<Object> generateCitizenStatementDocument(@RequestBody GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
                                                            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                            @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
-        fileIndex = 0;
         String caseId = generateAndUploadDocumentRequest.getValues().get("caseId");
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
         CaseData tempCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+
+        int fileIndex = 0;
         if (generateAndUploadDocumentRequest.getValues() != null
             && generateAndUploadDocumentRequest.getValues().containsKey("documentType")
             && generateAndUploadDocumentRequest.getValues().containsKey("partyName")) {
             final String documentType = generateAndUploadDocumentRequest.getValues().get("documentType");
             final String partyName = generateAndUploadDocumentRequest.getValues().get("partyName");
-            if (tempCaseData.getCitizenUploadedDocumentList() != null
-                && !tempCaseData.getCitizenUploadedDocumentList().isEmpty()) {
-                tempCaseData.getCitizenUploadedDocumentList()
-                    .stream().forEach(document -> {
-                        if (documentType.equalsIgnoreCase(document.getValue().getDocumentType())
-                            && partyName.equalsIgnoreCase(document.getValue().getPartyName())) {
-                            fileIndex++;
-                        }
-                    });
+
+            if (CollectionUtils.isNotEmpty(tempCaseData.getCitizenUploadedDocumentList())) {
+                fileIndex = (int) tempCaseData.getCitizenUploadedDocumentList().stream()
+                    .map(Element::getValue)
+                    .filter(uploadedDocuments -> documentType.equalsIgnoreCase(uploadedDocuments.getDocumentType()))
+                    .filter(uploadedDocuments -> partyName.equalsIgnoreCase(uploadedDocuments.getPartyName()))
+                    .count();
             }
         }
-        UploadedDocuments uploadedDocuments =
-            documentGenService.generateCitizenStatementDocument(
+
+        UploadedDocuments uploadedDocuments = documentGenService.generateCitizenStatementDocument(
                 authorisation,
                 generateAndUploadDocumentRequest,
                 fileIndex + 1
@@ -136,7 +137,6 @@ public class CaseDocumentController {
             tempCaseData,
             uploadedDocuments
         );
-
     }
 
     private ResponseEntity<Object> getUploadedDocumentsList(@RequestBody GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
@@ -376,7 +376,9 @@ public class CaseDocumentController {
     }
 
     private boolean isAuthorized(String authorisation, String serviceAuthorization) {
-        return Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
+
+        Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
+        return userInfo.isPresent() && Boolean.TRUE.equals(
             authorisationService.authoriseService(serviceAuthorization));
     }
 

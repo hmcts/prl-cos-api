@@ -27,8 +27,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
-import uk.gov.hmcts.reform.prl.services.SendAndReplyCommonService;
-import uk.gov.hmcts.reform.prl.services.SendAndReplyService;
+import uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyCommonService;
+import uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -511,11 +511,11 @@ public class SendAndReplyControllerTest {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        when(sendAndReplyService.sendAndReplySubmitted(callbackRequest)).thenReturn(ok(SubmittedCallbackResponse.builder().build()));
+
+        when(sendAndReplyService.sendAndReplySubmitted(callbackRequest, auth)).thenReturn(ok(SubmittedCallbackResponse.builder().build()));
         ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyController.handleSubmittedSendAndReply(auth, callbackRequest);
         Assertions.assertThat(response.getStatusCode().value()).isEqualTo(200);
-        verify(sendAndReplyService).sendAndReplySubmitted(callbackRequest);
-
+        verify(sendAndReplyService).sendAndReplySubmitted(callbackRequest, auth);
     }
 
     @Test

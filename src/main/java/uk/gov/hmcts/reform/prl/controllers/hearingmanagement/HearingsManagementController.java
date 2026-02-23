@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -31,10 +32,12 @@ import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDateReque
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.services.hearingmanagement.HearingManagementService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEXT_HEARING_DATE;
@@ -46,17 +49,20 @@ public class HearingsManagementController extends AbstractCallbackController {
     private final AuthorisationService authorisationService;
     private final HearingManagementService hearingManagementService;
     private final AllTabServiceImpl allTabService;
+    private final CafcassDateTimeService cafcassDateTimeService;
 
     @Autowired
     public HearingsManagementController(ObjectMapper objectMapper,
                                     EventService eventPublisher,
                                         AuthorisationService authorisationService,
                                         HearingManagementService hearingManagementService,
-                                        AllTabServiceImpl allTabService) {
+                                        AllTabServiceImpl allTabService,
+                                        CafcassDateTimeService cafcassDateTimeService) {
         super(objectMapper, eventPublisher);
         this.hearingManagementService = hearingManagementService;
         this.allTabService = allTabService;
         this.authorisationService = authorisationService;
+        this.cafcassDateTimeService = cafcassDateTimeService;
     }
 
     @PutMapping(path = "/hearing-management-state-update/{caseState}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -72,6 +78,7 @@ public class HearingsManagementController extends AbstractCallbackController {
         if (Boolean.FALSE.equals(authorisationService.authoriseService(s2sToken))) {
             throw new HearingManagementValidationException("Provide a valid s2s token");
         } else {
+            log.info("Updating hearing request state change to {} for case {} ", caseState, hearingRequest.getCaseRef());
             hearingManagementService.caseStateChangeForHearingManagement(hearingRequest,caseState);
         }
     }
@@ -85,8 +92,8 @@ public class HearingsManagementController extends AbstractCallbackController {
     public void nextHearingDateUpdateByHearingManagement(@RequestHeader("authorization") String authorization,
                                                          @RequestHeader("serviceAuthorization") String s2sToken,
                                                          @RequestBody NextHearingDateRequest nextHearingDateRequest) throws Exception {
-        if (Boolean.FALSE.equals(authorisationService.authoriseUser(authorization))
-            && Boolean.FALSE.equals(authorisationService.authoriseService(s2sToken))) {
+        Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorization);
+        if (userInfo.isEmpty() && Boolean.FALSE.equals(authorisationService.authoriseService(s2sToken))) {
             throw new HearingManagementValidationException("Provide a valid s2s token");
         } else {
             hearingManagementService.caseNextHearingDateChangeForHearingManagement(nextHearingDateRequest);
@@ -110,6 +117,7 @@ public class HearingsManagementController extends AbstractCallbackController {
         if (ObjectUtils.isNotEmpty(nextHearingDetails) && null != nextHearingDetails.getHearingDateTime()) {
             caseDataUpdated.put(NEXT_HEARING_DATE, nextHearingDetails.getHearingDateTime().toLocalDate());
         }
+        cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 

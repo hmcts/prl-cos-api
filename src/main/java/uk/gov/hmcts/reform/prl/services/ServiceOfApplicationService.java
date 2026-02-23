@@ -66,6 +66,7 @@ import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.services.pin.FL401CaseInviteService;
+import uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -144,7 +145,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITHOUT_C1A;
-import static uk.gov.hmcts.reform.prl.services.SendAndReplyService.ARROW_SEPARATOR;
+import static uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyService.ARROW_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasDashboardAccess;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasLegalRepresentation;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -4099,16 +4100,16 @@ public class ServiceOfApplicationService {
             log.info("Reject reason list not empty");
             // get existing reject reason
             confidentialCheckFailedList.addAll(caseData.getServiceOfApplication().getConfidentialCheckFailed());
+            //The confidentiality check reason text is mandatory on Manage Case, therefore we only add it to the
+            //case when it has a value to avoid null entries.
+            log.info("Adding reject reason list to the case");
+            caseDataMap.put(CONFIDENTIAL_CHECK_FAILED, confidentialCheckFailedList);
+        } else {
+            //No rejection reasons = not an actual rejection  since the user interface does not allow proceeding with
+            //a rejection without writing at least one reason.
+            log.info("Reject reason list empty, therefore not an actual rejection but"
+                         + " likely timeout on update all tabs");
         }
-        log.info("Reject reason list empty, adding first reject reason");
-        final ConfidentialCheckFailed confidentialCheckFailed = ConfidentialCheckFailed.builder().confidentialityCheckRejectReason(
-                caseData.getServiceOfApplication().getRejectionReason())
-            .dateRejected(CaseUtils.getCurrentDate())
-            .build();
-
-        confidentialCheckFailedList.add(ElementUtils.element(confidentialCheckFailed));
-
-        caseDataMap.put(CONFIDENTIAL_CHECK_FAILED, confidentialCheckFailedList);
 
         response = ok(SubmittedCallbackResponse.builder()
                       .confirmationHeader(RETURNED_TO_ADMIN_HEADER)

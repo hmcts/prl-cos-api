@@ -76,6 +76,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -92,6 +93,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ANY_OTHER_DOC;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_APPLICATION;
@@ -157,6 +159,10 @@ public class CaseService {
     public static final DateTimeFormatter DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS);
     public static final DateTimeFormatter DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS_AM_PM =
         DateTimeFormatter.ofPattern("d-MMM-yyyy hh:mm:ss a", Locale.ENGLISH);
+    public static final List<DateTimeFormatter> POSSIBLE_DATE_FORMATTERS = List.of(
+        DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS_AM_PM,
+        DateTimeFormatter.ofPattern("dd-MMM-yyyy HH:mm:ss a", Locale.UK)
+    );
     public static final String IS_NEW = "isNew";
     public static final String IS_FINAL = "isFinal";
     public static final String IS_MULTIPLE = "isMultiple";
@@ -1505,8 +1511,7 @@ public class CaseService {
                     .categoryId(PartyEnum.applicant.equals(awp.getPartyType())
                         ? APPLICATIONS_WITHIN_PROCEEDINGS : APPLICATIONS_FROM_OTHER_PROCEEDINGS)
                     .document(document.getDocument())
-                    .uploadedDate(LocalDateTime.parse(awp.getUploadedDateTime(),
-                        DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS_AM_PM))
+                    .uploadedDate(parseUploadDateTime(awp.getUploadedDateTime()))
                     .build()
             ).toList();
     }
@@ -1520,6 +1525,26 @@ public class CaseService {
                 .anyMatch(servedParty -> partyId.equals(servedParty.getPartyId()));
         }
         return false;
+    }
+
+    /**
+     * Try to parse the AWP uploadedDateTime for historical data which was formatted
+     * with two different formatters in each journey.
+     * first - citizen journey (& fixed solicitor journey), is 22-Sep-2024 03:32:12 PM
+     * second - OLD solicitor journey, had Sept instead of Sep and 15:32:12 pm, 24 hour with am/pm
+     * @param uploadedDateTime string in format detailed above
+     * @return a correctly parsed LocalDateTime, or throw an exception if it's not of the right format
+     */
+    private LocalDateTime parseUploadDateTime(String uploadedDateTime) {
+        for (DateTimeFormatter formatter : POSSIBLE_DATE_FORMATTERS) {
+            try {
+                return LocalDateTime.parse(uploadedDateTime, formatter);
+            } catch (DateTimeParseException e) {
+                // continue to next formatter
+            }
+        }
+        // If none of the formatters worked, throw an exception
+        throw new DateTimeParseException("Unable to parse date: " + uploadedDateTime, uploadedDateTime, 0);
     }
 
     private List<CitizenDocuments> getAwpDocuments(AdditionalApplicationsBundle awp,
@@ -1536,8 +1561,7 @@ public class CaseService {
                          .categoryId(PartyEnum.applicant.equals(awp.getPartyType())
                                          ? APPLICATIONS_WITHIN_PROCEEDINGS : APPLICATIONS_FROM_OTHER_PROCEEDINGS)
                          .document(document)
-                         .uploadedDate(LocalDateTime.parse(awp.getUploadedDateTime(),
-                                                           DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS_AM_PM))
+                         .uploadedDate(parseUploadDateTime(awp.getUploadedDateTime()))
                          .build()
             ).toList();
     }
@@ -1631,7 +1655,10 @@ public class CaseService {
 
             return servedDetails.getEmailNotificationDetails().stream()
                 .map(Element::getValue)
-                .filter(emailNotification -> partyIdAndType.get(PARTY_ID).equals(emailNotification.getPartyIds()))
+                .filter(emailNotification -> {
+                    String partyId = nonNull(partyIdAndType) ? partyIdAndType.get(PARTY_ID) : null;
+                    return nonNull(partyId) && partyId.equals(emailNotification.getPartyIds());
+                })
                 .map(emailNotification ->
                     getSodDocuments(
                         emailNotification.getDocs(),
@@ -1656,7 +1683,10 @@ public class CaseService {
 
             return servedDetails.getBulkPrintDetails().stream()
                 .map(Element::getValue)
-                .filter(postNotification -> partyIdAndType.get(PARTY_ID).equals(postNotification.getPartyIds()))
+                .filter(postNotification -> {
+                    String partyId = nonNull(partyIdAndType) ? partyIdAndType.get(PARTY_ID) : null;
+                    return nonNull(partyId) && partyId.equals(postNotification.getPartyIds());
+                })
                 .map(postNotification ->
                          getSodDocuments(
                              postNotification.getPrintDocs(),

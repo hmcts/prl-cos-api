@@ -49,12 +49,12 @@ import uk.gov.hmcts.reform.prl.models.serviceofdocuments.ServiceOfDocuments;
 import uk.gov.hmcts.reform.prl.services.BulkPrintService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityCheckService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
-import uk.gov.hmcts.reform.prl.services.SendAndReplyService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationEmailService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationPostService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
+import uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -975,5 +975,73 @@ public class ServiceOfDocumentsServiceTest {
         assertEquals(1,response.size());
     }
 
+    @Test
+    public void validateAdditionalRecipientsShouldReturnErrorsForInvalidEmails() {
+        Document document = Document.builder()
+            .documentUrl("testUrl")
+            .documentBinaryUrl("testUrl")
+            .documentFileName("testFile.pdf")
+            .build();
+        CaseData testData = CaseData.builder()
+            .serviceOfDocuments(ServiceOfDocuments.builder()
+                                    .sodAdditionalDocumentsList(List.of(element(document)))
+                                    .sodAdditionalRecipientsList(List.of(
+                                        element(ServeOrgDetails.builder()
+                                                    .serveByPostOrEmail(DeliveryByEnum.email)
+                                                    .emailInformation(EmailInformation.builder()
+                                                                          .emailAddress("invalid-email")
+                                                                          .build())
+                                                    .build())))
+                                    .build())
+            .build();
+
+        CallbackRequest testCallback = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder().id(Long.valueOf(TEST_CASE_ID))
+                             .data(caseData.toMap(new ObjectMapper()))
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(testData);
+
+        List<String> errors = serviceOfDocumentsService.validateAdditionalRecipients(testCallback);
+
+        assertNotNull(errors);
+        assertEquals(1, errors.size());
+        assertEquals("Please provide valid email address for all recipients", errors.getFirst());
+    }
+
+    @Test
+    public void validateAdditionalRecipientsShouldReturnNoErrorsForValidEmails() {
+        Document document = Document.builder()
+            .documentUrl("testUrl")
+            .documentBinaryUrl("testUrl")
+            .documentFileName("testFile.pdf")
+            .build();
+        CaseData testData = CaseData.builder()
+            .serviceOfDocuments(ServiceOfDocuments.builder()
+                                    .sodAdditionalDocumentsList(List.of(element(document)))
+                                    .sodAdditionalRecipientsList(List.of(
+                                        element(ServeOrgDetails.builder()
+                                                    .serveByPostOrEmail(DeliveryByEnum.email)
+                                                    .emailInformation(EmailInformation.builder()
+                                                                          .emailAddress("test@test.com")
+                                                                          .build())
+                                                    .build())))
+                                    .build())
+            .build();
+
+        CallbackRequest testCallback = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder().id(Long.valueOf(TEST_CASE_ID))
+                             .data(caseData.toMap(new ObjectMapper()))
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(testData);
+
+        List<String> errors = serviceOfDocumentsService.validateAdditionalRecipients(testCallback);
+
+        assertNotNull(errors);
+        assertEquals(0, errors.size());
+    }
 
 }

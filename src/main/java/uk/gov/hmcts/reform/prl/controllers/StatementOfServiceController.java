@@ -21,11 +21,16 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.StmtOfServImplService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
+
+import java.util.Map;
+import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
@@ -43,6 +48,7 @@ public class StatementOfServiceController {
     private final AuthorisationService authorisationService;
     private final StmtOfServImplService stmtOfServImplService;
     private final ObjectMapper objectMapper;
+    private final CafcassDateTimeService cafcassDateTimeService;
 
     @PostMapping(path = "/Statement-of-service-about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to Statement of service about to start.")
@@ -56,8 +62,8 @@ public class StatementOfServiceController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
-            && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken))) {
+        Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
+        if (userInfo.isPresent() && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken))) {
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(stmtOfServImplService.retrieveRespondentsList(callbackRequest.getCaseDetails())).build();
         } else {
@@ -77,13 +83,15 @@ public class StatementOfServiceController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
-            && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken))) {
+        Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
+        if (userInfo.isPresent() && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken))) {
+            Map<String, Object> caseDataMap = stmtOfServImplService.handleSosAboutToSubmit(
+                callbackRequest.getCaseDetails(),
+                authorisation
+            );
+            cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(stmtOfServImplService.handleSosAboutToSubmit(
-                    callbackRequest.getCaseDetails(),
-                    authorisation
-                )).build();
+                .data(caseDataMap).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -101,8 +109,8 @@ public class StatementOfServiceController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
-            && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken))) {
+        Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
+        if (userInfo.isPresent() && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken))) {
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
@@ -125,8 +133,8 @@ public class StatementOfServiceController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CitizenSos sosObject
     ) {
-        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
-            && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken))) {
+        Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
+        if (userInfo.isPresent() && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken))) {
             stmtOfServImplService.saveCitizenSos(caseId, eventId, authorisation, sosObject);
             return ResponseEntity.ok().build();
         } else {

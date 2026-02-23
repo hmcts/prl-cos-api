@@ -1,0 +1,8 @@
+server:
+  port: 4144
+
+idam:
+  s2s-auth:
+    totp-secret: ${PRL_IDAM_S2S_AUTH_TOTP_SECRET}
+  client:
+    secret: ${PRL_IDAM_CLIENT_SECRET}

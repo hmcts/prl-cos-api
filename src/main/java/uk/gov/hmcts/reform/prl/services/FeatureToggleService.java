@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.models.Features.IS_BARRISTER_FEATURE_ENABLED;
+import static uk.gov.hmcts.reform.prl.models.Features.IS_CAFCASS_DATE_TIME_FEATURE_ENABLED;
+import static uk.gov.hmcts.reform.prl.models.Features.IS_OS_COURT_LOOKUP_ENABLED;
 
 
 /**
@@ -46,4 +48,11 @@ public class FeatureToggleService {
         return isFeatureEnabled(IS_BARRISTER_FEATURE_ENABLED);
     }
 
+    public boolean isCafcassDateTimeFeatureEnabled() {
+        return isFeatureEnabled(IS_CAFCASS_DATE_TIME_FEATURE_ENABLED);
+    }
+
+    public boolean isOsCourtLookupFeatureEnabled() {
+        return isFeatureEnabled(IS_OS_COURT_LOOKUP_ENABLED);
+    }
 }

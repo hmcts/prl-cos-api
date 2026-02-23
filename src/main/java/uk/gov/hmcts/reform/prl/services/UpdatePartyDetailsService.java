@@ -105,6 +105,7 @@ public class UpdatePartyDetailsService {
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     private final ManageOrderService manageOrderService;
     private final C8ArchiveService c8ArchiveService;
+    private final CaseNameService caseNameService;
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
@@ -264,6 +265,7 @@ public class UpdatePartyDetailsService {
             Map<String, Object> oldCaseDataMap = callbackRequest.getCaseDetailsBefore().getData();
             partyLevelCaseFlagsService.amendCaseFlags(oldCaseDataMap, updatedCaseData, callbackRequest.getEventId());
         }
+        caseNameService.setFinalCaseName(updatedCaseData, caseData);
         return updatedCaseData;
     }
 
@@ -954,12 +956,12 @@ public class UpdatePartyDetailsService {
             List<Element<PartyDetails>> removeParty = new ArrayList<>();
             removeParty.addAll(caseDataBefore.getApplicants().stream()
                 .filter(appBefore -> caseData.getApplicants().stream()
-                    .noneMatch(app -> app.getId().equals(appBefore.getId())))
+                    .noneMatch(app -> appBefore.getId().equals(app.getId())))
                 .toList());
 
             removeParty.addAll(caseDataBefore.getRespondents().stream()
                 .filter(respBefore -> caseData.getRespondents().stream()
-                    .noneMatch(resp -> resp.getId().equals(respBefore.getId())))
+                    .noneMatch(resp -> respBefore.getId().equals(resp.getId())))
                 .toList());
 
             if (!removeParty.isEmpty()) {

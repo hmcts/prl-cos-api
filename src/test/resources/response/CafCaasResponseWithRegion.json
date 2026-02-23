@@ -60,6 +60,44 @@
         "previousAttendenceEvidence" : "In the 4 months prior to making the application, the person filed a relevant family application confirming that a MIAM exemption applied and that application related to the same or substantially the same dispute",
         "otherGroundsEvidence" : "(i) the prospective applicant is or all of the prospective respondents are subject to a disability or other inability that would prevent attendance at a MIAM unless appropriate facilities can be offered by an authorised mediator; (ii) the prospective applicant has contacted as many authorised family mediators as have an office within fifteen miles of his or her home (or three of them if there are three or more), and all have stated that they are unable to provide such facilities; and (iii)the names, postal addresses and telephone numbers or e-mail addresses for such authorised family mediators, and the dates of contact, can be provided to the court if requested."
       },
+      "courtStaffUploadDocListDocTab": [
+        {
+          "id": "d41e7b51-a2ee-4689-95e4-4aba808ff062",
+          "value": {
+            "categoryId": "MIAMCertificate",
+            "uploadedBy": "Harry Potter",
+            "categoryName": "MIAM certificate/Exemption",
+            "uploaderRole": "Staff",
+            "documentParty": "Applicant",
+            "uploadedByIdamId": "bcf08345-44d1-4bb7-9f0b-c04a89e81e66",
+            "documentUploadedDate": "2025-05-30T11:34:11.245727",
+            "miamCertificateDocument": {
+              "document_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/00000000-0000-0000-0000-000000000000",
+              "upload_timestamp": "2025-05-30T10:34:11.346297918",
+              "document_filename": "*Redacted*",
+              "document_binary_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/00000000-0000-0000-0000-000000000000/binary"
+            }
+          }
+        },
+        {
+          "id": "05aae22b-4ec7-49d1-96e8-0a88143a1f99",
+          "value": {
+            "categoryId": "MIAMCertificate",
+            "uploadedBy": "Harry Potter",
+            "categoryName": "MIAM certificate/Exemption",
+            "uploaderRole": "Staff",
+            "documentParty": "Applicant",
+            "uploadedByIdamId": "bcf08345-44d1-4bb7-9f0b-c04a89e81e66",
+            "documentUploadedDate": "2025-05-30T11:42:22.559806",
+            "miamCertificateDocument": {
+              "document_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/f6879f36-ddce-4266-8f62-70bc72f62bb7",
+              "upload_timestamp": "2025-05-30T10:42:22.662985879",
+              "document_filename": "Manage cases MIAM.jpeg",
+              "document_binary_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/f6879f36-ddce-4266-8f62-70bc72f62bb7/binary"
+            }
+          }
+        }
+      ],
       "cafcassUploadedDocs": [
         {
           "id": "a5dbc39d-6322-4abc-821a-45206b88253f",

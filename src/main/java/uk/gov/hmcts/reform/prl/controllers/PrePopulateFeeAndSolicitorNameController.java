@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,11 +30,11 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
-import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.C100DocumentTemplateFinderService;
+import uk.gov.hmcts.reform.prl.services.payment.FeeService;
 import uk.gov.hmcts.reform.prl.services.validators.SubmitAndPayChecker;
 
 import java.util.ArrayList;
@@ -44,7 +43,9 @@ import java.util.List;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CURRENCY_SIGN_POUND;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -54,7 +55,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 @Slf4j
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor
 public class PrePopulateFeeAndSolicitorNameController {
     private final FeeService feeService;
     private final UserService userService;
@@ -96,7 +97,7 @@ public class PrePopulateFeeAndSolicitorNameController {
                 errorList.add(
                     "Submit and pay is not allowed for this case unless you finish all the mandatory events");
             } else {
-                FeeResponse feeResponse = null;
+                FeeResponse feeResponse;
                 try {
                     feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
                 } catch (Exception e) {
@@ -105,15 +106,16 @@ public class PrePopulateFeeAndSolicitorNameController {
                         .errors(errorList)
                         .build();
                 }
-                CaseData caseDataForOrgDetails = callbackRequest.getCaseDetails().getCaseData();
-                caseDataForOrgDetails = organisationService.getApplicantOrganisationDetails(caseDataForOrgDetails);
-                caseDataForOrgDetails = organisationService.getRespondentOrganisationDetails(caseDataForOrgDetails);
-
                 Court closestChildArrangementsCourt = courtLocatorService
                     .getNearestFamilyCourt(callbackRequest.getCaseDetails()
                                                .getCaseData());
+
+                CaseData baseCaseData = callbackRequest.getCaseDetails().getCaseData();
+
                 UserDetails userDetails = userService.getUserDetails(authorisation);
-                caseData = CaseData.builder()
+
+                caseData = baseCaseData.toBuilder()
+                    .caseSolicitorName(userDetails.getFullName()) //adding caseSolicitorName for SOT
                     .solicitorName(userDetails.getFullName())
                     .userInfo(wrapElements(userService.getUserInfo(authorisation, UserRoles.SOLICITOR)))
                     .applicantSolicitorEmailAddress(userDetails.getEmail())
@@ -121,20 +123,18 @@ public class PrePopulateFeeAndSolicitorNameController {
                     .feeAmount(CURRENCY_SIGN_POUND + feeResponse.getAmount().toString())
                     .courtName((closestChildArrangementsCourt != null) ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
                     .build();
-                // setting fee amount to populate in draft document
-                caseDataForOrgDetails = caseDataForOrgDetails.toBuilder().feeAmount(CURRENCY_SIGN_POUND + feeResponse.getAmount().toString()).build();
-                if (TASK_LIST_VERSION_V3.equalsIgnoreCase(caseDataForOrgDetails.getTaskListVersion())
-                    && isNotEmpty(caseDataForOrgDetails.getMiamPolicyUpgradeDetails())) {
-                    caseDataForOrgDetails = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(
-                        caseDataForOrgDetails,
+                if (TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())
+                    && isNotEmpty(caseData.getMiamPolicyUpgradeDetails())) {
+                    caseData = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(
+                        caseData,
                         new HashMap<>()
                     );
                 }
+                // Pass only the merged caseData to the document generation so new solicitor name is not lost
                 caseData = buildGeneratedDocumentCaseData(
                     authorisation,
                     callbackRequest,
-                    caseData,
-                    caseDataForOrgDetails
+                    caseData
                 );
             }
 
@@ -150,15 +150,32 @@ public class PrePopulateFeeAndSolicitorNameController {
     private CaseData buildGeneratedDocumentCaseData(
         @RequestHeader("Authorization") String authorisation,
         @RequestBody CallbackRequest callbackRequest,
-        CaseData caseData,
-        CaseData caseDataForOrgDetails)
-        throws Exception {
+        CaseData caseData) {
+
+        // Clone for templating (do NOT mutate the original as we don't want transient orgs)
+        CaseData caseDataForDocs = caseData;
+
+        // Enrich with transient org info
+        try {
+            if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                caseDataForDocs = organisationService.getApplicantOrganisationDetails(caseDataForDocs);
+                caseDataForDocs = organisationService.getRespondentOrganisationDetails(caseDataForDocs);
+            } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                caseDataForDocs = organisationService.getApplicantOrganisationDetailsForFL401(caseDataForDocs);
+                caseDataForDocs = organisationService.getRespondentOrganisationDetailsForFL401(caseDataForDocs);
+            }
+            // caseDataForDocs now has PartyDetails.organisations populated for doc merge only
+        } catch (Exception e) {
+            log.warn("Unable to enrich organisation details for doc generation: {}", e.getMessage());
+        }
+
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(callbackRequest.getCaseDetails().getCaseData());
+
         if (documentLanguage.isGenEng()) {
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
-                CaseDetails.builder().caseData(caseDataForOrgDetails).build(),
-                c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseDataForOrgDetails, false)
+                CaseDetails.builder().caseData(caseDataForDocs).build(),
+                c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseDataForDocs, false)
             );
 
             caseData = caseData.toBuilder().isEngDocGen(documentLanguage.isGenEng() ? Yes.toString() : No.toString())
@@ -172,8 +189,8 @@ public class PrePopulateFeeAndSolicitorNameController {
         if (documentLanguage.isGenWelsh()) {
             GeneratedDocumentInfo generatedWelshDocumentInfo = dgsService.generateWelshDocument(
                 authorisation,
-                CaseDetails.builder().caseData(caseDataForOrgDetails).build(),
-                c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseDataForOrgDetails, true)
+                CaseDetails.builder().caseData(caseDataForDocs).build(),
+                c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseDataForDocs, true)
             );
 
             caseData = caseData.toBuilder().isWelshDocGen(documentLanguage.isGenWelsh() ? Yes.toString() : No.toString())

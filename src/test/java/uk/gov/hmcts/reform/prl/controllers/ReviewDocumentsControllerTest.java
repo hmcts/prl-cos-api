@@ -92,9 +92,9 @@ public class ReviewDocumentsControllerTest {
     @Test
     public void testHandleAboutToStart() throws Exception {
 
-        when(reviewDocumentService.fetchDocumentDynamicListElements(caseData, caseDetails.getData())).thenReturn(dynamicListElements);
+        when(reviewDocumentService.fetchDocumentDynamicListElements(caseData)).thenReturn(dynamicListElements);
         reviewDocumentsController.handleAboutToStart(auth, callbackRequest);
-        verify(reviewDocumentService).fetchDocumentDynamicListElements(caseData, caseDetails.getData());
+        verify(reviewDocumentService).fetchDocumentDynamicListElements(caseData);
         verifyNoMoreInteractions(reviewDocumentService);
     }
 
@@ -116,9 +116,16 @@ public class ReviewDocumentsControllerTest {
 
     @Test
     public void testHandleSubmitted() {
+        CaseDetails caseDetailsBefore = CaseDetails.builder().id(123L).build();
+        CaseData caseDataBefore = CaseData.builder().id(123L).build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(objectMapper.convertValue(caseDetailsBefore.getData(), CaseData.class)).thenReturn(caseDataBefore);
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetailsBefore)
+            .build();
         reviewDocumentsController.handleSubmitted(auth, callbackRequest);
+        verify(reviewDocumentService).cleanupOldCopyOfDocuments(caseData, caseDataBefore);
         verify(reviewDocumentService).getReviewResult(caseData);
         verifyNoMoreInteractions(reviewDocumentService);
     }

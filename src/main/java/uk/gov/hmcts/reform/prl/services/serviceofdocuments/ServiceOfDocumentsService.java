@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.DocumentsDynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.PostalInformation;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.ServeOrgDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofdocuments.SodPack;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
@@ -46,12 +47,12 @@ import uk.gov.hmcts.reform.prl.services.BulkPrintService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityCheckService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.EmailService;
-import uk.gov.hmcts.reform.prl.services.SendAndReplyService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationEmailService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationPostService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
+import uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -103,6 +104,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
+import static uk.gov.hmcts.reform.prl.utils.EmailUtils.isValidEmailAddress;
 
 @Service
 @Slf4j
@@ -967,6 +969,22 @@ public class ServiceOfDocumentsService {
                 caseDataMap.put(field, null);
             }
         }
+    }
+
+    public List<String> validateAdditionalRecipients(CallbackRequest callbackRequest) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        // Validate additional recipients email addresses - return error on first invalid email
+        if (CollectionUtils.isNotEmpty(caseData.getServiceOfDocuments().getSodAdditionalRecipientsList())) {
+            for (Element<ServeOrgDetails> recipient : caseData.getServiceOfDocuments()
+                .getSodAdditionalRecipientsList()) {
+                if (recipient.getValue().getServeByPostOrEmail().equals(DeliveryByEnum.email)
+                    && !isValidEmailAddress(recipient.getValue().getEmailInformation().getEmailAddress())) {
+                    return List.of("Please provide valid email address for all recipients");
+                }
+            }
+        }
+        return emptyList();
     }
 
     public List<String> validateDocuments(CallbackRequest callbackRequest) {

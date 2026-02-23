@@ -3,8 +3,10 @@ package uk.gov.hmcts.reform.prl.services.managedocuments;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
@@ -82,6 +85,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 import static uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc.quarantineCategoriesToRemove;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.findElement;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 
@@ -272,7 +276,7 @@ public class ManageDocumentsService {
                 && !DocumentPartyEnum.COURT.getDisplayedValue().equals(quarantineLegalDoc.getDocumentParty())) {
                 String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
                 Document document = getQuarantineDocumentForUploader(loggedInUserType, quarantineLegalDoc);
-                Document updatedConfidentialDocument = downloadAndDeleteDocument(document, systemUserService.getSysUserToken());
+                Document updatedConfidentialDocument = renameAndReuploadFileToBeConfidential(document);
                 quarantineLegalDoc = setQuarantineDocumentForUploader(
                     ManageDocuments.builder()
                         .document(updatedConfidentialDocument)
@@ -280,6 +284,11 @@ public class ManageDocumentsService {
                     loggedInUserType,
                     quarantineLegalDoc
                 );
+                if (quarantineLegalDoc != null) {
+                    quarantineLegalDoc = quarantineLegalDoc.toBuilder()
+                        .originalDocumentId(DocumentUtils.getDocumentId(document.getDocumentUrl()))
+                        .build();
+                }
             }
             if (quarantineLegalDoc != null) {
                 QuarantineLegalDoc finalConfidentialDocument = convertQuarantineDocumentToRightCategoryDocument(
@@ -341,6 +350,7 @@ public class ManageDocumentsService {
             .documentParty(quarantineLegalDoc.getDocumentParty())
             .documentType(COURTNAV.equals(quarantineLegalDoc.getUploadedBy()) ? quarantineLegalDoc.getDocumentType() : null)
             .documentUploadedDate(quarantineLegalDoc.getDocumentUploadedDate())
+            .originalDocumentId(quarantineLegalDoc.getOriginalDocumentId())
             .categoryId(quarantineLegalDoc.getCategoryId())
             .categoryName(quarantineLegalDoc.getCategoryName())
             //PRL-4320 - Manage documents redesign
@@ -452,6 +462,7 @@ public class ManageDocumentsService {
     public Document renameAndReuploadFileToBeConfidential(Document document) {
         UUID documentId = UUID.fromString(DocumentUtils.getDocumentId(document.getDocumentUrl()));
         if (!document.getDocumentFileName().startsWith(CONFIDENTIAL)) {
+            log.info("Attempting to rename document {} to confidential", documentId);
             Document newUploadedDocument = getNewUploadedDocument(
                 document,
                 documentId
@@ -460,35 +471,28 @@ public class ManageDocumentsService {
                 return newUploadedDocument;
             }
         } else {
-            log.info("Since the document name starts with confidential it is not renamed");
+            log.info("Since the document name starts with confidential it will not be renamed");
         }
         log.info("Using original document {}", documentId);
         return document;
     }
 
-    public Document downloadAndDeleteDocument(Document document, String systemAuthorisation) {
+    public void deleteDocumentById(String documentId) {
         try {
-            if (!document.getDocumentFileName().startsWith(CONFIDENTIAL)) {
-                UUID documentId = UUID.fromString(DocumentUtils.getDocumentId(document.getDocumentUrl()));
-                Document newUploadedDocument = getNewUploadedDocument(
-                    document,
-                    documentId
-                );
-                if (null != newUploadedDocument) {
-                    caseDocumentClient.deleteDocument(systemAuthorisation,
-                                                      authTokenGenerator.generate(),
-                                                      documentId, true
-                    );
-                    return newUploadedDocument;
-                }
-
-            } else {
-                log.info("since the document name starts with confidential so its not renamed");
-            }
-        } catch (Exception e) {
-            throw new IllegalStateException("Failed to move document to confidential tab please retry", e);
+            log.info("Attempting to delete document {}", documentId);
+            caseDocumentClient.deleteDocument(
+                systemUserService.getSysUserToken(),
+                authTokenGenerator.generate(),
+                UUID.fromString(documentId), true
+            );
+            log.info("Successfully deleted document {}", documentId);
+        } catch (FeignException e) {
+            log.error("Failed to delete document {} ", documentId, e);
         }
-        return document;
+    }
+
+    public void deleteDocument(Document document) {
+        deleteDocumentById(DocumentUtils.getDocumentId(document.getDocumentUrl()));
     }
 
     public QuarantineLegalDoc addQuarantineDocumentFields(QuarantineLegalDoc legalProfUploadDoc,
@@ -542,7 +546,12 @@ public class ManageDocumentsService {
                         docData
                     ))
             );
-            newUploadedDocument = Document.buildFromDocument(uploadResponse.getDocuments().get(0));
+
+            if (uploadResponse == null || CollectionUtils.isEmpty(uploadResponse.getDocuments())) {
+                throw new IllegalStateException("Upload returned no documents for id: " + documentId);
+            }
+
+            newUploadedDocument = Document.buildFromDocument(uploadResponse.getDocuments().getFirst());
         } catch (Exception ex) {
             log.error("Failed to upload new document {}", ex.getMessage(), ex);
         }
@@ -730,17 +739,42 @@ public class ManageDocumentsService {
 
     public void appendConfidentialDocumentNameForCourtAdminAndUpdate(CallbackRequest callbackRequest, String authorisation) {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
-                = allTabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
+            = allTabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
         Map<String, Object> updatedCaseDataMap
-                = appendConfidentialDocumentNameForCourtAdmin(authorisation,
-                startAllTabsUpdateDataContent.caseDataMap(),
-                startAllTabsUpdateDataContent.caseData());
-        //update all tabs
-        allTabService.submitAllTabsUpdate(startAllTabsUpdateDataContent.authorisation(),
-                String.valueOf(callbackRequest.getCaseDetails().getId()),
-                startAllTabsUpdateDataContent.startEventResponse(),
-                startAllTabsUpdateDataContent.eventRequestData(),
-                updatedCaseDataMap);
+            = appendConfidentialDocumentNameForCourtAdmin(
+            authorisation,
+            startAllTabsUpdateDataContent.caseDataMap(),
+            startAllTabsUpdateDataContent.caseData()
+        );
+
+        CaseDetails currentCaseDetails = allTabService.submitAllTabsUpdate(
+            startAllTabsUpdateDataContent.authorisation(),
+            String.valueOf(callbackRequest.getCaseDetails().getId()),
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            updatedCaseDataMap
+        );
+        CaseData currentCaseData = CaseUtils.getCaseData(currentCaseDetails, objectMapper);
+
+        cleanupOldCopyOfConfidentialDocuments(authorisation, currentCaseData, startAllTabsUpdateDataContent.caseData());
+    }
+
+    void cleanupOldCopyOfConfidentialDocuments(String authorization, CaseData currentCaseData, CaseData previousCaseData) {
+        List<String> userRole = getLoggedInUserType(authorization);
+        if (userRole.contains(COURT_ADMIN_ROLE) || userRole.contains(COURT_STAFF)) {
+            if (CollectionUtils.isNotEmpty(currentCaseData.getReviewDocuments().getConfidentialDocuments())) {
+                deleteCopyOfRenamedConfidentialDocument(
+                    previousCaseData.getReviewDocuments().getConfidentialDocuments(),
+                    currentCaseData.getReviewDocuments().getConfidentialDocuments()
+                );
+            }
+            if (CollectionUtils.isNotEmpty(currentCaseData.getReviewDocuments().getRestrictedDocuments())) {
+                deleteCopyOfRenamedConfidentialDocument(
+                    previousCaseData.getReviewDocuments().getRestrictedDocuments(),
+                    currentCaseData.getReviewDocuments().getRestrictedDocuments()
+                );
+            }
+        }
     }
 
     public Map<String, Object> appendConfidentialDocumentNameForCourtAdmin(String authorization, Map<String, Object> caseDataMap, CaseData caseData) {
@@ -761,30 +795,67 @@ public class ManageDocumentsService {
         return caseDataMap;
     }
 
+    private void deleteCopyOfRenamedConfidentialDocument(List<Element<QuarantineLegalDoc>> previousConfidentialDocuments,
+                                           List<Element<QuarantineLegalDoc>> currentConfidentialDocuments) {
+
+        currentConfidentialDocuments.forEach(
+            docElement -> {
+                try {
+                    if (YesOrNo.Yes.equals(docElement.getValue().getHasTheConfidentialDocumentBeenRenamed())) {
+                        val elementId = docElement.getId();
+                        val previousDocElement = findElement(elementId, previousConfidentialDocuments);
+                        if (previousDocElement.isPresent() && YesOrNo.No.equals(previousDocElement.get().getValue()
+                                                                                    .getHasTheConfidentialDocumentBeenRenamed())) {
+                            String attributeName = DocumentUtils.populateAttributeNameFromCategoryId(
+                                previousDocElement.get().getValue().getCategoryId(),
+                                null
+                            );
+                            Document docToDelete = objectMapper.convertValue(
+                                objectMapper.convertValue(previousDocElement.get().getValue(), Map.class).get(attributeName),
+                                Document.class
+                            );
+                            deleteDocument(docToDelete);
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error("Error while trying to delete the document {} : ", docElement.getId(), e);
+                }
+            }
+        );
+    }
+
     private List<Element<QuarantineLegalDoc>> renameConfidentialDocumentForCourtAdmin(List<Element<QuarantineLegalDoc>> confidentialDocuments) {
         List<Element<QuarantineLegalDoc>> confidentialTabDocuments = new ArrayList<>();
         confidentialDocuments.forEach(
             element -> {
-                if (YesOrNo.No.equals(element.getValue().getHasTheConfidentialDocumentBeenRenamed())) {
-                    String attributeName = DocumentUtils.populateAttributeNameFromCategoryId(element.getValue().getCategoryId(), null);
-                    Document existingDocument = objectMapper.convertValue(
-                        objectMapper.convertValue(element.getValue(), Map.class).get(attributeName),
-                        Document.class
-                    );
-                    Document renamedDocument = downloadAndDeleteDocument(existingDocument, systemUserService.getSysUserToken());
-                    Map tempQuarantineObjectMap =
-                        objectMapper.convertValue(element.getValue(), Map.class);
-                    tempQuarantineObjectMap.put(
-                        attributeName,
-                        renamedDocument
-                    );
-                    tempQuarantineObjectMap.put("hasTheConfidentialDocumentBeenRenamed", YesOrNo.Yes);
-                    QuarantineLegalDoc updatedQuarantineLegalDocumentObject = objectMapper.convertValue(
-                        tempQuarantineObjectMap,
-                        QuarantineLegalDoc.class
-                    );
-                    confidentialTabDocuments.add(element(element.getId(), updatedQuarantineLegalDocumentObject));
-                } else {
+                try {
+                    if (YesOrNo.No.equals(element.getValue().getHasTheConfidentialDocumentBeenRenamed())) {
+                        String attributeName = DocumentUtils.populateAttributeNameFromCategoryId(
+                            element.getValue().getCategoryId(),
+                            null
+                        );
+                        Document existingDocument = objectMapper.convertValue(
+                            objectMapper.convertValue(element.getValue(), Map.class).get(attributeName),
+                            Document.class
+                        );
+                        Document renamedDocument = renameAndReuploadFileToBeConfidential(existingDocument);
+                        Map tempQuarantineObjectMap =
+                            objectMapper.convertValue(element.getValue(), Map.class);
+                        tempQuarantineObjectMap.put(
+                            attributeName,
+                            renamedDocument
+                        );
+                        tempQuarantineObjectMap.put("hasTheConfidentialDocumentBeenRenamed", YesOrNo.Yes);
+                        QuarantineLegalDoc updatedQuarantineLegalDocumentObject = objectMapper.convertValue(
+                            tempQuarantineObjectMap,
+                            QuarantineLegalDoc.class
+                        );
+                        confidentialTabDocuments.add(element(element.getId(), updatedQuarantineLegalDocumentObject));
+                    } else {
+                        confidentialTabDocuments.add(element);
+                    }
+                } catch (Exception ex) {
+                    log.info("Document cannot be renamed: {} ", element.getId());
                     confidentialTabDocuments.add(element);
                 }
             }
