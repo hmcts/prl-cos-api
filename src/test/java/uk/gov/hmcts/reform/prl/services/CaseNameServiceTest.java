@@ -1,11 +1,10 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -15,17 +14,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class CaseNameServiceTest {
+@ExtendWith(MockitoExtension.class)
+class CaseNameServiceTest {
 
     @InjectMocks
     CaseNameService caseNameService;
-
     @Mock
     CaseData caseData;
     @Mock
@@ -35,23 +33,19 @@ public class CaseNameServiceTest {
 
     Map<String, Object> updatedCaseData = new HashMap<>();
 
-    @Before
-    public void setup() {
-    }
-
     @Test
-    public void shouldGetFinalCaseNameC100() {
+    void shouldGetFinalCaseNameC100() {
         assertEquals("app1LN V respLN", caseNameService.getCaseNameForCA("app1LN", "respLN"));
     }
 
     @Test
-    public void shouldGetFinalCaseNameFL01() {
+    void shouldGetFinalCaseNameFL01() {
         assertEquals("app1FN app1LN & respFN respLN",
                      caseNameService.getCaseNameForDA("app1FN", "app1LN", "respFN", "respLN"));
     }
 
     @Test
-    public void shouldSetFinalCaseNameC100() {
+    void shouldSetFinalCaseNameC100() {
         when(applicant.getLastName()).thenReturn("AppLN");
         when(respondent.getLastName()).thenReturn("RespLN");
 
@@ -67,7 +61,7 @@ public class CaseNameServiceTest {
     }
 
     @Test
-    public void shouldSetFinalCaseNameFL401() {
+    void shouldSetFinalCaseNameFL401() {
         when(applicant.getFirstName()).thenReturn("AppFN");
         when(applicant.getLastName()).thenReturn("AppLN");
         when(respondent.getFirstName()).thenReturn("RespFN");
@@ -80,11 +74,10 @@ public class CaseNameServiceTest {
         caseNameService.setFinalCaseName(updatedCaseData, caseData);
 
         assertEquals("AppFN AppLN & RespFN RespLN", updatedCaseData.get("applicantCaseName"));
-
     }
 
     @Test
-    public void shouldUpdateFinalCaseNameC100() {
+    void shouldUpdateFinalCaseNameC100() {
         updatedCaseData.put("applicantCaseName", "CaseNameBefore");
         when(applicant.getLastName()).thenReturn("AppLN");
         when(respondent.getLastName()).thenReturn("RespLN");
@@ -101,7 +94,7 @@ public class CaseNameServiceTest {
     }
 
     @Test
-    public void shouldUpdateFinalCaseNameFL401() {
+    void shouldUpdateFinalCaseNameFL401() {
         updatedCaseData.put("applicantCaseName", "CaseNameBefore");
         when(applicant.getFirstName()).thenReturn("AppFN");
         when(applicant.getLastName()).thenReturn("AppLN");
@@ -115,11 +108,10 @@ public class CaseNameServiceTest {
         caseNameService.setFinalCaseName(updatedCaseData, caseData);
 
         assertEquals("AppFN AppLN & RespFN RespLN", updatedCaseData.get("applicantCaseName"));
-
     }
 
     @Test
-    public void shouldNotSetFinalCaseNameC100WhenApplicantsEmpty() {
+    void shouldNotSetFinalCaseNameC100WhenApplicantsEmpty() {
         List<Element<PartyDetails>> applicantsList = new ArrayList<>();
         when(caseData.getApplicants()).thenReturn(applicantsList);
         when(caseData.getCaseTypeOfApplication()).thenReturn("C100");
@@ -130,7 +122,7 @@ public class CaseNameServiceTest {
     }
 
     @Test
-    public void shouldNotSetFinalCaseNameC100WhenRespondentsEmpty() {
+    void shouldNotSetFinalCaseNameC100WhenRespondentsEmpty() {
         List<Element<PartyDetails>> applicantsList = List.of(Element.<PartyDetails>builder().value(applicant).build());
         List<Element<PartyDetails>> respondentsList = new ArrayList<>();
         when(caseData.getApplicants()).thenReturn(applicantsList);
@@ -143,7 +135,7 @@ public class CaseNameServiceTest {
     }
 
     @Test
-    public void shouldNotSetFinalCaseNameFL401WhenApplicantNull() {
+    void shouldNotSetFinalCaseNameFL401WhenApplicantNull() {
         when(caseData.getCaseTypeOfApplication()).thenReturn("FL401");
 
         caseNameService.setFinalCaseName(updatedCaseData, caseData);
@@ -152,7 +144,7 @@ public class CaseNameServiceTest {
     }
 
     @Test
-    public void shouldNotSetFinalCaseNameFL401WhenRespondentNull() {
+    void shouldNotSetFinalCaseNameFL401WhenRespondentNull() {
         when(caseData.getCaseTypeOfApplication()).thenReturn("FL401");
         when(caseData.getApplicantsFL401()).thenReturn(applicant);
 
@@ -162,15 +154,13 @@ public class CaseNameServiceTest {
     }
 
     @Test
-    public void shouldNotSetFinalCaseNameForInvalidCaseType() {
+    void shouldNotSetFinalCaseNameForInvalidCaseType() {
         when(caseData.getId()).thenReturn(1234L);
         when(caseData.getCaseTypeOfApplication()).thenReturn("INVALID");
 
-        RuntimeException rte = assertThrows(RuntimeException.class, () ->
-            caseNameService.setFinalCaseName(updatedCaseData, caseData)
-        );
+        Exception exception = assertThrows(RuntimeException.class, () ->
+            caseNameService.setFinalCaseName(updatedCaseData, caseData));
 
-        assertEquals("Invalid caseTypeOfApplication found for case 1234", rte.getMessage());
+        assertEquals("Invalid caseTypeOfApplication found for case 1234", exception.getMessage());
     }
-
 }
