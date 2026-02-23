@@ -33,7 +33,7 @@ public class TypeOfApplicationMapperTest {
         orderType.add(OrderTypeEnum.prohibitedStepsOrder);
         Document document = Document.builder().documentFileName("file.pdf").build();
         CaseData caseDataInput = CaseData.builder().ordersApplyingFor(orderType).typeOfChildArrangementsOrder(
-            ChildArrangementOrderTypeEnum.liveWithOrder).natureOfOrder("test")
+                ChildArrangementOrderTypeEnum.liveWithOrder).natureOfOrder("test")
             .consentOrder(Yes).applicationPermissionRequired(
                 PermissionRequiredEnum.getValue("Yes")).applicationPermissionRequiredReason("Need Permission")
             .uploadOrderDocForPermission(document).applicationDetails("Done").build();
@@ -41,7 +41,21 @@ public class TypeOfApplicationMapperTest {
     }
 
     @Test
-    public void testForTypeOfApplicationMapperAnotherOption() {
+    public void testForTypeOfApplicationMapperOption1() {
+        List<OrderTypeEnum> orderType = new ArrayList<>();
+        orderType.add(OrderTypeEnum.childArrangementsOrder);
+        orderType.add(OrderTypeEnum.prohibitedStepsOrder);
+        Document document = Document.builder().documentFileName("file.pdf").build();
+        CaseData caseDataInput = CaseData.builder().ordersApplyingFor(orderType).typeOfChildArrangementsOrder(
+                ChildArrangementOrderTypeEnum.liveWithOrder).natureOfOrder("test")
+            .consentOrder(Yes).applicationPermissionRequired(
+                PermissionRequiredEnum.getValue("No")).applicationPermissionRequiredReason("Need Permission")
+            .uploadOrderDocForPermission(document).applicationDetails("Done").build();
+        assertNotNull(typeOfApplicationMapper.map(caseDataInput));
+    }
+
+    @Test
+    public void testForTypeOfApplicationMapperAnotherOption2() {
         List<OrderTypeEnum> orderType = new ArrayList<>();
         orderType.add(OrderTypeEnum.childArrangementsOrder);
         orderType.add(OrderTypeEnum.prohibitedStepsOrder);
