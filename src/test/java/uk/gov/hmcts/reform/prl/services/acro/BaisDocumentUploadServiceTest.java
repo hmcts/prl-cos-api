@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.acro;
 
-import com.sendgrid.SendGrid;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,7 +61,6 @@ class BaisDocumentUploadServiceTest {
     @Mock private PdfExtractorService pdfExtractorService;
     @Mock private LaunchDarklyClient launchDarklyClient;
     @Mock private SftpService sftpService;
-    @Mock private SendGrid sendGrid;
 
     @Captor
     ArgumentCaptor<CsvData> csvDataArgumentCaptor;
