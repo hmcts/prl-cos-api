@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -33,7 +34,7 @@ import static uk.gov.hmcts.reform.prl.services.fl401listonnotice.Fl401ListOnNoti
 @SpringBootTest
 @ContextConfiguration
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@Ignore
+@Disabled
 public class Fl401ListOnNoticeControllerFT {
 
     @Autowired
