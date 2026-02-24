@@ -54,7 +54,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -207,7 +206,7 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            List<String> errorList = emptyList();
+            List<String> errorList = new ArrayList<>();
             errorList.addAll(manageOrderService.validateAdditionalPartiesForServingOrder(callbackRequest));
             errorList.addAll(manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest));
             return AboutToStartOrSubmitCallbackResponse.builder()
