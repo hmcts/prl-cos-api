@@ -2208,6 +2208,7 @@ public class EditAndApproveDraftOrderControllerTest {
             .validateAdditionalPartiesForServingOrder(authToken, s2sToken, callbackRequest);
 
         assertNotNull(aboutToStartOrSubmitCallbackResponse);
+        assertEquals(0, aboutToStartOrSubmitCallbackResponse.getErrors().size());
     }
 
     @Test
@@ -2247,7 +2248,7 @@ public class EditAndApproveDraftOrderControllerTest {
             .validateAdditionalPartiesForServingOrder(authToken, s2sToken, callbackRequest);
 
         assertNotNull(aboutToStartOrSubmitCallbackResponse);
-        assertNotNull(aboutToStartOrSubmitCallbackResponse.getErrors());
+        assertEquals(1, aboutToStartOrSubmitCallbackResponse.getErrors().size());
         assertEquals("Invalid email address. Please check the email address entered. "
                          + "To send to multiple recipients please use the add new button.",
                      aboutToStartOrSubmitCallbackResponse.getErrors().getFirst());
