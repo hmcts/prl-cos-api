@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
+import uk.gov.hmcts.reform.prl.enums.TypeOfAbuseEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
@@ -141,7 +142,12 @@ public class AllegationsOfHarmRevisedMapper {
                 .map(Element::getValue)
                 .toList();
         return domesticBehavioursList.stream().map(domesticBehaviour -> new NullAwareJsonObjectBuilder()
-                .add("typeOfAbuse", domesticBehaviour.getTypeOfAbuse().getDisplayedValue())
+                .add(
+                    "typeOfAbuse",
+                    Optional.ofNullable(domesticBehaviour.getTypeOfAbuse())
+                        .map(TypeOfAbuseEnum::getDisplayedValue)
+                        .orElse(null)
+                )
                 .add("newAbuseNatureDescription", domesticBehaviour.getNewAbuseNatureDescription())
                 .add("newBehavioursStartDateAndLength", domesticBehaviour.getNewBehavioursStartDateAndLength())
                 .add("newBehavioursApplicantSoughtHelp", CommonUtils.getYesOrNoValue(domesticBehaviour.getNewBehavioursApplicantSoughtHelp()))
