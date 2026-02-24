@@ -172,7 +172,6 @@ public class PrepareHearingBundleService {
         // Hearing state(s)
         StateFilter stateFilter = esQueryService.getFilterForStates(
             List.of(
-                State.JUDICIAL_REVIEW,
                 State.PREPARE_FOR_HEARING_CONDUCT_HEARING,
                 State.DECISION_OUTCOME
             ));
