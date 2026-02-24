@@ -15,14 +15,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.exception.cafcass.exceptionhandlers.ApiError;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
-import uk.gov.hmcts.reform.prl.services.cafcass.CaseDataService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassCaseDataService;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -37,13 +39,13 @@ import static uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi.SERVICE_AUTHORIZATI
 @RequestMapping("/cases")
 public class CafCassController extends AbstractCallbackController {
     private static final String BEARER = "Bearer ";
-    private  final CaseDataService caseDataService;
+    private  final CafcassCaseDataService cafcassCaseDataService;
     private final AuthorisationService authorisationService;
 
     public CafCassController(ObjectMapper objectMapper, EventService eventPublisher,
-                             CaseDataService caseDataService, AuthorisationService authorisationService) {
+                             CafcassCaseDataService cafcassCaseDataService, AuthorisationService authorisationService) {
         super(objectMapper, eventPublisher);
-        this.caseDataService = caseDataService;
+        this.cafcassCaseDataService = cafcassCaseDataService;
         this.authorisationService = authorisationService;
 
     }
@@ -62,8 +64,9 @@ public class CafCassController extends AbstractCallbackController {
         try {
             serviceAuthorisation = serviceAuthorisation.startsWith(BEARER)
                 ? serviceAuthorisation : BEARER.concat(serviceAuthorisation);
+            Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
 
-            if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
+            if (userInfo.isPresent() && Boolean.TRUE.equals(
                 authorisationService.authoriseService(serviceAuthorisation))) {
                 log.info("processing request after authorization");
                 LocalDateTime startDateTime = LocalDateTime.parse(startDate);
@@ -72,7 +75,7 @@ public class CafCassController extends AbstractCallbackController {
                     return status(BAD_REQUEST).body(new ApiError(
                         "Difference between end date and start date should not be more than 15 minutes"));
                 }
-                return ResponseEntity.ok(caseDataService.getCaseData(
+                return ResponseEntity.ok(cafcassCaseDataService.getCaseData(
                     authorisation,
                     startDate,
                     endDate
