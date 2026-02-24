@@ -60,24 +60,6 @@ public class AwaitingInformationController {
         throw (new RuntimeException(INVALID_CLIENT));
     }
 
-    @PostMapping(path = "/populate-header-awaiting-information", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to populate the header awaiting information")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback to populate the header awaiting information Processed.",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
-        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public AboutToStartOrSubmitCallbackResponse populateHeader(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
-    ) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)
-            && featureToggleService.isAwaitingInformationEnabled()) {
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .build();
-        }
-        throw (new RuntimeException(INVALID_CLIENT));
-
-    }
 
     @PostMapping(path = "/validate-awaiting-information", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to validate review date")
