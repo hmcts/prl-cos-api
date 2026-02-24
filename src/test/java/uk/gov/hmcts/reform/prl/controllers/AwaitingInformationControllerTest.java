@@ -174,8 +174,7 @@ public class AwaitingInformationControllerTest {
         // When
         AboutToStartOrSubmitCallbackResponse response = awaitingInformationController.populateHeader(
             AUTH_TOKEN,
-            S2S_TOKEN,
-            callbackRequest
+            S2S_TOKEN
         );
 
         // Then
@@ -190,7 +189,7 @@ public class AwaitingInformationControllerTest {
 
         // When & Then
         assertExpectedException(
-            () -> awaitingInformationController.populateHeader(AUTH_TOKEN, S2S_TOKEN, callbackRequest),
+            () -> awaitingInformationController.populateHeader(AUTH_TOKEN, S2S_TOKEN),
             RuntimeException.class,
             INVALID_CLIENT_ERROR
         );
@@ -201,8 +200,7 @@ public class AwaitingInformationControllerTest {
         // When
         AboutToStartOrSubmitCallbackResponse response = awaitingInformationController.populateHeader(
             AUTH_TOKEN,
-            S2S_TOKEN,
-            callbackRequest
+            S2S_TOKEN
         );
 
         // Then
