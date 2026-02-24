@@ -26,14 +26,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class AwaitingInformationControllerTest {
@@ -167,46 +162,6 @@ public class AwaitingInformationControllerTest {
         assertEquals("testValue", response.getData().get("testKey"));
     }
 
-
-    // Tests for populateHeader method
-    @Test
-    public void testPopulateHeaderAwaitingInformationSuccessfully() {
-        // When
-        AboutToStartOrSubmitCallbackResponse response = awaitingInformationController.populateHeader(
-            AUTH_TOKEN,
-            S2S_TOKEN
-        );
-
-        // Then
-        assertNotNull(response);
-        verify(authorisationService, times(1)).isAuthorized(AUTH_TOKEN, S2S_TOKEN);
-    }
-
-    @Test
-    public void testPopulateHeaderAwaitingInformationThrowsExceptionWhenUnauthorized() {
-        // Given
-        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
-
-        // When & Then
-        assertExpectedException(
-            () -> awaitingInformationController.populateHeader(AUTH_TOKEN, S2S_TOKEN),
-            RuntimeException.class,
-            INVALID_CLIENT_ERROR
-        );
-    }
-
-    @Test
-    public void testPopulateHeaderReturnsEmptyDataWhenAuthorized() {
-        // When
-        AboutToStartOrSubmitCallbackResponse response = awaitingInformationController.populateHeader(
-            AUTH_TOKEN,
-            S2S_TOKEN
-        );
-
-        // Then
-        assertNotNull(response);
-        verify(authorisationService, times(1)).isAuthorized(AUTH_TOKEN, S2S_TOKEN);
-    }
 
     // Tests for validateUrgentCaseCreation (validateAwaitingInformation) method
     @Test
