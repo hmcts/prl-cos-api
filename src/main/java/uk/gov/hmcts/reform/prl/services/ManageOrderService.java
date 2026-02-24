@@ -3588,7 +3588,7 @@ public class ManageOrderService {
             checkPartyAddressAndReturnError(otherPeopleInCase, selectedOtherPartyIds, errorList, false);
         }
 
-        return isNotEmpty(errorList) ? errorList : emptyList();
+        return errorList;
     }
 
     private void checkPartyAddressAndReturnError(List<Element<PartyDetails>> partyDetails,
