@@ -381,7 +381,8 @@ public class ManageDocumentsServiceTest {
     @Test
     public void testPopulateDocumentCategoriesForLaParty() {
 
-        Category laCategory = new Category("localAuthorityDocuments", "localAuthorityDocuments", 2, List.of(document), List.of(subCategory1, subCategory2));
+        Category laCategory = new Category("localAuthorityDocuments", "localAuthorityDocuments",
+                                           2, List.of(document), List.of(subCategory1, subCategory2));
         CategoriesAndDocuments laCategoriesAndDocuments = new CategoriesAndDocuments(1, List.of(laCategory), List.of(document));
 
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
@@ -410,7 +411,8 @@ public class ManageDocumentsServiceTest {
     @Test
     public void testLaPartyWithRoleSocialWorker() {
 
-        Category laCategory = new Category("localAuthorityDocuments", "localAuthorityDocuments", 2, List.of(document), List.of(subCategory1, subCategory2));
+        Category laCategory = new Category("localAuthorityDocuments", "localAuthorityDocuments",
+                                           2, List.of(document), List.of(subCategory1, subCategory2));
         CategoriesAndDocuments laCategoriesAndDocuments = new CategoriesAndDocuments(1, List.of(laCategory), List.of(document));
 
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
@@ -439,7 +441,8 @@ public class ManageDocumentsServiceTest {
     @Test
     public void testLaPartyWithRoleSolicitor() {
 
-        Category laCategory = new Category("localAuthorityDocuments", "localAuthorityDocuments", 2, List.of(document), List.of(subCategory1, subCategory2));
+        Category laCategory = new Category("localAuthorityDocuments", "localAuthorityDocuments",
+                                           2, List.of(document), List.of(subCategory1, subCategory2));
         CategoriesAndDocuments laCategoriesAndDocuments = new CategoriesAndDocuments(1, List.of(laCategory), List.of(document));
 
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
