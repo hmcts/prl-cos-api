@@ -41,7 +41,7 @@ public class AwaitingInformationController {
     private final FeatureToggleService featureToggleService;
 
     @PostMapping(path = "/submit-awaiting-information", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Copy fl401 case name to C100 Case name")
+    @Operation(description = "Awaiting On Information callback to update case data and set case status to awaiting information")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
@@ -68,8 +68,7 @@ public class AwaitingInformationController {
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public AboutToStartOrSubmitCallbackResponse populateHeader(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)
             && featureToggleService.isAwaitingInformationEnabled()) {
