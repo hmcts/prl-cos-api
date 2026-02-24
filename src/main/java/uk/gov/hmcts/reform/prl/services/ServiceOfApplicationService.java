@@ -1201,7 +1201,7 @@ public class ServiceOfApplicationService {
                         emailNotificationDetails,
                         respondent,
                         finalDocs,
-                        SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT,
+                        SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP,
                         fieldsMap,
                         coverLetters
                     );
@@ -1260,7 +1260,7 @@ public class ServiceOfApplicationService {
                         emailNotificationDetails,
                         party.get(),
                         finalDocs,
-                        SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT,
+                        SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP,
                         fieldsMap,
                         coverLetters
                     );
