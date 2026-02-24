@@ -134,7 +134,7 @@ public class DocumentUtils {
             loggedInUserType = COURTNAV;
         } else if (roles.contains("LOCAL_AUTHORITY")) {
             loggedInUserType = LOCAL_AUTHORITY;
-        }else {
+        } else {
             loggedInUserType = CAFCASS;
         }
 

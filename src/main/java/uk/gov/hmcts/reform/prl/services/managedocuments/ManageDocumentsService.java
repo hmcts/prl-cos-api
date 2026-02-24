@@ -38,7 +38,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocumen
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
-import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
@@ -128,7 +127,11 @@ public class ManageDocumentsService {
         boolean isUserRoleLA = isUserAllocatedRoleForCaseLA(String.valueOf(caseData.getId()), userDetails.getId());
 
         ManageDocuments manageDocuments = ManageDocuments.builder()
-            .documentCategories(getCategoriesSubcategories(authorization, String.valueOf(caseData.getId()), isUserRoleLA))
+            .documentCategories(getCategoriesSubcategories(
+                authorization,
+                String.valueOf(caseData.getId()),
+                isUserRoleLA
+            ))
             .documentParty(setDefaultDocumentParty(isUserRoleLA))
             .build();
 
@@ -150,11 +153,10 @@ public class ManageDocumentsService {
             if (null != categoriesAndDocuments) {
                 List<Category> parentCategories = nullSafeCollection(categoriesAndDocuments.getCategories())
                     .stream()
-                    .filter(category-> {
+                    .filter(category -> {
                         if (isUserRoleLA) {
                             return category.getCategoryId().equals("localAuthorityDocuments");
-                        }
-                        else {
+                        } else {
                             return !category.getCategoryId().equals("localAuthorityDocuments");
                         }
                     })
@@ -252,7 +254,7 @@ public class ManageDocumentsService {
             if (!userRole.equals(COURT_ADMIN)
                 && (DocumentPartyEnum.CAFCASS.equals(manageDocument.getDocumentParty())
                 || DocumentPartyEnum.CAFCASS_CYMRU.equals(
-                manageDocument.getDocumentParty())) &&  null != quarantineLegalDoc) {
+                manageDocument.getDocumentParty())) && null != quarantineLegalDoc) {
                 quarantineLegalDoc = updateQuarantineLegalDocForCafcass(
                     quarantineLegalDoc
                 );
@@ -350,9 +352,11 @@ public class ManageDocumentsService {
 
             //This is for both events manage documents & review documents for non-confidential documents
             //Epic-PRL-5842 - notifications to lips, solicitors, cafcass cymru
-            notificationService.sendNotificationsAsync(caseData,
-                                                  quarantineLegalDoc,
-                                                  userRole);
+            notificationService.sendNotificationsAsync(
+                caseData,
+                quarantineLegalDoc,
+                userRole
+            );
         }
     }
 
@@ -362,7 +366,12 @@ public class ManageDocumentsService {
         Document document = getQuarantineDocumentForUploader(loggedInUserType, quarantineLegalDoc);
 
         HashMap<String, Object> hashMap = new HashMap<>();
-        hashMap.put(DocumentUtils.populateAttributeNameFromCategoryId(quarantineLegalDoc.getCategoryId(), loggedInUserType), document);
+        hashMap.put(
+            DocumentUtils.populateAttributeNameFromCategoryId(
+                quarantineLegalDoc.getCategoryId(),
+                loggedInUserType
+            ), document
+        );
         objectMapper.registerModule(new ParameterNamesModule());
         QuarantineLegalDoc finalQuarantineDocument = objectMapper.convertValue(hashMap, QuarantineLegalDoc.class);
         return finalQuarantineDocument.toBuilder()
@@ -517,7 +526,7 @@ public class ManageDocumentsService {
     }
 
     public QuarantineLegalDoc addQuarantineDocumentFields(QuarantineLegalDoc legalProfUploadDoc,
-                                                           QuarantineLegalDoc quarantineLegalDoc) {
+                                                          QuarantineLegalDoc quarantineLegalDoc) {
 
         return legalProfUploadDoc.toBuilder()
             .documentParty(quarantineLegalDoc.getDocumentParty())
@@ -550,8 +559,9 @@ public class ManageDocumentsService {
         try {
             String sysUserToken = systemUserService.getSysUserToken();
             String serviceToken = authTokenGenerator.generate();
-            Resource resource = caseDocumentClient.getDocumentBinary(sysUserToken, serviceToken,
-                                                                     documentId
+            Resource resource = caseDocumentClient.getDocumentBinary(
+                sysUserToken, serviceToken,
+                documentId
             ).getBody();
             docData = IOUtils.toByteArray(resource.getInputStream());
             UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
@@ -605,8 +615,10 @@ public class ManageDocumentsService {
             case COURT_STAFF ->
                 quarantineLegalDoc.toBuilder().courtStaffQuarantineDocument(manageDocument.getDocument()).build();
             case BULK_SCAN -> quarantineLegalDoc.toBuilder().url(manageDocument.getDocument()).build();
-            case CITIZEN -> quarantineLegalDoc.toBuilder().citizenQuarantineDocument(manageDocument.getDocument()).build();
-            case COURTNAV -> quarantineLegalDoc.toBuilder().courtNavQuarantineDocument(manageDocument.getDocument()).build();
+            case CITIZEN ->
+                quarantineLegalDoc.toBuilder().citizenQuarantineDocument(manageDocument.getDocument()).build();
+            case COURTNAV ->
+                quarantineLegalDoc.toBuilder().courtNavQuarantineDocument(manageDocument.getDocument()).build();
             default -> null;
         };
     }
@@ -616,7 +628,8 @@ public class ManageDocumentsService {
         if (isCourtSelectedInDocumentParty(callbackRequest)
             && !checkIfUserIsCourtStaff(userDetails)) {
             if (PrlAppsConstants.WELSH.equals(language)) {
-                return List.of("Dim ond staff gweinyddol y llys/Barnwr all ddewis yr opsiwn ‘llys’ ar gyfer yr opsiwn ‘cyflwyno ar ran’");
+                return List.of(
+                    "Dim ond staff gweinyddol y llys/Barnwr all ddewis yr opsiwn ‘llys’ ar gyfer yr opsiwn ‘cyflwyno ar ran’");
             } else {
                 return List.of("Only court admin/Judge can select the value 'court' for 'submitting on behalf of'");
             }
@@ -634,7 +647,7 @@ public class ManageDocumentsService {
             .anyMatch(element -> DocumentPartyEnum.COURT.equals(element.getValue().getDocumentParty()));
     }
 
-    private void updateCaseDataUpdatedByRole(Map<String,Object> caseDataUpdated,
+    private void updateCaseDataUpdatedByRole(Map<String, Object> caseDataUpdated,
                                              String userRole) {
 
         if (SOLICITOR.equals(userRole)) {
@@ -643,7 +656,7 @@ public class ManageDocumentsService {
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "CAFCASS");
         } else if (LOCAL_AUTHORITY.equals(userRole)) {
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "LOCAL_AUTHORITY");
-        }else if (COURT_STAFF.equals(userRole)) {
+        } else if (COURT_STAFF.equals(userRole)) {
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "STAFF");
         } else if (CITIZEN.equals(userRole)) {
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "CITIZEN");
@@ -667,26 +680,22 @@ public class ManageDocumentsService {
                                                         List<Element<QuarantineLegalDoc>> quarantineDocs,
                                                         String userRole, boolean isDocumentTab) {
         switch (userRole) {
-            case SOLICITOR ->
-                caseDataUpdated.put(
-                    isDocumentTab ? "legalProfUploadDocListDocTab" : "legalProfQuarantineDocsList",
-                    quarantineDocs
-                );
-            case CAFCASS ->
-                caseDataUpdated.put(
-                    isDocumentTab ? "cafcassUploadDocListDocTab" : "cafcassQuarantineDocsList",
-                    quarantineDocs
-                );
-            case LOCAL_AUTHORITY ->
-                caseDataUpdated.put(
-                    isDocumentTab ? "localAuthorityUploadDocListDocTab" : "localAuthorityQuarantineDocsList",
-                    quarantineDocs
-                );
-            case COURT_STAFF ->
-                caseDataUpdated.put(
-                    isDocumentTab ? "courtStaffUploadDocListDocTab" : "courtStaffQuarantineDocsList",
-                    quarantineDocs
-                );
+            case SOLICITOR -> caseDataUpdated.put(
+                isDocumentTab ? "legalProfUploadDocListDocTab" : "legalProfQuarantineDocsList",
+                quarantineDocs
+            );
+            case CAFCASS -> caseDataUpdated.put(
+                isDocumentTab ? "cafcassUploadDocListDocTab" : "cafcassQuarantineDocsList",
+                quarantineDocs
+            );
+            case LOCAL_AUTHORITY -> caseDataUpdated.put(
+                isDocumentTab ? "localAuthorityUploadDocListDocTab" : "localAuthorityQuarantineDocsList",
+                quarantineDocs
+            );
+            case COURT_STAFF -> caseDataUpdated.put(
+                isDocumentTab ? "courtStaffUploadDocListDocTab" : "courtStaffQuarantineDocsList",
+                quarantineDocs
+            );
             case COURT_ADMIN -> {
                 if (isDocumentTab) {
                     caseDataUpdated.put("courtStaffUploadDocListDocTab", quarantineDocs);
@@ -697,16 +706,14 @@ public class ManageDocumentsService {
                     caseDataUpdated.put("bulkScannedDocListDocTab", quarantineDocs);
                 }
             }
-            case COURTNAV ->
-                caseDataUpdated.put(
-                    isDocumentTab ? "courtNavUploadedDocListDocTab" : "courtNavQuarantineDocumentList",
-                    quarantineDocs
-                );
-            case CITIZEN ->
-                caseDataUpdated.put(
-                    isDocumentTab ? "citizenUploadedDocListDocTab" : "citizenQuarantineDocsList",
-                    quarantineDocs
-                );
+            case COURTNAV -> caseDataUpdated.put(
+                isDocumentTab ? "courtNavUploadedDocListDocTab" : "courtNavQuarantineDocumentList",
+                quarantineDocs
+            );
+            case CITIZEN -> caseDataUpdated.put(
+                isDocumentTab ? "citizenUploadedDocListDocTab" : "citizenQuarantineDocsList",
+                quarantineDocs
+            );
             default -> throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
         }
     }
@@ -720,14 +727,14 @@ public class ManageDocumentsService {
 
         return switch (userRole) {
             case SOLICITOR -> getQuarantineOrUploadDocsBasedOnDocumentTab(
-                    isDocumentTab,
-                    caseData.getReviewDocuments().getLegalProfUploadDocListDocTab(),
-                    caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList()
+                isDocumentTab,
+                caseData.getReviewDocuments().getLegalProfUploadDocListDocTab(),
+                caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList()
             );
             case CAFCASS -> getQuarantineOrUploadDocsBasedOnDocumentTab(
-                    isDocumentTab,
-                    caseData.getReviewDocuments().getCafcassUploadDocListDocTab(),
-                    caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList()
+                isDocumentTab,
+                caseData.getReviewDocuments().getCafcassUploadDocListDocTab(),
+                caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList()
             );
             case LOCAL_AUTHORITY -> getQuarantineOrUploadDocsBasedOnDocumentTab(
                 isDocumentTab,
@@ -735,14 +742,14 @@ public class ManageDocumentsService {
                 caseData.getDocumentManagementDetails().getLocalAuthorityQuarantineDocsList()
             );
             case COURT_STAFF -> getQuarantineOrUploadDocsBasedOnDocumentTab(
-                    isDocumentTab,
-                    caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
-                    caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList()
+                isDocumentTab,
+                caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
+                caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList()
             );
             case COURT_ADMIN -> getQuarantineOrUploadDocsBasedOnDocumentTab(
-                    isDocumentTab,
-                    caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
-                    caseData.getReviewDocuments().getCourtStaffUploadDocListConfTab()//not in use
+                isDocumentTab,
+                caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
+                caseData.getReviewDocuments().getCourtStaffUploadDocListConfTab()//not in use
             );
             case BULK_SCAN -> getQuarantineOrUploadDocsBasedOnDocumentTab(
                 isDocumentTab,
@@ -832,7 +839,7 @@ public class ManageDocumentsService {
     }
 
     private void deleteCopyOfRenamedConfidentialDocument(List<Element<QuarantineLegalDoc>> previousConfidentialDocuments,
-                                           List<Element<QuarantineLegalDoc>> currentConfidentialDocuments) {
+                                                         List<Element<QuarantineLegalDoc>> currentConfidentialDocuments) {
 
         currentConfidentialDocuments.forEach(
             docElement -> {
@@ -847,7 +854,8 @@ public class ManageDocumentsService {
                                 null
                             );
                             Document docToDelete = objectMapper.convertValue(
-                                objectMapper.convertValue(previousDocElement.get().getValue(), Map.class).get(attributeName),
+                                objectMapper.convertValue(previousDocElement.get().getValue(), Map.class).get(
+                                    attributeName),
                                 Document.class
                             );
                             deleteDocument(docToDelete);
@@ -935,8 +943,7 @@ public class ManageDocumentsService {
                     loggedInUserType.add(COURT_ADMIN_ROLE);
                 } else if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.CAFCASS_CYMRU.getRoles()::contains)) {
                     loggedInUserType.add(UserRoles.CAFCASS.name());
-                }
-                else if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.LOCAL_AUTHORITY.getRoles()::contains)) {
+                } else if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.LOCAL_AUTHORITY.getRoles()::contains)) {
                     loggedInUserType.add(UserRoles.LOCAL_AUTHORITY.name());
                 }
             } else if (roles.contains(Roles.BULK_SCAN.getValue())) {
@@ -965,7 +972,7 @@ public class ManageDocumentsService {
             loggedInUserType.add(CITIZEN_ROLE);
         } else if (roles.contains(Roles.BULK_SCAN.getValue())) {
             loggedInUserType.add(BULK_SCAN);
-        }else if (roles.contains(Roles.LOCAL_AUTHORITY_SOLICITOR.getValue())) {
+        } else if (roles.contains(Roles.LOCAL_AUTHORITY_SOLICITOR.getValue())) {
             loggedInUserType.add(UserRoles.LOCAL_AUTHORITY.name());
         } else {
             loggedInUserType.add(UserRoles.CAFCASS.name());
@@ -973,12 +980,16 @@ public class ManageDocumentsService {
     }
 
     private DocumentPartyEnum setDefaultDocumentParty(boolean isUserRoleLA) {
-        return isUserRoleLA ? DocumentPartyEnum.LOCAL_AUTHORITY :  null;
+        return isUserRoleLA ? DocumentPartyEnum.LOCAL_AUTHORITY : null;
     }
 
     private boolean isUserAllocatedRoleForCaseLA(String caseId, String idamId) {
         return roleAssignmentService.isUserAllocatedRoleForCase(caseId, idamId, Roles.LOCAL_AUTHORITY_STAFF.getValue())
-            || roleAssignmentService.isUserAllocatedRoleForCase(caseId, idamId, Roles.LOCAL_AUTHORITY_SOLICITOR.getValue());
+            || roleAssignmentService.isUserAllocatedRoleForCase(
+            caseId,
+            idamId,
+            Roles.LOCAL_AUTHORITY_SOLICITOR.getValue()
+        );
         //return true;
     }
 }
