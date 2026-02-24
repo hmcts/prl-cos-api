@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -143,20 +144,32 @@ public class BaisDocumentUploadService {
             .courtName(caseData.getCourtName())
             .courtEpimsId(caseData.getCourtEpimsId())
             .courtTypeId(caseData.getCourtTypeId())
-            .dateOrderMade(formateOrderMadeDate(order))
+            .dateOrderMade(formatOrderMadeDate(order))
             .orderExpiryDate(getOrderExpiryDate(order))
             .familymanCaseNumber(caseData.getFamilymanCaseNumber())
             .build();
     }
 
-    private static String formateOrderMadeDate(OrderDetails order) {
-
+    private String formatOrderMadeDate(OrderDetails order) {
         String orderMadeDate = order.getOtherDetails().getOrderMadeDate();
-        DateTimeFormatter inputFormatter =  DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH);
-        DateTimeFormatter outputFormatter =  DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        LocalDate date = LocalDate.parse(orderMadeDate, inputFormatter);
-        return date.format(outputFormatter);
+
+        if (orderMadeDate == null || orderMadeDate.isBlank()) {
+            return "";
+        }
+
+        DateTimeFormatter inputFormatter =
+            DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH);
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        try {
+            LocalDate date = LocalDate.parse(orderMadeDate.trim(), inputFormatter);
+            return date.format(outputFormatter);
+        } catch (DateTimeParseException e) {
+            log.error("Invalid date format: {}", orderMadeDate);
+            return "";
+        }
     }
+
 
     private String getFilePrefix(String caseId, LocalDateTime orderCreatedDate) {
         ZonedDateTime zdt = ZonedDateTime.of(orderCreatedDate, ZoneId.systemDefault());
