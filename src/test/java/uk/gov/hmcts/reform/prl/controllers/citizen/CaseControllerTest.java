@@ -11,7 +11,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -141,7 +140,7 @@ public class CaseControllerTest {
         when(userInfo.getRoles()).thenReturn(List.of(CASEWORKER_ROLE));
         when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Optional.of(userInfo));
 
-        assertThrows(INVALID_ROLE, ResponseStatusException.class,
+        assertThrows(INVALID_ROLE, RuntimeException.class,
                      () -> caseController.getCase(TEST_CASE_ID, AUTH_TOKEN, SERV_AUTH_TOKEN));
     }
 
@@ -156,7 +155,7 @@ public class CaseControllerTest {
 
         when(authorisationService.isAuthorized(AUTH_TOKEN, SERV_AUTH_TOKEN)).thenReturn(false);
 
-        assertThrows(INVALID_CLIENT, ResponseStatusException.class,
+        assertThrows(INVALID_CLIENT, RuntimeException.class,
                      () -> caseController.getCase(TEST_CASE_ID, AUTH_TOKEN, SERV_AUTH_TOKEN));
     }
 
@@ -193,7 +192,7 @@ public class CaseControllerTest {
         when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Optional.of(userInfo));
 
 
-        assertThrows(INVALID_ROLE, ResponseStatusException.class,
+        assertThrows(INVALID_ROLE, RuntimeException.class,
                      () -> caseController.retrieveCaseWithHearing(TEST_CASE_ID, "test", AUTH_TOKEN, SERV_AUTH_TOKEN));
     }
 
@@ -207,7 +206,7 @@ public class CaseControllerTest {
             .build();
 
         when(authorisationService.isAuthorized(AUTH_TOKEN, SERV_AUTH_TOKEN)).thenReturn(false);
-        assertThrows(INVALID_CLIENT, ResponseStatusException.class,
+        assertThrows(INVALID_CLIENT, RuntimeException.class,
                      () -> caseController.retrieveCaseWithHearing(TEST_CASE_ID, "test", AUTH_TOKEN, SERV_AUTH_TOKEN));
     }
 
@@ -282,7 +281,7 @@ public class CaseControllerTest {
         when(userInfo.getRoles()).thenReturn(List.of(CASEWORKER_ROLE));
         when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Optional.of(userInfo));
 
-        assertThrows(INVALID_ROLE, ResponseStatusException.class,
+        assertThrows(INVALID_ROLE, RuntimeException.class,
                      () -> caseController.updateCase(caseData, TEST_CASE_ID,
                                                      "test", AUTH_TOKEN, SERV_AUTH_TOKEN, "test"));
     }
@@ -297,7 +296,7 @@ public class CaseControllerTest {
             .build();
 
         when(authorisationService.isAuthorized(AUTH_TOKEN, SERV_AUTH_TOKEN)).thenReturn(false);
-        assertThrows(INVALID_CLIENT, ResponseStatusException.class,
+        assertThrows(INVALID_CLIENT, RuntimeException.class,
                      () -> caseController.updateCase(caseData, TEST_CASE_ID,
                                                      "test", AUTH_TOKEN, SERV_AUTH_TOKEN, "test"));
     }
@@ -340,7 +339,7 @@ public class CaseControllerTest {
     @Test
     public void testRetrieveCaseInvalidClient() {
         when(authorisationService.isAuthorized(AUTH_TOKEN, SERV_AUTH_TOKEN)).thenReturn(false);
-        assertThrows(INVALID_CLIENT, ResponseStatusException.class,
+        assertThrows(INVALID_CLIENT, RuntimeException.class,
                      () -> caseController.retrieveCases(TEST_CASE_ID, TEST_CASE_ID, AUTH_TOKEN, SERV_AUTH_TOKEN));
     }
 
@@ -382,14 +381,14 @@ public class CaseControllerTest {
         when(userInfo.getRoles()).thenReturn(List.of(CASEWORKER_ROLE));
         when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Optional.of(userInfo));
 
-        assertThrows(INVALID_ROLE, ResponseStatusException.class,
+        assertThrows(INVALID_ROLE, RuntimeException.class,
                      () -> caseController.retrieveCitizenCases(AUTH_TOKEN, SERV_AUTH_TOKEN));
     }
 
     @Test
     public void testRetrieveCitizenCaseInvalidClient() {
         when(authorisationService.isAuthorized(AUTH_TOKEN, SERV_AUTH_TOKEN)).thenReturn(false);
-        assertThrows(INVALID_CLIENT, ResponseStatusException.class,
+        assertThrows(INVALID_CLIENT, RuntimeException.class,
                      () -> caseController.retrieveCitizenCases(AUTH_TOKEN, SERV_AUTH_TOKEN));
     }
 
@@ -430,7 +429,7 @@ public class CaseControllerTest {
         when(userInfo.getRoles()).thenReturn(List.of(CASEWORKER_ROLE));
         when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Optional.of(userInfo));
 
-        assertThrows(INVALID_ROLE, ResponseStatusException.class,
+        assertThrows(INVALID_ROLE, RuntimeException.class,
                      () -> caseController.createCase(AUTH_TOKEN, SERV_AUTH_TOKEN, caseData));
     }
 
@@ -444,7 +443,7 @@ public class CaseControllerTest {
             .build();
 
         when(authorisationService.isAuthorized(AUTH_TOKEN, SERV_AUTH_TOKEN)).thenReturn(false);
-        assertThrows(INVALID_CLIENT, ResponseStatusException.class,
+        assertThrows(INVALID_CLIENT, RuntimeException.class,
                      () -> caseController.createCase(AUTH_TOKEN, SERV_AUTH_TOKEN, caseData));
     }
 
@@ -468,14 +467,14 @@ public class CaseControllerTest {
         when(userInfo.getRoles()).thenReturn(List.of(CASEWORKER_ROLE));
         when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Optional.of(userInfo));
 
-        assertThrows(INVALID_ROLE, ResponseStatusException.class,
+        assertThrows(INVALID_ROLE, RuntimeException.class,
                      () -> caseController.getAllHearingsForCitizenCase(AUTH_TOKEN, SERV_AUTH_TOKEN, "test"));
     }
 
     @Test
     public void testGetAllHearingsForCaseInvalidClient() {
         when(authorisationService.isAuthorized(AUTH_TOKEN, SERV_AUTH_TOKEN)).thenReturn(false);
-        assertThrows(INVALID_CLIENT, ResponseStatusException.class,
+        assertThrows(INVALID_CLIENT, RuntimeException.class,
                      () -> caseController.getAllHearingsForCitizenCase(AUTH_TOKEN, SERV_AUTH_TOKEN, "test"));
     }
 
@@ -502,7 +501,7 @@ public class CaseControllerTest {
         Mockito.when(caseService.fetchIdamAmRoles(AUTH_TOKEN, emailId)).thenReturn(amRoles);
 
 
-        assertThrows(INVALID_CLIENT, ResponseStatusException.class,
+        assertThrows(INVALID_CLIENT, RuntimeException.class,
                     () -> caseController.fetchIdamAmRoles(AUTH_TOKEN, emailId));
     }
 

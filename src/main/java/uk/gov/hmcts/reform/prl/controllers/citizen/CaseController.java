@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
@@ -42,8 +41,6 @@ import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
@@ -85,10 +82,10 @@ public class CaseController {
                     .citizenDocumentsManagement(caseService.getAllCitizenDocumentsOrders(userToken, caseData))
                     .build();
             } else {
-                throw (new ResponseStatusException(UNAUTHORIZED, INVALID_ROLE));
+                throw (new RuntimeException(INVALID_ROLE));
             }
         } else {
-            throw (new ResponseStatusException(UNAUTHORIZED, INVALID_CLIENT));
+            throw (new RuntimeException(INVALID_CLIENT));
         }
     }
 
@@ -105,10 +102,10 @@ public class CaseController {
             if (userInfo.isPresent() && userInfo.get().getRoles().contains(CITIZEN_ROLE)) {
                 return caseService.getCaseWithHearing(authorisation, caseId, hearingNeeded);
             } else {
-                throw (new ResponseStatusException(UNAUTHORIZED, INVALID_ROLE));
+                throw (new RuntimeException(INVALID_ROLE));
             }
         } else {
-            throw (new ResponseStatusException(UNAUTHORIZED, INVALID_CLIENT));
+            throw (new RuntimeException(INVALID_CLIENT));
         }
     }
 
@@ -137,10 +134,10 @@ public class CaseController {
                 return updatedCaseData
                     .toBuilder().id(caseDetails.getId()).build();
             } else {
-                throw (new ResponseStatusException(UNAUTHORIZED, INVALID_ROLE));
+                throw (new RuntimeException(INVALID_ROLE));
             }
         } else {
-            throw (new ResponseStatusException(UNAUTHORIZED, INVALID_CLIENT));
+            throw (new RuntimeException(INVALID_CLIENT));
         }
     }
 
@@ -154,7 +151,7 @@ public class CaseController {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             return caseService.retrieveCases(authorisation, authTokenGenerator.generate());
         } else {
-            throw (new ResponseStatusException(UNAUTHORIZED, INVALID_CLIENT));
+            throw (new RuntimeException(INVALID_CLIENT));
         }
     }
 
@@ -169,10 +166,10 @@ public class CaseController {
             if (userInfo.isPresent() && userInfo.get().getRoles().contains(CITIZEN_ROLE)) {
                 caseDataList = caseService.retrieveCases(authorisation, authTokenGenerator.generate());
             } else {
-                throw (new ResponseStatusException(UNAUTHORIZED, INVALID_ROLE));
+                throw (new RuntimeException(INVALID_ROLE));
             }
         } else {
-            throw (new ResponseStatusException(UNAUTHORIZED, INVALID_CLIENT));
+            throw (new RuntimeException(INVALID_CLIENT));
         }
         return caseDataList.stream().map(this::buildCitizenCaseData).toList();
     }
@@ -205,10 +202,10 @@ public class CaseController {
                 return createdCaseData.toBuilder().noOfDaysRemainingToSubmitCase(
                     PrlAppsConstants.CASE_SUBMISSION_THRESHOLD).build();
             } else {
-                throw (new ResponseStatusException(UNAUTHORIZED, INVALID_ROLE));
+                throw (new RuntimeException(INVALID_ROLE));
             }
         } else {
-            throw (new ResponseStatusException(UNAUTHORIZED, INVALID_CLIENT));
+            throw (new RuntimeException(INVALID_CLIENT));
         }
     }
 
@@ -228,10 +225,10 @@ public class CaseController {
             if (userInfo.isPresent() && userInfo.get().getRoles().contains(CITIZEN_ROLE)) {
                 return hearingService.getHearings(authorisation, caseId);
             } else {
-                throw (new ResponseStatusException(UNAUTHORIZED, INVALID_ROLE));
+                throw (new RuntimeException(INVALID_ROLE));
             }
         } else {
-            throw (new ResponseStatusException(UNAUTHORIZED, INVALID_CLIENT));
+            throw (new RuntimeException(INVALID_CLIENT));
         }
     }
 
@@ -249,7 +246,7 @@ public class CaseController {
         if (userInfo.isPresent()) {
             return caseService.fetchIdamAmRoles(authorisation, emailId);
         } else {
-            throw (new ResponseStatusException(INTERNAL_SERVER_ERROR,INVALID_CLIENT));
+            throw (new RuntimeException(INVALID_CLIENT));
         }
     }
 }
