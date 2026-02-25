@@ -14,11 +14,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.cafcass.CaseDataService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassCaseDataService;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -52,7 +54,10 @@ public class CafCassControllerIntegrationTest {
     private AuthTokenGenerator authTokenGenerator;
 
     @MockBean
-    CaseDataService caseDataService;
+    private UserInfo userInfo;
+
+    @MockBean
+    CafcassCaseDataService cafcassCaseDataService;
 
     @Before
     public void setUp() {
@@ -64,8 +69,8 @@ public class CafCassControllerIntegrationTest {
     public void givenValidDatetimeRangeSearchCasesByCafCassControllerReturnOkStatus() throws Exception {
         Mockito.when(authorisationService.authoriseService(any())).thenReturn(true);
         Mockito.when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_AUTH_TOKEN);
-        Mockito.when(authorisationService.authoriseUser(any())).thenReturn(true);
-        Mockito.when(caseDataService.getCaseData(anyString(), anyString(), anyString()))
+        Mockito.when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
+        Mockito.when(cafcassCaseDataService.getCaseData(anyString(), anyString(), anyString()))
             .thenReturn(CafCassResponse.builder().cases(new ArrayList<>()).build());
 
         mockMvc.perform(get(SEARCH_CASE_ENDPOINT)
