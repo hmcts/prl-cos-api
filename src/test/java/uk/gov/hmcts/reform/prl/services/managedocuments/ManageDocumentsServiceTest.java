@@ -1071,6 +1071,34 @@ public class ManageDocumentsServiceTest {
         assertNull(caseDataMapUpdated.get("manageDocuments"));
     }
 
+    @Test
+    public void testCopyDocumentWithEmptyOrNullDocumentList() {
+
+        ManageDocuments manageDocuments = null;
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments",manageDocuments);
+
+        CaseData caseData = CaseData.builder()
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(null)
+                                           .build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsCafcassRole);
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
+            "caseworker-privatelaw-externaluser-viewonly");
+        when(roleAssignmentApi.getRoleAssignments(auth, authTokenGenerator.generate(), null, "234")).thenReturn(
+            roleAssignmentServiceResponse);
+
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
+
+        assertTrue(caseDataMapUpdated.isEmpty());
+        assertNull(caseDataMapUpdated.get("manageDocuments"));
+    }
 
     @Test
     public void testCopyDocumentIfRestrictedWithCourtAdminRoleNonEmptyCourtStaffUploadDocListDocTab() {
