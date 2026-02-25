@@ -38,6 +38,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocumen
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
@@ -58,6 +59,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
@@ -78,6 +80,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIONAL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESTRICTED_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
@@ -892,15 +895,22 @@ public class ManageDocumentsService {
                 null,
                 userDetails.getId()
             );
-            if (roles.contains(Roles.SOLICITOR.getValue())) {
+
+            List<String> amRoles = Optional.ofNullable(roleAssignmentServiceResponse).isPresent()
+                ? roleAssignmentServiceResponse.getRoleAssignmentResponse()
+                .stream()
+                .map(RoleAssignmentResponse::getRoleName).toList()
+                : List.of();
+
+            if (roles.contains(Roles.SOLICITOR.getValue()) && !amRoles.isEmpty()
+                && amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.LOCAL_AUTHORITY.getRoles()::contains)) {
+                loggedInUserType.add(LOCAL_AUTHORITY);
+            } else if (roles.contains(Roles.SOLICITOR.getValue())) {
                 loggedInUserType.add(LEGAL_PROFESSIONAL);
                 loggedInUserType.add(SOLICITOR_ROLE);
             } else if (roles.contains(Roles.CITIZEN.getValue())) {
                 loggedInUserType.add(CITIZEN_ROLE);
-            } else if (roleAssignmentServiceResponse != null) {
-                List<String> amRoles = roleAssignmentServiceResponse.getRoleAssignmentResponse()
-                    .stream()
-                    .map(role -> role.getRoleName()).toList();
+            } else if (!amRoles.isEmpty()) {
                 if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.JUDGE.getRoles()::contains)) {
                     loggedInUserType.add(COURT_STAFF);
                     loggedInUserType.add(JUDGE_ROLE);
@@ -912,8 +922,6 @@ public class ManageDocumentsService {
                     loggedInUserType.add(COURT_ADMIN_ROLE);
                 } else if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.CAFCASS_CYMRU.getRoles()::contains)) {
                     loggedInUserType.add(UserRoles.CAFCASS.name());
-                } else if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.LOCAL_AUTHORITY.getRoles()::contains)) {
-                    loggedInUserType.add(UserRoles.LOCAL_AUTHORITY.name());
                 }
             } else if (roles.contains(Roles.BULK_SCAN.getValue())) {
                 loggedInUserType.add(BULK_SCAN);
