@@ -18,14 +18,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static junit.framework.TestCase.assertNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWAITING_INFORMATION_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_STATUS;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -220,79 +218,6 @@ public class AwaitingInformationServiceTest {
         assertTrue(result.containsKey(CASE_STATUS));
     }
 
-    @Test
-    public void awaitingInformationDetailsContainsBothReviewDateAndReasonList() {
-        // Given
-        LocalDate reviewDate = LocalDate.now().plusDays(10);
-        caseDataMap.put("reviewByDate", reviewDate);
-        caseDataMap.put("awaitingInformationReasonList", AwaitingInformationReasonEnum.applicantFurtherInformation);
-        when(objectMapper.convertValue(eq(caseDataMap), eq(AwaitingInformation.class)))
-            .thenReturn(awaitingInformation);
-
-        // When
-        Map<String, Object> result = awaitingInformationService.addToCase(callbackRequest);
-
-        // Then
-        assertNotNull(result);
-        assertTrue(result.containsKey(AWAITING_INFORMATION_DETAILS));
-        Map<String, Object> awaitingInfoDetails = (Map<String, Object>) result.get(AWAITING_INFORMATION_DETAILS);
-        assertNotNull(awaitingInfoDetails);
-        assertEquals(2, awaitingInfoDetails.size());
-        assertEquals(reviewDate, awaitingInfoDetails.get("reviewByDate"));
-        assertEquals(
-            AwaitingInformationReasonEnum.applicantFurtherInformation,
-            awaitingInfoDetails.get("awaitingInformationReasonList")
-        );
-    }
-
-
-    @Test
-    public void awaitingInformationDetailsNotCreatedWhenKeysNotPresent() {
-        // Given
-        // caseDataMap does not contain reviewByDate or awaitingInformationReasonList
-        when(objectMapper.convertValue(eq(caseDataMap), eq(AwaitingInformation.class)))
-            .thenReturn(awaitingInformation);
-
-        // When
-        Map<String, Object> result = awaitingInformationService.addToCase(callbackRequest);
-
-        // Then
-        assertNotNull(result);
-        assertTrue(result.containsKey(AWAITING_INFORMATION_DETAILS));
-        Map<String, Object> awaitingInfoDetails = (Map<String, Object>) result.get(AWAITING_INFORMATION_DETAILS);
-        assertNotNull(awaitingInfoDetails);
-        assertEquals(2, awaitingInfoDetails.size());
-        assertNull(awaitingInfoDetails.get("reviewByDate"));
-        assertNull(awaitingInfoDetails.get("awaitingInformationReasonList"));
-    }
-
-    @Test
-    public void awaitingInformationDetailsWithDifferentReasonEnums() {
-        // Given
-        AwaitingInformationReasonEnum[] reasons = {
-            AwaitingInformationReasonEnum.dwpHmrcWhereaboutsUnknown,
-            AwaitingInformationReasonEnum.applicantFurtherInformation,
-            AwaitingInformationReasonEnum.applicantClarifyConfidentialDetails,
-            AwaitingInformationReasonEnum.respondentFurtherInformation
-        };
-
-        for (AwaitingInformationReasonEnum reason : reasons) {
-            caseDataMap.put("reviewByDate", LocalDate.now().plusDays(10));
-            caseDataMap.put("awaitingInformationReasonList", reason);
-            when(objectMapper.convertValue(eq(caseDataMap), eq(AwaitingInformation.class)))
-                .thenReturn(awaitingInformation);
-
-            // When
-            Map<String, Object> result = awaitingInformationService.addToCase(callbackRequest);
-
-            // Then
-            assertNotNull(result);
-            assertTrue(result.containsKey(AWAITING_INFORMATION_DETAILS));
-            Map<String, Object> awaitingInfoDetails = (Map<String, Object>) result.get(AWAITING_INFORMATION_DETAILS);
-            assertNotNull(awaitingInfoDetails);
-            assertEquals(reason, awaitingInfoDetails.get("awaitingInformationReasonList"));
-        }
-    }
 
 }
 

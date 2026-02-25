@@ -13,11 +13,9 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWAITING_INFORMATION_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_STATUS;
 import static uk.gov.hmcts.reform.prl.enums.State.AWAITING_INFORMATION;
 
@@ -47,11 +45,6 @@ public class AwaitingInformationService {
                 .state(AWAITING_INFORMATION.getLabel())
                 .build()
         );
-        Map<String, Object> awaitingInformationDetails = new HashMap<>();
-        awaitingInformationDetails.put("reviewByDate", caseDataUpdated.get("reviewByDate"));
-        awaitingInformationDetails.put("awaitingInformationReasonList", caseDataUpdated.get("awaitingInformationReasonList"));
-        caseDataUpdated.put(AWAITING_INFORMATION_DETAILS,awaitingInformationDetails);
-
         CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
         return caseDataUpdated;
     }
