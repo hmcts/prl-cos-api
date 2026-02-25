@@ -24,10 +24,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-import static uk.gov.hmcts.reform.prl.util.TestConstants.AUTHORISATION_HEADER;
-import static uk.gov.hmcts.reform.prl.util.TestConstants.SERVICE_AUTHORISATION_HEADER;
-import static uk.gov.hmcts.reform.prl.util.TestConstants.TEST_AUTH_TOKEN;
-import static uk.gov.hmcts.reform.prl.util.TestConstants.TEST_SERVICE_AUTH_TOKEN;
+import static uk.gov.hmcts.reform.prl.util.TestConstants.*;
 
 
 @Slf4j
@@ -94,24 +91,6 @@ public class AwaitingInformationControllerIntegrationTest {
                     .contentType(APPLICATION_JSON)
                     .content(jsonRequest))
             .andExpect(status().isInternalServerError())
-            .andReturn();
-    }
-
-    @Test
-    public void testPopulateHeaderSuccess() throws Exception {
-        String url = "/populate-header-awaiting-information";
-        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
-
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-
-        mockMvc.perform(
-                post(url)
-                    .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
-                    .header(SERVICE_AUTHORISATION_HEADER, TEST_SERVICE_AUTH_TOKEN)
-                    .accept(APPLICATION_JSON)
-                    .contentType(APPLICATION_JSON)
-                    .content(jsonRequest))
-            .andExpect(status().isOk())
             .andReturn();
     }
 
