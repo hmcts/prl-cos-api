@@ -806,7 +806,7 @@ public class PrlAppsConstants {
     public static final String HMC_STATUS_COMPLETED = "COMPLETED";
 
     public static final String CAFCASS = "Cafcass";
-    public  static final String LOCAL_AUTHORITY = "Local Authority";//TODO review the value later
+    public  static final String LOCAL_AUTHORITY = "LOCAL_AUTHORITY";//TODO review the value later
 
     public static final String APPLICANTS = "applicants";
     public static final String RESPONDENTS = "respondents";

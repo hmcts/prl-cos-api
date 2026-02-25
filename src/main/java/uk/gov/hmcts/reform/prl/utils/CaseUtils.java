@@ -91,6 +91,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM_TASK;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL_AND_POST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_POST;
@@ -415,6 +416,8 @@ public class CaseUtils {
             return BULK_SCAN;
         } else if (roles.contains(CITIZEN_ROLE)) {
             return CITIZEN;
+        } else if (roles.contains(LOCAL_AUTHORITY)) {
+            return LOCAL_AUTHORITY;
         }
 
         return CAFCASS;
