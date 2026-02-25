@@ -18,6 +18,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RespondentBehaviourMapperTest {
 
@@ -92,9 +93,8 @@ class RespondentBehaviourMapperTest {
 
         RespondentBehaviour result = mapper.map(source);
 
-        assertNotNull(result);
-        assertNull(result.getApplicantWantToStopFromRespondentDoing());
-        assertNull(result.getApplicantWantToStopFromRespondentDoingToChild());
+        assertTrue(result.getApplicantWantToStopFromRespondentDoing().isEmpty());
+        assertTrue(result.getApplicantWantToStopFromRespondentDoingToChild().isEmpty());
         assertEquals("Nothing", result.getOtherReasonApplicantWantToStopFromRespondentDoing());
     }
 }
