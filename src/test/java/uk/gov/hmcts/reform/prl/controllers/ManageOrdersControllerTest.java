@@ -52,7 +52,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
@@ -77,7 +76,6 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.TaskUtils;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -87,7 +85,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Predicate;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -1585,115 +1582,6 @@ public class ManageOrdersControllerTest {
         List<Element<AppointedGuardianFullName>> namesList = new ArrayList<>();
         verify(manageOrderService, times(1))
             .updateCaseDataWithAppointedGuardianNames(caseDetails, namesList);
-    }
-
-
-    @Test
-    @Ignore
-    public void testSubmitManageOrderCafacassEmailNotification() throws Exception {
-
-        applicant = PartyDetails.builder()
-            .firstName("TestFirst")
-            .lastName("TestLast")
-            .email("applicant@tests.com")
-            .canYouProvideEmailAddress(Yes)
-            .isEmailAddressConfidential(No)
-            .isAddressConfidential(No)
-            .solicitorEmail("test@test.com")
-            .build();
-
-        respondent = PartyDetails.builder()
-            .firstName("TestFirst")
-            .lastName("TestLast")
-            .canYouProvideEmailAddress(Yes)
-            .email("respondent@tests.com")
-            .isEmailAddressConfidential(No)
-            .isAddressConfidential(No)
-            .solicitorEmail("test@test.com")
-            .build();
-
-        CaseDetails caseDetails = CaseDetails.builder()
-            .state(State.CASE_ISSUED.getValue())
-            .build();
-
-        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
-        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
-
-        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
-        List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
-
-        List<LiveWithEnum> childLiveWithList = new ArrayList<>();
-        childLiveWithList.add(LiveWithEnum.applicant);
-
-        Child child = Child.builder()
-            .childLiveWith(childLiveWithList)
-            .build();
-
-        String childNames = "child1 child2";
-
-        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
-        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
-
-        String cafcassEmail = "testing@cafcass.com";
-
-        Element<String> wrappedCafcass = Element.<String>builder().value(cafcassEmail).build();
-        List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
-
-        ManageOrders manageOrders = ManageOrders.builder()
-            .cafcassEmailAddress(listOfCafcassEmail)
-            .build();
-
-        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
-            .binaryUrl("binaryUrl")
-            .hashToken("testHashToken")
-            .build();
-
-
-        caseData = CaseData.builder()
-            .id(12345L)
-            .manageOrders(ManageOrders.builder().markedToServeEmailNotification(Yes)
-                              .checkForAutomatedHearing(No).build())
-            .applicantCaseName("TestCaseName")
-            .applicantSolicitorEmailAddress("test@test.com")
-            .applicants(listOfApplicants)
-            .respondents(listOfRespondents)
-            .children(listOfChildren)
-            .courtName("testcourt")
-            .previewOrderDoc(Document.builder()
-                                 .documentUrl(generatedDocumentInfo.getUrl())
-                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                 .documentHash(generatedDocumentInfo.getHashToken())
-                                 .documentFileName("PRL-ORDER-C21-COMMON.docx")
-                                 .build())
-            .build();
-
-        Map<String, Object> summaryTabFields = Map.of(
-            "field4", "value4",
-            "field5", "value5"
-        );
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(12345L)
-                             .data(stringObjectMap)
-                             .state(State.CASE_ISSUED.getValue())
-                             .build())
-            .build();
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
-        when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
-            authToken,
-            s2sToken,
-            callbackRequest
-        );
-        verify(manageOrderEmailService, times(1))
-            .sendEmailWhenOrderIsServed("Bearer TestAuthToken", caseData, stringObjectMap);
     }
 
     @Test
