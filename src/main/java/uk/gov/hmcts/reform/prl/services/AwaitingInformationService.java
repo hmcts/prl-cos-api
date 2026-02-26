@@ -33,7 +33,7 @@ public class AwaitingInformationService {
         List<String> errorList = new ArrayList<>();
         if (featureToggleService.isAwaitingInformationEnabled() && awaitingInformation.getReviewDate()
             != null && !awaitingInformation.getReviewDate().isAfter(LocalDate.now())) {
-            errorList.add("The date must be in the future");
+            errorList.add("Please enter a future date");
         }
         return errorList;
     }
