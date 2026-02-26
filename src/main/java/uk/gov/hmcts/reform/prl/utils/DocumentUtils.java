@@ -81,7 +81,7 @@ public class DocumentUtils {
             String[] splittedCategory = StringUtils.splitByCharacterTypeCamelCase(categoryId);
 
             if (splittedCategory == null || splittedCategory.length == 0) {
-                return null;
+                return "UncategorizedDocument";
             }
             String finalCategory = "";
 
