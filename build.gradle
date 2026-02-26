@@ -42,7 +42,7 @@ def versions = [
   jsonAssert                   : '1.5.3',
   junit                        : '6.0.3',
   lombok                       : '1.18.42',
-  pact                         : '4.1.11',
+  pact                         : '4.6.20',
   pitest                       : '1.22.1',
   puppyCrawl                   : '8.45.1',
   reformsJavaLogging           : '6.1.9',
