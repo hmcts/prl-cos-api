@@ -154,13 +154,7 @@ public class ManageDocumentsService {
             if (null != categoriesAndDocuments) {
                 List<Category> parentCategories = nullSafeCollection(categoriesAndDocuments.getCategories())
                     .stream()
-                    .filter(category -> {
-                        if (isUserRoleLA) {
-                            return category.getCategoryId().equals("localAuthorityDocuments");
-                        } else {
-                            return !category.getCategoryId().equals("localAuthorityDocuments");
-                        }
-                    })
+                    .filter(category -> isUserRoleLA == category.getCategoryId().equals("localAuthorityDocuments"))
                     .sorted(Comparator.comparing(Category::getCategoryName))
                     .toList();
 
