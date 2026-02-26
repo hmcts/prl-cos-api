@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -31,6 +32,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_INVOLVED_IN_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY;
 
 @Slf4j
@@ -85,6 +87,12 @@ class LocalAuthorityControllerTest {
         // Assert
         assertNotNull(response, "Response should not be null");
         assertNotNull(response.getData(), "Response data map should not be null");
+
+        assertTrue(
+            response.getData().containsKey(LOCAL_AUTHORITY_INVOLVED_IN_CASE),
+            "Expected LOCAL_AUTHORITY_INVOLVED_IN_CASE FLAG to be set in response map"
+        );
+        assertEquals(YesOrNo.Yes, response.getData().get(LOCAL_AUTHORITY_INVOLVED_IN_CASE));
         assertTrue(
             response.getData().containsKey(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY),
             "Expected policy to be set in response map"
@@ -153,6 +161,11 @@ class LocalAuthorityControllerTest {
         // Assert
         assertNotNull(response, "Response should not be null");
         assertNotNull(response.getData(), "Response data should not be null");
+        assertTrue(
+            response.getData().containsKey(LOCAL_AUTHORITY_INVOLVED_IN_CASE),
+            "Expected LOCAL_AUTHORITY_INVOLVED_IN_CASE FLAG to be set in response map"
+        );
+        assertEquals(YesOrNo.No, response.getData().get(LOCAL_AUTHORITY_INVOLVED_IN_CASE));
         assertFalse(
             response.getData().containsKey(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY),
             "Policy key should be removed from map"

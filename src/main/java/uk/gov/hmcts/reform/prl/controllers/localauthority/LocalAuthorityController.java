@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -25,6 +26,7 @@ import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_INVOLVED_IN_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY;
 
 @Slf4j
@@ -65,6 +67,7 @@ public class LocalAuthorityController extends AbstractCallbackController {
                 LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY,
                 localAuthorityOrganisationPolicy.toBuilder().orgPolicyCaseAssignedRole("[LASOLICITOR]").build()
             );
+            caseDataUpdated.put(LOCAL_AUTHORITY_INVOLVED_IN_CASE, YesOrNo.Yes);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -90,6 +93,7 @@ public class LocalAuthorityController extends AbstractCallbackController {
 
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             caseDataUpdated.remove(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY);
+            caseDataUpdated.put(LOCAL_AUTHORITY_INVOLVED_IN_CASE, YesOrNo.No);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
