@@ -32,6 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipEnum.noneOfTheAbove;
 import static uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipOptionsEnum.cousin;
 import static uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum.applicantStopFromRespondentEnum_Value_8;
@@ -495,7 +496,7 @@ class FL401ApplicationMapperTest {
 
         CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
-        assertNull(caseData.getRespondentBehaviourData().getApplicantWantToStopFromRespondentDoing());
+        assertTrue(caseData.getRespondentBehaviourData().getApplicantWantToStopFromRespondentDoing().isEmpty());
         assertEquals(
             List.of(applicantStopFromRespondentDoingToChildEnum_Value_1),
             caseData.getRespondentBehaviourData().getApplicantWantToStopFromRespondentDoingToChild()
@@ -525,7 +526,7 @@ class FL401ApplicationMapperTest {
             List.of(applicantStopFromRespondentEnum_Value_8),
             caseData.getRespondentBehaviourData().getApplicantWantToStopFromRespondentDoing()
         );
-        assertNull(caseData.getRespondentBehaviourData().getApplicantWantToStopFromRespondentDoingToChild());
+        assertTrue(caseData.getRespondentBehaviourData().getApplicantWantToStopFromRespondentDoingToChild().isEmpty());
     }
 
     @Test
