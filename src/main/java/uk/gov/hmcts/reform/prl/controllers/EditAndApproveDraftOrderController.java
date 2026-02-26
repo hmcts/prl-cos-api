@@ -196,28 +196,6 @@ public class EditAndApproveDraftOrderController {
         }
     }
 
-    @PostMapping(path = "/judge-or-admin-edit-approve/validate-additional-parties",
-        consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Mid event callback to validate additional parties "
-        + "email addresses and others addresses for the edit and serve an order event")
-    @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse validateAdditionalPartiesForServingOrder(
-        @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            List<String> errorList = new ArrayList<>();
-            errorList.addAll(manageOrderService.validateAdditionalPartiesForServingOrder(callbackRequest));
-            errorList.addAll(manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest));
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .errors(errorList)
-                .data(callbackRequest.getCaseDetails().getData())
-                .build();
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
-    }
-
     @PostMapping(path = "/judge-or-admin-edit-approve/about-to-submit",
         consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Remove dynamic list from the caseData")
