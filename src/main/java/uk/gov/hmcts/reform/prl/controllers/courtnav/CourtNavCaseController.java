@@ -107,27 +107,27 @@ public class CourtNavCaseController {
         @RequestParam String typeOfDocument
     ) {
         Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
-        if (userInfo.isEmpty() || !Boolean.TRUE.equals(
+        if (userInfo.isPresent() && Boolean.TRUE.equals(
             authorisationService.authoriseService(serviceAuthorization))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        }
 
-        java.util.Collection<String> roles = userInfo.get().getRoles();
-
-        if (roles.contains(CAFCASS_USER_ROLE)) {
-            log.info("uploading cafcass document");
-            cafcassUploadDocService.uploadDocument(
-                systemUserService.getSysUserToken(),
-                file,
-                typeOfDocument,
-                caseId
-            );
-        } else if (roles.contains(COURTNAV)) {
-            courtNavCaseService.uploadDocument(authorisation, file, typeOfDocument, caseId);
+            if (userInfo.get().getRoles().contains(CAFCASS_USER_ROLE)) {
+                log.info("uploading cafcass document");
+                cafcassUploadDocService.uploadDocument(
+                    systemUserService.getSysUserToken(),
+                    file,
+                    typeOfDocument,
+                    caseId
+                );
+            } else {
+                if (userInfo.get().getRoles().contains(COURTNAV)) {
+                    courtNavCaseService.uploadDocument(authorisation, file, typeOfDocument, caseId);
+                } else {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+                }
+            }
+            return ResponseEntity.ok().body(new ResponseMessage("Document has been uploaded successfully: " + file.getOriginalFilename()));
         } else {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
-
-        return ResponseEntity.ok().body(new ResponseMessage("Document has been uploaded successfully: " + file.getOriginalFilename()));
     }
 }
