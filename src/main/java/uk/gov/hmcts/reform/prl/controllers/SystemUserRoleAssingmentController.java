@@ -14,8 +14,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentServiceForSystemUser;
+
+import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
@@ -35,7 +38,8 @@ public class SystemUserRoleAssingmentController {
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     public ResponseEntity<Object> assignRole(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation) {
-        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))) {
+        Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
+        if (userInfo.isPresent()) {
             roleAssignmentServiceForSystemUser.assignHearingRoleToSysUser();
             ResponseEntity<Object> response = new ResponseEntity<>(HttpStatusCode.valueOf(200));
             return response;

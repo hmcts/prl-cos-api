@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
@@ -36,10 +37,12 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.TASK_LIST_V3_FLAG;
 
@@ -56,27 +59,31 @@ public class CaseController {
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
     private final AuthTokenGenerator authTokenGenerator;
     private static final String INVALID_CLIENT = "Invalid Client";
+    private static final String INVALID_ROLE = "Invalid Role on User";
     private final LaunchDarklyClient launchDarklyClient;
-    private static final String CASE_LINKING_FAILED = "Case Linking has failed";
 
     @GetMapping(path = "/{caseId}", produces = APPLICATION_JSON)
     @Operation(description = "Frontend to fetch the data")
     public UiCitizenCaseData getCase(
         @PathVariable("caseId") String caseId,
         @RequestHeader(value = "Authorization", required = false) @Parameter(hidden = true) String userToken,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
-    ) {
-        if (authorisationService.isAuthorized(userToken, s2sToken)) {
-            CaseDetails caseDetails = caseService.getCase(userToken, caseId);
-            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-            return UiCitizenCaseData.builder()
-                .caseData(caseData.toBuilder()
-                              .noOfDaysRemainingToSubmitCase(
-                                  CaseUtils.getRemainingDaysSubmitCase(caseData))
-                              .build())
-                .citizenDocumentsManagement(caseService.getAllCitizenDocumentsOrders(userToken, caseData))
-                .build();
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken) {
 
+        if (authorisationService.isAuthorized(userToken, s2sToken)) {
+            Optional<UserInfo> userInfo = authorisationService.authoriseUser(userToken);
+            if (userInfo.isPresent() && userInfo.get().getRoles().contains(CITIZEN_ROLE)) {
+                CaseDetails caseDetails = caseService.getCase(userToken, caseId);
+                CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+                return UiCitizenCaseData.builder()
+                    .caseData(caseData.toBuilder()
+                                  .noOfDaysRemainingToSubmitCase(
+                                      CaseUtils.getRemainingDaysSubmitCase(caseData))
+                                  .build())
+                    .citizenDocumentsManagement(caseService.getAllCitizenDocumentsOrders(userToken, caseData))
+                    .build();
+            } else {
+                throw (new RuntimeException(INVALID_ROLE));
+            }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -91,7 +98,12 @@ public class CaseController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            return caseService.getCaseWithHearing(authorisation, caseId, hearingNeeded);
+            Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
+            if (userInfo.isPresent() && userInfo.get().getRoles().contains(CITIZEN_ROLE)) {
+                return caseService.getCaseWithHearing(authorisation, caseId, hearingNeeded);
+            } else {
+                throw (new RuntimeException(INVALID_ROLE));
+            }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -108,17 +120,22 @@ public class CaseController {
         @RequestHeader("accessCode") String accessCode
     ) throws JsonProcessingException {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            CaseDetails caseDetails = caseService.updateCase(
-                caseData,
-                authorisation,
-                caseId,
-                eventId
-            );
-            CaseData updatedCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-            updatedCaseData = confidentialDetailsMapper.mapConfidentialData(updatedCaseData, true);
+            Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
+            if (userInfo.isPresent() && userInfo.get().getRoles().contains(CITIZEN_ROLE)) {
+                CaseDetails caseDetails = caseService.updateCase(
+                    caseData,
+                    authorisation,
+                    caseId,
+                    eventId
+                );
+                CaseData updatedCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+                updatedCaseData = confidentialDetailsMapper.mapConfidentialData(updatedCaseData, true);
 
-            return updatedCaseData
-                .toBuilder().id(caseDetails.getId()).build();
+                return updatedCaseData
+                    .toBuilder().id(caseDetails.getId()).build();
+            } else {
+                throw (new RuntimeException(INVALID_ROLE));
+            }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -145,7 +162,12 @@ public class CaseController {
     ) {
         List<CaseData> caseDataList;
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            caseDataList = caseService.retrieveCases(authorisation, authTokenGenerator.generate());
+            Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
+            if (userInfo.isPresent() && userInfo.get().getRoles().contains(CITIZEN_ROLE)) {
+                caseDataList = caseService.retrieveCases(authorisation, authTokenGenerator.generate());
+            } else {
+                throw (new RuntimeException(INVALID_ROLE));
+            }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -167,16 +189,21 @@ public class CaseController {
                                @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
                                @RequestBody CaseData caseData) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())
-                && launchDarklyClient.isFeatureEnabled(TASK_LIST_V3_FLAG)) {
-                caseData = caseData.toBuilder()
-                    .taskListVersion(TASK_LIST_VERSION_V3)
-                    .build();
+            Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
+            if (userInfo.isPresent() && userInfo.get().getRoles().contains(CITIZEN_ROLE)) {
+                if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())
+                    && launchDarklyClient.isFeatureEnabled(TASK_LIST_V3_FLAG)) {
+                    caseData = caseData.toBuilder()
+                        .taskListVersion(TASK_LIST_VERSION_V3)
+                        .build();
+                }
+                CaseDetails caseDetails = caseService.createCase(caseData, authorisation);
+                CaseData createdCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+                return createdCaseData.toBuilder().noOfDaysRemainingToSubmitCase(
+                    PrlAppsConstants.CASE_SUBMISSION_THRESHOLD).build();
+            } else {
+                throw (new RuntimeException(INVALID_ROLE));
             }
-            CaseDetails caseDetails = caseService.createCase(caseData, authorisation);
-            CaseData createdCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-            return createdCaseData.toBuilder().noOfDaysRemainingToSubmitCase(
-                PrlAppsConstants.CASE_SUBMISSION_THRESHOLD).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -194,7 +221,12 @@ public class CaseController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @PathVariable("caseId") String caseId) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            return hearingService.getHearings(authorisation, caseId);
+            Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
+            if (userInfo.isPresent() && userInfo.get().getRoles().contains(CITIZEN_ROLE)) {
+                return hearingService.getHearings(authorisation, caseId);
+            } else {
+                throw (new RuntimeException(INVALID_ROLE));
+            }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -210,8 +242,8 @@ public class CaseController {
     public Map<String, String> fetchIdamAmRoles(
         @RequestHeader(AUTHORIZATION) String authorisation,
         @PathVariable("emailId") String emailId) {
-        boolean isAuthorised = authorisationService.authoriseUser(authorisation);
-        if (isAuthorised) {
+        Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
+        if (userInfo.isPresent()) {
             return caseService.fetchIdamAmRoles(authorisation, emailId);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
