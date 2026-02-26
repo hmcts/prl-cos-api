@@ -231,6 +231,7 @@ public class CafcassCaseDataService {
 
     private void addSpecificDocumentsFromCaseFileViewBasedOnCategories(CafCassResponse cafCassResponse) {
         cafCassResponse.getCases().parallelStream().forEach(cafCassCaseDetail -> {
+            log.info("Adding documents for case ID {} ", cafCassCaseDetail.getId());
             List<Element<uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments>> otherDocsList = new ArrayList<>();
             CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
             populateReviewDocuments(otherDocsList, caseData);
