@@ -246,8 +246,7 @@ public class HearingService {
         FeignException.GatewayTimeout.class,
         FeignException.BadGateway.class,
         FeignException.InternalServerError.class},
-        backoff = @Backoff (delay = 500, multiplier = 2, maxDelay = 2000),
-        recover = "recoverFromFilterCasesFailure")
+        backoff = @Backoff (delay = 500, multiplier = 2, maxDelay = 2000))
     public List<CaseDetails> filterCasesWithHearingsStartingOnDate(List<CaseDetails> cases, String userToken, LocalDate dateToCheck) {
         List<CaseDetails> filteredCases = new ArrayList<>();
         if (cases == null || cases.isEmpty()) {

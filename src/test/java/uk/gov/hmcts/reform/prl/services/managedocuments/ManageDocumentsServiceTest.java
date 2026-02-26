@@ -970,7 +970,6 @@ public class ManageDocumentsServiceTest {
         assertNull(caseDataMapUpdated.get("manageDocuments"));
     }
 
-
     @Test
     public void testCopyDocumentIfRestrictedWithCourtAdminRoleNonEmptyCourtStaffUploadDocListDocTab() {
 
