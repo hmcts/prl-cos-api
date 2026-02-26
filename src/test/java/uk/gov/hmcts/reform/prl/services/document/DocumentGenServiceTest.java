@@ -3000,7 +3000,9 @@ public class DocumentGenServiceTest {
         when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(any(CaseData.class))).thenReturn(
             c100CaseDataFinal);
 
-        Map<String, Object> stringObjectMap = documentGenService.createIssueCaseDocuments(AUTH_TOKEN, c100CaseDataFinal);
+        Map<String, Object> stringObjectMap = documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN,
+                                                                                                    c100CaseDataFinal,
+                                                                                                    true);
 
         verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_C8, DOCUMENT_FIELD_FINAL,
                                DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C1A, DOCUMENT_FIELD_C1A_WELSH);

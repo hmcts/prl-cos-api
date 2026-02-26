@@ -140,7 +140,7 @@ public class DocumentGenService {
         String authorisation,
         CaseData caseData,
         Map<String, Object> updatedCaseData,
-        boolean issueCaseEvent
+        boolean overrideC100CaseLock
     ) {}
 
     @Value("${document.templates.c100.c100_final_template}")
@@ -353,39 +353,40 @@ public class DocumentGenService {
     }
 
     /**
-     * Create case documents when issue case event is triggered.
+     * Updates C100, C1A and C8 documents in case data based on the case type and the state of the case.
      *
-     * @param authorisation authorisation token
-     * @param caseData      case data
+     * @param authorisation user authorisation token
+     * @param caseData      case data for which the documents need to be generated and updated in case data
      * @return updated case data with generated documents
-     * @throws Exception in case of any errors during document generation
-     */
-    public Map<String, Object> createIssueCaseDocuments(String authorisation, CaseData caseData) throws Exception {
-        return createUpdatedCaseDataWithDocuments(authorisation, caseData, true);
-    }
-
-    /**
-     * Create case documents for events other than issue case event.
-     *
-     * @param authorisation authorisation token
-     * @param caseData      case data
-     * @return updated case data with generated documents
-     * @throws Exception in case of any errors during document generation
+     * @throws Exception in case of any errors during document generation or retrieval
      */
     public Map<String, Object> createUpdatedCaseDataWithDocuments(String authorisation, CaseData caseData) throws Exception {
         return createUpdatedCaseDataWithDocuments(authorisation, caseData, false);
     }
 
-    private Map<String, Object> createUpdatedCaseDataWithDocuments(String authorisation, CaseData caseData,
-                                                                  boolean issueCaseEvent) throws Exception {
+    /**
+     * Updates C100, C1A and C8 documents in case data based on the case type and the state of the case.
+     * If overrideC100CaseLock is true, it will generate documents even if the case is locked for C100.
+     *
+     * @param authorisation        user authorisation token
+     * @param caseData             case data for which the documents need to be generated and updated in case data
+     * @param overrideC100CaseLock flag to indicate whether to override the case lock for C100 cases.
+     *                             If true, documents will be generated even if the case is locked for C100.
+     * @return updated case data with generated documents
+     * @throws Exception in case of any errors during document generation or retrieval
+     */
+    public Map<String, Object> createUpdatedCaseDataWithDocuments(String authorisation, CaseData caseData,
+                                                                  boolean overrideC100CaseLock) throws Exception {
         caseData = populateOrganisationDetailsInCaseData(caseData);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseData = allegationOfHarmRevisedService.updateChildAbusesForDocmosis(caseData);
         }
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        DocumentUpdateContext documentUpdateContext = new DocumentUpdateContext(authorisation, caseData,
-                                                                                new HashMap<>(), issueCaseEvent);
+        DocumentUpdateContext documentUpdateContext = new DocumentUpdateContext(
+            authorisation, caseData,
+            new HashMap<>(), overrideC100CaseLock
+        );
         if (documentLanguage.isGenEng()) {
             addEnglishDocumentsToUpdatedCaseData(documentUpdateContext);
         }
@@ -1590,6 +1591,6 @@ public class DocumentGenService {
     }
 
     private boolean isCaseNotLocked(DocumentUpdateContext documentUpdateContext) {
-        return documentUpdateContext.issueCaseEvent || !CaseUtils.isC100CaseIssued(documentUpdateContext.caseData);
+        return documentUpdateContext.overrideC100CaseLock || !CaseUtils.isC100CaseIssued(documentUpdateContext.caseData);
     }
 }
