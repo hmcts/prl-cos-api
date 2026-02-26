@@ -21,7 +21,7 @@ import uk.gov.hmcts.reform.prl.exception.cafcass.exceptionhandlers.ApiError;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
-import uk.gov.hmcts.reform.prl.services.cafcass.CaseDataService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassCaseDataService;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -40,13 +40,13 @@ import static uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi.SERVICE_AUTHORIZATI
 public class CafCassController extends AbstractCallbackController {
     private static final String BEARER = "Bearer ";
     private static final String CAFCASS_USER_ROLE = "caseworker-privatelaw-cafcass";
-    private  final CaseDataService caseDataService;
+    private  final CafcassCaseDataService cafcassCaseDataService;
     private final AuthorisationService authorisationService;
 
     public CafCassController(ObjectMapper objectMapper, EventService eventPublisher,
-                             CaseDataService caseDataService, AuthorisationService authorisationService) {
+                             CafcassCaseDataService cafcassCaseDataService, AuthorisationService authorisationService) {
         super(objectMapper, eventPublisher);
-        this.caseDataService = caseDataService;
+        this.cafcassCaseDataService = cafcassCaseDataService;
         this.authorisationService = authorisationService;
     }
 
@@ -76,7 +76,7 @@ public class CafCassController extends AbstractCallbackController {
                         return status(BAD_REQUEST).body(new ApiError(
                             "Difference between end date and start date should not be more than 15 minutes"));
                     }
-                    return ResponseEntity.ok(caseDataService.getCaseData(
+                    return ResponseEntity.ok(cafcassCaseDataService.getCaseData(
                         authorisation,
                         startDate,
                         endDate
