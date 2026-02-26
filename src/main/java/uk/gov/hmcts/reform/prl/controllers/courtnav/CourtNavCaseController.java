@@ -37,6 +37,7 @@ import java.util.Optional;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
 import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CAFCASS_USER_ROLE;
 
 @Slf4j
@@ -51,7 +52,7 @@ public class CourtNavCaseController {
     private final CourtLocationService courtLocationService;
     private final AuthorisationService authorisationService;
     private final FL401ApplicationMapper fl401ApplicationMapper;
-    private  final CafcassUploadDocService cafcassUploadDocService;
+    private final CafcassUploadDocService cafcassUploadDocService;
     private final SystemUserService systemUserService;
 
     @PostMapping(path = "/case", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -69,8 +70,12 @@ public class CourtNavCaseController {
         @Valid @RequestBody CourtNavFl401 inputData
     ) throws Exception {
 
+        if (!authorisationService.isAuthorized(authorisation, serviceAuthorization)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+
         Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
-        if (userInfo.isEmpty() || !authorisationService.authoriseService(serviceAuthorization)) {
+        if (userInfo.isEmpty() || !userInfo.get().getRoles().contains(COURTNAV)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
 
@@ -102,17 +107,25 @@ public class CourtNavCaseController {
         @RequestParam String typeOfDocument
     ) {
         Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
-        if ((authorisationService.authoriseUser(authorisation).isPresent()) && Boolean.TRUE.equals(
+        if (userInfo.isPresent() && Boolean.TRUE.equals(
             authorisationService.authoriseService(serviceAuthorization))) {
 
             if (userInfo.get().getRoles().contains(CAFCASS_USER_ROLE)) {
                 log.info("uploading cafcass document");
-                cafcassUploadDocService.uploadDocument(systemUserService.getSysUserToken(), file, typeOfDocument, caseId);
+                cafcassUploadDocService.uploadDocument(
+                    systemUserService.getSysUserToken(),
+                    file,
+                    typeOfDocument,
+                    caseId
+                );
             } else {
-                courtNavCaseService.uploadDocument(authorisation, file, typeOfDocument, caseId);
+                if (userInfo.get().getRoles().contains(COURTNAV)) {
+                    courtNavCaseService.uploadDocument(authorisation, file, typeOfDocument, caseId);
+                } else {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+                }
             }
-            return ResponseEntity.ok().body(new ResponseMessage("Document has been uploaded successfully: "
-                                                                    + file.getOriginalFilename()));
+            return ResponseEntity.ok().body(new ResponseMessage("Document has been uploaded successfully: " + file.getOriginalFilename()));
         } else {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
