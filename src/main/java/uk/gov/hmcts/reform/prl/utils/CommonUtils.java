@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -25,12 +26,15 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.UUID;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getWaMapper;
 
 
 @Slf4j
@@ -249,5 +253,22 @@ public class CommonUtils {
             return partyDetails.getResponse();
         }
         return Response.builder().build();
+    }
+
+    public static String getMessageIdentifierAssociatedWithTask(String clientContext) {
+        WaMapper waMapper = null;
+        if (StringUtils.isNotBlank(clientContext)) {
+            waMapper = getWaMapper(clientContext);
+        }
+
+        return ofNullable(waMapper)
+            .map(value -> value
+                .getClientContext()
+                .getUserTask())
+            .filter(Objects::nonNull)
+            .map(value -> value
+                .getTaskData()
+                .getAdditionalProperties()
+                .getMessageIdentifier()).orElse(null);
     }
 }

@@ -73,7 +73,6 @@ import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendAndReplyDynamicDoc;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendReplyTempDoc;
-import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.services.BulkPrintService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
@@ -156,9 +155,9 @@ import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.models.documents.Document.buildFromDocument;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
-import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getWaMapper;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.formatDateTime;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getDynamicList;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getMessageIdentifierAssociatedWithTask;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -1142,7 +1141,7 @@ public class SendAndReplyService {
             .build();
         data.put("messageObject", messageMetaData);
 
-        String messageIdentifier = getMessageIdentifierAssociatedWithTask(callbackRequest, clientContext);
+        String messageIdentifier = getMessageIdentifierAssociatedWithTask(clientContext);
 
         List<Element<Message>> openMessages = getOpenMessages(caseData.getSendOrReplyMessage().getMessages(), messageIdentifier);
         if (isNotEmpty(openMessages)) {
@@ -1151,23 +1150,7 @@ public class SendAndReplyService {
         return data;
     }
 
-    private String getMessageIdentifierAssociatedWithTask(CallbackRequest callbackRequest, String clientContext) {
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        WaMapper waMapper = null;
-        if (StringUtils.isNotBlank(clientContext)) {
-            waMapper = getWaMapper(clientContext);
-        }
 
-        return ofNullable(waMapper)
-            .map(value -> value
-                .getClientContext()
-                .getUserTask())
-            .filter(Objects::nonNull)
-            .map(value -> value
-                .getTaskData()
-                .getAdditionalProperties()
-                .getMessageIdentifier()).orElse(null);
-    }
 
     public DynamicList getReplyMessagesList(List<Element<Message>> openMessages) {
         return ElementUtils.asDynamicList(
