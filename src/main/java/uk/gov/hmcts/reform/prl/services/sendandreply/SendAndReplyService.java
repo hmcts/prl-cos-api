@@ -73,6 +73,7 @@ import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendAndReplyDynamicDoc;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendReplyTempDoc;
+import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.services.BulkPrintService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
@@ -117,6 +118,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
+import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
@@ -153,6 +155,8 @@ import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.models.documents.Document.buildFromDocument;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getWaMapper;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.formatDateTime;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getDynamicList;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
@@ -1130,6 +1134,41 @@ public class SendAndReplyService {
         return data;
     }
 
+    public Map<String, Object> setSenderAndGenerateMessageReplyList(CallbackRequest callbackRequest, String authorisation, String clientContext) {
+        Map<String, Object> data = new HashMap<>();
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        MessageMetaData messageMetaData = MessageMetaData.builder()
+            .senderEmail(getLoggedInUserEmail(authorisation))
+            .build();
+        data.put("messageObject", messageMetaData);
+
+        String messageIdentifier = getMessageIdentifierAssociatedWithTask(callbackRequest, clientContext);
+
+        List<Element<Message>> openMessages = getOpenMessages(caseData.getSendOrReplyMessage().getMessages(), messageIdentifier);
+        if (isNotEmpty(openMessages)) {
+            data.put("messageReplyDynamicList", getReplyMessagesList(openMessages));
+        }
+        return data;
+    }
+
+    private String getMessageIdentifierAssociatedWithTask(CallbackRequest callbackRequest, String clientContext) {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        WaMapper waMapper = null;
+        if (StringUtils.isNotBlank(clientContext)) {
+            waMapper = getWaMapper(clientContext);
+        }
+
+        return ofNullable(waMapper)
+            .map(value -> value
+                .getClientContext()
+                .getUserTask())
+            .filter(Objects::nonNull)
+            .map(value -> value
+                .getTaskData()
+                .getAdditionalProperties()
+                .getMessageIdentifier()).orElse(null);
+    }
+
     public DynamicList getReplyMessagesList(List<Element<Message>> openMessages) {
         return ElementUtils.asDynamicList(
             openMessages,
@@ -1138,10 +1177,16 @@ public class SendAndReplyService {
         );
     }
 
-    public static List<Element<Message>> getOpenMessages(List<Element<Message>> messages) {
+    public static List<Element<Message>> getOpenMessages(List<Element<Message>> messages, String messageIdentifier) {
         return nullSafeCollection(messages).stream()
-            .filter(element -> OPEN.equals(element.getValue().getStatus()))
+            .filter(element ->
+                        OPEN.equals(element.getValue().getStatus())
+                            && (isNull(messageIdentifier) || messageIdentifier.equalsIgnoreCase(element.getValue().getMessageIdentifier())))
             .toList();
+    }
+
+    public static List<Element<Message>> getOpenMessages(List<Element<Message>> messages) {
+        return getOpenMessages(messages, null);
     }
 
     public CaseData populateMessageReplyFields(CaseData caseData, String authorization) {
@@ -2139,7 +2184,7 @@ public class SendAndReplyService {
     }
 
     public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmitted(CallbackRequest callbackRequest, String authorisation) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         if (REPLY.equals(caseData.getChooseSendOrReply())
             && YesOrNo.Yes.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
@@ -2172,7 +2217,7 @@ public class SendAndReplyService {
 
     public AboutToStartOrSubmitCallbackResponse clearDynamicLists(CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        CaseData caseData = getCaseData(caseDetails, objectMapper);
 
         Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
         if (Objects.nonNull(message)
